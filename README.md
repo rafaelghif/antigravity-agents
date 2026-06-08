@@ -16,12 +16,23 @@ Get any repository agent-ready in a single step:
 
 ### Step 1: Bootstrap the Repository
 Navigate to your project root and execute the bootstrapper:
+
+**For Linux/macOS:**
 ```bash
 # Option A: From a locally cloned antigravity-agents repo
 /path/to/antigravity-agents/bootstrap.sh
 
-# Option B: Run directly via curl
+# Option B: Download and run via curl
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
+```
+
+**For Windows (PowerShell):**
+```powershell
+# Option A: From a locally cloned antigravity-agents repo
+powershell -ExecutionPolicy Bypass -File \path\to\antigravity-agents\bootstrap.ps1
+
+# Option B: Download and run via powershell one-liner
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
 ```
 
 ### Step 2: Scaffold Your Stack (Optional)
@@ -123,11 +134,24 @@ cd my-brand-new-project
 ```
 
 #### **Step 2: Run the Bootstrapper**
-Run this one-liner command to download and run the bootstrapper:
+
+**For Linux/macOS:**
 ```bash
+# Download and execute
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
+
+# Or run from local clone
+/path/to/antigravity-agents/bootstrap.sh
 ```
-*(Alternatively, if you cloned the repo locally, run: `/path/to/antigravity-agents/bootstrap.sh`)*
+
+**For Windows (PowerShell):**
+```powershell
+# Download and execute
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
+
+# Or run from local clone
+powershell -ExecutionPolicy Bypass -File \path\to\antigravity-agents\bootstrap.ps1
+```
 
 > [!NOTE]
 > The script will automatically initialize Git for you and clean itself up from the root when done.
@@ -159,9 +183,15 @@ cd /path/to/your/existing-project
 ```
 
 #### **Step 2: Run the Bootstrapper**
-Execute the script to configure the workspace around your current code:
+
+**For Linux/macOS:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
+```
+
+**For Windows (PowerShell):**
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
 ```
 The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/project_rules.md` automatically!
 
