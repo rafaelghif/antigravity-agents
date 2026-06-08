@@ -133,6 +133,9 @@ cmd_init() {
     local project_name="${2:-}"
     local tech_stack="${3:-}"
     local arch_pattern="${4:-}"
+    local db_orm="${5:-}"
+    local env_vars="${6:-}"
+    local scaffold=""
 
     if [ -z "$project_name" ]; then
         read -p "Enter Project Name (default: My Project): " project_name
@@ -140,13 +143,30 @@ cmd_init() {
     fi
     
     if [ -z "$tech_stack" ]; then
-        read -p "Enter Primary Language/Framework (e.g. Node/TypeScript, Go) (default: TypeScript): " tech_stack
-        if [ -z "$tech_stack" ]; then tech_stack="TypeScript"; fi
+        read -p "Enter Language/Framework (e.g. Node/TypeScript, Go, Python) (default: Node/TypeScript): " tech_stack
+        if [ -z "$tech_stack" ]; then tech_stack="Node/TypeScript"; fi
     fi
 
     if [ -z "$arch_pattern" ]; then
-        read -p "Enter Architectural Pattern (e.g. Clean Architecture, MVC) (default: MVC): " arch_pattern
+        read -p "Enter Architectural Pattern (e.g. Clean, MVC, Hexagonal) (default: MVC): " arch_pattern
         if [ -z "$arch_pattern" ]; then arch_pattern="MVC"; fi
+    fi
+
+    if [ -z "$db_orm" ]; then
+        read -p "Enter Database/ORM (e.g. Prisma, PostgreSQL, None) (default: None): " db_orm
+        if [ -z "$db_orm" ]; then db_orm="None"; fi
+    fi
+
+    if [ -z "$env_vars" ]; then
+        read -p "Enter config variables (comma-separated, e.g. PORT,DATABASE_URL) (default: None): " env_vars
+        if [ -z "$env_vars" ]; then env_vars=""; fi
+    fi
+
+    if [ -z "${7:-}" ]; then
+        read -p "Scaffold initial project folders? (y/n) (default: y): " scaffold
+        if [ -z "$scaffold" ]; then scaffold="y"; fi
+    else
+        scaffold="${7:-}"
     fi
 
     # Initialize Git if not present
@@ -164,80 +184,92 @@ cmd_init() {
         echo "Git post-commit hook installed."
     fi
 
-    # Write project_rules.md
-    cat << PAB_EOF > .agents/project_rules.md
-# Project Architecture Blueprint (PAB)
+    # Scaffolding folders if requested
+    if [ "$scaffold" = "y" ] || [ "$scaffold" = "yes" ]; then
+        echo "Scaffolding directory structure..."
+        mkdir -p src tests config
+        
+        # Node/TypeScript Template
+        if [[ "$tech_stack" =~ "Node" || "$tech_stack" =~ "TypeScript" || "$tech_stack" =~ "TS" ]]; then
+            if [ ! -f package.json ]; then
+                cat << 'JSON_EOF' > package.json
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
+JSON_EOF
+                echo "Created package.json scaffolding"
+            fi
+        fi
+        
+        # Go Template
+        if [[ "$tech_stack" =~ "Go" || "$tech_stack" =~ "Golang" ]]; then
+            if [ ! -f go.mod ]; then
+                cat << 'GO_EOF' > go.mod
+module project
 
-This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
+go 1.20
+GO_EOF
+                echo "Created go.mod scaffolding"
+            fi
+            if [ ! -f src/main.go ]; then
+                cat << 'GO_EOF' > src/main.go
+package main
 
----
+import "fmt"
 
-## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: $tech_stack
-- **Directory Structure**:
-  - \`src/\` -> Application source code
-  - \`tests/\` -> Test suites
+func main() {
+    fmt.Println("Hello, Antigravity!")
+}
+GO_EOF
+                echo "Created src/main.go template"
+            fi
+        fi
 
-## 2. Architectural Conventions
-- Pattern: $arch_pattern
-- Insulate business logic from framework details.
+        # Python Template
+        if [[ "$tech_stack" =~ "Python" || "$tech_stack" =~ "Py" ]]; then
+            if [ ! -f src/main.py ]; then
+                cat << 'PY_EOF' > src/main.py
+def main():
+    print("Hello, Antigravity!")
 
-## 3. Spacing & Styling Standards
-- Follow standard formatting conventions for $tech_stack.
+if __name__ == "__main__":
+    main()
+PY_EOF
+                echo "Created src/main.py template"
+            fi
+        fi
+    fi
 
-## 4. Security & External Services
-- Ensure secure environment variable storage and validation.
+    # Create .env and .env.example if env_vars exist
+    if [ -n "$env_vars" ]; then
+        echo "Writing configuration environment variables..."
+        IFS=',' read -ra ADDR <<< "$env_vars"
+        # Reset files
+        > .env.example
+        > .env
+        for i in "${ADDR[@]}"; do
+            echo "$i=" >> .env.example
+            echo "$i=" >> .env
+        done
+        echo "Created .env and .env.example templates"
+    fi
 
-## 5. Long-Term Impact & 10-Year Maintainability Gates
-- **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the \`impact-analysis\` skill and document design rationales.
-- **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
-- **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
-- **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
-PAB_EOF
-
-    # Write memory.md
-    cat << MEM_EOF > .agents/memory.md
-# Agent Core Memory
-
-> **Memory Schema Version**: 5.0.0  
-> **Target System**: $project_name
-> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.
-
----
-
-## 1. Git State & Infrastructure Runtime
-- **Active Branch**: \$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-- **Last Commit Reference**: \$(git log -n 1 --format="%h" 2>/dev/null || echo "none")
-- **Active Pull Request Target**: \`main\`
-- **Infrastructure Health Status**:
-  - Database: \`HEALTHY\`
-  - Cache/Broker: \`HEALTHY\`
-  - Primary API Server: \`HEALTHY\`
-
----
-
-## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Workspace Setup & Initial Features
-- **Current Task Target**: Onboarding and Initial Commits
-- **State Flag**: \`IN_PROGRESS\`
-
-### Sprint Tasks Checklist
-- [ ] Initialize codebase-recon scan
-- [ ] Create initial package files or framework scaffolding
-- [ ] Verify build and tests pass
-
----
-
-## 3. Reference Links Index
-- **Core Guidelines**: [AGENTS.md](file://../AGENTS.md)
-- **Project Specific Rules**: [project_rules.md](file://./project_rules.md)
-- **Database Schema**: [schema.md](file://./schema.md)
-- **Design Decisions**: [adr.md](file://./adr.md)
-- **Sprint Archives**: [archive/](file://./archive/)
-MEM_EOF
-
-    # Sync git hash to memory file immediately
-    cmd_sync_git
+    # Run auto-recon to generate the blueprints
+    echo "Running autonomous reconnaissance to populate blueprint files..."
+    if [ -f .agents/scripts/recon.sh ]; then
+        .agents/scripts/recon.sh
+    fi
 
     echo "=========================================================="
     echo "Workspace initialized successfully for '$project_name'!"

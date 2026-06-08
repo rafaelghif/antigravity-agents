@@ -44,8 +44,7 @@ if [ -f package.json ]; then
     if grep -q '"lint"' package.json; then LINT_CMD="npm run lint"; fi
 elif [ -f go.mod ]; then
     TECH_STACK="Go"
-    local module_name
-    module_name=$(grep "^module " go.mod | cut -d' ' -f2)
+    module_name=$(grep "^module " go.mod | cut -d' ' -f2 || echo "project")
     TECH_STACK="Go Module: $module_name"
     ARCH_PATTERN="Hexagonal / Domain-Driven Design in Go"
     BUILD_CMD="go build ./..."

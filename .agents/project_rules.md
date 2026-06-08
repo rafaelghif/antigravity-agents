@@ -7,7 +7,8 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ## 1. Stack & Directory Boundaries
 - **Primary Language/Framework**: Unknown
 - **Directory Structure**:
-  - Root directory contains project files.
+  - `tests/` -> Project workspace component
+  - `config/` -> Project workspace component
 
 ## 2. Architectural Conventions
 - **Architectural Pattern**: Standard Model-View-Controller (MVC)

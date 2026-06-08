@@ -22,7 +22,7 @@ if [ -f "$MEMORY_FILE" ]; then
         echo "  [WARNING] Memory file '$MEMORY_FILE' exceeds the 100-line limit ($LINE_COUNT lines)!"
         echo "            Please run './.agents/scripts/helper.sh archive' to compact your memory."
     else
-        echo "  [PASS] Memory file size is within world-class limits."
+        echo "  [PASS] Memory file size is within recommended limits."
     fi
 else
     echo "  [FAIL] Memory file '$MEMORY_FILE' does not exist!"
@@ -121,7 +121,7 @@ fi
 
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
-    echo "Workspace Status: VALIDATED (1% World-Class Standard)"
+    echo "Workspace Status: VALIDATED"
     exit 0
 else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
