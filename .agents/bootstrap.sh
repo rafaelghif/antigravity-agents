@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 1% World-Class Agent Workspace Bootstrapper
+# Antigravity Agent Workspace Bootstrapper
 # This script initializes a clean, decoupled agent memory and protocol setup in any project repository.
 
 set -euo pipefail

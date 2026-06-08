@@ -4,6 +4,34 @@ AAC is a project-agnostic operational configuration and workspace blueprint desi
 
 ---
 
+## 🚀 30-Second Quick Start
+
+Get any repository agent-ready in a single step:
+
+### 1. Bootstrap the Repository
+Navigate to your project root and execute the bootstrapper:
+```bash
+# Option A: From a locally cloned antigravity-agent repo
+/path/to/antigravity-agent/.agents/bootstrap.sh
+
+# Option B: Run directly via curl (if hosted online)
+curl -fsSL https://raw.githubusercontent.com/<username>/antigravity-agent/main/.agents/bootstrap.sh | bash
+```
+
+### 2. Scaffold Your Stack (Optional)
+If it's an empty project, run the interactive initialization wizard:
+```bash
+./.agents/scripts/helper.sh init
+```
+
+### 3. Verify Health & Status
+Ensure the workspace is healthy:
+```bash
+./.agents/scripts/helper.sh doctor
+```
+
+---
+
 ## 1. Directory Structure Blueprint
 
 When initialized in a project, the directory layout is structured as follows:
@@ -62,17 +90,27 @@ Ensures strict coding and security practices before code is staged or committed:
 
 ## 3. How to Install & Bootstrap
 
-To bootstrap any repository (new or existing):
+You can bootstrap Antigravity in any repository (new or existing) using one of these simple methods:
 
-1. Copy the `.agents/bootstrap.sh` script to your project root.
-2. Make it executable and run it:
-   ```bash
-   chmod +x .agents/bootstrap.sh && ./.agents/bootstrap.sh
-   ```
-3. Commit the initialized setup:
-   ```bash
-   git add AGENTS.md .agents/ && git commit -m "chore(infra): initialize antigravity agent workspace"
-   ```
+### Method A: Execute from Local Clone (Recommended)
+If you already have `antigravity-agent` cloned locally, navigate to your target project folder and run the bootstrapper directly:
+```bash
+/path/to/antigravity-agent/.agents/bootstrap.sh
+```
+
+### Method B: Via One-Liner Script
+If the template is hosted online, run this one-liner at your project root to download and run the bootstrapper in one step:
+```bash
+curl -fsSL https://raw.githubusercontent.com/<username>/antigravity-agent/main/.agents/bootstrap.sh | bash
+```
+
+### Next Steps:
+Once bootstrapped, check the diagnostics and commit the template configuration:
+```bash
+./.agents/scripts/helper.sh doctor
+git add AGENTS.md .agents/
+./.agents/scripts/helper.sh commit chore core "initialize antigravity agent workspace"
+```
 
 ---
 
