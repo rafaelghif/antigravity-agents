@@ -5,20 +5,23 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ---
 
 ## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: [e.g. Node/TypeScript, Python/FastAPI, Go, Rust]
+- **Primary Language/Framework**: Unknown
 - **Directory Structure**:
-  - `src/` -> Application source code
-  - `tests/` -> Test suites
+  - Root directory contains project files.
 
 ## 2. Architectural Conventions
-- [Describe the architecture pattern here, e.g. Clean Architecture, MVC, Hexagonal, simple service-repository layer]
-- [Define rules regarding coupling and boundaries, e.g. UI layers must not call database adapters directly]
+- **Architectural Pattern**: Standard Model-View-Controller (MVC)
+- **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
 
 ## 3. Spacing & Styling Standards
-- [Define layout spacing, form guidelines, or styling patterns if frontend project, or code style rules]
+- **Linter command**: `echo 'No linter found'`
+- **Build validation**: `echo 'No build command needed'`
+- **Follow formatting**: Follow standard formatting guidelines for Unknown development.
 
 ## 4. Security & External Services
-- [Define database transaction rules, third-party adapters (S3, Auth, Payment), and caching protocols]
+- **Database/ORM**: None detected
+- **Required Configuration Variables**:
+  - No configuration parameters detected.
 
 ## 5. Long-Term Impact & 10-Year Maintainability Gates
 - **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the `impact-analysis` skill and document design rationales.

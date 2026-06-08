@@ -94,9 +94,10 @@ Every code mutation must execute in an atomic, sequential loop:
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
-6. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
-7. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
+5. **Workspace Validation**: Run `./.agents/scripts/helper.sh validate` to verify memory limits, lack of hardcoded secrets, and environment boundary conformance.
+6. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
+7. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
+8. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
 
 ---
 
@@ -129,14 +130,9 @@ To optimize prompt caching and prevent context window bloat:
 ## 10. Autonomous Adaptation & Self-Configuration Protocol
 When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
 If the blueprints are not initialized for the current project:
-1. **Interactive User Discovery**: Immediately interview the user with a structured questionnaire. Ask:
-   - What is this project's name and its primary business goals?
-   - What tech stack, ORM, database, and library versions are preferred?
-   - What architectural boundaries and conventions should be followed?
-   - What are the commands to compile, build, test, and lint the code?
-2. **Trigger Reconnaissance**: Execute the `codebase-recon` skill to verify folder boundaries, configuration files, and relational database migrations/schemas, cross-referencing with user inputs.
-3. **Populate Project Blueprint**:
-   - Write the finalized technical stack, directory boundaries, and validation commands directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
+1. **Trigger Autonomous Reconnaissance**: Immediately execute `./.agents/scripts/helper.sh recon` to automatically discover the tech stack, directory boundaries, build/test/lint commands, Relational DB/ORM integrations, and environment variable configuration template.
+2. **Interactive User Alignment**: Present the auto-detected stack and boundaries to the user for quick confirmation or adjustments.
+3. **Refine Blueprint**: Adjust [.agents/project_rules.md](file://./.agents/project_rules.md) and [.agents/schema.md](file://./.agents/schema.md) based on user confirmation.
 4. **Populate Database Schema Map**:
    - Map all relational database models, tables, columns, and API routes found, organizing them into domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
    - Update the high-level index map inside [.agents/schema.md](file://./.agents/schema.md) to link to these domain schemas.
@@ -628,6 +624,10 @@ show_help() {
     echo "Usage: \$0 [command] [args]"
     echo ""
     echo "Commands:"
+    echo "  init [name] [stack] [arch] Initialize the workspace interactively or with parameters"
+    echo "  recon             Run autonomous codebase stack and directory structure detection"
+    echo "  validate          Perform security audit, lock checks, and memory size validation"
+    echo "  doctor            Diagnose workspace health and verify system executables"
     echo "  sync-git          Synchronize Git branch and last commit hash with memory.md"
     echo "  lock [module]     Acquire a lock on a module"
     echo "  unlock [module]   Release a lock on a module"
@@ -646,8 +646,8 @@ cmd_sync_git() {
     commit=$(git log -n 1 --format="%h" 2>/dev/null || echo "none")
 
     # Update memory.md using sed
-    sed -i -E "s/- \*\*Active Branch\*\*: .*/- **Active Branch**: $branch/" "$MEMORY_FILE"
-    sed -i -E "s/- \*\*Last Commit Reference\*\*: .*/- **Last Commit Reference**: $commit/" "$MEMORY_FILE"
+    sed -i -E "s|- \*\*Active Branch\*\*: .*|- **Active Branch**: $branch|" "$MEMORY_FILE"
+    sed -i -E "s|- \*\*Last Commit Reference\*\*: .*|- **Last Commit Reference**: $commit|" "$MEMORY_FILE"
     echo "Synchronized: Branch=$branch, Commit=$commit in $MEMORY_FILE"
 }
 
@@ -739,6 +739,218 @@ INNER_EOF
     echo "Checklist reset successfully."
 }
 
+cmd_init() {
+    echo "=========================================================="
+    echo "  Antigravity Agent Core - Workspace Initialization"
+    echo "=========================================================="
+    
+    local project_name="${2:-}"
+    local tech_stack="${3:-}"
+    local arch_pattern="${4:-}"
+
+    if [ -z "$project_name" ]; then
+        read -p "Enter Project Name (default: My Project): " project_name
+        if [ -z "$project_name" ]; then project_name="My Project"; fi
+    fi
+    
+    if [ -z "$tech_stack" ]; then
+        read -p "Enter Primary Language/Framework (e.g. Node/TypeScript, Go) (default: TypeScript): " tech_stack
+        if [ -z "$tech_stack" ]; then tech_stack="TypeScript"; fi
+    fi
+
+    if [ -z "$arch_pattern" ]; then
+        read -p "Enter Architectural Pattern (e.g. Clean Architecture, MVC) (default: MVC): " arch_pattern
+        if [ -z "$arch_pattern" ]; then arch_pattern="MVC"; fi
+    fi
+
+    # Initialize Git if not present
+    if [ ! -d .git ]; then
+        echo "Initializing Git repository..."
+        git init
+        git branch -m main
+    fi
+
+    # Install Git post-commit Hook template
+    if [ -f .agents/hooks/post-commit ]; then
+        mkdir -p .git/hooks
+        cp .agents/hooks/post-commit .git/hooks/post-commit
+        chmod +x .git/hooks/post-commit
+        echo "Git post-commit hook installed."
+    fi
+
+    # Write project_rules.md
+    cat << PAB_EOF > .agents/project_rules.md
+# Project Architecture Blueprint (PAB)
+
+This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
+
+---
+
+## 1. Stack & Directory Boundaries
+- **Primary Language/Framework**: $tech_stack
+- **Directory Structure**:
+  - \`src/\` -> Application source code
+  - \`tests/\` -> Test suites
+
+## 2. Architectural Conventions
+- Pattern: $arch_pattern
+- Insulate business logic from framework details.
+
+## 3. Spacing & Styling Standards
+- Follow standard formatting conventions for $tech_stack.
+
+## 4. Security & External Services
+- Ensure secure environment variable storage and validation.
+
+## 5. Long-Term Impact & 10-Year Maintainability Gates
+- **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the \`impact-analysis\` skill and document design rationales.
+- **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
+- **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
+- **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
+PAB_EOF
+
+    # Write memory.md
+    cat << MEM_EOF > .agents/memory.md
+# Agent Core Memory
+
+> **Memory Schema Version**: 5.0.0  
+> **Target System**: $project_name
+> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.
+
+---
+
+## 1. Git State & Infrastructure Runtime
+- **Active Branch**: \$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+- **Last Commit Reference**: \$(git log -n 1 --format="%h" 2>/dev/null || echo "none")
+- **Active Pull Request Target**: \`main\`
+- **Infrastructure Health Status**:
+  - Database: \`HEALTHY\`
+  - Cache/Broker: \`HEALTHY\`
+  - Primary API Server: \`HEALTHY\`
+
+---
+
+## 2. Active Epic & Sub-Tasks Execution Matrix
+- **Primary Epic**: Workspace Setup & Initial Features
+- **Current Task Target**: Onboarding and Initial Commits
+- **State Flag**: \`IN_PROGRESS\`
+
+### Sprint Tasks Checklist
+- [ ] Initialize codebase-recon scan
+- [ ] Create initial package files or framework scaffolding
+- [ ] Verify build and tests pass
+
+---
+
+## 3. Reference Links Index
+- **Core Guidelines**: [AGENTS.md](file://../AGENTS.md)
+- **Project Specific Rules**: [project_rules.md](file://./project_rules.md)
+- **Database Schema**: [schema.md](file://./schema.md)
+- **Design Decisions**: [adr.md](file://./adr.md)
+- **Sprint Archives**: [archive/](file://./archive/)
+MEM_EOF
+
+    # Sync git hash to memory file immediately
+    cmd_sync_git
+
+    echo "=========================================================="
+    echo "Workspace initialized successfully for '$project_name'!"
+    echo "=========================================================="
+}
+
+cmd_recon() {
+    if [ -f .agents/scripts/recon.sh ]; then
+        .agents/scripts/recon.sh
+    else
+        echo "Error: recon.sh not found at .agents/scripts/recon.sh" >&2
+        exit 1
+    fi
+}
+
+cmd_validate() {
+    if [ -f .agents/scripts/validate.sh ]; then
+        .agents/scripts/validate.sh
+    else
+        echo "Error: validate.sh not found at .agents/scripts/validate.sh" >&2
+        exit 1
+    fi
+}
+
+cmd_doctor() {
+    echo "=========================================================="
+    echo "  Antigravity Workspace Doctor Diagnostics"
+    echo "=========================================================="
+    
+    local errors=0
+    
+    # Check Git Repository
+    if [ -d .git ]; then
+        echo "  [PASS] Git repository initialized."
+    else
+        echo "  [FAIL] Git repository not initialized!"
+        errors=$((errors + 1))
+    fi
+    
+    # Check post-commit hook
+    if [ -f .git/hooks/post-commit ] && [ -x .git/hooks/post-commit ]; then
+        echo "  [PASS] post-commit Git hook is installed and executable."
+    else
+        echo "  [WARNING] Git post-commit hook is missing or not executable."
+        echo "            To install: cp .agents/hooks/post-commit .git/hooks/post-commit && chmod +x .git/hooks/post-commit"
+    fi
+    
+    # Check helper script executability
+    if [ -x .agents/scripts/helper.sh ]; then
+        echo "  [PASS] helper.sh is executable."
+    else
+        echo "  [WARNING] helper.sh is not executable."
+        chmod +x .agents/scripts/helper.sh
+    fi
+    
+    # Check recon script
+    if [ -f .agents/scripts/recon.sh ]; then
+        if [ -x .agents/scripts/recon.sh ]; then
+            echo "  [PASS] recon.sh is executable."
+        else
+            echo "  [WARNING] recon.sh is not executable. Auto-correcting..."
+            chmod +x .agents/scripts/recon.sh
+        fi
+    else
+        echo "  [FAIL] recon.sh is missing!"
+        errors=$((errors + 1))
+    fi
+
+    # Check validate script
+    if [ -f .agents/scripts/validate.sh ]; then
+        if [ -x .agents/scripts/validate.sh ]; then
+            echo "  [PASS] validate.sh is executable."
+        else
+            echo "  [WARNING] validate.sh is not executable. Auto-correcting..."
+            chmod +x .agents/scripts/validate.sh
+        fi
+    else
+        echo "  [FAIL] validate.sh is missing!"
+        errors=$((errors + 1))
+    fi
+
+    # Run validate.sh checks
+    if [ -f .agents/scripts/validate.sh ]; then
+        echo "----------------------------------------------------------"
+        if ! .agents/scripts/validate.sh; then
+            errors=$((errors + 1))
+        fi
+    fi
+    
+    echo "=========================================================="
+    if [ $errors -eq 0 ]; then
+        echo "Doctor diagnostics: ALL SYSTEMS HEALTHY"
+        exit 0
+    else
+        echo "Doctor diagnostics: FOUND $errors ERROR(S) / WARNING(S)"
+        exit 1
+    fi
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -746,6 +958,18 @@ if [ $# -lt 1 ]; then
 fi
 
 case "$1" in
+    init)
+        cmd_init "$@"
+        ;;
+    recon)
+        cmd_recon
+        ;;
+    validate)
+        cmd_validate
+        ;;
+    doctor)
+        cmd_doctor
+        ;;
     sync-git)
         cmd_sync_git
         ;;
@@ -769,7 +993,364 @@ case "$1" in
 esac
 EOF
 
-# 10. Write post-commit hook template
+# 10. Write recon.sh script
+cat << 'EOF' > .agents/scripts/recon.sh
+#!/usr/bin/env bash
+# Antigravity Agent Core - Autonomous Reconnaissance Script
+# Scans the target workspace to automatically configure the agent environment blueprints.
+
+set -euo pipefail
+
+PROJECT_RULES_FILE=".agents/project_rules.md"
+SCHEMA_INDEX_FILE=".agents/schema.md"
+SCHEMAS_DIR=".agents/schemas"
+
+echo "=========================================================="
+echo "Running Autonomous Codebase Reconnaissance..."
+echo "=========================================================="
+
+# 1. Tech Stack Detection
+TECH_STACK="Unknown"
+BUILD_CMD="echo 'No build command needed'"
+TEST_CMD="echo 'No test suite found'"
+LINT_CMD="echo 'No linter found'"
+ARCH_PATTERN="Standard Model-View-Controller (MVC)"
+
+if [ -f package.json ]; then
+    TECH_STACK="Node.js"
+    if grep -q '"typescript"' package.json; then
+        TECH_STACK="Node.js (TypeScript)"
+    fi
+    if grep -q '"next"' package.json; then
+        TECH_STACK="Next.js / React"
+        ARCH_PATTERN="Next.js App Router Architecture"
+    elif grep -q '"nest"' package.json; then
+        TECH_STACK="NestJS (TypeScript)"
+        ARCH_PATTERN="Modular NestJS Dependency Injection Architecture"
+    elif grep -q '"react"' package.json; then
+        TECH_STACK="React SPA"
+        ARCH_PATTERN="Component-Driven SPA Architecture"
+    elif grep -q '"express"' package.json; then
+        TECH_STACK="Express API"
+        ARCH_PATTERN="Express Layered Routing Architecture"
+    fi
+    
+    # Extract package.json scripts
+    if grep -q '"build"' package.json; then BUILD_CMD="npm run build"; fi
+    if grep -q '"test"' package.json; then TEST_CMD="npm run test"; fi
+    if grep -q '"lint"' package.json; then LINT_CMD="npm run lint"; fi
+elif [ -f go.mod ]; then
+    TECH_STACK="Go"
+    local module_name
+    module_name=$(grep "^module " go.mod | cut -d' ' -f2)
+    TECH_STACK="Go Module: $module_name"
+    ARCH_PATTERN="Hexagonal / Domain-Driven Design in Go"
+    BUILD_CMD="go build ./..."
+    TEST_CMD="go test ./..."
+    LINT_CMD="golangci-lint run"
+elif [ -f Cargo.toml ]; then
+    TECH_STACK="Rust"
+    ARCH_PATTERN="Modular Cargo Workspace Architecture"
+    BUILD_CMD="cargo build"
+    TEST_CMD="cargo test"
+    LINT_CMD="cargo clippy"
+elif [ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f Pipfile ]; then
+    TECH_STACK="Python"
+    BUILD_CMD="echo 'No build step required'"
+    
+    if [ -f pyproject.toml ] && grep -q "fastapi" pyproject.toml; then
+        TECH_STACK="Python (FastAPI)"
+        ARCH_PATTERN="Asynchronous layered API structure"
+    elif [ -f requirements.txt ] && grep -q "fastapi" requirements.txt; then
+        TECH_STACK="Python (FastAPI)"
+        ARCH_PATTERN="Asynchronous layered API structure"
+    elif [ -f requirements.txt ] && grep -q "django" requirements.txt; then
+        TECH_STACK="Python (Django)"
+        ARCH_PATTERN="Django MTV Pattern"
+    fi
+
+    if [ -f requirements.txt ] && grep -q "pytest" requirements.txt; then
+        TEST_CMD="pytest"
+    else
+        TEST_CMD="python -m unittest discover"
+    fi
+    LINT_CMD="flake8 . || black --check ."
+elif [ -f composer.json ]; then
+    TECH_STACK="PHP"
+    if grep -q '"laravel/framework"' composer.json; then
+        TECH_STACK="PHP (Laravel)"
+        ARCH_PATTERN="Laravel MVC / Eloquent Architecture"
+    fi
+    BUILD_CMD="composer install"
+    TEST_CMD="vendor/bin/phpunit"
+    LINT_CMD="vendor/bin/php-cs-fixer fix --dry-run"
+elif [ -f Gemfile ]; then
+    TECH_STACK="Ruby"
+    if grep -q "rails" Gemfile; then
+        TECH_STACK="Ruby on Rails"
+        ARCH_PATTERN="Rails Convention-over-Configuration MVC"
+    fi
+    BUILD_CMD="bundle install"
+    TEST_CMD="bundle exec rake test"
+    LINT_CMD="bundle exec rubocop"
+fi
+
+echo "Detected Stack: $TECH_STACK"
+echo "Detected Build: $BUILD_CMD"
+echo "Detected Test:  $TEST_CMD"
+echo "Detected Lint:  $LINT_CMD"
+
+# 2. Directory Structure Mapping
+NL=$'\n'
+DIRS=""
+for d in src lib app apps controllers views handlers models services repositories routes tests test config pkg cmd; do
+    if [ -d "$d" ]; then
+        DIRS="${DIRS}${NL}  - \`$d/\` -> Project workspace component"
+    fi
+done
+
+if [ -z "$DIRS" ]; then
+    DIRS="${NL}  - Root directory contains project files."
+fi
+
+# 3. Database & ORM Detection
+DB_STACK="None detected"
+if [ -f prisma/schema.prisma ]; then
+    DB_STACK="Prisma ORM (schema: prisma/schema.prisma)"
+elif grep -r -q "sequelize" package.json 2>/dev/null || [ -d models ] && grep -r -q "Sequelize" models/ 2>/dev/null; then
+    DB_STACK="Sequelize ORM"
+elif grep -r -q "typeorm" package.json 2>/dev/null; then
+    DB_STACK="TypeORM"
+elif grep -r -q "sqlalchemy" requirements.txt pyproject.toml 2>/dev/null; then
+    DB_STACK="SQLAlchemy ORM"
+elif grep -r -q "gorm.io" go.mod 2>/dev/null; then
+    DB_STACK="GORM (Go)"
+elif [ -d db/migrate ]; then
+    DB_STACK="Rails ActiveRecord Migrations"
+elif [ -d database/migrations ]; then
+    DB_STACK="Laravel Eloquent Migrations"
+fi
+
+echo "Detected Database/ORM: $DB_STACK"
+
+# 4. Environment Template Variable Extraction
+ENV_VARS=""
+if [ -f .env.example ]; then
+    ENV_VARS=$(grep -v '^#' .env.example | grep '=' | cut -d'=' -f1 | sed 's/^/  - /' || true)
+elif [ -f .env ]; then
+    ENV_VARS=$(grep -v '^#' .env | grep '=' | cut -d'=' -f1 | sed 's/^/  - /' || true)
+fi
+
+if [ -z "$ENV_VARS" ]; then
+    ENV_VARS="  - No configuration parameters detected."
+fi
+
+# 5. Populate .agents/project_rules.md
+cat << PAB_EOF > "$PROJECT_RULES_FILE"
+# Project Architecture Blueprint (PAB)
+
+This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
+
+---
+
+## 1. Stack & Directory Boundaries
+- **Primary Language/Framework**: $TECH_STACK
+- **Directory Structure**:$DIRS
+
+## 2. Architectural Conventions
+- **Architectural Pattern**: $ARCH_PATTERN
+- **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
+
+## 3. Spacing & Styling Standards
+- **Linter command**: \`$LINT_CMD\`
+- **Build validation**: \`$BUILD_CMD\`
+- **Follow formatting**: Follow standard formatting guidelines for $TECH_STACK development.
+
+## 4. Security & External Services
+- **Database/ORM**: $DB_STACK
+- **Required Configuration Variables**:
+$ENV_VARS
+
+## 5. Long-Term Impact & 10-Year Maintainability Gates
+- **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the \`impact-analysis\` skill and document design rationales.
+- **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
+- **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
+- **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
+PAB_EOF
+
+# 6. Database schema domain mapping (Auto-discover domain tables or modules)
+mkdir -p "$SCHEMAS_DIR"
+
+# Write a basic schema.md index file
+cat << SRD_EOF > "$SCHEMA_INDEX_FILE"
+# Technical Schema & Reference Database (SRD) - Index Map
+
+This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
+
+---
+
+## 1. Domain Schemas Index
+- [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
+SRD_EOF
+
+# Check for custom schema files
+if [ "$DB_STACK" = "Prisma ORM (schema: prisma/schema.prisma)" ]; then
+    # Create prisma schema domain layout
+    cat << PRISMA_EOF > "$SCHEMAS_DIR/database_schema.md"
+# Schema: Database Models (Prisma)
+
+Automatically discovered Prisma model entities:
+
+---
+
+## 1. Relational Database Tables / Models
+$(grep -E "^model " prisma/schema.prisma | cut -d' ' -f2 | sed 's/^/- /' || true)
+PRISMA_EOF
+
+    cat << SRD_EOF >> "$SCHEMA_INDEX_FILE"
+- [Database Schema (Prisma)](file://./schemas/database_schema.md) -> Reference: [database_schema.md](file://./schemas/database_schema.md)
+SRD_EOF
+fi
+
+echo "=========================================================="
+echo "Reconnaissance Complete! Blueprints updated successfully."
+echo "=========================================================="
+EOF
+
+# 11. Write validate.sh script
+cat << 'EOF' > .agents/scripts/validate.sh
+#!/usr/bin/env bash
+# Antigravity Agent Core - Workspace & Security Validator
+# Validates workspace rules, scans for credentials, checks memory size, and details active locks.
+
+set -euo pipefail
+
+MEMORY_FILE=".agents/memory.md"
+LOCKS_DIR=".agents/locks"
+PROJECT_RULES=".agents/project_rules.md"
+
+echo "=========================================================="
+echo "Starting Antigravity Agent Workspace Validation..."
+echo "=========================================================="
+
+FAILED=0
+
+# 1. Check Active Memory Size
+if [ -f "$MEMORY_FILE" ]; then
+    LINE_COUNT=$(wc -l < "$MEMORY_FILE" | tr -d ' ')
+    echo "Check 1: Memory File Line Count: $LINE_COUNT lines"
+    if [ "$LINE_COUNT" -gt 100 ]; then
+        echo "  [WARNING] Memory file '$MEMORY_FILE' exceeds the 100-line limit ($LINE_COUNT lines)!"
+        echo "            Please run './.agents/scripts/helper.sh archive' to compact your memory."
+    else
+        echo "  [PASS] Memory file size is within world-class limits."
+    fi
+else
+    echo "  [FAIL] Memory file '$MEMORY_FILE' does not exist!"
+    FAILED=1
+fi
+
+# 2. Check Active Lockfiles
+echo "Check 2: Active Module Locks"
+if [ -d "$LOCKS_DIR" ] && [ "$(ls -A "$LOCKS_DIR")" ]; then
+    echo "  Found active locks:"
+    for lock in "$LOCKS_DIR"/*.lock; do
+        if [ -f "$lock" ]; then
+            mod=$(basename "$lock" .lock)
+            echo "  - Module '$mod':"
+            sed 's/^/    /' "$lock"
+        fi
+    done
+else
+    echo "  [PASS] No active locks found."
+fi
+
+# 3. Secret and Credential Scanning (Pre-commit / Validation)
+echo "Check 3: Hardcoded Credentials Scan (excluding .agents/ and .git/)"
+SECRET_FOUND=0
+# Search for API keys, secrets, private keys, passwords
+# Match common secret variables and high entropy patterns
+SECRET_PATTERNS=("apikey" "api_key" "secret" "password" "passwd" "private_key" "jwt_secret")
+FILES_TO_SCAN=$(find . -type f \
+    -not -path '*/.*' \
+    -not -path './.agents/*' \
+    -not -path './node_modules/*' \
+    -not -path './dist/*' \
+    -not -path './build/*' \
+    -not -path '*.md' \
+    -not -path '*.json' \
+    -not -path '*.lock' \
+    -not -path '*.png' \
+    -not -path '*.jpg' \
+    -not -path '*.gif' 2>/dev/null || true)
+
+if [ -n "$FILES_TO_SCAN" ]; then
+    for pattern in "${SECRET_PATTERNS[@]}"; do
+        # search for assignment of secrets like API_KEY = "xxx"
+        # avoid false positives by ensuring there is an assignment with quotation marks
+        res=$(echo "$FILES_TO_SCAN" | xargs grep -rnEi "$pattern\s*=\s*['\"][a-zA-Z0-9_\-\.]{8,}['\"]" 2>/dev/null || true)
+        if [ -n "$res" ]; then
+            echo "  [FAIL] Potential hardcoded credential found for pattern '$pattern':"
+            echo "$res" | sed 's/^/    /'
+            SECRET_FOUND=1
+        fi
+    done
+    
+    # Scan for RSA/PEM private key headers
+    private_key_res=$(echo "$FILES_TO_SCAN" | xargs grep -rn "BEGIN PRIVATE KEY" 2>/dev/null || true)
+    if [ -n "$private_key_res" ]; then
+        echo "  [FAIL] Hardcoded Private Key Block found:"
+        echo "$private_key_res" | sed 's/^/    /'
+        SECRET_FOUND=1
+    fi
+fi
+
+if [ "$SECRET_FOUND" -eq 0 ]; then
+    echo "  [PASS] No hardcoded credentials detected in scan scope."
+else
+    FAILED=1
+fi
+
+# 4. Check for Raw Environment Variable Reads
+echo "Check 4: Raw Environment Access Scan (domain-purity verification)"
+RAW_ENV_FOUND=0
+# Scanning JS/TS, Go, Python files for raw env variable access
+JS_FILES=$(find . -name "*.js" -o -name "*.ts" -o -name "*.tsx" -not -path './.agents/*' -not -path './node_modules/*' -not -path './dist/*' 2>/dev/null || true)
+if [ -n "$JS_FILES" ]; then
+    # Look for process.env.something, but ignore common config folders
+    raw_js_env=$(echo "$JS_FILES" | grep -v "config" | xargs grep -rn "process\.env\.[A-Za-z0-9_]" 2>/dev/null || true)
+    if [ -n "$raw_js_env" ]; then
+        echo "  [WARNING] Raw 'process.env' access found outside configuration modules:"
+        echo "$raw_js_env" | sed 's/^/    /'
+        RAW_ENV_FOUND=1
+    fi
+fi
+
+GO_FILES=$(find . -name "*.go" -not -path './.agents/*' 2>/dev/null || true)
+if [ -n "$GO_FILES" ]; then
+    raw_go_env=$(echo "$GO_FILES" | grep -v "config" | xargs grep -rn "os\.Getenv" 2>/dev/null || true)
+    if [ -n "$raw_go_env" ]; then
+        echo "  [WARNING] Raw 'os.Getenv' access found outside configuration modules:"
+        echo "$raw_go_env" | sed 's/^/    /'
+        RAW_ENV_FOUND=1
+    fi
+fi
+
+if [ "$RAW_ENV_FOUND" -eq 0 ]; then
+    echo "  [PASS] Domain isolation looks healthy (no scattered raw env reads)."
+fi
+
+echo "=========================================================="
+if [ "$FAILED" -eq 0 ]; then
+    echo "Workspace Status: VALIDATED (1% World-Class Standard)"
+    exit 0
+else
+    echo "Workspace Status: DEGRADED (Check issues detailed above)"
+    exit 1
+fi
+EOF
+
+# 12. Write post-commit hook template
 cat << 'EOF' > .agents/hooks/post-commit
 #!/usr/bin/env bash
 # Auto-sync Git branch and commit hash to agent memory ledger
@@ -778,15 +1359,23 @@ if [ -f .agents/scripts/helper.sh ]; then
 fi
 EOF
 
-chmod +x .agents/bootstrap.sh
-chmod +x .agents/scripts/helper.sh
-chmod +x .agents/hooks/post-commit
+if [ -f .agents/bootstrap.sh ]; then chmod +x .agents/bootstrap.sh; fi
+if [ -f .agents/scripts/helper.sh ]; then chmod +x .agents/scripts/helper.sh; fi
+if [ -f .agents/scripts/recon.sh ]; then chmod +x .agents/scripts/recon.sh; fi
+if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi
+if [ -f .agents/hooks/post-commit ]; then chmod +x .agents/hooks/post-commit; fi
 
 if [ -d .git ]; then
     mkdir -p .git/hooks
     cp .agents/hooks/post-commit .git/hooks/post-commit
     chmod +x .git/hooks/post-commit
     echo "Git post-commit hook installed."
+fi
+
+# Run auto-recon immediately to initialize configuration blueprints
+echo "Running autonomous reconnaissance to initialize workspace..."
+if [ -f .agents/scripts/recon.sh ]; then
+    .agents/scripts/recon.sh
 fi
 
 echo "=========================================================="
@@ -802,6 +1391,7 @@ echo "Helper Scripts created at: .agents/scripts/"
 echo "Git Hooks created at: .agents/hooks/"
 echo "Generalized Skills loaded in: .agents/skills/"
 echo "=========================================================="
-echo "Next Steps: Edit .agents/project_rules.md and .agents/schema.md"
-echo "to match your target project frameworks and relational schemas."
+echo "Workspace diagnostics status:"
+.agents/scripts/helper.sh doctor
 echo "=========================================================="
+

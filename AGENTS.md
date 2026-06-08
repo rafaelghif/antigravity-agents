@@ -66,9 +66,10 @@ Every code mutation must execute in an atomic, sequential loop:
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
-6. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
-7. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
+5. **Workspace Validation**: Run `./.agents/scripts/helper.sh validate` to verify memory limits, lack of hardcoded secrets, and environment boundary conformance.
+6. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
+7. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
+8. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
 
 ---
 
@@ -101,14 +102,9 @@ To optimize prompt caching and prevent context window bloat:
 ## 10. Autonomous Adaptation & Self-Configuration Protocol
 When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
 If the blueprints are not initialized for the current project:
-1. **Interactive User Discovery**: Immediately interview the user with a structured questionnaire. Ask:
-   - What is this project's name and its primary business goals?
-   - What tech stack, ORM, database, and library versions are preferred?
-   - What architectural boundaries and conventions should be followed?
-   - What are the commands to compile, build, test, and lint the code?
-2. **Trigger Reconnaissance**: Execute the `codebase-recon` skill to verify folder boundaries, configuration files, and relational database migrations/schemas, cross-referencing with user inputs.
-3. **Populate Project Blueprint**:
-   - Write the finalized technical stack, directory boundaries, and validation commands directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
+1. **Trigger Autonomous Reconnaissance**: Immediately execute `./.agents/scripts/helper.sh recon` to automatically discover the tech stack, directory boundaries, build/test/lint commands, Relational DB/ORM integrations, and environment variable configuration template.
+2. **Interactive User Alignment**: Present the auto-detected stack and boundaries to the user for quick confirmation or adjustments.
+3. **Refine Blueprint**: Adjust [.agents/project_rules.md](file://./.agents/project_rules.md) and [.agents/schema.md](file://./.agents/schema.md) based on user confirmation.
 4. **Populate Database Schema Map**:
    - Map all relational database models, tables, columns, and API routes found, organizing them into domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
    - Update the high-level index map inside [.agents/schema.md](file://./.agents/schema.md) to link to these domain schemas.
