@@ -16,6 +16,7 @@ mkdir -p .agents/skills/test-driven-patch
 mkdir -p .agents/skills/infra-provisioner
 mkdir -p .agents/skills/security-ci-audit
 mkdir -p .agents/skills/code-review
+mkdir -p .agents/skills/impact-analysis
 mkdir -p .agents/workflows
 mkdir -p .agents/archive
 mkdir -p .agents/locks
@@ -128,16 +129,30 @@ To optimize prompt caching and prevent context window bloat:
 ## 10. Autonomous Adaptation & Self-Configuration Protocol
 When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
 If the blueprints are not initialized for the current project:
-1. **Trigger Reconnaissance**: Immediately execute the `codebase-recon` skill to discover the project's language, framework, folder structure, config files, and relational database migrations/schemas.
-2. **Populate Project Blueprint**:
-   - Write the discovered technical stack, directories boundary gate, and validation commands (build, test, lint) directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
-3. **Populate Database Schema Map**:
-   - Map all relational database models, tables, columns, and API routes found, and organize them into specialized domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
+1. **Interactive User Discovery**: Immediately interview the user with a structured questionnaire. Ask:
+   - What is this project's name and its primary business goals?
+   - What tech stack, ORM, database, and library versions are preferred?
+   - What architectural boundaries and conventions should be followed?
+   - What are the commands to compile, build, test, and lint the code?
+2. **Trigger Reconnaissance**: Execute the `codebase-recon` skill to verify folder boundaries, configuration files, and relational database migrations/schemas, cross-referencing with user inputs.
+3. **Populate Project Blueprint**:
+   - Write the finalized technical stack, directory boundaries, and validation commands directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
+4. **Populate Database Schema Map**:
+   - Map all relational database models, tables, columns, and API routes found, organizing them into domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
    - Update the high-level index map inside [.agents/schema.md](file://./.agents/schema.md) to link to these domain schemas.
-4. **Initialize Active Memory**:
-   - Populate [.agents/memory.md](file://./.agents/memory.md) with the detected system topology, active branch, and initial task list.
-5. **Autoprovision Commit**: Commit these initialized configuration files using git: `chore(agent): autodetect project stack and initialize memory blueprints`.
+5. **Initialize Active Memory**:
+   - Populate [.agents/memory.md](file://./.agents/memory.md) with the verified system topology, active branch, and initial task checklist.
+6. **Autoprovision Commit**: Commit these initialized configuration files using Git: `chore(agent): autodetect project stack and initialize memory blueprints`.
 Once the blueprints are populated, the agent must strictly follow the detected project rules for all code mutations.
+
+---
+
+## 11. Long-Term Impact & Architectural Integrity Gates
+To prevent technical debt and ensure the system remains maintainable, secure, and performant over a 10-year lifespan, all agent modifications must satisfy these checks:
+- **Mandatory Impact Auditing**: Before proposing any major code change, architectural restructuring, or package import, the agent MUST run the `impact-analysis` skill to identify downstream dependency breaks, security vulnerabilities, or performance bottlenecks.
+- **Architectural Boundary Insulation**: Maintain pure layer decoupling. Never mix infrastructure details (like database models, network clients, framework-specific wrappers) with core business logic.
+- **Strict User Consultations**: In situations of ambiguity, high security risk, database schema migrations, or backward-incompatible API changes, the agent MUST halt execution and consult the user with options before writing code.
+- **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/project_rules.md` to prevent future errors.
 EOF
 
 # 3. Write .agents/memory.md template
@@ -204,6 +219,12 @@ This file defines the specific technical stack, directory boundaries, coding sta
 
 ## 4. Security & External Services
 - [Define database transaction rules, third-party adapters (S3, Auth, Payment), and caching protocols]
+
+## 5. Long-Term Impact & 10-Year Maintainability Gates
+- **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the `impact-analysis` skill and document design rationales.
+- **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
+- **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
+- **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
 EOF
 
 # 5. Write .agents/schema.md template
@@ -551,6 +572,46 @@ description: Audits production code modifications for type cleanliness, security
 - [ ] Secrets and credential configurations are fully isolated.
 - [ ] Newly added lines satisfy target code coverage limits.
 - [ ] PR Review Handover document generated.
+EOF
+
+# Write impact-analysis SKILL.md
+cat << 'EOF' > .agents/skills/impact-analysis/SKILL.md
+---
+name: impact-analysis
+description: Audits the long-term architectural, performance, security, and maintainability impacts of any feature design or code mutation.
+---
+
+# Long-Term Impact & Dependency Analysis Skill
+
+## 1. Input Specification
+- **Proposed Mutation/Feature**: Description of the changes to be made.
+- **Affected Domain/Modules**: List of files, databases, routes, or interfaces that interact with the modified sections.
+- **Project Lifespan Context**: Designing with a long-term (up to 10-year) maintainability and scalability horizon.
+
+## 2. Operational Procedures
+1. **Critical Thinking Assessment**:
+   - Before writing any code, write down a mental or scratchpad analysis of the proposed implementation path.
+   - Run a multi-dimensional analysis on:
+     - **Architectural Coupling**: Ensure zero leakages. Core business domains must remain completely framework-agnostic.
+     - **Performance & Resource Scalability**: Analyze database query count (avoid N+1), index usages, network roundtrips, and memory consumption.
+     - **Security & Data Privacy**: Check inputs for injection, cross-site scripting, rate-limiting violations, data access authorization, and credential leakages.
+     - **Backward Compatibility**: Verify that existing clients, APIs, or database records are not broken.
+     - **10-Year Maintainability**: Avoid convoluted patterns, unchecked external dependencies, or unverified imports. Write clean, self-documenting code.
+2. **Structural Dependency Mapping**:
+   - Scan downstream dependencies of any file being modified using `grep_search` or code analysis to trace what else might break.
+3. **Interactive Validation Gate**:
+   - If any potential high-risk impact is detected (e.g., database schema changes, backward-incompatible API changes, high latency operations, or major security risks), the agent MUST halt execution and consult the user using a clear multiple-choice list of alternatives before proceeding.
+
+## 3. Decision Matrix
+- **Does the task involve changing database columns or relational constraints?**
+  - **YES**: Write a migration plan, check database compatibility, and ask the user for approval.
+- **Does the task introduce a new third-party package?**
+  - **YES**: Analyze the package's security posture, active maintainer status, bundle size, and license compliance before importing.
+- **Does the code bleed boundary layers (e.g., ORM annotations in domain structs, HTTP logic in services)?**
+  - **YES**: Refactor to introduce proper abstraction layers (like Repository patterns or interfaces).
+
+## 4. Output Protocol
+For all major features or architectural shifts, record the design choices and downstream analysis under a new Architectural Decision Record (ADR) in `.agents/adr.md` or a workflows folder before writing code.
 EOF
 
 # 9. Write helper.sh script

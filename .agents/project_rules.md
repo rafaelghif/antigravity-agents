@@ -19,3 +19,9 @@ This file defines the specific technical stack, directory boundaries, coding sta
 
 ## 4. Security & External Services
 - [Define database transaction rules, third-party adapters (S3, Auth, Payment), and caching protocols]
+
+## 5. Long-Term Impact & 10-Year Maintainability Gates
+- **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the `impact-analysis` skill and document design rationales.
+- **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
+- **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
+- **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.

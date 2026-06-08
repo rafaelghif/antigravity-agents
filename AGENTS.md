@@ -101,13 +101,27 @@ To optimize prompt caching and prevent context window bloat:
 ## 10. Autonomous Adaptation & Self-Configuration Protocol
 When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
 If the blueprints are not initialized for the current project:
-1. **Trigger Reconnaissance**: Immediately execute the `codebase-recon` skill to discover the project's language, framework, folder structure, config files, and relational database migrations/schemas.
-2. **Populate Project Blueprint**:
-   - Write the discovered technical stack, directories boundary gate, and validation commands (build, test, lint) directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
-3. **Populate Database Schema Map**:
-   - Map all relational database models, tables, columns, and API routes found, and organize them into specialized domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
+1. **Interactive User Discovery**: Immediately interview the user with a structured questionnaire. Ask:
+   - What is this project's name and its primary business goals?
+   - What tech stack, ORM, database, and library versions are preferred?
+   - What architectural boundaries and conventions should be followed?
+   - What are the commands to compile, build, test, and lint the code?
+2. **Trigger Reconnaissance**: Execute the `codebase-recon` skill to verify folder boundaries, configuration files, and relational database migrations/schemas, cross-referencing with user inputs.
+3. **Populate Project Blueprint**:
+   - Write the finalized technical stack, directory boundaries, and validation commands directly into [.agents/project_rules.md](file://./.agents/project_rules.md).
+4. **Populate Database Schema Map**:
+   - Map all relational database models, tables, columns, and API routes found, organizing them into domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
    - Update the high-level index map inside [.agents/schema.md](file://./.agents/schema.md) to link to these domain schemas.
-4. **Initialize Active Memory**:
-   - Populate [.agents/memory.md](file://./.agents/memory.md) with the detected system topology, active branch, and initial task list.
-5. **Autoprovision Commit**: Commit these initialized configuration files using git: `chore(agent): autodetect project stack and initialize memory blueprints`.
+5. **Initialize Active Memory**:
+   - Populate [.agents/memory.md](file://./.agents/memory.md) with the verified system topology, active branch, and initial task checklist.
+6. **Autoprovision Commit**: Commit these initialized configuration files using Git: `chore(agent): autodetect project stack and initialize memory blueprints`.
 Once the blueprints are populated, the agent must strictly follow the detected project rules for all code mutations.
+
+---
+
+## 11. Long-Term Impact & Architectural Integrity Gates
+To prevent technical debt and ensure the system remains maintainable, secure, and performant over a 10-year lifespan, all agent modifications must satisfy these checks:
+- **Mandatory Impact Auditing**: Before proposing any major code change, architectural restructuring, or package import, the agent MUST run the `impact-analysis` skill to identify downstream dependency breaks, security vulnerabilities, or performance bottlenecks.
+- **Architectural Boundary Insulation**: Maintain pure layer decoupling. Never mix infrastructure details (like database models, network clients, framework-specific wrappers) with core business logic.
+- **Strict User Consultations**: In situations of ambiguity, high security risk, database schema migrations, or backward-incompatible API changes, the agent MUST halt execution and consult the user with options before writing code.
+- **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/project_rules.md` to prevent future errors.

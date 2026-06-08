@@ -7,7 +7,7 @@ LOCKS_DIR=".agents/locks"
 ARCHIVE_DIR=".agents/archive"
 
 show_help() {
-    echo "Usage: $0 [command] [args]"
+    echo "Usage: \$0 [command] [args]"
     echo ""
     echo "Commands:"
     echo "  sync-git          Synchronize Git branch and last commit hash with memory.md"
@@ -52,11 +52,11 @@ cmd_lock() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-    cat << EOF > "$lockfile"
+    cat << INNER_EOF > "$lockfile"
 Branch: $branch
 Owner: Agent
 Timestamp: $timestamp
-EOF
+INNER_EOF
     echo "Acquired lock for module '$module' at $lockfile"
 }
 
@@ -111,11 +111,11 @@ cmd_archive() {
     local temp_file
     temp_file=$(mktemp)
     head -n "$start_line" "$MEMORY_FILE" > "$temp_file"
-    cat << 'EOF' >> "$temp_file"
+    cat << 'INNER_EOF' >> "$temp_file"
 - [ ] Implement core logic
 - [ ] Write unit tests
 - [ ] Verify build and tests pass
-EOF
+INNER_EOF
     tail -n +"$end_line" "$MEMORY_FILE" >> "$temp_file"
     mv "$temp_file" "$MEMORY_FILE"
     echo "Checklist reset successfully."
