@@ -14,6 +14,7 @@ show_help() {
     echo "  recon             Run autonomous codebase stack and directory structure detection"
     echo "  validate          Perform security audit, lock checks, and memory size validation"
     echo "  doctor            Diagnose workspace health and verify system executables"
+    echo "  commit            Verify code tests, run security checks, and execute conventional commit"
     echo "  sync-git          Synchronize Git branch and last commit hash with memory.md"
     echo "  lock [module]     Acquire a lock on a module"
     echo "  unlock [module]   Release a lock on a module"
@@ -369,6 +370,149 @@ cmd_doctor() {
     fi
 }
 
+cmd_commit() {
+    local no_test_flag="false"
+    local stage_files=()
+    local type=""
+    local scope=""
+    local desc=""
+
+    # Parse arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --no-test|--no-verify)
+                no_test_flag="true"
+                shift
+                ;;
+            *)
+                if [ "$1" = "commit" ]; then
+                    shift
+                elif [ -z "$type" ]; then
+                    type="$1"
+                    shift
+                elif [ -z "$scope" ]; then
+                    scope="$1"
+                    shift
+                elif [ -z "$desc" ]; then
+                    desc="$1"
+                    shift
+                else
+                    stage_files+=("$1")
+                    shift
+                fi
+                ;;
+        esac
+    done
+
+    # Interactive inputs if parameters are missing
+    if [ -z "$type" ]; then
+        echo "Choose commit type:"
+        echo "  [1] feat:     A new feature"
+        echo "  [2] fix:      A bug fix"
+        echo "  [3] refactor: A code change that neither fixes a bug nor adds a feature"
+        echo "  [4] chore:    Changes to the build process or auxiliary tools and libraries"
+        echo "  [5] docs:     Documentation only changes"
+        echo "  [6] test:     Adding missing tests or correcting existing tests"
+        echo "  [7] perf:     A code change that improves performance"
+        read -p "Select number or type string (default: feat): " type_choice
+        case "$type_choice" in
+            1) type="feat" ;;
+            2) type="fix" ;;
+            3) type="refactor" ;;
+            4) type="chore" ;;
+            5) type="docs" ;;
+            6) type="test" ;;
+            7) type="perf" ;;
+            "") type="feat" ;;
+            *) type="$type_choice" ;;
+        esac
+    fi
+
+    if [ -z "$scope" ]; then
+        read -p "Enter commit scope (e.g. core, auth, db, shared) (default: core): " scope
+        if [ -z "$scope" ]; then scope="core"; fi
+    fi
+
+    if [ -z "$desc" ]; then
+        read -p "Enter brief description of change: " desc
+        if [ -z "$desc" ]; then
+            echo "Error: Description cannot be empty." >&2
+            exit 1
+        fi
+    fi
+
+    # Workspace Validation
+    echo "Running workspace validation checks..."
+    if ! .agents/scripts/validate.sh; then
+        echo "Error: Workspace validation failed. Aborting commit." >&2
+        exit 1
+    fi
+
+    # Linter Execution
+    if [ "$no_test_flag" = "false" ]; then
+        local linter_cmd=""
+        if [ -f .agents/project_rules.md ]; then
+            linter_cmd=$(grep "Linter command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+        fi
+
+        if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
+            echo "Running linter command: $linter_cmd..."
+            if ! eval "$linter_cmd"; then
+                echo "Error: Linter check failed. Aborting commit." >&2
+                exit 1
+            fi
+            echo "  [PASS] Linter check passed successfully."
+        else
+            echo "No linter configured in project_rules.md. Skipping linting."
+        fi
+    else
+        echo "Linter check bypassed via --no-test / --no-verify."
+    fi
+
+    # Test Execution
+    if [ "$no_test_flag" = "false" ]; then
+        local test_runner=""
+        if [ -f .agents/project_rules.md ]; then
+            test_runner=$(grep "Test runner command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+        fi
+
+        if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
+            echo "Running test suite: $test_runner..."
+            if ! eval "$test_runner"; then
+                echo "Error: Test runner suite failed. Aborting commit." >&2
+                exit 1
+            fi
+            echo "  [PASS] All tests passed successfully."
+        else
+            echo "No test runner configured in project_rules.md. Skipping tests."
+        fi
+    else
+        echo "Test execution bypassed via --no-test / --no-verify."
+    fi
+
+    # File Staging
+    if [ ${#stage_files[@]} -gt 0 ]; then
+        echo "Staging specified files: ${stage_files[*]}..."
+        git add "${stage_files[@]}"
+    else
+        echo "Staging all modified and untracked files..."
+        # Check if there are changes to stage
+        if [ -n "$(git status --porcelain | grep -v '^\?\? .agents/locks/')" ]; then
+            git add -A -- ':!.agents/locks/*'
+        fi
+    fi
+
+    # Conventional Commit Execution
+    local commit_msg="$type($scope): $desc"
+    echo "Executing conventional commit: '$commit_msg'..."
+    if git commit -m "$commit_msg"; then
+        echo "Commit successful."
+    else
+        echo "Error: Git commit failed." >&2
+        exit 1
+    fi
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -387,6 +531,9 @@ case "$1" in
         ;;
     doctor)
         cmd_doctor
+        ;;
+    commit)
+        cmd_commit "$@"
         ;;
     sync-git)
         cmd_sync_git

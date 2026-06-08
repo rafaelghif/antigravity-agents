@@ -86,6 +86,7 @@ Manage your workspace using the helper command dispatcher:
 | `recon` | `./.agents/scripts/helper.sh recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
 | `validate` | `./.agents/scripts/helper.sh validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
 | `doctor` | `./.agents/scripts/helper.sh doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
+| `commit` | `./.agents/scripts/helper.sh commit [type] [scope] [desc] [files...]` | Runs workspace validations, checks the project's linter and test suite, and executes a Git conventional commit (supports `--no-verify`/`--no-test` to bypass checks). |
 | `sync-git` | `./.agents/scripts/helper.sh sync-git` | Synchronizes the active branch and last commit hash in `memory.md`. |
 | `lock` | `./.agents/scripts/helper.sh lock <module>` | Locks a specific module to prevent editing conflicts with other agents. |
 | `unlock` | `./.agents/scripts/helper.sh unlock <module>` | Releases a locked module lock file. |
@@ -101,8 +102,6 @@ Manage your workspace using the helper command dispatcher:
 4. **Development Loop**:
    - Lock module: `./.agents/scripts/helper.sh lock <module_name>`
    - Write code & tests under TDD guidelines.
-   - Compile & Test.
-   - Run validation: `./.agents/scripts/helper.sh validate` to pass security gates.
-   - Commit changes using Git conventional commits format: `type(scope): description`.
+   - Run automated validations, linter, tests, and commit using: `./.agents/scripts/helper.sh commit`
    - Release lock: `./.agents/scripts/helper.sh unlock <module_name>`
 5. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact logs before merging to `main`/`master`.

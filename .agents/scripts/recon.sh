@@ -166,6 +166,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ## 3. Spacing & Styling Standards
 - **Linter command**: \`$LINT_CMD\`
 - **Build validation**: \`$BUILD_CMD\`
+- **Test runner command**: \`$TEST_CMD\`
 - **Follow formatting**: Follow standard formatting guidelines for $TECH_STACK development.
 
 ## 4. Security & External Services
