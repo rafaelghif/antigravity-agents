@@ -37,12 +37,12 @@ To operate seamlessly in collaborative environments with other developers and au
 - **Isolated Feature Branches**: All development must occur on separate, isolated git feature branches. Directly committing to `main` or `master` is strictly forbidden.
 - **Federated Git-Backed Memory**: Memory resides in the repository. Pulling remote updates (`git pull --rebase origin main`) automatically syncs schemas, decision records, and active task progress across the entire team without needing external databases.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
-  - Create a lockfile under `.agents/locks/<module_name>.lock` containing: branch name, active owner (agent or human name), lock timestamp, and file paths.
-  - Before editing any file, check `.agents/locks/`. If a lock exists for files you intend to edit, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
-  - Delete the lockfile immediately upon committing your changes or closing the branch.
+  - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
+  - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
+  - Release the lock immediately upon committing your changes by running `.agents/scripts/helper.sh unlock <module_name>`.
 - **Pre-Merge Compaction Protocol**: To prevent merge conflicts on `memory.md` during integration:
-  - Before merging a branch into `main`/`master`, the agent/developer MUST archive their active task checklist from `memory.md` into a new file: `.agents/archive/sprint_<branch_name>.md`.
-  - Reset the active checklists and sprint metrics in `memory.md` back to an idle/blank state, referencing the new archive file.
+  - Before merging a branch into `main`/`master`, the agent/developer MUST archive their active task checklist by running `.agents/scripts/helper.sh archive`.
+  - This automatically saves the checklist to `.agents/archive/sprint_<branch_name>.md` and resets the active checklist in `memory.md`.
   - Commit this compaction: `chore(memory): archive active checklists for merge`.
 - **Peer Review Handover**: When submitting a PR, the agent/developer must write a review guide at `.agents/workflows/pr_review_<branch_name>.md` detailing:
   1. **Scope of Work**: Added/modified files and symbols.
@@ -63,12 +63,12 @@ The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must
 ## 6. The Atomic Commit Loop (Strict Discipline)
 Every code mutation must execute in an atomic, sequential loop:
 1. **Sync**: Rebase the branch to sync with remote updates (`git pull --rebase origin main`).
-2. **Lock**: Create `.agents/locks/<module>.lock` and set the target task to `[/]` in `memory.md`.
+2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`.
+5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
 6. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
-7. **Unlock**: Delete the lock file.
+7. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
 
 ---
 

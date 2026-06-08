@@ -20,6 +20,8 @@ mkdir -p .agents/workflows
 mkdir -p .agents/archive
 mkdir -p .agents/locks
 mkdir -p .agents/schemas
+mkdir -p .agents/scripts
+mkdir -p .agents/hooks
 
 # 2. Write AGENTS.md (Global Agent Protocol) to project root
 cat << 'EOF' > AGENTS.md
@@ -62,12 +64,12 @@ To operate seamlessly in collaborative environments with other developers and au
 - **Isolated Feature Branches**: All development must occur on separate, isolated git feature branches. Directly committing to `main` or `master` is strictly forbidden.
 - **Federated Git-Backed Memory**: Memory resides in the repository. Pulling remote updates (`git pull --rebase origin main`) automatically syncs schemas, decision records, and active task progress across the entire team without needing external databases.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
-  - Create a lockfile under `.agents/locks/<module_name>.lock` containing: branch name, active owner (agent or human name), lock timestamp, and file paths.
-  - Before editing any file, check `.agents/locks/`. If a lock exists for files you intend to edit, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
-  - Delete the lockfile immediately upon committing your changes or closing the branch.
+  - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
+  - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
+  - Release the lock immediately upon committing your changes by running `.agents/scripts/helper.sh unlock <module_name>`.
 - **Pre-Merge Compaction Protocol**: To prevent merge conflicts on `memory.md` during integration:
-  - Before merging a branch into `main`/`master`, the agent/developer MUST archive their active task checklist from `memory.md` into a new file: `.agents/archive/sprint_<branch_name>.md`.
-  - Reset the active checklists and sprint metrics in `memory.md` back to an idle/blank state, referencing the new archive file.
+  - Before merging a branch into `main`/`master`, the agent/developer MUST archive their active task checklist by running `.agents/scripts/helper.sh archive`.
+  - This automatically saves the checklist to `.agents/archive/sprint_<branch_name>.md` and resets the active checklist in `memory.md`.
   - Commit this compaction: `chore(memory): archive active checklists for merge`.
 - **Peer Review Handover**: When submitting a PR, the agent/developer must write a review guide at `.agents/workflows/pr_review_<branch_name>.md` detailing:
   1. **Scope of Work**: Added/modified files and symbols.
@@ -88,12 +90,12 @@ The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must
 ## 6. The Atomic Commit Loop (Strict Discipline)
 Every code mutation must execute in an atomic, sequential loop:
 1. **Sync**: Rebase the branch to sync with remote updates (`git pull --rebase origin main`).
-2. **Lock**: Create `.agents/locks/<module>.lock` and set the target task to `[/]` in `memory.md`.
+2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`.
+5. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
 6. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
-7. **Unlock**: Delete the lock file.
+7. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
 
 ---
 
@@ -551,7 +553,180 @@ description: Audits production code modifications for type cleanliness, security
 - [ ] PR Review Handover document generated.
 EOF
 
+# 9. Write helper.sh script
+cat << 'EOF' > .agents/scripts/helper.sh
+#!/usr/bin/env bash
+# Antigravity Agent Core Helper Script
+set -euo pipefail
+
+MEMORY_FILE=".agents/memory.md"
+LOCKS_DIR=".agents/locks"
+ARCHIVE_DIR=".agents/archive"
+
+show_help() {
+    echo "Usage: \$0 [command] [args]"
+    echo ""
+    echo "Commands:"
+    echo "  sync-git          Synchronize Git branch and last commit hash with memory.md"
+    echo "  lock [module]     Acquire a lock on a module"
+    echo "  unlock [module]   Release a lock on a module"
+    echo "  archive           Archive completed sprint tasks and reset memory.md checklist"
+    echo "  help              Show this help message"
+}
+
+cmd_sync_git() {
+    if [ ! -f "$MEMORY_FILE" ]; then
+        echo "Error: Memory file $MEMORY_FILE not found." >&2
+        exit 1
+    fi
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    local commit
+    commit=$(git log -n 1 --format="%h" 2>/dev/null || echo "none")
+
+    # Update memory.md using sed
+    sed -i -E "s/- \*\*Active Branch\*\*: .*/- **Active Branch**: $branch/" "$MEMORY_FILE"
+    sed -i -E "s/- \*\*Last Commit Reference\*\*: .*/- **Last Commit Reference**: $commit/" "$MEMORY_FILE"
+    echo "Synchronized: Branch=$branch, Commit=$commit in $MEMORY_FILE"
+}
+
+cmd_lock() {
+    local module="${1:-}"
+    if [ -z "$module" ]; then
+        echo "Error: Please specify a module name to lock." >&2
+        exit 1
+    fi
+    mkdir -p "$LOCKS_DIR"
+    local lockfile="$LOCKS_DIR/$module.lock"
+    if [ -f "$lockfile" ]; then
+        echo "Error: Module '$module' is already locked!" >&2
+        cat "$lockfile" >&2
+        exit 1
+    fi
+
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    cat << INNER_EOF > "$lockfile"
+Branch: $branch
+Owner: Agent
+Timestamp: $timestamp
+INNER_EOF
+    echo "Acquired lock for module '$module' at $lockfile"
+}
+
+cmd_unlock() {
+    local module="${1:-}"
+    if [ -z "$module" ]; then
+        echo "Error: Please specify a module name to unlock." >&2
+        exit 1
+    fi
+    local lockfile="$LOCKS_DIR/$module.lock"
+    if [ ! -f "$lockfile" ]; then
+        echo "Warning: Module '$module' is not locked." >&2
+        exit 0
+    fi
+    rm -f "$lockfile"
+    echo "Released lock for module '$module'"
+}
+
+cmd_archive() {
+    if [ ! -f "$MEMORY_FILE" ]; then
+        echo "Error: Memory file $MEMORY_FILE not found." >&2
+        exit 1
+    fi
+    mkdir -p "$ARCHIVE_DIR"
+    local branch
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    # replace slashes in branch name to avoid path issues
+    branch_clean=${branch//\//_}
+    local archive_file="$ARCHIVE_DIR/sprint_${branch_clean}.md"
+
+    echo "Archiving tasks to $archive_file..."
+    
+    # Extract checklist from memory.md
+    sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v '---' > "$archive_file"
+
+    # Reset checklist in memory.md
+    local start_line
+    start_line=$(grep -n "### Sprint Tasks Checklist" "$MEMORY_FILE" | cut -d: -f1)
+    if [ -z "$start_line" ]; then
+        echo "Error: Could not locate checklist section in $MEMORY_FILE" >&2
+        exit 1
+    fi
+
+    local end_line
+    end_line=$(tail -n +$start_line "$MEMORY_FILE" | grep -n "^---" | head -n 1 | cut -d: -f1)
+    if [ -z "$end_line" ]; then
+        end_line=$(wc -l < "$MEMORY_FILE")
+    else
+        end_line=$((start_line + end_line - 1))
+    fi
+
+    local temp_file
+    temp_file=$(mktemp)
+    head -n "$start_line" "$MEMORY_FILE" > "$temp_file"
+    cat << 'INNER_EOF' >> "$temp_file"
+- [ ] Implement core logic
+- [ ] Write unit tests
+- [ ] Verify build and tests pass
+INNER_EOF
+    tail -n +"$end_line" "$MEMORY_FILE" >> "$temp_file"
+    mv "$temp_file" "$MEMORY_FILE"
+    echo "Checklist reset successfully."
+}
+
+# Dispatch command
+if [ $# -lt 1 ]; then
+    show_help
+    exit 1
+fi
+
+case "$1" in
+    sync-git)
+        cmd_sync_git
+        ;;
+    lock)
+        cmd_lock "${2:-}"
+        ;;
+    unlock)
+        cmd_unlock "${2:-}"
+        ;;
+    archive)
+        cmd_archive
+        ;;
+    help)
+        show_help
+        ;;
+    *)
+        echo "Unknown command: $1" >&2
+        show_help
+        exit 1
+        ;;
+esac
+EOF
+
+# 10. Write post-commit hook template
+cat << 'EOF' > .agents/hooks/post-commit
+#!/usr/bin/env bash
+# Auto-sync Git branch and commit hash to agent memory ledger
+if [ -f .agents/scripts/helper.sh ]; then
+    .agents/scripts/helper.sh sync-git
+fi
+EOF
+
 chmod +x .agents/bootstrap.sh
+chmod +x .agents/scripts/helper.sh
+chmod +x .agents/hooks/post-commit
+
+if [ -d .git ]; then
+    mkdir -p .git/hooks
+    cp .agents/hooks/post-commit .git/hooks/post-commit
+    chmod +x .git/hooks/post-commit
+    echo "Git post-commit hook installed."
+fi
 
 echo "=========================================================="
 echo "Workspace Initialization Complete!"
@@ -562,6 +737,8 @@ echo "Architectural Blueprint written to: .agents/project_rules.md"
 echo "Architectural Decision Records template written to: .agents/adr.md"
 echo "Locks folder created at: .agents/locks/"
 echo "Schemas folder created at: .agents/schemas/"
+echo "Helper Scripts created at: .agents/scripts/"
+echo "Git Hooks created at: .agents/hooks/"
 echo "Generalized Skills loaded in: .agents/skills/"
 echo "=========================================================="
 echo "Next Steps: Edit .agents/project_rules.md and .agents/schema.md"
