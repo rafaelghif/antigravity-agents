@@ -1,12 +1,24 @@
 # Antigravity Agent Core (AAC) 🚀
 
-> **A project-agnostic operational configuration and workspace blueprint designed for AI software engineering agents (Gemini, Claude, GPT-4). It enforces clean development boundaries, guarantees token-efficiency (prompt caching), and keeps your workspace safe and secure.**
->
-> Created by: **Muhammad Rafael Ghifari**  
-> Contact Business: [business.rafaelghifari@gmail.com](mailto:business.rafaelghifari@gmail.com)  
-> LinkedIn: [rafaelghifari](https://www.linkedin.com/in/rafaelghifari/)  
-> GitHub Profile: [rafaelghif](https://github.com/rafaelghif)  
-> Project Repository: [antigravity-agents](https://github.com/rafaelghif/antigravity-agents)
+<p align="center">
+  <a href="https://github.com/rafaelghif/antigravity-agents/blob/main/LICENSE"><img src="https://img.shields.io/github/license/rafaelghif/antigravity-agents?style=flat-square&color=blue" alt="License"></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents/stargazers"><img src="https://img.shields.io/github/stars/rafaelghif/antigravity-agents?style=flat-square&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents/network/members"><img src="https://img.shields.io/github/forks/rafaelghif/antigravity-agents?style=flat-square&color=lightgrey" alt="Forks"></a>
+</p>
+
+**Antigravity Agent Core** is a project-agnostic operational workspace layout and developer protocol designed specifically for AI software engineering agents (such as Gemini, Claude, GPT-4, Cursor, Aider, and local LLMs). 
+
+It enforces developer discipline, enables zero-hallucination execution, optimizes token efficiency (reducing API cost and latency by up to 80% through model-side prompt caching), and secures the codebase against hardcoded credentials and boundary leaks.
+
+---
+
+## 🌟 Open Source & Free Forever
+
+This project is **100% Free, Open Source, and Openly Licensed** under the MIT License:
+- **Free to Use**: Deploy it in your personal, commercial, or enterprise repositories without any cost.
+- **Free to Fork**: Customize the skills, scripts, and rules to match your team's specific developer workflows.
+- **Free to Contribute**: Pull requests, issues, and ideas are highly welcome! Help us build the ultimate workspace for AI agents.
 
 ---
 
@@ -193,6 +205,7 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
 ```
+
 The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/project_rules.md` automatically!
 
 #### **Step 3: Run Diagnostics & Commit**
@@ -254,3 +267,16 @@ Antigravity Workspace enforces these key rules on AI agents:
 - **No Remote Git operations**: The agent is **forbidden** from running `git pull`, `git push`, `git fetch`, or `git checkout -b` to prevent conflicts. Branch management and pushing to remote repos is handled exclusively by **you** (the user).
 - **Hardcoded Secret Scan**: The agent cannot commit if there are passwords, private keys, or API tokens exposed in the codebase (scanned via `validate.sh`).
 - **Context Preservation**: Keeps the task checklists small and modular (`memory.md` capped at 100 lines) to achieve 100% prompt cache hits, making agent invocations 80% faster and cheaper.
+
+---
+
+## 👤 Created By & Contact
+
+This project is created and maintained with 💙 by:
+
+- **Author**: Muhammad Rafael Ghifari
+- **Business Email**: [business.rafaelghifari@gmail.com](mailto:business.rafaelghifari@gmail.com)
+- **LinkedIn**: [rafaelghifari](https://www.linkedin.com/in/rafaelghifari/)
+- **GitHub**: [rafaelghif](https://github.com/rafaelghif)
+
+Feel free to open an issue or submit a pull request on the [GitHub Repository](https://github.com/rafaelghif/antigravity-agents). We welcome all ideas and feedback to make AI coding agent workflows better for everyone!
