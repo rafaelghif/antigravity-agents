@@ -12,9 +12,9 @@ description: Manages local Git branches and executes version control flows enfor
 
 ## 2. Operational Procedures & Checklist
 1. **Branch Hygiene & Naming Check**:
-   - Ensure the current branch is **NOT** `main` or `master`.
-   - The branch name must strictly conform to: `<type>/<kebab-case-description>` (e.g., `feat/firebase-integration`, `fix/cors-headers`, `chore/update-postgres-port`).
-   - If currently on `main`, checkout a new branch: `git checkout -b <branch-name>`.
+   - Ensure you are working on the user's checked-out feature branch.
+   - You must NOT create, delete, switch, merge, push, or pull branches.
+   - If the active branch is `main` or `master`, or if a branch operation is required, halt and instruct the user to handle the git branch operation.
 2. **Pre-Staging Verification**:
    - Run compilation and tests locally (e.g. `npm run build` / `npm run test` or language-equivalent tools) before staging any files.
 3. **Secret Scan Check**:
@@ -28,17 +28,15 @@ description: Manages local Git branches and executes version control flows enfor
      - **Types**: `feat` (new features), `fix` (bug fixes), `refactor` (code restructuring), `chore` (infra, build tools, dependency adjustments, memory updates).
      - **Scopes**: Use the project-specific module name or workspace directory (e.g. `backend`, `frontend`, `infra`, `auth`, `shared`, `db`).
      - *Example*: `fix(frontend): adjust asset detail layout overlay overflow`
-6. **Synchronize & Push**:
-   - Pull remote changes using rebase to avoid unnecessary merge commits: `git pull --rebase origin main`.
-   - Push branch to remote: `git push origin <active-branch-name>`.
+6. **Local Commit Verification**:
+   - Verify that the commit is successfully completed locally.
+   - Inform the user that the changes have been committed, and let them handle pushing to the remote origin.
 
 ## 3. Decision Matrix
-- **Are there uncommitted changes on the active branch but we need to pull updates?**
-   - **YES**: Stash changes: `git stash`, pull changes: `git pull --rebase origin main`, then restore: `git stash pop`.
+- **Are there remote changes that need to be pulled?**
+   - **YES**: Halt and ask the user to pull the updates for you.
 - **Did a file containing private credentials get staged/committed?**
    - **YES**: Instantly stop and undo: `git reset HEAD~1` (if committed) or `git reset HEAD <file>` (if staged). Move keys into `.env` and add the filename to `.gitignore`.
-- **Does a merge conflict occur during a pull?**
-   - **YES**: Resolve conflicts in files. Compile/Test to verify resolution. Then `git add <resolved_files>` and `git rebase --continue`. Never force-push (`-f` / `--force`) to shared branches.
 
 ## 4. Error Mitigation Tree
 - **Detached HEAD State**:

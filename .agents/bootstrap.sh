@@ -64,8 +64,8 @@ To maximize prompt execution speed, leverage model-side context caching, and avo
 
 ## 4. Multi-Agent & Teamwork Coordination
 To operate seamlessly in collaborative environments with other developers and autonomous agents:
-- **Isolated Feature Branches**: All development must occur on separate, isolated git feature branches. Directly committing to `main` or `master` is strictly forbidden.
-- **Federated Git-Backed Memory**: Memory resides in the repository. Pulling remote updates (`git pull --rebase origin main`) automatically syncs schemas, decision records, and active task progress across the entire team without needing external databases.
+- **Isolated Feature Branches**: The agent must operate exclusively on the feature branch created by the user. Creating, switching, pushing, or pulling branches is forbidden for the agent; these tasks are strictly handled by the user.
+- **Federated Git-Backed Memory**: Memory resides in the repository. The user synchronizes schemas, decision records, and active task progress across the team by running git pull/push.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
   - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
   - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
@@ -92,7 +92,7 @@ The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must
 
 ## 6. The Atomic Commit Loop (Strict Discipline)
 Every code mutation must execute in an atomic, sequential loop:
-1. **Sync**: Rebase the branch to sync with remote updates (`git pull --rebase origin main`).
+1. **Sync**: Verify that the workspace is on the correct branch and that there are no uncommitted changes (other than locks or memory files).
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
@@ -328,9 +328,9 @@ description: Manages local Git branches and executes version control flows enfor
 
 ## 2. Operational Procedures & Checklist
 1. **Branch Hygiene & Naming Check**:
-   - Ensure the current branch is **NOT** `main` or `master`.
-   - The branch name must strictly conform to: `<type>/<kebab-case-description>` (e.g., `feat/firebase-integration`, `fix/cors-headers`, `chore/update-postgres-port`).
-   - If currently on `main`, checkout a new branch: `git checkout -b <branch-name>`.
+   - Ensure you are working on the user's checked-out feature branch.
+   - You must NOT create, delete, switch, merge, push, or pull branches.
+   - If the active branch is `main` or `master`, or if a branch operation is required, halt and instruct the user to handle the git branch operation.
 2. **Pre-Staging Verification**:
    - Run compilation and tests locally (e.g. `npm run build` / `npm run test` or language-equivalent tools) before staging any files.
 3. **Secret Scan Check**:
@@ -344,17 +344,15 @@ description: Manages local Git branches and executes version control flows enfor
      - **Types**: `feat` (new features), `fix` (bug fixes), `refactor` (code restructuring), `chore` (infra, build tools, dependency adjustments, memory updates).
      - **Scopes**: Use the project-specific module name or workspace directory (e.g. `backend`, `frontend`, `infra`, `auth`, `shared`, `db`).
      - *Example*: `fix(frontend): adjust asset detail layout overlay overflow`
-6. **Synchronize & Push**:
-   - Pull remote changes using rebase to avoid unnecessary merge commits: `git pull --rebase origin main`.
-   - Push branch to remote: `git push origin <active-branch-name>`.
+6. **Local Commit Verification**:
+   - Verify that the commit is successfully completed locally.
+   - Inform the user that the changes have been committed, and let them handle pushing to the remote origin.
 
 ## 3. Decision Matrix
-- **Are there uncommitted changes on the active branch but we need to pull updates?**
-   - **YES**: Stash changes: `git stash`, pull changes: `git pull --rebase origin main`, then restore: `git stash pop`.
+- **Are there remote changes that need to be pulled?**
+   - **YES**: Halt and ask the user to pull the updates for you.
 - **Did a file containing private credentials get staged/committed?**
    - **YES**: Instantly stop and undo: `git reset HEAD~1` (if committed) or `git reset HEAD <file>` (if staged). Move keys into `.env` and add the filename to `.gitignore`.
-- **Does a merge conflict occur during a pull?**
-   - **YES**: Resolve conflicts in files. Compile/Test to verify resolution. Then `git add <resolved_files>` and `git rebase --continue`. Never force-push (`-f` / `--force`) to shared branches.
 
 ## 4. Error Mitigation Tree
 - **Detached HEAD State**:

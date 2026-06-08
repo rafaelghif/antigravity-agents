@@ -36,8 +36,8 @@ To maximize prompt execution speed, leverage model-side context caching, and avo
 
 ## 4. Multi-Agent & Teamwork Coordination
 To operate seamlessly in collaborative environments with other developers and autonomous agents:
-- **Isolated Feature Branches**: All development must occur on separate, isolated git feature branches. Directly committing to `main` or `master` is strictly forbidden.
-- **Federated Git-Backed Memory**: Memory resides in the repository. Pulling remote updates (`git pull --rebase origin main`) automatically syncs schemas, decision records, and active task progress across the entire team without needing external databases.
+- **Isolated Feature Branches**: The agent must operate exclusively on the feature branch created by the user. Creating, switching, pushing, or pulling branches is forbidden for the agent; these tasks are strictly handled by the user.
+- **Federated Git-Backed Memory**: Memory resides in the repository. The user synchronizes schemas, decision records, and active task progress across the team by running git pull/push.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
   - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
   - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
@@ -64,7 +64,7 @@ The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must
 
 ## 6. The Atomic Commit Loop (Strict Discipline)
 Every code mutation must execute in an atomic, sequential loop:
-1. **Sync**: Rebase the branch to sync with remote updates (`git pull --rebase origin main`).
+1. **Sync**: Verify that the workspace is on the correct branch and that there are no uncommitted changes (other than locks or memory files).
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
