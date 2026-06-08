@@ -56,6 +56,7 @@ FILES_TO_SCAN=$(find . -type f \
     -not -path './node_modules/*' \
     -not -path './dist/*' \
     -not -path './build/*' \
+    -not -name 'bootstrap.sh' \
     -not -path '*.md' \
     -not -path '*.json' \
     -not -path '*.lock' \
