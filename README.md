@@ -10,37 +10,104 @@
 
 ---
 
+## 🚀 30-Second Quick Start
+
+Get any repository agent-ready in a single step:
+
+### Step 1: Bootstrap the Repository
+Navigate to your project root and execute the bootstrapper:
+```bash
+# Option A: From a locally cloned antigravity-agents repo
+/path/to/antigravity-agents/bootstrap.sh
+
+# Option B: Run directly via curl
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
+```
+
+### Step 2: Scaffold Your Stack (Optional)
+If it's an empty project, run the interactive initialization wizard:
+```bash
+./.agents/scripts/helper.sh init
+```
+
+### Step 3: Verify Health & Status
+Ensure the workspace is healthy and ready:
+```bash
+./.agents/scripts/helper.sh doctor
+```
+
+---
+
 ## 📖 Table of Contents
-1. [Overview](#-overview)
-2. [How it Works](#-how-it-works)
-3. [Step-by-Step Setup Guide](#-step-by-step-setup-guide)
+1. [Directory Structure Blueprint](#1-directory-structure-blueprint)
+2. [Core Features & Capabilities](#2-core-features--capabilities)
+3. [Step-by-Step Setup Guide](#3-step-by-step-setup-guide)
    - [Scenario A: Starting a Brand New / Empty Project](#scenario-a-starting-a-brand-new--empty-project)
    - [Scenario B: Integrating into an Existing Project](#scenario-b-integrating-into-an-existing-project)
-4. [Helper Commands Reference (`helper.sh`)](#-helper-commands-reference-helpersh)
-5. [The AI Agent's Development Loop](#-the-ai-agents-development-loop)
-6. [Core Rules & Architecture Purity](#-core-rules--architecture-purity)
+4. [Operational Scripts Guide (`helper.sh`)](#4-operational-scripts-guide-helpersh)
+5. [Typical Workflow for the Agent](#5-typical-workflow-for-the-agent)
+6. [Core Rules & Architecture Purity](#6-core-rules--architecture-purity)
 
 ---
 
-## 🌟 Overview
+## 1. Directory Structure Blueprint
 
-Antigravity Agent Core is a plug-and-play workspace configuration script. When you run the `bootstrap.sh` script in any folder, it automatically constructs a standardized environment with:
-- **Global Agent Protocol (`AGENTS.md`)**: Set of instructions that align the AI agent on how to work.
-- **Diagnostics & Validator Scripts**: Protects your codebase from hardcoded passwords/credentials, prevents memory/context size bloat, and verifies code isolation patterns.
-- **Git Hooks**: Automatically keeps the agent's task checklist and branch status synchronized on every commit.
+When initialized in a project, the directory layout is structured as follows:
+
+```
+[Project Root]
+  ├── bootstrap.sh                <-- Bootstrapper entrypoint (automatically deletes itself)
+  ├── AGENTS.md                   <-- Static: Global Agent Protocol (cached)
+  ├── README.md                   <-- Static: Developer handbook
+  └── .agents/                    <-- Workspace operational directory (generated)
+        ├── bootstrap.sh          <-- Local backup of the bootstrapper script
+        ├── project_rules.md      <-- Static: Tech Stack, coding rules, & gates (cached)
+        ├── schema.md             <-- Semi-Static: Database & API specs index
+        ├── adr.md                <-- Static: Architectural Design Records (cached)
+        ├── memory.md             <-- Dynamic: Active task state (<100 lines)
+        ├── schemas/              <-- Semi-Static: Domain-driven schema files (lazy-loaded)
+        │     └── default_module.md
+        ├── skills/               <-- Static: Generalized parameterizable agent skills
+        │     ├── codebase-recon/
+        │     ├── git-ops/
+        │     ├── test-driven-patch/
+        │     ├── infra-provisioner/
+        │     ├── security-ci-audit/
+        │     └── code-review/
+        ├── locks/                <-- Dynamic: Module locks preventing parallel edits
+        ├── workflows/            <-- Project-specific implementation plans
+        ├── scripts/              <-- Workspace management scripts
+        │     ├── helper.sh       <-- Main command dispatcher
+        │     ├── recon.sh        <-- Auto-reconnaissance scanner
+        │     └── validate.sh     <-- Security and standards validator
+        └── archive/              <-- Historical: Completed sprint/checklists archives
+```
 
 ---
 
-## 🛠️ How it Works
+## 2. Core Features & Capabilities
 
-1. You put **only** the `bootstrap.sh` file at the root of your project directory and execute it.
-2. The script initializes Git (if not present), scaffolds all required files and scripts inside `.agents/` directory, installs the git hooks, and sets up `AGENTS.md`.
-3. It copies itself to `.agents/bootstrap.sh` as a backup.
-4. It **automatically deletes itself** from the root, keeping your project directory completely clean!
+### 2.1. Project Initialization & Scaffolding Wizard
+If you are starting a project from scratch, running the initialization command launches an interactive prompt wizard that guides you (or the agent) through setting up:
+- Project name
+- Target language/framework stack (e.g. Node/TypeScript, Go, Python)
+- Architectural pattern (e.g. MVC, Clean, Hexagonal)
+- Target database / ORM configuration (e.g. Prisma, PostgreSQL, None)
+- Required configuration environment variable keys
+- Option to automatically scaffold project folders and file templates (e.g. `package.json`, `go.mod`, `main.go`, `main.py`, `.env`)
+
+### 2.2. Autonomous Adaptation Protocol (AAP)
+If deployed in an existing codebase, the workspace autodetects the programming language, framework, database migrations, testing commands, and linter configurations. It automatically updates `project_rules.md` and generates relational schema maps inside `schemas/` without manual setup.
+
+### 2.3. Workspace Validator & Security Gate
+Ensures strict coding and security practices before code is staged or committed:
+- **Secret Scanner**: Detects hardcoded credentials, private keys, passwords, and API keys.
+- **Memory Cap Guard**: Keeps `memory.md` under 100 lines for prompt cache hits.
+- **Purity Verifier**: Flags raw environment variable reads (e.g., `process.env` or `os.Getenv`) outside config adapters.
 
 ---
 
-## 🚀 Step-by-Step Setup Guide
+## 3. Step-by-Step Setup Guide
 
 No matter if you are an expert developer or have zero coding experience, setting up Antigravity is as easy as running a single command.
 
@@ -63,7 +130,7 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 *(Alternatively, if you cloned the repo locally, run: `/path/to/antigravity-agents/bootstrap.sh`)*
 
 > [!NOTE]
-> The script will automatically initialize Git for you and clean itself up when done.
+> The script will automatically initialize Git for you and clean itself up from the root when done.
 
 #### **Step 3: Run the Initialization Wizard**
 Configure your project details (scaffolding directories and template config files) by running the wizard:
@@ -98,12 +165,12 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 ```
 The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/project_rules.md` automatically!
 
-#### **Step 3: Run diagnostics**
+#### **Step 3: Run Diagnostics & Commit**
 Verify that your existing workspace passes the agent safety checks:
 ```bash
 ./.agents/scripts/helper.sh doctor
 ```
-If everything is healthy, commit the configurations to Git:
+If everything is healthy, stage the configurations and make your first validated commit:
 ```bash
 git add AGENTS.md .agents/
 ./.agents/scripts/helper.sh commit chore core "initialize antigravity agent workspace"
@@ -111,33 +178,34 @@ git add AGENTS.md .agents/
 
 ---
 
-## 💻 Helper Commands Reference (`helper.sh`)
+## 4. Operational Scripts Guide (`helper.sh`)
 
 Once bootstrapped, all operations are managed through `./.agents/scripts/helper.sh`. Here is a quick reference:
 
 | Command | Usage | Description |
 |---|---|---|
-| `init` | `./.agents/scripts/helper.sh init` | Launches the interactive wizard to scaffold folders, configurations, and templates. |
-| `recon` | `./.agents/scripts/helper.sh recon` | Re-scans the repository to map directory boundaries, stacks, linters, tests, and API routes. |
-| `validate` | `./.agents/scripts/helper.sh validate` | Audits the project for hardcoded credentials/secrets, memory file size limits, and raw process env access. |
-| `doctor` | `./.agents/scripts/helper.sh doctor` | Performs diagnostics on git initialization, hook executable permissions, and active locks. |
-| `commit` | `./.agents/scripts/helper.sh commit [type] [scope] [desc] [files...]` | Runs validation and tests, then commits changes using the Conventional Commits format (e.g. `feat(auth): add google login`). Use `--no-verify` or `--no-test` to bypass checks. |
+| `init` | `./.agents/scripts/helper.sh init` | Launches the interactive setup questionnaire to scaffold directories, configurations, and file templates. |
+| `recon` | `./.agents/scripts/helper.sh recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
+| `validate` | `./.agents/scripts/helper.sh validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
+| `doctor` | `./.agents/scripts/helper.sh doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
+| `commit` | `./.agents/scripts/helper.sh commit [type] [scope] [desc] [files...]` | Runs workspace validations, checks the project's linter and test suite, and executes a Git conventional commit (supports `--no-verify`/`--no-test` to bypass checks). |
+| `sync-git` | `./.agents/scripts/helper.sh sync-git` | Synchronizes the active branch and last commit hash in `memory.md`. |
 | `lock` | `./.agents/scripts/helper.sh lock <module>` | Locks a specific module to prevent parallel developers or agents from modifying the same files simultaneously. |
 | `unlock` | `./.agents/scripts/helper.sh unlock <module>` | Releases the lock on a module. |
-| `archive` | `./.agents/scripts/helper.sh archive` | Archives completed sprint checklists from `memory.md` to `.agents/archive/` pre-merge to prevent merge conflicts. |
+| `archive` | `./.agents/scripts/helper.sh archive` | Archives the completed checklists from `memory.md` to `archive/` pre-merge to prevent merge conflicts. |
 
 ---
 
-## 🔄 The AI Agent's Development Loop
+## 5. Typical Workflow for the Agent
 
 When an AI Agent starts working on a task, it must strictly follow these steps to ensure clean history and zero bugs:
 
-1. **Verify State**: Verify that the workspace is on the correct branch.
+1. **Verify State**: Verify that the workspace is on the correct branch and clean.
 2. **Lock Module**: Acquire the module lock to prevent conflicts:
    ```bash
    ./.agents/scripts/helper.sh lock <module_name>
    ```
-3. **Implement Feature**: Modify a single file or write unit tests.
+3. **Implement Feature**: Write code & tests under TDD guidelines.
 4. **Automated Verification & Local Commit**: Stage, validate, run tests, and commit cleanly in one step:
    ```bash
    ./.agents/scripts/helper.sh commit feat core "add new feature implementation"
@@ -146,10 +214,11 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
    ```bash
    ./.agents/scripts/helper.sh unlock <module_name>
    ```
+6. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.
 
 ---
 
-## 🛡️ Core Rules & Architecture Purity
+## 6. Core Rules & Architecture Purity
 
 Antigravity Workspace enforces these key rules on AI agents:
 - **No Remote Git operations**: The agent is **forbidden** from running `git pull`, `git push`, `git fetch`, or `git checkout -b` to prevent conflicts. Branch management and pushing to remote repos is handled exclusively by **you** (the user).
