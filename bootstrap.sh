@@ -1578,6 +1578,12 @@ echo "Workspace diagnostics status:"
 .agents/scripts/helper.sh doctor
 echo "=========================================================="
 
+# Save a copy of the bootstrapper inside .agents/ for future updates/resets
+if [ -f bootstrap.sh ]; then
+    cp bootstrap.sh .agents/bootstrap.sh
+    chmod +x .agents/bootstrap.sh
+fi
+
 # Self-cleanup if bootstrap.sh is executed from the project root
 if [ -f bootstrap.sh ]; then
     echo "Cleaning up root bootstrapper script..."
