@@ -33,7 +33,7 @@ This document dictates the absolute boundaries, operational procedures, memory c
 ---
 
 ## 1. Bootstrapping & Cognitive Alignment
-- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read:
+- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
   1. The Global Agent Protocol (this file: [AGENTS.md](file://./AGENTS.md)).
   2. The Project-Specific Rules, if available (e.g. [.agents/project_rules.md](file://./.agents/project_rules.md)).
   3. The Schema Reference database, if available (e.g. [.agents/schema.md](file://./.agents/schema.md)).
@@ -47,6 +47,7 @@ This document dictates the absolute boundaries, operational procedures, memory c
 - **Symbol Verification Gate**: Before writing an import statement or invoking a function, the agent MUST run `view_file` or `grep_search` to verify:
   1. The path exists.
   2. The exact spelling of the exported symbol/module.
+- **Batch Verification and Line Capping**: To prevent token bloat during verification, the agent MUST use precise `StartLine` and `EndLine` parameters in `view_file` to read only the imports/definitions needed, or run batch `grep_search` operations instead of parsing entire source files.
 - **verbatim Reference**: When documenting compile, lint, or test failures, paste the exact stack traces and logs verbatim instead of describing them in general terms.
 
 ---
@@ -55,6 +56,7 @@ This document dictates the absolute boundaries, operational procedures, memory c
 To maximize prompt execution speed, leverage model-side context caching, and avoid token exhaustion, agents must strictly follow these caching protocols:
 - **Cache-Friendly Memory Split**: Decouple static files (`AGENTS.md`, `project_rules.md`, `adr.md`) from dynamic ones. Static files must remain stable to hit 100% prompt cache.
 - **Active Memory Cap**: Keep [.agents/memory.md](file://./.agents/memory.md) under 100 lines at all times. Once a milestone is achieved, immediately archive the checklist to [.agents/archive/](file://./.agents/archive/).
+- **Hierarchical Task Trees (Memory Scaling)**: For large projects or complex tasks, the agent MUST NOT store granular, detailed checklists in `memory.md`. Instead, create task-specific workflow files under `.agents/workflows/task_<name>.md`. Track only high-level epic milestones in the core `memory.md`, and lazy-load the workflow files as needed.
 - **Targeted File Reads**: NEVER read entire source files when looking for small details. Always use precise `StartLine` and `EndLine` parameters in file-viewing tools to preserve prefix cache hits.
 - **Persistent Terminal Shells**: Reuse active terminal sessions by passing `RunPersistent: true` and specifying `RequestedTerminalID`. This avoids spawning new bash subshells, which bloats terminal history logs.
 
