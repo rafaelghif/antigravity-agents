@@ -5,9 +5,12 @@
 
 set -euo pipefail
 
-echo "=========================================================="
-echo "Initializing Antigravity Agent Workspace..."
-echo "=========================================================="
+# Initialize Git if not present (ensures doctor and hooks pass seamlessly)
+if [ ! -d .git ]; then
+    echo "Git repository not detected. Initializing Git repository..."
+    git init
+    git branch -m main
+fi
 
 # 1. Create directory structure
 mkdir -p .agents/skills/codebase-recon
@@ -1574,4 +1577,10 @@ echo "=========================================================="
 echo "Workspace diagnostics status:"
 .agents/scripts/helper.sh doctor
 echo "=========================================================="
+
+# Self-cleanup if bootstrap.sh is executed from the project root
+if [ -f bootstrap.sh ]; then
+    echo "Cleaning up root bootstrapper script..."
+    rm -f bootstrap.sh
+fi
 
