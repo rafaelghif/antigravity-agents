@@ -12,7 +12,7 @@ This document dictates the absolute boundaries, operational procedures, memory c
   4. The Active Memory Ledger ([.agents/memory.md](file://./.agents/memory.md)).
 - **Strict Adherence to .agents Workspace Blueprints**: The agent must strictly follow all files, guidelines, and directories under the `.agents/` folder. This includes:
   * **Memory & Sprints**: Aligning checklists and state flags in [memory.md](file://./.agents/memory.md).
-  * **Architectural Blueprint**: Strictly following stack directories, lint/build/test scripts, and layers defined in [project_rules.md](file://./.agents/project_rules.md).
+  * **Architectural Blueprint**: Strictly following stack directories, lint/build/test scripts, and layers defined in [project_rules.md](file://./project_rules.md).
   * **Domain Schemas Index**: Reading database models and API specs mapped in [schema.md](file://./.agents/schema.md) and domain schemas under `schemas/`.
   * **Architectural Decisions**: Logging and respecting design decisions recorded in [adr.md](file://./.agents/adr.md).
   * **Task Workflows**: Reading/writing granular implementation plans under `workflows/task_*.md`.

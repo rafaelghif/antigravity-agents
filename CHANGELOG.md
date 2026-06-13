@@ -2,6 +2,14 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.5.0] - 2026-06-13
+### Added
+- Added **Automated Skill Registry** feature to scaffold, audit, and manage specialized agent skills.
+- Added `./.agents/scripts/helper.sh create-skill <name> [description]` to scaffold a new specialized skill directory containing `SKILL.md` and a structured, executable Python template at `scripts/main.py`.
+- Added `./.agents/scripts/helper.sh list-skills` to dynamically audit and verify Keep-a-Skill compliance for all registered skills.
+- Implemented **Agent-Initiated Dynamic Skill Self-Creation** protocol allowing the agent to autonomously generate, audit, test, and commit new specialized capabilities upon detecting functional gaps.
+- Resolved and cleaned up backslash escaping bugs inside the helper script templates in `bootstrap.sh` to ensure clean workspace upgrades and syntax-error-free bootstrapping.
+
 ## [1.4.1] - 2026-06-13
 ### Added
 - Added automatic version bump utility via `helper.sh release <major|minor|patch>` to automatically increment versions and comparison links in `CHANGELOG.md`.
@@ -101,6 +109,7 @@ This document tracks all version updates, script refinements, and protocol chang
 - Module lock validation, credentials scanning, and domain-purity env scanning in `validate.sh`.
 - Tech stack auto-detection in `recon.sh`.
 
+[1.5.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/rafaelghif/antigravity-agents/compare/v1.3.1...v1.3.2

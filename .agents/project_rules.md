@@ -49,6 +49,8 @@ The agent must execute workspace scripts automatically without manual user guida
 - **Initial Verification**: Run `./.agents/scripts/helper.sh validate` and `./.agents/scripts/helper.sh doctor` as the first step of any edit cycle.
 - **Module Lock**: Before editing any code within a directory (e.g. `apps/backend`), run `./.agents/scripts/helper.sh lock <module_name>`.
 - **API Synchronization**: When backend model schemas or API paths change, run `./.agents/scripts/helper.sh sync-api` to sync types to the frontend.
+- **Skill Scaffolding**: To autonomously create new specialized skills when gaps are detected, run `./.agents/scripts/helper.sh create-skill <name> [description]`.
+- **Skill Compliance Check**: To verify that all registered skills conform to Keep-a-Skill compliance and possess executable scripts, run `./.agents/scripts/helper.sh list-skills`.
 - **Code Validation**: Run `./.agents/scripts/helper.sh validate` before staging and preparing any commit.
 - **Pre-Merge Cleanup**: Run `./.agents/scripts/helper.sh archive` before completing a pull request task to clean up dynamic workspaces.
 - **Token Budget Compliance**: The agent must log its token usage using `./.agents/scripts/helper.sh log-usage <token_count>` at the end of each turn. If validation warns that token usage has reached the threshold, the agent must immediately save its progress, update the task checklist target in `memory.md` to `IN_PROGRESS`, and log off for handover.

@@ -271,6 +271,8 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `unlock` | `./.agents/scripts/helper.sh unlock <module>` | *(Automated)* Releases the lock on a module. |
 | `archive` | `./.agents/scripts/helper.sh archive` | Archives completed checklists and moves dynamic workflow files to `archive/` pre-merge to prevent conflicts. |
 | `sync-api` | `./.agents/scripts/helper.sh sync-api` | Automatically extracts backend OpenAPI schema and generates a zero-dependency typed TypeScript fetch client in the frontend. |
+| `create-skill` | `./.agents/scripts/helper.sh create-skill <name> [description]` | Scaffolds a new specialized skill directory containing SKILL.md and a Python script template. |
+| `list-skills` | `./.agents/scripts/helper.sh list-skills` | Audits all registered skills in `.agents/skills/` for compliance and lists them. |
 | `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
@@ -281,6 +283,16 @@ The `sync-api` command extracts the OpenAPI schema (`openapi.json`) from the bac
 - **Go Gin Backend**: Runs `swag init` on the main server entry point to build and copy the schema.
 - **Frontend Client Compilation**: Reads `openapi.json` and parses components, schemas, path parameters, query parameters, request bodies, and responses. Outputs interfaces and client classes at the appropriate frontend location (e.g., `src/lib/api-client.ts`).
 - **Zero-Dependency**: The generated client is clean TypeScript that uses vanilla `fetch` and does not require third-party libraries.
+
+### 4.2 Skill Scaffolding & Auditing (`create-skill` / `list-skills`)
+
+To dynamically extend the agent's capabilities inside this workspace, you (or the agent) can create and audit specialized skills:
+
+- **Create Skill**: Run `./.agents/scripts/helper.sh create-skill <name> [description]`. This scaffolds a new directory at `.agents/skills/<name>/` containing a standard, parameterizable `SKILL.md` template and a structured Python script wrapper inside `scripts/main.py`.
+- **List & Audit Skills**: Run `./.agents/scripts/helper.sh list-skills`. This scans all registered skill directories and audits them for compliance:
+  1. `SKILL.md` exists and starts with a valid YAML frontmatter header containing `name` and `description`.
+  2. File body and script source code contain no unresolved placeholder markers (e.g. `TODO`, `FIXME`, or `[placeholder]`).
+  3. All referenced scripts listed in the YAML header exist and have executable permissions (`chmod +x`).
 
 ---
 

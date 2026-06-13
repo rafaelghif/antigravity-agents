@@ -24,6 +24,8 @@ show_help() {
     echo "  lint              Run monorepo-aware linter validations on modified folders"
     echo "  test              Run monorepo-aware testing runner suites on modified folders"
     echo "  sync-api          Synchronize API contracts and generate typed TypeScript client"
+    echo "  create-skill      Scaffold a new specialized skill directory"
+    echo "  list-skills       Audit and list all registered skills for compliance"
     echo "  log-usage         Log token usage stats to token_budget.json"
     echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
     echo "  help              Show this help message"
@@ -2842,6 +2844,254 @@ cmd_release() {
     echo "Successfully bumped version to $next_version and updated CHANGELOG.md."
 }
 
+audit_skill() {
+    local skill_dir="$1"
+    local skill_name=$(basename "$skill_dir")
+    local skill_md="$skill_dir/SKILL.md"
+    
+    # Check 1: SKILL.md exists
+    if [ ! -f "$skill_md" ]; then
+        echo "FAIL: $skill_name is missing SKILL.md"
+        return 1
+    fi
+    
+    # Check 2: Parse YAML frontmatter
+    local line1=$(head -n 1 "$skill_md" | tr -d '\r')
+    if [ "$line1" != "---" ]; then
+        echo "FAIL: $skill_name SKILL.md does not start with YAML frontmatter delimiter (---)"
+        return 1
+    fi
+    
+    local closing_line=$(grep -n "^---" "$skill_md" | sed -n '2p' | cut -d':' -f1)
+    if [ -z "$closing_line" ]; then
+        echo "FAIL: $skill_name SKILL.md has unclosed YAML frontmatter"
+        return 1
+    fi
+    
+    local frontmatter=$(sed -n "2,$((closing_line - 1))p" "$skill_md")
+    
+    local parsed_name=$(echo "$frontmatter" | grep "^name:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+    local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+    
+    if [ -z "$parsed_name" ]; then
+        echo "FAIL: $skill_name frontmatter missing 'name'"
+        return 1
+    fi
+    if [ -z "$parsed_desc" ]; then
+        echo "FAIL: $skill_name frontmatter missing 'description'"
+        return 1
+    fi
+    
+    # Check 3: Check for placeholders in SKILL.md
+    if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$skill_md"; then
+        echo "FAIL: $skill_name SKILL.md contains placeholder text (TODO/FIXME/placeholder)"
+        return 1
+    fi
+    
+    # Check 4: Verify referenced scripts
+    local in_scripts=0
+    local script_lines=""
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^scripts:[[:space:]]*$ ]]; then
+            in_scripts=1
+            continue
+        elif [[ "$line" =~ ^[a-zA-Z_]+: ]]; then
+            in_scripts=0
+        fi
+        
+        if [ "$in_scripts" -eq 1 ]; then
+            script_lines="$script_lines"$'\n'"$line"
+        fi
+    done <<INNER_EOF
+$frontmatter
+INNER_EOF
+
+    while IFS= read -r s_line; do
+        s_line=$(echo "$s_line" | sed -e 's/^[[:space:]]*-//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        if [ -n "$s_line" ]; then
+            local script_path="$skill_dir/$s_line"
+            if [ ! -f "$script_path" ]; then
+                echo "FAIL: $skill_name referenced script $s_line does not exist"
+                return 1
+            fi
+            if [ ! -x "$script_path" ]; then
+                echo "FAIL: $skill_name referenced script $s_line is not executable (missing chmod +x)"
+                return 1
+            fi
+        fi
+    done <<INNER_EOF
+$script_lines
+INNER_EOF
+
+    if [ -d "$skill_dir/scripts" ]; then
+        for f in "$skill_dir/scripts"/*; do
+            if [ -f "$f" ]; then
+                if [ ! -x "$f" ]; then
+                    echo "FAIL: $skill_name script $(basename "$f") is not executable"
+                    return 1
+                fi
+                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$f"; then
+                    echo "FAIL: $skill_name script $(basename "$f") contains placeholder text (TODO/FIXME/placeholder)"
+                    return 1
+                fi
+            fi
+        done
+    fi
+    
+    echo "PASS: $parsed_name ($parsed_desc)"
+    return 0
+}
+
+cmd_create_skill() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: $0 create-skill <name> [description]"
+        exit 1
+    fi
+    local name="$2"
+    local desc="${3:-}"
+    
+    if [[ ! "$name" =~ ^[a-z0-9-]+$ ]]; then
+        echo "Error: Skill name must be lowercase kebab-case (e.g., custom-skill-name)." >&2
+        exit 1
+    fi
+    
+    local skill_dir=".agents/skills/$name"
+    if [ -d "$skill_dir" ]; then
+        echo "Error: Skill '$name' already exists at $skill_dir." >&2
+        exit 1
+    fi
+    
+    mkdir -p "$skill_dir/scripts"
+    
+    cat << INNER_EOF > "$skill_dir/SKILL.md"
+---
+name: $name
+description: ${desc:-Specialized skill for $name automation.}
+scripts:
+  - scripts/main.py
+---
+
+# ${name} Skill
+
+## 1. Input Specification
+- Specify required inputs (e.g., target file paths, options).
+
+## 2. Operational Procedures
+1. Run the associated script.
+2. Verify results.
+
+## 3. Decision Matrix
+- If the script returns success (exit code 0), the action is accepted.
+- If the script returns error, it fails.
+
+## 4. Error Mitigation Tree
+- Retry execution.
+- If it fails, report details back to the user.
+
+## 5. Output Verification Gate
+- [ ] Executable script passes all internal checks.
+INNER_EOF
+
+    cat << INNER_EOF > "$skill_dir/scripts/main.py"
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def run_skill(args):
+    """
+    Main logic of the skill script.
+    """
+    logging.info(f"Running skill with arguments: {args}")
+    # Implement operational logic here
+    
+    result = {
+        "status": "success",
+        "message": "Skill $name executed successfully",
+        "data": {}
+    }
+    return result
+
+def main():
+    parser = argparse.ArgumentParser(description="Default Python script for agent skill $name.")
+    parser.add_argument('--target', type=str, help="Target path or resource")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {str(e)}")
+        error_output = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+INNER_EOF
+
+    chmod +x "$skill_dir/scripts/main.py"
+    echo "Skill '$name' created successfully at $skill_dir"
+}
+
+cmd_list_skills() {
+    local skills_dir=".agents/skills"
+    if [ ! -d "$skills_dir" ]; then
+        echo "Error: Skills directory $skills_dir not found." >&2
+        exit 1
+    fi
+    
+    echo "=========================================================="
+    echo "          Antigravity Agent Skills Audit & Registry"
+    echo "=========================================================="
+    
+    local audit_failed=0
+    printf "%-25s | %-12s | %s\n" "Skill Name" "Status" "Description"
+    echo "----------------------------------------------------------"
+    
+    for dir in "$skills_dir"/*; do
+        if [ -d "$dir" ]; then
+            local skill_name=$(basename "$dir")
+            local audit_res
+            local exit_code=0
+            if ! audit_res=$(audit_skill "$dir" 2>&1); then
+                exit_code=1
+            fi
+            
+            local status="[PASS]"
+            local detail=""
+            if [ $exit_code -eq 0 ]; then
+                detail=$(echo "$audit_res" | sed -E 's/^PASS: [^ ]+ \((.*)\)/\1/')
+            else
+                status="[FAIL]"
+                detail=$(echo "$audit_res" | sed -E 's/^FAIL: //')
+                audit_failed=$((audit_failed + 1))
+            fi
+            
+            printf "%-25s | %-12s | %s\n" "$skill_name" "$status" "$detail"
+        fi
+    done
+    
+    echo "=========================================================="
+    if [ $audit_failed -eq 0 ]; then
+        echo "All skills are compliant and ready for use."
+        return 0
+    else
+        echo "Audit failed! Found $audit_failed non-compliant skill(s)." >&2
+        return 1
+    fi
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -2896,6 +3146,12 @@ case "$1" in
         ;;
     release)
         cmd_release "$@"
+        ;;
+    create-skill)
+        cmd_create_skill "$@"
+        ;;
+    list-skills)
+        cmd_list_skills
         ;;
     help)
         show_help
