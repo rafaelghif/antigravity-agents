@@ -97,6 +97,14 @@ cmd_archive() {
     # Extract checklist from memory.md
     sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v '---' > "$archive_file"
 
+    # Relocate workflow and PR review files to a branch-specific subdirectory
+    local branch_archive_dir="$ARCHIVE_DIR/sprint_${branch_clean}"
+    mkdir -p "$branch_archive_dir"
+    echo "Archiving workflow and PR review files to $branch_archive_dir..."
+    find .agents/workflows -maxdepth 1 -name "task_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
+    find .agents/workflows -maxdepth 1 -name "pr_review_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
+
+
     # Reset checklist in memory.md
     local start_line
     start_line=$(grep -n "### Sprint Tasks Checklist" "$MEMORY_FILE" | cut -d: -f1)
