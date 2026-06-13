@@ -3,7 +3,8 @@
 
 param (
     [string]$Version = "main",
-    [switch]$Force = $false
+    [switch]$Force = $false,
+    [switch]$Update = $false
 )
 
 $gitBash = "C:\Program Files\Git\bin\bash.exe"
@@ -20,6 +21,9 @@ if (-not $gitBash) {
 $bashArgs = @()
 if ($Force) {
     $bashArgs += "-f"
+}
+if ($Update) {
+    $bashArgs += "-u"
 }
 if ($args) {
     $bashArgs += $args

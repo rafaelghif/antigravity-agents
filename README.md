@@ -84,6 +84,7 @@ Run the doctor tool to inspect active hooks, locks, script permissions, and secu
 4. [Operational Scripts Guide (`helper.sh`)](#4-operational-scripts-guide-helpersh)
 5. [Typical Workflow for the Agent](#5-typical-workflow-for-the-agent)
 6. [Core Rules & Architecture Purity](#6-core-rules--architecture-purity)
+7. [Migration Guide (Upgrading from Older Versions)](#7-migration-guide-upgrading-from-older-versions)
 
 ---
 
@@ -286,7 +287,36 @@ Antigravity Workspace enforces these key rules on AI agents:
 - **Hardcoded Secret Scan**: The agent cannot commit code if passwords, keys, or API tokens are detected in the workspace (scanned via `validate.sh`).
 - **Handover Relayed Context**: Before finishing a turn or switching accounts, the agent writes the current status and next action items in `memory.md` under `## 3. Relayed Context & Handover Notes`, ensuring the next agent picks up immediately without token waste.
 
+## 7. Migration Guide (Upgrading from Older Versions)
+
+To upgrade your existing Antigravity Agent Workspace to the latest version, run the bootstrapper with the `--update` (or `-u`) flag. This will upgrade the system scripts, skills, and Git hooks while preserving all of your project configurations (like `project_rules.md`, `schema.md`, `memory.md`, and custom schemas).
+
+### 💻 Upgrading via CLI
+
+Run the appropriate command in your project root:
+
+#### **Linux & macOS (Bash/Zsh)**
+```bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash -s -- --update
+```
+
+#### **Windows (PowerShell)**
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1')); powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Update
+```
+
+### 🔍 Verification After Upgrade
+Once the upgrade is completed, verify the integrity of the workspace:
+1. Run `./.agents/scripts/helper.sh doctor` to check hooks and permissions.
+2. Run `./.agents/scripts/helper.sh validate` to verify workspace compliance.
+3. Commit the updated files to Git:
+   ```bash
+   git add AGENTS.md .agents/
+   git commit -m "chore(core): upgrade antigravity agent core to latest version"
+   ```
+
 ---
+
 
 ## 📅 Version History & Changelog
 

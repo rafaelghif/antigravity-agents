@@ -7,10 +7,15 @@ set -euo pipefail
 
 # Parse arguments
 FORCE_OVERWRITE=false
+UPDATE_ONLY=false
 while [ $# -gt 0 ]; do
     case "$1" in
         -f|--force)
             FORCE_OVERWRITE=true
+            shift
+            ;;
+        -u|--update)
+            UPDATE_ONLY=true
             shift
             ;;
         *)
@@ -53,11 +58,21 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 log_success "Git is installed."
 
-# Helper function to write templates safely (preserves existing files unless -f/--force is specified)
+# Helper function to write templates safely (preserves existing files unless -f/--force or -u/--update is specified)
 write_template_safe() {
     local target_file="$1"
     if [ -f "$target_file" ] && [ "$FORCE_OVERWRITE" = "false" ]; then
-        log_warning "$target_file already exists. Preserving current file."
+        local is_system_file=false
+        if [ "$target_file" = "AGENTS.md" ] || [[ "$target_file" =~ \.agents/scripts/ ]] || [[ "$target_file" =~ \.agents/hooks/ ]] || [[ "$target_file" =~ \.agents/skills/ ]]; then
+            is_system_file=true
+        fi
+
+        if [ "$UPDATE_ONLY" = "true" ] && [ "$is_system_file" = "true" ]; then
+            log_info "Updating system file: $target_file..."
+            cat > "$target_file"
+        else
+            log_warning "$target_file already exists. Preserving current file."
+        fi
     else
         log_info "Writing template to $target_file..."
         cat > "$target_file"
