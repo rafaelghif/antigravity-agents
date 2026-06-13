@@ -170,6 +170,33 @@ else
     FAILED=1
 fi
 
+# 7. Check Gitignore Configuration Compliance
+echo "Check 7: Gitignore Configuration Compliance"
+GITIGNORE_ERRORS=0
+if [ -f ".gitignore" ]; then
+    # Verify that .gitignore does NOT ignore .agents/ or AGENTS.md globally
+    if grep -E -q "^\.agents/?$" .gitignore; then
+        echo "  [FAIL] .gitignore ignores '.agents/' folder globally! Please remove it."
+        GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
+    fi
+    if grep -q "^AGENTS.md$" .gitignore; then
+        echo "  [FAIL] .gitignore ignores 'AGENTS.md'! Please remove it."
+        GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
+    fi
+    # Verify that .agents/locks/ is ignored
+    if ! grep -E -q "^\.agents/locks/?" .gitignore; then
+        echo "  [WARNING] .gitignore does not ignore transient locks ('.agents/locks/')."
+    fi
+else
+    echo "  [WARNING] No .gitignore file found in project root."
+fi
+
+if [ "$GITIGNORE_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Gitignore is correctly configured."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -178,4 +205,5 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
+
 

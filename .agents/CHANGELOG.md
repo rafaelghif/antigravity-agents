@@ -9,13 +9,16 @@ This document tracks all version updates, script refinements, and protocol chang
 - Added `pre-commit` Git hook to automate workspace validation checks, linter checks, and test runner suites on standard git commits.
 - Refined `post-commit` Git hook to automatically release all active workspace locks upon successful commits, eliminating manual command invocations.
 - Added `.antigravityignore` in the project root to exclude dependency, build, OS, binary, and log folders to optimize agent token usage.
+- Added Check 7 (Gitignore Configuration Compliance) to verify that workspace `.gitignore` correctly tracks agent files while ignoring locks.
 - Created `.agents/CHANGELOG.md` (this file) to record historical updates of agent rules and scripts.
 
 ### Changed
+- Updated root `bootstrap.sh` and local backup templates to write Check 5, Check 6, and Check 7 in the validation script.
 - Updated `helper.sh` (`cmd_init` and `cmd_doctor`) to copy and verify both hooks.
 - Refined `helper.sh archive` command to automatically archive dynamic task workflows (`task_*.md`) and PR guides (`pr_review_*.md`) from `.agents/workflows/` to branch-specific subdirectories under `.agents/archive/`.
 - Made bootstrapping rules in `AGENTS.md` and `project_rules.md` stricter: sequence is absolute, and no edits or command executions are allowed before reading the core files.
 - Documented `/grill-me` outcomes of the teamwork design alignment in `.agents/workflows/task_teamwork_rules.md`.
+
 
 
 ---

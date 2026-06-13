@@ -1523,6 +1523,83 @@ if [ "$RAW_ENV_FOUND" -eq 0 ]; then
     echo "  [PASS] Domain isolation looks healthy (no scattered raw env reads)."
 fi
 
+# 5. Check Git Upstream Synchronization
+echo "Check 5: Git Upstream Synchronization Check"
+# Attempt to fetch upstream changes silently to check sync state (gracefully handle failures/offline)
+git fetch origin >/dev/null 2>&1 || true
+
+LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "none")
+REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "none")
+BASE=$(git merge-base HEAD @{u} 2>/dev/null || echo "none")
+
+if [ "$LOCAL" = "none" ] || [ "$REMOTE" = "none" ]; then
+    echo "  [WARNING] No upstream tracking branch set or Git repository not initialized."
+elif [ "$LOCAL" = "$REMOTE" ]; then
+    echo "  [PASS] Local branch is up-to-date with upstream."
+elif [ "$LOCAL" = "$BASE" ]; then
+    echo "  [FAIL] Workspace is behind upstream! Run 'git pull' before letting the agent modify files."
+    FAILED=1
+elif [ "$REMOTE" = "$BASE" ]; then
+    echo "  [PASS] Local branch is ahead of upstream (unpushed commits)."
+else
+    echo "  [FAIL] Workspace has diverged from upstream! Please reconcile branches before modifying files."
+    FAILED=1
+fi
+
+# 6. Check Schema Index Registration Compliance
+echo "Check 6: Schema Index Registration Compliance"
+SCHEMA_ERRORS=0
+if [ -f ".agents/schema.md" ]; then
+    if [ -d ".agents/schemas" ]; then
+        for schema_file in .agents/schemas/*.md; do
+            if [ -f "$schema_file" ]; then
+                base_name=$(basename "$schema_file")
+                # Verify registration in schema.md
+                if ! grep -q "$base_name" ".agents/schema.md"; then
+                    echo "  [FAIL] Domain schema file '$base_name' is NOT registered in '.agents/schema.md'!"
+                    SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
+                fi
+            fi
+        done
+    fi
+else
+    echo "  [FAIL] Primary schema index '.agents/schema.md' is missing!"
+    SCHEMA_ERRORS=$((SCHEMA_ERRORS + 1))
+fi
+
+if [ "$SCHEMA_ERRORS" -eq 0 ]; then
+    echo "  [PASS] All domain schemas are correctly indexed."
+else
+    FAILED=1
+fi
+
+# 7. Check Gitignore Configuration Compliance
+echo "Check 7: Gitignore Configuration Compliance"
+GITIGNORE_ERRORS=0
+if [ -f ".gitignore" ]; then
+    # Verify that .gitignore does NOT ignore .agents/ or AGENTS.md globally
+    if grep -E -q "^\.agents/?$" .gitignore; then
+        echo "  [FAIL] .gitignore ignores '.agents/' folder globally! Please remove it."
+        GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
+    fi
+    if grep -q "^AGENTS.md$" .gitignore; then
+        echo "  [FAIL] .gitignore ignores 'AGENTS.md'! Please remove it."
+        GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
+    fi
+    # Verify that .agents/locks/ is ignored
+    if ! grep -E -q "^\.agents/locks/?" .gitignore; then
+        echo "  [WARNING] .gitignore does not ignore transient locks ('.agents/locks/')."
+    fi
+else
+    echo "  [WARNING] No .gitignore file found in project root."
+fi
+
+if [ "$GITIGNORE_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Gitignore is correctly configured."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -1532,6 +1609,7 @@ else
     exit 1
 fi
 EOF
+
 
 # 12. Write Git hooks templates
 cat << 'EOF' > .agents/hooks/pre-commit
