@@ -12,25 +12,29 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ---
 
 ## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: Unknown
+- **Primary Language/Framework**: TypeScript / Node.js
 - **Directory Structure**:
-  - `tests/` -> Project workspace component
-  - `config/` -> Project workspace component
+  - `src/controllers/` -> Route handlers and request orchestrators
+  - `src/models/` -> Database entities and models
+  - `src/services/` -> Business logic layer
+  - `tests/` -> Test suites (unit and integration tests)
 
 ## 2. Architectural Conventions
 - **Architectural Pattern**: Standard Model-View-Controller (MVC)
 - **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
 
 ## 3. Spacing & Styling Standards
-- **Linter command**: `echo 'No linter found'`
-- **Build validation**: `echo 'No build command needed'`
-- **Test runner command**: `echo 'No test suite found'`
-- **Follow formatting**: Follow standard formatting guidelines for Unknown development.
+- **Linter command**: `npm run lint`
+- **Build validation**: `npm run build`
+- **Test runner command**: `npm test`
+- **Follow formatting**: Follow standard formatting guidelines for TypeScript development.
 
 ## 4. Security & External Services
-- **Database/ORM**: None detected
+- **Database/ORM**: TypeORM
 - **Required Configuration Variables**:
-  - No configuration parameters detected.
+  - `PORT` -> Server port configuration
+  - `DATABASE_URL` -> Database connection connection string
+  - `JWT_SECRET` -> Token encryption secret key
 
 ## 5. Long-Term Impact & 10-Year Maintainability Gates
 - **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the `impact-analysis` skill and document design rationales.
