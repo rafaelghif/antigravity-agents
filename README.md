@@ -95,8 +95,12 @@ When initialized in a project, the directory layout is structured as follows:
 ```
 [Project Root]
   ├── bootstrap.sh                <-- Bootstrapper entrypoint (automatically deletes itself)
+  ├── bootstrap.ps1               <-- Windows Bootstrapper entrypoint (automatically deletes itself)
   ├── AGENTS.md                   <-- Static: Global Agent Protocol (cached)
   ├── README.md                   <-- Static: Developer handbook
+  ├── .github/                    <-- GitHub configurations
+  │     └── workflows/
+  │           └── antigravity.yml <-- CI workspace validator workflow
   └── .agents/                    <-- Workspace operational directory (generated)
         ├── bootstrap.sh          <-- Local backup of the bootstrapper script
         ├── schema.md             <-- Semi-Static: Database & API specs index
@@ -117,6 +121,7 @@ When initialized in a project, the directory layout is structured as follows:
         ├── workflows/            <-- Project-specific implementation plans
         ├── scripts/              <-- Workspace management scripts
         │     ├── helper.sh       <-- Main command dispatcher
+        │     ├── helper.ps1      <-- PowerShell command wrapper for Windows compatibility
         │     ├── recon.sh        <-- Auto-reconnaissance scanner
         │     └── validate.sh     <-- Security and standards validator
         └── archive/              <-- Historical: Completed sprint/checklists archives
@@ -143,6 +148,7 @@ Ensures strict coding and security practices before code is staged or committed:
 - **Secret Scanner**: Detects hardcoded credentials, private keys, passwords, and API keys.
 - **Memory Cap Guard**: Keeps `memory.md` under 100 lines for prompt cache hits.
 - **Purity Verifier**: Flags raw environment variable reads (e.g., `process.env` or `os.Getenv`) outside config adapters.
+- **Automated CI Validation**: Runs validation checks automatically on GitHub pushes and pull requests via the `.github/workflows/antigravity.yml` workflow template.
 
 ### 2.4. Native Monorepo Support & Directory-Aware Validation
 Antigravity natively supports multi-project repositories (e.g., Turborepo, pnpm workspaces, Yarn workspaces, Go workspaces):
@@ -257,9 +263,9 @@ git commit -m "chore(core): initialize antigravity agent workspace"
 
 ---
 
-## 4. Operational Scripts Guide (`helper.sh`)
+## 4. Operational Scripts Guide (`helper.sh` / `helper.ps1`)
 
-Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` or standard Git commands. Here is a quick reference:
+Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` (or `./.agents/scripts/helper.ps1` for native PowerShell support on Windows) or standard Git commands. Here is a quick reference:
 
 | Command | Usage | Description |
 |---|---|---|
@@ -308,6 +314,13 @@ Workspace rules define how coding standards are applied dynamically. The rules r
   2. Valid YAML frontmatter containing `name` and `activation`.
   3. Correct configuration of activation-dependent parameter (e.g. `pattern` for Glob, `description` for Model Decision).
   4. Absence of unresolved placeholders (e.g. `TODO`, `FIXME`, `[placeholder]`) in the rule body.
+
+### 4.4 Windows PowerShell Wrapper (`helper.ps1`)
+
+For developers working natively on Windows without standard Bash shells, a native PowerShell wrapper is available at `.agents/scripts/helper.ps1`.
+
+- **Automatic Location**: The wrapper automatically searches for `bash.exe` (from Git Bash) in standard install directories (e.g., `C:\Program Files\Git\bin\bash.exe`) and in the system `PATH`.
+- **Transparent Forwarding**: It forwards all command-line arguments directly to the underlying `helper.sh` script, making all CLI features (like `lock`, `validate`, `create-skill`) fully available in PowerShell.
 
 ---
 

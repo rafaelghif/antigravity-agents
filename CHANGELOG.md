@@ -2,6 +2,12 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.7.0] - 2026-06-14
+### Added
+- Added Windows PowerShell compatibility via `.agents/scripts/helper.ps1` command wrapper, allowing seamless script execution for developers working natively on Windows.
+- Added automated GitHub Actions CI workspace validation via `.github/workflows/antigravity.yml` workflow template, running strict credential scans, schema compliance, and system checks automatically on push and pull requests.
+- Integrated generation of `helper.ps1` and `antigravity.yml` into the workspace installer (`bootstrap.sh` / `bootstrap.ps1`).
+
 ## [1.6.0] - 2026-06-13
 ### Added
 - Added **Workspace Rules Registry** feature to scaffold, audit, and manage dynamic coding rules under `.agents/rules/`.
@@ -116,6 +122,7 @@ This document tracks all version updates, script refinements, and protocol chang
 - Module lock validation, credentials scanning, and domain-purity env scanning in `validate.sh`.
 - Tech stack auto-detection in `recon.sh`.
 
+[1.7.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.0...v1.4.1
