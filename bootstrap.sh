@@ -3862,6 +3862,15 @@ $ENV_VARS
   - Architectural decisions must be documented as a new ADR entry in \`.agents/adr.md\`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
 - **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under \`## 3. Relayed Context & Handover Notes\`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
+
+## 7. Autonomous Operational Scripts & Commands
+The agent must execute workspace scripts automatically without manual user guidance or request under the following conditions:
+- **Project Discovery**: If \`.agents/project_rules.md\` is empty or generic, run \`./.agents/scripts/helper.sh recon\` immediately.
+- **Initial Verification**: Run \`./.agents/scripts/helper.sh validate\` and \`./.agents/scripts/helper.sh doctor\` as the first step of any edit cycle.
+- **Module Lock**: Before editing any code within a directory (e.g. \`apps/backend\`), run \`./.agents/scripts/helper.sh lock <module_name>\`.
+- **API Synchronization**: When backend model schemas or API paths change, run \`./.agents/scripts/helper.sh sync-api\` to sync types to the frontend.
+- **Code Validation**: Run \`./.agents/scripts/helper.sh validate\` before staging and preparing any commit.
+- **Pre-Merge Cleanup**: Run \`./.agents/scripts/helper.sh archive\` before completing a pull request task to clean up dynamic workspaces.
 PAB_EOF
 
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)
