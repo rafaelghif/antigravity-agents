@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Auto-sync Git branch and commit hash to agent memory ledger
+if [ -f .agents/scripts/helper.sh ]; then
+    .agents/scripts/helper.sh sync-git
+fi
