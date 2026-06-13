@@ -1025,6 +1025,10 @@ cmd_init() {
     local db_orm="${5:-}"
     local env_vars="${6:-}"
     local scaffold=""
+    local be_choice="1"
+    local be_arch_choice="2"
+    local fe_choice="1"
+    local fe_arch_choice="2"
 
     if [ -z "$project_name" ]; then
         read -p "Enter Project Name (default: My Project): " project_name
@@ -1040,7 +1044,8 @@ cmd_init() {
         echo "  [5] Go (Generic Main App)"
         echo "  [6] Python (Generic Script)"
         echo "  [7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)"
-        read -p "Select choice [1-7] (default: 1): " stack_choice
+        echo "  [8] Custom Multi-Project / Separate Apps (e.g. apps/backend + apps/frontend)"
+        read -p "Select choice [1-8] (default: 1): " stack_choice
         case "$stack_choice" in
             2) tech_stack="Go Gin" ;;
             3) tech_stack="FastAPI" ;;
@@ -1048,9 +1053,51 @@ cmd_init() {
             5) tech_stack="Go" ;;
             6) tech_stack="Python" ;;
             7) tech_stack="Monorepo" ;;
+            8) tech_stack="Multi-Project" ;;
             1|"") tech_stack="Next.js" ;;
             *) tech_stack="$stack_choice" ;;
         esac
+    fi
+
+    if [ "$tech_stack" = "Multi-Project" ]; then
+        echo ""
+        echo "--- Configure Backend Application ---"
+        echo "  [1] NestJS (TypeScript)"
+        echo "  [2] FastAPI (Python)"
+        echo "  [3] Go Gin"
+        echo "  [4] None"
+        read -p "Select Backend Choice [1-4] (default: 1): " be_choice
+        if [ -z "$be_choice" ]; then be_choice="1"; fi
+
+        if [ "$be_choice" != "4" ]; then
+            echo "Configure Backend Architecture:"
+            echo "  [1] Hexagonal Architecture (Ports & Adapters)"
+            echo "  [2] Clean Architecture"
+            echo "  [3] Standard MVC / Modular"
+            read -p "Select Architecture [1-3] (default: 2): " be_arch_choice
+            if [ -z "$be_arch_choice" ]; then be_arch_choice="2"; fi
+        fi
+
+        echo ""
+        echo "--- Configure Frontend Application ---"
+        echo "  [1] Next.js (TypeScript)"
+        echo "  [2] React SPA (Vite)"
+        echo "  [3] Laravel Blade / PHP HTML"
+        echo "  [4] None"
+        read -p "Select Frontend Choice [1-4] (default: 1): " fe_choice
+        if [ -z "$fe_choice" ]; then fe_choice="1"; fi
+
+        if [ "$fe_choice" != "4" ]; then
+            echo "Configure Frontend Architecture:"
+            echo "  [1] Atomic Design"
+            echo "  [2] Standard Components / App Router Layout"
+            read -p "Select Architecture [1-2] (default: 2): " fe_arch_choice
+            if [ -z "$fe_arch_choice" ]; then fe_arch_choice="2"; fi
+        fi
+        
+        arch_pattern="Decoupled / Distributed Architecture"
+        db_orm="None"
+        env_vars="PORT"
     fi
 
     # Auto-suggest architecture based on stack
@@ -1125,7 +1172,13 @@ cmd_init() {
         echo "Scaffolding directory structure..."
         
         if [ "$tech_stack" = "Next.js" ]; then
-            mkdir -p src/app src/components src/lib tests
+            if [[ "$arch_pattern" =~ "Atomic" || "$arch_pattern" =~ "atomic" ]]; then
+                mkdir -p src/app src/components/atoms src/components/molecules src/components/organisms src/components/templates src/lib tests
+            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
+                mkdir -p src/app src/core/entities src/core/usecases src/infrastructure/db src/infrastructure/api src/lib tests
+            else
+                mkdir -p src/app src/components src/lib tests
+            fi
             # Write package.json
             cat << 'JSON_EOF' > package.json
 {
@@ -1345,7 +1398,13 @@ TS_EOF
             echo "Scaffolded Next.js application template successfully!"
 
         elif [ "$tech_stack" = "Go Gin" ]; then
-            mkdir -p src/cmd/server src/internal/controller src/internal/config tests
+            if [[ "$arch_pattern" =~ "Hexagonal" || "$arch_pattern" =~ "hexagonal" || "$arch_pattern" =~ "Ports" || "$arch_pattern" =~ "ports" ]]; then
+                mkdir -p src/cmd/server src/internal/core/domain src/internal/core/ports src/internal/adapters/in/web src/internal/adapters/out/db src/internal/config tests
+            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
+                mkdir -p src/cmd/server src/internal/domain/entity src/internal/domain/usecase src/internal/adapter/controller src/internal/adapter/repository src/internal/infrastructure/db src/internal/config tests
+            else
+                mkdir -p src/cmd/server src/internal/model src/internal/controller src/internal/view src/internal/config tests
+            fi
             # Write go.mod
             cat << 'GO_EOF' > go.mod
 module project
@@ -1499,7 +1558,13 @@ MAKE_EOF
             echo "Scaffolded Go Gin application template successfully!"
 
         elif [ "$tech_stack" = "FastAPI" ]; then
-            mkdir -p src/app/core src/app/api/endpoints tests
+            if [[ "$arch_pattern" =~ "Hexagonal" || "$arch_pattern" =~ "hexagonal" || "$arch_pattern" =~ "Ports" || "$arch_pattern" =~ "ports" ]]; then
+                mkdir -p src/app/domain src/app/ports src/app/adapters/in/api src/app/adapters/out/db src/app/core tests
+            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
+                mkdir -p src/app/entities src/app/usecases src/app/controllers src/app/infrastructure/db src/app/core tests
+            else
+                mkdir -p src/app/core src/app/api/endpoints tests
+            fi
             # Write requirements.txt
             cat << 'TXT_EOF' > requirements.txt
 fastapi>=0.110.0
@@ -2009,6 +2074,336 @@ export const version: string;
 TS_EOF
 
             echo "Scaffolded Monorepo application template successfully!"
+
+        elif [ "$tech_stack" = "Multi-Project" ]; then
+            # Scaffold Custom Multi-Project / Separate Apps layout
+            mkdir -p apps/backend apps/frontend
+            
+            echo "Scaffolding Custom Multi-Project layout..."
+
+            # 1. Scaffold Backend App
+            if [ "$be_choice" = "1" ]; then
+                # NestJS Boilerplate
+                echo "  Scaffolding NestJS backend..."
+                mkdir -p apps/backend/src
+                
+                # Check Architecture
+                if [ "$be_arch_choice" = "1" ]; then
+                    # Hexagonal Architecture
+                    mkdir -p apps/backend/src/core/domain apps/backend/src/core/ports apps/backend/src/adapters/in/web apps/backend/src/adapters/out/persistence
+                elif [ "$be_arch_choice" = "2" ]; then
+                    # Clean Architecture
+                    mkdir -p apps/backend/src/entities apps/backend/src/usecases apps/backend/src/controllers apps/backend/src/infrastructure/db
+                else
+                    # Standard NestJS Modular
+                    mkdir -p apps/backend/src/modules apps/backend/src/common
+                fi
+                
+                cat << 'JSON_EOF' > apps/backend/package.json
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "lint": "eslint 'src/**/*.ts'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  }
+}
+JSON_EOF
+
+                cat << 'TS_EOF' > apps/backend/src/main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(process.env.PORT || 3000);
+}
+bootstrap();
+TS_EOF
+
+                cat << 'TS_EOF' > apps/backend/src/app.module.ts
+import { Module } from '@nestjs/common';
+
+@Module({
+  imports: [],
+  controllers: [],
+  providers: [],
+})
+export class AppModule {}
+TS_EOF
+
+            elif [ "$be_choice" = "2" ]; then
+                # FastAPI Boilerplate
+                echo "  Scaffolding FastAPI backend..."
+                mkdir -p apps/backend/src/app
+                
+                if [ "$be_arch_choice" = "1" ]; then
+                    # Hexagonal Architecture
+                    mkdir -p apps/backend/src/app/domain apps/backend/src/app/ports apps/backend/src/app/adapters/in/api apps/backend/src/app/adapters/out/db apps/backend/src/app/core
+                elif [ "$be_arch_choice" = "2" ]; then
+                    # Clean Architecture
+                    mkdir -p apps/backend/src/app/entities apps/backend/src/app/usecases apps/backend/src/app/controllers apps/backend/src/app/infrastructure/db apps/backend/src/app/core
+                else
+                    # Standard Modular API
+                    mkdir -p apps/backend/src/app/core apps/backend/src/app/api/endpoints
+                fi
+                
+                cat << 'TXT_EOF' > apps/backend/requirements.txt
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.4
+pytest>=8.1.1
+httpx>=0.27.0
+TXT_EOF
+
+                cat << 'PY_EOF' > apps/backend/src/app/main.py
+from fastapi import FastAPI
+
+app = FastAPI(title="Antigravity Custom Backend")
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from Custom FastAPI Backend!"}
+PY_EOF
+
+            elif [ "$be_choice" = "3" ]; then
+                # Go Gin Boilerplate
+                echo "  Scaffolding Go Gin backend..."
+                mkdir -p apps/backend/src/cmd/server
+                
+                if [ "$be_arch_choice" = "1" ]; then
+                    # Hexagonal Architecture
+                    mkdir -p apps/backend/src/internal/core/domain apps/backend/src/internal/core/ports apps/backend/src/internal/adapters/in/web apps/backend/src/internal/adapters/out/db apps/backend/src/internal/config
+                elif [ "$be_arch_choice" = "2" ]; then
+                    # Clean Architecture
+                    mkdir -p apps/backend/src/internal/domain/entity apps/backend/src/internal/domain/usecase apps/backend/src/internal/adapter/controller apps/backend/src/internal/adapter/repository apps/backend/src/internal/infrastructure/db apps/backend/src/internal/config
+                else
+                    # Standard Go Gin MVC
+                    mkdir -p apps/backend/src/internal/model apps/backend/src/internal/controller apps/backend/src/internal/view apps/backend/src/internal/config
+                fi
+                
+                cat << 'GO_EOF' > apps/backend/go.mod
+module backend
+
+go 1.20
+
+require (
+	github.com/gin-gonic/gin v1.9.1
+)
+GO_EOF
+
+                cat << 'GO_EOF' > apps/backend/src/cmd/server/main.go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.Default()
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Hello from Custom Go Gin Backend!",
+		})
+	})
+	r.Run()
+}
+GO_EOF
+            fi
+
+            # 2. Scaffold Frontend App
+            if [ "$fe_choice" = "1" ]; then
+                # Next.js Boilerplate
+                echo "  Scaffolding Next.js frontend..."
+                mkdir -p apps/frontend/src/app apps/frontend/src/lib
+                
+                if [ "$fe_arch_choice" = "1" ]; then
+                    # Atomic Design
+                    mkdir -p apps/frontend/src/components/atoms apps/frontend/src/components/molecules apps/frontend/src/components/organisms apps/frontend/src/components/templates
+                else
+                    # Standard Next.js App Router
+                    mkdir -p apps/frontend/src/components
+                fi
+                
+                cat << 'JSON_EOF' > apps/frontend/package.json
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  }
+}
+JSON_EOF
+
+                cat << 'TSX_EOF' > apps/frontend/src/app/layout.tsx
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Antigravity Custom Frontend',
+  description: 'Flexible separate frontend application',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+TSX_EOF
+
+                cat << 'TSX_EOF' > apps/frontend/src/app/page.tsx
+export default function Home() {
+  return (
+    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>🚀 Welcome to Antigravity Custom Frontend</h1>
+      <p>Running alongside a decoupled backend service in a clean modular layout.</p>
+    </main>
+  );
+}
+TSX_EOF
+
+            elif [ "$fe_choice" = "2" ]; then
+                # React SPA (Vite) Boilerplate
+                echo "  Scaffolding React SPA frontend..."
+                mkdir -p apps/frontend/src apps/frontend/public
+                
+                if [ "$fe_arch_choice" = "1" ]; then
+                    # Atomic Design
+                    mkdir -p apps/frontend/src/components/atoms apps/frontend/src/components/molecules apps/frontend/src/components/organisms apps/frontend/src/components/templates
+                else
+                    # Standard React Components
+                    mkdir -p apps/frontend/src/components
+                fi
+                
+                cat << 'JSON_EOF' > apps/frontend/package.json
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint 'src/**/*.ts'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  }
+}
+JSON_EOF
+
+                cat << 'HTML_EOF' > apps/frontend/index.html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antigravity React SPA</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+HTML_EOF
+
+                cat << 'TSX_EOF' > apps/frontend/src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+TSX_EOF
+
+                cat << 'TSX_EOF' > apps/frontend/src/App.tsx
+import React from 'react';
+
+export default function App() {
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>🚀 Welcome to Antigravity React SPA Frontend</h1>
+      <p>Decoupled single-page frontend application.</p>
+    </div>
+  );
+}
+TSX_EOF
+
+            elif [ "$fe_choice" = "3" ]; then
+                # Laravel Blade / PHP HTML Boilerplate
+                echo "  Scaffolding Laravel Blade/HTML frontend..."
+                mkdir -p apps/frontend/resources/views apps/frontend/public/css apps/frontend/public/js
+                
+                cat << 'HTML_EOF' > apps/frontend/resources/views/welcome.blade.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Blade Frontend</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; background-color: #f8fafc; color: #1e293b; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Welcome to Antigravity Blade/HTML Frontend</h1>
+    <p>Flexible separate frontend application template.</p>
+</body>
+</html>
+HTML_EOF
+            fi
+
+            echo "Scaffolded Custom Multi-Project application template successfully!"
 
         else
             # Generic/Basic Scaffolding Fallback
@@ -2567,9 +2962,17 @@ IS_MONOREPO=false
 SUBPROJECTS_FILE=".agents/subprojects.sh"
 rm -f "$SUBPROJECTS_FILE"
 
-# Detect if monorepo
+# Detect if monorepo or multi-project structure (e.g., apps/backend + apps/frontend)
 if [ -f pnpm-workspace.yaml ] || [ -f turbo.json ] || [ -f lerna.json ] || [ -f go.work ] || ( [ -f package.json ] && grep -q '"workspaces"' package.json ) || ( [ -f Cargo.toml ] && grep -q "\[workspace\]" Cargo.toml ); then
     IS_MONOREPO=true
+else
+    # Fallback scan for folders under apps/, packages/, or services/ containing project signatures
+    for check_dir in apps/* packages/* services/*; do
+        if [ -d "$check_dir" ] && ( [ -f "$check_dir/package.json" ] || [ -f "$check_dir/go.mod" ] || [ -f "$check_dir/requirements.txt" ] || [ -f "$check_dir/pyproject.toml" ] || [ -f "$check_dir/composer.json" ] || [ -f "$check_dir/Gemfile" ] ); then
+            IS_MONOREPO=true
+            break
+        fi
+    done
 fi
 
 if [ "$IS_MONOREPO" = "true" ]; then

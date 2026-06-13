@@ -48,9 +48,17 @@ IS_MONOREPO=false
 SUBPROJECTS_FILE=".agents/subprojects.sh"
 rm -f "$SUBPROJECTS_FILE"
 
-# Detect if monorepo
+# Detect if monorepo or multi-project structure (e.g., apps/backend + apps/frontend)
 if [ -f pnpm-workspace.yaml ] || [ -f turbo.json ] || [ -f lerna.json ] || [ -f go.work ] || ( [ -f package.json ] && grep -q '"workspaces"' package.json ) || ( [ -f Cargo.toml ] && grep -q "\[workspace\]" Cargo.toml ); then
     IS_MONOREPO=true
+else
+    # Fallback scan for folders under apps/, packages/, or services/ containing project signatures
+    for check_dir in apps/* packages/* services/*; do
+        if [ -d "$check_dir" ] && ( [ -f "$check_dir/package.json" ] || [ -f "$check_dir/go.mod" ] || [ -f "$check_dir/requirements.txt" ] || [ -f "$check_dir/pyproject.toml" ] || [ -f "$check_dir/composer.json" ] || [ -f "$check_dir/Gemfile" ] ); then
+            IS_MONOREPO=true
+            break
+        fi
+    done
 fi
 
 if [ "$IS_MONOREPO" = "true" ]; then

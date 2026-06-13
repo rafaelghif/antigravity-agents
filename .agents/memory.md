@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 63c7aca
+- **Last Commit Reference**: 0570d95
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,8 +18,8 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Monorepo Support
-- **Current Task Target**: Implement monorepo scaffolding, monorepo-aware linter/builder/tester, and auto-detection
+- **Primary Epic**: Monorepo & Custom Multi-Project Support
+- **Current Task Target**: Implement custom Multi-Project scaffolding (NestJS, FastAPI, Go Gin, Next.js, React SPA, Blade) and architectural layouts (Hexagonal, Clean, Atomic, MVC)
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -28,12 +28,14 @@
 - [x] Implement auto-detection and subproject config output in recon.sh
 - [x] Verify monorepo linter, build, and test run correctly on staged files
 - [x] Verify validation and test compliance
+- [x] Support Hexagonal, Clean, and Atomic architectures in folder generator
+- [x] Implement fallback multi-project scanner in recon.sh for decoupled apps
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity Gemini
-- **Last Action Completed**: Implemented monorepo templates, auto-detection scripts, directory-aware lint/build/test validations, sanitized slash-lock mechanisms, and updated docs.
-- **Next Planned Action**: Awaiting user request or next sprint task.
+- **Last Action Completed**: Implemented flexible Multi-Project scaffolding and architectural mappings (Hexagonal, Clean, Atomic) alongside folder-specific recon scanning.
+- **Next Planned Action**: Awaiting user checkout, review, or additional framework extensions.
 - **Blockers / Runtime Notes**: None. Workspace status validated and fully compliant.
 
 ---

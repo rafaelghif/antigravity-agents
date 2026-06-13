@@ -6,9 +6,12 @@ This document tracks all version updates, script refinements, and protocol chang
 ### Added
 - Added Next.js, Go Gin, and FastAPI boilerplates to the workspace scaffolding wizard (`helper.sh init`).
 - Added a **Monorepo** template option in scaffolding (`helper.sh init`) which sets up a Turborepo + pnpm layout containing Next.js frontend (`apps/web`), Go Gin backend (`apps/api`), and shared workspace packages (`packages/shared`).
+- Added a **Custom Multi-Project / Separate Apps** scaffolding option (`helper.sh init`) allowing users to choose and combine different backend stacks (NestJS, FastAPI, Go Gin) and frontend stacks (Next.js, React SPA, Laravel Blade/HTML) with decoupled layouts.
+- Added native directory scaffolding for multiple architecture layouts: **Hexagonal Architecture** (domain, ports, adapters), **Clean Architecture** (entities, usecases, controllers), and **Atomic Design** (atoms, molecules, organisms, templates).
 - Added automatic workspace migration utility (`helper.sh migrate`) that safely backs up user settings, updates workspace structures, handles hook alignment, and updates active memory schema configuration.
 - Created standalone `MIGRATION.md` detailing automated and manual workspace upgrades.
 - Enhanced `recon.sh` to natively detect monorepos (Turborepo, Yarn/pnpm workspaces, Go workspaces) and configure sub-project mappings inside `.agents/subprojects.sh` and `project_rules.md`.
+- Added a fallback scanner in `recon.sh` to auto-discover and map nested projects under `apps/`, `packages/`, or `services/` even if a root workspace configuration file (like `turbo.json` or `pnpm-workspace.yaml`) is not present.
 - Added monorepo-aware linter, builder, and testing execution inside `helper.sh` (`helper.sh build/lint/test`) which parse subprojects and dynamically execute validations only on directories containing staged modifications.
 - Modified lock/unlock command to sanitize slash paths in module names (e.g., `apps/backend` locks as `apps_backend.lock`), avoiding path conflicts.
 
