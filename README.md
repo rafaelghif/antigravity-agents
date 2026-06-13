@@ -274,11 +274,20 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
 ## 6. Core Rules & Architecture Purity
 
 Antigravity Workspace enforces these key rules on AI agents:
-- **No Remote Git operations**: The agent is **forbidden** from running `git pull`, `git push`, `git fetch`, or `git checkout -b` to prevent conflicts. Branch management and pushing to remote repos is handled exclusively by **you** (the user).
-- **Hardcoded Secret Scan**: The agent cannot commit if there are passwords, private keys, or API tokens exposed in the codebase (scanned via `validate.sh`).
-- **Context Preservation**: Keeps the task checklists small and modular (`memory.md` capped at 100 lines) to achieve 100% prompt cache hits, making agent invocations 80% faster and cheaper.
+- **Strict Bootstrapping sequence**: At startup, the agent MUST read `AGENTS.md` ➔ `project_rules.md` ➔ `schema.md` ➔ `memory.md` in order. No other tools or files may be touched prior to this.
+- **Git-Backed Memory Sync**: All schemas, ADRs, dynamic workflows, and memory files under `.agents/` (except `.agents/locks/`) MUST be committed to Git. The agent will run verification checks on startup to ensure your local clone is not behind upstream (`origin`).
+- **No Agent Git Push/Pull**: The agent is **forbidden** from running remote operations like `git pull`, `git push`, or changing branches. The user must fetch/pull updates before starting work.
+- **Discussion Traceability**: All `/grill-me` or design discussion outcomes are immediately saved to `.agents/workflows/task_<task_name>.md`. When feature branches are merged, running `helper.sh archive` moves these files to `.agents/archive/sprint_<branch>/` to keep active workspace clean.
+- **Real-Time Schema & Dependency Sync**: Database model or API changes must immediately update `.agents/schemas/` and the main `.agents/schema.md` index before coding starts. Library dependencies must update `project_rules.md` and package manager configs (`package.json`, etc.) immediately.
+- **Token Optimization (.antigravityignore)**: Agents strictly adhere to `.antigravityignore` patterns, preventing costly crawls through dependencies, logs, binaries, or build directories.
+- **Hardcoded Secret Scan**: The agent cannot commit code if passwords, keys, or API tokens are detected in the workspace (scanned via `validate.sh`).
 
 ---
+
+## 📅 Version History & Changelog
+
+All protocol modifications, script updates, and rule changes are documented in the [Agent Core Changelog](file://./.agents/CHANGELOG.md). Refer to it for tracing changes to the workspace setup.
+
 
 ## 👤 Created By & Contact
 

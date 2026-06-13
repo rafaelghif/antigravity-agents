@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 40efd37
+- **Last Commit Reference**: 165114a
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -26,6 +26,8 @@
 - [x] Refine bootstrapping sequence, checkbox lifecycle, and real-time schema/library updates in AGENTS.md and project_rules.md
 - [x] Run /grill-me alignment and document outcomes in task_teamwork_rules.md
 - [x] Implement branch-specific dynamic workflow archiving in helper.sh
+- [x] Add .antigravityignore configuration to exclude dependency and build files
+- [x] Document setup, teamwork guidelines, and changelog in README.md and CHANGELOG.md
 - [x] Run validate.sh and commit changes
 
 

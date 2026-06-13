@@ -1,0 +1,69 @@
+# ==========================================
+# Antigravity Agent Ignore Rules (.antigravityignore)
+# Excludes heavy dependencies, binaries, system files, and build assets
+# to optimize token consumption and prevent hallucinations.
+# ==========================================
+
+# Dependency Directories
+node_modules/
+bower_components/
+jspm_packages/
+web_modules/
+.npm/
+.yarn/
+.pnpm-store/
+
+# Build & Compilation Outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.docusaurus/
+target/
+bin/
+obj/
+pkg/
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.docstate
+
+# Version Control & Agent Internal Transient files
+.git/
+.agents/locks/
+
+# Media & Binary Assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.mp4
+*.mp3
+*.pdf
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+
+# Logs & Temporary files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

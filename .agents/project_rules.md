@@ -41,5 +41,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
   - Technologies/libraries must be documented in `.agents/project_rules.md` and their respective workspace configuration files (`package.json`, `go.mod`, etc.).
   - Architectural decisions must be documented as a new ADR entry in `.agents/adr.md`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked `[/]` at a time across the entire workspace. Do not change a task checklist state to `[x]` until verification has passed and the changes have been staged and committed in the completed state.
+- **Respect .antigravityignore**: Adhere strictly to `.antigravityignore` rules. Never read, search, or list files matching these patterns to optimize token consumption and prevent file read hallucinations.
+
 
 
