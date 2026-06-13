@@ -6,7 +6,7 @@ set -euo pipefail
 
 MEMORY_FILE=".agents/memory.md"
 LOCKS_DIR=".agents/locks"
-PROJECT_RULES=".agents/project_rules.md"
+PROJECT_RULES=".agents/rules/project_rules.md"
 
 echo "=========================================================="
 echo "Starting Antigravity Agent Workspace Validation..."

@@ -11,8 +11,8 @@ if [ -f .agents/scripts/validate.sh ]; then
     fi
 fi
 
-if [ -f .agents/project_rules.md ]; then
-    linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+if [ -f .agents/rules/project_rules.md ]; then
+    linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
     linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
         echo "Running linter: $linter_cmd..."
@@ -23,7 +23,7 @@ if [ -f .agents/project_rules.md ]; then
         echo "  [PASS] Linter check passed."
     fi
 
-    test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+    test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
     test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
         echo "Running test suite: $test_runner..."

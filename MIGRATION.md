@@ -17,7 +17,7 @@ Run the following command in Git Bash (Windows) or Terminal (Linux/macOS):
 ```
 
 ### What the Automated Migrator Does:
-1. **Backs up User Files**: Automatically copies existing [.agents/project_rules.md](file://./.agents/project_rules.md) and [.agents/memory.md](file://./.agents/memory.md) to `.backup` files to ensure no custom configurations are lost.
+1. **Backs up User Files**: Automatically copies existing [.agents/rules/project_rules.md](file://./.agents/rules/project_rules.md) and [.agents/memory.md](file://./.agents/memory.md) to `.backup` files to ensure no custom configurations are lost.
 2. **Updates Directory Structure**: Prepares directories for schemas, locks, workflows, and skills.
 3. **Installs/Chains Git Hooks**: Copies and configures Git hooks (`pre-commit`, `post-commit`, `commit-msg`) in your local `.git/hooks/` directory, chaining them with any pre-existing custom hooks.
 4. **Upgrades Memory Ledger**: Updates [.agents/memory.md](file://./.agents/memory.md) to the V5.0.0 layout.
@@ -25,7 +25,7 @@ Run the following command in Git Bash (Windows) or Terminal (Linux/macOS):
 6. **Reconstructs Blueprints**: Runs the codebase stack auto-recon to generate the new project rules.
 
 > [!WARNING]
-> If you have custom rules configured in [.agents/project_rules.md](file://./.agents/project_rules.md), they will be backed up to `project_rules.md.backup`. Please review the backup and merge any custom rules back into the newly generated file.
+> If you have custom rules configured in [.agents/rules/project_rules.md](file://./.agents/rules/project_rules.md), they will be backed up to `project_rules.md.backup` under `rules/`. Please review the backup and merge any custom rules back into the newly generated file.
 
 ---
 
@@ -46,7 +46,7 @@ Update [.agents/memory.md](file://./.agents/memory.md) to include the **Memory S
 
 > **Memory Schema Version**: 5.0.0  
 > **Target System**: Antigravity Agent Core
-> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.
+> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.
 ```
 
 Ensure the file contains the following high-level headers:

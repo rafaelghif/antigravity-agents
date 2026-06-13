@@ -99,10 +99,11 @@ When initialized in a project, the directory layout is structured as follows:
   ├── README.md                   <-- Static: Developer handbook
   └── .agents/                    <-- Workspace operational directory (generated)
         ├── bootstrap.sh          <-- Local backup of the bootstrapper script
-        ├── project_rules.md      <-- Static: Tech Stack, coding rules, & gates (cached)
         ├── schema.md             <-- Semi-Static: Database & API specs index
         ├── adr.md                <-- Static: Architectural Design Records (cached)
         ├── memory.md             <-- Dynamic: Active task state (<100 lines)
+        ├── rules/                <-- Static: Workspace rules including tech stack and architecture
+        │     └── project_rules.md <-- Static: Tech Stack, coding rules, & gates (cached)
         ├── schemas/              <-- Semi-Static: Domain-driven schema files (lazy-loaded)
         │     └── default_module.md
         ├── skills/               <-- Static: Generalized parameterizable agent skills
@@ -241,7 +242,7 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
 ```
 
-The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/project_rules.md` automatically!
+The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/rules/project_rules.md` automatically!
 
 #### **Step 3: Run Diagnostics & Commit**
 Verify that your existing workspace passes the agent safety checks:
@@ -313,7 +314,7 @@ Workspace rules define how coding standards are applied dynamically. The rules r
 ## 5. Typical Workflow for the Agent
  
 > [!NOTE]
-> **Autonomous Script Execution**: Agents are instructed by the project architectural blueprint ([project_rules.md](file://./.agents/project_rules.md)) to execute these operational commands (locking, validation, API sync, and archiving) automatically without requiring manual user commands.
+> **Autonomous Script Execution**: Agents are instructed by the project architectural blueprint ([project_rules.md](file://./.agents/rules/project_rules.md)) to execute these operational commands (locking, validation, API sync, and archiving) automatically without requiring manual user commands.
 
 When an AI Agent starts working on a task, it must strictly follow these steps to ensure clean history and zero bugs:
  
@@ -338,11 +339,11 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
 ## 6. Core Rules & Architecture Purity
 
 Antigravity Workspace enforces these key rules on AI agents:
-- **Strict Bootstrapping sequence**: At startup, the agent MUST read `AGENTS.md` ➔ `project_rules.md` ➔ `schema.md` ➔ `memory.md` in order. No other tools or files may be touched prior to this.
+- **Strict Bootstrapping sequence**: At startup, the agent MUST read `AGENTS.md` ➔ `rules/project_rules.md` ➔ `schema.md` ➔ `memory.md` in order. No other tools or files may be touched prior to this.
 - **Git-Backed Memory Sync**: All schemas, ADRs, dynamic workflows, and memory files under `.agents/` (except `.agents/locks/`) MUST be committed to Git. The agent will run verification checks on startup to ensure your local clone is not behind upstream (`origin`).
 - **No Agent Git Push/Pull**: The agent is **forbidden** from running remote operations like `git pull`, `git push`, or changing branches. The user must fetch/pull updates before starting work.
 - **Discussion Traceability**: All `/grill-me` or design discussion outcomes are immediately saved to `.agents/workflows/task_<task_name>.md`. When feature branches are merged, running `helper.sh archive` moves these files to `.agents/archive/sprint_<branch>/` to keep active workspace clean.
-- **Real-Time Schema & Dependency Sync**: Database model or API changes must immediately update `.agents/schemas/` and the main `.agents/schema.md` index before coding starts. Library dependencies must update `project_rules.md` and package manager configs (`package.json`, etc.) immediately.
+- **Real-Time Schema & Dependency Sync**: Database model or API changes must immediately update `.agents/schemas/` and the main `.agents/schema.md` index before coding starts. Library dependencies must update `.agents/rules/project_rules.md` and package manager configs (`package.json`, etc.) immediately.
 - **Token Optimization (.antigravityignore)**: Agents strictly adhere to `.antigravityignore` patterns, preventing costly crawls through dependencies, logs, binaries, or build directories.
 - **Hardcoded Secret Scan**: The agent cannot commit code if passwords, keys, or API tokens are detected in the workspace (scanned via `validate.sh`).
 - **Handover Relayed Context**: Before finishing a turn or switching accounts, the agent writes the current status and next action items in `memory.md` under `## 3. Relayed Context & Handover Notes`, ensuring the next agent picks up immediately without token waste.
@@ -366,7 +367,7 @@ For upgrading existing workspaces configured with older versions of the Antigrav
    ```bash
    ./.agents/scripts/helper.sh migrate
    ```
-   *This automatically backs up your existing configuration files (`memory.md`, `project_rules.md`, `schema.md`) to `.backup` extensions, updates system hooks and subdirectories, upgrades your active memory schema, and runs auto-recon to align rules.*
+   *This automatically backs up your existing configuration files (`memory.md`, `rules/project_rules.md`, `schema.md`) to `.backup` extensions, updates system hooks and subdirectories, upgrades your active memory schema, and runs auto-recon to align rules.*
 
 For full details, precautions, and manual step-by-step migration instructions, refer to the standalone [MIGRATION.md](file://./MIGRATION.md) guide in the project root.
 

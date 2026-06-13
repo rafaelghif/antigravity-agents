@@ -167,12 +167,12 @@ This document dictates the absolute boundaries, operational procedures, memory c
 ## 1. Bootstrapping & Cognitive Alignment
 - **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. The agent MUST NOT perform any file edits, command execution, or code modifications prior to reading these files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
   1. The Global Agent Protocol (this file: [AGENTS.md](file://./AGENTS.md)).
-  2. The Project-Specific Rules, if available (e.g. [.agents/project_rules.md](file://./.agents/project_rules.md)).
+  2. The Project-Specific Rules, if available (e.g. [.agents/rules/project_rules.md](file://./.agents/rules/project_rules.md)).
   3. The Schema Reference database, if available (e.g. [.agents/schema.md](file://./.agents/schema.md)).
   4. The Active Memory Ledger ([.agents/memory.md](file://./.agents/memory.md)).
 - **Strict Adherence to .agents Workspace Blueprints**: The agent must strictly follow all files, guidelines, and directories under the `.agents/` folder. This includes:
   * **Memory & Sprints**: Aligning checklists and state flags in [memory.md](file://./.agents/memory.md).
-  * **Architectural Blueprint**: Strictly following stack directories, lint/build/test scripts, and layers defined in [project_rules.md](file://./project_rules.md).
+  * **Architectural Blueprint**: Strictly following stack directories, lint/build/test scripts, and layers defined in [project_rules.md](file://./rules/project_rules.md).
   * **Domain Schemas Index**: Reading database models and API specs mapped in [schema.md](file://./.agents/schema.md) and domain schemas under `schemas/`.
   * **Architectural Decisions**: Logging and respecting design decisions recorded in [adr.md](file://./.agents/adr.md).
   * **Task Workflows**: Reading/writing granular implementation plans under `workflows/task_*.md`.
@@ -185,7 +185,7 @@ This document dictates the absolute boundaries, operational procedures, memory c
 - **Fact-Checking over Guessing**: Never assume a file exists, a package is installed, or a function signature is correct. If a detail is missing, search and verify it.
 - **Symbol & Command Verification Gate**: Before writing an import statement, invoking a method/function, or proposing a terminal command/script to execute, the agent MUST run `view_file` or `grep_search` to verify:
   1. The file path and module export spelling are correct.
-  2. The package, linter, or script command exists in the workspace configuration files (e.g., `package.json`, `go.mod`, or `.agents/project_rules.md`). Do not guess or execute unverified third-party commands.
+  2. The package, linter, or script command exists in the workspace configuration files (e.g., `package.json`, `go.mod`, or `.agents/rules/project_rules.md`). Do not guess or execute unverified third-party commands.
 - **Interactive Clarification Gate**: If the requirements, symbols, or parameters of a task remain ambiguous even after searching the codebase, the agent MUST present a clear, multiple-choice question using the `ask_question` tool to resolve the ambiguity with the user rather than guessing or hallucinating the path forward.
 - **Batch Verification and Line Capping**: To prevent token bloat during verification, the agent MUST use precise `StartLine` and `EndLine` parameters in `view_file` to read only the imports/definitions needed, or run batch `grep_search` operations instead of parsing entire source files.
 - **verbatim Reference**: When documenting compile, lint, or test failures, paste the exact stack traces and logs verbatim instead of describing them in general terms.
@@ -213,7 +213,7 @@ To operate seamlessly in collaborative environments with other developers and au
 - **Design & /grill-me Alignment Documentation**: Whenever a design interview, `/grill-me` session, or architectural alignment is completed, the agent MUST immediately save the resulting execution plan to a new task workflow file at `.agents/workflows/task_<task_name>.md`. This file acts as the single source of truth for the task's execution plan, architectural decisions, and schema changes, and must be committed to Git.
 - **Real-Time Schema & Library Synchronization**: Any discussion regarding changes to the database structure, API contracts, dependencies, libraries, or architectural patterns must be documented *immediately* in the corresponding workspace files *before* writing any code:
   - Database schema changes must immediately update the domain-driven schemas under `.agents/schemas/` and the master index `.agents/schema.md`.
-  - Technology or library dependencies (e.g. npm package additions, go modules) must immediately update `.agents/project_rules.md` and the workspace package configuration files (e.g. `package.json`, `go.mod`).
+  - Technology or library dependencies (e.g. npm package additions, go modules) must immediately update `.agents/rules/project_rules.md` and the workspace package configuration files (e.g. `package.json`, `go.mod`).
   - Architectural changes must immediately be recorded as a new Architectural Decision Record (ADR) in `.agents/adr.md`.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
   - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
@@ -269,7 +269,7 @@ If build tools, linters, or test suites crash, run this diagnostic checklist:
 
 ## 8. Self-Improvement & Meta-Refactoring Protocol
 The agent must continuously optimize its own tools, protocols, and developer guidelines to maintain a 1% world-class execution standard:
-- **Refinement Triggers**: If a lint error, type mismatch, or testing bottleneck repeats more than 3 times, the agent MUST immediately refine [.agents/project_rules.md](file://./.agents/project_rules.md) or update the respective skill file to document the solution permanently.
+- **Refinement Triggers**: If a lint error, type mismatch, or testing bottleneck repeats more than 3 times, the agent MUST immediately refine [.agents/rules/project_rules.md](file://./.agents/rules/project_rules.md) or update the respective skill file to document the solution permanently.
 - **Dynamic Skill Creation**: If the agent identifies a missing capability (e.g. a skill for code auditing, packaging, or migration validation), it must proactively define it under `.agents/skills/<skill_name>/SKILL.md` and use it.
 - **Grounding Gate**: All proposed self-improvements and optimizations must be 100% realistic and functional. Do not suggest or create configurations for tools that are not installed or are unavailable in the workspace environment.
 
@@ -286,11 +286,11 @@ To optimize prompt caching and prevent context window bloat:
 ---
 
 ## 10. Autonomous Adaptation & Self-Configuration Protocol
-When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
+When the agent starts execution in a workspace, it must check if the project-specific blueprints (.agents/rules/project_rules.md and .agents/schema.md) are either missing, empty, or contain default templates.
 If the blueprints are not initialized for the current project:
 1. **Trigger Autonomous Reconnaissance**: Immediately execute `./.agents/scripts/helper.sh recon` to automatically discover the tech stack, directory boundaries, build/test/lint commands, Relational DB/ORM integrations, and environment variable configuration template.
 2. **Interactive User Alignment**: Present the auto-detected stack and boundaries to the user for quick confirmation or adjustments.
-3. **Refine Blueprint**: Adjust [.agents/project_rules.md](file://./.agents/project_rules.md) and [.agents/schema.md](file://./.agents/schema.md) based on user confirmation.
+3. **Refine Blueprint**: Adjust [.agents/rules/project_rules.md](file://./.agents/rules/project_rules.md) and [.agents/schema.md](file://./.agents/schema.md) based on user confirmation.
 4. **Populate Database Schema Map**:
    - Map all relational database models, tables, columns, and API routes found, organizing them into domain-driven schemas under [.agents/schemas/](file://./.agents/schemas/).
    - Update the high-level index map inside [.agents/schema.md](file://./.agents/schema.md) to link to these domain schemas.
@@ -306,7 +306,7 @@ To prevent technical debt and ensure the system remains maintainable, secure, an
 - **Mandatory Impact Auditing**: Before proposing any major code change, architectural restructuring, or package import, the agent MUST run the `impact-analysis` skill to identify downstream dependency breaks, security vulnerabilities, or performance bottlenecks.
 - **Architectural Boundary Insulation**: Maintain pure layer decoupling. Never mix infrastructure details (like database models, network clients, framework-specific wrappers) with core business logic.
 - **Strict User Consultations**: In situations of ambiguity, high security risk, database schema migrations, or backward-incompatible API changes, the agent MUST halt execution and consult the user with options before writing code.
-- **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/project_rules.md` to prevent future errors.
+- **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/rules/project_rules.md` to prevent future errors.
 EOF
 # 3. Write .agents/memory.md template
 write_template_safe ".agents/memory.md" << 'EOF'
@@ -314,7 +314,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 > **Memory Schema Version**: 5.0.0  
 > **Target System**: [Project Name]
-> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.
+> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.
 
 ---
 
@@ -351,14 +351,20 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 4. Reference Links Index
 - **Core Guidelines**: [AGENTS.md](file://../AGENTS.md)
-- **Project Specific Rules**: [project_rules.md](file://./project_rules.md)
+- **Project Specific Rules**: [project_rules.md](file://./rules/project_rules.md)
 - **Database Schema**: [schema.md](file://./schema.md)
 - **Design Decisions**: [adr.md](file://./adr.md)
 - **Sprint Archives**: [archive/](file://./archive/)
 EOF
 
-# 4. Write .agents/project_rules.md template
-write_template_safe ".agents/project_rules.md" << 'EOF'
+# 4. Write .agents/rules/project_rules.md template
+write_template_safe ".agents/rules/project_rules.md" << 'EOF'
+---
+name: project-rules
+activation: Always On
+description: "Project architecture blueprint and technical stack rules."
+---
+
 # Project Architecture Blueprint (PAB)
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
@@ -890,7 +896,7 @@ cmd_build() {
         return $failed
     else
         # Fallback to project_rules build command
-        local build_line=$(grep "Build validation" .agents/project_rules.md || echo "")
+        local build_line=$(grep "Build validation" .agents/rules/project_rules.md || echo "")
         local build_cmd=$(echo "$build_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$build_cmd" ] && [ "$build_cmd" != "echo 'No build command needed'" ]; then
             eval "$build_cmd"
@@ -937,7 +943,7 @@ cmd_lint() {
         return $failed
     else
         # Fallback to project_rules linter
-        local linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+        local linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
         local linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
             eval "$linter_cmd"
@@ -984,7 +990,7 @@ cmd_test() {
         return $failed
     else
         # Fallback to project_rules test runner
-        local test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+        local test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
         local test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
             eval "$test_runner"
@@ -3154,9 +3160,9 @@ cmd_commit() {
     # Linter Execution
     if [ "$no_test_flag" = "false" ]; then
         local linter_cmd=""
-        if [ -f .agents/project_rules.md ]; then
+        if [ -f .agents/rules/project_rules.md ]; then
             local linter_line
-            linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+            linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
             linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
@@ -3177,9 +3183,9 @@ cmd_commit() {
     # Test Execution
     if [ "$no_test_flag" = "false" ]; then
         local test_runner=""
-        if [ -f .agents/project_rules.md ]; then
+        if [ -f .agents/rules/project_rules.md ]; then
             local test_line
-            test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+            test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
             test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
@@ -3233,9 +3239,9 @@ cmd_migrate() {
         cp "$MEMORY_FILE" "${MEMORY_FILE}${backup_suffix}"
     fi
 
-    if [ -f ".agents/project_rules.md" ]; then
-        echo "Warning: Existing project rules blueprint found. Backing up to .agents/project_rules.md${backup_suffix}"
-        cp ".agents/project_rules.md" ".agents/project_rules.md${backup_suffix}"
+    if [ -f ".agents/rules/project_rules.md" ]; then
+        echo "Warning: Existing project rules blueprint found. Backing up to .agents/rules/project_rules.md${backup_suffix}"
+        cp ".agents/rules/project_rules.md" ".agents/rules/project_rules.md${backup_suffix}"
     fi
 
     if [ -f ".agents/schema.md" ]; then
@@ -3308,7 +3314,7 @@ cmd_migrate() {
             # Prepend schema version header if not found
             local temp_mem
             temp_mem=$(mktemp)
-            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
+            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
             tail -n +2 "$MEMORY_FILE" >> "$temp_mem"
             mv "$temp_mem" "$MEMORY_FILE"
         fi
@@ -4205,7 +4211,7 @@ write_recon_file_safe() {
     fi
 }
 
-PROJECT_RULES_FILE=".agents/project_rules.md"
+PROJECT_RULES_FILE=".agents/rules/project_rules.md"
 SCHEMA_INDEX_FILE=".agents/schema.md"
 SCHEMAS_DIR=".agents/schemas"
 
@@ -4448,8 +4454,14 @@ if [ -z "$ENV_VARS" ]; then
     ENV_VARS="  - No configuration parameters detected."
 fi
 
-# 5. Populate .agents/project_rules.md
+# 5. Populate .agents/rules/project_rules.md
 write_recon_file_safe "$PROJECT_RULES_FILE" << PAB_EOF
+---
+name: project-rules
+activation: Always On
+description: "Project architecture blueprint and technical stack rules."
+---
+
 # Project Architecture Blueprint (PAB)
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
@@ -4482,20 +4494,20 @@ $ENV_VARS
 - **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
 
 ## 6. Multi-Agent & Teamwork Constraints
-- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: \`AGENTS.md\`, \`.agents/project_rules.md\`, \`.agents/schema.md\`, and \`.agents/memory.md\`. No file writes or terminal runs are allowed prior to this initialization.
+- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: \`AGENTS.md\`, \`.agents/rules/project_rules.md\`, \`.agents/schema.md\`, and \`.agents/memory.md\`. No file writes or terminal runs are allowed prior to this initialization.
 - **Workspace Git Tracking**: Never ignore \`.agents/\` or \`AGENTS.md\` in \`.gitignore\` (except \`.agents/locks/\`). Commit all memory, schemas, dynamic workflows, and ADR files to Git to ensure proper multi-agent synchronization.
 - **Upstream Sync Gate**: You must run \`./.agents/scripts/helper.sh validate\` before beginning code changes to check if the branch is behind origin. If it is behind, stop and ask the user to pull first.
 - **Discussion and Design Plans**: Document all \`/grill-me\` outcomes and execution plans under \`.agents/workflows/task_<task_name>.md\`. Never log task-specific plans or checklists globally or in the main memory ledger.
 - **Real-Time Schema & Dependency Updates**: Any discussion on database models, API routes, or third-party libraries must be documented in the repository *immediately* before starting code edits:
   - Database structures must be saved under \`.agents/schemas/\` and registered in \`.agents/schema.md\`.
-  - Technologies/libraries must be documented in \`.agents/project_rules.md\` and their respective workspace configuration files (\`package.json\`, \`go.mod\`, etc.).
+  - Technologies/libraries must be documented in \`.agents/rules/project_rules.md\` and their respective workspace configuration files (\`package.json\`, \`go.mod\`, etc.).
   - Architectural decisions must be documented as a new ADR entry in \`.agents/adr.md\`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
 - **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under \`## 3. Relayed Context & Handover Notes\`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
 
 ## 7. Autonomous Operational Scripts & Commands
 The agent must execute workspace scripts automatically without manual user guidance or request under the following conditions:
-- **Project Discovery**: If \`.agents/project_rules.md\` is empty or generic, run \`./.agents/scripts/helper.sh recon\` immediately.
+- **Project Discovery**: If \`.agents/rules/project_rules.md\` is empty or generic, run \`./.agents/scripts/helper.sh recon\` immediately.
 - **Initial Verification**: Run \`./.agents/scripts/helper.sh validate\` and \`./.agents/scripts/helper.sh doctor\` as the first step of any edit cycle.
 - **Module Lock**: Before editing any code within a directory (e.g. \`apps/backend\`), run \`./.agents/scripts/helper.sh lock <module_name>\`.
 - **API Synchronization**: When backend model schemas or API paths change, run \`./.agents/scripts/helper.sh sync-api\` to sync types to the frontend.
@@ -4563,7 +4575,7 @@ set -euo pipefail
 
 MEMORY_FILE=".agents/memory.md"
 LOCKS_DIR=".agents/locks"
-PROJECT_RULES=".agents/project_rules.md"
+PROJECT_RULES=".agents/rules/project_rules.md"
 
 echo "=========================================================="
 echo "Starting Antigravity Agent Workspace Validation..."
@@ -5019,8 +5031,8 @@ if [ -f .agents/scripts/validate.sh ]; then
     fi
 fi
 
-if [ -f .agents/project_rules.md ]; then
-    linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+if [ -f .agents/rules/project_rules.md ]; then
+    linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
     linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
         echo "Running linter: $linter_cmd..."
@@ -5031,7 +5043,7 @@ if [ -f .agents/project_rules.md ]; then
         echo "  [PASS] Linter check passed."
     fi
 
-    test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+    test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
     test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
         echo "Running test suite: $test_runner..."
@@ -5159,7 +5171,7 @@ echo "Workspace Initialization Complete!"
 echo "Global Agent Protocol written to: AGENTS.md"
 echo "Active Memory Ledger written to: .agents/memory.md"
 echo "Technical Schema Reference written to: .agents/schema.md"
-echo "Architectural Blueprint written to: .agents/project_rules.md"
+echo "Architectural Blueprint written to: .agents/rules/project_rules.md"
 echo "Architectural Decision Records template written to: .agents/adr.md"
 echo "Locks folder created at: .agents/locks/"
 echo "Schemas folder created at: .agents/schemas/"

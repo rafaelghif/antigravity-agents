@@ -113,7 +113,7 @@ cmd_build() {
         return $failed
     else
         # Fallback to project_rules build command
-        local build_line=$(grep "Build validation" .agents/project_rules.md || echo "")
+        local build_line=$(grep "Build validation" .agents/rules/project_rules.md || echo "")
         local build_cmd=$(echo "$build_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$build_cmd" ] && [ "$build_cmd" != "echo 'No build command needed'" ]; then
             eval "$build_cmd"
@@ -160,7 +160,7 @@ cmd_lint() {
         return $failed
     else
         # Fallback to project_rules linter
-        local linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+        local linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
         local linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
             eval "$linter_cmd"
@@ -207,7 +207,7 @@ cmd_test() {
         return $failed
     else
         # Fallback to project_rules test runner
-        local test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+        local test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
         local test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
             eval "$test_runner"
@@ -2377,9 +2377,9 @@ cmd_commit() {
     # Linter Execution
     if [ "$no_test_flag" = "false" ]; then
         local linter_cmd=""
-        if [ -f .agents/project_rules.md ]; then
+        if [ -f .agents/rules/project_rules.md ]; then
             local linter_line
-            linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+            linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
             linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
@@ -2400,9 +2400,9 @@ cmd_commit() {
     # Test Execution
     if [ "$no_test_flag" = "false" ]; then
         local test_runner=""
-        if [ -f .agents/project_rules.md ]; then
+        if [ -f .agents/rules/project_rules.md ]; then
             local test_line
-            test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+            test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
             test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
@@ -2456,9 +2456,9 @@ cmd_migrate() {
         cp "$MEMORY_FILE" "${MEMORY_FILE}${backup_suffix}"
     fi
 
-    if [ -f ".agents/project_rules.md" ]; then
-        echo "Warning: Existing project rules blueprint found. Backing up to .agents/project_rules.md${backup_suffix}"
-        cp ".agents/project_rules.md" ".agents/project_rules.md${backup_suffix}"
+    if [ -f ".agents/rules/project_rules.md" ]; then
+        echo "Warning: Existing project rules blueprint found. Backing up to .agents/rules/project_rules.md${backup_suffix}"
+        cp ".agents/rules/project_rules.md" ".agents/rules/project_rules.md${backup_suffix}"
     fi
 
     if [ -f ".agents/schema.md" ]; then
@@ -2531,7 +2531,7 @@ cmd_migrate() {
             # Prepend schema version header if not found
             local temp_mem
             temp_mem=$(mktemp)
-            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
+            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
             tail -n +2 "$MEMORY_FILE" >> "$temp_mem"
             mv "$temp_mem" "$MEMORY_FILE"
         fi
