@@ -270,6 +270,16 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `lock` | `./.agents/scripts/helper.sh lock <module>` | Locks a specific module to prevent parallel developers or agents from modifying the same files simultaneously. |
 | `unlock` | `./.agents/scripts/helper.sh unlock <module>` | *(Automated)* Releases the lock on a module. |
 | `archive` | `./.agents/scripts/helper.sh archive` | Archives completed checklists and moves dynamic workflow files to `archive/` pre-merge to prevent conflicts. |
+| `sync-api` | `./.agents/scripts/helper.sh sync-api` | Automatically extracts backend OpenAPI schema and generates a zero-dependency typed TypeScript fetch client in the frontend. |
+
+### 4.1 API Contract Synchronization (`sync-api`)
+
+The `sync-api` command extracts the OpenAPI schema (`openapi.json`) from the backend application and synchronizes it with the frontend to generate a zero-dependency, fully-typed TypeScript fetch API client wrapper (`api-client.ts`).
+
+- **FastAPI/Python Backend**: Automatically boots a minimal context to dump `app.openapi()` directly into `openapi.json`.
+- **Go Gin Backend**: Runs `swag init` on the main server entry point to build and copy the schema.
+- **Frontend Client Compilation**: Reads `openapi.json` and parses components, schemas, path parameters, query parameters, request bodies, and responses. Outputs interfaces and client classes at the appropriate frontend location (e.g., `src/lib/api-client.ts`).
+- **Zero-Dependency**: The generated client is clean TypeScript that uses vanilla `fetch` and does not require third-party libraries.
 
 ---
 

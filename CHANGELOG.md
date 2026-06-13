@@ -4,6 +4,8 @@ This document tracks all version updates, script refinements, and protocol chang
 
 ## [1.4.0] - 2026-06-13
 ### Added
+- Added automated API Contract Synchronization feature via `helper.sh sync-api`, extracting `openapi.json` from backend stacks and writing zero-dependency typed TypeScript clients in the frontend.
+- Created zero-dependency Node.js parser at `.agents/scripts/generate-client.js` to convert `openapi.json` schemas into fully-typed fetch API client wrapper classes.
 - Added Next.js, Go Gin, and FastAPI boilerplates to the workspace scaffolding wizard (`helper.sh init`).
 - Added a **Monorepo** template option in scaffolding (`helper.sh init`) which sets up a Turborepo + pnpm layout containing Next.js frontend (`apps/web`), Go Gin backend (`apps/api`), and shared workspace packages (`packages/shared`).
 - Added a **Custom Multi-Project / Separate Apps** scaffolding option (`helper.sh init`) allowing users to choose and combine different backend stacks (NestJS, FastAPI, Go Gin) and frontend stacks (Next.js, React SPA, Laravel Blade/HTML) with decoupled layouts.

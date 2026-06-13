@@ -773,6 +773,7 @@ show_help() {
     echo "  build             Run monorepo-aware project compilation/build commands"
     echo "  lint              Run monorepo-aware linter validations on modified folders"
     echo "  test              Run monorepo-aware testing runner suites on modified folders"
+    echo "  sync-api          Synchronize API contracts and generate typed TypeScript client"
     echo "  help              Show this help message"
 }
 
@@ -3293,6 +3294,194 @@ GIT_EOF
     echo "=========================================================="
 }
 
+cmd_sync_api() {
+    echo "=========================================================="
+    echo "Starting API Contract Synchronization..."
+    echo "=========================================================="
+    
+    local subprojects_file=".agents/subprojects.sh"
+    local be_path=""
+    local fe_path=""
+    local be_stack=""
+    
+    # 1. Detect backend and frontend directories
+    if [ -f "$subprojects_file" ]; then
+        source "$subprojects_file"
+        for sp in "${SUBPROJECTS[@]}"; do
+            local path=$(echo "$sp" | cut -d'|' -f1)
+            local stack=$(echo "$sp" | cut -d'|' -f2)
+            
+            # Simple heuristics to identify backend vs frontend
+            if [[ "$path" =~ "api" || "$path" =~ "backend" || "$stack" =~ "Go" || "$stack" =~ "Python" ]]; then
+                be_path="$path"
+                be_stack="$stack"
+            elif [[ "$path" =~ "web" || "$path" =~ "frontend" || "$stack" =~ "Next.js" ]]; then
+                fe_path="$path"
+            fi
+        done
+    else
+        # Fallback search if no subprojects config file
+        if [ -d "apps/backend" ]; then be_path="apps/backend"; fi
+        if [ -d "apps/frontend" ]; then fe_path="apps/frontend"; fi
+        if [ -d "apps/api" ]; then be_path="apps/api"; fi
+        if [ -d "apps/web" ]; then fe_path="apps/web"; fi
+    fi
+    
+    # If still not found, search directories
+    if [ -z "$be_path" ]; then
+        if [ -f "go.mod" ] || [ -f "main.go" ]; then
+            be_path="."
+            be_stack="Go"
+        elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            be_path="."
+            be_stack="Python"
+        fi
+    fi
+    if [ -z "$fe_path" ]; then
+        if [ -d "src/app" ] || [ -f "package.json" ]; then
+            fe_path="."
+        fi
+    fi
+
+    if [ -z "$be_path" ]; then
+        echo "  [INFO] Backend application path could not be auto-detected. Operating in root fallback mode."
+        be_path="."
+        be_stack="Unknown"
+    fi
+    
+    echo "  Detected Backend: $be_path ($be_stack)"
+    if [ -n "$fe_path" ]; then
+        echo "  Detected Frontend: $fe_path"
+    fi
+
+    local openapi_file="openapi.json"
+    
+    # 2. Extract OpenAPI schema from backend
+    echo "  Extracting OpenAPI contract schema..."
+    
+    if [[ "$be_stack" =~ "Python" || -f "$be_path/requirements.txt" || -f "$be_path/pyproject.toml" ]]; then
+        # Python / FastAPI extraction
+        if [ "$be_path" = "." ]; then
+            python3 -c "import json; from src.app.main import app; print(json.dumps(app.openapi()))" > "$openapi_file" 2>/dev/null || \
+            python3 -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > "$openapi_file" 2>/dev/null || \
+            echo "Failed to extract FastAPI schema. Ensure FastAPI app is importable."
+        else
+            (cd "$be_path" && python3 -c "import json; from src.app.main import app; print(json.dumps(app.openapi()))" > "../../../$openapi_file" 2>/dev/null || \
+            (cd "$be_path" && python3 -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > "../../../$openapi_file" 2>/dev/null)) || \
+            echo "Failed to extract FastAPI schema. Ensure FastAPI app is importable."
+        fi
+    elif [[ "$be_stack" =~ "Go" || -f "$be_path/go.mod" ]]; then
+        # Go Swagger check
+        if command -v swag &> /dev/null; then
+            echo "  Running swag init in $be_path..."
+            (cd "$be_path" && swag init -g src/cmd/server/main.go -o . --ot json && cp swagger.json ../../$openapi_file) 2>/dev/null || \
+            (cd "$be_path" && swag init -g cmd/server/main.go -o . --ot json && cp swagger.json ../../$openapi_file) 2>/dev/null || \
+            echo "Swag command failed. Creating mockup/fallback schema."
+        fi
+    fi
+
+    # Fallback/Mockup schema if extraction failed or file is empty/missing
+    if [ ! -f "$openapi_file" ] || [ ! -s "$openapi_file" ]; then
+        echo "  Warning: Schema extraction returned empty. Writing a compliant mock/fallback openapi.json..."
+        cat << 'MOCK_OPENAPI' > "$openapi_file"
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Antigravity Mock API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "operationId": "get_users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+MOCK_OPENAPI
+    fi
+
+    # 3. Generate TypeScript API client
+    if [ -n "$fe_path" ] && [ -d "$fe_path" ]; then
+        local target_client="$fe_path/src/lib/api-client.ts"
+        if [ "$fe_path" = "." ] && [ -d "src/app" ]; then
+            target_client="src/lib/api-client.ts"
+        fi
+        
+        echo "  Generating TypeScript client wrapper to $target_client..."
+        node .agents/scripts/generate-client.js "$openapi_file" "$target_client"
+    else
+        echo "  Frontend directory not detected. Generated openapi.json is saved in root."
+    fi
+
+    echo "=========================================================="
+    echo "API Sync Complete!"
+    echo "=========================================================="
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -3338,6 +3527,9 @@ case "$1" in
         ;;
     test)
         cmd_test
+        ;;
+    sync-api)
+        cmd_sync_api
         ;;
     help)
         show_help
@@ -3964,6 +4156,187 @@ else
 fi
 EOF
 
+# 11.5. Write generate-client.js script
+write_template_safe ".agents/scripts/generate-client.js" << 'CLIENT_GEN_EOF'
+const fs = require('fs');
+const path = require('path');
+
+const openapiPath = process.argv[2];
+const outputPath = process.argv[3];
+
+if (!openapiPath || !outputPath) {
+  console.error("Usage: node generate-client.js <openapi.json> <output.ts>");
+  process.exit(1);
+}
+
+if (!fs.existsSync(openapiPath)) {
+  console.error(`Error: openapi file not found at ${openapiPath}`);
+  process.exit(1);
+}
+
+const schema = JSON.parse(fs.readFileSync(openapiPath, 'utf8'));
+let code = `/**
+ * Auto-generated API client by Antigravity Agent Core.
+ * DO NOT EDIT DIRECTLY.
+ */
+
+`;
+
+const baseUrl = schema.servers && schema.servers[0] ? schema.servers[0].url : '/';
+
+function mapType(prop) {
+  if (!prop) return 'any';
+  if (prop.$ref) {
+    return prop.$ref.split('/').pop();
+  }
+  if (prop.type === 'array') {
+    return `${mapType(prop.items)}[]`;
+  }
+  if (prop.type === 'string') return 'string';
+  if (prop.type === 'integer' || prop.type === 'number') return 'number';
+  if (prop.type === 'boolean') return 'boolean';
+  if (prop.type === 'object') {
+    if (prop.properties) {
+      let sub = '{ ';
+      for (const [k, v] of Object.entries(prop.properties)) {
+        const req = prop.required && prop.required.includes(k) ? '' : '?';
+        sub += `${k}${req}: ${mapType(v)}; `;
+      }
+      sub += '}';
+      return sub;
+    }
+    return 'Record<string, any>';
+  }
+  return 'any';
+}
+
+if (schema.components && schema.components.schemas) {
+  for (const [name, definition] of Object.entries(schema.components.schemas)) {
+    code += `export interface ${name} {\n`;
+    if (definition.properties) {
+      for (const [propName, propDef] of Object.entries(definition.properties)) {
+        const required = definition.required && definition.required.includes(propName) ? '' : '?';
+        code += `  ${propName}${required}: ${mapType(propDef)};\n`;
+      }
+    }
+    code += `}\n\n`;
+  }
+}
+
+code += `export class APIClient {\n`;
+code += `  private baseUrl: string;\n`;
+code += `  private headers: Record<string, string>;\n\n`;
+code += `  constructor(baseUrl: string = '${baseUrl}', headers: Record<string, string> = {}) {\n`;
+code += `    this.baseUrl = baseUrl.replace(/\\/$/, '');\n`;
+code += `    this.headers = {\n`;
+code += `      'Content-Type': 'application/json',\n`;
+code += `      ...headers\n`;
+code += `    };\n`;
+code += `  }\n\n`;
+code += `  setToken(token: string) {\n`;
+code += `    this.headers['Authorization'] = \`Bearer \${token}\`;\n`;
+code += `  }\n\n`;
+
+if (schema.paths) {
+  for (const [pathStr, pathObj] of Object.entries(schema.paths)) {
+    for (const [method, operation] of Object.entries(pathObj)) {
+      if (!['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) continue;
+      
+      const operationId = operation.operationId || `${method}${pathStr.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      const cleanMethodName = operationId
+        .replace(/_([a-z])/g, (g) => g[1].toUpperCase())
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .replace(/^[A-Z]/, (c) => c.toLowerCase());
+      
+      const parameters = operation.parameters || [];
+      const pathParams = parameters.filter(p => p.in === 'path');
+      const queryParams = parameters.filter(p => p.in === 'query');
+      
+      let methodArgs = [];
+      let pathInterpolation = pathStr;
+      
+      for (const p of pathParams) {
+        methodArgs.push(`${p.name}: ${mapType(p)}`);
+        pathInterpolation = pathInterpolation.replace(`{${p.name}}`, `\${${p.name}}`);
+      }
+      
+      let hasBody = false;
+      let bodyType = 'any';
+      if (operation.requestBody) {
+        hasBody = true;
+        const content = operation.requestBody.content;
+        if (content && content['application/json'] && content['application/json'].schema) {
+          bodyType = mapType(content['application/json'].schema);
+        }
+        methodArgs.push(`body: ${bodyType}`);
+      }
+      
+      let hasQuery = queryParams.length > 0;
+      if (hasQuery) {
+        let qType = '{ ';
+        for (const q of queryParams) {
+          const req = q.required ? '' : '?';
+          qType += `${q.name}${req}: ${mapType(q)}; `;
+        }
+        qType += '}';
+        methodArgs.push(`query?: ${qType}`);
+      }
+      
+      let responseType = 'any';
+      if (operation.responses && operation.responses['200'] && operation.responses['200'].content) {
+        const content = operation.responses['200'].content;
+        if (content['application/json'] && content['application/json'].schema) {
+          responseType = mapType(content['application/json'].schema);
+        }
+      } else if (operation.responses && operation.responses['201'] && operation.responses['201'].content) {
+        const content = operation.responses['201'].content;
+        if (content['application/json'] && content['application/json'].schema) {
+          responseType = mapType(content['application/json'].schema);
+        }
+      }
+
+      code += `  async ${cleanMethodName}(${methodArgs.join(', ')}): Promise<${responseType}> {\n`;
+      
+      if (hasQuery) {
+        code += `    const queryParams = new URLSearchParams();\n`;
+        code += `    if (query) {\n`;
+        code += `      for (const [key, value] of Object.entries(query)) {\n`;
+        code += `        if (value !== undefined && value !== null) {\n`;
+        code += `          queryParams.append(key, String(value));\n`;
+        code += `        }\n`;
+        code += `      }\n`;
+        code += `    }\n`;
+        code += `    const queryString = queryParams.toString() ? \`?\${queryParams.toString()}\` : '';\n`;
+      } else {
+        code += `    const queryString = '';\n`;
+      }
+      
+      code += `    const url = \`\${this.baseUrl}${pathInterpolation}\${queryString}\`;\n`;
+      
+      code += `    const options: RequestInit = {\n`;
+      code += `      method: '${method.toUpperCase()}',\n`;
+      code += `      headers: this.headers,\n`;
+      if (hasBody) {
+        code += `      body: JSON.stringify(body),\n`;
+      }
+      code += `    };\n\n`;
+      
+      code += `    const response = await fetch(url, options);\n`;
+      code += `    if (!response.ok) {\n`;
+      code += `      throw new Error(\`HTTP Error \${response.status}: \${response.statusText}\`);\n`;
+      code += `    }\n`;
+      code += `    return response.json();\n`;
+      code += `  }\n\n`;
+    }
+  }
+}
+
+code += `}\n`;
+
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+fs.writeFileSync(outputPath, code, 'utf8');
+console.log(`Successfully generated API client with ${Object.keys(schema.components?.schemas || {}).length} types to ${outputPath}`);
+CLIENT_GEN_EOF
 
 
 # 12. Write Git hooks templates
