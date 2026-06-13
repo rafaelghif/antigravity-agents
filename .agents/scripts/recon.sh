@@ -75,6 +75,17 @@ elif [ -f go.mod ]; then
     BUILD_CMD="go build ./..."
     TEST_CMD="go test ./..."
     LINT_CMD="golangci-lint run"
+    if grep -q "gin-gonic/gin" go.mod; then
+        TECH_STACK="Go (Gin)"
+        ARCH_PATTERN="Clean Architecture REST API"
+        if [ -f Makefile ]; then
+            BUILD_CMD="make build"
+            TEST_CMD="make test"
+        else
+            BUILD_CMD="go build -o bin/server src/cmd/server/main.go"
+            TEST_CMD="go test -v ./tests/..."
+        fi
+    fi
 elif [ -f Cargo.toml ]; then
     TECH_STACK="Rust"
     ARCH_PATTERN="Modular Cargo Workspace Architecture"
@@ -215,6 +226,7 @@ $ENV_VARS
   - Technologies/libraries must be documented in \`.agents/project_rules.md\` and their respective workspace configuration files (\`package.json\`, \`go.mod\`, etc.).
   - Architectural decisions must be documented as a new ADR entry in \`.agents/adr.md\`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
+- **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under \`## 3. Relayed Context & Handover Notes\`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
 PAB_EOF
 
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)

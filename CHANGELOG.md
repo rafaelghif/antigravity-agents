@@ -2,6 +2,19 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.4.0] - 2026-06-13
+### Added
+- Added Next.js, Go Gin, and FastAPI boilerplates to the workspace scaffolding wizard (`helper.sh init`).
+- Added automatic workspace migration utility (`helper.sh migrate`) that safely backs up user settings, updates workspace structures, handles hook alignment, and updates active memory schema configuration.
+- Created standalone `MIGRATION.md` detailing automated and manual workspace upgrades.
+- Enhanced `recon.sh` to natively detect Go Gin modules and configure Makefile or standard go commands in `project_rules.md`.
+
+### Changed
+- Updated bootstrapper initialization to run autonomous stack discovery with `--force` internally, writing clean, optimized lint, build, and test runner configurations to `project_rules.md`.
+- Modified bootstrapper doctor step to run non-destructively without aborting on active local development warnings.
+
+---
+
 ## [1.3.2] - 2026-06-13
 ### Added
 - Added **Handover Protocol (Relayed Context)** support to allow seamless turn/account continuation.

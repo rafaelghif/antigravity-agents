@@ -19,6 +19,7 @@ show_help() {
     echo "  lock [module]     Acquire a lock on a module"
     echo "  unlock [module]   Release a lock on a module"
     echo "  archive           Archive completed sprint tasks and reset memory.md checklist"
+    echo "  migrate           Migrate workspace from older agent versions to version 1.4.0"
     echo "  help              Show this help message"
 }
 
@@ -95,7 +96,7 @@ cmd_archive() {
     echo "Archiving tasks to $archive_file..."
     
     # Extract checklist from memory.md
-    sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v '---' > "$archive_file"
+    sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v -- '---' > "$archive_file"
 
     # Relocate workflow and PR review files to a branch-specific subdirectory
     local branch_archive_dir="$ARCHIVE_DIR/sprint_${branch_clean}"
@@ -152,13 +153,46 @@ cmd_init() {
     fi
     
     if [ -z "$tech_stack" ]; then
-        read -p "Enter Language/Framework (e.g. Node/TypeScript, Go, Python) (default: Node/TypeScript): " tech_stack
-        if [ -z "$tech_stack" ]; then tech_stack="Node/TypeScript"; fi
+        echo "Select Technology Stack:"
+        echo "  [1] Next.js (TypeScript, Tailwind, App Router) [Recommended]"
+        echo "  [2] Go Gin (Clean Architecture REST API)"
+        echo "  [3] FastAPI (Python REST API with pytest)"
+        echo "  [4] Node/TypeScript (Generic Node App)"
+        echo "  [5] Go (Generic Main App)"
+        echo "  [6] Python (Generic Script)"
+        read -p "Select choice [1-6] (default: 1): " stack_choice
+        case "$stack_choice" in
+            2) tech_stack="Go Gin" ;;
+            3) tech_stack="FastAPI" ;;
+            4) tech_stack="Node/TypeScript" ;;
+            5) tech_stack="Go" ;;
+            6) tech_stack="Python" ;;
+            1|"") tech_stack="Next.js" ;;
+            *) tech_stack="$stack_choice" ;;
+        esac
+    fi
+
+    # Auto-suggest architecture based on stack
+    local default_arch="MVC"
+    if [ "$tech_stack" = "Next.js" ]; then
+        default_arch="App Router"
+    elif [ "$tech_stack" = "Go Gin" ]; then
+        default_arch="Clean Architecture"
+    elif [ "$tech_stack" = "FastAPI" ]; then
+        default_arch="Modular REST"
     fi
 
     if [ -z "$arch_pattern" ]; then
-        read -p "Enter Architectural Pattern (e.g. Clean, MVC, Hexagonal) (default: MVC): " arch_pattern
-        if [ -z "$arch_pattern" ]; then arch_pattern="MVC"; fi
+        read -p "Enter Architectural Pattern (default: $default_arch): " arch_pattern
+        if [ -z "$arch_pattern" ]; then arch_pattern="$default_arch"; fi
+    fi
+
+    # Auto-suggest env vars based on stack
+    local default_env="PORT"
+    if [ "$tech_stack" = "Go Gin" ] || [ "$tech_stack" = "FastAPI" ]; then
+        default_env="PORT,ENV"
+    elif [ "$tech_stack" = "Next.js" ]; then
+        default_env="PORT"
     fi
 
     if [ -z "$db_orm" ]; then
@@ -167,8 +201,8 @@ cmd_init() {
     fi
 
     if [ -z "$env_vars" ]; then
-        read -p "Enter config variables (comma-separated, e.g. PORT,DATABASE_URL) (default: None): " env_vars
-        if [ -z "$env_vars" ]; then env_vars=""; fi
+        read -p "Enter config variables (comma-separated) (default: $default_env): " env_vars
+        if [ -z "$env_vars" ]; then env_vars="$default_env"; fi
     fi
 
     if [ -z "${7:-}" ]; then
@@ -203,17 +237,473 @@ cmd_init() {
         echo "Git commit-msg hook installed."
     fi
 
-
-
     # Scaffolding folders if requested
     if [ "$scaffold" = "y" ] || [ "$scaffold" = "yes" ]; then
         echo "Scaffolding directory structure..."
-        mkdir -p src tests config
         
-        # Node/TypeScript Template
-        if [[ "$tech_stack" =~ "Node" || "$tech_stack" =~ "TypeScript" || "$tech_stack" =~ "TS" ]]; then
-            if [ ! -f package.json ]; then
-                cat << 'JSON_EOF' > package.json
+        if [ "$tech_stack" = "Next.js" ]; then
+            mkdir -p src/app src/components src/lib tests
+            # Write package.json
+            cat << 'JSON_EOF' > package.json
+{
+  "name": "nextjs-boilerplate",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4"
+  }
+}
+JSON_EOF
+            # Write next.config.js
+            cat << 'JS_EOF' > next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+};
+
+module.exports = nextConfig;
+JS_EOF
+            # Write tailwind.config.js
+            cat << 'JS_EOF' > tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+JS_EOF
+            # Write postcss.config.js
+            cat << 'JS_EOF' > postcss.config.js
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+JS_EOF
+            # Write tsconfig.json
+            cat << 'JSON_EOF' > tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+JSON_EOF
+            # Write jest.config.js
+            cat << 'JS_EOF' > jest.config.js
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testMatch: ['**/tests/**/*.test.ts'],
+};
+JS_EOF
+            # Write src/app/globals.css
+            cat << 'CSS_EOF' > src/app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #020617;
+  color: #f8fafc;
+}
+CSS_EOF
+            # Write src/app/layout.tsx
+            cat << 'TSX_EOF' > src/app/layout.tsx
+import React from 'react';
+import './globals.css';
+
+export const metadata = {
+  title: 'Antigravity Next.js Boilerplate',
+  description: 'Scaffolded Next.js workspace for AI software agents',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+TSX_EOF
+            # Write src/app/page.tsx
+            cat << 'TSX_EOF' > src/app/page.tsx
+import React from 'react';
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
+      <div className="max-w-4xl w-full text-center space-y-8">
+        <header className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse">
+            🚀 Antigravity Workspace Active
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Antigravity Next.js Boilerplate
+          </h1>
+          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+            Your production-ready Next.js application, scaffolded and pre-configured for seamless development with AI coding agents.
+          </p>
+        </header>
+
+        <main className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">⚡ App Router</h2>
+            <p className="text-slate-400 text-sm">
+              Scaffolded with React Server Components, layout sharing, and clean directory structure inside <code className="text-indigo-400">src/app</code>.
+            </p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">🎨 Styling & UI</h2>
+            <p className="text-slate-400 text-sm">
+              Pre-integrated with Tailwind CSS, custom fonts, CSS variables, and modern dark-mode aesthetics ready for immediate extension.
+            </p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">🛡️ AI Agent Guard</h2>
+            <p className="text-slate-400 text-sm">
+              Wrapped inside Antigravity's cognitive alignment gates (automated pre-commit validators, secret scanning, and memory sync).
+            </p>
+          </div>
+        </main>
+
+        <footer className="text-slate-500 text-sm border-t border-slate-900 pt-8 mt-12 flex justify-between items-center">
+          <div> Muhammad Rafael Ghifari &copy; 2026</div>
+          <div className="flex gap-4">
+            <a href="https://github.com/rafaelghif/antigravity-agents" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">GitHub Repository</a>
+            <a href="/api/health" className="hover:text-indigo-400 transition-colors">API Health Check</a>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+TSX_EOF
+            # Write src/app/api/health/route.ts
+            mkdir -p src/app/api/health
+            cat << 'TS_EOF' > src/app/api/health/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  return NextResponse.json({
+    status: 'HEALTHY',
+    timestamp: new Date().toISOString(),
+    system: 'Antigravity Workspace Core',
+  });
+}
+TS_EOF
+            # Write tests/health.test.ts
+            cat << 'TS_EOF' > tests/health.test.ts
+describe('Next.js Boilerplate Test Suite', () => {
+  it('should pass initial unit test check', () => {
+    expect(true).toBe(true);
+  });
+});
+TS_EOF
+            echo "Scaffolded Next.js application template successfully!"
+
+        elif [ "$tech_stack" = "Go Gin" ]; then
+            mkdir -p src/cmd/server src/internal/controller src/internal/config tests
+            # Write go.mod
+            cat << 'GO_EOF' > go.mod
+module project
+
+go 1.20
+
+require (
+	github.com/gin-gonic/gin v1.9.1
+)
+GO_EOF
+            # Write src/cmd/server/main.go
+            cat << 'GO_EOF' > src/cmd/server/main.go
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"project/src/internal/config"
+	"project/src/internal/controller"
+
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	cfg := config.LoadConfig()
+
+	if cfg.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	r := gin.Default()
+	r.Use(gin.Recovery())
+
+	healthCtrl := controller.NewHealthController()
+
+	api := r.Group("/api")
+	{
+		api.GET("/health", healthCtrl.Check)
+	}
+
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Welcome to Antigravity Go Gin Boilerplate!",
+			"status":  "Active",
+		})
+	})
+
+	addr := fmt.Sprintf(":%s", cfg.Port)
+	log.Printf("Server starting on port %s...", cfg.Port)
+	if err := r.Run(addr); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
+}
+GO_EOF
+            # Write src/internal/config/config.go
+            cat << 'GO_EOF' > src/internal/config/config.go
+package config
+
+import "os"
+
+type Config struct {
+	Port string
+	Env  string
+}
+
+func LoadConfig() *Config {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+	return &Config{
+		Port: port,
+		Env:  env,
+	}
+}
+GO_EOF
+            # Write src/internal/controller/health_controller.go
+            cat << 'GO_EOF' > src/internal/controller/health_controller.go
+package controller
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
+
+type HealthController struct{}
+
+func NewHealthController() *HealthController {
+	return &HealthController{}
+}
+
+func (h *HealthController) Check(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status":    "HEALTHY",
+		"timestamp": time.Now().Format(time.RFC3339),
+		"system":    "Antigravity Go Gin Core",
+	})
+}
+GO_EOF
+            # Write tests/health_test.go
+            cat << 'GO_EOF' > tests/health_test.go
+package tests
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"project/src/internal/controller"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+)
+
+func TestHealthCheck(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	healthCtrl := controller.NewHealthController()
+	r.GET("/api/health", healthCtrl.Check)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/health", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code 200, got %d", w.Code)
+	}
+}
+GO_EOF
+            # Write Makefile
+            cat << 'MAKE_EOF' > Makefile
+.PHONY: run test build clean
+
+run:
+	go run src/cmd/server/main.go
+
+test:
+	go test -v ./tests/...
+
+build:
+	go build -o bin/server src/cmd/server/main.go
+
+clean:
+	rm -rf bin/
+MAKE_EOF
+            echo "Scaffolded Go Gin application template successfully!"
+
+        elif [ "$tech_stack" = "FastAPI" ]; then
+            mkdir -p src/app/core src/app/api/endpoints tests
+            # Write requirements.txt
+            cat << 'TXT_EOF' > requirements.txt
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.4
+pytest>=8.1.1
+httpx>=0.27.0
+TXT_EOF
+            # Write pyproject.toml
+            cat << 'TOML_EOF' > pyproject.toml
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+TOML_EOF
+            # Write src/app/main.py
+            cat << 'PY_EOF' > src/app/main.py
+import uvicorn
+from fastapi import FastAPI
+from src.app.core.config import settings
+from src.app.api.endpoints import health
+
+app = FastAPI(
+    title="Antigravity FastAPI Boilerplate",
+    description="Production-ready FastAPI setup for AI software agents",
+    version="1.0.0",
+)
+
+app.include_router(health.router, prefix="/api")
+
+@app.get("/")
+def read_root():
+    return {
+        "message": "Welcome to Antigravity FastAPI Boilerplate!",
+        "status": "Active",
+    }
+
+if __name__ == "__main__":
+    uvicorn.run("src.app.main:app", host="0.0.0.0", port=settings.PORT, reload=True)
+PY_EOF
+            # Write src/app/core/config.py
+            cat << 'PY_EOF' > src/app/core/config.py
+import os
+
+class Settings:
+    PORT: int = int(os.getenv("PORT", 8000))
+    ENV: str = os.getenv("ENV", "development")
+
+settings = Settings()
+PY_EOF
+            # Write src/app/api/endpoints/health.py
+            cat << 'PY_EOF' > src/app/api/endpoints/health.py
+from datetime import datetime
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/health", tags=["system"])
+def check_health():
+    return {
+        "status": "HEALTHY",
+        "timestamp": datetime.utcnow().isoformat(),
+        "system": "Antigravity FastAPI Core",
+    }
+PY_EOF
+            # Write tests/test_health.py
+            cat << 'PY_EOF' > tests/test_health.py
+from fastapi.testclient import TestClient
+from src.app.main import app
+
+client = TestClient(app)
+
+def test_health_check():
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "HEALTHY"
+    assert "timestamp" in data
+    assert data["system"] == "Antigravity FastAPI Core"
+PY_EOF
+            echo "Scaffolded FastAPI application template successfully!"
+
+        else
+            # Generic/Basic Scaffolding Fallback
+            mkdir -p src tests config
+            if [[ "$tech_stack" =~ "Node" || "$tech_stack" =~ "TypeScript" || "$tech_stack" =~ "TS" ]]; then
+                if [ ! -f package.json ]; then
+                    cat << 'JSON_EOF' > package.json
 {
   "name": "project",
   "version": "1.0.0",
@@ -229,22 +719,21 @@ cmd_init() {
   "devDependencies": {}
 }
 JSON_EOF
-                echo "Created package.json scaffolding"
+                    echo "Created package.json scaffolding"
+                fi
             fi
-        fi
-        
-        # Go Template
-        if [[ "$tech_stack" =~ "Go" || "$tech_stack" =~ "Golang" ]]; then
-            if [ ! -f go.mod ]; then
-                cat << 'GO_EOF' > go.mod
+            
+            if [[ "$tech_stack" =~ "Go" || "$tech_stack" =~ "Golang" ]]; then
+                if [ ! -f go.mod ]; then
+                    cat << 'GO_EOF' > go.mod
 module project
 
 go 1.20
 GO_EOF
-                echo "Created go.mod scaffolding"
-            fi
-            if [ ! -f src/main.go ]; then
-                cat << 'GO_EOF' > src/main.go
+                    echo "Created go.mod scaffolding"
+                fi
+                if [ ! -f src/main.go ]; then
+                    cat << 'GO_EOF' > src/main.go
 package main
 
 import "fmt"
@@ -253,24 +742,25 @@ func main() {
     fmt.Println("Hello, Antigravity!")
 }
 GO_EOF
-                echo "Created src/main.go template"
+                    echo "Created src/main.go template"
+                fi
             fi
-        fi
 
-        # Python Template
-        if [[ "$tech_stack" =~ "Python" || "$tech_stack" =~ "Py" ]]; then
-            if [ ! -f src/main.py ]; then
-                cat << 'PY_EOF' > src/main.py
+            if [[ "$tech_stack" =~ "Python" || "$tech_stack" =~ "Py" ]]; then
+                if [ ! -f src/main.py ]; then
+                    cat << 'PY_EOF' > src/main.py
 def main():
     print("Hello, Antigravity!")
 
 if __name__ == "__main__":
     main()
 PY_EOF
-                echo "Created src/main.py template"
+                    echo "Created src/main.py template"
+                fi
             fi
         fi
     fi
+
 
     # Create .env and .env.example if env_vars exist
     if [ -n "$env_vars" ]; then
@@ -289,7 +779,7 @@ PY_EOF
     # Run auto-recon to generate the blueprints
     echo "Running autonomous reconnaissance to populate blueprint files..."
     if [ -f .agents/scripts/recon.sh ]; then
-        .agents/scripts/recon.sh
+        .agents/scripts/recon.sh -f
     fi
 
     echo "=========================================================="
@@ -549,6 +1039,113 @@ cmd_commit() {
     fi
 }
 
+cmd_migrate() {
+    echo "=========================================================="
+    echo "  Antigravity Agent Core - Workspace Migration (V1.4.0)"
+    echo "=========================================================="
+
+    local backup_suffix=".backup"
+
+    # 1. Back up user-controlled files if they exist
+    if [ -f "$MEMORY_FILE" ]; then
+        echo "Warning: Existing memory file found. Backing up to ${MEMORY_FILE}${backup_suffix}"
+        cp "$MEMORY_FILE" "${MEMORY_FILE}${backup_suffix}"
+    fi
+
+    if [ -f ".agents/project_rules.md" ]; then
+        echo "Warning: Existing project rules blueprint found. Backing up to .agents/project_rules.md${backup_suffix}"
+        cp ".agents/project_rules.md" ".agents/project_rules.md${backup_suffix}"
+    fi
+
+    if [ -f ".agents/schema.md" ]; then
+        echo "Warning: Existing schema index found. Backing up to .agents/schema.md${backup_suffix}"
+        cp ".agents/schema.md" ".agents/schema.md${backup_suffix}"
+    fi
+
+    # 2. Ensure directories exist
+    echo "Re-creating directory structure..."
+    mkdir -p .agents/skills/codebase-recon
+    mkdir -p .agents/skills/git-ops
+    mkdir -p .agents/skills/test-driven-patch
+    mkdir -p .agents/skills/infra-provisioner
+    mkdir -p .agents/skills/security-ci-audit
+    mkdir -p .agents/skills/code-review
+    mkdir -p .agents/skills/impact-analysis
+    mkdir -p .agents/workflows
+    mkdir -p .agents/archive
+    mkdir -p .agents/locks
+    mkdir -p .agents/schemas
+    mkdir -p .agents/scripts
+    mkdir -p .agents/hooks
+
+    # 3. Update Git Hooks
+    echo "Updating local Git hooks..."
+    if [ -f .agents/hooks/pre-commit ]; then
+        cp .agents/hooks/pre-commit .git/hooks/pre-commit
+        chmod +x .git/hooks/pre-commit
+        echo "  - Installed pre-commit hook"
+    fi
+    if [ -f .agents/hooks/post-commit ]; then
+        cp .agents/hooks/post-commit .git/hooks/post-commit
+        chmod +x .git/hooks/post-commit
+        echo "  - Installed post-commit hook"
+    fi
+    if [ -f .agents/hooks/commit-msg ]; then
+        cp .agents/hooks/commit-msg .git/hooks/commit-msg
+        chmod +x .git/hooks/commit-msg
+        echo "  - Installed commit-msg hook"
+    fi
+
+    # 4. Update memory.md schema version
+    if [ -f "$MEMORY_FILE" ]; then
+        echo "Updating memory ledger schema version to 5.0.0..."
+        if grep -Fq "Memory Schema Version" "$MEMORY_FILE"; then
+            local temp_mem
+            temp_mem=$(mktemp)
+            sed -E "s|Memory Schema Version\*\*: [0-9]+\.[0-9]+\.[0-9]+|Memory Schema Version**: 5.0.0|" "$MEMORY_FILE" > "$temp_mem"
+            mv "$temp_mem" "$MEMORY_FILE"
+        else
+            # Prepend schema version header if not found
+            local temp_mem
+            temp_mem=$(mktemp)
+            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/project_rules.md](file://./project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
+            tail -n +2 "$MEMORY_FILE" >> "$temp_mem"
+            mv "$temp_mem" "$MEMORY_FILE"
+        fi
+    fi
+
+    # 5. Fix .gitignore configuration
+    if [ -f ".gitignore" ]; then
+        echo "Validating .gitignore compliance..."
+        local temp_git
+        temp_git=$(mktemp)
+        # remove any lines that ignore .agents or AGENTS.md globally
+        grep -v -E "^\.agents/?$" .gitignore | grep -v "^AGENTS.md$" > "$temp_git" || true
+        # ensure Locks directory is ignored
+        if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
+            echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
+        fi
+        mv "$temp_git" ".gitignore"
+        echo "  - .gitignore updated."
+    else
+        echo "Creating default compliant .gitignore..."
+        cat << 'GIT_EOF' > .gitignore
+# Ignore agent transient locks
+.agents/locks/
+GIT_EOF
+    fi
+
+    # 6. Re-run codebase stack reconstruction (forces regeneration of blueprints)
+    echo "Running autonomous stack reconstruction..."
+    if [ -f .agents/scripts/recon.sh ]; then
+        .agents/scripts/recon.sh -f
+    fi
+
+    echo "=========================================================="
+    echo "Migration Complete! Workspace successfully upgraded."
+    echo "=========================================================="
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -582,6 +1179,9 @@ case "$1" in
         ;;
     archive)
         cmd_archive
+        ;;
+    migrate)
+        cmd_migrate
         ;;
     help)
         show_help

@@ -289,31 +289,26 @@ Antigravity Workspace enforces these key rules on AI agents:
 
 ## 7. Migration Guide (Upgrading from Older Versions)
 
-To upgrade your existing Antigravity Agent Workspace to the latest version, run the bootstrapper with the `--update` (or `-u`) flag. This will upgrade the system scripts, skills, and Git hooks while preserving all of your project configurations (like `project_rules.md`, `schema.md`, `memory.md`, and custom schemas).
+For upgrading existing workspaces configured with older versions of the Antigravity Agent to the new version **1.4.0**, a dedicated migration command is available.
 
-### 💻 Upgrading via CLI
+### ⚡ Automatic Upgrade (Recommended)
 
-Run the appropriate command in your project root:
-
-#### **Linux & macOS (Bash/Zsh)**
-```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash -s -- --update
-```
-
-#### **Windows (PowerShell)**
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1')); powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Update
-```
-
-### 🔍 Verification After Upgrade
-Once the upgrade is completed, verify the integrity of the workspace:
-1. Run `./.agents/scripts/helper.sh doctor` to check hooks and permissions.
-2. Run `./.agents/scripts/helper.sh validate` to verify workspace compliance.
-3. Commit the updated files to Git:
+1. First, pull the latest system files and script templates:
+   - **Linux/macOS (Bash/Zsh)**:
+     ```bash
+     curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash -s -- --update
+     ```
+   - **Windows (PowerShell)**:
+     ```powershell
+     Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1')); powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1 -Update
+     ```
+2. Run the automated migration command:
    ```bash
-   git add AGENTS.md .agents/
-   git commit -m "chore(core): upgrade antigravity agent core to latest version"
+   ./.agents/scripts/helper.sh migrate
    ```
+   *This automatically backs up your existing configuration files (`memory.md`, `project_rules.md`, `schema.md`) to `.backup` extensions, updates system hooks and subdirectories, upgrades your active memory schema, and runs auto-recon to align rules.*
+
+For full details, precautions, and manual step-by-step migration instructions, refer to the standalone [MIGRATION.md](file://./MIGRATION.md) guide in the project root.
 
 ---
 
