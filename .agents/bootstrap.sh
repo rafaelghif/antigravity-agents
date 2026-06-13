@@ -136,6 +136,7 @@ mkdir -p .agents/schemas
 mkdir -p .agents/scripts
 mkdir -p .agents/hooks
 mkdir -p .agents/rules
+mkdir -p .github/workflows
 
 # Check for legacy rules folder and migrate
 if [ -d ".agent/rules" ]; then
@@ -432,6 +433,37 @@ This document registers the historical technical design decisions, rationales, a
 - **Decision**: [Describe the decision made]
 - **Consequences**: [Describe the result and impact of this decision]
 EOF
+
+# 7.1 Write .github/workflows/antigravity.yml template
+write_template_safe ".github/workflows/antigravity.yml" << 'EOF'
+name: Antigravity Workspace Validator
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run Antigravity Workspace Validation
+        run: |
+          chmod +x .agents/scripts/validate.sh
+          ./.agents/scripts/validate.sh
+EOF
+
 
 # 8. Write skills
 # codebase-recon SKILL.md
@@ -4176,6 +4208,39 @@ case "$1" in
         exit 1
         ;;
 esac
+EOF
+
+# Write helper.ps1 wrapper script
+write_template_safe ".agents/scripts/helper.ps1" << 'EOF'
+# Antigravity Agent Workspace Helper Wrapper for Windows PowerShell
+# Forwards arguments to helper.sh running inside Git Bash
+
+$gitBash = "C:\Program Files\Git\bin\bash.exe"
+if (-not (Test-Path $gitBash)) {
+    $gitBash = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
+}
+
+if (-not $gitBash) {
+    Write-Error "Git Bash is required to run Antigravity helper scripts on Windows. Please install Git for Windows (https://git-scm.com/)."
+    exit 1
+}
+
+# Resolve target helper.sh script path relative to this script
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$helperSh = Join-Path $scriptPath "helper.sh"
+
+# Format target path for Bash environment (ensure Unix style slashes)
+$helperShUnix = $helperSh.Replace('\', '/')
+
+# Forward all arguments exactly as passed
+$forwardArgs = @()
+if ($args) {
+    $forwardArgs += $args
+}
+$forwardArgsStr = [string]::Join(" ", $forwardArgs)
+
+# Execute helper.sh inside Git Bash
+& $gitBash -c "$helperShUnix $forwardArgsStr"
 EOF
 
 # 10. Write recon.sh script
