@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: a157c78
+- **Last Commit Reference**: c0a6910
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,17 +18,17 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Modular Rules Splitting
-- **Current Task Target**: Split project rules into modular rules under rules/
+- **Primary Epic**: Revert Rules to Generic State
+- **Current Task Target**: Restore project rules to generic project-agnostic configuration
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Split project rules into modular rules under rules/ (Aligned via /grill-me)
+- [x] Revert rules to generic state (Aligned via /grill-me)
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Split monolithic `project_rules.md` into modular rule files (`mvc-conventions.md`, `db-rules.md`, `security-rules.md`) and verified compliance with list-rules.
+- **Last Action Completed**: Reverted all workspace rules to the original generic state, restoring `project_rules.md` to "Unknown" stack, removing custom modular files, and verifying status.
 - **Next Planned Action**: None.
 - **Blockers / Runtime Notes**: Workspace validated. Lock will be released automatically upon commit.
 
