@@ -34,40 +34,40 @@ This project is **100% Free, Open Source, and Openly Licensed** under the MIT Li
 
 ## 🚀 30-Second Quick Start
 
-Get any repository agent-ready in a single step:
+Get any local repository agent-ready in a single command. The bootstrapper automatically configures the environment blueprints, installs Git hooks, and sets up active memory and schemas.
 
-### Step 1: Bootstrap the Repository
-Navigate to your project root and execute the bootstrapper:
+### 💻 1. Installation
 
-**For Linux/macOS:**
+Open your terminal in your project root folder and execute the appropriate command for your operating system:
+
+#### **Linux & macOS (Bash/Zsh)**
+Run this one-liner to download and install:
 ```bash
-# Option A: From a locally cloned antigravity-agents repo
-/path/to/antigravity-agents/bootstrap.sh
-
-# Option B: Download and run via curl
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
 ```
 
-**For Windows (PowerShell):**
+#### **Windows (PowerShell)**
+Run this one-liner to download and install (*requires Git Bash installed*):
 ```powershell
-# Option A: From a locally cloned antigravity-agents repo
-powershell -ExecutionPolicy Bypass -File \path\to\antigravity-agents\bootstrap.ps1
-
-# Option B: Download and run via powershell one-liner
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1'))
 ```
 
-### Step 2: Scaffold Your Stack (Optional)
-If it's an empty project, run the interactive initialization wizard:
+---
+
+### 🛠️ 2. Scaffold Your Stack (Optional)
+If you are starting a brand new project, run the scaffolding wizard to initialize folders and configure dependencies (supports Node, TypeScript, Python, Go, PHP, Ruby):
 ```bash
 ./.agents/scripts/helper.sh init
 ```
 
-### Step 3: Verify Health & Status
-Ensure the workspace is healthy and ready:
+---
+
+### 🩺 3. Verify Workspace Health
+Run the doctor tool to inspect active hooks, locks, script permissions, and security validation checks:
 ```bash
 ./.agents/scripts/helper.sh doctor
 ```
+
 
 ---
 
@@ -284,7 +284,8 @@ Antigravity Workspace enforces these key rules on AI agents:
 
 ## 📅 Version History & Changelog
 
-All protocol modifications, script updates, and rule changes are documented in the [Agent Core Changelog](file://./.agents/CHANGELOG.md). Refer to it for tracing changes to the workspace setup.
+All protocol modifications, script updates, and rule changes are documented in the [Agent Core Changelog](file://./CHANGELOG.md). Refer to it for tracing changes to the workspace setup.
+
 
 
 ## 👤 Created By & Contact

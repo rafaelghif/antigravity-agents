@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 49f4d7a
+- **Last Commit Reference**: 9d5e1a3
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -31,7 +31,9 @@
 - [x] Implement Git pre-commit and post-commit hook automations
 - [x] Update README.md with the simplified Git commit workflow and hook automations
 - [x] Implement Check 7 Gitignore Compliance validation check in validate.sh and bootstrap.sh
+- [x] Relocate CHANGELOG.md to project root and update README link
 - [x] Run validate.sh and commit changes
+
 
 
 
