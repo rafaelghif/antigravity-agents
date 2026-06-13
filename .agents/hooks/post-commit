@@ -3,3 +3,15 @@
 if [ -f .agents/scripts/helper.sh ]; then
     .agents/scripts/helper.sh sync-git
 fi
+
+# Auto-unlock all locks after a successful commit
+if [ -d .agents/locks ] && [ "$(ls -A .agents/locks)" ]; then
+    echo "Releasing active module locks..."
+    for lock in .agents/locks/*.lock; do
+        if [ -f "$lock" ]; then
+            rm -f "$lock"
+        fi
+    done
+    echo "  [PASS] All active locks released."
+fi
+

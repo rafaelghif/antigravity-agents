@@ -185,13 +185,19 @@ cmd_init() {
         git branch -m main
     fi
 
-    # Install Git post-commit Hook template
+    # Install Git hooks (pre-commit & post-commit)
+    mkdir -p .git/hooks
+    if [ -f .agents/hooks/pre-commit ]; then
+        cp .agents/hooks/pre-commit .git/hooks/pre-commit
+        chmod +x .git/hooks/pre-commit
+        echo "Git pre-commit hook installed."
+    fi
     if [ -f .agents/hooks/post-commit ]; then
-        mkdir -p .git/hooks
         cp .agents/hooks/post-commit .git/hooks/post-commit
         chmod +x .git/hooks/post-commit
         echo "Git post-commit hook installed."
     fi
+
 
     # Scaffolding folders if requested
     if [ "$scaffold" = "y" ] || [ "$scaffold" = "yes" ]; then
@@ -318,7 +324,13 @@ cmd_doctor() {
         errors=$((errors + 1))
     fi
     
-    # Check post-commit hook
+    # Check Git hooks
+    if [ -f .git/hooks/pre-commit ] && [ -x .git/hooks/pre-commit ]; then
+        echo "  [PASS] pre-commit Git hook is installed and executable."
+    else
+        echo "  [WARNING] Git pre-commit hook is missing or not executable."
+        echo "            To install: cp .agents/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+    fi
     if [ -f .git/hooks/post-commit ] && [ -x .git/hooks/post-commit ]; then
         echo "  [PASS] post-commit Git hook is installed and executable."
     else

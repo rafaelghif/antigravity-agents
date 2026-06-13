@@ -80,11 +80,11 @@ Every code mutation must execute in an atomic, sequential loop:
 1. **Sync**: Verify that the workspace is on the correct branch and that there are no uncommitted changes (other than locks or memory files).
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
-4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Workspace Validation**: Run `./.agents/scripts/helper.sh validate` to verify memory limits, lack of hardcoded secrets, and environment boundary conformance.
-6. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
-7. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
-8. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
+4. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
+5. **Commit**: Stage files and execute a standard Git commit using conventional format: `git commit -m "type(scope): description"`.
+   - **Automated Validation**: The Git `pre-commit` hook automatically runs `./.agents/scripts/validate.sh` and the project linter/tests. The commit will automatically abort on failure.
+   - **Automated Sync & Unlock**: Upon a successful commit, the Git `post-commit` hook automatically updates `memory.md` with the new branch/commit hash and releases all active locks.
+
 
 
 ---
