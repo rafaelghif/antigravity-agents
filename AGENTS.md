@@ -10,16 +10,23 @@ This document dictates the absolute boundaries, operational procedures, memory c
   2. The Project-Specific Rules, if available (e.g. [.agents/project_rules.md](file://./.agents/project_rules.md)).
   3. The Schema Reference database, if available (e.g. [.agents/schema.md](file://./.agents/schema.md)).
   4. The Active Memory Ledger ([.agents/memory.md](file://./.agents/memory.md)).
-- **Autonomy Principle & Strict Alignment**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question.
-- **Zero-Halucination Rule**: Under no circumstances should the agent make assumptions about dependencies, compiler configurations, path paths, or API structures. If they are not detailed in the files read during bootstrapping, verify them immediately using read tools before taking actions.
-
----
+- **Strict Adherence to .agents Workspace Blueprints**: The agent must strictly follow all files, guidelines, and directories under the `.agents/` folder. This includes:
+  * **Memory & Sprints**: Aligning checklists and state flags in [memory.md](file://./.agents/memory.md).
+  * **Architectural Blueprint**: Strictly following stack directories, lint/build/test scripts, and layers defined in [project_rules.md](file://./.agents/project_rules.md).
+  * **Domain Schemas Index**: Reading database models and API specs mapped in [schema.md](file://./.agents/schema.md) and domain schemas under `schemas/`.
+  * **Architectural Decisions**: Logging and respecting design decisions recorded in [adr.md](file://./.agents/adr.md).
+  * **Task Workflows**: Reading/writing granular implementation plans under `workflows/task_*.md`.
+  * **Decoupled Skills**: Executing specialized commands and routines according to instructions under `skills/`.
+  * **Hooks & Verification**: Relying on Git pre-commit/post-commit/commit-msg hooks inside `hooks/` and the validate script `validate.sh`.
+- **Autonomy Principle & Strict Alignment**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question using the `ask_question` tool.
+- **Strict Zero-Hallucination Rule**: Under no circumstances should the agent make assumptions or guess about dependencies, compiler configurations, path routes, API structures, or command options. If they are not detailed in the files read during bootstrapping, verify them programmatically using search and read tools before taking any actions.
 
 ## 2. Zero-Hallucination & Import Verification Gates
-- **Fact-Checking over Guessing**: Never assume a file exists, a package is installed, or a function signature is correct.
-- **Symbol & Command Verification Gate**: Before writing an import statement, invoking a function, or executing a terminal command/script, the agent MUST run `view_file` or `grep_search` to verify:
+- **Fact-Checking over Guessing**: Never assume a file exists, a package is installed, or a function signature is correct. If a detail is missing, search and verify it.
+- **Symbol & Command Verification Gate**: Before writing an import statement, invoking a method/function, or proposing a terminal command/script to execute, the agent MUST run `view_file` or `grep_search` to verify:
   1. The file path and module export spelling are correct.
   2. The package, linter, or script command exists in the workspace configuration files (e.g., `package.json`, `go.mod`, or `.agents/project_rules.md`). Do not guess or execute unverified third-party commands.
+- **Interactive Clarification Gate**: If the requirements, symbols, or parameters of a task remain ambiguous even after searching the codebase, the agent MUST present a clear, multiple-choice question using the `ask_question` tool to resolve the ambiguity with the user rather than guessing or hallucinating the path forward.
 - **Batch Verification and Line Capping**: To prevent token bloat during verification, the agent MUST use precise `StartLine` and `EndLine` parameters in `view_file` to read only the imports/definitions needed, or run batch `grep_search` operations instead of parsing entire source files.
 - **verbatim Reference**: When documenting compile, lint, or test failures, paste the exact stack traces and logs verbatim instead of describing them in general terms.
 
