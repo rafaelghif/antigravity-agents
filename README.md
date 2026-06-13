@@ -22,13 +22,17 @@ This project is **100% Free, Open Source, and Openly Licensed** under the MIT Li
 
 ---
 
-## ⚠️ Disclaimer & No Warranty
+## ⚠️ Disclaimer & No Warranty (Read Before Use)
 
-> [!WARNING]
-> **Use at your own risk.** This workspace protocol and template framework is provided "as is", without warranty of any kind, express or implied.
-> - **API/Token Costs**: AI agent operations can consume large amounts of tokens depending on the size of the codebase. The user is solely responsible for monitoring their own API keys, usage, and billing costs.
-> - **No Liability**: The author (Muhammad Rafael Ghifari) shall not be held liable for any direct or indirect damages, loss of database records, broken branches, system crashes, or security boundary issues resulting from the use of this project.
-> - **Responsible Use**: Please review agent suggestions and output commits carefully before pushing them to shared production repositories. Use wisely and responsibly!
+> [!CAUTION]
+> **ALL USAGE IS ENTIRELY AT YOUR OWN RISK. THIS FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY KIND.**
+>
+> By using Antigravity Agent Core, you acknowledge and agree to the following:
+>
+> - **Financial Responsibility (API & Token Costs)**: AI agent operations are highly recursive and can consume a significant volume of LLM tokens (input, output, and caching). You are **solely responsible** for all charges billed by your AI providers (OpenAI, Anthropic, Google, etc.). Keep track of your spending limits and usage alerts.
+> - **Operational & Code Risk**: Autonomous agents can modify files, execute terminal scripts, alter directories, and rewrite Git branches. Always execute agent tasks in a safe development workspace with version control active.
+> - **No Liability**: In no event shall the author (Muhammad Rafael Ghifari) or contributors be liable for any direct, indirect, incidental, or consequential damages (including, but not limited to, lost data, system crashes, file corruption, or database downtime) arising out of the use or inability to use this software.
+> - **Responsible Review**: You are responsible for inspecting all agent-generated code, commit logs, and validation results before merging them into production environments.
 
 ---
 
