@@ -5,22 +5,24 @@ This document dictates the absolute boundaries, operational procedures, memory c
 ---
 
 ## 1. Bootstrapping & Cognitive Alignment
-- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
+- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. The agent MUST NOT perform any file edits, command execution, or code modifications prior to reading these files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
   1. The Global Agent Protocol (this file: [AGENTS.md](file://./AGENTS.md)).
   2. The Project-Specific Rules, if available (e.g. [.agents/project_rules.md](file://./.agents/project_rules.md)).
   3. The Schema Reference database, if available (e.g. [.agents/schema.md](file://./.agents/schema.md)).
   4. The Active Memory Ledger ([.agents/memory.md](file://./.agents/memory.md)).
-- **Autonomy Principle**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question.
+- **Autonomy Principle & Strict Alignment**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question.
+- **Zero-Halucination Rule**: Under no circumstances should the agent make assumptions about dependencies, compiler configurations, path paths, or API structures. If they are not detailed in the files read during bootstrapping, verify them immediately using read tools before taking actions.
 
 ---
 
 ## 2. Zero-Hallucination & Import Verification Gates
 - **Fact-Checking over Guessing**: Never assume a file exists, a package is installed, or a function signature is correct.
-- **Symbol Verification Gate**: Before writing an import statement or invoking a function, the agent MUST run `view_file` or `grep_search` to verify:
-  1. The path exists.
-  2. The exact spelling of the exported symbol/module.
+- **Symbol & Command Verification Gate**: Before writing an import statement, invoking a function, or executing a terminal command/script, the agent MUST run `view_file` or `grep_search` to verify:
+  1. The file path and module export spelling are correct.
+  2. The package, linter, or script command exists in the workspace configuration files (e.g., `package.json`, `go.mod`, or `.agents/project_rules.md`). Do not guess or execute unverified third-party commands.
 - **Batch Verification and Line Capping**: To prevent token bloat during verification, the agent MUST use precise `StartLine` and `EndLine` parameters in `view_file` to read only the imports/definitions needed, or run batch `grep_search` operations instead of parsing entire source files.
 - **verbatim Reference**: When documenting compile, lint, or test failures, paste the exact stack traces and logs verbatim instead of describing them in general terms.
+
 
 ---
 
@@ -40,6 +42,10 @@ To operate seamlessly in collaborative environments with other developers and au
 - **Federated Git-Backed Memory & Git-Tracked Workspace**: Memory and configuration reside in the repository. All files under `.agents/` (including `memory.md`, `project_rules.md`, `adr.md`, `schema.md`, `schemas/`, and `workflows/`) and `AGENTS.md` MUST be committed to Git to synchronize context across different developer accounts and agents. The transient locks under `.agents/locks/` are the only excluded files.
 - **Upstream Synchronization Gate**: Before starting any task or code modifications, the agent MUST run `.agents/scripts/helper.sh validate` to verify that the local repository is not behind its upstream branch (e.g. `origin/<branch>`). If the local repository is behind, the agent MUST halt execution and prompt the user to run `git pull` to ensure synchronization.
 - **Design & /grill-me Alignment Documentation**: Whenever a design interview, `/grill-me` session, or architectural alignment is completed, the agent MUST immediately save the resulting execution plan to a new task workflow file at `.agents/workflows/task_<task_name>.md`. This file acts as the single source of truth for the task's execution plan, architectural decisions, and schema changes, and must be committed to Git.
+- **Real-Time Schema & Library Synchronization**: Any discussion regarding changes to the database structure, API contracts, dependencies, libraries, or architectural patterns must be documented *immediately* in the corresponding workspace files *before* writing any code:
+  - Database schema changes must immediately update the domain-driven schemas under `.agents/schemas/` and the master index `.agents/schema.md`.
+  - Technology or library dependencies (e.g. npm package additions, go modules) must immediately update `.agents/project_rules.md` and the workspace package configuration files (e.g. `package.json`, `go.mod`).
+  - Architectural changes must immediately be recorded as a new Architectural Decision Record (ADR) in `.agents/adr.md`.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
   - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
   - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
@@ -54,14 +60,16 @@ To operate seamlessly in collaborative environments with other developers and au
   3. **Schema Changes**: Visual mappings of any table/field modifications.
   4. **Code References**: Clickable file links pointing to key files for review.
 
-
 ---
 
 ## 5. Stateful Task Checklist
-The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must strictly follow this lifecycle:
+The active checklist inside [.agents/memory.md](file://./.agents/memory.md) and any dynamic workflow files must strictly follow this lifecycle:
 - `[ ]` **Unstarted**: Proposed task.
-- `[/]` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked `[/]` at a time. The agent must focus 100% on this task.
-- `[x]` **Completed**: Done, verified, and committed.
+- `[/]` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked `[/]` at a time across the entire workspace (including main `memory.md` and any active dynamic workflow file). The agent must focus 100% on this task. Any code modifications must strictly match the current active task scope.
+- `[x]` **Completed**: Done, verified, and committed. A task must **only** be marked `[x]` after:
+  1. Code compile/tests pass.
+  2. Workspace validation checks via `.agents/scripts/helper.sh validate` pass.
+  3. Changes have been staged and committed to Git (meaning the task is committed in a completed state).
 
 ---
 
@@ -72,9 +80,10 @@ Every code mutation must execute in an atomic, sequential loop:
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
 5. **Workspace Validation**: Run `./.agents/scripts/helper.sh validate` to verify memory limits, lack of hardcoded secrets, and environment boundary conformance.
-6. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
-7. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
+6. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
+7. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
 8. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
+
 
 ---
 
