@@ -4,6 +4,31 @@
 
 set -euo pipefail
 
+# Parse arguments
+FORCE_OVERWRITE=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f|--force)
+            FORCE_OVERWRITE=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Helper function to write templates safely (preserves existing files unless -f/--force is specified)
+write_recon_file_safe() {
+    local target_file="$1"
+    if [ -f "$target_file" ] && [ "$FORCE_OVERWRITE" = "false" ]; then
+        echo "  [PRESERVE] $target_file already exists. Preserving current file."
+    else
+        echo "  [WRITE] Writing $target_file..."
+        cat > "$target_file"
+    fi
+}
+
 PROJECT_RULES_FILE=".agents/project_rules.md"
 SCHEMA_INDEX_FILE=".agents/schema.md"
 SCHEMAS_DIR=".agents/schemas"
@@ -148,7 +173,7 @@ if [ -z "$ENV_VARS" ]; then
 fi
 
 # 5. Populate .agents/project_rules.md
-cat << PAB_EOF > "$PROJECT_RULES_FILE"
+write_recon_file_safe "$PROJECT_RULES_FILE" << PAB_EOF
 # Project Architecture Blueprint (PAB)
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
@@ -181,7 +206,7 @@ $ENV_VARS
 - **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
 
 ## 6. Multi-Agent & Teamwork Constraints
-- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: `AGENTS.md`, `.agents/project_rules.md`, `.agents/schema.md`, and `.agents/memory.md`. No file writes or terminal runs are allowed prior to this initialization.
+- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: \`AGENTS.md\`, \`.agents/project_rules.md\`, \`.agents/schema.md\`, and \`.agents/memory.md\`. No file writes or terminal runs are allowed prior to this initialization.
 - **Workspace Git Tracking**: Never ignore \`.agents/\` or \`AGENTS.md\` in \`.gitignore\` (except \`.agents/locks/\`). Commit all memory, schemas, dynamic workflows, and ADR files to Git to ensure proper multi-agent synchronization.
 - **Upstream Sync Gate**: You must run \`./.agents/scripts/helper.sh validate\` before beginning code changes to check if the branch is behind origin. If it is behind, stop and ask the user to pull first.
 - **Discussion and Design Plans**: Document all \`/grill-me\` outcomes and execution plans under \`.agents/workflows/task_<task_name>.md\`. Never log task-specific plans or checklists globally or in the main memory ledger.
@@ -192,12 +217,24 @@ $ENV_VARS
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
 PAB_EOF
 
-
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)
 mkdir -p "$SCHEMAS_DIR"
 
 # Write a basic schema.md index file
-cat << SRD_EOF > "$SCHEMA_INDEX_FILE"
+if [ "$DB_STACK" = "Prisma ORM (schema: prisma/schema.prisma)" ]; then
+    write_recon_file_safe "$SCHEMA_INDEX_FILE" << SRD_EOF
+# Technical Schema & Reference Database (SRD) - Index Map
+
+This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
+
+---
+
+## 1. Domain Schemas Index
+- [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
+- [Database Schema (Prisma)](file://./schemas/database_schema.md) -> Reference: [database_schema.md](file://./schemas/database_schema.md)
+SRD_EOF
+else
+    write_recon_file_safe "$SCHEMA_INDEX_FILE" << SRD_EOF
 # Technical Schema & Reference Database (SRD) - Index Map
 
 This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
@@ -207,11 +244,12 @@ This file serves as the high-level index for the project's technical schemas, da
 ## 1. Domain Schemas Index
 - [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
 SRD_EOF
+fi
 
 # Check for custom schema files
 if [ "$DB_STACK" = "Prisma ORM (schema: prisma/schema.prisma)" ]; then
     # Create prisma schema domain layout
-    cat << PRISMA_EOF > "$SCHEMAS_DIR/database_schema.md"
+    write_recon_file_safe "$SCHEMAS_DIR/database_schema.md" << PRISMA_EOF
 # Schema: Database Models (Prisma)
 
 Automatically discovered Prisma model entities:
@@ -221,10 +259,6 @@ Automatically discovered Prisma model entities:
 ## 1. Relational Database Tables / Models
 $(grep -E "^model " prisma/schema.prisma | cut -d' ' -f2 | sed 's/^/- /' || true)
 PRISMA_EOF
-
-    cat << SRD_EOF >> "$SCHEMA_INDEX_FILE"
-- [Database Schema (Prisma)](file://./schemas/database_schema.md) -> Reference: [database_schema.md](file://./schemas/database_schema.md)
-SRD_EOF
 fi
 
 echo "=========================================================="

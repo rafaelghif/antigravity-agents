@@ -2,6 +2,30 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.3.1] - 2026-06-13
+### Fixed
+- Fixed infinite recursion loop in Git hooks installation by adding the `# Antigravity Agent Git Hook` marker to all hook templates and checking it in `install_git_hook_safe`.
+- Fixed invalid `local` variable declarations in the global shell scope of `bootstrap.sh`.
+
+### Changed
+- Improved linter and test suite command extraction from `project_rules.md` to be format-agnostic, handling backticks, quotes, and raw text formats safely in both `helper.sh` and the `pre-commit` hook.
+- Enhanced `bootstrap.ps1` to natively support PowerShell switch `-Force` (`-f`) and `-Version` (`-v`) parameter sets for clean arg forwarding.
+
+---
+
+## [1.3.0] - 2026-06-13
+### Added
+- Added `-f`/`--force` argument parsing in `bootstrap.sh` and `recon.sh` to control template overwriting.
+- Created `install_git_hook_safe` to safely backup pre-existing custom Git hooks (`.backup` suffix) and chain them automatically, preventing developer data-loss.
+- Added colorized logs (`log_info`, `log_success`, `log_warning`, `log_error`) for bootstrapper user feedback.
+- Added template development repository detection to prevent the root bootstrapper from deleting itself during local development testing.
+- Added argument forwarding support in `bootstrap.ps1` for Windows users.
+
+### Changed
+- Converted all embedded file, script, and hook generations in `bootstrap.sh` to use `write_template_safe` for full idempotency.
+- Refined `recon.sh` database schema generation to avoid string append (`>>`) side-effects.
+- Synchronized `AGENTS.md` and `helper.sh` templates inside `bootstrap.sh` with the latest strict multi-agent coordination rules and tools.
+
 ---
 
 ## [1.2.0] - 2026-06-13

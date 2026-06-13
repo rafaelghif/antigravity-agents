@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Git commit-msg hook: Enforce Conventional Commits specification
 set -e
 
@@ -28,4 +29,13 @@ if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
     echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, merge" >&2
     echo "==========================================================" >&2
     exit 1
+fi
+
+# Chain to backup commit-msg hook if it exists
+if [ -f .git/hooks/commit-msg.backup ]; then
+    if [ -x .git/hooks/commit-msg.backup ]; then
+        .git/hooks/commit-msg.backup "$@"
+    else
+        sh .git/hooks/commit-msg.backup "$@"
+    fi
 fi

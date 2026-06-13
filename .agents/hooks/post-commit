@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Auto-sync Git branch and commit hash to agent memory ledger
 if [ -f .agents/scripts/helper.sh ]; then
     .agents/scripts/helper.sh sync-git
@@ -15,3 +16,11 @@ if [ -d .agents/locks ] && [ "$(ls -A .agents/locks)" ]; then
     echo "  [PASS] All active locks released."
 fi
 
+# Chain to backup post-commit hook if it exists
+if [ -f .git/hooks/post-commit.backup ]; then
+    if [ -x .git/hooks/post-commit.backup ]; then
+        .git/hooks/post-commit.backup "$@"
+    else
+        sh .git/hooks/post-commit.backup "$@"
+    fi
+fi

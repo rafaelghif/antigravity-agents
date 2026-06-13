@@ -123,7 +123,13 @@ fi
 # 5. Check Git Upstream Synchronization
 echo "Check 5: Git Upstream Synchronization Check"
 # Attempt to fetch upstream changes silently to check sync state (gracefully handle failures/offline)
-git fetch origin >/dev/null 2>&1 || true
+if command -v timeout >/dev/null 2>&1; then
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" timeout 5 git fetch origin >/dev/null 2>&1 || true
+elif command -v gtimeout >/dev/null 2>&1; then
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" gtimeout 5 git fetch origin >/dev/null 2>&1 || true
+else
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" git -c transfer.timeout=5 fetch origin >/dev/null 2>&1 || true
+fi
 
 LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "none")
 REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "none")
@@ -231,6 +237,3 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
-
-
-

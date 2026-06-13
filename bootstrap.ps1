@@ -2,7 +2,8 @@
 # Wrapper script to execute bootstrap.sh inside Git Bash
 
 param (
-    [string]$Version = "main"
+    [string]$Version = "main",
+    [switch]$Force = $false
 )
 
 $gitBash = "C:\Program Files\Git\bin\bash.exe"
@@ -15,22 +16,41 @@ if (-not $gitBash) {
     exit 1
 }
 
+# Collect and join any additional arguments to forward
+$bashArgs = @()
+if ($Force) {
+    $bashArgs += "-f"
+}
+if ($args) {
+    $bashArgs += $args
+}
+$bashArgsStr = [string]::Join(" ", $bashArgs)
+
 # If a local bootstrap.sh exists, run it. Otherwise, download it from GitHub.
 if (Test-Path .\bootstrap.sh) {
     Write-Host "Running local bootstrap.sh via Git Bash..."
-    & $gitBash -c "./bootstrap.sh"
+    & $gitBash -c "./bootstrap.sh $bashArgsStr"
 } else {
     Write-Host "Downloading and running bootstrap.sh (version: $Version) via Git Bash..."
-    & $gitBash -c "curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/$Version/bootstrap.sh | bash"
+    & $gitBash -c "curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/$Version/bootstrap.sh | bash -s -- $bashArgsStr"
 }
 
 
-# Self-cleanup if run from root and local bootstrap.ps1 exists
+# Self-cleanup if run from root and local bootstrap.ps1 exists (unless we are in the template development repository)
 if (Test-Path .\bootstrap.ps1) {
     # If bootstrap.sh was copied and deleted itself, we should also delete bootstrap.ps1
     # Check if .agents directory was successfully created
     if (Test-Path .\.agents) {
-        Write-Host "Cleaning up root bootstrapper script bootstrap.ps1..."
-        Remove-Item .\bootstrap.ps1 -Force
+        $isDev = $false
+        if (Test-Path .\.git) {
+            $origin = (git config --get remote.origin.url) 2>$null
+            if ($origin -like "*antigravity-agents*") {
+                $isDev = $true
+            }
+        }
+        if (-not $isDev) {
+            Write-Host "Cleaning up root bootstrapper script bootstrap.ps1..."
+            Remove-Item .\bootstrap.ps1 -Force
+        }
     }
 }

@@ -5,9 +5,103 @@
 
 set -euo pipefail
 
+# Parse arguments
+FORCE_OVERWRITE=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f|--force)
+            FORCE_OVERWRITE=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Determine color support
+RED=''
+GREEN=''
+YELLOW=''
+BLUE=''
+BOLD=''
+NC=''
+if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
+    ncolors=$(tput colors)
+    if [ -n "$ncolors" ] && [ "$ncolors" -ge 8 ]; then
+        RED='\033[0;31m'
+        GREEN='\033[0;32m'
+        YELLOW='\033[0;33m'
+        BLUE='\033[0;34m'
+        BOLD='\033[1m'
+        NC='\033[0m'
+    fi
+fi
+
+log_info() { echo -e "${BLUE}${BOLD}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}${BOLD}[PASS]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}${BOLD}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}${BOLD}[FAIL]${NC} $1" >&2; }
+
+echo "=========================================================="
+log_info "Checking System Prerequisites..."
+echo "=========================================================="
+
+if ! command -v git >/dev/null 2>&1; then
+    log_error "Git is required but not installed! Please install Git first."
+    exit 1
+fi
+log_success "Git is installed."
+
+# Helper function to write templates safely (preserves existing files unless -f/--force is specified)
+write_template_safe() {
+    local target_file="$1"
+    if [ -f "$target_file" ] && [ "$FORCE_OVERWRITE" = "false" ]; then
+        log_warning "$target_file already exists. Preserving current file."
+    else
+        log_info "Writing template to $target_file..."
+        cat > "$target_file"
+    fi
+}
+
+# Helper function to install Git hooks safely without breaking existing setups
+install_git_hook_safe() {
+    local hook_name="$1"
+    local source_hook=".agents/hooks/$hook_name"
+    local target_hook=".git/hooks/$hook_name"
+
+    if [ ! -f "$source_hook" ]; then
+        return 0
+    fi
+
+    if [ -f "$target_hook" ]; then
+        # Check if it contains Antigravity marker
+        if grep -q "# Antigravity Agent" "$target_hook"; then
+            log_info "Updating existing Antigravity Git hook: $hook_name"
+            cp "$source_hook" "$target_hook"
+            chmod +x "$target_hook"
+        else
+            local backup_hook="$target_hook.backup"
+            if [ -f "$backup_hook" ]; then
+                log_warning "Custom Git hook '$hook_name' detected, but backup '$hook_name.backup' already exists. Overwriting current hook, preserving backup."
+                rm -f "$target_hook"
+            else
+                log_warning "Custom Git hook '$hook_name' detected. Backing up to '$hook_name.backup' and chaining."
+                mv "$target_hook" "$backup_hook"
+            fi
+            cp "$source_hook" "$target_hook"
+            chmod +x "$target_hook"
+        fi
+    else
+        log_info "Installing Git hook: $hook_name"
+        cp "$source_hook" "$target_hook"
+        chmod +x "$target_hook"
+    fi
+}
+
 # Initialize Git if not present (ensures doctor and hooks pass seamlessly)
 if [ ! -d .git ]; then
-    echo "Git repository not detected. Initializing Git repository..."
+    log_info "Git repository not detected. Initializing Git repository..."
     git init
     git branch -m main
 fi
@@ -28,7 +122,7 @@ mkdir -p .agents/scripts
 mkdir -p .agents/hooks
 
 # 2. Write AGENTS.md (Global Agent Protocol) to project root
-cat << 'EOF' > AGENTS.md
+write_template_safe "AGENTS.md" << 'EOF'
 # Global Agent Protocol (GAP)
 
 This document dictates the absolute boundaries, operational procedures, memory constraints, and quality gates for all AI agent operations in this workspace. Compliance is mandatory for every agent execution.
@@ -36,22 +130,24 @@ This document dictates the absolute boundaries, operational procedures, memory c
 ---
 
 ## 1. Bootstrapping & Cognitive Alignment
-- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
+- **Autonomous Bootstrapping**: At the beginning of any session or task context, the agent MUST read the core files. The agent MUST NOT perform any file edits, command execution, or code modifications prior to reading these files. To maximize prompt prefix cache hits, the agent or the loading interface MUST retrieve these files in the exact sequence from *Most Static* to *Most Dynamic*:
   1. The Global Agent Protocol (this file: [AGENTS.md](file://./AGENTS.md)).
   2. The Project-Specific Rules, if available (e.g. [.agents/project_rules.md](file://./.agents/project_rules.md)).
   3. The Schema Reference database, if available (e.g. [.agents/schema.md](file://./.agents/schema.md)).
   4. The Active Memory Ledger ([.agents/memory.md](file://./.agents/memory.md)).
-- **Autonomy Principle**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question.
+- **Autonomy Principle & Strict Alignment**: The agent must rely on these documents and the codebase layout rather than asking the user repetitive or basic design questions. If a design pattern is missing or a user's instruction is ambiguous, default to standard industry best practices or ask a direct, clear multiple-choice question.
+- **Zero-Halucination Rule**: Under no circumstances should the agent make assumptions about dependencies, compiler configurations, path paths, or API structures. If they are not detailed in the files read during bootstrapping, verify them immediately using read tools before taking actions.
 
 ---
 
 ## 2. Zero-Hallucination & Import Verification Gates
 - **Fact-Checking over Guessing**: Never assume a file exists, a package is installed, or a function signature is correct.
-- **Symbol Verification Gate**: Before writing an import statement or invoking a function, the agent MUST run `view_file` or `grep_search` to verify:
-  1. The path exists.
-  2. The exact spelling of the exported symbol/module.
+- **Symbol & Command Verification Gate**: Before writing an import statement, invoking a function, or executing a terminal command/script, the agent MUST run `view_file` or `grep_search` to verify:
+  1. The file path and module export spelling are correct.
+  2. The package, linter, or script command exists in the workspace configuration files (e.g., `package.json`, `go.mod`, or `.agents/project_rules.md`). Do not guess or execute unverified third-party commands.
 - **Batch Verification and Line Capping**: To prevent token bloat during verification, the agent MUST use precise `StartLine` and `EndLine` parameters in `view_file` to read only the imports/definitions needed, or run batch `grep_search` operations instead of parsing entire source files.
 - **verbatim Reference**: When documenting compile, lint, or test failures, paste the exact stack traces and logs verbatim instead of describing them in general terms.
+
 
 ---
 
@@ -61,14 +157,22 @@ To maximize prompt execution speed, leverage model-side context caching, and avo
 - **Active Memory Cap**: Keep [.agents/memory.md](file://./.agents/memory.md) under 100 lines at all times. Once a milestone is achieved, immediately archive the checklist to [.agents/archive/](file://./.agents/archive/).
 - **Hierarchical Task Trees (Memory Scaling)**: For large projects or complex tasks, the agent MUST NOT store granular, detailed checklists in `memory.md`. Instead, create task-specific workflow files under `.agents/workflows/task_<name>.md`. Track only high-level epic milestones in the core `memory.md`, and lazy-load the workflow files as needed.
 - **Targeted File Reads**: NEVER read entire source files when looking for small details. Always use precise `StartLine` and `EndLine` parameters in file-viewing tools to preserve prefix cache hits.
+- **Respect .antigravityignore**: The agent MUST strictly respect `.antigravityignore` patterns. Never read, search, or list files matching these patterns to optimize token usage and eliminate hallucination hazards.
 - **Persistent Terminal Shells**: Reuse active terminal sessions by passing `RunPersistent: true` and specifying `RequestedTerminalID`. This avoids spawning new bash subshells, which bloats terminal history logs.
+
 
 ---
 
 ## 4. Multi-Agent & Teamwork Coordination
 To operate seamlessly in collaborative environments with other developers and autonomous agents:
 - **Isolated Feature Branches**: The agent must operate exclusively on the feature branch created by the user. Creating, switching, pushing, or pulling branches is forbidden for the agent; these tasks are strictly handled by the user.
-- **Federated Git-Backed Memory**: Memory resides in the repository. The user synchronizes schemas, decision records, and active task progress across the team by running git pull/push.
+- **Federated Git-Backed Memory & Git-Tracked Workspace**: Memory and configuration reside in the repository. All files under `.agents/` (including `memory.md`, `project_rules.md`, `adr.md`, `schema.md`, `schemas/`, and `workflows/`) and `AGENTS.md` MUST be committed to Git to synchronize context across different developer accounts and agents. The transient locks under `.agents/locks/` are the only excluded files.
+- **Upstream Synchronization Gate**: Before starting any task or code modifications, the agent MUST run `.agents/scripts/helper.sh validate` to verify that the local repository is not behind its upstream branch (e.g. `origin/<branch>`). If the local repository is behind, the agent MUST halt execution and prompt the user to run `git pull` to ensure synchronization.
+- **Design & /grill-me Alignment Documentation**: Whenever a design interview, `/grill-me` session, or architectural alignment is completed, the agent MUST immediately save the resulting execution plan to a new task workflow file at `.agents/workflows/task_<task_name>.md`. This file acts as the single source of truth for the task's execution plan, architectural decisions, and schema changes, and must be committed to Git.
+- **Real-Time Schema & Library Synchronization**: Any discussion regarding changes to the database structure, API contracts, dependencies, libraries, or architectural patterns must be documented *immediately* in the corresponding workspace files *before* writing any code:
+  - Database schema changes must immediately update the domain-driven schemas under `.agents/schemas/` and the master index `.agents/schema.md`.
+  - Technology or library dependencies (e.g. npm package additions, go modules) must immediately update `.agents/project_rules.md` and the workspace package configuration files (e.g. `package.json`, `go.mod`).
+  - Architectural changes must immediately be recorded as a new Architectural Decision Record (ADR) in `.agents/adr.md`.
 - **Active Lockfile Protocol**: To prevent parallel agents/developers from editing the same module:
   - Acquire the lock by running `.agents/scripts/helper.sh lock <module_name>`. This creates a lockfile under `.agents/locks/<module_name>.lock`.
   - Before editing any file, check if a lock exists. If it does, do NOT proceed. Coordinate with the lock owner, wait for release, or notify the user.
@@ -86,10 +190,13 @@ To operate seamlessly in collaborative environments with other developers and au
 ---
 
 ## 5. Stateful Task Checklist
-The active checklist inside [.agents/memory.md](file://./.agents/memory.md) must strictly follow this lifecycle:
+The active checklist inside [.agents/memory.md](file://./.agents/memory.md) and any dynamic workflow files must strictly follow this lifecycle:
 - `[ ]` **Unstarted**: Proposed task.
-- `[/]` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked `[/]` at a time. The agent must focus 100% on this task.
-- `[x]` **Completed**: Done, verified, and committed.
+- `[/]` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked `[/]` at a time across the entire workspace (including main `memory.md` and any active dynamic workflow file). The agent must focus 100% on this task. Any code modifications must strictly match the current active task scope.
+- `[x]` **Completed**: Done, verified, and committed. A task must **only** be marked `[x]` after:
+  1. Code compile/tests pass.
+  2. Workspace validation checks via `.agents/scripts/helper.sh validate` pass.
+  3. Changes have been staged and committed to Git (meaning the task is committed in a completed state).
 
 ---
 
@@ -98,11 +205,12 @@ Every code mutation must execute in an atomic, sequential loop:
 1. **Sync**: Verify that the workspace is on the correct branch and that there are no uncommitted changes (other than locks or memory files).
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
-4. **Compile & Test**: Run local validation commands. If tests fail, go back to step 3.
-5. **Workspace Validation**: Run `./.agents/scripts/helper.sh validate` to verify memory limits, lack of hardcoded secrets, and environment boundary conformance.
-6. **Commit**: Stage and commit using conventional commit format: `type(scope): description`. Note: The installed Git `post-commit` hook will automatically execute `.agents/scripts/helper.sh sync-git` to keep `memory.md` updated.
-7. **Sync Memory**: Update [.agents/memory.md](file://./.agents/memory.md) task checklist to `[x]` and update `schema.md` (if database columns or API routes changed).
-8. **Unlock**: Run `.agents/scripts/helper.sh unlock <module>`.
+4. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
+5. **Commit**: Stage files and execute a standard Git commit using conventional format: `git commit -m "type(scope): description"`.
+   - **Automated Validation**: The Git `pre-commit` hook automatically runs `./.agents/scripts/validate.sh` and the project linter/tests. The commit will automatically abort on failure.
+   - **Automated Sync & Unlock**: Upon a successful commit, the Git `post-commit` hook automatically updates `memory.md` with the new branch/commit hash and releases all active locks.
+
+
 
 ---
 
@@ -125,10 +233,11 @@ The agent must continuously optimize its own tools, protocols, and developer gui
 
 ## 9. Modular Document Grouping (Domain-Driven Schemas)
 To optimize prompt caching and prevent context window bloat:
-- **Index Reference**: The main [.agents/schema.md](file://./.agents/schema.md) file acts strictly as a high-level index mapping domain-specific database and API layouts.
-- **Domain Segmentation**: Schemas and contracts must be grouped by function under [.agents/schemas/](file://./.agents/schemas/) (e.g., `admin_and_auth.md`, `assets_and_taxonomy.md`).
+- **Index Reference**: The main [.agents/schema.md](file://./schema.md) file acts strictly as a high-level index mapping domain-specific database and API layouts.
+- **Domain Segmentation**: Schemas and contracts must be grouped by function under [.agents/schemas/](file://./schemas/) (e.g., `admin_and_auth.md`, `assets_and_taxonomy.md`).
 - **Targeted Reading**: When modifying a resource, the agent MUST ONLY load the relevant domain schema file. Loading the entire database schema map for localized edits is strictly forbidden.
-- **Incremental Growth**: These domain-specific schemas grow incrementally when new modules are registered under the schema index map.
+- **Incremental Growth & Registration Gate**: These domain-specific schemas grow incrementally. Every file created under `.agents/schemas/` MUST be registered as a markdown link in the primary `.agents/schema.md` index. The validation suite programmatically checks for registration compliance.
+- **Decision Tracking (ADRs)**: Any new domain or database schema design decision must also have an associated Architectural Decision Record entry in `.agents/adr.md`.
 
 ---
 
@@ -155,9 +264,8 @@ To prevent technical debt and ensure the system remains maintainable, secure, an
 - **Strict User Consultations**: In situations of ambiguity, high security risk, database schema migrations, or backward-incompatible API changes, the agent MUST halt execution and consult the user with options before writing code.
 - **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/project_rules.md` to prevent future errors.
 EOF
-
 # 3. Write .agents/memory.md template
-cat << 'EOF' > .agents/memory.md
+write_template_safe ".agents/memory.md" << 'EOF'
 # Agent Core Memory
 
 > **Memory Schema Version**: 5.0.0  
@@ -198,7 +306,7 @@ cat << 'EOF' > .agents/memory.md
 EOF
 
 # 4. Write .agents/project_rules.md template
-cat << 'EOF' > .agents/project_rules.md
+write_template_safe ".agents/project_rules.md" << 'EOF'
 # Project Architecture Blueprint (PAB)
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
@@ -229,7 +337,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 EOF
 
 # 5. Write .agents/schema.md template
-cat << 'EOF' > .agents/schema.md
+write_template_safe ".agents/schema.md" << 'EOF'
 # Technical Schema & Reference Database (SRD) - Index Map
 
 This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
@@ -241,7 +349,7 @@ This file serves as the high-level index for the project's technical schemas, da
 EOF
 
 # 6. Write default_module.md template
-cat << 'EOF' > .agents/schemas/default_module.md
+write_template_safe ".agents/schemas/default_module.md" << 'EOF'
 # Schema: Default Module
 
 Description of tables and APIs in this domain.
@@ -253,7 +361,7 @@ Description of tables and APIs in this domain.
 EOF
 
 # 7. Write .agents/adr.md template
-cat << 'EOF' > .agents/adr.md
+write_template_safe ".agents/adr.md" << 'EOF'
 # Architectural Decision Records (ADR)
 
 This document registers the historical technical design decisions, rationales, and consequences accepted in this project.
@@ -269,7 +377,7 @@ EOF
 
 # 8. Write skills
 # codebase-recon SKILL.md
-cat << 'EOF' > .agents/skills/codebase-recon/SKILL.md
+write_template_safe ".agents/skills/codebase-recon/SKILL.md" << 'EOF'
 ---
 name: codebase-recon
 description: Maps the repository architecture, file layout, and config structures. Run this first before initiating any codebase changes or feature designs.
@@ -316,7 +424,7 @@ Save the reconnaissance summary in the project's memory ledger (e.g., `schema.md
 EOF
 
 # git-ops SKILL.md
-cat << 'EOF' > .agents/skills/git-ops/SKILL.md
+write_template_safe ".agents/skills/git-ops/SKILL.md" << 'EOF'
 ---
 name: git-ops
 description: Manages local Git branches and executes version control flows enforcing the strict Conventional Commits specification.
@@ -368,7 +476,7 @@ Update the project's active memory ledger (`.agents/memory.md`) under the Git/ve
 EOF
 
 # test-driven-patch SKILL.md
-cat << 'EOF' > .agents/skills/test-driven-patch/SKILL.md
+write_template_safe ".agents/skills/test-driven-patch/SKILL.md" << 'EOF'
 ---
 name: test-driven-patch
 description: Modifies codebase operations or fixes defects under strict TDD constraints inside specific application domains.
@@ -421,7 +529,7 @@ description: Modifies codebase operations or fixes defects under strict TDD cons
 EOF
 
 # infra-provisioner SKILL.md
-cat << 'EOF' > .agents/skills/infra-provisioner/SKILL.md
+write_template_safe ".agents/skills/infra-provisioner/SKILL.md" << 'EOF'
 ---
 name: infra-provisioner
 description: Generates, configures, and orchestrates local Docker and Docker Compose environments for system dependencies like databases, caches, and object storage.
@@ -467,7 +575,7 @@ description: Generates, configures, and orchestrates local Docker and Docker Com
 EOF
 
 # security-ci-audit SKILL.md
-cat << 'EOF' > .agents/skills/security-ci-audit/SKILL.md
+write_template_safe ".agents/skills/security-ci-audit/SKILL.md" << 'EOF'
 ---
 name: security-ci-audit
 description: Verifies security configurations, scans for hardcoded credentials, checks CORS/rate-limiting setup, API docs compliance, and environment schema validation.
@@ -522,7 +630,7 @@ description: Verifies security configurations, scans for hardcoded credentials, 
 EOF
 
 # code-review SKILL.md
-cat << 'EOF' > .agents/skills/code-review/SKILL.md
+write_template_safe ".agents/skills/code-review/SKILL.md" << 'EOF'
 ---
 name: code-review
 description: Audits production code modifications for type cleanliness, security, architectural boundaries, Swagger documentation, and unit test compliance.
@@ -574,7 +682,7 @@ description: Audits production code modifications for type cleanliness, security
 EOF
 
 # Write impact-analysis SKILL.md
-cat << 'EOF' > .agents/skills/impact-analysis/SKILL.md
+write_template_safe ".agents/skills/impact-analysis/SKILL.md" << 'EOF'
 ---
 name: impact-analysis
 description: Audits the long-term architectural, performance, security, and maintainability impacts of any feature design or code mutation.
@@ -614,7 +722,7 @@ For all major features or architectural shifts, record the design choices and do
 EOF
 
 # 9. Write helper.sh script
-cat << 'EOF' > .agents/scripts/helper.sh
+write_template_safe ".agents/scripts/helper.sh" << 'EOF'
 #!/usr/bin/env bash
 # Antigravity Agent Core Helper Script
 set -euo pipefail
@@ -714,6 +822,14 @@ cmd_archive() {
     # Extract checklist from memory.md
     sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v '---' > "$archive_file"
 
+    # Relocate workflow and PR review files to a branch-specific subdirectory
+    local branch_archive_dir="$ARCHIVE_DIR/sprint_${branch_clean}"
+    mkdir -p "$branch_archive_dir"
+    echo "Archiving workflow and PR review files to $branch_archive_dir..."
+    find .agents/workflows -maxdepth 1 -name "task_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
+    find .agents/workflows -maxdepth 1 -name "pr_review_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
+
+
     # Reset checklist in memory.md
     local start_line
     start_line=$(grep -n "### Sprint Tasks Checklist" "$MEMORY_FILE" | cut -d: -f1)
@@ -794,13 +910,25 @@ cmd_init() {
         git branch -m main
     fi
 
-    # Install Git post-commit Hook template
+    # Install Git hooks (pre-commit & post-commit)
+    mkdir -p .git/hooks
+    if [ -f .agents/hooks/pre-commit ]; then
+        cp .agents/hooks/pre-commit .git/hooks/pre-commit
+        chmod +x .git/hooks/pre-commit
+        echo "Git pre-commit hook installed."
+    fi
     if [ -f .agents/hooks/post-commit ]; then
-        mkdir -p .git/hooks
         cp .agents/hooks/post-commit .git/hooks/post-commit
         chmod +x .git/hooks/post-commit
         echo "Git post-commit hook installed."
     fi
+    if [ -f .agents/hooks/commit-msg ]; then
+        cp .agents/hooks/commit-msg .git/hooks/commit-msg
+        chmod +x .git/hooks/commit-msg
+        echo "Git commit-msg hook installed."
+    fi
+
+
 
     # Scaffolding folders if requested
     if [ "$scaffold" = "y" ] || [ "$scaffold" = "yes" ]; then
@@ -927,12 +1055,24 @@ cmd_doctor() {
         errors=$((errors + 1))
     fi
     
-    # Check post-commit hook
+    # Check Git hooks
+    if [ -f .git/hooks/pre-commit ] && [ -x .git/hooks/pre-commit ]; then
+        echo "  [PASS] pre-commit Git hook is installed and executable."
+    else
+        echo "  [WARNING] Git pre-commit hook is missing or not executable."
+        echo "            To install: cp .agents/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+    fi
     if [ -f .git/hooks/post-commit ] && [ -x .git/hooks/post-commit ]; then
         echo "  [PASS] post-commit Git hook is installed and executable."
     else
         echo "  [WARNING] Git post-commit hook is missing or not executable."
         echo "            To install: cp .agents/hooks/post-commit .git/hooks/post-commit && chmod +x .git/hooks/post-commit"
+    fi
+    if [ -f .git/hooks/commit-msg ] && [ -x .git/hooks/commit-msg ]; then
+        echo "  [PASS] commit-msg Git hook is installed and executable."
+    else
+        echo "  [WARNING] Git commit-msg hook is missing or not executable."
+        echo "            To install: cp .agents/hooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg"
     fi
     
     # Check helper script executability
@@ -1069,7 +1209,9 @@ cmd_commit() {
     if [ "$no_test_flag" = "false" ]; then
         local linter_cmd=""
         if [ -f .agents/project_rules.md ]; then
-            linter_cmd=$(grep "Linter command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+            local linter_line
+            linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+            linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
         if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
@@ -1090,7 +1232,9 @@ cmd_commit() {
     if [ "$no_test_flag" = "false" ]; then
         local test_runner=""
         if [ -f .agents/project_rules.md ]; then
-            test_runner=$(grep "Test runner command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+            local test_line
+            test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+            test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
         if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
@@ -1176,12 +1320,37 @@ esac
 EOF
 
 # 10. Write recon.sh script
-cat << 'EOF' > .agents/scripts/recon.sh
+write_template_safe ".agents/scripts/recon.sh" << 'EOF'
 #!/usr/bin/env bash
 # Antigravity Agent Core - Autonomous Reconnaissance Script
 # Scans the target workspace to automatically configure the agent environment blueprints.
 
 set -euo pipefail
+
+# Parse arguments
+FORCE_OVERWRITE=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f|--force)
+            FORCE_OVERWRITE=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Helper function to write templates safely (preserves existing files unless -f/--force is specified)
+write_recon_file_safe() {
+    local target_file="$1"
+    if [ -f "$target_file" ] && [ "$FORCE_OVERWRITE" = "false" ]; then
+        echo "  [PRESERVE] $target_file already exists. Preserving current file."
+    else
+        echo "  [WRITE] Writing $target_file..."
+        cat > "$target_file"
+    fi
+}
 
 PROJECT_RULES_FILE=".agents/project_rules.md"
 SCHEMA_INDEX_FILE=".agents/schema.md"
@@ -1327,7 +1496,7 @@ if [ -z "$ENV_VARS" ]; then
 fi
 
 # 5. Populate .agents/project_rules.md
-cat << PAB_EOF > "$PROJECT_RULES_FILE"
+write_recon_file_safe "$PROJECT_RULES_FILE" << PAB_EOF
 # Project Architecture Blueprint (PAB)
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
@@ -1358,13 +1527,37 @@ $ENV_VARS
 - **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
 - **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
 - **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
+
+## 6. Multi-Agent & Teamwork Constraints
+- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: \`AGENTS.md\`, \`.agents/project_rules.md\`, \`.agents/schema.md\`, and \`.agents/memory.md\`. No file writes or terminal runs are allowed prior to this initialization.
+- **Workspace Git Tracking**: Never ignore \`.agents/\` or \`AGENTS.md\` in \`.gitignore\` (except \`.agents/locks/\`). Commit all memory, schemas, dynamic workflows, and ADR files to Git to ensure proper multi-agent synchronization.
+- **Upstream Sync Gate**: You must run \`./.agents/scripts/helper.sh validate\` before beginning code changes to check if the branch is behind origin. If it is behind, stop and ask the user to pull first.
+- **Discussion and Design Plans**: Document all \`/grill-me\` outcomes and execution plans under \`.agents/workflows/task_<task_name>.md\`. Never log task-specific plans or checklists globally or in the main memory ledger.
+- **Real-Time Schema & Dependency Updates**: Any discussion on database models, API routes, or third-party libraries must be documented in the repository *immediately* before starting code edits:
+  - Database structures must be saved under \`.agents/schemas/\` and registered in \`.agents/schema.md\`.
+  - Technologies/libraries must be documented in \`.agents/project_rules.md\` and their respective workspace configuration files (\`package.json\`, \`go.mod\`, etc.).
+  - Architectural decisions must be documented as a new ADR entry in \`.agents/adr.md\`.
+- **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
 PAB_EOF
 
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)
 mkdir -p "$SCHEMAS_DIR"
 
 # Write a basic schema.md index file
-cat << SRD_EOF > "$SCHEMA_INDEX_FILE"
+if [ "$DB_STACK" = "Prisma ORM (schema: prisma/schema.prisma)" ]; then
+    write_recon_file_safe "$SCHEMA_INDEX_FILE" << SRD_EOF
+# Technical Schema & Reference Database (SRD) - Index Map
+
+This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
+
+---
+
+## 1. Domain Schemas Index
+- [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
+- [Database Schema (Prisma)](file://./schemas/database_schema.md) -> Reference: [database_schema.md](file://./schemas/database_schema.md)
+SRD_EOF
+else
+    write_recon_file_safe "$SCHEMA_INDEX_FILE" << SRD_EOF
 # Technical Schema & Reference Database (SRD) - Index Map
 
 This file serves as the high-level index for the project's technical schemas, database specifications, and API contracts.
@@ -1374,11 +1567,12 @@ This file serves as the high-level index for the project's technical schemas, da
 ## 1. Domain Schemas Index
 - [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
 SRD_EOF
+fi
 
 # Check for custom schema files
 if [ "$DB_STACK" = "Prisma ORM (schema: prisma/schema.prisma)" ]; then
     # Create prisma schema domain layout
-    cat << PRISMA_EOF > "$SCHEMAS_DIR/database_schema.md"
+    write_recon_file_safe "$SCHEMAS_DIR/database_schema.md" << PRISMA_EOF
 # Schema: Database Models (Prisma)
 
 Automatically discovered Prisma model entities:
@@ -1388,10 +1582,6 @@ Automatically discovered Prisma model entities:
 ## 1. Relational Database Tables / Models
 $(grep -E "^model " prisma/schema.prisma | cut -d' ' -f2 | sed 's/^/- /' || true)
 PRISMA_EOF
-
-    cat << SRD_EOF >> "$SCHEMA_INDEX_FILE"
-- [Database Schema (Prisma)](file://./schemas/database_schema.md) -> Reference: [database_schema.md](file://./schemas/database_schema.md)
-SRD_EOF
 fi
 
 echo "=========================================================="
@@ -1400,7 +1590,7 @@ echo "=========================================================="
 EOF
 
 # 11. Write validate.sh script
-cat << 'EOF' > .agents/scripts/validate.sh
+write_template_safe ".agents/scripts/validate.sh" << 'EOF'
 #!/usr/bin/env bash
 # Antigravity Agent Core - Workspace & Security Validator
 # Validates workspace rules, scans for credentials, checks memory size, and details active locks.
@@ -1526,7 +1716,13 @@ fi
 # 5. Check Git Upstream Synchronization
 echo "Check 5: Git Upstream Synchronization Check"
 # Attempt to fetch upstream changes silently to check sync state (gracefully handle failures/offline)
-git fetch origin >/dev/null 2>&1 || true
+if command -v timeout >/dev/null 2>&1; then
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" timeout 5 git fetch origin >/dev/null 2>&1 || true
+elif command -v gtimeout >/dev/null 2>&1; then
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" gtimeout 5 git fetch origin >/dev/null 2>&1 || true
+else
+    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" git -c transfer.timeout=5 fetch origin >/dev/null 2>&1 || true
+fi
 
 LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "none")
 REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "none")
@@ -1639,8 +1835,9 @@ EOF
 
 
 # 12. Write Git hooks templates
-cat << 'EOF' > .agents/hooks/pre-commit
+write_template_safe ".agents/hooks/pre-commit" << 'EOF'
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Git pre-commit hook: Auto-run validations and tests
 set -e
 
@@ -1653,7 +1850,8 @@ if [ -f .agents/scripts/validate.sh ]; then
 fi
 
 if [ -f .agents/project_rules.md ]; then
-    linter_cmd=$(grep "Linter command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+    linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+    linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
         echo "Running linter: $linter_cmd..."
         if ! eval "$linter_cmd"; then
@@ -1663,7 +1861,8 @@ if [ -f .agents/project_rules.md ]; then
         echo "  [PASS] Linter check passed."
     fi
 
-    test_runner=$(grep "Test runner command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+    test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+    test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
         echo "Running test suite: $test_runner..."
         if ! eval "$test_runner"; then
@@ -1673,10 +1872,20 @@ if [ -f .agents/project_rules.md ]; then
         echo "  [PASS] All tests passed."
     fi
 fi
+
+# Chain to backup pre-commit hook if it exists
+if [ -f .git/hooks/pre-commit.backup ]; then
+    if [ -x .git/hooks/pre-commit.backup ]; then
+        .git/hooks/pre-commit.backup "$@"
+    else
+        sh .git/hooks/pre-commit.backup "$@"
+    fi
+fi
 EOF
 
-cat << 'EOF' > .agents/hooks/post-commit
+write_template_safe ".agents/hooks/post-commit" << 'EOF'
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Auto-sync Git branch and commit hash to agent memory ledger
 if [ -f .agents/scripts/helper.sh ]; then
     .agents/scripts/helper.sh sync-git
@@ -1692,10 +1901,20 @@ if [ -d .agents/locks ] && [ "$(ls -A .agents/locks)" ]; then
     done
     echo "  [PASS] All active locks released."
 fi
+
+# Chain to backup post-commit hook if it exists
+if [ -f .git/hooks/post-commit.backup ]; then
+    if [ -x .git/hooks/post-commit.backup ]; then
+        .git/hooks/post-commit.backup "$@"
+    else
+        sh .git/hooks/post-commit.backup "$@"
+    fi
+fi
 EOF
 
-cat << 'EOF' > .agents/hooks/commit-msg
+write_template_safe ".agents/hooks/commit-msg" << 'EOF'
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Git commit-msg hook: Enforce Conventional Commits specification
 set -e
 
@@ -1726,6 +1945,15 @@ if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
     echo "==========================================================" >&2
     exit 1
 fi
+
+# Chain to backup commit-msg hook if it exists
+if [ -f .git/hooks/commit-msg.backup ]; then
+    if [ -x .git/hooks/commit-msg.backup ]; then
+        .git/hooks/commit-msg.backup "$@"
+    else
+        sh .git/hooks/commit-msg.backup "$@"
+    fi
+fi
 EOF
 
 if [ -f .agents/bootstrap.sh ]; then chmod +x .agents/bootstrap.sh; fi
@@ -1738,21 +1966,22 @@ if [ -f .agents/hooks/commit-msg ]; then chmod +x .agents/hooks/commit-msg; fi
 
 if [ -d .git ]; then
     mkdir -p .git/hooks
-    cp .agents/hooks/pre-commit .git/hooks/pre-commit
-    chmod +x .git/hooks/pre-commit
-    cp .agents/hooks/post-commit .git/hooks/post-commit
-    chmod +x .git/hooks/post-commit
-    cp .agents/hooks/commit-msg .git/hooks/commit-msg
-    chmod +x .git/hooks/commit-msg
-    echo "Git pre-commit, post-commit, and commit-msg hooks installed."
+    install_git_hook_safe "pre-commit"
+    install_git_hook_safe "post-commit"
+    install_git_hook_safe "commit-msg"
+    log_success "Git pre-commit, post-commit, and commit-msg hooks processed."
 fi
 
 
 
 # Run auto-recon immediately to initialize configuration blueprints
-echo "Running autonomous reconnaissance to initialize workspace..."
+log_info "Running autonomous reconnaissance to initialize workspace..."
 if [ -f .agents/scripts/recon.sh ]; then
-    .agents/scripts/recon.sh
+    if [ "$FORCE_OVERWRITE" = "true" ]; then
+        .agents/scripts/recon.sh --force
+    else
+        .agents/scripts/recon.sh
+    fi
 fi
 
 echo "=========================================================="
@@ -1773,14 +2002,26 @@ echo "Workspace diagnostics status:"
 echo "=========================================================="
 
 # Save a copy of the bootstrapper inside .agents/ for future updates/resets
-if [ -f bootstrap.sh ]; then
+if [ -f "$0" ]; then
+    cp "$0" .agents/bootstrap.sh
+    chmod +x .agents/bootstrap.sh
+elif [ -f bootstrap.sh ]; then
     cp bootstrap.sh .agents/bootstrap.sh
     chmod +x .agents/bootstrap.sh
 fi
 
-# Self-cleanup if bootstrap.sh is executed from the project root
+# Self-cleanup if bootstrap.sh is executed from the project root (unless we are in the template development repository)
 if [ -f bootstrap.sh ]; then
-    echo "Cleaning up root bootstrapper script..."
-    rm -f bootstrap.sh
+    is_dev=false
+    if [ -d .git ]; then
+        origin=$(git config --get remote.origin.url || echo "")
+        if [[ "$origin" =~ "antigravity-agents" ]]; then
+            is_dev=true
+        fi
+    fi
+    if [ "$is_dev" = "false" ]; then
+        log_info "Cleaning up root bootstrapper script..."
+        rm -f bootstrap.sh
+    fi
 fi
 

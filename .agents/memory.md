@@ -19,10 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: World-Class Agent Workspace Core Improvements
-- **Current Task Target**: Establish strict multi-agent teamwork rules, git memory sync, and schema validation
+- **Current Task Target**: Review and improve bootstrap.sh and bootstrap.ps1 for enterprise and world-class grade safety
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
+- [x] Review and improve bootstrap.sh and bootstrap.ps1 for enterprise and world-class grade safety
 - [x] Refine bootstrapping sequence, checkbox lifecycle, and real-time schema/library updates in AGENTS.md and project_rules.md
 - [x] Run /grill-me alignment and document outcomes in task_teamwork_rules.md
 - [x] Implement branch-specific dynamic workflow archiving in helper.sh

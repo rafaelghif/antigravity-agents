@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+# Antigravity Agent Git Hook
 # Git pre-commit hook: Auto-run validations and tests
 set -e
 
-# 1. Run workspace validation checks
 if [ -f .agents/scripts/validate.sh ]; then
     echo "Running workspace validation checks..."
     if ! .agents/scripts/validate.sh; then
@@ -11,10 +11,9 @@ if [ -f .agents/scripts/validate.sh ]; then
     fi
 fi
 
-# 2. Run project linter and tests if rules are configured in project_rules.md
 if [ -f .agents/project_rules.md ]; then
-    # Extract linter command
-    linter_cmd=$(grep "Linter command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+    linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+    linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
         echo "Running linter: $linter_cmd..."
         if ! eval "$linter_cmd"; then
@@ -24,8 +23,8 @@ if [ -f .agents/project_rules.md ]; then
         echo "  [PASS] Linter check passed."
     fi
 
-    # Extract test command
-    test_runner=$(grep "Test runner command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+    test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+    test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
     if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
         echo "Running test suite: $test_runner..."
         if ! eval "$test_runner"; then
@@ -33,5 +32,14 @@ if [ -f .agents/project_rules.md ]; then
             exit 1
         fi
         echo "  [PASS] All tests passed."
+    fi
+fi
+
+# Chain to backup pre-commit hook if it exists
+if [ -f .git/hooks/pre-commit.backup ]; then
+    if [ -x .git/hooks/pre-commit.backup ]; then
+        .git/hooks/pre-commit.backup "$@"
+    else
+        sh .git/hooks/pre-commit.backup "$@"
     fi
 fi

@@ -484,7 +484,9 @@ cmd_commit() {
     if [ "$no_test_flag" = "false" ]; then
         local linter_cmd=""
         if [ -f .agents/project_rules.md ]; then
-            linter_cmd=$(grep "Linter command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+            local linter_line
+            linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+            linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
         if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
@@ -505,7 +507,9 @@ cmd_commit() {
     if [ "$no_test_flag" = "false" ]; then
         local test_runner=""
         if [ -f .agents/project_rules.md ]; then
-            test_runner=$(grep "Test runner command" .agents/project_rules.md | grep -o "\`.*\`" | tr -d "\`" || echo "")
+            local test_line
+            test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+            test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
         fi
 
         if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
