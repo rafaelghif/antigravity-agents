@@ -285,6 +285,9 @@ The `sync-api` command extracts the OpenAPI schema (`openapi.json`) from the bac
 
 ## 5. Typical Workflow for the Agent
  
+> [!NOTE]
+> **Autonomous Script Execution**: Agents are instructed by the project architectural blueprint ([project_rules.md](file://./.agents/project_rules.md)) to execute these operational commands (locking, validation, API sync, and archiving) automatically without requiring manual user commands.
+
 When an AI Agent starts working on a task, it must strictly follow these steps to ensure clean history and zero bugs:
  
 1. **Verify State**: Verify that the workspace is on the correct branch and clean.
