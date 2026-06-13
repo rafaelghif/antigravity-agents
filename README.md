@@ -249,9 +249,9 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 ---
 
 ## 5. Typical Workflow for the Agent
-
+ 
 When an AI Agent starts working on a task, it must strictly follow these steps to ensure clean history and zero bugs:
-
+ 
 1. **Verify State**: Verify that the workspace is on the correct branch and clean.
 2. **Lock Module**: Acquire the module lock to prevent conflicts:
    ```bash
@@ -264,7 +264,8 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
    git commit -m "feat(core): add new feature implementation"
    ```
    *(The Git `pre-commit` hook automatically runs validations/tests, and the `post-commit` hook automatically syncs memory and releases all active locks).*
-5. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.
+5. **Handover Relay (Next Turn)**: Before ending a session or switching agent accounts, the agent writes a brief state summary (under 5 lines) in `.agents/memory.md` under `## 3. Relayed Context & Handover Notes` to guide the incoming agent.
+6. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.
 
 
 ---
@@ -279,6 +280,7 @@ Antigravity Workspace enforces these key rules on AI agents:
 - **Real-Time Schema & Dependency Sync**: Database model or API changes must immediately update `.agents/schemas/` and the main `.agents/schema.md` index before coding starts. Library dependencies must update `project_rules.md` and package manager configs (`package.json`, etc.) immediately.
 - **Token Optimization (.antigravityignore)**: Agents strictly adhere to `.antigravityignore` patterns, preventing costly crawls through dependencies, logs, binaries, or build directories.
 - **Hardcoded Secret Scan**: The agent cannot commit code if passwords, keys, or API tokens are detected in the workspace (scanned via `validate.sh`).
+- **Handover Relayed Context**: Before finishing a turn or switching accounts, the agent writes the current status and next action items in `memory.md` under `## 3. Relayed Context & Handover Notes`, ensuring the next agent picks up immediately without token waste.
 
 ---
 
