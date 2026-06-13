@@ -225,15 +225,15 @@ Verify that your existing workspace passes the agent safety checks:
 ```
 If everything is healthy, stage the configurations and make your first validated commit:
 ```bash
-git add AGENTS.md .agents/
-./.agents/scripts/helper.sh commit chore core "initialize antigravity agent workspace"
+git add AGENTS.md .agents/ .antigravityignore
+git commit -m "chore(core): initialize antigravity agent workspace"
 ```
 
 ---
 
 ## 4. Operational Scripts Guide (`helper.sh`)
 
-Once bootstrapped, all operations are managed through `./.agents/scripts/helper.sh`. Here is a quick reference:
+Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` or standard Git commands. Here is a quick reference:
 
 | Command | Usage | Description |
 |---|---|---|
@@ -241,11 +241,10 @@ Once bootstrapped, all operations are managed through `./.agents/scripts/helper.
 | `recon` | `./.agents/scripts/helper.sh recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
 | `validate` | `./.agents/scripts/helper.sh validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
 | `doctor` | `./.agents/scripts/helper.sh doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
-| `commit` | `./.agents/scripts/helper.sh commit [type] [scope] [desc] [files...]` | Runs workspace validations, checks the project's linter and test suite, and executes a Git conventional commit (supports `--no-verify`/`--no-test` to bypass checks). |
-| `sync-git` | `./.agents/scripts/helper.sh sync-git` | Synchronizes the active branch and last commit hash in `memory.md`. |
+| `sync-git` | `./.agents/scripts/helper.sh sync-git` | *(Automated)* Synchronizes active branch and last commit hash in `memory.md`. |
 | `lock` | `./.agents/scripts/helper.sh lock <module>` | Locks a specific module to prevent parallel developers or agents from modifying the same files simultaneously. |
-| `unlock` | `./.agents/scripts/helper.sh unlock <module>` | Releases the lock on a module. |
-| `archive` | `./.agents/scripts/helper.sh archive` | Archives the completed checklists from `memory.md` to `archive/` pre-merge to prevent merge conflicts. |
+| `unlock` | `./.agents/scripts/helper.sh unlock <module>` | *(Automated)* Releases the lock on a module. |
+| `archive` | `./.agents/scripts/helper.sh archive` | Archives completed checklists and moves dynamic workflow files to `archive/` pre-merge to prevent conflicts. |
 
 ---
 
@@ -259,15 +258,14 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
    ./.agents/scripts/helper.sh lock <module_name>
    ```
 3. **Implement Feature**: Write code & tests under TDD guidelines.
-4. **Automated Verification & Local Commit**: Stage, validate, run tests, and commit cleanly in one step:
+4. **Staging & Commit**: Stage files and execute a standard Git commit:
    ```bash
-   ./.agents/scripts/helper.sh commit feat core "add new feature implementation"
+   git add -A
+   git commit -m "feat(core): add new feature implementation"
    ```
-5. **Unlock Module**: Release the lock:
-   ```bash
-   ./.agents/scripts/helper.sh unlock <module_name>
-   ```
-6. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.
+   *(The Git `pre-commit` hook automatically runs validations/tests, and the `post-commit` hook automatically syncs memory and releases all active locks).*
+5. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.
+
 
 ---
 
