@@ -51,3 +51,5 @@ The agent must execute workspace scripts automatically without manual user guida
 - **API Synchronization**: When backend model schemas or API paths change, run `./.agents/scripts/helper.sh sync-api` to sync types to the frontend.
 - **Code Validation**: Run `./.agents/scripts/helper.sh validate` before staging and preparing any commit.
 - **Pre-Merge Cleanup**: Run `./.agents/scripts/helper.sh archive` before completing a pull request task to clean up dynamic workspaces.
+- **Token Budget Compliance**: The agent must log its token usage using `./.agents/scripts/helper.sh log-usage <token_count>` at the end of each turn. If validation warns that token usage has reached the threshold, the agent must immediately save its progress, update the task checklist target in `memory.md` to `IN_PROGRESS`, and log off for handover.
+

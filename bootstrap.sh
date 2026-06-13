@@ -3482,8 +3482,34 @@ MOCK_OPENAPI
     echo "=========================================================="
 }
 
+cmd_log_usage() {
+    if [ \$# -lt 2 ]; then
+        echo "Usage: \$0 log-usage <token_count>"
+        exit 1
+    fi
+    local count="\$2"
+    local file=".agents/token_budget.json"
+    if [ ! -f "\$file" ]; then
+        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90}" > "\$file"
+    fi
+    if command -v jq >/dev/null 2>&1; then
+        local current=\$(jq -r '.current_token_usage' "\$file")
+        local new_usage=\$((current + count))
+        local temp=\$(mktemp)
+        jq --argjson usage "\$new_usage" '.current_token_usage = \$usage' "\$file" > "\$temp"
+        mv "\$temp" "\$file"
+        echo "Logged \$count tokens. Total usage: \$new_usage."
+    else
+        # fallback parsing using sed if jq not found
+        local current=\$(grep -o '"current_token_usage":\s*[0-9]*' "\$file" | grep -o '[0-9]*' || echo "0")
+        local new_usage=\$((current + count))
+        sed -i "s/\"current_token_usage\":\s*[0-9]*/\"current_token_usage\": \$new_usage/" "\$file"
+        echo "Logged \$count tokens (fallback). Total usage: \$new_usage."
+    fi
+}
+
 # Dispatch command
-if [ $# -lt 1 ]; then
+if [ \$# -lt 1 ]; then
     show_help
     exit 1
 fi
@@ -3530,6 +3556,9 @@ case "$1" in
         ;;
     sync-api)
         cmd_sync_api
+        ;;
+    log-usage)
+        cmd_log_usage "\$@"
         ;;
     help)
         show_help
@@ -3871,6 +3900,7 @@ The agent must execute workspace scripts automatically without manual user guida
 - **API Synchronization**: When backend model schemas or API paths change, run \`./.agents/scripts/helper.sh sync-api\` to sync types to the frontend.
 - **Code Validation**: Run \`./.agents/scripts/helper.sh validate\` before staging and preparing any commit.
 - **Pre-Merge Cleanup**: Run \`./.agents/scripts/helper.sh archive\` before completing a pull request task to clean up dynamic workspaces.
+- **Token Budget Compliance**: The agent must log its token usage using \`./.agents/scripts/helper.sh log-usage <token_count>\` at the end of each turn. If validation warns that token usage has reached the threshold, the agent must immediately save its progress, update the task checklist target in \`memory.md\` to \`IN_PROGRESS\`, and log off for handover.
 PAB_EOF
 
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)
@@ -4153,6 +4183,31 @@ if [ "$STATE_ERRORS" -eq 0 ]; then
     fi
 else
     FAILED=1
+fi
+
+# 9. Check Token Budget Guard
+echo "Check 9: Token Budget Guard"
+BUDGET_FILE=".agents/token_budget.json"
+if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
+    MAX_BUDGET=\$(jq -r '.max_token_budget' "\$BUDGET_FILE")
+    CURRENT_USAGE=\$(jq -r '.current_token_usage' "\$BUDGET_FILE")
+    THRESHOLD=\$(jq -r '.alert_threshold_percent' "\$BUDGET_FILE")
+    
+    if [ "\$MAX_BUDGET" -gt 0 ]; then
+        PERCENT=\$(( CURRENT_USAGE * 100 / MAX_BUDGET ))
+        echo "  Current token usage: \$CURRENT_USAGE / \$MAX_BUDGET (\$PERCENT%)"
+        if [ "\$CURRENT_USAGE" -ge "\$MAX_BUDGET" ]; then
+            echo "  [FAIL] Token budget exceeded! Current: \$CURRENT_USAGE, Limit: \$MAX_BUDGET."
+            echo "         Please save your task checkpoint in workflows/ and handover the task."
+            FAILED=1
+        elif [ "\$PERCENT" -ge "\$THRESHOLD" ]; then
+            echo "  [WARNING] Token usage is at \$PERCENT% of budget. Consider saving and handing over."
+        else
+            echo "  [PASS] Token usage is within safe budget limits."
+        fi
+    fi
+else
+    echo "  [PASS] No active token budget file or jq tool found. Bypassing check."
 fi
 
 echo "=========================================================="

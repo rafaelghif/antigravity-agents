@@ -271,6 +271,7 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `unlock` | `./.agents/scripts/helper.sh unlock <module>` | *(Automated)* Releases the lock on a module. |
 | `archive` | `./.agents/scripts/helper.sh archive` | Archives completed checklists and moves dynamic workflow files to `archive/` pre-merge to prevent conflicts. |
 | `sync-api` | `./.agents/scripts/helper.sh sync-api` | Automatically extracts backend OpenAPI schema and generates a zero-dependency typed TypeScript fetch client in the frontend. |
+| `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
 

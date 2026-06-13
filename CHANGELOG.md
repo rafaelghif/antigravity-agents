@@ -4,6 +4,8 @@ This document tracks all version updates, script refinements, and protocol chang
 
 ## [1.4.0] - 2026-06-13
 ### Added
+- Added Token Budget Guard (Check 9) in `validate.sh` to monitor token usage and enforce auto-saving progress when limits are reached.
+- Added `helper.sh log-usage <count>` command to log token counts dynamically into `.agents/token_budget.json`.
 - Hardened agent security by adding environment secrets (`.env*`), cryptographic keys (`*.pem`, `*.key`), and credential configurations to `.antigravityignore` to programmatically block the agent from crawling or indexing sensitive configurations.
 - Added Section 7 (Autonomous Operational Scripts & Commands) to project rules blueprint, instructing agents to autonomously invoke helper commands (`lock`, `unlock`, `validate`, `doctor`, `archive`, `sync-api`) without manual user intervention.
 - Added automated API Contract Synchronization feature via `helper.sh sync-api`, extracting `openapi.json` from backend stacks and writing zero-dependency typed TypeScript clients in the frontend.

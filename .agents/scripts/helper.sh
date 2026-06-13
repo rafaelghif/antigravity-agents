@@ -2732,6 +2732,32 @@ MOCK_OPENAPI
     echo "=========================================================="
 }
 
+cmd_log_usage() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: $0 log-usage <token_count>"
+        exit 1
+    fi
+    local count="$2"
+    local file=".agents/token_budget.json"
+    if [ ! -f "$file" ]; then
+        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90}" > "$file"
+    fi
+    if command -v jq >/dev/null 2>&1; then
+        local current=$(jq -r '.current_token_usage' "$file")
+        local new_usage=$((current + count))
+        local temp=$(mktemp)
+        jq --argjson usage "$new_usage" '.current_token_usage = $usage' "$file" > "$temp"
+        mv "$temp" "$file"
+        echo "Logged $count tokens. Total usage: $new_usage."
+    else
+        # fallback parsing using sed if jq not found
+        local current=$(grep -o '"current_token_usage":\s*[0-9]*' "$file" | grep -o '[0-9]*' || echo "0")
+        local new_usage=$((current + count))
+        sed -i "s/\"current_token_usage\":\s*[0-9]*/\"current_token_usage\": $new_usage/" "$file"
+        echo "Logged $count tokens (fallback). Total usage: $new_usage."
+    fi
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -2780,6 +2806,9 @@ case "$1" in
         ;;
     sync-api)
         cmd_sync_api
+        ;;
+    log-usage)
+        cmd_log_usage "$@"
         ;;
     help)
         show_help
