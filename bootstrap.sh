@@ -189,14 +189,16 @@ To operate seamlessly in collaborative environments with other developers and au
 
 ---
 
-## 5. Stateful Task Checklist
+## 5. Stateful Task Checklist & Handover Notes
 The active checklist inside [.agents/memory.md](file://./.agents/memory.md) and any dynamic workflow files must strictly follow this lifecycle:
-- `[ ]` **Unstarted**: Proposed task.
-- `[/]` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked `[/]` at a time across the entire workspace (including main `memory.md` and any active dynamic workflow file). The agent must focus 100% on this task. Any code modifications must strictly match the current active task scope.
-- `[x]` **Completed**: Done, verified, and committed. A task must **only** be marked `[x]` after:
+- \`[ ]\` **Unstarted**: Proposed task.
+- \`[/]\` **In Progress**: Active task. **CRITICAL**: Only ONE task can be marked \`[/]\` at a time across the entire workspace (including main \`memory.md\` and any active dynamic workflow file). The agent must focus 100% on this task. Any code modifications must strictly match the current active task scope.
+- \`[x]\` **Completed**: Done, verified, and committed. A task must **only** be marked \`[x]\` after:
   1. Code compile/tests pass.
-  2. Workspace validation checks via `.agents/scripts/helper.sh validate` pass.
+  2. Workspace validation checks via \`.agents/scripts/helper.sh validate\` pass.
   3. Changes have been staged and committed to Git (meaning the task is committed in a completed state).
+
+- **Handover Protocol (Relayed Context)**: Before completing a turn, finishing a milestone, or handing over the repository to another agent/developer account, the agent MUST write a concise summary (under 5 lines) in [.agents/memory.md](file://./.agents/memory.md) under \`## 3. Relayed Context & Handover Notes\`. This allows the incoming agent to seamlessly resume work in a new session without reading long transcripts or wasting tokens.
 
 ---
 
@@ -297,7 +299,15 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ---
 
-## 3. Reference Links Index
+## 3. Relayed Context & Handover Notes
+- **Last Active Agent**: [agent-id / model]
+- **Last Action Completed**: [brief description of last done action]
+- **Next Planned Action**: [immediate next task to execute]
+- **Blockers / Runtime Notes**: [any active errors, pending verification, or configs]
+
+---
+
+## 4. Reference Links Index
 - **Core Guidelines**: [AGENTS.md](file://../AGENTS.md)
 - **Project Specific Rules**: [project_rules.md](file://./project_rules.md)
 - **Database Schema**: [schema.md](file://./schema.md)
@@ -1538,6 +1548,7 @@ $ENV_VARS
   - Technologies/libraries must be documented in \`.agents/project_rules.md\` and their respective workspace configuration files (\`package.json\`, \`go.mod\`, etc.).
   - Architectural decisions must be documented as a new ADR entry in \`.agents/adr.md\`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked \`[/]\` at a time across the entire workspace. Do not change a task checklist state to \`[x]\` until verification has passed and the changes have been staged and committed in the completed state.
+- **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under \`## 3. Relayed Context & Handover Notes\`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
 PAB_EOF
 
 # 6. Database schema domain mapping (Auto-discover domain tables or modules)

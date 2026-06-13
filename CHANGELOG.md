@@ -2,6 +2,14 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.3.2] - 2026-06-13
+### Added
+- Added **Handover Protocol (Relayed Context)** support to allow seamless turn/account continuation.
+- Added Section 3 `Relayed Context & Handover Notes` in the `.agents/memory.md` template.
+- Documented Handover rules in both `AGENTS.md` and `.agents/project_rules.md` templates.
+
+---
+
 ## [1.3.1] - 2026-06-13
 ### Fixed
 - Fixed infinite recursion loop in Git hooks installation by adding the `# Antigravity Agent Git Hook` marker to all hook templates and checking it in `install_git_hook_safe`.
