@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: c9b7eaa
+- **Last Commit Reference**: eaa8819
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -33,7 +33,7 @@
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity Gemini
-- **Last Action Completed**: Completed implementation, verification, and documentation of the Automated Skill Registry. Released version 1.5.0.
+- **Last Action Completed**: Completed implementation, validation, and legacy rules migration of the Workspace Rules Registry. Released version 1.6.0.
 - **Next Planned Action**: None. All sprint tasks completed successfully.
 - **Blockers / Runtime Notes**: Workspace validated and clean. All locks released.
 
