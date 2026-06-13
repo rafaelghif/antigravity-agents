@@ -254,6 +254,38 @@ else
     echo "  [PASS] No active token budget file or jq tool found. Bypassing check."
 fi
 
+# 10. Check ADR Compliance Check
+echo "Check 10: ADR Compliance Check"
+ADR_ERRORS=0
+if [ -f ".agents/adr.md" ]; then
+    if [ -d ".agents/adrs" ]; then
+        for adr_file in .agents/adrs/*.md; do
+            if [ -f "$adr_file" ]; then
+                base_name=$(basename "$adr_file")
+                # Verify registration in adr.md
+                if ! grep -q "$base_name" ".agents/adr.md"; then
+                    echo "  [FAIL] Architectural Decision Record file '$base_name' is NOT registered in '.agents/adr.md'!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+                # Check for placeholders
+                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder)!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+            fi
+        done
+    fi
+else
+    echo "  [FAIL] Primary ADR index '.agents/adr.md' is missing!"
+    ADR_ERRORS=$((ADR_ERRORS + 1))
+fi
+
+if [ "$ADR_ERRORS" -eq 0 ]; then
+    echo "  [PASS] All Architectural Decision Records are correctly indexed and complete."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"

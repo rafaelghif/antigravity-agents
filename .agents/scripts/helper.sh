@@ -30,6 +30,7 @@ show_help() {
     echo "  list-rules        Audit and list all workspace rules for compliance"
     echo "  log-usage         Log token usage stats to token_budget.json"
     echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
+    echo "  create-adr        Scaffold a new Architectural Decision Record under .agents/adrs/"
     echo "  help              Show this help message"
 }
 
@@ -2783,6 +2784,86 @@ cmd_log_usage() {
     fi
 }
 
+cmd_create_adr() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: $0 create-adr <title> [proposed|accepted|superseded]"
+        exit 1
+    fi
+    local title="$2"
+    local status="${3:-proposed}"
+    
+    # Normalize status to lowercase
+    status=$(echo "$status" | tr '[:upper:]' '[:lower:]')
+    
+    if [ "$status" != "proposed" ] && [ "$status" != "accepted" ] && [ "$status" != "superseded" ]; then
+        echo "Error: Status must be one of: proposed, accepted, superseded" >&2
+        exit 1
+    fi
+    
+    # Capitalize status for presentation (Proposed, Accepted, Superseded)
+    local status_cap
+    if [ "$status" = "proposed" ]; then
+        status_cap="Proposed"
+    elif [ "$status" = "accepted" ]; then
+        status_cap="Accepted"
+    else
+        status_cap="Superseded"
+    fi
+
+    local adrs_dir=".agents/adrs"
+    mkdir -p "$adrs_dir"
+    
+    # Determine the next ADR number
+    local count=1
+    for f in "$adrs_dir"/[0-9][0-9][0-9]-*.md; do
+        if [ -e "$f" ]; then
+            count=$((count + 1))
+        fi
+    done
+    
+    local num
+    num=$(printf "%03d" "$count")
+    
+    # Convert title to kebab-case for filename (lowercase, replace non-alphanumeric with hyphens)
+    local slug
+    slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
+    
+    local filename="$adrs_dir/${num}-${slug}.md"
+    
+    local adr_date
+    adr_date=$(date +%Y-%m-%d)
+    
+    # Write ADR template
+    cat << INNER_EOF > "$filename"
+# ADR-${num}: ${title}
+
+- **Date**: ${adr_date}
+- **Status**: ${status_cap}
+
+## Context
+[Describe the problem context and alternatives]
+
+## Decision
+[Describe the decision made]
+
+## Consequences
+[Describe the result and impact of this decision]
+INNER_EOF
+
+    # Register in .agents/adr.md
+    local index_file=".agents/adr.md"
+    if [ -f "$index_file" ]; then
+        # Check if "## 1. Architectural Decisions Index" exists, if not create it
+        if ! grep -q "## 1. Architectural Decisions Index" "$index_file"; then
+            echo -e "\n## 1. Architectural Decisions Index" >> "$index_file"
+        fi
+        # Append the link
+        echo "- [ADR-${num}: ${title}](file://./adrs/${num}-${slug}.md) - Status: ${status_cap}" >> "$index_file"
+    fi
+    
+    echo "Created ADR-${num} at $filename and registered in $index_file"
+}
+
 cmd_release() {
     if [ $# -lt 2 ]; then
         echo "Usage: $0 release <major|minor|patch>"
@@ -3368,6 +3449,9 @@ case "$1" in
         ;;
     log-usage)
         cmd_log_usage "$@"
+        ;;
+    create-adr)
+        cmd_create_adr "$@"
         ;;
     release)
         cmd_release "$@"

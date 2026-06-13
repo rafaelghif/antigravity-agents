@@ -136,6 +136,7 @@ mkdir -p .agents/schemas
 mkdir -p .agents/scripts
 mkdir -p .agents/hooks
 mkdir -p .agents/rules
+mkdir -p .agents/adrs
 mkdir -p .github/workflows
 
 # Check for legacy rules folder and migrate
@@ -421,17 +422,25 @@ EOF
 
 # 7. Write .agents/adr.md template
 write_template_safe ".agents/adr.md" << 'EOF'
-# Architectural Decision Records (ADR)
+# Architectural Decision Records (ADR) - Index Map
 
 This document registers the historical technical design decisions, rationales, and consequences accepted in this project.
 
 ---
 
-### ADR-001: [Title of Decision]
-- **Status**: [Proposed / Accepted / Superceded]
-- **Context**: [Describe the problem context and alternatives]
-- **Decision**: [Describe the decision made]
-- **Consequences**: [Describe the result and impact of this decision]
+## 1. Architectural Decisions Index
+- [ADR-001: Initial Workspace Protocol Adoption](file://./adrs/001-initial-workspace-protocol.md) - Status: Accepted
+EOF
+
+# 7.2 Write .agents/adrs/001-initial-workspace-protocol.md template
+write_template_safe ".agents/adrs/001-initial-workspace-protocol.md" << 'EOF'
+# ADR-001: Initial Workspace Protocol Adoption
+
+- **Date**: 2026-06-13
+- **Status**: Accepted
+- **Context**: The workspace needs a structured operational protocol for AI engineering agents to ensure version alignment, zero-hallucination execution, and high token efficiency.
+- **Decision**: Adopt the Antigravity Agent Core (AAC) protocol, establishing `AGENTS.md` and the `.agents/` structure containing locks, rules, schemas, and active task memory ledgers.
+- **Consequences**: Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
 EOF
 
 # 7.1 Write .github/workflows/antigravity.yml template
@@ -845,6 +854,7 @@ show_help() {
     echo "  list-rules        Audit and list all workspace rules for compliance"
     echo "  log-usage         Log token usage stats to token_budget.json"
     echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
+    echo "  create-adr        Scaffold a new Architectural Decision Record under .agents/adrs/"
     echo "  help              Show this help message"
 }
 
@@ -3598,6 +3608,86 @@ cmd_log_usage() {
     fi
 }
 
+cmd_create_adr() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: $0 create-adr <title> [proposed|accepted|superseded]"
+        exit 1
+    fi
+    local title="$2"
+    local status="${3:-proposed}"
+    
+    # Normalize status to lowercase
+    status=$(echo "$status" | tr '[:upper:]' '[:lower:]')
+    
+    if [ "$status" != "proposed" ] && [ "$status" != "accepted" ] && [ "$status" != "superseded" ]; then
+        echo "Error: Status must be one of: proposed, accepted, superseded" >&2
+        exit 1
+    fi
+    
+    # Capitalize status for presentation (Proposed, Accepted, Superseded)
+    local status_cap
+    if [ "$status" = "proposed" ]; then
+        status_cap="Proposed"
+    elif [ "$status" = "accepted" ]; then
+        status_cap="Accepted"
+    else
+        status_cap="Superseded"
+    fi
+
+    local adrs_dir=".agents/adrs"
+    mkdir -p "$adrs_dir"
+    
+    # Determine the next ADR number
+    local count=1
+    for f in "$adrs_dir"/[0-9][0-9][0-9]-*.md; do
+        if [ -e "$f" ]; then
+            count=$((count + 1))
+        fi
+    done
+    
+    local num
+    num=$(printf "%03d" "$count")
+    
+    # Convert title to kebab-case for filename (lowercase, replace non-alphanumeric with hyphens)
+    local slug
+    slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
+    
+    local filename="$adrs_dir/${num}-${slug}.md"
+    
+    local adr_date
+    adr_date=$(date +%Y-%m-%d)
+    
+    # Write ADR template
+    cat << INNER_EOF > "$filename"
+# ADR-${num}: ${title}
+
+- **Date**: ${adr_date}
+- **Status**: ${status_cap}
+
+## Context
+[Describe the problem context and alternatives]
+
+## Decision
+[Describe the decision made]
+
+## Consequences
+[Describe the result and impact of this decision]
+INNER_EOF
+
+    # Register in .agents/adr.md
+    local index_file=".agents/adr.md"
+    if [ -f "$index_file" ]; then
+        # Check if "## 1. Architectural Decisions Index" exists, if not create it
+        if ! grep -q "## 1. Architectural Decisions Index" "$index_file"; then
+            echo -e "\n## 1. Architectural Decisions Index" >> "$index_file"
+        fi
+        # Append the link
+        echo "- [ADR-${num}: ${title}](file://./adrs/${num}-${slug}.md) - Status: ${status_cap}" >> "$index_file"
+    fi
+    
+    echo "Created ADR-${num} at $filename and registered in $index_file"
+}
+
 cmd_release() {
     if [ $# -lt 2 ]; then
         echo "Usage: $0 release <major|minor|patch>"
@@ -4183,6 +4273,9 @@ case "$1" in
         ;;
     log-usage)
         cmd_log_usage "$@"
+        ;;
+    create-adr)
+        cmd_create_adr "$@"
         ;;
     release)
         cmd_release "$@"
@@ -4884,8 +4977,38 @@ if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
             echo "  [PASS] Token usage is within safe budget limits."
         fi
     fi
+fi
+
+# 10. Check ADR Compliance Check
+echo "Check 10: ADR Compliance Check"
+ADR_ERRORS=0
+if [ -f ".agents/adr.md" ]; then
+    if [ -d ".agents/adrs" ]; then
+        for adr_file in .agents/adrs/*.md; do
+            if [ -f "$adr_file" ]; then
+                base_name=$(basename "$adr_file")
+                # Verify registration in adr.md
+                if ! grep -q "$base_name" ".agents/adr.md"; then
+                    echo "  [FAIL] Architectural Decision Record file '$base_name' is NOT registered in '.agents/adr.md'!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+                # Check for placeholders
+                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder)!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+            fi
+        done
+    fi
 else
-    echo "  [PASS] No active token budget file or jq tool found. Bypassing check."
+    echo "  [FAIL] Primary ADR index '.agents/adr.md' is missing!"
+    ADR_ERRORS=$((ADR_ERRORS + 1))
+fi
+
+if [ "$ADR_ERRORS" -eq 0 ]; then
+    echo "  [PASS] All Architectural Decision Records are correctly indexed and complete."
+else
+    FAILED=1
 fi
 
 echo "=========================================================="

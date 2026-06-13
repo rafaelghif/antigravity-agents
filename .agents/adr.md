@@ -1,11 +1,9 @@
-# Architectural Decision Records (ADR)
+# Architectural Decision Records (ADR) - Index Map
 
 This document registers the historical technical design decisions, rationales, and consequences accepted in this project.
 
 ---
 
-### ADR-001: [Title of Decision]
-- **Status**: [Proposed / Accepted / Superceded]
-- **Context**: [Describe the problem context and alternatives]
-- **Decision**: [Describe the decision made]
-- **Consequences**: [Describe the result and impact of this decision]
+## 1. Architectural Decisions Index
+- [ADR-001: Initial Workspace Protocol Adoption](file://./adrs/001-initial-workspace-protocol.md) - Status: Accepted
+- [ADR-002: Introduce Modular ADRs and Validation](file://./adrs/002-introduce-modular-adrs-and-validation.md) - Status: Accepted
