@@ -156,6 +156,13 @@ Keeps multiple agents, developers, and distinct user accounts 100% aligned and i
 - **Sub-Project Module Locks**: Prevents overlapping edits on the same directory by using local locking (`helper.sh lock <path>`). Slash paths are sanitized automatically (e.g., `apps/backend` locks to `apps_backend.lock`).
 - **Pre-Merge Checklist Archival**: Clears active memory checklists and archives them to `archive/` upon branch completion to avoid git merge conflicts.
 
+### 2.6. Docker & Local Infrastructure Provisioning
+Easily containerize and orchestrate your application components and databases:
+- **Dockerfile Generation**: Automatically generates multi-stage, production-ready `Dockerfile` configurations for Next.js, NestJS, Go Gin, FastAPI, and React SPA (served via Nginx).
+- **Docker Compose Orchestration**: Configures a unified `docker-compose.yml` to spin up backend services, frontend services, and persistent database volumes.
+- **Service Sequencing & Healthchecks**: Automatically structures `depends_on` conditions to ensure application containers wait for database healthchecks (e.g., `pg_isready` for PostgreSQL, `mysqladmin ping` for MySQL, or `redis-cli ping` for Redis) to pass before starting.
+- **Port-Clash Prevention**: Intelligently offsets host ports (e.g., mapping host `3001` to frontend `3000`) if backend and frontend containers both default to port `3000`.
+
 ---
 
 ## 3. Step-by-Step Setup Guide

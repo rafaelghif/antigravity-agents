@@ -1029,6 +1029,7 @@ cmd_init() {
     local be_arch_choice="2"
     local fe_choice="1"
     local fe_arch_choice="2"
+    local gen_docker=""
 
     if [ -z "$project_name" ]; then
         read -p "Enter Project Name (default: My Project): " project_name
@@ -1140,6 +1141,13 @@ cmd_init() {
         if [ -z "$scaffold" ]; then scaffold="y"; fi
     else
         scaffold="${7:-}"
+    fi
+
+    if [ -z "${8:-}" ]; then
+        read -p "Generate Dockerfiles and docker-compose.yml? (y/n) (default: y): " gen_docker
+        if [ -z "$gen_docker" ]; then gen_docker="y"; fi
+    else
+        gen_docker="${8:-}"
     fi
 
     # Initialize Git if not present
@@ -2464,6 +2472,438 @@ if __name__ == "__main__":
 PY_EOF
                     echo "Created src/main.py template"
                 fi
+            fi
+        fi
+
+        if [ "$gen_docker" = "y" ] || [ "$gen_docker" = "yes" ]; then
+            echo "Generating Dockerfiles and docker-compose.yml..."
+            
+            # Helper variables for database
+            local db_service=""
+            local db_envs=""
+            local db_depends=""
+            
+            local db_lower
+            db_lower=$(echo "$db_orm" | tr '[:upper:]' '[:lower:]')
+            
+            if [[ "$db_lower" =~ "postgres" ]]; then
+                db_service=$(cat << 'DB_POSTGRES'
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+DB_POSTGRES
+)
+                db_envs="      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres\n      - DB_HOST=postgres\n      - DB_PORT=5432"
+                db_depends="    depends_on:\n      postgres:\n        condition: service_healthy"
+            elif [[ "$db_lower" =~ "mysql" || "$db_lower" =~ "mariadb" ]]; then
+                db_service=$(cat << 'DB_MYSQL'
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+DB_MYSQL
+)
+                db_envs="      - DATABASE_URL=mysql://root:root@mysql:3306/db\n      - DB_HOST=mysql\n      - DB_PORT=3306"
+                db_depends="    depends_on:\n      mysql:\n        condition: service_healthy"
+            elif [[ "$db_lower" =~ "mongo" ]]; then
+                db_service=$(cat << 'DB_MONGO'
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\")' | mongosh localhost:27017/test --quiet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+DB_MONGO
+)
+                db_envs="      - DATABASE_URL=mongodb://mongodb:27017/db\n      - DB_HOST=mongodb\n      - DB_PORT=27017"
+                db_depends="    depends_on:\n      mongodb:\n        condition: service_healthy"
+            elif [[ "$db_lower" =~ "redis" ]]; then
+                db_service=$(cat << 'DB_REDIS'
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+DB_REDIS
+)
+                db_envs="      - REDIS_URL=redis://redis:6379"
+                db_depends="    depends_on:\n      redis:\n        condition: service_healthy"
+            fi
+
+            # 1. Monorepo / Multi-Project Scaffolding
+            if [ "$tech_stack" = "Monorepo" ] || [ "$tech_stack" = "Multi-Project" ]; then
+                local be_dir=""
+                local fe_dir=""
+                local be_port="3000"
+                local fe_port="3000"
+                local be_dockerfile=""
+                local fe_dockerfile=""
+                
+                if [ "$tech_stack" = "Monorepo" ]; then
+                    be_dir="apps/api"
+                    fe_dir="apps/web"
+                    be_port="8080" # Go Gin
+                    fe_port="3000" # Next.js
+                    
+                    be_dockerfile=$(cat << 'MONO_BE'
+FROM golang:1.20-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/main .
+EXPOSE 8080
+CMD ["./main"]
+MONO_BE
+)
+                    fe_dockerfile=$(cat << 'MONO_FE'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+RUN \
+  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+  else npm install; \
+  fi
+COPY . .
+RUN \
+  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
+  else npm run build; \
+  fi
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+CMD ["npm", "start"]
+MONO_FE
+)
+                else
+                    # Multi-Project
+                    be_dir="apps/backend"
+                    fe_dir="apps/frontend"
+                    
+                    # Backend Dockerfile selection
+                    if [ "$be_choice" = "1" ]; then
+                        be_port="3000"
+                        be_dockerfile=$(cat << 'MULTI_NEST'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+CMD ["node", "dist/main"]
+MULTI_NEST
+)
+                    elif [ "$be_choice" = "2" ]; then
+                        be_port="8000"
+                        be_dockerfile=$(cat << 'MULTI_PY'
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+MULTI_PY
+)
+                    elif [ "$be_choice" = "3" ]; then
+                        be_port="8080"
+                        be_dockerfile=$(cat << 'MULTI_GO'
+FROM golang:1.20-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/main .
+EXPOSE 8080
+CMD ["./main"]
+MULTI_GO
+)
+                    fi
+
+                    # Frontend Dockerfile selection
+                    if [ "$fe_choice" = "1" ]; then
+                        fe_port="3000"
+                        fe_dockerfile=$(cat << 'MULTI_NEXT'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+RUN \
+  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+  else npm install; \
+  fi
+COPY . .
+RUN \
+  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
+  else npm run build; \
+  fi
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+CMD ["npm", "start"]
+MULTI_NEXT
+)
+                    elif [ "$fe_choice" = "2" ]; then
+                        fe_port="80"
+                        fe_dockerfile=$(cat << 'MULTI_VITE'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+MULTI_VITE
+)
+                    elif [ "$fe_choice" = "3" ]; then
+                        fe_port="80"
+                        fe_dockerfile=$(cat << 'MULTI_PHP'
+FROM php:8.2-apache
+COPY . /var/www/html/
+RUN chown -R www-data:www-data /var/www/html
+EXPOSE 80
+MULTI_PHP
+)
+                    fi
+                fi
+                
+                # Write Dockerfiles
+                if [ -n "$be_dockerfile" ] && [ -d "$be_dir" ]; then
+                    echo "$be_dockerfile" > "$be_dir/Dockerfile"
+                    echo "  Created $be_dir/Dockerfile"
+                fi
+                if [ -n "$fe_dockerfile" ] && [ -d "$fe_dir" ]; then
+                    echo "$fe_dockerfile" > "$fe_dir/Dockerfile"
+                    echo "  Created $fe_dir/Dockerfile"
+                fi
+
+                # Build docker-compose services
+                local services=""
+                if [ -d "$be_dir" ] && [ "$be_choice" != "4" ]; then
+                    services="${services}\n  backend:\n    build:\n      context: ./${be_dir}\n    ports:\n      - \"${be_port}:${be_port}\"\n"
+                    if [ -n "$db_depends" ]; then
+                        services="${services}$(echo -e "$db_depends")\n"
+                    fi
+                    if [ -n "$db_envs" ]; then
+                        services="${services}    environment:\n$(echo -e "$db_envs")\n"
+                    fi
+                fi
+                
+                if [ -d "$fe_dir" ] && [ "$fe_choice" != "4" ]; then
+                    local host_fe_port="3000"
+                    if [ "$be_choice" != "4" ] && [ "$be_port" = "3000" ]; then
+                        host_fe_port="3001"
+                    fi
+                    services="${services}\n  frontend:\n    build:\n      context: ./${fe_dir}\n    ports:\n      - \"${host_fe_port}:${fe_port}\"\n"
+                    if [ -d "$be_dir" ] && [ "$be_choice" != "4" ]; then
+                        services="${services}    depends_on:\n      backend:\n        condition: service_started\n"
+                        services="${services}    environment:\n      - BACKEND_URL=http://backend:${be_port}\n"
+                    fi
+                fi
+                
+                if [ -n "$db_service" ]; then
+                    services="${services}\n$(echo -e "$db_service")"
+                fi
+                
+                # Write docker-compose.yml
+                cat << 'COMPOSE_MULTI' > docker-compose.yml
+version: '3.8'
+
+services:
+COMPOSE_MULTI
+                echo -e "$services" >> docker-compose.yml
+                cat << 'COMPOSE_VOLUME' >> docker-compose.yml
+
+volumes:
+  pgdata:
+  mysql_data:
+  mongo_data:
+  redis_data:
+COMPOSE_VOLUME
+                echo "  Created docker-compose.yml at root"
+
+            else
+                # 2. Single Project Scaffolding
+                local port="3000"
+                local dockerfile=""
+                
+                if [ "$tech_stack" = "Next.js" ]; then
+                    port="3000"
+                    dockerfile=$(cat << 'SINGLE_NEXT'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+CMD ["npm", "start"]
+SINGLE_NEXT
+)
+                elif [ "$tech_stack" = "Go Gin" ] || [ "$tech_stack" = "Go" ]; then
+                    port="8080"
+                    dockerfile=$(cat << 'SINGLE_GO'
+FROM golang:1.20-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=builder /app/main .
+EXPOSE 8080
+CMD ["./main"]
+SINGLE_GO
+)
+                elif [ "$tech_stack" = "FastAPI" ] || [ "$tech_stack" = "Python" ]; then
+                    port="8000"
+                    dockerfile=$(cat << 'SINGLE_PY'
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+SINGLE_PY
+)
+                elif [ "$tech_stack" = "Node/TypeScript" ]; then
+                    port="3000"
+                    dockerfile=$(cat << 'SINGLE_NODE'
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
+SINGLE_NODE
+)
+                fi
+                
+                if [ -n "$dockerfile" ]; then
+                    echo "$dockerfile" > Dockerfile
+                    echo "  Created Dockerfile"
+                fi
+
+                # Build services for docker-compose.yml
+                local services="  app:\n    build:\n      context: .\n    ports:\n      - \"${port}:${port}\"\n"
+                if [ -n "$db_depends" ]; then
+                    services="${services}$(echo -e "$db_depends")\n"
+                fi
+                if [ -n "$db_envs" ]; then
+                    services="${services}    environment:\n$(echo -e "$db_envs")\n"
+                fi
+                if [ -n "$db_service" ]; then
+                    services="${services}\n$(echo -e "$db_service")"
+                fi
+                
+                # Write docker-compose.yml
+                cat << 'COMPOSE_SINGLE' > docker-compose.yml
+version: '3.8'
+
+services:
+COMPOSE_SINGLE
+                echo -e "$services" >> docker-compose.yml
+                cat << 'COMPOSE_VOLUME' >> docker-compose.yml
+
+volumes:
+  pgdata:
+  mysql_data:
+  mongo_data:
+  redis_data:
+COMPOSE_VOLUME
+                echo "  Created docker-compose.yml"
             fi
         fi
     fi
