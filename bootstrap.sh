@@ -770,6 +770,9 @@ show_help() {
     echo "  unlock [module]   Release a lock on a module"
     echo "  archive           Archive completed sprint tasks and reset memory.md checklist"
     echo "  migrate           Migrate workspace from older agent versions to version 1.4.0"
+    echo "  build             Run monorepo-aware project compilation/build commands"
+    echo "  lint              Run monorepo-aware linter validations on modified folders"
+    echo "  test              Run monorepo-aware testing runner suites on modified folders"
     echo "  help              Show this help message"
 }
 
@@ -796,7 +799,9 @@ cmd_lock() {
         exit 1
     fi
     mkdir -p "$LOCKS_DIR"
-    local lockfile="$LOCKS_DIR/$module.lock"
+    # Replace slashes with underscores for nested monorepo paths
+    local lock_name="${module//\//_}"
+    local lockfile="$LOCKS_DIR/$lock_name.lock"
     if [ -f "$lockfile" ]; then
         echo "Error: Module '$module' is already locked!" >&2
         cat "$lockfile" >&2
@@ -822,13 +827,137 @@ cmd_unlock() {
         echo "Error: Please specify a module name to unlock." >&2
         exit 1
     fi
-    local lockfile="$LOCKS_DIR/$module.lock"
+    # Replace slashes with underscores for nested monorepo paths
+    local lock_name="${module//\//_}"
+    local lockfile="$LOCKS_DIR/$lock_name.lock"
     if [ ! -f "$lockfile" ]; then
         echo "Warning: Module '$module' is not locked." >&2
         exit 0
     fi
     rm -f "$lockfile"
     echo "Released lock for module '$module'"
+}
+
+cmd_build() {
+    local subprojects_file=".agents/subprojects.sh"
+    if [ -f "$subprojects_file" ]; then
+        source "$subprojects_file"
+        echo "Monorepo detected. Running build compilation..."
+        local failed=0
+        for sp in "${SUBPROJECTS[@]}"; do
+            local path=$(echo "$sp" | cut -d'|' -f1)
+            local build_cmd=$(echo "$sp" | cut -d'|' -f3)
+            echo "  Building $path ($build_cmd)..."
+            if ! (cd "$path" && eval "$build_cmd"); then
+                echo "  [FAIL] Build failed in $path" >&2
+                failed=1
+            fi
+        done
+        return $failed
+    else
+        # Fallback to project_rules build command
+        local build_line=$(grep "Build validation" .agents/project_rules.md || echo "")
+        local build_cmd=$(echo "$build_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
+        if [ -n "$build_cmd" ] && [ "$build_cmd" != "echo 'No build command needed'" ]; then
+            eval "$build_cmd"
+        else
+            echo "No build configuration found."
+        fi
+    fi
+}
+
+cmd_lint() {
+    local subprojects_file=".agents/subprojects.sh"
+    if [ -f "$subprojects_file" ]; then
+        source "$subprojects_file"
+        local changed_files=""
+        changed_files=$(git diff --cached --name-only 2>/dev/null || echo "")
+        local failed=0
+        local run_all=0
+        if [ -z "$changed_files" ]; then
+            run_all=1
+            echo "No staged changes detected. Running linter on all monorepo modules..."
+        else
+            echo "Analyzing staged file boundaries for monorepo-aware linting..."
+        fi
+        
+        for sp in "${SUBPROJECTS[@]}"; do
+            local path=$(echo "$sp" | cut -d'|' -f1)
+            local lint_cmd=$(echo "$sp" | cut -d'|' -f5)
+            local should_run=$run_all
+            if [ "$should_run" = "0" ]; then
+                if echo "$changed_files" | grep -q "^$path/"; then
+                    should_run=1
+                fi
+            fi
+            if [ "$should_run" = "1" ]; then
+                echo "  Linting $path ($lint_cmd)..."
+                if ! (cd "$path" && eval "$lint_cmd"); then
+                    echo "  [FAIL] Linter errors found in $path" >&2
+                    failed=1
+                fi
+            else
+                echo "  Skipping $path (no staged modifications)."
+            fi
+        done
+        return $failed
+    else
+        # Fallback to project_rules linter
+        local linter_line=$(grep "Linter command" .agents/project_rules.md || echo "")
+        local linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
+        if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
+            eval "$linter_cmd"
+        else
+            echo "No linter configuration found."
+        fi
+    fi
+}
+
+cmd_test() {
+    local subprojects_file=".agents/subprojects.sh"
+    if [ -f "$subprojects_file" ]; then
+        source "$subprojects_file"
+        local changed_files=""
+        changed_files=$(git diff --cached --name-only 2>/dev/null || echo "")
+        local failed=0
+        local run_all=0
+        if [ -z "$changed_files" ]; then
+            run_all=1
+            echo "No staged changes detected. Running tests on all monorepo modules..."
+        else
+            echo "Analyzing staged file boundaries for monorepo-aware testing..."
+        fi
+        
+        for sp in "${SUBPROJECTS[@]}"; do
+            local path=$(echo "$sp" | cut -d'|' -f1)
+            local test_cmd=$(echo "$sp" | cut -d'|' -f4)
+            local should_run=$run_all
+            if [ "$should_run" = "0" ]; then
+                if echo "$changed_files" | grep -q "^$path/"; then
+                    should_run=1
+                fi
+            fi
+            if [ "$should_run" = "1" ]; then
+                echo "  Testing $path ($test_cmd)..."
+                if ! (cd "$path" && eval "$test_cmd"); then
+                    echo "  [FAIL] Testing suite failed in $path" >&2
+                    failed=1
+                fi
+            else
+                echo "  Skipping $path (no staged modifications)."
+            fi
+        done
+        return $failed
+    else
+        # Fallback to project_rules test runner
+        local test_line=$(grep "Test runner command" .agents/project_rules.md || echo "")
+        local test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
+        if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
+            eval "$test_runner"
+        else
+            echo "No test runner configuration found."
+        fi
+    fi
 }
 
 cmd_archive() {
@@ -910,13 +1039,15 @@ cmd_init() {
         echo "  [4] Node/TypeScript (Generic Node App)"
         echo "  [5] Go (Generic Main App)"
         echo "  [6] Python (Generic Script)"
-        read -p "Select choice [1-6] (default: 1): " stack_choice
+        echo "  [7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)"
+        read -p "Select choice [1-7] (default: 1): " stack_choice
         case "$stack_choice" in
             2) tech_stack="Go Gin" ;;
             3) tech_stack="FastAPI" ;;
             4) tech_stack="Node/TypeScript" ;;
             5) tech_stack="Go" ;;
             6) tech_stack="Python" ;;
+            7) tech_stack="Monorepo" ;;
             1|"") tech_stack="Next.js" ;;
             *) tech_stack="$stack_choice" ;;
         esac
@@ -930,6 +1061,8 @@ cmd_init() {
         default_arch="Clean Architecture"
     elif [ "$tech_stack" = "FastAPI" ]; then
         default_arch="Modular REST"
+    elif [ "$tech_stack" = "Monorepo" ]; then
+        default_arch="Decoupled / Distributed"
     fi
 
     if [ -z "$arch_pattern" ]; then
@@ -1448,6 +1581,435 @@ def test_health_check():
 PY_EOF
             echo "Scaffolded FastAPI application template successfully!"
 
+        elif [ "$tech_stack" = "Monorepo" ]; then
+            # Scaffold Turborepo monorepo structure
+            mkdir -p apps/web apps/api packages/shared
+
+            # Write root pnpm-workspace.yaml
+            cat << 'YAML_EOF' > pnpm-workspace.yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+YAML_EOF
+
+            # Write root turbo.json
+            cat << 'JSON_EOF' > turbo.json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**", "bin/**"]
+    },
+    "lint": {},
+    "test": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+JSON_EOF
+
+            # Write root package.json
+            cat << 'JSON_EOF' > package.json
+{
+  "name": "monorepo-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}
+JSON_EOF
+
+            # ----------------------------------------------------
+            # 1. Apps: apps/web (Next.js)
+            # ----------------------------------------------------
+            mkdir -p apps/web/src/app apps/web/src/components apps/web/src/lib apps/web/tests
+            
+            # package.json for web app
+            cat << 'JSON_EOF' > apps/web/package.json
+{
+  "name": "web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest"
+  },
+  "dependencies": {
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@monorepo/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.3",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4"
+  }
+}
+JSON_EOF
+
+            # next.config.js for web app
+            cat << 'JS_EOF' > apps/web/next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+};
+module.exports = nextConfig;
+JS_EOF
+
+            # tailwind.config.js for web app
+            cat << 'JS_EOF' > apps/web/tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+JS_EOF
+
+            # postcss.config.js for web app
+            cat << 'JS_EOF' > apps/web/postcss.config.js
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+JS_EOF
+
+            # tsconfig.json for web app
+            cat << 'JSON_EOF' > apps/web/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+JSON_EOF
+
+            # jest.config.js for web app
+            cat << 'JS_EOF' > apps/web/jest.config.js
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testMatch: ['**/tests/**/*.test.ts'],
+};
+JS_EOF
+
+            # globals.css for web app
+            cat << 'CSS_EOF' > apps/web/src/app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #020617;
+  color: #f8fafc;
+}
+CSS_EOF
+
+            # layout.tsx for web app
+            cat << 'TSX_EOF' > apps/web/src/app/layout.tsx
+import React from 'react';
+import './globals.css';
+export const metadata = {
+  title: 'Antigravity Monorepo Frontend',
+  description: 'Scaffolded Turborepo Frontend Web Application',
+};
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+TSX_EOF
+
+            # page.tsx for web app
+            cat << 'TSX_EOF' > apps/web/src/app/page.tsx
+import React from 'react';
+import { appName, version } from '@monorepo/shared';
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
+      <div className="max-w-4xl w-full text-center space-y-8">
+        <header className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse">
+            🚀 Antigravity Monorepo Active
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            {appName}
+          </h1>
+          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+            Monorepo Web Client (v{version}) running alongside an isolated Go Gin backend service.
+          </p>
+        </header>
+        <main className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">⚡ Next.js</h2>
+            <p className="text-slate-400 text-sm">
+              Frontend web client running Next.js App Router inside <code className="text-indigo-400">apps/web</code>.
+            </p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">🐹 Go Gin API</h2>
+            <p className="text-slate-400 text-sm">
+              Isolated REST API backend service with Go Gin inside <code className="text-purple-400">apps/api</code>.
+            </p>
+          </div>
+          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">📦 Shared Workspace</h2>
+            <p className="text-slate-400 text-sm">
+              Shared package containing index exports, interfaces, and types inside <code className="text-pink-400">packages/shared</code>.
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+TSX_EOF
+
+            # health route for web app
+            mkdir -p apps/web/src/app/api/health
+            cat << 'TS_EOF' > apps/web/src/app/api/health/route.ts
+import { NextResponse } from 'next/server';
+export async function GET() {
+  return NextResponse.json({
+    status: 'HEALTHY',
+    timestamp: new Date().toISOString(),
+    system: 'Antigravity Monorepo Frontend',
+  });
+}
+TS_EOF
+
+            # tests for web app
+            cat << 'TS_EOF' > apps/web/tests/health.test.ts
+describe('Monorepo Web Client Test Suite', () => {
+  it('should pass initial tests', () => {
+    expect(true).toBe(true);
+  });
+});
+TS_EOF
+
+            # ----------------------------------------------------
+            # 2. Apps: apps/api (Go Gin)
+            # ----------------------------------------------------
+            mkdir -p apps/api/src/cmd/server apps/api/src/internal/controller apps/api/src/internal/config apps/api/tests
+
+            # go.mod for api app
+            cat << 'GO_EOF' > apps/api/go.mod
+module api
+
+go 1.20
+
+require (
+	github.com/gin-gonic/gin v1.9.1
+)
+GO_EOF
+
+            # main.go for api app
+            cat << 'GO_EOF' > apps/api/src/cmd/server/main.go
+package main
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"api/src/internal/config"
+	"api/src/internal/controller"
+	"github.com/gin-gonic/gin"
+)
+func main() {
+	cfg := config.LoadConfig()
+	if cfg.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	r := gin.Default()
+	r.Use(gin.Recovery())
+	healthCtrl := controller.NewHealthController()
+	api := r.Group("/api")
+	{
+		api.GET("/health", healthCtrl.Check)
+	}
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Welcome to Antigravity Go Gin Backend in Monorepo!",
+			"status":  "Active",
+		})
+	})
+	addr := fmt.Sprintf(":%s", cfg.Port)
+	log.Printf("Backend starting on port %s...", cfg.Port)
+	if err := r.Run(addr); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
+}
+GO_EOF
+
+            # config.go for api app
+            cat << 'GO_EOF' > apps/api/src/internal/config/config.go
+package config
+import "os"
+type Config struct {
+	Port string
+	Env  string
+}
+func LoadConfig() *Config {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+	return &Config{
+		Port: port,
+		Env:  env,
+	}
+}
+GO_EOF
+
+            # health_controller.go for api app
+            cat << 'GO_EOF' > apps/api/src/internal/controller/health_controller.go
+package controller
+import (
+	"net/http"
+	"time"
+	"github.com/gin-gonic/gin"
+)
+type HealthController struct{}
+func NewHealthController() *HealthController {
+	return &HealthController{}
+}
+func (h *HealthController) Check(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status":    "HEALTHY",
+		"timestamp": time.Now().Format(time.RFC3339),
+		"system":    "Antigravity Monorepo Backend API",
+	})
+}
+GO_EOF
+
+            # test for api app
+            cat << 'GO_EOF' > apps/api/tests/health_test.go
+package tests
+import (
+	"net/http"
+	"net/http/httptest"
+	"api/src/internal/controller"
+	"testing"
+	"github.com/gin-gonic/gin"
+)
+func TestHealthCheck(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.Default()
+	healthCtrl := controller.NewHealthController()
+	r.GET("/api/health", healthCtrl.Check)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/health", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status code 200, got %d", w.Code)
+	}
+}
+GO_EOF
+
+            # Makefile for api app
+            cat << 'MAKE_EOF' > apps/api/Makefile
+.PHONY: run test build clean
+run:
+	go run src/cmd/server/main.go
+test:
+	go test -v ./tests/...
+build:
+	go build -o bin/server src/cmd/server/main.go
+clean:
+	rm -rf bin/
+MAKE_EOF
+
+            # ----------------------------------------------------
+            # 3. Packages: packages/shared
+            # ----------------------------------------------------
+            cat << 'JSON_EOF' > packages/shared/package.json
+{
+  "name": "@monorepo/shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts"
+}
+JSON_EOF
+
+            cat << 'JS_EOF' > packages/shared/index.js
+module.exports = {
+  appName: "Antigravity Monorepo",
+  version: "1.0.0"
+};
+JS_EOF
+
+            cat << 'TS_EOF' > packages/shared/index.d.ts
+export const appName: string;
+export const version: string;
+TS_EOF
+
+            echo "Scaffolded Monorepo application template successfully!"
+
         else
             # Generic/Basic Scaffolding Fallback
             mkdir -p src tests config
@@ -1933,6 +2495,15 @@ case "$1" in
     migrate)
         cmd_migrate
         ;;
+    build)
+        cmd_build
+        ;;
+    lint)
+        cmd_lint
+        ;;
+    test)
+        cmd_test
+        ;;
     help)
         show_help
         ;;
@@ -1992,93 +2563,170 @@ TEST_CMD="echo 'No test suite found'"
 LINT_CMD="echo 'No linter found'"
 ARCH_PATTERN="Standard Model-View-Controller (MVC)"
 
-if [ -f package.json ]; then
-    TECH_STACK="Node.js"
-    if grep -q '"typescript"' package.json; then
-        TECH_STACK="Node.js (TypeScript)"
-    fi
-    if grep -q '"next"' package.json; then
-        TECH_STACK="Next.js / React"
-        ARCH_PATTERN="Next.js App Router Architecture"
-    elif grep -q '"nest"' package.json; then
-        TECH_STACK="NestJS (TypeScript)"
-        ARCH_PATTERN="Modular NestJS Dependency Injection Architecture"
-    elif grep -q '"react"' package.json; then
-        TECH_STACK="React SPA"
-        ARCH_PATTERN="Component-Driven SPA Architecture"
-    elif grep -q '"express"' package.json; then
-        TECH_STACK="Express API"
-        ARCH_PATTERN="Express Layered Routing Architecture"
-    fi
-    
-    # Extract package.json scripts
-    if grep -q '"build"' package.json; then BUILD_CMD="npm run build"; fi
-    if grep -q '"test"' package.json; then TEST_CMD="npm run test"; fi
-    if grep -q '"lint"' package.json; then LINT_CMD="npm run lint"; fi
-elif [ -f go.mod ]; then
-    TECH_STACK="Go"
-    module_name=$(grep "^module " go.mod | cut -d' ' -f2 || echo "project")
-    TECH_STACK="Go Module: $module_name"
-    ARCH_PATTERN="Hexagonal / Domain-Driven Design in Go"
-    BUILD_CMD="go build ./..."
-    TEST_CMD="go test ./..."
-    LINT_CMD="golangci-lint run"
-    if grep -q "gin-gonic/gin" go.mod; then
-        TECH_STACK="Go (Gin)"
-        ARCH_PATTERN="Clean Architecture REST API"
-        if [ -f Makefile ]; then
-            BUILD_CMD="make build"
-            TEST_CMD="make test"
-        else
-            BUILD_CMD="go build -o bin/server src/cmd/server/main.go"
-            TEST_CMD="go test -v ./tests/..."
-        fi
-    fi
-elif [ -f Cargo.toml ]; then
-    TECH_STACK="Rust"
-    ARCH_PATTERN="Modular Cargo Workspace Architecture"
-    BUILD_CMD="cargo build"
-    TEST_CMD="cargo test"
-    LINT_CMD="cargo clippy"
-elif [ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f Pipfile ]; then
-    TECH_STACK="Python"
-    BUILD_CMD="echo 'No build step required'"
-    
-    if [ -f pyproject.toml ] && grep -q "fastapi" pyproject.toml; then
-        TECH_STACK="Python (FastAPI)"
-        ARCH_PATTERN="Asynchronous layered API structure"
-    elif [ -f requirements.txt ] && grep -q "fastapi" requirements.txt; then
-        TECH_STACK="Python (FastAPI)"
-        ARCH_PATTERN="Asynchronous layered API structure"
-    elif [ -f requirements.txt ] && grep -q "django" requirements.txt; then
-        TECH_STACK="Python (Django)"
-        ARCH_PATTERN="Django MTV Pattern"
-    fi
+IS_MONOREPO=false
+SUBPROJECTS_FILE=".agents/subprojects.sh"
+rm -f "$SUBPROJECTS_FILE"
 
-    if [ -f requirements.txt ] && grep -q "pytest" requirements.txt; then
-        TEST_CMD="pytest"
-    else
-        TEST_CMD="python -m unittest discover"
+# Detect if monorepo
+if [ -f pnpm-workspace.yaml ] || [ -f turbo.json ] || [ -f lerna.json ] || [ -f go.work ] || ( [ -f package.json ] && grep -q '"workspaces"' package.json ) || ( [ -f Cargo.toml ] && grep -q "\[workspace\]" Cargo.toml ); then
+    IS_MONOREPO=true
+fi
+
+if [ "$IS_MONOREPO" = "true" ]; then
+    TECH_STACK="Monorepo"
+    ARCH_PATTERN="Decoupled / Distributed Architecture"
+    BUILD_CMD="./.agents/scripts/helper.sh build"
+    TEST_CMD="./.agents/scripts/helper.sh test"
+    LINT_CMD="./.agents/scripts/helper.sh lint"
+    
+    # Discovery loop
+    discovered_projects=""
+    declare -a sp_list=()
+    NL=$'\n'
+    
+    # Find all sub-directories under apps/, packages/, services/ up to 1 level deep
+    for dir in apps/* packages/* services/*; do
+        if [ -d "$dir" ]; then
+            # Signature check in sub-directory
+            sub_stack="Unknown"
+            sub_build="echo 'No build command'"
+            sub_test="echo 'No test command'"
+            sub_lint="echo 'No lint command'"
+            
+            if [ -f "$dir/package.json" ]; then
+                sub_stack="Node.js"
+                if grep -q '"typescript"' "$dir/package.json"; then sub_stack="Node.js (TypeScript)"; fi
+                if grep -q '"next"' "$dir/package.json"; then sub_stack="Next.js"; fi
+                if grep -q '"build"' "$dir/package.json"; then sub_build="npm run build"; else sub_build="echo 'No build step'"; fi
+                if grep -q '"test"' "$dir/package.json"; then sub_test="npm run test"; fi
+                if grep -q '"lint"' "$dir/package.json"; then sub_lint="npm run lint"; fi
+            elif [ -f "$dir/go.mod" ]; then
+                sub_stack="Go"
+                sub_build="go build -o bin/server src/cmd/server/main.go 2>/dev/null || go build ./..."
+                sub_test="go test ./..."
+                sub_lint="golangci-lint run ./..."
+                if [ -f "$dir/Makefile" ]; then
+                    sub_build="make build"
+                    sub_test="make test"
+                fi
+            elif [ -f "$dir/requirements.txt" ] || [ -f "$dir/pyproject.toml" ]; then
+                sub_stack="Python"
+                sub_build="echo 'No build step'"
+                if grep -q "fastapi" "$dir/requirements.txt" 2>/dev/null || grep -q "fastapi" "$dir/pyproject.toml" 2>/dev/null; then
+                    sub_stack="Python (FastAPI)"
+                fi
+                if grep -q "pytest" "$dir/requirements.txt" 2>/dev/null || grep -q "pytest" "$dir/pyproject.toml" 2>/dev/null; then
+                    sub_test="pytest"
+                else
+                    sub_test="python -m unittest discover"
+                fi
+                sub_lint="flake8 . || black --check ."
+            fi
+            
+            if [ "$sub_stack" != "Unknown" ]; then
+                sp_list+=("$dir|$sub_stack|$sub_build|$sub_test|$sub_lint")
+                discovered_projects="${discovered_projects}${NL}  - \`$dir/\` -> $sub_stack"
+            fi
+        fi
+    done
+    
+    # Save the subprojects configuration file
+    if [ ${#sp_list[@]} -gt 0 ]; then
+        echo "SUBPROJECTS=(" > "$SUBPROJECTS_FILE"
+        for sp in "${sp_list[@]}"; do
+            echo "  \"$sp\"" >> "$SUBPROJECTS_FILE"
+        done
+        echo ")" >> "$SUBPROJECTS_FILE"
     fi
-    LINT_CMD="flake8 . || black --check ."
-elif [ -f composer.json ]; then
-    TECH_STACK="PHP"
-    if grep -q '"laravel/framework"' composer.json; then
-        TECH_STACK="PHP (Laravel)"
-        ARCH_PATTERN="Laravel MVC / Eloquent Architecture"
+else
+    if [ -f package.json ]; then
+        TECH_STACK="Node.js"
+        if grep -q '"typescript"' package.json; then
+            TECH_STACK="Node.js (TypeScript)"
+        fi
+        if grep -q '"next"' package.json; then
+            TECH_STACK="Next.js / React"
+            ARCH_PATTERN="Next.js App Router Architecture"
+        elif grep -q '"nest"' package.json; then
+            TECH_STACK="NestJS (TypeScript)"
+            ARCH_PATTERN="Modular NestJS Dependency Injection Architecture"
+        elif grep -q '"react"' package.json; then
+            TECH_STACK="React SPA"
+            ARCH_PATTERN="Component-Driven SPA Architecture"
+        elif grep -q '"express"' package.json; then
+            TECH_STACK="Express API"
+            ARCH_PATTERN="Express Layered Routing Architecture"
+        fi
+        
+        # Extract package.json scripts
+        if grep -q '"build"' package.json; then BUILD_CMD="npm run build"; fi
+        if grep -q '"test"' package.json; then TEST_CMD="npm run test"; fi
+        if grep -q '"lint"' package.json; then LINT_CMD="npm run lint"; fi
+    elif [ -f go.mod ]; then
+        TECH_STACK="Go"
+        module_name=$(grep "^module " go.mod | cut -d' ' -f2 || echo "project")
+        TECH_STACK="Go Module: $module_name"
+        ARCH_PATTERN="Hexagonal / Domain-Driven Design in Go"
+        BUILD_CMD="go build ./..."
+        TEST_CMD="go test ./..."
+        LINT_CMD="golangci-lint run"
+        if grep -q "gin-gonic/gin" go.mod; then
+            TECH_STACK="Go (Gin)"
+            ARCH_PATTERN="Clean Architecture REST API"
+            if [ -f Makefile ]; then
+                BUILD_CMD="make build"
+                TEST_CMD="make test"
+            else
+                BUILD_CMD="go build -o bin/server src/cmd/server/main.go"
+                TEST_CMD="go test -v ./tests/..."
+            fi
+        fi
+    elif [ -f Cargo.toml ]; then
+        TECH_STACK="Rust"
+        ARCH_PATTERN="Modular Cargo Workspace Architecture"
+        BUILD_CMD="cargo build"
+        TEST_CMD="cargo test"
+        LINT_CMD="cargo clippy"
+    elif [ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f Pipfile ]; then
+        TECH_STACK="Python"
+        BUILD_CMD="echo 'No build step required'"
+        
+        if [ -f pyproject.toml ] && grep -q "fastapi" pyproject.toml; then
+            TECH_STACK="Python (FastAPI)"
+            ARCH_PATTERN="Asynchronous layered API structure"
+        elif [ -f requirements.txt ] && grep -q "fastapi" requirements.txt; then
+            TECH_STACK="Python (FastAPI)"
+            ARCH_PATTERN="Asynchronous layered API structure"
+        elif [ -f requirements.txt ] && grep -q "django" requirements.txt; then
+            TECH_STACK="Python (Django)"
+            ARCH_PATTERN="Django MTV Pattern"
+        fi
+
+        if [ -f requirements.txt ] && grep -q "pytest" requirements.txt; then
+            TEST_CMD="pytest"
+        else
+            TEST_CMD="python -m unittest discover"
+        fi
+        LINT_CMD="flake8 . || black --check ."
+    elif [ -f composer.json ]; then
+        TECH_STACK="PHP"
+        if grep -q '"laravel/framework"' composer.json; then
+            TECH_STACK="PHP (Laravel)"
+            ARCH_PATTERN="Laravel MVC / Eloquent Architecture"
+        fi
+        BUILD_CMD="composer install"
+        TEST_CMD="vendor/bin/phpunit"
+        LINT_CMD="vendor/bin/php-cs-fixer fix --dry-run"
+    elif [ -f Gemfile ]; then
+        TECH_STACK="Ruby"
+        if grep -q "rails" Gemfile; then
+            TECH_STACK="Ruby on Rails"
+            ARCH_PATTERN="Rails Convention-over-Configuration MVC"
+        fi
+        BUILD_CMD="bundle install"
+        TEST_CMD="bundle exec rake test"
+        LINT_CMD="bundle exec rubocop"
     fi
-    BUILD_CMD="composer install"
-    TEST_CMD="vendor/bin/phpunit"
-    LINT_CMD="vendor/bin/php-cs-fixer fix --dry-run"
-elif [ -f Gemfile ]; then
-    TECH_STACK="Ruby"
-    if grep -q "rails" Gemfile; then
-        TECH_STACK="Ruby on Rails"
-        ARCH_PATTERN="Rails Convention-over-Configuration MVC"
-    fi
-    BUILD_CMD="bundle install"
-    TEST_CMD="bundle exec rake test"
-    LINT_CMD="bundle exec rubocop"
 fi
 
 echo "Detected Stack: $TECH_STACK"
@@ -2089,11 +2737,15 @@ echo "Detected Lint:  $LINT_CMD"
 # 2. Directory Structure Mapping
 NL=$'\n'
 DIRS=""
-for d in src lib app apps controllers views handlers models services repositories routes tests test config pkg cmd; do
-    if [ -d "$d" ]; then
-        DIRS="${DIRS}${NL}  - \`$d/\` -> Project workspace component"
-    fi
-done
+if [ "$IS_MONOREPO" = "true" ]; then
+    DIRS="$discovered_projects"
+else
+    for d in src lib app apps controllers views handlers models services repositories routes tests test config pkg cmd; do
+        if [ -d "$d" ]; then
+            DIRS="${DIRS}${NL}  - \`$d/\` -> Project workspace component"
+        fi
+    done
+fi
 
 if [ -z "$DIRS" ]; then
     DIRS="${NL}  - Root directory contains project files."

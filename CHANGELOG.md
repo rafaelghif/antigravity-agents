@@ -5,9 +5,12 @@ This document tracks all version updates, script refinements, and protocol chang
 ## [1.4.0] - 2026-06-13
 ### Added
 - Added Next.js, Go Gin, and FastAPI boilerplates to the workspace scaffolding wizard (`helper.sh init`).
+- Added a **Monorepo** template option in scaffolding (`helper.sh init`) which sets up a Turborepo + pnpm layout containing Next.js frontend (`apps/web`), Go Gin backend (`apps/api`), and shared workspace packages (`packages/shared`).
 - Added automatic workspace migration utility (`helper.sh migrate`) that safely backs up user settings, updates workspace structures, handles hook alignment, and updates active memory schema configuration.
 - Created standalone `MIGRATION.md` detailing automated and manual workspace upgrades.
-- Enhanced `recon.sh` to natively detect Go Gin modules and configure Makefile or standard go commands in `project_rules.md`.
+- Enhanced `recon.sh` to natively detect monorepos (Turborepo, Yarn/pnpm workspaces, Go workspaces) and configure sub-project mappings inside `.agents/subprojects.sh` and `project_rules.md`.
+- Added monorepo-aware linter, builder, and testing execution inside `helper.sh` (`helper.sh build/lint/test`) which parse subprojects and dynamically execute validations only on directories containing staged modifications.
+- Modified lock/unlock command to sanitize slash paths in module names (e.g., `apps/backend` locks as `apps_backend.lock`), avoiding path conflicts.
 
 ### Changed
 - Updated bootstrapper initialization to run autonomous stack discovery with `--force` internally, writing clean, optimized lint, build, and test runner configurations to `project_rules.md`.

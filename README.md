@@ -143,6 +143,19 @@ Ensures strict coding and security practices before code is staged or committed:
 - **Memory Cap Guard**: Keeps `memory.md` under 100 lines for prompt cache hits.
 - **Purity Verifier**: Flags raw environment variable reads (e.g., `process.env` or `os.Getenv`) outside config adapters.
 
+### 2.4. Native Monorepo Support & Directory-Aware Validation
+Antigravity natively supports multi-project repositories (e.g., Turborepo, pnpm workspaces, Yarn workspaces, Go workspaces):
+- **Autonomous Discovery**: The recon engine scans the repository and maps out all nested sub-projects under directories like `apps/`, `packages/`, or `services/`.
+- **Differential Execution**: Linter and test runners analyze staged git file boundaries, executing commands only on directories that contain modifications, preventing redundant runs and minimizing token consumption.
+- **Scaffolding Integration**: The initialization script allows users to scaffold a full Turborepo + pnpm monorepo architecture (Next.js frontend, Go Gin backend API, and shared workspace package) out-of-the-box.
+
+### 2.5. Multi-Agent & Multi-Account Synchronization Protocol
+Keeps multiple agents, developers, and distinct user accounts 100% aligned and in sync:
+- **Git-Backed Single Source of Truth**: Active task checklists (`memory.md`), project blueprints (`project_rules.md`), design decisions (`adr.md`), and domain schemas (`schema.md`, `schemas/`) are committed and tracked in Git. When a developer or agent pulls modifications (`git pull`), the workspace context aligns instantly.
+- **Branch-Aware Upstream Gate**: The validation suite checks if the local repository is behind its remote origin branch. If so, it halts agent execution to prevent code conflicts and split-brain memory states.
+- **Sub-Project Module Locks**: Prevents overlapping edits on the same directory by using local locking (`helper.sh lock <path>`). Slash paths are sanitized automatically (e.g., `apps/backend` locks to `apps_backend.lock`).
+- **Pre-Merge Checklist Archival**: Clears active memory checklists and archives them to `archive/` upon branch completion to avoid git merge conflicts.
+
 ---
 
 ## 3. Step-by-Step Setup Guide
