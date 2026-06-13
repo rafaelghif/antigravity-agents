@@ -24,6 +24,8 @@ show_help() {
     echo "  lint              Run monorepo-aware linter validations on modified folders"
     echo "  test              Run monorepo-aware testing runner suites on modified folders"
     echo "  sync-api          Synchronize API contracts and generate typed TypeScript client"
+    echo "  log-usage         Log token usage stats to token_budget.json"
+    echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
     echo "  help              Show this help message"
 }
 
@@ -2758,6 +2760,88 @@ cmd_log_usage() {
     fi
 }
 
+cmd_release() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: $0 release <major|minor|patch>"
+        exit 1
+    fi
+    local bump_type="$2"
+    local changelog_file="CHANGELOG.md"
+    
+    if [ ! -f "$changelog_file" ]; then
+        echo "Error: CHANGELOG.md not found!"
+        exit 1
+    fi
+    
+    # Extract latest version from CHANGELOG.md (e.g. ## [1.4.0] - 2026-06-13)
+    local current_version
+    current_version=$(grep -m 1 -E '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' "$changelog_file" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+    
+    if [ -z "$current_version" ]; then
+        echo "Error: Could not parse current version from CHANGELOG.md."
+        exit 1
+    fi
+    
+    local major=$(echo "$current_version" | cut -d. -f1)
+    local minor=$(echo "$current_version" | cut -d. -f2)
+    local patch=$(echo "$current_version" | cut -d. -f3)
+    
+    case "$bump_type" in
+        major)
+            major=$((major + 1))
+            minor=0
+            patch=0
+            ;;
+        minor)
+            minor=$((minor + 1))
+            patch=0
+            ;;
+        patch)
+            patch=$((patch + 1))
+            ;;
+        *)
+            echo "Error: Invalid bump type '$bump_type'. Must be major, minor, or patch."
+            exit 1
+            ;;
+    esac
+    
+    local next_version="$major.$minor.$patch"
+    local current_date=$(date +%Y-%m-%d)
+    
+    echo "Bumping version: $current_version -> $next_version ($bump_type)"
+    
+    # 1. Insert new version section at the top of the version list in CHANGELOG.md
+    local temp_changelog=$(mktemp)
+    awk -v next_ver="$next_version" -v date="$current_date" '
+        BEGIN { done = 0 }
+        /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ && done == 0 {
+            print "## [" next_ver "] - " date;
+            print "### Added";
+            print "- ";
+            print "";
+            done = 1
+        }
+        { print }
+    ' "$changelog_file" > "$temp_changelog"
+    
+    # 2. Update version comparison links at the bottom
+    local repo_url="https://github.com/rafaelghif/antigravity-agents"
+    local temp_links=$(mktemp)
+    awk -v next_ver="$next_version" -v curr_ver="$current_version" -v url="$repo_url" '
+        BEGIN { link_inserted = 0 }
+        /^\[[0-9]+\.[0-9]+\.[0-9]+\]:/ && link_inserted == 0 {
+            print "[" next_ver "]: " url "/compare/v" curr_ver "...v" next_ver;
+            link_inserted = 1
+        }
+        { print }
+    ' "$temp_changelog" > "$temp_links"
+    
+    mv "$temp_links" "$changelog_file"
+    rm -f "$temp_changelog"
+    
+    echo "Successfully bumped version to $next_version and updated CHANGELOG.md."
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -2809,6 +2893,9 @@ case "$1" in
         ;;
     log-usage)
         cmd_log_usage "$@"
+        ;;
+    release)
+        cmd_release "$@"
         ;;
     help)
         show_help
