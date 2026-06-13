@@ -2,6 +2,13 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.6.0] - 2026-06-13
+### Added
+- Added **Workspace Rules Registry** feature to scaffold, audit, and manage dynamic coding rules under `.agents/rules/`.
+- Implemented **Legacy rules migration** from the old `.agent/rules/` path to the new `.agents/rules/` path automatically during bootstrap and workspace initialization.
+- Added `./.agents/scripts/helper.sh create-rule <name> <activation> [param]` subcommand to scaffold rule markdown files supporting multiple activation modes (manual, always-on, glob, and model-decision).
+- Added `./.agents/scripts/helper.sh list-rules` subcommand to list all registered rules and audit them for compliance (naming, valid frontmatter, activation configuration parameters, and absence of placeholders).
+
 ## [1.5.0] - 2026-06-13
 ### Added
 - Added **Automated Skill Registry** feature to scaffold, audit, and manage specialized agent skills.
@@ -109,6 +116,7 @@ This document tracks all version updates, script refinements, and protocol chang
 - Module lock validation, credentials scanning, and domain-purity env scanning in `validate.sh`.
 - Tech stack auto-detection in `recon.sh`.
 
+[1.6.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.3.2...v1.4.0

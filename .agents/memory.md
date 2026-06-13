@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 9705235
+- **Last Commit Reference**: c9b7eaa
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,16 +18,17 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Skill Registry Scaffolding
-- **Current Task Target**: Implement create-skill and list-skills commands with agent self-creation capability
+- **Primary Epic**: Workspace Rules Registry
+- **Current Task Target**: Implement create-rule and list-rules commands with legacy migration
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Design skill command structure and verification requirements (including agent self-creation)
-- [x] Implement create-skill command in helper.sh and bootstrap.sh
-- [x] Implement list-skills command and auditor in helper.sh and bootstrap.sh
-- [x] Verify skill creation and compliance checks
-- [x] Update README.md and CHANGELOG.md for skill commands
+- [x] Design rules structure and legacy migration requirements (Aligned via /grill-me)
+- [x] Implement legacy migration logic in bootstrap.sh and helper.sh
+- [x] Implement create-rule command in helper.sh and bootstrap.sh
+- [x] Implement list-rules command and compliance auditor in helper.sh and bootstrap.sh
+- [x] Verify rules creation, migration, and compliance checks
+- [x] Update README.md and CHANGELOG.md for rules commands
 ---
 
 ## 3. Relayed Context & Handover Notes

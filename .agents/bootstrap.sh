@@ -135,6 +135,26 @@ mkdir -p .agents/locks
 mkdir -p .agents/schemas
 mkdir -p .agents/scripts
 mkdir -p .agents/hooks
+mkdir -p .agents/rules
+
+# Check for legacy rules folder and migrate
+if [ -d ".agent/rules" ]; then
+    log_info "Legacy rules folder .agent/rules found. Migrating to .agents/rules/..."
+    if [ "$(ls -A .agent/rules 2>/dev/null)" ]; then
+        cp -r .agent/rules/* .agents/rules/
+        log_info "  - Migrated rule files: $(ls -A .agent/rules | tr '\n' ' ')"
+    fi
+    rm -rf .agent/rules
+    if [ -d ".agent" ] && [ ! "$(ls -A .agent 2>/dev/null)" ]; then
+        rm -rf .agent
+    fi
+    log_success "Migration of legacy rules complete."
+    if [ -f .agents/memory.md ]; then
+        if ! grep -q "Legacy rules migrated" .agents/memory.md; then
+            sed -i '/## 3. Relayed Context/a - **Migration Log**: Legacy rules migrated from .agent/rules to .agents/rules.' .agents/memory.md
+        fi
+    fi
+fi
 
 # 2. Write AGENTS.md (Global Agent Protocol) to project root
 write_template_safe "AGENTS.md" << 'EOF'
@@ -783,6 +803,8 @@ show_help() {
     echo "  sync-api          Synchronize API contracts and generate typed TypeScript client"
     echo "  create-skill      Scaffold a new specialized skill directory"
     echo "  list-skills       Audit and list all registered skills for compliance"
+    echo "  create-rule       Scaffold a new workspace rule file under .agents/rules/"
+    echo "  list-rules        Audit and list all workspace rules for compliance"
     echo "  log-usage         Log token usage stats to token_budget.json"
     echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
     echo "  help              Show this help message"
@@ -3236,6 +3258,25 @@ cmd_migrate() {
     mkdir -p .agents/schemas
     mkdir -p .agents/scripts
     mkdir -p .agents/hooks
+    mkdir -p .agents/rules
+
+    # Check for legacy rules folder and migrate
+    if [ -d ".agent/rules" ]; then
+        echo "Legacy rules folder .agent/rules found. Migrating to .agents/rules/..."
+        if [ "$(ls -A .agent/rules 2>/dev/null)" ]; then
+            cp -r .agent/rules/* .agents/rules/
+        fi
+        rm -rf .agent/rules
+        if [ -d ".agent" ] && [ ! "$(ls -A .agent 2>/dev/null)" ]; then
+            rm -rf .agent
+        fi
+        echo "Migration of legacy rules complete."
+        if [ -f "$MEMORY_FILE" ]; then
+            if ! grep -q "Legacy rules migrated" "$MEMORY_FILE"; then
+                sed -i '/## 3. Relayed Context/a - **Migration Log**: Legacy rules migrated from .agent/rules to .agents/rules.' "$MEMORY_FILE"
+            fi
+        fi
+    fi
 
     # 3. Update Git Hooks
     echo "Updating local Git hooks..."
@@ -3849,6 +3890,210 @@ cmd_list_skills() {
     fi
 }
 
+audit_rule() {
+    local rule_file="$1"
+    local rule_name=$(basename "$rule_file" .md)
+    
+    # Check 1: Must be .md extension
+    if [[ ! "$rule_file" =~ \.md$ ]]; then
+        echo "FAIL: $rule_name is not a markdown file"
+        return 1
+    fi
+    
+    # Check 2: Parse YAML frontmatter
+    local line1=$(head -n 1 "$rule_file" | tr -d '\r')
+    if [ "$line1" != "---" ]; then
+        echo "FAIL: $rule_name does not start with YAML frontmatter delimiter (---)"
+        return 1
+    fi
+    
+    local closing_line=$(grep -n "^---" "$rule_file" | sed -n '2p' | cut -d':' -f1)
+    if [ -z "$closing_line" ]; then
+        echo "FAIL: $rule_name has unclosed YAML frontmatter"
+        return 1
+    fi
+    
+    local frontmatter=$(sed -n "2,$((closing_line - 1))p" "$rule_file")
+    
+    local parsed_name=$(echo "$frontmatter" | grep "^name:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+    local parsed_activation=$(echo "$frontmatter" | grep "^activation:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+    
+    if [ -z "$parsed_name" ]; then
+        echo "FAIL: $rule_name frontmatter missing 'name'"
+        return 1
+    fi
+    
+    if [ -z "$parsed_activation" ]; then
+        echo "FAIL: $rule_name frontmatter missing 'activation'"
+        return 1
+    fi
+    
+    # Check 3: Validate activation parameters
+    case "$parsed_activation" in
+        "Manual"|"Always On")
+            ;;
+        "Glob")
+            local parsed_pattern=$(echo "$frontmatter" | grep "^pattern:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+            if [ -z "$parsed_pattern" ]; then
+                echo "FAIL: $rule_name activation is Glob but missing 'pattern'"
+                return 1
+            fi
+            ;;
+        "Model Decision")
+            local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+            if [ -z "$parsed_desc" ]; then
+                echo "FAIL: $rule_name activation is Model Decision but missing 'description'"
+                return 1
+            fi
+            ;;
+        *)
+            echo "FAIL: $rule_name has invalid activation mode '$parsed_activation'"
+            return 1
+            ;;
+    esac
+    
+    # Check 4: Check for placeholders in rule body
+    if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$rule_file"; then
+        echo "FAIL: $rule_name contains placeholder text (TODO/FIXME/placeholder)"
+        return 1
+    fi
+    
+    # Return activation details for tabulated output
+    local details="$parsed_activation"
+    if [ "$parsed_activation" = "Glob" ]; then
+        local parsed_pattern=$(echo "$frontmatter" | grep "^pattern:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+        details="Glob ($parsed_pattern)"
+    elif [ "$parsed_activation" = "Model Decision" ]; then
+        local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
+        details="Model Decision ($parsed_desc)"
+    fi
+    
+    echo "PASS: $parsed_name ($details)"
+    return 0
+}
+
+cmd_create_rule() {
+    if [ $# -lt 3 ]; then
+        echo "Usage: $0 create-rule <name> <activation> [description_or_pattern]"
+        exit 1
+    fi
+    local name="$2"
+    local activation="$3"
+    local param="${4:-}"
+    
+    if [[ ! "$name" =~ ^[a-z0-9-]+$ ]]; then
+        echo "Error: Rule name must be lowercase kebab-case (e.g., custom-rule-name)." >&2
+        exit 1
+    fi
+    
+    local activation_mode=""
+    case "$activation" in
+        manual) activation_mode="Manual" ;;
+        always-on) activation_mode="Always On" ;;
+        model-decision) activation_mode="Model Decision" ;;
+        glob) activation_mode="Glob" ;;
+        *)
+            echo "Error: Invalid activation mode '$activation'. Must be: manual, always-on, model-decision, or glob." >&2
+            exit 1
+            ;;
+    esac
+    
+    local pattern=""
+    local description=""
+    if [ "$activation_mode" = "Glob" ]; then
+        if [ -z "$param" ]; then
+            echo "Error: Glob activation requires a glob pattern parameter (e.g., 'src/**/*.ts')." >&2
+            exit 1
+        fi
+        pattern="$param"
+    elif [ "$activation_mode" = "Model Decision" ]; then
+        if [ -z "$param" ]; then
+            echo "Error: Model Decision activation requires a natural language description parameter." >&2
+            exit 1
+        fi
+        description="$param"
+    fi
+    
+    local rule_file=".agents/rules/$name.md"
+    if [ -f "$rule_file" ]; then
+        echo "Error: Rule '$name' already exists at $rule_file." >&2
+        exit 1
+    fi
+    
+    mkdir -p ".agents/rules"
+    
+    cat << INNER_EOF > "$rule_file"
+---
+name: $name
+activation: $activation_mode
+$( [ -n "$pattern" ] && echo "pattern: \"$pattern\"" )
+$( [ -n "$description" ] && echo "description: \"$description\"" )
+---
+
+# ${name} Workspace Rule
+
+## Guidelines
+- Define the coding standard or instructions for this rule here.
+- Example: Prefer arrow functions over traditional function syntax.
+INNER_EOF
+
+    echo "Rule '$name' created successfully at $rule_file"
+}
+
+cmd_list_rules() {
+    local rules_dir=".agents/rules"
+    if [ ! -d "$rules_dir" ]; then
+        echo "Error: Rules directory $rules_dir not found." >&2
+        exit 1
+    fi
+    
+    echo "=========================================================="
+    echo "          Antigravity Agent Rules Audit & Registry"
+    echo "=========================================================="
+    
+    local audit_failed=0
+    printf "%-25s | %-12s | %s\n" "Rule Name" "Status" "Activation Mode"
+    echo "----------------------------------------------------------"
+    
+    local file_found=0
+    for file in "$rules_dir"/*; do
+        if [ -f "$file" ]; then
+            file_found=1
+            local rule_name=$(basename "$file")
+            local audit_res
+            local exit_code=0
+            if ! audit_res=$(audit_rule "$file" 2>&1); then
+                exit_code=1
+            fi
+            
+            local status="[PASS]"
+            local detail=""
+            if [ $exit_code -eq 0 ]; then
+                detail=$(echo "$audit_res" | sed -E 's/^PASS: [^ ]+ \((.*)\)/\1/')
+            else
+                status="[FAIL]"
+                detail=$(echo "$audit_res" | sed -E 's/^FAIL: //')
+                audit_failed=$((audit_failed + 1))
+            fi
+            
+            printf "%-25s | %-12s | %s\n" "$rule_name" "$status" "$detail"
+        fi
+    done
+    
+    if [ $file_found -eq 0 ]; then
+        echo "No rules registered in $rules_dir."
+    fi
+    
+    echo "=========================================================="
+    if [ $audit_failed -eq 0 ]; then
+        echo "All rules are compliant and active."
+        return 0
+    else
+        echo "Audit failed! Found $audit_failed non-compliant rule(s)." >&2
+        return 1
+    fi
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -3909,6 +4154,12 @@ case "$1" in
         ;;
     list-skills)
         cmd_list_skills
+        ;;
+    create-rule)
+        cmd_create_rule "$@"
+        ;;
+    list-rules)
+        cmd_list_rules
         ;;
     help)
         show_help

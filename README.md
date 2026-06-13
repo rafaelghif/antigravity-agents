@@ -273,6 +273,8 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `sync-api` | `./.agents/scripts/helper.sh sync-api` | Automatically extracts backend OpenAPI schema and generates a zero-dependency typed TypeScript fetch client in the frontend. |
 | `create-skill` | `./.agents/scripts/helper.sh create-skill <name> [description]` | Scaffolds a new specialized skill directory containing SKILL.md and a Python script template. |
 | `list-skills` | `./.agents/scripts/helper.sh list-skills` | Audits all registered skills in `.agents/skills/` for compliance and lists them. |
+| `create-rule` | `./.agents/scripts/helper.sh create-rule <name> <activation> [param]` | Scaffolds a new workspace rule file under `.agents/rules/` with specified activation mode. |
+| `list-rules` | `./.agents/scripts/helper.sh list-rules` | Audits all registered workspace rules in `.agents/rules/` for compliance and lists them. |
 | `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
@@ -293,6 +295,18 @@ To dynamically extend the agent's capabilities inside this workspace, you (or th
   1. `SKILL.md` exists and starts with a valid YAML frontmatter header containing `name` and `description`.
   2. File body and script source code contain no unresolved placeholder markers (e.g. `TODO`, `FIXME`, or `[placeholder]`).
   3. All referenced scripts listed in the YAML header exist and have executable permissions (`chmod +x`).
+
+### 4.3 Workspace Rules Scaffolding & Auditing (`create-rule` / `list-rules`)
+
+Workspace rules define how coding standards are applied dynamically. The rules reside in the `.agents/rules/` directory (with backward compatibility/automatic migration for `.agent/rules/`):
+
+- **Create Rule**: Run `./.agents/scripts/helper.sh create-rule <name> <activation> [param]`. Scaffolds a new markdown rule file under `.agents/rules/<name>.md`.
+  * Activation modes: `manual`, `always-on`, `glob` (requires glob pattern param), and `model-decision` (requires NL description param).
+- **List & Audit Rules**: Run `./.agents/scripts/helper.sh list-rules`. Audits all registered rule files for compliance:
+  1. Valid `.md` file name extension.
+  2. Valid YAML frontmatter containing `name` and `activation`.
+  3. Correct configuration of activation-dependent parameter (e.g. `pattern` for Glob, `description` for Model Decision).
+  4. Absence of unresolved placeholders (e.g. `TODO`, `FIXME`, `[placeholder]`) in the rule body.
 
 ---
 
