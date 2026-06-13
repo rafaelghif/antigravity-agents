@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: f528435
+- **Last Commit Reference**: ead1a7d
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,22 +18,23 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Contract Synchronization
-- **Current Task Target**: None. Awaiting next sprint target.
+- **Primary Epic**: Skill Registry Scaffolding
+- **Current Task Target**: Implement create-skill and list-skills commands
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement generate-client.js TypeScript client generator
-- [x] Add cmd_sync_api command to helper.sh and bootstrap.sh
-- [x] Verify TypeScript client outputs correct TS types
-- [x] Update README.md and CHANGELOG.md for sync-api
+- [x] Design skill command structure and verification requirements
+- [ ] Implement create-skill command in helper.sh and bootstrap.sh
+- [ ] Implement list-skills command and auditor in helper.sh and bootstrap.sh
+- [ ] Verify skill creation and compliance checks
+- [ ] Update README.md and CHANGELOG.md for skill commands
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity Gemini
-- **Last Action Completed**: Completed the API Contract Synchronization epic, generated test TypeScript clients, and updated all documentation.
-- **Next Planned Action**: Awaiting next user sprint target.
-- **Blockers / Runtime Notes**: None. Lock released.
+- **Last Action Completed**: Completed the /grill-me session and generated the task_skill_registry.md workflow plan.
+- **Next Planned Action**: Implement create-skill and list-skills commands in helper.sh and bootstrap.sh.
+- **Blockers / Runtime Notes**: None. Lock core active.
 
 ---
 
