@@ -197,6 +197,12 @@ cmd_init() {
         chmod +x .git/hooks/post-commit
         echo "Git post-commit hook installed."
     fi
+    if [ -f .agents/hooks/commit-msg ]; then
+        cp .agents/hooks/commit-msg .git/hooks/commit-msg
+        chmod +x .git/hooks/commit-msg
+        echo "Git commit-msg hook installed."
+    fi
+
 
 
     # Scaffolding folders if requested
@@ -336,6 +342,12 @@ cmd_doctor() {
     else
         echo "  [WARNING] Git post-commit hook is missing or not executable."
         echo "            To install: cp .agents/hooks/post-commit .git/hooks/post-commit && chmod +x .git/hooks/post-commit"
+    fi
+    if [ -f .git/hooks/commit-msg ] && [ -x .git/hooks/commit-msg ]; then
+        echo "  [PASS] commit-msg Git hook is installed and executable."
+    else
+        echo "  [WARNING] Git commit-msg hook is missing or not executable."
+        echo "            To install: cp .agents/hooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg"
     fi
     
     # Check helper script executability

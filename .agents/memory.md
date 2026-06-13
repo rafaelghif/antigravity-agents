@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 9d5e1a3
+- **Last Commit Reference**: 5875b8b
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -32,7 +32,11 @@
 - [x] Update README.md with the simplified Git commit workflow and hook automations
 - [x] Implement Check 7 Gitignore Compliance validation check in validate.sh and bootstrap.sh
 - [x] Relocate CHANGELOG.md to project root and update README link
+- [x] Implement Check 8 Memory State Flag Enforcement validation check in validate.sh and bootstrap.sh
+- [x] Create commit-msg Git hook template to validate conventional commit formats
+- [x] Support -Version parameter in bootstrap.ps1 for pinned installation
 - [x] Run validate.sh and commit changes
+
 
 
 

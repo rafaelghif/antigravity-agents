@@ -197,6 +197,32 @@ else
     FAILED=1
 fi
 
+# 8. Check Memory State Flag Enforcement
+echo "Check 8: Memory State Flag Enforcement"
+STATE_ERRORS=0
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+    if [ -f "$MEMORY_FILE" ]; then
+        if grep -Fq -- "- **State Flag**:" "$MEMORY_FILE"; then
+            if ! grep -Ei -- "- \*\*State Flag\*\*:\s*\`?COMPLETED\`?" "$MEMORY_FILE" >/dev/null; then
+                echo "  [FAIL] Commit rejected on branch '$CURRENT_BRANCH' because State Flag is not 'COMPLETED'!"
+                echo "         Please complete your tasks and update memory.md State Flag to 'COMPLETED' first."
+                STATE_ERRORS=$((STATE_ERRORS + 1))
+            fi
+        fi
+    fi
+else
+    echo "  [PASS] Memory state flag checks bypassed on local feature branch '$CURRENT_BRANCH'."
+fi
+
+if [ "$STATE_ERRORS" -eq 0 ]; then
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+        echo "  [PASS] Memory state flag is 'COMPLETED' for production commit."
+    fi
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -205,5 +231,6 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
+
 
 

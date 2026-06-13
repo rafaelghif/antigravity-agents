@@ -1,6 +1,10 @@
 # Antigravity Agent Workspace Bootstrapper for Windows
 # Wrapper script to execute bootstrap.sh inside Git Bash
 
+param (
+    [string]$Version = "main"
+)
+
 $gitBash = "C:\Program Files\Git\bin\bash.exe"
 if (-not (Test-Path $gitBash)) {
     $gitBash = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
@@ -16,9 +20,10 @@ if (Test-Path .\bootstrap.sh) {
     Write-Host "Running local bootstrap.sh via Git Bash..."
     & $gitBash -c "./bootstrap.sh"
 } else {
-    Write-Host "Downloading and running bootstrap.sh via Git Bash..."
-    & $gitBash -c "curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash"
+    Write-Host "Downloading and running bootstrap.sh (version: $Version) via Git Bash..."
+    & $gitBash -c "curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/$Version/bootstrap.sh | bash"
 }
+
 
 # Self-cleanup if run from root and local bootstrap.ps1 exists
 if (Test-Path .\bootstrap.ps1) {

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Git commit-msg hook: Enforce Conventional Commits specification
+set -e
+
+commit_msg_file="$1"
+# Read commit message, ignoring comments
+commit_msg=$(grep -v '^#' "$commit_msg_file" | tr -d '\n' || true)
+
+# Ignore empty messages or automatic merge commits
+if [ -z "$commit_msg" ] || [[ "$commit_msg" =~ ^Merge\ branch ]] || [[ "$commit_msg" =~ ^Merge\ remote-tracking\ branch ]]; then
+    exit 0
+fi
+
+# Conventional Commits regex: type(scope): description
+convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\-\/]+\))?: .+$"
+
+if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
+    echo "==========================================================" >&2
+    echo "  [FAIL] Commit Message Format Rejected!" >&2
+    echo "==========================================================" >&2
+    echo "Your commit message: '$commit_msg'" >&2
+    echo "Does not conform to the Conventional Commits specification." >&2
+    echo "" >&2
+    echo "Standard format: <type>(<scope>): <description>" >&2
+    echo "Example: feat(auth): add google OAuth login flow" >&2
+    echo "Example: fix(db): resolve migration lock issue" >&2
+    echo "" >&2
+    echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, merge" >&2
+    echo "==========================================================" >&2
+    exit 1
+fi

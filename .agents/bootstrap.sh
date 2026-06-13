@@ -1600,6 +1600,32 @@ else
     FAILED=1
 fi
 
+# 8. Check Memory State Flag Enforcement
+echo "Check 8: Memory State Flag Enforcement"
+STATE_ERRORS=0
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+    if [ -f "$MEMORY_FILE" ]; then
+        if grep -Fq -- "- **State Flag**:" "$MEMORY_FILE"; then
+            if ! grep -Ei -- "- \*\*State Flag\*\*:\s*\`?COMPLETED\`?" "$MEMORY_FILE" >/dev/null; then
+                echo "  [FAIL] Commit rejected on branch '$CURRENT_BRANCH' because State Flag is not 'COMPLETED'!"
+                echo "         Please complete your tasks and update memory.md State Flag to 'COMPLETED' first."
+                STATE_ERRORS=$((STATE_ERRORS + 1))
+            fi
+        fi
+    fi
+else
+    echo "  [PASS] Memory state flag checks bypassed on local feature branch '$CURRENT_BRANCH'."
+fi
+
+if [ "$STATE_ERRORS" -eq 0 ]; then
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+        echo "  [PASS] Memory state flag is 'COMPLETED' for production commit."
+    fi
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -1609,6 +1635,7 @@ else
     exit 1
 fi
 EOF
+
 
 
 # 12. Write Git hooks templates
@@ -1667,12 +1694,47 @@ if [ -d .agents/locks ] && [ "$(ls -A .agents/locks)" ]; then
 fi
 EOF
 
+cat << 'EOF' > .agents/hooks/commit-msg
+#!/usr/bin/env bash
+# Git commit-msg hook: Enforce Conventional Commits specification
+set -e
+
+commit_msg_file="$1"
+# Read commit message, ignoring comments
+commit_msg=$(grep -v '^#' "$commit_msg_file" | tr -d '\n' || true)
+
+# Ignore empty messages or automatic merge commits
+if [ -z "$commit_msg" ] || [[ "$commit_msg" =~ ^Merge\ branch ]] || [[ "$commit_msg" =~ ^Merge\ remote-tracking\ branch ]]; then
+    exit 0
+fi
+
+# Conventional Commits regex: type(scope): description
+convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\-\/]+\))?: .+$"
+
+if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
+    echo "==========================================================" >&2
+    echo "  [FAIL] Commit Message Format Rejected!" >&2
+    echo "==========================================================" >&2
+    echo "Your commit message: '$commit_msg'" >&2
+    echo "Does not conform to the Conventional Commits specification." >&2
+    echo "" >&2
+    echo "Standard format: <type>(<scope>): <description>" >&2
+    echo "Example: feat(auth): add google OAuth login flow" >&2
+    echo "Example: fix(db): resolve migration lock issue" >&2
+    echo "" >&2
+    echo "Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, merge" >&2
+    echo "==========================================================" >&2
+    exit 1
+fi
+EOF
+
 if [ -f .agents/bootstrap.sh ]; then chmod +x .agents/bootstrap.sh; fi
 if [ -f .agents/scripts/helper.sh ]; then chmod +x .agents/scripts/helper.sh; fi
 if [ -f .agents/scripts/recon.sh ]; then chmod +x .agents/scripts/recon.sh; fi
 if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi
 if [ -f .agents/hooks/pre-commit ]; then chmod +x .agents/hooks/pre-commit; fi
 if [ -f .agents/hooks/post-commit ]; then chmod +x .agents/hooks/post-commit; fi
+if [ -f .agents/hooks/commit-msg ]; then chmod +x .agents/hooks/commit-msg; fi
 
 if [ -d .git ]; then
     mkdir -p .git/hooks
@@ -1680,8 +1742,11 @@ if [ -d .git ]; then
     chmod +x .git/hooks/pre-commit
     cp .agents/hooks/post-commit .git/hooks/post-commit
     chmod +x .git/hooks/post-commit
-    echo "Git pre-commit and post-commit hooks installed."
+    cp .agents/hooks/commit-msg .git/hooks/commit-msg
+    chmod +x .git/hooks/commit-msg
+    echo "Git pre-commit, post-commit, and commit-msg hooks installed."
 fi
+
 
 
 # Run auto-recon immediately to initialize configuration blueprints
