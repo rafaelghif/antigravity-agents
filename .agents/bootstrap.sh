@@ -443,6 +443,25 @@ write_template_safe ".agents/adrs/001-initial-workspace-protocol.md" << 'EOF'
 - **Consequences**: Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
 EOF
 
+# 7.3 Write .agents/git_profiles.example template
+write_template_safe ".agents/git_profiles.example" << 'EOF'
+# Antigravity Git Profiles Template
+# Copy this file to '.agents/git_profiles' and fill in your git accounts
+# to enable easy profile switching and automated round-robin commit rotation.
+
+# Profile 1 (e.g. Work account)
+work.name=Developer Work Name
+work.email=work@company.com
+
+# Profile 2 (e.g. Personal account)
+personal.name=Developer Personal Name
+personal.email=personal@gmail.com
+
+# Profile 3 (e.g. Side project / alternative account)
+sideproject.name=Side Project Name
+sideproject.email=side@project.com
+EOF
+
 # 7.1 Write .github/workflows/antigravity.yml template
 write_template_safe ".github/workflows/antigravity.yml" << 'EOF'
 name: Antigravity Workspace Validator
