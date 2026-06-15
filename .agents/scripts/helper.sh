@@ -4039,6 +4039,42 @@ cmd_git_profile() {
         profiles_file="$HOME/.git_profiles"
     fi
 
+    # Check if we should rotate manually
+    local is_key_rotate=0
+    if [ -n "$profiles_file" ] && grep -q "^rotate\.name=" "$profiles_file"; then
+        is_key_rotate=1
+    fi
+
+    if ( [ "$name" = "rotate" ] || [ "$name" = "--rotate" ] ) && [ $is_key_rotate -eq 0 ]; then
+        if [ -n "$profiles_file" ] && [ -f "$profiles_file" ]; then
+            local profile_keys
+            profile_keys=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
+            local keys_arr=($profile_keys)
+            local num_profiles=${#keys_arr[@]}
+            if [ $num_profiles -gt 0 ]; then
+                local last_email
+                last_email=$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
+                local selected_idx=0
+                for i in "${!keys_arr[@]}"; do
+                    local p="${keys_arr[$i]}"
+                    local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
+                    if [ "$p_e" = "$last_email" ]; then
+                        selected_idx=$(( (i + 1) % num_profiles ))
+                        break
+                    fi
+                done
+                name="${keys_arr[$selected_idx]}"
+                echo "Rotating local Git profile to: '$name'..."
+            else
+                echo "Error: No profiles defined in $profiles_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: No Git profiles configuration found (.agents/git_profiles) to rotate." >&2
+            exit 1
+        fi
+    fi
+
     # Check if a single argument matches a profile key in the config file
     if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^${name}\.name=" "$profiles_file"; then
         local p_n=$(grep "^${name}\.name=" "$profiles_file" | cut -d'=' -f2-)

@@ -4893,13 +4893,64 @@ cmd_git_profile() {
         profiles_file="$HOME/.git_profiles"
     fi
 
+    # Check if we should rotate manually
+    local is_key_rotate=0
+    if [ -n "$profiles_file" ] && grep -q "^rotate\.name=" "$profiles_file"; then
+        is_key_rotate=1
+    fi
+
+    if ( [ "$name" = "rotate" ] || [ "$name" = "--rotate" ] ) && [ $is_key_rotate -eq 0 ]; then
+        if [ -n "$profiles_file" ] && [ -f "$profiles_file" ]; then
+            local profile_keys
+            profile_keys=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
+            local keys_arr=($profile_keys)
+            local num_profiles=${#keys_arr[@]}
+            if [ $num_profiles -gt 0 ]; then
+                local last_email
+                last_email=$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
+                local selected_idx=0
+                for i in "${!keys_arr[@]}"; do
+                    local p="${keys_arr[$i]}"
+                    local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
+                    if [ "$p_e" = "$last_email" ]; then
+                        selected_idx=$(( (i + 1) % num_profiles ))
+                        break
+                    fi
+                done
+                name="${keys_arr[$selected_idx]}"
+                echo "Rotating local Git profile to: '$name'..."
+            else
+                echo "Error: No profiles defined in $profiles_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: No Git profiles configuration found (.agents/git_profiles) to rotate." >&2
+            exit 1
+        fi
+    fi
+
     # Check if a single argument matches a profile key in the config file
     if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^${name}\.name=" "$profiles_file"; then
         local p_n=$(grep "^${name}\.name=" "$profiles_file" | cut -d'=' -f2-)
         local p_e=$(grep "^${name}\.email=" "$profiles_file" | cut -d'=' -f2-)
+        local p_s=$(grep "^${name}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
         echo "Setting local repository Git configuration to profile '$name'..."
         git config --local user.name "$p_n"
         git config --local user.email "$p_e"
+        if [ -n "$p_s" ]; then
+            local resolved_ssh="$p_s"
+            if [[ "$resolved_ssh" == \~/* ]]; then
+                resolved_ssh="${resolved_ssh/\~/$HOME}"
+            fi
+            if [ -f "$resolved_ssh" ]; then
+                git config --local core.sshCommand "ssh -i \"$p_s\" -o IdentitiesOnly=yes"
+            else
+                echo "  [WARNING] SSH key file at '$p_s' was not found on your system. Bypassing SSH command setup." >&2
+                git config --local --unset core.sshCommand 2>/dev/null || true
+            fi
+        else
+            git config --local --unset core.sshCommand 2>/dev/null || true
+        fi
         echo "  [SUCCESS] Local Git profile updated."
         name=""
         email=""
@@ -4909,6 +4960,7 @@ cmd_git_profile() {
         echo "Setting local repository Git configuration..."
         git config --local user.name "$name"
         git config --local user.email "$email"
+        git config --local --unset core.sshCommand 2>/dev/null || true
         echo "  [SUCCESS] Local Git profile updated."
     elif [ -n "$name" ] || [ -n "$email" ]; then
         if [ -n "$profiles_file" ]; then
@@ -4917,8 +4969,8 @@ cmd_git_profile() {
             echo "Error: Both name and email are required to set a profile." >&2
         fi
         echo "Usage:" >&2
-        echo "  \$0 git-profile [name] [email]   (Set profile directly)" >&2
-        echo "  \$0 git-profile [profile-key]   (Set from profiles config file)" >&2
+        echo "  $0 git-profile [name] [email]   (Set profile directly)" >&2
+        echo "  $0 git-profile [profile-key]   (Set from profiles config file)" >&2
         exit 1
     fi
 
@@ -4927,16 +4979,20 @@ cmd_git_profile() {
     echo "=========================================================="
     local local_name=$(git config --local user.name 2>/dev/null || echo "<not set>")
     local local_email=$(git config --local user.email 2>/dev/null || echo "<not set>")
+    local local_ssh=$(git config --local core.sshCommand 2>/dev/null || echo "<not set>")
     local global_name=$(git config --global user.name 2>/dev/null || echo "<not set>")
     local global_email=$(git config --global user.email 2>/dev/null || echo "<not set>")
+    local global_ssh=$(git config --global core.sshCommand 2>/dev/null || echo "<not set>")
 
     echo "Local Profile (This Repository):"
-    echo "  user.name:  $local_name"
-    echo "  user.email: $local_email"
+    echo "  user.name:        $local_name"
+    echo "  user.email:       $local_email"
+    echo "  core.sshCommand:  $local_ssh"
     echo ""
     echo "Global Profile (Default):"
-    echo "  user.name:  $global_name"
-    echo "  user.email: $global_email"
+    echo "  user.name:        $global_name"
+    echo "  user.email:       $global_email"
+    echo "  core.sshCommand:  $global_ssh"
     echo ""
 
     if [ -f "$profiles_file" ]; then
@@ -4946,7 +5002,12 @@ cmd_git_profile() {
         for p in $profiles; do
             local p_n=$(grep "^${p}\.name=" "$profiles_file" | cut -d'=' -f2-)
             local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
-            echo "  - \$p: \"$p_n\" <$p_e>"
+            local p_s=$(grep "^${p}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
+            if [ -n "$p_s" ]; then
+                echo "  - $p: \"$p_n\" <$p_e> (ssh_key: $p_s)"
+            else
+                echo "  - $p: \"$p_n\" <$p_e>"
+            fi
         done
     fi
     echo "=========================================================="
@@ -5744,6 +5805,59 @@ fi
 
 if [ "$ADR_ERRORS" -eq 0 ]; then
     echo "  [PASS] All Architectural Decision Records are correctly indexed and complete."
+else
+    FAILED=1
+fi
+
+# 11. Check Git Configuration & Profile Compliance
+echo "Check 11: Git Configuration & Profile Compliance"
+GIT_ERRORS=0
+PROFILES_FILE=".agents/git_profiles"
+if [ -f "$PROFILES_FILE" ]; then
+    # Verify profiles syntax and check for missing names/emails
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Ignore comments and empty lines
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+        
+        # Check if the line is a valid key-value pair
+        if [[ "$line" =~ ^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"
+            prop="${BASH_REMATCH[2]}"
+            val="${BASH_REMATCH[3]}"
+            
+            # Check for dummy/placeholder emails in defined profiles
+            if [ "$prop" = "email" ]; then
+                if [[ "$val" =~ ^(work@company\.com|personal@gmail\.com|side@project\.com)$ ]]; then
+                    echo "  [WARNING] Profile '$key' uses a default template email: '$val'."
+                fi
+            fi
+            
+            # Verify if SSH key file path exists if specified
+            if [ "$prop" = "ssh_key" ] && [ -n "$val" ]; then
+                resolved_key="$val"
+                if [[ "$resolved_key" == \~/* ]]; then
+                    resolved_key="${resolved_key/\~/$HOME}"
+                fi
+                if [ ! -f "$resolved_key" ]; then
+                    echo "  [WARNING] Profile '$key' specifies an SSH key file that does not exist: '$val'."
+                fi
+            fi
+        fi
+    done < "$PROFILES_FILE"
+fi
+
+local_name=$(git config --local user.name 2>/dev/null || echo "")
+local_email=$(git config --local user.email 2>/dev/null || echo "")
+if [ -n "$local_name" ] && [ -n "$local_email" ]; then
+    # Warn if local config is a generic template
+    if [[ "$local_email" =~ ^(work@company\.com|personal@gmail\.com|side@project\.com)$ ]]; then
+        echo "  [WARNING] Local Git config user.email uses a placeholder email: '$local_email'."
+    fi
+fi
+
+if [ "$GIT_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Git configurations and profiles are validated."
 else
     FAILED=1
 fi

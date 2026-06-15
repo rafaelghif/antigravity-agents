@@ -293,6 +293,59 @@ else
     FAILED=1
 fi
 
+# 11. Check Git Configuration & Profile Compliance
+echo "Check 11: Git Configuration & Profile Compliance"
+GIT_ERRORS=0
+PROFILES_FILE=".agents/git_profiles"
+if [ -f "$PROFILES_FILE" ]; then
+    # Verify profiles syntax and check for missing names/emails
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Ignore comments and empty lines
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+        
+        # Check if the line is a valid key-value pair
+        if [[ "$line" =~ ^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"
+            prop="${BASH_REMATCH[2]}"
+            val="${BASH_REMATCH[3]}"
+            
+            # Check for dummy/placeholder emails in defined profiles
+            if [ "$prop" = "email" ]; then
+                if [[ "$val" =~ ^(work@company\.com|personal@gmail\.com|side@project\.com)$ ]]; then
+                    echo "  [WARNING] Profile '$key' uses a default template email: '$val'."
+                fi
+            fi
+            
+            # Verify if SSH key file path exists if specified
+            if [ "$prop" = "ssh_key" ] && [ -n "$val" ]; then
+                resolved_key="$val"
+                if [[ "$resolved_key" == \~/* ]]; then
+                    resolved_key="${resolved_key/\~/$HOME}"
+                fi
+                if [ ! -f "$resolved_key" ]; then
+                    echo "  [WARNING] Profile '$key' specifies an SSH key file that does not exist: '$val'."
+                fi
+            fi
+        fi
+    done < "$PROFILES_FILE"
+fi
+
+local_name=$(git config --local user.name 2>/dev/null || echo "")
+local_email=$(git config --local user.email 2>/dev/null || echo "")
+if [ -n "$local_name" ] && [ -n "$local_email" ]; then
+    # Warn if local config is a generic template
+    if [[ "$local_email" =~ ^(work@company\.com|personal@gmail\.com|side@project\.com)$ ]]; then
+        echo "  [WARNING] Local Git config user.email uses a placeholder email: '$local_email'."
+    fi
+fi
+
+if [ "$GIT_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Git configurations and profiles are validated."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
