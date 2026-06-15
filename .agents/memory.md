@@ -18,14 +18,13 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: [Active Epic / Feature Group]
-- **Current Task Target**: [Current target being worked on]
+- **Primary Epic**: Git Multi-Account Configuration
+- **Current Task Target**: Support SSH key rotation for Git profiles
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
+- [x] Support SSH key rotation in helper.sh and bootstrap templates
+- [x] Verify validation and clean workspace
 
 ---
 

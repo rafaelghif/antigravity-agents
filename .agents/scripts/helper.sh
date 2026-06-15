@@ -2994,11 +2994,18 @@ cmd_commit() {
             local selected_profile="${keys_arr[$selected_idx]}"
             local p_name=$(grep "^${selected_profile}\.name=" "$profiles_file" | cut -d'=' -f2-)
             local p_email=$(grep "^${selected_profile}\.email=" "$profiles_file" | cut -d'=' -f2-)
+            local p_ssh=$(grep "^${selected_profile}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
             
             echo "Auto-selecting Git profile: '$selected_profile' (\"$p_name\" <$p_email>) for round-robin commit rotation."
             # Set locally
             git config --local user.name "$p_name"
             git config --local user.email "$p_email"
+            if [ -n "$p_ssh" ]; then
+                echo "Auto-selecting SSH key: '$p_ssh' for profile '$selected_profile'."
+                git config --local core.sshCommand "ssh -i $p_ssh -o IdentitiesOnly=yes"
+            else
+                git config --local --unset core.sshCommand 2>/dev/null || true
+            fi
         fi
     fi
 
@@ -3995,9 +4002,15 @@ cmd_git_profile() {
     if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^${name}\.name=" "$profiles_file"; then
         local p_n=$(grep "^${name}\.name=" "$profiles_file" | cut -d'=' -f2-)
         local p_e=$(grep "^${name}\.email=" "$profiles_file" | cut -d'=' -f2-)
+        local p_s=$(grep "^${name}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
         echo "Setting local repository Git configuration to profile '$name'..."
         git config --local user.name "$p_n"
         git config --local user.email "$p_e"
+        if [ -n "$p_s" ]; then
+            git config --local core.sshCommand "ssh -i $p_s -o IdentitiesOnly=yes"
+        else
+            git config --local --unset core.sshCommand 2>/dev/null || true
+        fi
         echo "  [SUCCESS] Local Git profile updated."
         name=""
         email=""
@@ -4007,6 +4020,7 @@ cmd_git_profile() {
         echo "Setting local repository Git configuration..."
         git config --local user.name "$name"
         git config --local user.email "$email"
+        git config --local --unset core.sshCommand 2>/dev/null || true
         echo "  [SUCCESS] Local Git profile updated."
     elif [ -n "$name" ] || [ -n "$email" ]; then
         if [ -n "$profiles_file" ]; then
@@ -4025,16 +4039,20 @@ cmd_git_profile() {
     echo "=========================================================="
     local local_name=$(git config --local user.name 2>/dev/null || echo "<not set>")
     local local_email=$(git config --local user.email 2>/dev/null || echo "<not set>")
+    local local_ssh=$(git config --local core.sshCommand 2>/dev/null || echo "<not set>")
     local global_name=$(git config --global user.name 2>/dev/null || echo "<not set>")
     local global_email=$(git config --global user.email 2>/dev/null || echo "<not set>")
+    local global_ssh=$(git config --global core.sshCommand 2>/dev/null || echo "<not set>")
 
     echo "Local Profile (This Repository):"
-    echo "  user.name:  $local_name"
-    echo "  user.email: $local_email"
+    echo "  user.name:        $local_name"
+    echo "  user.email:       $local_email"
+    echo "  core.sshCommand:  $local_ssh"
     echo ""
     echo "Global Profile (Default):"
-    echo "  user.name:  $global_name"
-    echo "  user.email: $global_email"
+    echo "  user.name:        $global_name"
+    echo "  user.email:       $global_email"
+    echo "  core.sshCommand:  $global_ssh"
     echo ""
 
     if [ -f "$profiles_file" ]; then
@@ -4044,7 +4062,12 @@ cmd_git_profile() {
         for p in $profiles; do
             local p_n=$(grep "^${p}\.name=" "$profiles_file" | cut -d'=' -f2-)
             local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
-            echo "  - $p: \"$p_n\" <$p_e>"
+            local p_s=$(grep "^${p}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
+            if [ -n "$p_s" ]; then
+                echo "  - $p: \"$p_n\" <$p_e> (ssh_key: $p_s)"
+            else
+                echo "  - $p: \"$p_n\" <$p_e>"
+            fi
         done
     fi
     echo "=========================================================="

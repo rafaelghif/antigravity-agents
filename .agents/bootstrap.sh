@@ -447,19 +447,23 @@ EOF
 write_template_safe ".agents/git_profiles.example" << 'EOF'
 # Antigravity Git Profiles Template
 # Copy this file to '.agents/git_profiles' and fill in your git accounts
-# to enable easy profile switching and automated round-robin commit rotation.
+# to enable easy profile switching, automated round-robin commit rotation, and SSH key rotation.
 
 # Profile 1 (e.g. Work account)
 work.name=Developer Work Name
 work.email=work@company.com
+# Optional: Add SSH key path to automatically rotate SSH authentication for Git operations
+# work.ssh_key=~/.ssh/id_rsa_work
 
 # Profile 2 (e.g. Personal account)
 personal.name=Developer Personal Name
 personal.email=personal@gmail.com
+# personal.ssh_key=~/.ssh/id_rsa_personal
 
 # Profile 3 (e.g. Side project / alternative account)
 sideproject.name=Side Project Name
 sideproject.email=side@project.com
+# sideproject.ssh_key=~/.ssh/id_rsa_side
 EOF
 
 # 7.1 Write .github/workflows/antigravity.yml template
