@@ -123,12 +123,19 @@ fi
 # 5. Check Git Upstream Synchronization
 echo "Check 5: Git Upstream Synchronization Check"
 # Attempt to fetch upstream changes silently to check sync state (gracefully handle failures/offline)
-if command -v timeout >/dev/null 2>&1; then
-    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" timeout 5 git fetch origin >/dev/null 2>&1 || true
-elif command -v gtimeout >/dev/null 2>&1; then
-    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" gtimeout 5 git fetch origin >/dev/null 2>&1 || true
-else
-    GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" git -c transfer.timeout=5 fetch origin >/dev/null 2>&1 || true
+# Use a pure Bash background process watchdog to enforce a strict 5-second timeout and prevent hanging.
+if git remote | grep -q "^origin$"; then
+    (
+        GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes" git -c transfer.timeout=5 fetch origin >/dev/null 2>&1 &
+        cmd_pid=$!
+        (
+            sleep 5
+            kill -0 "$cmd_pid" 2>/dev/null && kill -9 "$cmd_pid" 2>/dev/null || true
+        ) &
+        watchdog_pid=$!
+        wait "$cmd_pid" 2>/dev/null || true
+        kill -9 "$watchdog_pid" 2>/dev/null || true
+    ) || true
 fi
 
 LOCAL=$(git rev-parse HEAD 2>/dev/null || echo "none")
