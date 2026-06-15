@@ -90,7 +90,7 @@ Every code mutation must execute in an atomic, sequential loop:
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
-5. **Commit**: Stage files and execute a standard Git commit using conventional format: `git commit -m "type(scope): description"`.
+5. **Commit**: Stage files and execute the commit using the helper command: `./.agents/scripts/helper.sh commit <type> <scope> "description" [files...]` to enforce automated Git profile and SSH key rotation. **Raw `git commit` is strictly forbidden** for agents and developers to prevent profile or authentication key misalignment.
    - **Automated Validation**: The Git `pre-commit` hook automatically runs `./.agents/scripts/validate.sh` and the project linter/tests. The commit will automatically abort on failure.
    - **Automated Sync & Unlock**: Upon a successful commit, the Git `post-commit` hook automatically updates `memory.md` with the new branch/commit hash and releases all active locks.
 

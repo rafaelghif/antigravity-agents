@@ -48,6 +48,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
   - Technologies/libraries must be documented in `.agents/rules/project_rules.md` and their respective workspace configuration files (`package.json`, `go.mod`, etc.).
   - Architectural decisions must be documented as a new ADR entry in `.agents/adr.md`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked `[/]` at a time across the entire workspace. Do not change a task checklist state to `[x]` until verification has passed and the changes have been staged and committed in the completed state.
+- **Git Profile Rotation Enforcement**: All commits MUST be executed via `./.agents/scripts/helper.sh commit` to enforce round-robin profile and SSH key rotation. Running raw `git commit` directly is prohibited.
 - **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under `## 3. Relayed Context & Handover Notes`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
 
 ## 7. Autonomous Operational Scripts & Commands

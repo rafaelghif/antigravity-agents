@@ -2996,6 +2996,12 @@ cmd_commit() {
             local p_email=$(grep "^${selected_profile}\.email=" "$profiles_file" | cut -d'=' -f2-)
             local p_ssh=$(grep "^${selected_profile}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
             
+            # Strict Validation of profile fields
+            if [ -z "$p_name" ] || [ -z "$p_email" ]; then
+                echo "Error: Profile '$selected_profile' is misconfigured in $profiles_file (name and email are required)." >&2
+                exit 1
+            fi
+
             echo "Auto-selecting Git profile: '$selected_profile' (\"$p_name\" <$p_email>) for round-robin commit rotation."
             # Set locally
             git config --local user.name "$p_name"
@@ -3006,7 +3012,30 @@ cmd_commit() {
             else
                 git config --local --unset core.sshCommand 2>/dev/null || true
             fi
+        else
+            echo "Error: Git profiles file found at $profiles_file but no valid profiles were parsed." >&2
+            exit 1
         fi
+    else
+        # Strict fallback behavior if no profiles file is found
+        local active_name=$(git config user.name 2>/dev/null || echo "")
+        local active_email=$(git config user.email 2>/dev/null || echo "")
+        
+        if [ -z "$active_name" ] || [ -z "$active_email" ]; then
+            echo "Error: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured." >&2
+            echo "  Please set your global Git configuration or copy '.agents/git_profiles.example' to '.agents/git_profiles'." >&2
+            exit 1
+        fi
+
+        # Warn if using generic mock emails to prevent bad commits
+        if [[ "$active_email" =~ ^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$ ]] && [[ "$active_name" =~ ^(Developer|Test|Alice|Bob).* ]]; then
+            echo "Warning: Active Git configuration appears to be using a template or placeholder:" >&2
+            echo "  Name:  $active_name" >&2
+            echo "  Email: $active_email" >&2
+            echo "  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance." >&2
+        fi
+
+        echo "[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"$active_name\" <$active_email>"
     fi
 
     # Conventional Commit Execution
