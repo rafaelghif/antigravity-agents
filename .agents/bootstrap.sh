@@ -1128,7 +1128,8 @@ cmd_init() {
         echo "  [6] Python (Generic Script)"
         echo "  [7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)"
         echo "  [8] Custom Multi-Project / Separate Apps (e.g. apps/backend + apps/frontend)"
-        read -p "Select choice [1-8] (default: 1): " stack_choice
+        echo "  [9] Laravel (PHP MVC Framework)"
+        read -p "Select choice [1-9] (default: 1): " stack_choice
         case "$stack_choice" in
             2) tech_stack="Go Gin" ;;
             3) tech_stack="FastAPI" ;;
@@ -1137,6 +1138,7 @@ cmd_init() {
             6) tech_stack="Python" ;;
             7) tech_stack="Monorepo" ;;
             8) tech_stack="Multi-Project" ;;
+            9) tech_stack="Laravel" ;;
             1|"") tech_stack="Next.js" ;;
             *) tech_stack="$stack_choice" ;;
         esac
@@ -1193,6 +1195,8 @@ cmd_init() {
         default_arch="Modular REST"
     elif [ "$tech_stack" = "Monorepo" ]; then
         default_arch="Decoupled / Distributed"
+    elif [ "$tech_stack" = "Laravel" ]; then
+        default_arch="MVC"
     fi
 
     if [ -z "$arch_pattern" ]; then
@@ -1206,6 +1210,8 @@ cmd_init() {
         default_env="PORT,ENV"
     elif [ "$tech_stack" = "Next.js" ]; then
         default_env="PORT"
+    elif [ "$tech_stack" = "Laravel" ]; then
+        default_env="APP_KEY,DB_CONNECTION,DB_DATABASE"
     fi
 
     if [ -z "$db_orm" ]; then
@@ -2494,6 +2500,523 @@ HTML_EOF
             fi
 
             echo "Scaffolded Custom Multi-Project application template successfully!"
+
+        elif [ "$tech_stack" = "Laravel" ]; then
+            # Scaffold Laravel Full-stack PHP application
+            echo "Scaffolding Laravel Application..."
+            # Create standard Laravel directories
+            mkdir -p app/Http/Controllers app/Models app/Providers bootstrap config database/migrations database/seeders database/factories public resources/views resources/css resources/js routes tests/Feature tests/Unit
+            
+            # Write Controller.php
+            cat << 'PHP_EOF' > app/Http/Controllers/Controller.php
+<?php
++
+namespace App\Http\Controllers;
++
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
++
+class Controller extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+}
+PHP_EOF
+
+            # Write User.php Model
+            cat << 'PHP_EOF' > app/Models/User.php
+<?php
++
+namespace App\Models;
++
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
++
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
++
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
++
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
++
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+}
+PHP_EOF
+
+            # Write composer.json
+            cat << 'JSON_EOF' > composer.json
+{
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.2",
+        "laravel/framework": "^10.0",
+        "laravel/sanctum": "^3.2",
+        "laravel/tinker": "^2.8"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.9.1",
+        "laravel/pint": "^1.0",
+        "laravel/sail": "^1.18",
+        "mockery/mockery": "^1.4.4",
+        "nunomaduro/collision": "^7.0",
+        "phpunit/phpunit": "^10.0",
+        "spatie/laravel-ignition": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+JSON_EOF
+
+            # Write package.json
+            cat << 'JSON_EOF' > package.json
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "axios": "^1.1.2",
+        "laravel-vite-plugin": "^0.7.5",
+        "vite": "^4.0.0"
+    }
+}
+JSON_EOF
+
+            # Write .env.example
+            cat << 'ENV_EOF' > .env.example
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
++
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
++
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=
++
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+ENV_EOF
+
+            cp .env.example .env
+
+            # Write Artisan executable
+            cat << 'ARTISAN_EOF' > artisan
+#!/usr/bin/env php
+<?php
++
+define('LARAVEL_START', microtime(true));
++
+if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
++
+require __DIR__.'/vendor/autoload.php';
++
+$app = require_once __DIR__.'/bootstrap/app.php';
++
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
++
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
++
+$kernel->terminate($input, $status);
++
+exit($status);
+ARTISAN_EOF
+            chmod +x artisan
+
+            # Write bootstrap/app.php
+            cat << 'BOOTSTRAP_EOF' > bootstrap/app.php
+<?php
++
+$app = new Illuminate\Foundation\Application(
+    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+);
++
+$app->singleton(
+    Illuminate\Contracts\Http\Kernel::class,
+    App\Http\Kernel::class
+);
++
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    App\Http\Console\Kernel::class
+);
++
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
++
+return $app;
+BOOTSTRAP_EOF
+
+            # Write App HTTP Kernel, Exceptions, Console, Web routes, Controllers, Welcome views etc.
+            mkdir -p app/Http app/Exceptions app/Console
+            
+            cat << 'KERNEL_EOF' > app/Http/Kernel.php
+<?php
++
+namespace App\Http;
++
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
++
+class Kernel extends HttpKernel
+{
+    protected $middleware = [
+        \Illuminate\Http\Middleware\TrustProxies::class,
+        \Illuminate\Http\Middleware\HandleCors::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
++
+    protected $middlewareGroups = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+        'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+    ];
++
+    protected $middlewareAliases = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+    ];
+}
+KERNEL_EOF
+
+            cat << 'CONSOLE_EOF' > app/Console/Kernel.php
+<?php
++
+namespace App\Console;
++
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
++
+class Kernel extends ConsoleKernel
+{
+    protected function commands(): void
+    {
+        $this->load(__DIR__.'/Commands');
+        require base_path('routes/console.php');
+    }
+}
+CONSOLE_EOF
+
+            cat << 'HANDLER_EOF' > app/Exceptions/Handler.php
+<?php
++
+namespace App\Exceptions;
++
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Throwable;
++
+class Handler extends ExceptionHandler
+{
+    protected $dontFlash = [
+        'current_password',
+        'password',
+        'password_confirmation',
+    ];
++
+    public function register(): void
+    {
+        $this->reportable(function (Throwable $e) {
+            //
+        });
+    }
+}
+HANDLER_EOF
+
+            # Middlewares: app/Http/Middleware/
+            mkdir -p app/Http/Middleware
+            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/TrimStrings.php
+<?php
+namespace App\Http\Middleware;
+use Illuminate\Foundation\Http\Middleware\TrimStrings as Middleware;
+class TrimStrings extends Middleware {}
+MIDDLEWARE_EOF
+
+            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/EncryptCookies.php
+<?php
+namespace App\Http\Middleware;
+use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
+class EncryptCookies extends Middleware {}
+MIDDLEWARE_EOF
+
+            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/VerifyCsrfToken.php
+<?php
+namespace App\Http\Middleware;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+class VerifyCsrfToken extends Middleware {}
+MIDDLEWARE_EOF
+
+            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/Authenticate.php
+<?php
+namespace App\Http\Middleware;
+use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Http\Request;
+class Authenticate extends Middleware {
+    protected function redirectTo(Request $request): ?string {
+        return $request->expectsJson() ? null : route('login');
+    }
+}
+MIDDLEWARE_EOF
+
+            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/RedirectIfAuthenticated.php
+<?php
+namespace App\Http\Middleware;
+use App\Providers\RouteServiceProvider;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+class RedirectIfAuthenticated {
+    public function handle(Request $request, Closure $next, string ...$guards): Response {
+        $guards = empty($guards) ? [null] : $guards;
+        foreach ($guards as $guard) {
+            if (Auth::guard($guard)->check()) {
+                return redirect(RouteServiceProvider::HOME);
+            }
+        }
+        return $next($request);
+    }
+}
+MIDDLEWARE_EOF
+
+            # Providers: app/Providers/
+            mkdir -p app/Providers
+            cat << 'PROVIDER_EOF' > app/Providers/RouteServiceProvider.php
+<?php
++
+namespace App\Providers;
++
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
++
+class RouteServiceProvider extends ServiceProvider
+{
+    public const HOME = '/home';
++
+    public function boot(): void
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
++
+        $this->routes(function () {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
++
+            Route::middleware('web')
+                ->group(base_path('routes/web.php'));
+        });
+    }
+}
+PROVIDER_EOF
+
+            # Write standard routes
+            cat << 'ROUTES_EOF' > routes/web.php
+<?php
++
+use Illuminate\Support\Facades\Route;
++
+Route::get('/', function () {
+    return view('welcome');
+});
+ROUTES_EOF
+
+            cat << 'ROUTES_EOF' > routes/api.php
+<?php
++
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
++
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+ROUTES_EOF
+
+            cat << 'ROUTES_EOF' > routes/console.php
+<?php
++
+use Illuminate\Support\Facades\Artisan;
++
+Artisan::command('inspire', function () {
+    $this->comment(Illuminate\Foundation\Inspiring::quote());
+})->purpose('Display an inspiring quote');
+ROUTES_EOF
+
+            # Write welcome view
+            cat << 'HTML_EOF' > resources/views/welcome.blade.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Laravel Application</title>
+    <style>
+        body {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #f43f5e, #fb7185);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(244, 63, 94, 0.1);
+            color: #f43f5e;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">Laravel 10.x + PHP</div>
+        <h1>🚀 Welcome to Antigravity Laravel</h1>
+        <p>Your production-ready Laravel full-stack MVC application, scaffolded and pre-configured for seamless development with AI coding agents.</p>
+    </div>
+</body>
+</html>
+HTML_EOF
+
+            # Write phpunit.xml
+            cat << 'XML_EOF' > phpunit.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
+XML_EOF
+
+            echo "Scaffolded Laravel application template successfully!"
 
         else
             # Generic/Basic Scaffolding Fallback
