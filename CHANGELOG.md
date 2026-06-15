@@ -2,6 +2,15 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.7.1] - 2026-06-16
+### Added
+- Added `git-profile` command in `helper.sh` (and template inside `bootstrap.sh`) to support switching Git configurations locally for multiple accounts, including reading profile keys from `.agents/git_profiles` or `~/.git_profiles`.
+- Integrated `.agents/git_profiles` in default `.gitignore` configurations to prevent accidental commits of local credentials.
+
+### Fixed
+- Fixed a potential installation hang issue in `validate.sh` / `bootstrap.sh` by introducing a pure-Bash watchdog timer for `git fetch origin`, limiting wait time to 5 seconds without relying on external `timeout` or `gtimeout` commands.
+- Restricted `git fetch origin` in validation checks to only run if a remote named `origin` is actually configured in the Git repository.
+
 ## [1.7.0] - 2026-06-14
 ### Added
 - Added Windows PowerShell compatibility via `.agents/scripts/helper.ps1` command wrapper, allowing seamless script execution for developers working natively on Windows.

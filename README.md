@@ -283,6 +283,7 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `create-rule` | `./.agents/scripts/helper.sh create-rule <name> <activation> [param]` | Scaffolds a new workspace rule file under `.agents/rules/` with specified activation mode. |
 | `list-rules` | `./.agents/scripts/helper.sh list-rules` | Audits all registered workspace rules in `.agents/rules/` for compliance and lists them. |
 | `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
+| `git-profile` | `./.agents/scripts/helper.sh git-profile [key/name] [email]` | Switch or display local repository Git user configuration. Supports pre-defined profiles from `.agents/git_profiles` or `~/.git_profiles`. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
 
@@ -315,7 +316,25 @@ Workspace rules define how coding standards are applied dynamically. The rules r
   3. Correct configuration of activation-dependent parameter (e.g. `pattern` for Glob, `description` for Model Decision).
   4. Absence of unresolved placeholders (e.g. `TODO`, `FIXME`, `[placeholder]`) in the rule body.
 
-### 4.4 Windows PowerShell Wrapper (`helper.ps1`)
+### 4.4 Git Profile Management (`git-profile`)
+
+The `git-profile` command allows developers to switch between multiple Git accounts (names and emails) locally inside the repository. This is useful for developers who work on multiple projects using different accounts (e.g. work vs personal).
+
+- **View Configuration**: Run `./.agents/scripts/helper.sh git-profile` to display active local configurations, global defaults, and available profiles.
+- **Direct Configuration**: Run `./.agents/scripts/helper.sh git-profile "Your Name" "email@example.com"` to set the local configuration directly.
+- **Profiles Config File**: Create a config file at `.agents/git_profiles` (local, automatically gitignored) or `~/.git_profiles` (global) containing flat properties:
+  ```ini
+  work.name=Developer Work
+  work.email=work@company.com
+  personal.name=Developer Personal
+  personal.email=personal@gmail.com
+  ```
+  Then switch profiles instantly using the profile key:
+  ```bash
+  ./.agents/scripts/helper.sh git-profile work
+  ```
+
+### 4.5 Windows PowerShell Wrapper (`helper.ps1`)
 
 For developers working natively on Windows without standard Bash shells, a native PowerShell wrapper is available at `.agents/scripts/helper.ps1`.
 
