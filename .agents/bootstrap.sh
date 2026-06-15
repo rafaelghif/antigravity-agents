@@ -2510,13 +2510,13 @@ HTML_EOF
             # Write Controller.php
             cat << 'PHP_EOF' > app/Http/Controllers/Controller.php
 <?php
-+
+
 namespace App\Http\Controllers;
-+
+
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-+
+
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
@@ -2526,29 +2526,29 @@ PHP_EOF
             # Write User.php Model
             cat << 'PHP_EOF' > app/Models/User.php
 <?php
-+
+
 namespace App\Models;
-+
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-+
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-+
+
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
-+
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
-+
+
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -2650,18 +2650,18 @@ APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
 APP_URL=http://localhost
-+
+
 LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=debug
-+
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=laravel
 DB_USERNAME=root
 DB_PASSWORD=
-+
+
 BROADCAST_DRIVER=log
 CACHE_DRIVER=file
 FILESYSTEM_DISK=local
@@ -2676,26 +2676,26 @@ ENV_EOF
             cat << 'ARTISAN_EOF' > artisan
 #!/usr/bin/env php
 <?php
-+
+
 define('LARAVEL_START', microtime(true));
-+
+
 if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
     require $maintenance;
 }
-+
+
 require __DIR__.'/vendor/autoload.php';
-+
+
 $app = require_once __DIR__.'/bootstrap/app.php';
-+
+
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-+
+
 $status = $kernel->handle(
     $input = new Symfony\Component\Console\Input\ArgvInput,
     new Symfony\Component\Console\Output\ConsoleOutput
 );
-+
+
 $kernel->terminate($input, $status);
-+
+
 exit($status);
 ARTISAN_EOF
             chmod +x artisan
@@ -2703,26 +2703,26 @@ ARTISAN_EOF
             # Write bootstrap/app.php
             cat << 'BOOTSTRAP_EOF' > bootstrap/app.php
 <?php
-+
+
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
-+
+
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class
 );
-+
+
 $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Http\Console\Kernel::class
 );
-+
+
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
-+
+
 return $app;
 BOOTSTRAP_EOF
 
@@ -2731,11 +2731,11 @@ BOOTSTRAP_EOF
             
             cat << 'KERNEL_EOF' > app/Http/Kernel.php
 <?php
-+
+
 namespace App\Http;
-+
+
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-+
+
 class Kernel extends HttpKernel
 {
     protected $middleware = [
@@ -2746,7 +2746,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
-+
+
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -2762,7 +2762,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-+
+
     protected $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
@@ -2773,11 +2773,11 @@ KERNEL_EOF
 
             cat << 'CONSOLE_EOF' > app/Console/Kernel.php
 <?php
-+
+
 namespace App\Console;
-+
+
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-+
+
 class Kernel extends ConsoleKernel
 {
     protected function commands(): void
@@ -2790,12 +2790,12 @@ CONSOLE_EOF
 
             cat << 'HANDLER_EOF' > app/Exceptions/Handler.php
 <?php
-+
+
 namespace App\Exceptions;
-+
+
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-+
+
 class Handler extends ExceptionHandler
 {
     protected $dontFlash = [
@@ -2803,7 +2803,7 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
-+
+
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
@@ -2873,30 +2873,30 @@ MIDDLEWARE_EOF
             mkdir -p app/Providers
             cat << 'PROVIDER_EOF' > app/Providers/RouteServiceProvider.php
 <?php
-+
+
 namespace App\Providers;
-+
+
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-+
+
 class RouteServiceProvider extends ServiceProvider
 {
     public const HOME = '/home';
-+
+
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
-+
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
-+
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -2907,9 +2907,9 @@ PROVIDER_EOF
             # Write standard routes
             cat << 'ROUTES_EOF' > routes/web.php
 <?php
-+
+
 use Illuminate\Support\Facades\Route;
-+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -2917,10 +2917,10 @@ ROUTES_EOF
 
             cat << 'ROUTES_EOF' > routes/api.php
 <?php
-+
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -2928,9 +2928,9 @@ ROUTES_EOF
 
             cat << 'ROUTES_EOF' > routes/console.php
 <?php
-+
+
 use Illuminate\Support\Facades\Artisan;
-+
+
 Artisan::command('inspire', function () {
     $this->comment(Illuminate\Foundation\Inspiring::quote());
 })->purpose('Display an inspiring quote');

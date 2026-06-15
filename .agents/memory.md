@@ -7,8 +7,8 @@
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: main
-- **Last Commit Reference**: 2316afa
+- **Active Branch**: [branch-name]
+- **Last Commit Reference**: [commit-hash]
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,19 +18,22 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Workspace Maintenance
-- **Current Task Target**: Clean workspace memory and prepare repository for github push
+- **Primary Epic**: [Active Epic / Feature Group]
+- **Current Task Target**: [Current target being worked on]
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Clean workspace memory and prepare repository for github push
+- [ ] Implement core logic
+- [ ] Write unit tests
+- [ ] Verify build and tests pass
+
 ---
 
 ## 3. Relayed Context & Handover Notes
-- **Last Active Agent**: Antigravity
-- **Last Action Completed**: Cleaned up active task checklists, workflows, archives, and prepared the repository for github push.
-- **Next Planned Action**: None.
-- **Blockers / Runtime Notes**: Workspace validated.
+- **Last Active Agent**: [agent-id / model]
+- **Last Action Completed**: [brief description of last done action]
+- **Next Planned Action**: [immediate next task to execute]
+- **Blockers / Runtime Notes**: [any active errors, pending verification, or configs]
 
 ---
 
