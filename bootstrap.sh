@@ -3781,6 +3781,51 @@ cmd_commit() {
         fi
     fi
 
+    # Auto-rotate profiles if configured
+    local profiles_file=""
+    if [ -f ".agents/git_profiles" ]; then
+        profiles_file=".agents/git_profiles"
+    elif [ -f "\$HOME/.git_profiles" ]; then
+        profiles_file="\$HOME/.git_profiles"
+    fi
+
+    if [ -n "\$profiles_file" ] && [ -f "\$profiles_file" ]; then
+        # Get list of profile keys
+        local profile_keys
+        profile_keys=\$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "\$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
+        
+        # Convert to array or list
+        local keys_arr=(\$profile_keys)
+        local num_profiles=\${#keys_arr[@]}
+        
+        if [ \$num_profiles -gt 0 ]; then
+            # Get last commit's author email
+            local last_email
+            last_email=\$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
+            
+            local selected_idx=0
+            # Search if last_email matches any profile's email
+            for i in "\${!keys_arr[@]}"; do
+                local p="\${keys_arr[\$i]}"
+                local p_e=\$(grep "^\${p}\.email=" "\$profiles_file" | cut -d'=' -f2-)
+                if [ "\$p_e" = "\$last_email" ]; then
+                    # Select the next profile (round-robin)
+                    selected_idx=\$(( (i + 1) % num_profiles ))
+                    break
+                fi
+            done
+            
+            local selected_profile="\${keys_arr[\$selected_idx]}"
+            local p_name=\$(grep "^\${selected_profile}\.name=" "\$profiles_file" | cut -d'=' -f2-)
+            local p_email=\$(grep "^\${selected_profile}\.email=" "\$profiles_file" | cut -d'=' -f2-)
+            
+            echo "Auto-selecting Git profile: '\$selected_profile' (\"\$p_name\" <\$p_email>) for round-robin commit rotation."
+            # Set locally
+            git config --local user.name "\$p_name"
+            git config --local user.email "\$p_email"
+        fi
+    fi
+
     # Conventional Commit Execution
     local commit_msg="$type($scope): $desc"
     echo "Executing conventional commit: '$commit_msg'..."

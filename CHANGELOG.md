@@ -5,6 +5,7 @@ This document tracks all version updates, script refinements, and protocol chang
 ## [1.7.1] - 2026-06-16
 ### Added
 - Added `git-profile` command in `helper.sh` (and template inside `bootstrap.sh`) to support switching Git configurations locally for multiple accounts, including reading profile keys from `.agents/git_profiles` or `~/.git_profiles`.
+- Added automatic round-robin Git profile commit rotation in `helper.sh commit` (and template inside `bootstrap.sh`) to automatically rotate commit authors among multiple pre-configured profiles, facilitating joint task simulation.
 - Integrated `.agents/git_profiles` in default `.gitignore` configurations to prevent accidental commits of local credentials.
 
 ### Fixed

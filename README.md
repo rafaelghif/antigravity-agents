@@ -333,6 +333,7 @@ The `git-profile` command allows developers to switch between multiple Git accou
   ```bash
   ./.agents/scripts/helper.sh git-profile work
   ```
+- **Automated Round-Robin Commit Rotation**: If multiple profiles are defined in `.agents/git_profiles` or `~/.git_profiles`, running `./.agents/scripts/helper.sh commit` will **automatically rotate** the commit author (round-robin) based on the author of the last commit. This is useful for group tasks where commits need to be distributed among multiple accounts.
 
 ### 4.5 Windows PowerShell Wrapper (`helper.ps1`)
 
