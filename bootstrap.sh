@@ -5010,15 +5010,12 @@ $helperSh = Join-Path $scriptPath "helper.sh"
 # Format target path for Bash environment (ensure Unix style slashes)
 $helperShUnix = $helperSh.Replace('\', '/')
 
-# Forward all arguments exactly as passed
-$forwardArgs = @()
+# Execute helper.sh inside Git Bash, forwarding all arguments exactly
 if ($args) {
-    $forwardArgs += $args
+    & $gitBash $helperShUnix @args
+} else {
+    & $gitBash $helperShUnix
 }
-$forwardArgsStr = [string]::Join(" ", $forwardArgs)
-
-# Execute helper.sh inside Git Bash
-& $gitBash -c "$helperShUnix $forwardArgsStr"
 EOF
 
 # 10. Write recon.sh script
