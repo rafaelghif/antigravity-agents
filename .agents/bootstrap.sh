@@ -855,6 +855,7 @@ show_help() {
     echo "  log-usage         Log token usage stats to token_budget.json"
     echo "  release           Auto-increment version and scaffold next release in CHANGELOG.md"
     echo "  create-adr        Scaffold a new Architectural Decision Record under .agents/adrs/"
+    echo "  git-profile [name] [email] Switch or display local repository Git user configuration"
     echo "  help              Show this help message"
 }
 
@@ -4745,6 +4746,51 @@ cmd_list_rules() {
     fi
 }
 
+cmd_git_profile() {
+    if [ ! -d .git ]; then
+        echo "Error: Not a Git repository." >&2
+        exit 1
+    fi
+
+    local name=""
+    local email=""
+    if [ "${2:-}" = "git-profile" ]; then
+        name="${3:-}"
+        email="${4:-}"
+    else
+        name="${2:-}"
+        email="${3:-}"
+    fi
+
+    if [ -n "$name" ] && [ -n "$email" ]; then
+        echo "Setting local repository Git configuration..."
+        git config --local user.name "$name"
+        git config --local user.email "$email"
+        echo "  [SUCCESS] Local Git profile updated."
+    elif [ -n "$name" ] || [ -n "$email" ]; then
+        echo "Error: Both name and email are required to set a profile." >&2
+        echo "Usage: \$0 git-profile [name] [email]" >&2
+        exit 1
+    fi
+
+    echo "=========================================================="
+    echo "          Current Git User Configuration"
+    echo "=========================================================="
+    local local_name=\$(git config --local user.name 2>/dev/null || echo "<not set>")
+    local local_email=\$(git config --local user.email 2>/dev/null || echo "<not set>")
+    local global_name=\$(git config --global user.name 2>/dev/null || echo "<not set>")
+    local global_email=\$(git config --global user.email 2>/dev/null || echo "<not set>")
+
+    echo "Local Profile (This Repository):"
+    echo "  user.name:  \$local_name"
+    echo "  user.email: \$local_email"
+    echo ""
+    echo "Global Profile (Default):"
+    echo "  user.name:  \$global_name"
+    echo "  user.email: \$global_email"
+    echo "=========================================================="
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -4814,6 +4860,9 @@ case "$1" in
         ;;
     list-rules)
         cmd_list_rules
+        ;;
+    git-profile)
+        cmd_git_profile "$@"
         ;;
     help)
         show_help
