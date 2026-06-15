@@ -3785,44 +3785,44 @@ cmd_commit() {
     local profiles_file=""
     if [ -f ".agents/git_profiles" ]; then
         profiles_file=".agents/git_profiles"
-    elif [ -f "\$HOME/.git_profiles" ]; then
-        profiles_file="\$HOME/.git_profiles"
+    elif [ -f "$HOME/.git_profiles" ]; then
+        profiles_file="$HOME/.git_profiles"
     fi
 
-    if [ -n "\$profiles_file" ] && [ -f "\$profiles_file" ]; then
+    if [ -n "$profiles_file" ] && [ -f "$profiles_file" ]; then
         # Get list of profile keys
         local profile_keys
-        profile_keys=\$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "\$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
+        profile_keys=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
         
         # Convert to array or list
-        local keys_arr=(\$profile_keys)
-        local num_profiles=\${#keys_arr[@]}
+        local keys_arr=($profile_keys)
+        local num_profiles=${#keys_arr[@]}
         
-        if [ \$num_profiles -gt 0 ]; then
+        if [ $num_profiles -gt 0 ]; then
             # Get last commit's author email
             local last_email
-            last_email=\$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
+            last_email=$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
             
             local selected_idx=0
             # Search if last_email matches any profile's email
-            for i in "\${!keys_arr[@]}"; do
-                local p="\${keys_arr[\$i]}"
-                local p_e=\$(grep "^\${p}\.email=" "\$profiles_file" | cut -d'=' -f2-)
-                if [ "\$p_e" = "\$last_email" ]; then
+            for i in "${!keys_arr[@]}"; do
+                local p="${keys_arr[$i]}"
+                local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
+                if [ "$p_e" = "$last_email" ]; then
                     # Select the next profile (round-robin)
-                    selected_idx=\$(( (i + 1) % num_profiles ))
+                    selected_idx=$(( (i + 1) % num_profiles ))
                     break
                 fi
             done
             
-            local selected_profile="\${keys_arr[\$selected_idx]}"
-            local p_name=\$(grep "^\${selected_profile}\.name=" "\$profiles_file" | cut -d'=' -f2-)
-            local p_email=\$(grep "^\${selected_profile}\.email=" "\$profiles_file" | cut -d'=' -f2-)
+            local selected_profile="${keys_arr[$selected_idx]}"
+            local p_name=$(grep "^${selected_profile}\.name=" "$profiles_file" | cut -d'=' -f2-)
+            local p_email=$(grep "^${selected_profile}\.email=" "$profiles_file" | cut -d'=' -f2-)
             
-            echo "Auto-selecting Git profile: '\$selected_profile' (\"\$p_name\" <\$p_email>) for round-robin commit rotation."
+            echo "Auto-selecting Git profile: '$selected_profile' (\"$p_name\" <$p_email>) for round-robin commit rotation."
             # Set locally
-            git config --local user.name "\$p_name"
-            git config --local user.email "\$p_email"
+            git config --local user.name "$p_name"
+            git config --local user.email "$p_email"
         fi
     fi
 
@@ -4818,17 +4818,17 @@ cmd_git_profile() {
     local profiles_file=""
     if [ -f ".agents/git_profiles" ]; then
         profiles_file=".agents/git_profiles"
-    elif [ -f "\$HOME/.git_profiles" ]; then
-        profiles_file="\$HOME/.git_profiles"
+    elif [ -f "$HOME/.git_profiles" ]; then
+        profiles_file="$HOME/.git_profiles"
     fi
 
     # Check if a single argument matches a profile key in the config file
-    if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^\${name}\.name=" "$profiles_file"; then
-        local p_n=\$(grep "^\${name}\.name=" "\$profiles_file" | cut -d'=' -f2-)
-        local p_e=\$(grep "^\${name}\.email=" "\$profiles_file" | cut -d'=' -f2-)
-        echo "Setting local repository Git configuration to profile '\$name'..."
-        git config --local user.name "\$p_n"
-        git config --local user.email "\$p_e"
+    if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^${name}\.name=" "$profiles_file"; then
+        local p_n=$(grep "^${name}\.name=" "$profiles_file" | cut -d'=' -f2-)
+        local p_e=$(grep "^${name}\.email=" "$profiles_file" | cut -d'=' -f2-)
+        echo "Setting local repository Git configuration to profile '$name'..."
+        git config --local user.name "$p_n"
+        git config --local user.email "$p_e"
         echo "  [SUCCESS] Local Git profile updated."
         name=""
         email=""
@@ -4841,7 +4841,7 @@ cmd_git_profile() {
         echo "  [SUCCESS] Local Git profile updated."
     elif [ -n "$name" ] || [ -n "$email" ]; then
         if [ -n "$profiles_file" ]; then
-            echo "Error: Profile '\$name' not found in \$profiles_file." >&2
+            echo "Error: Profile '$name' not found in $profiles_file." >&2
         else
             echo "Error: Both name and email are required to set a profile." >&2
         fi
@@ -4854,28 +4854,28 @@ cmd_git_profile() {
     echo "=========================================================="
     echo "          Current Git User Configuration"
     echo "=========================================================="
-    local local_name=\$(git config --local user.name 2>/dev/null || echo "<not set>")
-    local local_email=\$(git config --local user.email 2>/dev/null || echo "<not set>")
-    local global_name=\$(git config --global user.name 2>/dev/null || echo "<not set>")
-    local global_email=\$(git config --global user.email 2>/dev/null || echo "<not set>")
+    local local_name=$(git config --local user.name 2>/dev/null || echo "<not set>")
+    local local_email=$(git config --local user.email 2>/dev/null || echo "<not set>")
+    local global_name=$(git config --global user.name 2>/dev/null || echo "<not set>")
+    local global_email=$(git config --global user.email 2>/dev/null || echo "<not set>")
 
     echo "Local Profile (This Repository):"
-    echo "  user.name:  \$local_name"
-    echo "  user.email: \$local_email"
+    echo "  user.name:  $local_name"
+    echo "  user.email: $local_email"
     echo ""
     echo "Global Profile (Default):"
-    echo "  user.name:  \$global_name"
-    echo "  user.email: \$global_email"
+    echo "  user.name:  $global_name"
+    echo "  user.email: $global_email"
     echo ""
 
-    if [ -f "\$profiles_file" ]; then
-        echo "Available Profiles (from \$profiles_file):"
+    if [ -f "$profiles_file" ]; then
+        echo "Available Profiles (from $profiles_file):"
         local profiles
-        profiles=\$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "\$profiles_file" | cut -d'.' -f1 | sort -u)
-        for p in \$profiles; do
-            local p_n=\$(grep "^\${p}\.name=" "\$profiles_file" | cut -d'=' -f2-)
-            local p_e=\$(grep "^\${p}\.email=" "\$profiles_file" | cut -d'=' -f2-)
-            echo "  - \$p: \"\$p_n\" <\$p_e>"
+        profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u)
+        for p in $profiles; do
+            local p_n=$(grep "^${p}\.name=" "$profiles_file" | cut -d'=' -f2-)
+            local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
+            echo "  - \$p: \"$p_n\" <$p_e>"
         done
     fi
     echo "=========================================================="
