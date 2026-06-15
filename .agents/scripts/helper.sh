@@ -3007,8 +3007,17 @@ cmd_commit() {
             git config --local user.name "$p_name"
             git config --local user.email "$p_email"
             if [ -n "$p_ssh" ]; then
-                echo "Auto-selecting SSH key: '$p_ssh' for profile '$selected_profile'."
-                git config --local core.sshCommand "ssh -i $p_ssh -o IdentitiesOnly=yes"
+                local resolved_ssh="$p_ssh"
+                if [[ "$resolved_ssh" == \~/* ]]; then
+                    resolved_ssh="${resolved_ssh/\~/$HOME}"
+                fi
+                if [ -f "$resolved_ssh" ]; then
+                    echo "Auto-selecting SSH key: '$p_ssh' for profile '$selected_profile'."
+                    git config --local core.sshCommand "ssh -i \"$p_ssh\" -o IdentitiesOnly=yes"
+                else
+                    echo "Warning: SSH key file at '$p_ssh' specified for profile '$selected_profile' does not exist. Bypassing SSH setup." >&2
+                    git config --local --unset core.sshCommand 2>/dev/null || true
+                fi
             else
                 git config --local --unset core.sshCommand 2>/dev/null || true
             fi
@@ -3022,20 +3031,23 @@ cmd_commit() {
         local active_email=$(git config user.email 2>/dev/null || echo "")
         
         if [ -z "$active_name" ] || [ -z "$active_email" ]; then
-            echo "Error: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured." >&2
-            echo "  Please set your global Git configuration or copy '.agents/git_profiles.example' to '.agents/git_profiles'." >&2
-            exit 1
-        fi
+            # Fall back to a default local-only profile for convenience
+            echo "Warning: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured." >&2
+            echo "  [FALLBACK] Configuring temporary local-only identity: \"Local Developer\" <local-dev@localhost>" >&2
+            git config --local user.name "Local Developer"
+            git config --local user.email "local-dev@localhost"
+            git config --local --unset core.sshCommand 2>/dev/null || true
+        else
+            # Warn if using generic mock emails to prevent bad commits
+            if [[ "$active_email" =~ ^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$ ]] && [[ "$active_name" =~ ^(Developer|Test|Alice|Bob).* ]]; then
+                echo "Warning: Active Git configuration appears to be using a template or placeholder:" >&2
+                echo "  Name:  $active_name" >&2
+                echo "  Email: $active_email" >&2
+                echo "  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance." >&2
+            fi
 
-        # Warn if using generic mock emails to prevent bad commits
-        if [[ "$active_email" =~ ^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$ ]] && [[ "$active_name" =~ ^(Developer|Test|Alice|Bob).* ]]; then
-            echo "Warning: Active Git configuration appears to be using a template or placeholder:" >&2
-            echo "  Name:  $active_name" >&2
-            echo "  Email: $active_email" >&2
-            echo "  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance." >&2
+            echo "[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"$active_name\" <$active_email>"
         fi
-
-        echo "[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"$active_name\" <$active_email>"
     fi
 
     # Conventional Commit Execution
@@ -4036,7 +4048,16 @@ cmd_git_profile() {
         git config --local user.name "$p_n"
         git config --local user.email "$p_e"
         if [ -n "$p_s" ]; then
-            git config --local core.sshCommand "ssh -i $p_s -o IdentitiesOnly=yes"
+            local resolved_ssh="$p_s"
+            if [[ "$resolved_ssh" == \~/* ]]; then
+                resolved_ssh="${resolved_ssh/\~/$HOME}"
+            fi
+            if [ -f "$resolved_ssh" ]; then
+                git config --local core.sshCommand "ssh -i \"$p_s\" -o IdentitiesOnly=yes"
+            else
+                echo "  [WARNING] SSH key file at '$p_s' was not found on your system. Bypassing SSH command setup." >&2
+                git config --local --unset core.sshCommand 2>/dev/null || true
+            fi
         else
             git config --local --unset core.sshCommand 2>/dev/null || true
         fi
