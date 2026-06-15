@@ -283,7 +283,7 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 | `create-rule` | `./.agents/scripts/helper.sh create-rule <name> <activation> [param]` | Scaffolds a new workspace rule file under `.agents/rules/` with specified activation mode. |
 | `list-rules` | `./.agents/scripts/helper.sh list-rules` | Audits all registered workspace rules in `.agents/rules/` for compliance and lists them. |
 | `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
-| `git-profile` | `./.agents/scripts/helper.sh git-profile [key/name] [email]` | Switch or display local repository Git user configuration. Supports pre-defined profiles from `.agents/git_profiles` or `~/.git_profiles`. |
+| `git-profile` | `./.agents/scripts/helper.sh git-profile [key/name] [email]` | Switch or display local repository Git configurations. Supports multiple profiles with name, email, and local SSH key rotation. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
 
@@ -318,22 +318,53 @@ Workspace rules define how coding standards are applied dynamically. The rules r
 
 ### 4.4 Git Profile Management (`git-profile`)
 
-The `git-profile` command allows developers to switch between multiple Git accounts (names and emails) locally inside the repository. This is useful for developers who work on multiple projects using different accounts (e.g. work vs personal).
+The `git-profile` command allows developers to switch between multiple Git accounts (names, emails, and SSH keys) locally inside the repository. This is useful for developers who work on multiple projects using different accounts (e.g. work vs personal) or want to simulate contributions from multiple users.
 
-- **View Configuration**: Run `./.agents/scripts/helper.sh git-profile` to display active local configurations, global defaults, and available profiles.
-- **Direct Configuration**: Run `./.agents/scripts/helper.sh git-profile "Your Name" "email@example.com"` to set the local configuration directly.
-- **Profiles Config File**: Create a config file at `.agents/git_profiles` (local, automatically gitignored) or `~/.git_profiles` (global) containing flat properties:
-  ```ini
-  work.name=Developer Work
-  work.email=work@company.com
-  personal.name=Developer Personal
-  personal.email=personal@gmail.com
-  ```
-  Then switch profiles instantly using the profile key:
+#### A. How it Works
+Git keeps configurations locally inside the `.git/config` folder of your project.
+- **Git Identity**: The tool configures `user.name` and `user.email` locally so they apply *only* to this repository.
+- **SSH Authentication (Private Key)**: If you specify an `ssh_key` path, the tool sets `core.sshCommand = "ssh -i <path> -o IdentitiesOnly=yes"`. This instructs Git to use that specific private key when talking to GitHub (pushing/pulling) for *only* this repository. This prevents SSH key clashes without messing up your global SSH config files!
+
+#### B. Quick Start Guide
+
+##### Step 1: Create your profiles file
+1. Copy the example file to `.agents/git_profiles` (which is already configured in `.gitignore` to keep your private details safe):
+   ```bash
+   cp .agents/git_profiles.example .agents/git_profiles
+   ```
+2. Open `.agents/git_profiles` and fill in your git accounts. You can configure user identity and private keys:
+   ```ini
+   # Profile 1: Work Account
+   work.name=Alice (Work)
+   work.email=alice@company.com
+   work.ssh_key=~/.ssh/id_rsa_work
+
+   # Profile 2: Personal Account
+   personal.name=Alice (Personal)
+   personal.email=alice@gmail.com
+   personal.ssh_key=~/.ssh/id_rsa_personal
+   ```
+
+##### Step 2: Switch accounts
+- **Manual Switch**:
+  To switch the active profile of the current repository to your work account, run:
   ```bash
   ./.agents/scripts/helper.sh git-profile work
   ```
-- **Automated Round-Robin Commit Rotation**: If multiple profiles are defined in `.agents/git_profiles` or `~/.git_profiles`, running `./.agents/scripts/helper.sh commit` will **automatically rotate** the commit author (round-robin) based on the author of the last commit. This is useful for group tasks where commits need to be distributed among multiple accounts.
+  *(This instantly configures Git to commit as Alice and push/pull using `id_rsa_work`)*
+
+- **Check Current Status**:
+  To see which identity and SSH key are currently active in this repository vs your global default settings, run:
+  ```bash
+  ./.agents/scripts/helper.sh git-profile
+  ```
+
+- **Automated Round-Robin Commit Rotation**:
+  If multiple profiles are configured in `.agents/git_profiles`, running:
+  ```bash
+  ./.agents/scripts/helper.sh commit
+  ```
+  will **automatically rotate** the commit author and SSH key (round-robin) based on the author of the last commit. For example, if your last commit was done using `personal`, the next commit will automatically switch to `work`, simulating multiple developers collaborating.
 
 ### 4.5 Windows PowerShell Wrapper (`helper.ps1`)
 
