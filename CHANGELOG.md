@@ -7,6 +7,8 @@ This document tracks all version updates, script refinements, and protocol chang
 - Added `git-profile` command in `helper.sh` (and template inside `bootstrap.sh`) to support switching Git configurations locally for multiple accounts, including reading profile keys from `.agents/git_profiles` or `~/.git_profiles`.
 - Added automatic round-robin Git profile commit rotation in `helper.sh commit` (and template inside `bootstrap.sh`) to automatically rotate commit authors among multiple pre-configured profiles, facilitating joint task simulation.
 - Added optional `ssh_key` configuration to Git profiles to support local SSH key rotation via `core.sshCommand`, letting users push to different GitHub accounts using separate private keys locally.
+- Added a temporary local-only default Git identity fallback (`Local Developer <local-dev@localhost>`) to prevent Git committing failures when neither profiles nor global system credentials exist.
+- Implemented robust key file checks including tilde `~` expansion, directory path whitespace escaping, and existence warnings for profile keys.
 - Integrated `.agents/git_profiles` in default `.gitignore` configurations to prevent accidental commits of local credentials.
 
 ### Fixed

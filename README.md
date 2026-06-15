@@ -366,6 +366,44 @@ Git keeps configurations locally inside the `.git/config` folder of your project
   ```
   will **automatically rotate** the commit author and SSH key (round-robin) based on the author of the last commit. For example, if your last commit was done using `personal`, the next commit will automatically switch to `work`, simulating multiple developers collaborating.
 
+#### C. How to Create and Register SSH Keys (Tutorial)
+If you have multiple GitHub accounts, you must generate a separate SSH key for each account:
+
+##### Step 1: Generate a new SSH key
+Open your terminal (or Git Bash on Windows) and run the following command. Make sure to specify a unique file path for each profile:
+```bash
+# For your personal account
+ssh-keygen -t ed25519 -C "your_personal_email@gmail.com" -f ~/.ssh/id_rsa_personal
+
+# For your work account
+ssh-keygen -t ed25519 -C "your_work_email@company.com" -f ~/.ssh/id_rsa_work
+```
+*(Press Enter when prompted for a passphrase to keep it passwordless, or enter one if desired).*
+
+##### Step 2: Register the Public Key on GitHub
+1. Copy the public key content to your clipboard:
+   ```bash
+   cat ~/.ssh/id_rsa_personal.pub
+   ```
+2. Log into your GitHub account, navigate to **Settings -> SSH and GPG keys -> New SSH Key**.
+3. Paste the copied text and save.
+4. Repeat this step for your work account using its corresponding public key.
+
+##### Step 3: Add Private Key Path to `.agents/git_profiles`
+Open `.agents/git_profiles` and paste the paths to the **private keys** (without the `.pub` extension):
+```ini
+work.ssh_key=~/.ssh/id_rsa_work
+personal.ssh_key=~/.ssh/id_rsa_personal
+```
+
+#### D. Robustness & Extreme Conditions Handling (Enterprise-Grade)
+The system is built to handle extreme edge cases gracefully:
+- **Zero Commit History**: On a brand new repository with no commits, the rotation logic safely defaults to the first profile in your `.agents/git_profiles`.
+- **Tilde Path Expansion**: Tilde paths (like `~/.ssh/...`) specified in your profile are automatically resolved to the absolute path of your `$HOME` directory before checking for file existence.
+- **Spaces in Key Paths**: Key paths containing spaces are automatically quoted inside the `core.sshCommand` configurations to prevent command splitting errors (especially on Windows).
+- **Missing SSH Key Files**: If a configured SSH key file is missing on your system, the tool warns you and unsets the local SSH command config (falling back to system default SSH keys) rather than letting connection commands crash.
+- **Zero Global/Local Git Identity**: If a developer has no Git identity configured on their machine and no profiles configuration is set, the tool automatically sets up a temporary, local-only identity (`Local Developer <local-dev@localhost>`) so they can still commit locally out-of-the-box.
+
 ### 4.5 Windows PowerShell Wrapper (`helper.ps1`)
 
 For developers working natively on Windows without standard Bash shells, a native PowerShell wrapper is available at `.agents/scripts/helper.ps1`.
