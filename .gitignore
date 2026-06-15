@@ -1,2 +1,3 @@
 .agents/locks/
+.agents/git_profiles
 openapi.json

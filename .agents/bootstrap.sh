@@ -3897,6 +3897,10 @@ cmd_migrate() {
         if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
             echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
         fi
+        # ensure local Git profiles config is ignored
+        if ! grep -E -q "^\.agents/git_profiles" "$temp_git"; then
+            echo -e "\n# Ignore local agent git profiles configuration\n.agents/git_profiles" >> "$temp_git"
+        fi
         mv "$temp_git" ".gitignore"
         echo "  - .gitignore updated."
     else
@@ -3904,6 +3908,9 @@ cmd_migrate() {
         cat << 'GIT_EOF' > .gitignore
 # Ignore agent transient locks
 .agents/locks/
+
+# Ignore local agent git profiles configuration
+.agents/git_profiles
 GIT_EOF
     fi
 
@@ -4762,14 +4769,40 @@ cmd_git_profile() {
         email="${3:-}"
     fi
 
+    # Find profiles config file
+    local profiles_file=""
+    if [ -f ".agents/git_profiles" ]; then
+        profiles_file=".agents/git_profiles"
+    elif [ -f "\$HOME/.git_profiles" ]; then
+        profiles_file="\$HOME/.git_profiles"
+    fi
+
+    # Check if a single argument matches a profile key in the config file
+    if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^\${name}\.name=" "$profiles_file"; then
+        local p_n=\$(grep "^\${name}\.name=" "\$profiles_file" | cut -d'=' -f2-)
+        local p_e=\$(grep "^\${name}\.email=" "\$profiles_file" | cut -d'=' -f2-)
+        echo "Setting local repository Git configuration to profile '\$name'..."
+        git config --local user.name "\$p_n"
+        git config --local user.email "\$p_e"
+        echo "  [SUCCESS] Local Git profile updated."
+        name=""
+        email=""
+    fi
+
     if [ -n "$name" ] && [ -n "$email" ]; then
         echo "Setting local repository Git configuration..."
         git config --local user.name "$name"
         git config --local user.email "$email"
         echo "  [SUCCESS] Local Git profile updated."
     elif [ -n "$name" ] || [ -n "$email" ]; then
-        echo "Error: Both name and email are required to set a profile." >&2
-        echo "Usage: \$0 git-profile [name] [email]" >&2
+        if [ -n "$profiles_file" ]; then
+            echo "Error: Profile '\$name' not found in \$profiles_file." >&2
+        else
+            echo "Error: Both name and email are required to set a profile." >&2
+        fi
+        echo "Usage:" >&2
+        echo "  \$0 git-profile [name] [email]   (Set profile directly)" >&2
+        echo "  \$0 git-profile [profile-key]   (Set from profiles config file)" >&2
         exit 1
     fi
 
@@ -4788,6 +4821,18 @@ cmd_git_profile() {
     echo "Global Profile (Default):"
     echo "  user.name:  \$global_name"
     echo "  user.email: \$global_email"
+    echo ""
+
+    if [ -f "\$profiles_file" ]; then
+        echo "Available Profiles (from \$profiles_file):"
+        local profiles
+        profiles=\$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "\$profiles_file" | cut -d'.' -f1 | sort -u)
+        for p in \$profiles; do
+            local p_n=\$(grep "^\${p}\.name=" "\$profiles_file" | cut -d'=' -f2-)
+            local p_e=\$(grep "^\${p}\.email=" "\$profiles_file" | cut -d'=' -f2-)
+            echo "  - \$p: \"\$p_n\" <\$p_e>"
+        done
+    fi
     echo "=========================================================="
 }
 
