@@ -367,30 +367,46 @@ Git keeps configurations locally inside the `.git/config` folder of your project
   will **automatically rotate** the commit author and SSH key (round-robin) based on the author of the last commit. For example, if your last commit was done using `personal`, the next commit will automatically switch to `work`, simulating multiple developers collaborating.
 
 #### C. How to Create and Register SSH Keys (Tutorial)
-If you have multiple GitHub accounts, you must generate a separate SSH key for each account:
+If you have multiple GitHub accounts, you must generate a separate SSH key for each account. This works across Linux, macOS, and Windows:
 
 ##### Step 1: Generate a new SSH key
-Open your terminal (or Git Bash on Windows) and run the following command. Make sure to specify a unique file path for each profile:
-```bash
-# For your personal account
-ssh-keygen -t ed25519 -C "your_personal_email@gmail.com" -f ~/.ssh/id_rsa_personal
+Open your terminal or command-line client and run the generator command:
 
-# For your work account
-ssh-keygen -t ed25519 -C "your_work_email@company.com" -f ~/.ssh/id_rsa_work
-```
+* **On Linux, macOS, Windows Git Bash, or Windows PowerShell**:
+  ```bash
+  # For your personal account
+  ssh-keygen -t ed25519 -C "your_personal_email@gmail.com" -f ~/.ssh/id_rsa_personal
+
+  # For your work account
+  ssh-keygen -t ed25519 -C "your_work_email@company.com" -f ~/.ssh/id_rsa_work
+  ```
+* **On Windows Command Prompt (CMD)**:
+  ```cmd
+  :: For your personal account
+  ssh-keygen -t ed25519 -C "your_personal_email@gmail.com" -f %USERPROFILE%\.ssh\id_rsa_personal
+
+  :: For your work account
+  ssh-keygen -t ed25519 -C "your_work_email@company.com" -f %USERPROFILE%\.ssh\id_rsa_work
+  ```
 *(Press Enter when prompted for a passphrase to keep it passwordless, or enter one if desired).*
 
 ##### Step 2: Register the Public Key on GitHub
 1. Copy the public key content to your clipboard:
-   ```bash
-   cat ~/.ssh/id_rsa_personal.pub
-   ```
+   * **Linux / macOS / Git Bash**: `cat ~/.ssh/id_rsa_personal.pub`
+   * **Windows PowerShell**: `Get-Content ~/.ssh/id_rsa_personal.pub`
+   * **Windows CMD**: `type %USERPROFILE%\.ssh\id_rsa_personal.pub`
 2. Log into your GitHub account, navigate to **Settings -> SSH and GPG keys -> New SSH Key**.
 3. Paste the copied text and save.
 4. Repeat this step for your work account using its corresponding public key.
 
 ##### Step 3: Add Private Key Path to `.agents/git_profiles`
 Open `.agents/git_profiles` and paste the paths to the **private keys** (without the `.pub` extension):
+
+> [!TIP]
+> **Cross-Platform Path Compatibility**:
+> - Using tilde paths like `~/.ssh/id_rsa_personal` is recommended as it is fully supported and automatically resolved on Linux, macOS, and Windows.
+> - If you prefer using absolute paths on Windows, **always use forward slashes** (e.g. `C:/Users/YourName/.ssh/id_rsa_personal`) to prevent backslash escaping conflicts in Git configuration commands.
+
 ```ini
 work.ssh_key=~/.ssh/id_rsa_work
 personal.ssh_key=~/.ssh/id_rsa_personal
