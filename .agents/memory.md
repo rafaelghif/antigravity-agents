@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: b68781c
+- **Last Commit Reference**: 05b6552
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,14 +18,14 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Automated API Key Rotation Test Suite
-- **Current Task Target**: Implement cross-platform Python rotation test suite in tests/test_rotation.py
+- **Primary Epic**: [epic-name]
+- **Current Task Target**: [task-name]
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement cross-platform Python rotation test suite in tests/test_rotation.py
-- [x] Verify test suite execution locally and compile templates
-- [x] Verify validation and clean workspace
+- [ ] Implement core logic
+- [ ] Write unit tests
+- [ ] Verify build and tests pass
 ---
 
 ## 3. Relayed Context & Handover Notes
