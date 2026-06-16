@@ -1,6 +1,6 @@
 {
   "max_token_budget": 500000,
-  "current_token_usage": 48650,
+  "current_token_usage": 53150,
   "alert_threshold_percent": 90,
   "profiles": {
     "default": {
@@ -12,7 +12,7 @@
       "max_token_budget": 500000
     },
     "work": {
-      "current_token_usage": 48350,
+      "current_token_usage": 52850,
       "max_token_budget": 500000
     }
   }

@@ -21,18 +21,18 @@ This workflow maps the implementation steps for the `docs-sync` specialized agen
 
 ## 2. Implementation Checklist
 
-- [ ] **Lock skills module**
+- [x] **Lock skills module**
   - Run `./.agents/scripts/helper.sh lock skills`
-- [ ] **Scaffold Skill**
+- [x] **Scaffold Skill**
   - Run `./.agents/scripts/helper.sh create-skill docs-sync "Synchronize inline code comments / docstrings with markdown documentation files."`
-- [ ] **Implement `main.py`**
+- [x] **Implement `main.py`**
   - Update `.agents/skills/docs-sync/scripts/main.py` with parsing and file updating logic.
-- [ ] **Create Unit Tests**
+- [x] **Create Unit Tests**
   - Create `tests/test_skill_docs_sync.py` to test the parsing and updating functionality.
-- [ ] **Verify and Validate**
+- [x] **Verify and Validate**
   - Run `python3 -m unittest tests/test_skill_docs_sync.py`
   - Run `./.agents/scripts/helper.sh validate`
-- [ ] **Document Changes**
+- [x] **Document Changes**
   - Update `CHANGELOG.md`
-- [ ] **Release Locks & Commit**
+- [x] **Release Locks & Commit**
   - Run `./.agents/scripts/helper.sh commit feat cli "add docs-sync specialized skill for automated docstring synchronization"`
