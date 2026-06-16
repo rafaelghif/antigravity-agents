@@ -58,6 +58,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made Git profiles properties parser in `commit` command robust to optional whitespace surrounding the `=` operator.
 - Fixed a logical precedence bug with `-o` in `find` queries inside `validate.sh` that was causing the script to search inside excluded directories like `node_modules` and `.agents`.
 - Implemented Python environment access scan (`os.environ`/`os.getenv`) in `validate.sh` to enforce architectural layer boundaries on Python projects.
+- Fixed script execution compatibility on Windows by executing `.sh` files with `sh` prefix.
+- Resolved Python stub execution crash on Windows in `helper.sh` and `validate.sh` by using the `--version` option to verify executable viability.
+- Fixed shebang and OS-specific path issues in unit tests (`docs-sync`, `pr-scaffolder`, `rotation`).
+- Fixed missing `CYAN` color initialization and skill directory creation bugs in `bootstrap.sh`.
+- Compiled missing skill template files for `adr-wizard`, `docs-sync`, and `pr-scaffolder` into `bootstrap.sh` by updating `compile_bootstrap.py`.
+- Fixed docstring backslash regex backreference injection bug in `docs-sync` main script using lambda replacement.
 
 ## [1.8.0] - 2026-06-16
 

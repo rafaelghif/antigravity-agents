@@ -9,5 +9,5 @@ def run(args):
         print(f"Error: recon.sh not found at {recon_sh}", file=sys.stderr)
         sys.exit(1)
         
-    proc = subprocess.run([recon_sh] + args[1:])
+    proc = utils.run_shell_script(recon_sh, args[1:])
     sys.exit(proc.returncode)

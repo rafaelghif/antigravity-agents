@@ -346,7 +346,7 @@ def merge_issue(issue_id_str):
                 f.write(temp_mem)
                 
         try:
-             proc = subprocess.run([validate_sh])
+             proc = utils.run_shell_script(validate_sh)
              if proc.returncode != 0:
                  if orig_mem:
                      with open(memory_file, 'w', encoding='utf-8') as f:

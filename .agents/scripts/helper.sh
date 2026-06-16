@@ -6,9 +6,9 @@ if [ -f "$PROJECT_ROOT/.venv/bin/python" ] && [ -x "$PROJECT_ROOT/.venv/bin/pyth
     PY_CMD="$PROJECT_ROOT/.venv/bin/python"
 elif [ -f "$PROJECT_ROOT/.venv/bin/python3" ] && [ -x "$PROJECT_ROOT/.venv/bin/python3" ]; then
     PY_CMD="$PROJECT_ROOT/.venv/bin/python3"
-elif command -v python3 >/dev/null 2>&1; then
+elif python3 --version >/dev/null 2>&1; then
     PY_CMD="python3"
-elif command -v python >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
+elif python --version >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
     PY_CMD="python"
 else
     echo "Error: Python 3 is required to run the Antigravity helper CLI." >&2

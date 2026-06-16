@@ -87,7 +87,10 @@ def run_bash_wrapper_test():
     setup_mock_config()
     
     # Run: wrapper.sh python3 tests/test_rotation.py --mock-command
-    cmd = [wrapper_path, sys.executable, __file__, "--mock-command"]
+    if os.name == 'nt':
+        cmd = ['sh', wrapper_path, sys.executable, __file__, "--mock-command"]
+    else:
+        cmd = [wrapper_path, sys.executable, __file__, "--mock-command"]
     print(f"Running: {' '.join(cmd)}")
     
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -111,7 +114,10 @@ def run_bash_wrapper_test():
     setup_mock_config()
     
     # Run: wrapper.sh python3 tests/test_rotation.py --mock-command-always-fail
-    cmd = [wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
+    if os.name == 'nt':
+        cmd = ['sh', wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
+    else:
+        cmd = [wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
     print(f"Running: {' '.join(cmd)}")
     
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -146,7 +152,10 @@ def run_bash_wrapper_test():
     assert "mock_p1" in cooldown_data and "mock_p2" in cooldown_data, "Both profiles should be on cooldown"
     
     # Now run rotate again with --rate-limited. It should wait and select mock_p1
-    proc = subprocess.run([helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
+    if os.name == 'nt':
+        proc = subprocess.run(['sh', helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
+    else:
+        proc = subprocess.run([helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
     print("Stdout:")
     print(proc.stdout)
     

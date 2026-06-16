@@ -538,7 +538,7 @@ def run(args):
     print("Running autonomous reconnaissance to populate blueprint files...")
     recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
     if os.path.exists(recon_sh):
-        subprocess.run([recon_sh, "-f"])
+        utils.run_shell_script(recon_sh, ["-f"])
         
     print("==========================================================")
     print(f"Workspace initialized successfully for '{project_name}'!")
