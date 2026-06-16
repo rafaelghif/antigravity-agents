@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD verify workflow `.github/workflows/verify.yml` to automate workspace validation and tests.
 - Python virtual environment `.venv` auto-detection in `helper.sh` and `helper.ps1`.
 - Virtual environment creation flag `-v` / `--venv` / `--create-venv` support in `bootstrap.sh`.
+- Compliant Git PR Review Scaffolder skill `pr-scaffolder` (`.agents/skills/pr-scaffolder/`) to generate review guides with symbol tracking, verification logging, and schema diffing.
+- Comprehensive unit tests in `tests/test_skill_pr_scaffolder.py` covering language-agnostic symbol parser and report formatter.
 
 ### Changed
 - Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.

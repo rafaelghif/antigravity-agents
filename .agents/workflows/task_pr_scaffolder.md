@@ -27,15 +27,15 @@ This task implements the `pr-scaffolder` skill as aligned during the `/grill-me`
 
 ## 2. Checklist & Implementation Status
 
-- [ ] **Scaffold Skill & Test Skeleton**
-  - [ ] Run `./.agents/scripts/helper.sh create-skill pr-scaffolder "Generates GAP-compliant PR review guides"`
-  - [ ] Verify test skeleton `tests/test_skill_pr_scaffolder.py` is created
-- [ ] **Core Logic Implementation**
-  - [ ] Implement git branch/diff parsing in `.agents/skills/pr-scaffolder/scripts/main.py`
-  - [ ] Implement test runner execution & output capturing
-  - [ ] Implement schema diff detection
-  - [ ] Implement Markdown generator formatting local/repo links
-- [ ] **Verification & Validation**
-  - [ ] Run the scaffolded test `python3 tests/test_rotation.py`
-  - [ ] Run skill audit check `./.agents/scripts/helper.sh list-skills`
-  - [ ] Verify validation check `./.agents/scripts/helper.sh validate` passes
+- [x] **Scaffold Skill & Test Skeleton**
+  - [x] Run `./.agents/scripts/helper.sh create-skill pr-scaffolder "Generates GAP-compliant PR review guides"`
+  - [x] Verify test skeleton `tests/test_skill_pr_scaffolder.py` is created
+- [x] **Core Logic Implementation**
+  - [x] Implement git branch/diff parsing in `.agents/skills/pr-scaffolder/scripts/main.py`
+  - [x] Implement test runner execution & output capturing
+  - [x] Implement schema diff detection
+  - [x] Implement Markdown generator formatting local/repo links
+- [x] **Verification & Validation**
+  - [x] Run the scaffolded test `python3 tests/test_rotation.py`
+  - [x] Run skill audit check `./.agents/scripts/helper.sh list-skills`
+  - [x] Verify validation check `./.agents/scripts/helper.sh validate` passes
