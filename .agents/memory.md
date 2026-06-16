@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: bd219ad
+- **Last Commit Reference**: 6203dac
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,15 +18,14 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Migration Audit & Refinement
-- **Current Task Target**: Review and refine migration scripts and documentation
+- **Primary Epic**: [epic-name]
+- **Current Task Target**: [task-name]
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Review migration documentation and scripts
-- [x] Implement hook-backup safety in cmd_migrate
-- [x] Implement gitignore compliance auto-updates in cmd_migrate
-- [x] Verify workspace passes validation and rotation tests
+- [ ] Implement core logic
+- [ ] Write unit tests
+- [ ] Verify build and tests pass
 ---
 
 ## 3. Relayed Context & Handover Notes
