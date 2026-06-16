@@ -9,5 +9,5 @@ def run(args):
         print(f"Error: validate.sh not found at {validate_sh}", file=sys.stderr)
         sys.exit(1)
         
-    proc = subprocess.run([validate_sh])
+    proc = utils.run_shell_script(validate_sh)
     sys.exit(proc.returncode)

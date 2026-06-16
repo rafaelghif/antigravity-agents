@@ -1,6 +1,7 @@
 import unittest
 import subprocess
 import os
+import sys
 import tempfile
 import shutil
 
@@ -22,7 +23,7 @@ class TestSkillDocsSync(unittest.TestCase):
         """Verify that the skill script can be executed with --help."""
         self.assertTrue(os.path.exists(self.script_path), f"Script not found at {self.script_path}")
         
-        proc = subprocess.run([self.script_path, "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, self.script_path, "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("Synchronize Python docstrings with Markdown", proc.stdout)
 
@@ -72,7 +73,7 @@ After the docs.
 
         # 3. Run the docs-sync script specifying both source and target
         proc = subprocess.run(
-            [self.script_path, "--target", target_path, "--source", src_path],
+            [sys.executable, self.script_path, "--target", target_path, "--source", src_path],
             capture_output=True,
             text=True
         )
@@ -128,7 +129,7 @@ def test_func():
 
         # 3. Run the docs-sync script without specifying --source
         proc = subprocess.run(
-            [self.script_path, "--target", target_path],
+            [sys.executable, self.script_path, "--target", target_path],
             capture_output=True,
             text=True
         )

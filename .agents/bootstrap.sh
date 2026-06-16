@@ -34,6 +34,7 @@ RED=''
 GREEN=''
 YELLOW=''
 BLUE=''
+CYAN=''
 BOLD=''
 NC=''
 if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
@@ -43,6 +44,7 @@ if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
         GREEN='\033[0;32m'
         YELLOW='\033[0;33m'
         BLUE='\033[0;34m'
+        CYAN='\033[0;36m'
         BOLD='\033[1m'
         NC='\033[0m'
     fi
@@ -167,6 +169,10 @@ mkdir -p .agents/skills/infra-provisioner
 mkdir -p .agents/skills/security-ci-audit
 mkdir -p .agents/skills/code-review
 mkdir -p .agents/skills/impact-analysis
+mkdir -p .agents/skills/api-rotator/scripts
+mkdir -p .agents/skills/adr-wizard/scripts
+mkdir -p .agents/skills/docs-sync/scripts
+mkdir -p .agents/skills/pr-scaffolder/scripts
 mkdir -p .agents/workflows
 mkdir -p .agents/archive
 mkdir -p .agents/locks
@@ -1301,9 +1307,9 @@ if [ -f "$PROJECT_ROOT/.venv/bin/python" ] && [ -x "$PROJECT_ROOT/.venv/bin/pyth
     PY_CMD="$PROJECT_ROOT/.venv/bin/python"
 elif [ -f "$PROJECT_ROOT/.venv/bin/python3" ] && [ -x "$PROJECT_ROOT/.venv/bin/python3" ]; then
     PY_CMD="$PROJECT_ROOT/.venv/bin/python3"
-elif command -v python3 >/dev/null 2>&1; then
+elif python3 --version >/dev/null 2>&1; then
     PY_CMD="python3"
-elif command -v python >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
+elif python --version >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
     PY_CMD="python"
 else
     echo "Error: Python 3 is required to run the Antigravity helper CLI." >&2
@@ -1312,6 +1318,5317 @@ else
 fi
 
 "$PY_CMD" "$(dirname "${BASH_SOURCE[0]}")/cli/helper.py" "$@"
+
+EOF
+
+# Write .agents\scripts\cli\commands\__init__.py
+write_template_safe ".agents\scripts\cli\commands\__init__.py" << 'EOF'
+
+
+EOF
+
+# Write .agents\scripts\cli\commands\validate.py
+write_template_safe ".agents\scripts\cli\commands\validate.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+    if not os.path.exists(validate_sh):
+        print(f"Error: validate.sh not found at {validate_sh}", file=sys.stderr)
+        sys.exit(1)
+        
+    proc = utils.run_shell_script(validate_sh)
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents\scripts\cli\commands\test.py
+write_template_safe ".agents\scripts\cli\commands\test.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        try:
+            changed_files = subprocess.check_output(
+                ["git", "diff", "--cached", "--name-only"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            changed_files = ""
+            
+        run_all = 0
+        if not changed_files:
+            run_all = 1
+            print("No staged changes detected. Running tests on all monorepo modules...")
+        else:
+            print("Analyzing staged file boundaries for monorepo-aware testing...")
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 4:
+                    path = parts[0]
+                    test_cmd = parts[3]
+                    
+                    should_run = run_all
+                    if should_run == 0:
+                        if any(f.startswith(f"{path}/") for f in changed_files.splitlines()):
+                            should_run = 1
+                            
+                    if should_run == 1:
+                        print(f"  Testing {path} ({test_cmd})...")
+                        proc = subprocess.run(test_cmd, shell=True, cwd=path)
+                        if proc.returncode != 0:
+                            print(f"  [FAIL] Testing suite failed in {path}", file=sys.stderr)
+                            failed = 1
+                    else:
+                        print(f"  Skipping {path} (no staged modifications).")
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        test_runner = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Test runner command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            test_runner = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if test_runner and test_runner != "echo 'No test suite found'":
+            print(f"Running test suite: {test_runner}...")
+            proc = subprocess.run(test_runner, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No test runner configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents\scripts\cli\commands\sync_git.py
+write_template_safe ".agents\scripts\cli\commands\sync_git.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"Error: Memory file {memory_file} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "detached"
+        
+    try:
+        commit = subprocess.check_output(
+            ["git", "log", "-n", "1", "--format=%h"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        commit = "none"
+        
+    with open(memory_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    content = re.sub(r"- \*\*Active Branch\*\*: .*", f"- **Active Branch**: {branch}", content)
+    content = re.sub(r"- \*\*Last Commit Reference\*\*: .*", f"- **Last Commit Reference**: {commit}", content)
+    
+    with open(memory_file, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    print(f"Synchronized: Branch={branch}, Commit={commit} in {memory_file}")
+
+EOF
+
+# Write .agents\scripts\cli\commands\sync_api.py
+write_template_safe ".agents\scripts\cli\commands\sync_api.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    print("==========================================================")
+    print("Starting API Contract Synchronization...")
+    print("==========================================================")
+    
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    be_path = ""
+    fe_path = ""
+    be_stack = ""
+    
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except:
+            lines = []
+            
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 2:
+                    path = parts[0]
+                    stack = parts[1]
+                    if any(x in path or x in stack for x in ("api", "backend", "Go", "Python")):
+                        be_path = path
+                        be_stack = stack
+                    elif any(x in path or x in stack for x in ("web", "frontend", "Next.js")):
+                        fe_path = path
+    else:
+        # Fallbacks
+        if os.path.isdir("apps/backend"): be_path = "apps/backend"
+        if os.path.isdir("apps/frontend"): fe_path = "apps/frontend"
+        if os.path.isdir("apps/api"): be_path = "apps/api"
+        if os.path.isdir("apps/web"): fe_path = "apps/web"
+        
+    if not be_path:
+        if os.path.isfile("go.mod") or os.path.isfile("main.go"):
+            be_path = "."
+            be_stack = "Go"
+        elif os.path.isfile("requirements.txt") or os.path.isfile("pyproject.toml"):
+            be_path = "."
+            be_stack = "Python"
+            
+    if not fe_path:
+        if os.path.isdir("src/app") or os.path.isfile("package.json"):
+            fe_path = "."
+            
+    if not be_path:
+        print("  [INFO] Backend application path could not be auto-detected. Operating in root fallback mode.")
+        be_path = "."
+        be_stack = "Unknown"
+        
+    print(f"  Detected Backend: {be_path} ({be_stack})")
+    if fe_path:
+        print(f"  Detected Frontend: {fe_path}")
+        
+    openapi_file = "openapi.json"
+    print("  Extracting OpenAPI contract schema...")
+    
+    extracted = False
+    
+    # Python
+    if "Python" in be_stack or os.path.isfile(os.path.join(be_path, "requirements.txt")) or os.path.isfile(os.path.join(be_path, "pyproject.toml")):
+        cmd1 = f"python3 -c \"import json; from src.app.main import app; print(json.dumps(app.openapi()))\" > {openapi_file}"
+        cmd2 = f"python3 -c \"import json; from app.main import app; print(json.dumps(app.openapi()))\" > {openapi_file}"
+        
+        cwd = None if be_path == "." else be_path
+        target_path = openapi_file if be_path == "." else os.path.join("..", "..", "..", openapi_file)
+        
+        cmd1_run = f"python3 -c \"import json; from src.app.main import app; print(json.dumps(app.openapi()))\" > {target_path}"
+        cmd2_run = f"python3 -c \"import json; from app.main import app; print(json.dumps(app.openapi()))\" > {target_path}"
+        
+        proc = subprocess.run(cmd1_run, shell=True, cwd=cwd, stderr=subprocess.DEVNULL)
+        if proc.returncode == 0:
+            extracted = True
+        else:
+            proc = subprocess.run(cmd2_run, shell=True, cwd=cwd, stderr=subprocess.DEVNULL)
+            if proc.returncode == 0:
+                extracted = True
+                
+    # Go
+    elif "Go" in be_stack or os.path.isfile(os.path.join(be_path, "go.mod")):
+        # check if swag command exists
+        try:
+            subprocess.run(["swag", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            swag_exists = True
+        except:
+            swag_exists = False
+            
+        if swag_exists:
+            print(f"  Running swag init in {be_path}...")
+            cwd = None if be_path == "." else be_path
+            # try different main locations
+            proc1 = subprocess.run("swag init -g src/cmd/server/main.go -o . --ot json", shell=True, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if proc1.returncode == 0:
+                shutil_copy = True
+            else:
+                proc2 = subprocess.run("swag init -g cmd/server/main.go -o . --ot json", shell=True, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                shutil_copy = proc2.returncode == 0
+                
+            if shutil_copy:
+                src_swagger = os.path.join(be_path, "swagger.json")
+                if os.path.exists(src_swagger):
+                    import shutil
+                    shutil.copy(src_swagger, openapi_file)
+                    extracted = True
+                    
+    if not extracted or not os.path.exists(openapi_file) or os.path.getsize(openapi_file) == 0:
+        print("  Warning: Schema extraction returned empty. Writing a compliant mock/fallback openapi.json...")
+        mock_content = """{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Antigravity Mock API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "operationId": "get_users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+"""
+        with open(openapi_file, 'w', encoding='utf-8') as f:
+            f.write(mock_content)
+            
+    # Generate client
+    if fe_path and os.path.isdir(fe_path):
+        target_client = os.path.join(fe_path, "src", "lib", "api-client.ts")
+        if fe_path == "." and os.path.isdir("src/app"):
+            target_client = os.path.join("src", "lib", "api-client.ts")
+            
+        print(f"  Generating TypeScript client wrapper to {target_client}...")
+        client_js = os.path.join(utils.get_agents_dir(), "scripts", "generate-client.js")
+        proc = subprocess.run(["node", client_js, openapi_file, target_client])
+        sys.exit(proc.returncode)
+    else:
+        print("  Frontend directory not detected. Generated openapi.json is saved in root.")
+        sys.exit(0)
+
+EOF
+
+# Write .agents\scripts\cli\commands\skills.py
+write_template_safe ".agents\scripts\cli\commands\skills.py" << 'EOF'
+import os
+import sys
+import re
+import utils
+
+def run(args):
+    if len(args) == 0:
+        print("Usage: helper.py <command> [arguments...]", file=sys.stderr)
+        sys.exit(1)
+        
+    command = args[0]
+    
+    if command == "create-skill":
+        create_skill(args)
+    elif command == "list-skills":
+        list_skills(args)
+    else:
+        print(f"Unknown skills command: {command}", file=sys.stderr)
+        sys.exit(1)
+
+def create_skill(args):
+    if len(args) < 2:
+        print("Usage: helper.py create-skill <name> [description]", file=sys.stderr)
+        sys.exit(1)
+        
+    name = args[1]
+    desc = args[2] if len(args) > 2 else ""
+    
+    if not re.match(r"^[a-z0-9-]+$", name):
+        print("Error: Skill name must be lowercase kebab-case (e.g., custom-skill-name).", file=sys.stderr)
+        sys.exit(1)
+        
+    workspace_root = utils.find_workspace_root()
+    skill_dir = os.path.join(workspace_root, ".agents", "skills", name)
+    
+    if os.path.exists(skill_dir):
+        print(f"Error: Skill '{name}' already exists at {skill_dir}.", file=sys.stderr)
+        sys.exit(1)
+        
+    os.makedirs(os.path.join(skill_dir, "scripts"), exist_ok=True)
+    
+    skill_md_content = f"""---
+name: {name}
+description: {desc if desc else f"Specialized skill for {name} automation."}
+scripts:
+  - scripts/main.py
+---
+
+# {name} Skill
+
+## 1. Input Specification
+- Specify required inputs (e.g., target file paths, options).
+
+## 2. Operational Procedures
+1. Run the associated script.
+2. Verify results.
+
+## 3. Decision Matrix
+- If the script returns success (exit code 0), the action is accepted.
+- If the script returns error, it fails.
+
+## 4. Error Mitigation Tree
+- Retry execution.
+- If it fails, report details back to the user.
+
+## 5. Output Verification Gate
+- [ ] Executable script passes all internal checks.
+"""
+
+    script_content = f"""#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def run_skill(args):
+    \"\"\"
+    Main logic of the skill script.
+    \"\"\"
+    logging.info(f"Running skill with arguments: {{args}}")
+    # Implement operational logic here
+    
+    result = {{
+        "status": "success",
+        "message": "Skill {name} executed successfully",
+        "data": {{}}
+    }}
+    return result
+
+def main():
+    parser = argparse.ArgumentParser(description="Default Python script for agent skill {name}.")
+    parser.add_argument('--target', type=str, help="Target path or resource")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {{str(e)}}")
+        error_output = {{
+            "status": "error",
+            "message": str(e)
+        }}
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+"""
+
+    skill_md_path = os.path.join(skill_dir, "SKILL.md")
+    script_path = os.path.join(skill_dir, "scripts", "main.py")
+    
+    with open(skill_md_path, 'w', encoding='utf-8') as f:
+        f.write(skill_md_content)
+        
+    with open(script_path, 'w', encoding='utf-8') as f:
+        f.write(script_content)
+        
+    os.chmod(script_path, 0o755)
+    
+    # Scaffold skeleton unit test for the skill
+    tests_dir = os.path.join(workspace_root, "tests")
+    os.makedirs(tests_dir, exist_ok=True)
+    name_with_underscores = name.replace("-", "_")
+    test_file_path = os.path.join(tests_dir, f"test_skill_{name_with_underscores}.py")
+    
+    camel_name = "".join(part.capitalize() for part in name.split("-"))
+    test_content = f"""import unittest
+import subprocess
+import os
+
+class TestSkill{camel_name}(unittest.TestCase):
+    def test_help_execution(self):
+        \"\"\"Verify that the skill script can be executed with --help.\"\"\"
+        script_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            ".agents", "skills", "{name}", "scripts", "main.py"
+        )
+        self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
+        
+        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Default Python script for agent skill {name}", proc.stdout)
+
+if __name__ == '__main__':
+    unittest.main()
+"""
+    with open(test_file_path, 'w', encoding='utf-8') as f:
+        f.write(test_content)
+        
+    print(f"Skill '{name}' created successfully at {skill_dir}")
+    print(f"Skeleton unit test scaffolded at {test_file_path}")
+
+def audit_skill(skill_dir):
+    skill_name = os.path.basename(skill_dir)
+    skill_md = os.path.join(skill_dir, "SKILL.md")
+    
+    # Check 1: SKILL.md exists
+    if not os.path.isfile(skill_md):
+        return False, f"{skill_name} is missing SKILL.md"
+        
+    # Check 2: Parse YAML frontmatter
+    try:
+        with open(skill_md, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except Exception as e:
+        return False, f"failed to read SKILL.md: {e}"
+        
+    if not lines or lines[0].strip() != "---":
+        return False, f"{skill_name} SKILL.md does not start with YAML frontmatter delimiter (---)"
+        
+    closing_idx = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            closing_idx = i
+            break
+            
+    if closing_idx == -1:
+        return False, f"{skill_name} SKILL.md has unclosed YAML frontmatter"
+        
+    frontmatter_lines = lines[1:closing_idx]
+    frontmatter_text = "".join(frontmatter_lines)
+    
+    # Parse fields
+    parsed_name = None
+    parsed_desc = None
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("name:"):
+            parsed_name = line_strip[len("name:"):].strip().strip("'\"")
+        elif line_strip.startswith("description:"):
+            parsed_desc = line_strip[len("description:"):].strip().strip("'\"")
+            
+    if not parsed_name:
+        return False, f"{skill_name} frontmatter missing 'name'"
+    if not parsed_desc:
+        return False, f"{skill_name} frontmatter missing 'description'"
+        
+    # Check 3: Check for placeholders in SKILL.md
+    try:
+        with open(skill_md, 'r', encoding='utf-8') as f:
+            full_content = f.read()
+    except Exception as e:
+        return False, f"failed to read SKILL.md content: {e}"
+        
+    if re.search(r"TODO|FIXME|\[placeholder\]", full_content, re.IGNORECASE):
+        return False, f"{skill_name} SKILL.md contains placeholder text (TODO/FIXME/placeholder)"
+        
+    # Check 4: Verify referenced scripts
+    in_scripts = False
+    script_paths = []
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("scripts:"):
+            in_scripts = True
+            continue
+        elif in_scripts and ":" in line_strip and not line_strip.startswith("-"):
+            in_scripts = False
+            
+        if in_scripts:
+            if line_strip.startswith("-"):
+                script_path_val = line_strip[1:].strip().strip("'\"")
+                if script_path_val:
+                    script_paths.append(script_path_val)
+                    
+    for s_path in script_paths:
+        full_script_path = os.path.join(skill_dir, s_path)
+        if not os.path.isfile(full_script_path):
+            return False, f"{skill_name} referenced script {s_path} does not exist"
+        if not os.access(full_script_path, os.X_OK):
+            return False, f"{skill_name} referenced script {s_path} is not executable (missing chmod +x)"
+            
+    # Check the scripts directory files if scripts dir exists
+    scripts_dir = os.path.join(skill_dir, "scripts")
+    if os.path.isdir(scripts_dir):
+        for entry in os.listdir(scripts_dir):
+            entry_path = os.path.join(scripts_dir, entry)
+            if os.path.isfile(entry_path):
+                if not os.access(entry_path, os.X_OK):
+                    return False, f"{skill_name} script {entry} is not executable"
+                try:
+                    with open(entry_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        script_code = f.read()
+                except Exception as e:
+                    return False, f"failed to read script {entry}: {e}"
+                if re.search(r"TODO|FIXME|\[placeholder\]", script_code, re.IGNORECASE):
+                    return False, f"{skill_name} script {entry} contains placeholder text (TODO/FIXME/placeholder)"
+                    
+    return True, parsed_desc
+
+def list_skills(args):
+    skills_dir = os.path.join(utils.get_agents_dir(), "skills")
+    if not os.path.isdir(skills_dir):
+        print(f"Error: Skills directory {skills_dir} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    print("==========================================================")
+    print("          Antigravity Agent Skills Audit & Registry")
+    print("==========================================================")
+    
+    audit_failed = 0
+    print(f"{'Skill Name':<25} | {'Status':<12} | Description")
+    print("----------------------------------------------------------")
+    
+    entries = sorted(os.listdir(skills_dir))
+    for entry in entries:
+        dir_path = os.path.join(skills_dir, entry)
+        if os.path.isdir(dir_path):
+            passed, detail = audit_skill(dir_path)
+            status = "[PASS]" if passed else "[FAIL]"
+            if not passed:
+                audit_failed += 1
+            print(f"{entry:<25} | {status:<12} | {detail}")
+            
+    print("==========================================================")
+    if audit_failed == 0:
+        print("All skills are compliant and ready for use.")
+        sys.exit(0)
+    else:
+        print(f"Audit failed! Found {audit_failed} non-compliant skill(s).", file=sys.stderr)
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\rules.py
+write_template_safe ".agents\scripts\cli\commands\rules.py" << 'EOF'
+import os
+import sys
+import re
+import utils
+
+def run(args):
+    if len(args) == 0:
+        print("Usage: helper.py <command> [arguments...]", file=sys.stderr)
+        sys.exit(1)
+        
+    command = args[0]
+    
+    if command == "create-rule":
+        create_rule(args)
+    elif command == "list-rules":
+        list_rules(args)
+    else:
+        print(f"Unknown rules command: {command}", file=sys.stderr)
+        sys.exit(1)
+
+def create_rule(args):
+    if len(args) < 3:
+        print("Usage: helper.py create-rule <name> <activation> [description_or_pattern]", file=sys.stderr)
+        sys.exit(1)
+        
+    name = args[1]
+    activation = args[2]
+    param = args[3] if len(args) > 3 else ""
+    
+    if not re.match(r"^[a-z0-9-]+$", name):
+        print("Error: Rule name must be lowercase kebab-case (e.g., custom-rule-name).", file=sys.stderr)
+        sys.exit(1)
+        
+    activation_mode = ""
+    if activation == "manual":
+        activation_mode = "Manual"
+    elif activation == "always-on":
+        activation_mode = "Always On"
+    elif activation == "model-decision":
+        activation_mode = "Model Decision"
+    elif activation == "glob":
+        activation_mode = "Glob"
+    else:
+        print(f"Error: Invalid activation mode '{activation}'. Must be: manual, always-on, model-decision, or glob.", file=sys.stderr)
+        sys.exit(1)
+        
+    pattern = ""
+    description = ""
+    if activation_mode == "Glob":
+        if not param:
+            print("Error: Glob activation requires a glob pattern parameter (e.g., 'src/**/*.ts').", file=sys.stderr)
+            sys.exit(1)
+        pattern = param
+    elif activation_mode == "Model Decision":
+        if not param:
+            print("Error: Model Decision activation requires a natural language description parameter.", file=sys.stderr)
+            sys.exit(1)
+        description = param
+        
+    workspace_root = utils.find_workspace_root()
+    rule_file = os.path.join(workspace_root, ".agents", "rules", f"{name}.md")
+    
+    if os.path.exists(rule_file):
+        print(f"Error: Rule '{name}' already exists at {rule_file}.", file=sys.stderr)
+        sys.exit(1)
+        
+    os.makedirs(os.path.dirname(rule_file), exist_ok=True)
+    
+    frontmatter_lines = [
+        "---",
+        f"name: {name}",
+        f"activation: {activation_mode}"
+    ]
+    if pattern:
+        frontmatter_lines.append(f'pattern: "{pattern}"')
+    if description:
+        frontmatter_lines.append(f'description: "{description}"')
+    frontmatter_lines.append("---")
+    
+    rule_content = "\n".join(frontmatter_lines) + f"""
+
+# {name} Workspace Rule
+
+## Guidelines
+- Define the coding standard or instructions for this rule here.
+- Example: Prefer arrow functions over traditional function syntax.
+"""
+
+    with open(rule_file, 'w', encoding='utf-8') as f:
+        f.write(rule_content)
+        
+    print(f"Rule '{name}' created successfully at {rule_file}")
+
+def audit_rule(rule_file):
+    rule_name = os.path.splitext(os.path.basename(rule_file))[0]
+    
+    if not rule_file.endswith(".md"):
+        return False, f"{rule_name} is not a markdown file"
+        
+    try:
+        with open(rule_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except Exception as e:
+        return False, f"failed to read rule: {e}"
+        
+    if not lines or lines[0].strip() != "---":
+        return False, f"{rule_name} does not start with YAML frontmatter delimiter (---)"
+        
+    closing_idx = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            closing_idx = i
+            break
+            
+    if closing_idx == -1:
+        return False, f"{rule_name} has unclosed YAML frontmatter"
+        
+    frontmatter_lines = lines[1:closing_idx]
+    
+    # Parse fields
+    parsed_name = None
+    parsed_activation = None
+    parsed_pattern = None
+    parsed_desc = None
+    
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("name:"):
+            parsed_name = line_strip[len("name:"):].strip().strip("'\"")
+        elif line_strip.startswith("activation:"):
+            parsed_activation = line_strip[len("activation:"):].strip().strip("'\"")
+        elif line_strip.startswith("pattern:"):
+            parsed_pattern = line_strip[len("pattern:"):].strip().strip("'\"")
+        elif line_strip.startswith("description:"):
+            parsed_desc = line_strip[len("description:"):].strip().strip("'\"")
+            
+    if not parsed_name:
+        return False, f"{rule_name} frontmatter missing 'name'"
+    if not parsed_activation:
+        return False, f"{rule_name} frontmatter missing 'activation'"
+        
+    if parsed_activation in ("Manual", "Always On"):
+        pass
+    elif parsed_activation == "Glob":
+        if not parsed_pattern:
+            return False, f"{rule_name} activation is Glob but missing 'pattern'"
+    elif parsed_activation == "Model Decision":
+        if not parsed_desc:
+            return False, f"{rule_name} activation is Model Decision but missing 'description'"
+    else:
+        return False, f"{rule_name} has invalid activation mode '{parsed_activation}'"
+        
+    # Check body for placeholders
+    try:
+        with open(rule_file, 'r', encoding='utf-8') as f:
+            full_content = f.read()
+    except Exception as e:
+        return False, f"failed to read rule content: {e}"
+        
+    if re.search(r"TODO|FIXME|\[placeholder\]", full_content, re.IGNORECASE):
+        return False, f"{rule_name} contains placeholder text (TODO/FIXME/placeholder)"
+        
+    # Return activation details
+    details = parsed_activation
+    if parsed_activation == "Glob":
+        details = f"Glob ({parsed_pattern})"
+    elif parsed_activation == "Model Decision":
+        details = f"Model Decision ({parsed_desc})"
+        
+    return True, details
+
+def list_rules(args):
+    rules_dir = os.path.join(utils.get_agents_dir(), "rules")
+    if not os.path.isdir(rules_dir):
+        print(f"Error: Rules directory {rules_dir} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    print("==========================================================")
+    print("          Antigravity Agent Rules Audit & Registry")
+    print("==========================================================")
+    
+    audit_failed = 0
+    print(f"{'Rule Name':<25} | {'Status':<12} | Activation Mode")
+    print("----------------------------------------------------------")
+    
+    file_found = False
+    entries = sorted(os.listdir(rules_dir))
+    for entry in entries:
+        file_path = os.path.join(rules_dir, entry)
+        if os.path.isfile(file_path):
+            file_found = True
+            passed, detail = audit_rule(file_path)
+            status = "[PASS]" if passed else "[FAIL]"
+            if not passed:
+                audit_failed += 1
+            print(f"{entry:<25} | {status:<12} | {detail}")
+            
+    if not file_found:
+        print(f"No rules registered in {rules_dir}.")
+        
+    print("==========================================================")
+    if audit_failed == 0:
+        print("All rules are compliant and active.")
+        sys.exit(0)
+    else:
+        print(f"Audit failed! Found {audit_failed} non-compliant rule(s).", file=sys.stderr)
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\release.py
+write_template_safe ".agents\scripts\cli\commands\release.py" << 'EOF'
+import os
+import sys
+import re
+from datetime import datetime
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py release <major|minor|patch>", file=sys.stderr)
+        sys.exit(1)
+        
+    bump_type = args[1].lower()
+    changelog_file = "CHANGELOG.md"
+    
+    if not os.path.exists(changelog_file):
+        print("Error: CHANGELOG.md not found!", file=sys.stderr)
+        sys.exit(1)
+        
+    with open(changelog_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    # Extract latest version
+    m = re.search(r'^##\s+\[([0-9]+\.[0-9]+\.[0-9]+)\]', content, re.MULTILINE)
+    if not m:
+        print("Error: Could not parse current version from CHANGELOG.md.", file=sys.stderr)
+        sys.exit(1)
+        
+    current_version = m.group(1)
+    major, minor, patch = map(int, current_version.split('.'))
+    
+    if bump_type == "major":
+        major += 1
+        minor = 0
+        patch = 0
+    elif bump_type == "minor":
+        minor += 1
+        patch = 0
+    elif bump_type == "patch":
+        patch += 1
+    else:
+        print(f"Error: Invalid bump type '{bump_type}'. Must be major, minor, or patch.", file=sys.stderr)
+        sys.exit(1)
+        
+    next_version = f"{major}.{minor}.{patch}"
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    print(f"Bumping version: {current_version} -> {next_version} ({bump_type})")
+    
+    # 1. Insert new version section at the top of version list (right before the first ## [version])
+    # We find the first line starting with ## [version]
+    lines = content.splitlines()
+    new_lines = []
+    inserted_version = False
+    
+    for line in lines:
+        if line.startswith("## [") and not inserted_version:
+            new_lines.append(f"## [{next_version}] - {current_date}")
+            new_lines.append("### Added")
+            new_lines.append("- ")
+            new_lines.append("")
+            inserted_version = True
+        new_lines.append(line)
+        
+    # 2. Update version comparison links at the bottom (right before the first link mapping [version]: )
+    content = "\n".join(new_lines)
+    lines = content.splitlines()
+    final_lines = []
+    inserted_link = False
+    repo_url = "https://github.com/rafaelghif/antigravity-agents"
+    
+    for line in lines:
+        if re.match(r'^\[[0-9]+\.[0-9]+\.[0-9]+\]:', line) and not inserted_link:
+            final_lines.append(f"[{next_version}]: {repo_url}/compare/v{current_version}...v{next_version}")
+            inserted_link = True
+        final_lines.append(line)
+        
+    new_content = "\n".join(final_lines)
+    if not new_content.endswith('\n'):
+        new_content += '\n'
+        
+    with open(changelog_file, 'w', encoding='utf-8') as f:
+        f.write(new_content)
+        
+    print(f"Successfully bumped version to {next_version} and updated CHANGELOG.md.")
+
+EOF
+
+# Write .agents\scripts\cli\commands\recon.py
+write_template_safe ".agents\scripts\cli\commands\recon.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    recon_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'recon.sh')
+    if not os.path.exists(recon_sh):
+        print(f"Error: recon.sh not found at {recon_sh}", file=sys.stderr)
+        sys.exit(1)
+        
+    proc = utils.run_shell_script(recon_sh, args[1:])
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents\scripts\cli\commands\push.py
+write_template_safe ".agents\scripts\cli\commands\push.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    # Parse options
+    force = False
+    no_validate = False
+    
+    if len(args) > 1:
+        if '--help' in args[1:] or '-h' in args[1:]:
+            print("==========================================================")
+            print("  Antigravity Helper CLI - git push wrapper")
+            print("==========================================================")
+            print("Usage: helper.sh push [options]")
+            print("")
+            print("Options:")
+            print("  -f, --force         Force push to remote origin")
+            print("  -n, --no-validate   Skip workspace validation and Git profile warnings")
+            print("  -h, --help          Show this help message")
+            sys.exit(0)
+            
+        for arg in args[1:]:
+            if arg in ('--force', '-f'):
+                force = True
+            elif arg in ('--no-validate', '-n'):
+                no_validate = True
+
+    # 1. Run Workspace Validation
+    if not no_validate:
+        validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+        if os.path.exists(validate_sh):
+            print("Running workspace validation...")
+            proc = subprocess.run([validate_sh])
+            if proc.returncode != 0:
+                print("Error: Workspace validation failed. Push aborted.", file=sys.stderr)
+                sys.exit(proc.returncode)
+        else:
+            print(f"Warning: validate.sh not found at {validate_sh}. Skipping validation.", file=sys.stderr)
+
+    # 2. Check Git user profile mapping
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    profiles_file = ""
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if profiles_file:
+        try:
+            with open(profiles_file, 'r') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
+        except Exception as e:
+            print(f"Warning: Failed to read profiles from {profiles_file}: {e}", file=sys.stderr)
+
+    current_email = ""
+    try:
+        current_email = subprocess.check_output(
+            ["git", "config", "user.email"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception as e:
+        pass
+
+    matching_profile = None
+    ssh_key_path = None
+
+    if config:
+        profile_names = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+        for p_name in profile_names:
+            p_email = config.get(f"{p_name}.email", "")
+            if current_email and p_email == current_email:
+                matching_profile = p_name
+                p_ssh = config.get(f"{p_name}.ssh_key", "")
+                if p_ssh:
+                    resolved_ssh = os.path.expanduser(p_ssh)
+                    if os.path.exists(resolved_ssh):
+                        ssh_key_path = resolved_ssh
+                    else:
+                        print(f"[WARNING] SSH key file for profile '{p_name}' at '{p_ssh}' was not found.", file=sys.stderr)
+                break
+
+    if not no_validate:
+        if not profiles_file:
+            print("[WARNING] No Git profiles configuration found. Cannot verify user profile alignment.", file=sys.stderr)
+        elif not matching_profile:
+            print(f"[WARNING] Current Git user email '{current_email}' does not match any profile in {profiles_file}.", file=sys.stderr)
+        else:
+            print(f"[INFO] Active Git profile matched: '{matching_profile}'")
+
+    # 3. Detect current branch
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception as e:
+        print(f"Error: Failed to resolve current Git branch: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if not branch or branch == "HEAD":
+        print("Error: Cannot push in detached HEAD state.", file=sys.stderr)
+        sys.exit(1)
+
+    # 4. Prepare and run git push
+    cmd = ["git", "push", "origin", branch]
+    if force:
+        cmd.append("--force")
+
+    env = os.environ.copy()
+    if ssh_key_path:
+        env["GIT_SSH_COMMAND"] = f"ssh -i \"{ssh_key_path}\" -o IdentitiesOnly=yes"
+        print(f"[INFO] Using SSH key rotation: '{ssh_key_path}'")
+
+    print(f"Running: {' '.join(cmd)}")
+    proc = subprocess.run(cmd, env=env)
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents\scripts\cli\commands\migrate.py
+write_template_safe ".agents\scripts\cli\commands\migrate.py" << 'EOF'
+import os
+import sys
+import shutil
+import subprocess
+import utils
+
+def run(args):
+    utils.print_title("Antigravity Agent Core - Workspace Migration (V1.9.0)")
+    
+    backup_suffix = ".backup"
+    agents_dir = utils.get_agents_dir()
+    
+    # 1. Back up files if they exist
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+        print(f"Warning: Existing memory file found. Backing up to {memory_file}{backup_suffix}")
+        shutil.copy(memory_file, memory_file + backup_suffix)
+        
+    project_rules = os.path.join(agents_dir, 'rules', 'project_rules.md')
+    if os.path.exists(project_rules):
+        print(f"Warning: Existing project rules blueprint found. Backing up to {project_rules}{backup_suffix}")
+        shutil.copy(project_rules, project_rules + backup_suffix)
+        
+    schema_index = os.path.join(agents_dir, 'schema.md')
+    if os.path.exists(schema_index):
+        print(f"Warning: Existing schema index found. Backing up to {schema_index}{backup_suffix}")
+        shutil.copy(schema_index, schema_index + backup_suffix)
+        
+    # 2. Re-create directory structure
+    print("Re-creating directory structure...")
+    skills = ['codebase-recon', 'git-ops', 'test-driven-patch', 'infra-provisioner', 'security-ci-audit', 'code-review', 'impact-analysis']
+    for s in skills:
+        os.makedirs(os.path.join(agents_dir, 'skills', s), exist_ok=True)
+        
+    os.makedirs(os.path.join(agents_dir, 'workflows'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'archive'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'locks'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'schemas'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'scripts'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'hooks'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'rules'), exist_ok=True)
+    
+    # 3. Update Git Hooks with custom backup checks
+    print("Updating local Git hooks...")
+    hooks = ['pre-commit', 'post-commit', 'commit-msg']
+    for h in hooks:
+        src_hook = os.path.join(agents_dir, 'hooks', h)
+        dest_hook = os.path.join('.git', 'hooks', h)
+        if os.path.exists(src_hook):
+            # Check if custom hooks exist and backup if not ours
+            if os.path.exists(dest_hook):
+                is_ours = False
+                try:
+                    with open(dest_hook, 'r') as f:
+                        if "Antigravity Agent Git Hook" in f.read():
+                            is_ours = True
+                except: pass
+                
+                if not is_ours:
+                    print(f"  - Backing up existing custom {h} hook")
+                    shutil.move(dest_hook, dest_hook + ".backup")
+                    
+            shutil.copy(src_hook, dest_hook)
+            try:
+                os.chmod(dest_hook, 0o755)
+            except: pass
+            print(f"  - Installed {h} hook")
+            
+    # 4. Update memory.md schema version
+    if os.path.exists(memory_file):
+        print("Updating memory ledger schema version to 5.0.0...")
+        try:
+            with open(memory_file, 'r') as f:
+                content = f.read()
+            if "Memory Schema Version" in content:
+                import re
+                content = re.sub(r"Memory Schema Version\*\*: [0-9]+\.[0-9]+\.[0-9]+", "Memory Schema Version**: 5.0.0", content)
+            else:
+                header = "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.\n\n"
+                # skip first line if it's the title
+                lines = content.splitlines()
+                if lines and lines[0].startswith("# "):
+                    content = header + "\n".join(lines[1:])
+                else:
+                    content = header + content
+            with open(memory_file, 'w') as f:
+                f.write(content)
+        except Exception as e:
+            print(f"Warning: Failed to update memory schema version: {e}", file=sys.stderr)
+            
+    # 5. Fix .gitignore configuration
+    gitignore = ".gitignore"
+    if os.path.exists(gitignore):
+        print("Validating .gitignore compliance...")
+        try:
+            with open(gitignore, 'r') as f:
+                content = f.read()
+            block = """# <<< ANTIGRAVITY AGENT START >>>
+# Ignore agent transient locks
+.agents/locks/
+
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>"""
+
+            start_guard = '# <<< ANTIGRAVITY AGENT START >>>'
+            end_guard = '# <<< ANTIGRAVITY AGENT END >>>'
+            
+            ignored_patterns = {
+                '.agents', '.agents/', 'AGENTS.md', '.agents/locks/', '.agents/locks',
+                '.agents/git_profiles', '.agents/api_keys', '.agents/active_api_keys',
+                '.agents/active_api_keys.ps1', '.agents/active_api_profile_name'
+            }
+            
+            lines = content.splitlines()
+            lines = [l for l in lines if l.strip() not in ignored_patterns]
+            content = '\n'.join(lines) + '\n'
+            
+            if start_guard in content and end_guard in content:
+                start_idx = content.find(start_guard)
+                end_idx = content.find(end_guard) + len(end_guard)
+                new_content = content[:start_idx] + block + content[end_idx:]
+            else:
+                if not content.endswith('\n'):
+                    content += '\n'
+                new_content = content + '\n' + block + '\n'
+                
+            while new_content.endswith('\n\n'):
+                new_content = new_content[:-1]
+                
+            with open(gitignore, 'w') as f:
+                f.write(new_content)
+            print("  - .gitignore updated with Antigravity Agent block guards.")
+        except Exception as e:
+            print(f"Warning: Failed to update .gitignore: {e}", file=sys.stderr)
+    else:
+        print("Creating default compliant .gitignore...")
+        try:
+            with open(gitignore, 'w') as f:
+                f.write("""# <<< ANTIGRAVITY AGENT START >>>
+# Ignore agent transient locks
+.agents/locks/
+
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>
+""")
+        except Exception as e:
+            print(f"Warning: Failed to create default .gitignore: {e}", file=sys.stderr)
+            
+    # 6. Re-run stack discovery
+    print("Running autonomous stack reconstruction...")
+    recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
+    if os.path.exists(recon_sh):
+        subprocess.run([recon_sh, "-f"])
+        
+    print("==========================================================")
+    print("Migration Complete! Workspace successfully upgraded.")
+    print("==========================================================")
+
+EOF
+
+# Write .agents\scripts\cli\commands\menu.py
+write_template_safe ".agents\scripts\cli\commands\menu.py" << 'EOF'
+import os
+import sys
+import subprocess
+import shutil
+import utils
+
+# ANSI Color Escape Codes
+C_HEADER = '\033[95m'
+C_BLUE = '\033[94m'
+C_CYAN = '\033[96m'
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_GRAY = '\033[90m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    """Wrap text in ANSI color codes if stdout is a TTY."""
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def get_progress_bar(pct, length=15):
+    """Generate a visual progress bar string."""
+    filled = int(round(length * pct / 100))
+    filled = max(0, min(filled, length))
+    bar = "█" * filled + "░" * (length - filled)
+    
+    # Color the progress bar based on percentage
+    if pct >= 90:
+        return color(bar, C_RED)
+    elif pct >= 75:
+        return color(bar, C_YELLOW)
+    return color(bar, C_GREEN)
+
+def get_git_info():
+    """Resolve active branch and local config email."""
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "unknown"
+        
+    try:
+        email = subprocess.check_output(
+            ["git", "config", "user.email"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        email = "not set"
+        
+    return branch, email
+
+def get_active_api_profile():
+    """Resolve active API profile name."""
+    profile_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+    if os.path.exists(profile_file):
+        try:
+            with open(profile_file, 'r') as f:
+                return f.read().strip()
+        except:
+            pass
+    return "default"
+
+def get_active_locks():
+    """Scan and return active lock names."""
+    locks_dir = os.path.join(utils.get_agents_dir(), 'locks')
+    locks = []
+    if os.path.exists(locks_dir):
+        for item in os.listdir(locks_dir):
+            if item.endswith('.lock'):
+                locks.append(item[:-5].replace('_', '/'))
+    return sorted(locks)
+
+def run_subcommand(cmd_name, args_list=None):
+    """Dynamically import and run a subcommand, trapping SystemExit."""
+    if args_list is None:
+        args_list = []
+    
+    cmd_map = {
+        "lock": "lock",
+        "unlock": "lock",
+        "validate": "validate",
+        "doctor": "doctor",
+        "migrate": "migrate",
+        "push": "push",
+        "clean": "clean",
+        "git-profile": "git_profile",
+        "api-profile": "api_profile",
+        "log-usage": "log_usage",
+        "archive": "archive",
+        "recon": "recon",
+        "list-skills": "skills",
+        "create-skill": "skills",
+        "list-rules": "rules",
+        "create-rule": "rules",
+        "init": "init",
+        "commit": "commit",
+        "sync-git": "sync_git",
+        "build": "build",
+        "lint": "lint",
+        "test": "test",
+        "sync-api": "sync_api",
+        "create-adr": "create_adr",
+        "adr-wizard": "adr_wizard",
+        "release": "release",
+        "autocomplete": "autocomplete",
+        "guide": "guide"
+    }
+    
+    module_name = cmd_map.get(cmd_name)
+    if not module_name:
+        print(color(f"Error: Unknown subcommand mapping for '{cmd_name}'", C_RED), file=sys.stderr)
+        return False
+        
+    try:
+        # Import the command module dynamically
+        cmd_module = __import__(f"commands.{module_name}", fromlist=[module_name])
+        # Execute the run function
+        cmd_module.run([cmd_name] + args_list)
+        return True
+    except SystemExit as e:
+        if e.code != 0:
+            print(color(f"\n[INFO] Command '{cmd_name}' finished with exit code {e.code}", C_YELLOW))
+            return False
+        return True
+    except Exception as e:
+        print(color(f"\n[ERROR] Failed to execute '{cmd_name}': {e}", C_RED), file=sys.stderr)
+        return False
+
+def show_git_profile_menu():
+    """Interactive selector for git profiles."""
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if os.path.exists(profiles_file):
+        with open(profiles_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+    
+    print(color("\n--- 👥 Git Identity Profiles ---", C_BOLD + C_CYAN))
+    for i, k in enumerate(keys):
+        p_n = config[f"{k}.name"]
+        p_e = config.get(f"{k}.email", "")
+        print(f"  [{color(str(i+1), C_GREEN)}] Switch to {color(k, C_BOLD)}: \"{p_n}\" <{p_e}>")
+    
+    offset = len(keys)
+    print(f"  [{color(str(offset+1), C_GREEN)}] Rotate Profiles (round-robin)")
+    print(f"  [{color(str(offset+2), C_GREEN)}] Manually enter new Name & Email")
+    print(f"  [{color('0', C_YELLOW)}] Cancel")
+    
+    try:
+        val = input(color("\nSelect choice: ", C_BOLD)).strip()
+        if not val or val == "0":
+            return
+            
+        choice = int(val)
+        if 1 <= choice <= len(keys):
+            selected_profile = keys[choice - 1]
+            run_subcommand("git-profile", [selected_profile])
+        elif choice == offset + 1:
+            run_subcommand("git-profile", ["rotate"])
+        elif choice == offset + 2:
+            name = input("Enter git user.name: ").strip()
+            email = input("Enter git user.email: ").strip()
+            if name and email:
+                run_subcommand("git-profile", [name, email])
+            else:
+                print(color("Error: name and email cannot be empty.", C_RED))
+    except ValueError:
+        print(color("Invalid choice.", C_RED))
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+
+def show_api_profile_menu():
+    """Interactive selector for API key profiles."""
+    api_keys_file = ""
+    agents_keys = os.path.join(utils.get_agents_dir(), 'api_keys')
+    home_keys = os.path.expanduser('~/.antigravity_api_keys')
+    if os.path.exists(agents_keys):
+        api_keys_file = agents_keys
+    elif os.path.exists(home_keys):
+        api_keys_file = home_keys
+        
+    config = {}
+    if os.path.exists(api_keys_file):
+        with open(api_keys_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    profiles_list = sorted(list(set(k.split('.')[0] for k in config.keys() if '.' in k)))
+    
+    print(color("\n--- 🔑 API Provider Key Profiles ---", C_BOLD + C_CYAN))
+    for i, p in enumerate(profiles_list):
+        keys = [k.split('.', 1)[1] for k in config.keys() if k.startswith(f"{p}.")]
+        print(f"  [{color(str(i+1), C_GREEN)}] Switch to {color(p, C_BOLD)} ({', '.join(keys)})")
+        
+    offset = len(profiles_list)
+    print(f"  [{color(str(offset+1), C_GREEN)}] Rotate Active API Profiles")
+    print(f"  [{color('0', C_YELLOW)}] Cancel")
+    
+    try:
+        val = input(color("\nSelect choice: ", C_BOLD)).strip()
+        if not val or val == "0":
+            return
+            
+        choice = int(val)
+        if 1 <= choice <= len(profiles_list):
+            selected_profile = profiles_list[choice - 1]
+            run_subcommand("api-profile", [selected_profile])
+        elif choice == offset + 1:
+            run_subcommand("api-profile", ["rotate"])
+    except ValueError:
+        print(color("Invalid choice.", C_RED))
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+
+def run(args):
+    """Main interactive menu loop."""
+    while True:
+        branch, email = get_git_info()
+        api_profile = get_active_api_profile()
+        locks = get_active_locks()
+        
+        # Load token budget statistics
+        budget = utils.load_budget()
+        global_usage = budget.get("current_token_usage", 0)
+        global_limit = budget.get("max_token_budget", 500000)
+        pct = (global_usage / global_limit) * 100 if global_limit > 0 else 0
+        bar = get_progress_bar(pct, length=12)
+        
+        # Draw Beautiful Card Header
+        print("\n" + color("+" + "="*58 + "+", C_BLUE))
+        print(color("|", C_BLUE) + color(f"   🚀  ANTIGRAVITY AGENT WORKSPACE CONTROL PANEL   ", C_BOLD + C_HEADER) + " "*7 + color("|", C_BLUE))
+        print(color("+" + "="*58 + "+", C_BLUE))
+        
+        branch_colored = color(branch, C_GREEN if branch != "unknown" else C_GRAY)
+        email_colored = color(email, C_CYAN if email != "not set" else C_GRAY)
+        api_profile_colored = color(api_profile, C_GREEN)
+        
+        if locks:
+            locks_colored = color(f"⚠️  Locked: {', '.join(locks)}", C_YELLOW)
+        else:
+            locks_colored = color("🔓 Open", C_GREEN)
+            
+        print(f"  Branch:      {branch_colored:<25} |  API Profile:  {api_profile_colored}")
+        print(f"  Git Email:   {email_colored:<25} |  Locks:        {locks_colored}")
+        print(f"  Token Limit: {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
+        print(color("+" + "-"*58 + "+", C_BLUE))
+        
+        print(color("\n  --- 🛠️  DAILY DEVELOPMENT ---", C_BOLD + C_BLUE))
+        print(f"  [{color('1', C_GREEN)}] 🔒 Lock a folder for editing (prevent parallel edits)")
+        print(f"  [{color('2', C_GREEN)}] 🔓 Unlock a folder (make it available again)")
+        print(f"  [{color('3', C_GREEN)}] 💾 Save & Commit changes (auto-rotates Git profiles + checks)")
+        print(f"  [{color('4', C_GREEN)}] 🚀 Push to Git Repository (runs security checks + pushes)")
+        
+        print(color("\n  --- 🩺 DIAGNOSTICS & SECURITY ---", C_BOLD + C_BLUE))
+        print(f"  [{color('5', C_GREEN)}] 🩺 Run Doctor Health diagnostics (checks hooks & permissions)")
+        print(f"  [{color('6', C_GREEN)}] 🛡️  Validate Compliance (scan for secrets, budget & rules)")
+        
+        print(color("\n  --- ⚙️  CONFIGURATIONS & PROFILES ---", C_BOLD + C_BLUE))
+        print(f"  [{color('7', C_GREEN)}] 👤 Switch/Rotate local Git identity profiles")
+        print(f"  [{color('8', C_GREEN)}] 🔑 Switch/Rotate API key credentials profiles")
+        print(f"  [{color('9', C_GREEN)}] 📝 Run guided ADR Wizard (document architectural decisions)")
+        
+        print(color("\n  --- 📚 UTILITIES & HELP ---", C_BOLD + C_BLUE))
+        print(f"  [{color('10', C_GREEN)}] 📖 View Step-by-Step Onboarding Tutorial")
+        print(f"  [{color('11', C_GREEN)}] 🧹 Clean Workspace (prepare repo for a clean public clone)")
+        print(f"  [{color('12', C_GREEN)}] 📦 Archive sprint checkpoints (prevents memory merge conflicts)")
+        print(f"  [{color('13', C_GREEN)}] 🔍 Scan codebase tech-stack topology")
+        
+        print(color(f"\n  [{color('0', C_YELLOW)}] Exit Dashboard", C_BOLD))
+        print(color("+" + "="*58 + "+", C_BLUE))
+        
+        try:
+            choice = input(color("Select choice [0-13]: ", C_BOLD)).strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nExiting.")
+            break
+            
+        if choice == "0":
+            print("Goodbye!")
+            break
+        elif choice == "1":
+            module = input("\nEnter folder/module name to lock (e.g. core, auth, apps/backend) or [0] to cancel: ").strip()
+            if module and module != "0":
+                run_subcommand("lock", [module])
+        elif choice == "2":
+            active_locks = get_active_locks()
+            if not active_locks:
+                print(color("\n[INFO] No active locks found.", C_CYAN))
+                input("\nPress Enter to continue...")
+                continue
+                
+            print(color("\n--- Active Module Locks ---", C_BOLD + C_CYAN))
+            for i, lock in enumerate(active_locks):
+                print(f"  [{color(str(i+1), C_GREEN)}] Unlock '{color(lock, C_BOLD)}'")
+            print(f"  [{color('0', C_YELLOW)}] Cancel")
+            
+            try:
+                sel = input(color("\nSelect lock to release: ", C_BOLD)).strip()
+                if sel and sel != "0":
+                    idx = int(sel) - 1
+                    if 0 <= idx < len(active_locks):
+                        run_subcommand("unlock", [active_locks[idx]])
+            except ValueError:
+                print(color("Invalid choice.", C_RED))
+        elif choice == "3":
+            run_subcommand("commit")
+        elif choice == "4":
+            print(color("\n--- Secure Push Actions ---", C_BOLD + C_CYAN))
+            print(f"  [{color('1', C_GREEN)}] Standard push (runs validation, rotates SSH key) [Recommended]")
+            print(f"  [{color('2', C_GREEN)}] Force push (--force)")
+            print(f"  [{color('3', C_GREEN)}] Skip validation checks (--no-validate)")
+            print(f"  [{color('0', C_YELLOW)}] Cancel")
+            push_sel = input(color("\nSelect push action: ", C_BOLD)).strip()
+            if push_sel == "1":
+                run_subcommand("push")
+            elif push_sel == "2":
+                run_subcommand("push", ["--force"])
+            elif push_sel == "3":
+                run_subcommand("push", ["--no-validate"])
+        elif choice == "5":
+            run_subcommand("doctor")
+            input("\nPress Enter to return to menu...")
+        elif choice == "6":
+            run_subcommand("validate")
+            input("\nPress Enter to return to menu...")
+        elif choice == "7":
+            show_git_profile_menu()
+        elif choice == "8":
+            show_api_profile_menu()
+        elif choice == "9":
+            run_subcommand("adr-wizard")
+        elif choice == "10":
+            run_subcommand("guide")
+            input("\nPress Enter to return to menu...")
+        elif choice == "11":
+            print(color("\n⚠️  WARNING: Workspace Clean-up", C_YELLOW + C_BOLD))
+            print("This will delete active lock files, sprint archives, and reset")
+            print("token budgets and active API configuration keys.")
+            confirm = input(color("Are you sure you want to clean the workspace? (y/N): ", C_BOLD)).strip().lower()
+            if confirm in ("y", "yes"):
+                run_subcommand("clean")
+                input("\nPress Enter to return to menu...")
+        elif choice == "12":
+            run_subcommand("archive")
+            input("\nPress Enter to return to menu...")
+        elif choice == "13":
+            run_subcommand("recon")
+            input("\nPress Enter to return to menu...")
+        else:
+            print(color("Invalid selection. Please enter a number from 0 to 13.", C_RED))
+            
+        print("\n" + color("-" * 60, C_BLUE))
+
+EOF
+
+# Write .agents\scripts\cli\commands\log_usage.py
+write_template_safe ".agents\scripts\cli\commands\log_usage.py" << 'EOF'
+import sys
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py log-usage <token_count>", file=sys.stderr)
+        sys.exit(1)
+        
+    try:
+        tokens = int(args[1])
+    except ValueError:
+        print("Error: Token count must be an integer.", file=sys.stderr)
+        sys.exit(1)
+        
+    utils.log_token_usage(tokens)
+
+EOF
+
+# Write .agents\scripts\cli\commands\lock.py
+write_template_safe ".agents\scripts\cli\commands\lock.py" << 'EOF'
+import os
+import sys
+import subprocess
+from datetime import datetime
+import utils
+
+def run(args):
+    command = args[0]
+    
+    if len(args) < 2:
+        print(f"Error: Please specify a module name to {command}.", file=sys.stderr)
+        sys.exit(1)
+        
+    module = args[1]
+    # Replace slashes with underscores for nested monorepo paths
+    lock_name = module.replace('/', '_')
+    locks_dir = os.path.join(utils.get_agents_dir(), 'locks')
+    os.makedirs(locks_dir, exist_ok=True)
+    lockfile = os.path.join(locks_dir, f"{lock_name}.lock")
+    
+    if command == "lock":
+        if os.path.exists(lockfile):
+            print(f"Error: Module '{module}' is already locked!", file=sys.stderr)
+            with open(lockfile, 'r') as f:
+                print(f.read(), file=sys.stderr)
+            sys.exit(1)
+            
+        # Get git branch
+        try:
+            branch = subprocess.check_output(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            branch = "detached"
+            
+        timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        
+        with open(lockfile, 'w') as f:
+            f.write(f"Branch: {branch}\n")
+            f.write(f"Owner: Agent\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            
+        print(f"Acquired lock for module '{module}' at {lockfile}")
+        
+    elif command == "unlock":
+        if os.path.exists(lockfile):
+            os.remove(lockfile)
+            print(f"Released lock for module '{module}'")
+        else:
+            print(f"Warning: No active lock found for module '{module}'")
+
+EOF
+
+# Write .agents\scripts\cli\commands\lint.py
+write_template_safe ".agents\scripts\cli\commands\lint.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        try:
+            changed_files = subprocess.check_output(
+                ["git", "diff", "--cached", "--name-only"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            changed_files = ""
+            
+        run_all = 0
+        if not changed_files:
+            run_all = 1
+            print("No staged changes detected. Running linter on all monorepo modules...")
+        else:
+            print("Analyzing staged file boundaries for monorepo-aware linting...")
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 5:
+                    path = parts[0]
+                    lint_cmd = parts[4]
+                    
+                    should_run = run_all
+                    if should_run == 0:
+                        # check if any changed file starts with path/
+                        if any(f.startswith(f"{path}/") for f in changed_files.splitlines()):
+                            should_run = 1
+                            
+                    if should_run == 1:
+                        print(f"  Linting {path} ({lint_cmd})...")
+                        proc = subprocess.run(lint_cmd, shell=True, cwd=path)
+                        if proc.returncode != 0:
+                            print(f"  [FAIL] Linter errors found in {path}", file=sys.stderr)
+                            failed = 1
+                    else:
+                        print(f"  Skipping {path} (no staged modifications).")
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        linter_cmd = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Linter command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            linter_cmd = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if linter_cmd and linter_cmd != "echo 'No linter found'":
+            print(f"Running linter command: {linter_cmd}...")
+            proc = subprocess.run(linter_cmd, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No linter configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents\scripts\cli\commands\issue.py
+write_template_safe ".agents\scripts\cli\commands\issue.py" << 'EOF'
+import os
+import sys
+import re
+from datetime import datetime
+import utils
+
+# ANSI color codes
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_GRAY = '\033[90m'
+C_BOLD = '\033[1m'
+C_CYAN = '\033[96m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def get_issues_dir():
+    issues_dir = os.path.join(utils.get_agents_dir(), "issues")
+    if not os.path.exists(issues_dir):
+        os.makedirs(issues_dir)
+    return issues_dir
+
+def parse_frontmatter(file_path):
+    metadata = {}
+    description = ""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        m = re.match(r'^---\n(.*?)\n---\n*(.*)', content, re.DOTALL)
+        if m:
+            yaml_block = m.group(1)
+            description = m.group(2).strip()
+            
+            for line in yaml_block.splitlines():
+                if ':' in line:
+                    k, v = line.split(':', 1)
+                    metadata[k.strip()] = v.strip().strip('"\'')
+        else:
+            description = content.strip()
+    except Exception as e:
+        print(f"Error parsing issue file {file_path}: {e}", file=sys.stderr)
+        
+    return metadata, description
+
+def show_help():
+    print("==========================================================")
+    print("  Antigravity Local Issue Tracker CLI")
+    print("==========================================================")
+    print("Usage: helper.sh issue <command> [arguments...]")
+    print("")
+    print("Subcommands:")
+    print("  list                       List all issues (open and closed)")
+    print("  create \"<title>\" [\"<desc>\"] Create a new local issue")
+    print("  view <id>                  View details of a specific issue")
+    print("  close <id>                 Close an open issue")
+    print("  checkout <id>              Create/checkout branch for an issue and update memory.md")
+    print("  merge <id>                 Validate workspace, commit issue branch, and merge it")
+    print("==========================================================")
+
+def list_issues():
+    issues_dir = get_issues_dir()
+    files = sorted([f for f in os.listdir(issues_dir) if re.match(r'^issue_[0-9]+\.md$', f)])
+    
+    if not files:
+        print(color("\nNo issues found in workspace.", C_GRAY))
+        return
+        
+    print(color("\n--- Workspace Local Issues ---", C_BOLD + C_CYAN))
+    print(f"{'ID':<6} | {'Status':<8} | {'Title':<35} | {'Assignee':<10}")
+    print("-" * 65)
+    
+    for f in files:
+        file_path = os.path.join(issues_dir, f)
+        meta, _ = parse_frontmatter(file_path)
+        
+        issue_id = meta.get("id", f.split('_')[1].split('.')[0])
+        title = meta.get("title", "No Title")
+        status = meta.get("status", "open").lower()
+        assignee = meta.get("assignee", "None")
+        
+        if len(title) > 33:
+            title = title[:30] + "..."
+            
+        status_str = f"[{status.upper()}]"
+        if status == "open":
+            status_colored = color(status_str, C_GREEN + C_BOLD)
+        else:
+            status_colored = color(status_str, C_GRAY)
+            
+        print(f"#{int(issue_id):<5} | {status_colored:<17} | {title:<35} | {assignee:<10}")
+    print("")
+
+def create_issue(title, description="No description provided."):
+    if not title:
+        print(color("Error: Issue title is required.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    files = [f for f in os.listdir(issues_dir) if re.match(r'^issue_[0-9]+\.md$', f)]
+    
+    next_id = 1
+    if files:
+        ids = []
+        for f in files:
+            m = re.search(r'issue_([0-9]+)\.md', f)
+            if m:
+                ids.append(int(m.group(1)))
+        if ids:
+            next_id = max(ids) + 1
+            
+    filename = f"issue_{next_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    created_at = datetime.now().strftime("%Y-%m-%d")
+    
+    content = f"""---
+id: {next_id}
+title: "{title}"
+status: open
+assignee: Agent
+created_at: {created_at}
+closed_at: null
+---
+
+# Description
+{description}
+"""
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(color(f"\n[SUCCESS] Created Issue #{next_id}: \"{title}\"", C_GREEN + C_BOLD))
+        print(f"Saved to: .agents/issues/{filename}\n")
+    except Exception as e:
+        print(color(f"Error: Failed to save issue file: {e}", C_RED), file=sys.stderr)
+        sys.exit(1)
+
+def close_issue(issue_id_str):
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    if meta.get("status") == "closed":
+        print(color(f"Issue #{issue_id} is already closed.", C_YELLOW))
+        return
+        
+    closed_at = datetime.now().strftime("%Y-%m-%d")
+    
+    content = f"""---
+id: {issue_id}
+title: "{meta.get('title', 'No Title')}"
+status: closed
+assignee: {meta.get('assignee', 'Agent')}
+created_at: {meta.get('created_at', closed_at)}
+closed_at: {closed_at}
+---
+
+# Description
+{desc}
+"""
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(color(f"\n[SUCCESS] Closed Issue #{issue_id}: \"{meta.get('title')}\"", C_GREEN + C_BOLD))
+    except Exception as e:
+        print(color(f"Error: Failed to close issue: {e}", C_RED), file=sys.stderr)
+        sys.exit(1)
+
+def view_issue(issue_id_str):
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    
+    status = meta.get("status", "open").lower()
+    if status == "open":
+        status_colored = color("OPEN", C_GREEN + C_BOLD)
+    else:
+        status_colored = color("CLOSED", C_GRAY)
+        
+    print("\n" + color("="*58, C_CYAN))
+    print(f"{color('ISSUE #' + str(issue_id), C_BOLD + C_CYAN)}: {color(meta.get('title', 'No Title'), C_BOLD)}")
+    print(color("="*58, C_CYAN))
+    print(f"  Status:     {status_colored}")
+    print(f"  Assignee:   {meta.get('assignee', 'None')}")
+    print(f"  Created At: {meta.get('created_at', 'N/A')}")
+    if status == "closed":
+        print(f"  Closed At:  {meta.get('closed_at', 'N/A')}")
+    print(color("-"*58, C_CYAN))
+    print(f"\n{desc}\n")
+    print(color("="*58, C_CYAN) + "\n")
+
+def checkout_issue(issue_id_str):
+    import subprocess
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    title = meta.get("title", "issue")
+    # Slugify title
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    if not slug:
+        slug = "task"
+    branch_name = f"issue-{issue_id}-{slug}"
+    
+    # Update issue assignee
+    git_user = "Agent"
+    try:
+        git_user = subprocess.check_output(["git", "config", "user.name"], stderr=subprocess.DEVNULL).decode().strip()
+    except:
+        pass
+    
+    meta["assignee"] = git_user
+    
+    closed_at_str = meta.get("closed_at", "null")
+    content = f"""---
+id: {issue_id}
+title: "{meta.get('title')}"
+status: {meta.get('status', 'open')}
+assignee: {meta.get('assignee')}
+created_at: {meta.get('created_at')}
+closed_at: {closed_at_str if closed_at_str else 'null'}
+---
+
+# Description
+{desc}
+"""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    print(color(f"Preparing Git branch '{branch_name}'...", C_CYAN))
+    
+    # Check if branch exists
+    try:
+        branches = subprocess.check_output(["git", "branch"]).decode()
+    except Exception as e:
+        branches = ""
+        
+    if re.search(fr'\b{re.escape(branch_name)}\b', branches):
+        subprocess.run(["git", "checkout", branch_name])
+    else:
+        subprocess.run(["git", "checkout", "-b", branch_name])
+        
+    # Update memory.md
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                mem_content = f.read()
+                
+            mem_content = re.sub(r'^- \*\*Current Task Target\*\*:.*', f'- **Current Task Target**: Resolve issue #{issue_id}: {title}', mem_content, flags=re.M)
+            mem_content = re.sub(r'^- \*\*State Flag\*\*:.*', '- **State Flag**: `IN_PROGRESS`', mem_content, flags=re.M)
+            
+            checklist_line = f"- [/] Resolve issue #{issue_id}: {title}"
+            if f"Resolve issue #{issue_id}:" not in mem_content:
+                m = re.search(r'### Sprint Tasks Checklist\n', mem_content)
+                if m:
+                    idx = m.end()
+                    mem_content = mem_content[:idx] + checklist_line + "\n" + mem_content[idx:]
+                    
+            with open(memory_file, 'w', encoding='utf-8') as f:
+                f.write(mem_content)
+            print(color(f"[SUCCESS] Updated memory.md with issue #{issue_id} task checklist.", C_GREEN))
+        except Exception as e:
+            print(color(f"Warning: Failed to update memory.md: {e}", C_YELLOW))
+            
+    print(color(f"[SUCCESS] Checked out branch '{branch_name}' and initialized task.", C_GREEN + C_BOLD))
+
+def merge_issue(issue_id_str):
+    import subprocess
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    title = meta.get("title", "issue")
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    if not slug:
+        slug = "task"
+    branch_name = f"issue-{issue_id}-{slug}"
+    
+    # Check current branch
+    current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode().strip()
+    if current_branch != branch_name:
+        print(color(f"Error: You are currently on branch '{current_branch}', but merging issue #{issue_id} requires being on issue branch '{branch_name}'.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    # 1. Run validation checks
+    validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
+    if os.path.exists(validate_sh):
+        print(color("Running workspace validation checks...", C_CYAN))
+        memory_file = utils.get_memory_file()
+        orig_mem = ""
+        if os.path.exists(memory_file):
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                orig_mem = f.read()
+            temp_mem = re.sub(r'^- \*\*State Flag\*\*:.*', '- **State Flag**: `COMPLETED`', orig_mem, flags=re.M)
+            temp_mem = temp_mem.replace(f"[/] Resolve issue #{issue_id}:", f"[x] Resolve issue #{issue_id}:")
+            with open(memory_file, 'w', encoding='utf-8') as f:
+                f.write(temp_mem)
+                
+        try:
+             proc = utils.run_shell_script(validate_sh)
+             if proc.returncode != 0:
+                 if orig_mem:
+                     with open(memory_file, 'w', encoding='utf-8') as f:
+                         f.write(orig_mem)
+                 print(color("Error: Workspace validation failed. Merge aborted.", C_RED), file=sys.stderr)
+                 sys.exit(proc.returncode)
+        except Exception as e:
+             if orig_mem:
+                 with open(memory_file, 'w', encoding='utf-8') as f:
+                     f.write(orig_mem)
+             raise e
+             
+        # Compile bootstrap
+        try:
+             repo_dir = os.path.dirname(os.path.dirname(utils.get_agents_dir()))
+             compile_script = os.path.join(repo_dir, "scratch", "compile_bootstrap.py")
+             if os.path.exists(compile_script):
+                 print(color("Re-compiling bootstrap.sh with completed task...", C_CYAN))
+                 subprocess.run([sys.executable, compile_script])
+        except Exception as e:
+             print(color(f"Warning: Failed to compile bootstrap: {e}", C_YELLOW))
+    else:
+        print(color("Warning: validate.sh not found. Skipping workspace validation.", C_YELLOW))
+         
+    # 2. Close the issue locally
+    close_issue(issue_id_str)
+     
+    # 3. Commit issue branch
+    print(color(f"Committing changes on branch '{branch_name}'...", C_CYAN))
+    commit_cmd = [
+         sys.executable,
+         os.path.join(utils.get_agents_dir(), "scripts", "cli", "helper.py"),
+         "commit",
+         "feat",
+         "issue",
+         f"resolve issue #{issue_id}: {title} closes #{issue_id}"
+    ]
+    subprocess.run(commit_cmd)
+     
+    # 4. Merge branch into base branch
+    base_branch = "main"
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+         with open(memory_file, 'r', encoding='utf-8') as f:
+             for line in f:
+                 if "Active Pull Request Target" in line:
+                     m = re.search(r'`([^`]+)`', line)
+                     if m:
+                         base_branch = m.group(1)
+                         
+    print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
+    subprocess.run(["git", "checkout", base_branch])
+    subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+     
+    # 5. Clean up local issue branch
+    print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))
+    subprocess.run(["git", "branch", "-d", branch_name])
+     
+    # 6. Clean workspace
+    clean_cmd = [
+         sys.executable,
+         os.path.join(utils.get_agents_dir(), "scripts", "cli", "helper.py"),
+         "clean"
+    ]
+    subprocess.run(clean_cmd)
+    
+    # Restore memory.md reference
+    subprocess.run(["git", "checkout", "--", memory_file])
+    print(color(f"\n[SUCCESS] Issue #{issue_id} branch merged successfully into '{base_branch}' and cleaned up!\n", C_GREEN + C_BOLD))
+
+def run(args):
+    if len(args) < 2:
+        show_help()
+        sys.exit(0)
+        
+    subcmd = args[1].lower()
+    
+    if subcmd == "list":
+        list_issues()
+    elif subcmd == "create":
+        if len(args) < 3:
+            print(color("Error: Title is required. Usage: helper.sh issue create \"<title>\" [\"<desc>\"]", C_RED), file=sys.stderr)
+            sys.exit(1)
+        title = args[2]
+        desc = args[3] if len(args) > 3 else "No description provided."
+        create_issue(title, desc)
+    elif subcmd == "close":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue close <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        close_issue(args[2])
+    elif subcmd == "view":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue view <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        view_issue(args[2])
+    elif subcmd == "checkout":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue checkout <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        checkout_issue(args[2])
+    elif subcmd == "merge":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue merge <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        merge_issue(args[2])
+    elif subcmd in ("-h", "--help", "help"):
+        show_help()
+    else:
+        print(color(f"Error: Unknown issue subcommand '{subcmd}'", C_RED), file=sys.stderr)
+        show_help()
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\init.py
+write_template_safe ".agents\scripts\cli\commands\init.py" << 'EOF'
+import os
+import sys
+import shutil
+import subprocess
+import utils
+
+NEXT_TEMPLATES = {
+  "package.json": "{\n  \"name\": \"nextjs-boilerplate\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"next\": \"^14.2.3\",\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"^20.12.12\",\n    \"@types/react\": \"^18.3.3\",\n    \"@types/react-dom\": \"^18.3.0\",\n    \"autoprefixer\": \"^10.4.19\",\n    \"postcss\": \"^8.4.38\",\n    \"tailwindcss\": \"^3.4.3\",\n    \"typescript\": \"^5.4.5\",\n    \"eslint\": \"^8.57.0\",\n    \"eslint-config-next\": \"^14.2.3\",\n    \"jest\": \"^29.7.0\",\n    \"ts-jest\": \"^29.1.4\"\n  }\n}\n",
+  "next.config.js": "/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  reactStrictMode: true,\n};\n\nmodule.exports = nextConfig;\n",
+  "tailwind.config.js": "/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  content: [\n    \"./src/app/**/*.{js,ts,jsx,tsx,mdx}\",\n    \"./src/components/**/*.{js,ts,jsx,tsx,mdx}\",\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\n",
+  "postcss.config.js": "module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}\n",
+  "tsconfig.json": "{\n  \"compilerOptions\": {\n    \"target\": \"es5\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"preserve\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./src/*\"]\n    }\n  },\n  \"include\": [\"next-env.d.ts\", \"**/*.ts\", \"**/*.tsx\", \".next/types/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n",
+  "jest.config.js": "module.exports = {\n  preset: 'ts-jest',\n  testEnvironment: 'node',\n  testMatch: ['**/tests/**/*.test.ts'],\n};\n",
+  "src/app/globals.css": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n:root {\n  color-scheme: dark;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #020617;\n  color: #f8fafc;\n}\n",
+  "src/app/layout.tsx": "import React from 'react';\nimport './globals.css';\n\nexport const metadata = {\n  title: 'Antigravity Next.js Boilerplate',\n  description: 'Scaffolded Next.js workspace for AI software agents',\n};\n\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "src/app/page.tsx": "import React from 'react';\n\nexport default function Home() {\n  return (\n    <div className=\"min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans\">\n      <div className=\"max-w-4xl w-full text-center space-y-8\">\n        <header className=\"space-y-4\">\n          <div className=\"inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse\">\n            \ud83d\ude80 Antigravity Workspace Active\n          </div>\n          <h1 className=\"text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent\">\n            Antigravity Next.js Boilerplate\n          </h1>\n          <p className=\"text-slate-400 text-lg max-w-2xl mx-auto\">\n            Your production-ready Next.js application, scaffolded and pre-configured for seamless development with AI coding agents.\n          </p>\n        </header>\n\n        <main className=\"grid grid-cols-1 md:grid-cols-3 gap-6 text-left\">\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\u26a1 App Router</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Scaffolded with React Server Components, layout sharing, and clean directory structure inside <code className=\"text-indigo-400\">src/app</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83c\udfa8 Styling & UI</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Pre-integrated with Tailwind CSS, custom fonts, CSS variables, and modern dark-mode aesthetics ready for immediate extension.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udee1\ufe0f AI Agent Guard</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Wrapped inside Antigravity's cognitive alignment gates (automated pre-commit validators, secret scanning, and memory sync).\n            </p>\n          </div>\n        </main>\n\n        <footer className=\"text-slate-500 text-sm border-t border-slate-900 pt-8 mt-12 flex justify-between items-center\">\n          <div> Muhammad Rafael Ghifari &copy; 2026</div>\n          <div className=\"flex gap-4\">\n            <a href=\"https://github.com/rafaelghif/antigravity-agents\" target=\"_blank\" rel=\"noopener noreferrer\" className=\"hover:text-indigo-400 transition-colors\">GitHub Repository</a>\n            <a href=\"/api/health\" className=\"hover:text-indigo-400 transition-colors\">API Health Check</a>\n          </div>\n        </footer>\n      </div>\n    </div>\n  );\n}\n",
+  "src/app/api/health/route.ts": "import { NextResponse } from 'next/server';\n\nexport async function GET() {\n  return NextResponse.json({\n    status: 'HEALTHY',\n    timestamp: new Date().toISOString(),\n    system: 'Antigravity Workspace Core',\n  });\n}\n",
+  "tests/health.test.ts": "describe('Next.js Boilerplate Test Suite', () => {\n  it('should pass initial unit test check', () => {\n    expect(true).toBe(true);\n  });\n});\n"
+}
+GOGIN_TEMPLATES = {
+  "go.mod": "module project\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "src/cmd/server/main.go": "package main\n\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n\t\"project/src/internal/config\"\n\t\"project/src/internal/controller\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc main() {\n\tcfg := config.LoadConfig()\n\n\tif cfg.Env == \"production\" {\n\t\tgin.SetMode(gin.ReleaseMode)\n\t}\n\n\tr := gin.Default()\n\tr.Use(gin.Recovery())\n\n\thealthCtrl := controller.NewHealthController()\n\n\tapi := r.Group(\"/api\")\n\t{\n\t\tapi.GET(\"/health\", healthCtrl.Check)\n\t}\n\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"message\": \"Welcome to Antigravity Go Gin Boilerplate!\",\n\t\t\t\"status\":  \"Active\",\n\t\t})\n\t})\n\n\taddr := fmt.Sprintf(\":%s\", cfg.Port)\n\tlog.Printf(\"Server starting on port %s...\", cfg.Port)\n\tif err := r.Run(addr); err != nil {\n\t\tlog.Fatalf(\"Failed to run server: %v\", err)\n\t}\n}\n",
+  "src/internal/config/config.go": "package config\n\nimport \"os\"\n\ntype Config struct {\n\tPort string\n\tEnv  string\n}\n\nfunc LoadConfig() *Config {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"8080\"\n\t}\n\tenv := os.Getenv(\"ENV\")\n\tif env == \"\" {\n\t\tenv = \"development\"\n\t}\n\treturn &Config{\n\t\tPort: port,\n\t\tEnv:  env,\n\t}\n}\n",
+  "src/internal/controller/health_controller.go": "package controller\n\nimport (\n\t\"net/http\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\ntype HealthController struct{}\n\nfunc NewHealthController() *HealthController {\n\treturn &HealthController{}\n}\n\nfunc (h *HealthController) Check(c *gin.Context) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"status\":    \"HEALTHY\",\n\t\t\"timestamp\": time.Now().Format(time.RFC3339),\n\t\t\"system\":    \"Antigravity Go Gin Core\",\n\t})\n}\n",
+  "tests/health_test.go": "package tests\n\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"project/src/internal/controller\"\n\t\"testing\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc TestHealthCheck(t *testing.T) {\n\tgin.SetMode(gin.TestMode)\n\tr := gin.Default()\n\thealthCtrl := controller.NewHealthController()\n\tr.GET(\"/api/health\", healthCtrl.Check)\n\n\tw := httptest.NewRecorder()\n\treq, _ := http.NewRequest(\"GET\", \"/api/health\", nil)\n\tr.ServeHTTP(w, req)\n\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected status code 200, got %d\", w.Code)\n\t}\n}\n",
+  "Makefile": ".PHONY: run test build clean\n\nrun:\n\tgo run src/cmd/server/main.go\n\ntest:\n\tgo test -v ./tests/...\n\nbuild:\n\tgo build -o bin/server src/cmd/server/main.go\n\nclean:\n\trm -rf bin/\n"
+}
+FASTAPI_TEMPLATES = {
+  "requirements.txt": "fastapi>=0.110.0\nuvicorn[standard]>=0.28.0\npydantic>=2.6.4\npytest>=8.1.1\nhttpx>=0.27.0\n",
+  "pyproject.toml": "[tool.pytest.ini_options]\npythonpath = [\".\"]\ntestpaths = [\"tests\"]\n",
+  "src/app/main.py": "import uvicorn\nfrom fastapi import FastAPI\nfrom src.app.core.config import settings\nfrom src.app.api.endpoints import health\n\napp = FastAPI(\n    title=\"Antigravity FastAPI Boilerplate\",\n    description=\"Production-ready FastAPI setup for AI software agents\",\n    version=\"1.0.0\",\n)\n\napp.include_router(health.router, prefix=\"/api\")\n\n@app.get(\"/\")\ndef read_root():\n    return {\n        \"message\": \"Welcome to Antigravity FastAPI Boilerplate!\",\n        \"status\": \"Active\",\n    }\n\nif __name__ == \"__main__\":\n    uvicorn.run(\"src.app.main:app\", host=\"0.0.0.0\", port=settings.PORT, reload=True)\n",
+  "src/app/core/config.py": "import os\n\nclass Settings:\n    PORT: int = int(os.getenv(\"PORT\", 8000))\n    ENV: str = os.getenv(\"ENV\", \"development\")\n\nsettings = Settings()\n",
+  "src/app/api/endpoints/health.py": "from datetime import datetime\nfrom fastapi import APIRouter\n\nrouter = APIRouter()\n\n@router.get(\"/health\", tags=[\"system\"])\ndef check_health():\n    return {\n        \"status\": \"HEALTHY\",\n        \"timestamp\": datetime.utcnow().isoformat(),\n        \"system\": \"Antigravity FastAPI Core\",\n    }\n",
+  "tests/test_health.py": "from fastapi.testclient import TestClient\nfrom src.app.main import app\n\nclient = TestClient(app)\n\ndef test_health_check():\n    response = client.get(\"/api/health\")\n    assert response.status_code == 200\n    data = response.json()\n    assert data[\"status\"] == \"HEALTHY\"\n    assert \"timestamp\" in data\n    assert data[\"system\"] == \"Antigravity FastAPI Core\"\n"
+}
+MONOREPO_TEMPLATES = {
+  "pnpm-workspace.yaml": "packages:\n  - 'apps/*'\n  - 'packages/*'\n",
+  "turbo.json": "{\n  \"$schema\": \"https://turbo.build/schema.json\",\n  \"tasks\": {\n    \"build\": {\n      \"dependsOn\": [\"^build\"],\n      \"outputs\": [\".next/**\", \"dist/**\", \"bin/**\"]\n    },\n    \"lint\": {},\n    \"test\": {},\n    \"dev\": {\n      \"cache\": false,\n      \"persistent\": true\n    }\n  }\n}\n",
+  "package.json": "{\n  \"name\": \"monorepo-root\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"build\": \"turbo run build\",\n    \"dev\": \"turbo run dev\",\n    \"lint\": \"turbo run lint\",\n    \"test\": \"turbo run test\"\n  },\n  \"devDependencies\": {\n    \"turbo\": \"^2.0.0\"\n  }\n}\n",
+  "apps/web/package.json": "{\n  \"name\": \"web\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"next\": \"^14.2.3\",\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\",\n    \"@monorepo/shared\": \"workspace:*\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"^20.12.12\",\n    \"@types/react\": \"^18.3.3\",\n    \"@types/react-dom\": \"^18.3.0\",\n    \"autoprefixer\": \"^10.4.19\",\n    \"postcss\": \"^8.4.38\",\n    \"tailwindcss\": \"^3.4.3\",\n    \"typescript\": \"^5.4.5\",\n    \"eslint\": \"^8.57.0\",\n    \"eslint-config-next\": \"^14.2.3\",\n    \"jest\": \"^29.7.0\",\n    \"ts-jest\": \"^29.1.4\"\n  }\n}\n",
+  "apps/web/next.config.js": "/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  reactStrictMode: true,\n};\nmodule.exports = nextConfig;\n",
+  "apps/web/tailwind.config.js": "/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  content: [\n    \"./src/app/**/*.{js,ts,jsx,tsx,mdx}\",\n    \"./src/components/**/*.{js,ts,jsx,tsx,mdx}\",\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\n",
+  "apps/web/postcss.config.js": "module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}\n",
+  "apps/web/tsconfig.json": "{\n  \"compilerOptions\": {\n    \"target\": \"es5\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"preserve\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./src/*\"]\n    }\n  },\n  \"include\": [\"next-env.d.ts\", \"**/*.ts\", \"**/*.tsx\", \".next/types/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n",
+  "apps/web/jest.config.js": "module.exports = {\n  preset: 'ts-jest',\n  testEnvironment: 'node',\n  testMatch: ['**/tests/**/*.test.ts'],\n};\n",
+  "apps/web/src/app/globals.css": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n:root {\n  color-scheme: dark;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #020617;\n  color: #f8fafc;\n}\n",
+  "apps/web/src/app/layout.tsx": "import React from 'react';\nimport './globals.css';\nexport const metadata = {\n  title: 'Antigravity Monorepo Frontend',\n  description: 'Scaffolded Turborepo Frontend Web Application',\n};\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "apps/web/src/app/page.tsx": "import React from 'react';\nimport { appName, version } from '@monorepo/shared';\n\nexport default function Home() {\n  return (\n    <div className=\"min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans\">\n      <div className=\"max-w-4xl w-full text-center space-y-8\">\n        <header className=\"space-y-4\">\n          <div className=\"inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse\">\n            \ud83d\ude80 Antigravity Monorepo Active\n          </div>\n          <h1 className=\"text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent\">\n            {appName}\n          </h1>\n          <p className=\"text-slate-400 text-lg max-w-2xl mx-auto\">\n            Monorepo Web Client (v{version}) running alongside an isolated Go Gin backend service.\n          </p>\n        </header>\n        <main className=\"grid grid-cols-1 md:grid-cols-3 gap-6 text-left\">\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\u26a1 Next.js</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Frontend web client running Next.js App Router inside <code className=\"text-indigo-400\">apps/web</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udc39 Go Gin API</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Isolated REST API backend service with Go Gin inside <code className=\"text-purple-400\">apps/api</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udce6 Shared Workspace</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Shared package containing index exports, interfaces, and types inside <code className=\"text-pink-400\">packages/shared</code>.\n            </p>\n          </div>\n        </main>\n      </div>\n    </div>\n  );\n}\n",
+  "apps/web/src/app/api/health/route.ts": "import { NextResponse } from 'next/server';\nexport async function GET() {\n  return NextResponse.json({\n    status: 'HEALTHY',\n    timestamp: new Date().toISOString(),\n    system: 'Antigravity Monorepo Frontend',\n  });\n}\n",
+  "apps/web/tests/health.test.ts": "describe('Monorepo Web Client Test Suite', () => {\n  it('should pass initial tests', () => {\n    expect(true).toBe(true);\n  });\n});\n",
+  "apps/api/go.mod": "module api\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "apps/api/src/cmd/server/main.go": "package main\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n\t\"api/src/internal/config\"\n\t\"api/src/internal/controller\"\n\t\"github.com/gin-gonic/gin\"\n)\nfunc main() {\n\tcfg := config.LoadConfig()\n\tif cfg.Env == \"production\" {\n\t\tgin.SetMode(gin.ReleaseMode)\n\t}\n\tr := gin.Default()\n\tr.Use(gin.Recovery())\n\thealthCtrl := controller.NewHealthController()\n\tapi := r.Group(\"/api\")\n\t{\n\t\tapi.GET(\"/health\", healthCtrl.Check)\n\t}\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"message\": \"Welcome to Antigravity Go Gin Backend in Monorepo!\",\n\t\t\t\"status\":  \"Active\",\n\t\t})\n\t})\n\taddr := fmt.Sprintf(\":%s\", cfg.Port)\n\tlog.Printf(\"Backend starting on port %s...\", cfg.Port)\n\tif err := r.Run(addr); err != nil {\n\t\tlog.Fatalf(\"Failed to run server: %v\", err)\n\t}\n}\n",
+  "apps/api/src/internal/config/config.go": "package config\nimport \"os\"\ntype Config struct {\n\tPort string\n\tEnv  string\n}\nfunc LoadConfig() *Config {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"8080\"\n\t}\n\tenv := os.Getenv(\"ENV\")\n\tif env == \"\" {\n\t\tenv = \"development\"\n\t}\n\treturn &Config{\n\t\tPort: port,\n\t\tEnv:  env,\n\t}\n}\n",
+  "apps/api/src/internal/controller/health_controller.go": "package controller\nimport (\n\t\"net/http\"\n\t\"time\"\n\t\"github.com/gin-gonic/gin\"\n)\ntype HealthController struct{}\nfunc NewHealthController() *HealthController {\n\treturn &HealthController{}\n}\nfunc (h *HealthController) Check(c *gin.Context) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"status\":    \"HEALTHY\",\n\t\t\"timestamp\": time.Now().Format(time.RFC3339),\n\t\t\"system\":    \"Antigravity Monorepo Backend API\",\n\t})\n}\n",
+  "apps/api/tests/health_test.go": "package tests\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"api/src/internal/controller\"\n\t\"testing\"\n\t\"github.com/gin-gonic/gin\"\n)\nfunc TestHealthCheck(t *testing.T) {\n\tgin.SetMode(gin.TestMode)\n\tr := gin.Default()\n\thealthCtrl := controller.NewHealthController()\n\tr.GET(\"/api/health\", healthCtrl.Check)\n\tw := httptest.NewRecorder()\n\treq, _ := http.NewRequest(\"GET\", \"/api/health\", nil)\n\tr.ServeHTTP(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected status code 200, got %d\", w.Code)\n\t}\n}\n",
+  "apps/api/Makefile": ".PHONY: run test build clean\nrun:\n\tgo run src/cmd/server/main.go\ntest:\n\tgo test -v ./tests/...\nbuild:\n\tgo build -o bin/server src/cmd/server/main.go\nclean:\n\trm -rf bin/\n",
+  "packages/shared/package.json": "{\n  \"name\": \"@monorepo/shared\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"types\": \"index.d.ts\"\n}\n",
+  "packages/shared/index.js": "module.exports = {\n  appName: \"Antigravity Monorepo\",\n  version: \"1.0.0\"\n};\n",
+  "packages/shared/index.d.ts": "export const appName: string;\nexport const version: string;\n"
+}
+LARAVEL_TEMPLATES = {
+  "app/Http/Controllers/Controller.php": "<?php\n\nnamespace App\\Http\\Controllers;\n\nuse Illuminate\\Foundation\\Auth\\Access\\AuthorizesRequests;\nuse Illuminate\\Foundation\\Validation\\ValidatesRequests;\nuse Illuminate\\Routing\\Controller as BaseController;\n\nclass Controller extends BaseController\n{\n    use AuthorizesRequests, ValidatesRequests;\n}\n",
+  "app/Models/User.php": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Foundation\\Auth\\User as Authenticatable;\nuse Illuminate\\Notifications\\Notifiable;\nuse Laravel\\Sanctum\\HasApiTokens;\n\nclass User extends Authenticatable\n{\n    use HasApiTokens, HasFactory, Notifiable;\n\n    protected $fillable = [\n        'name',\n        'email',\n        'password',\n    ];\n\n    protected $hidden = [\n        'password',\n        'remember_token',\n    ];\n\n    protected $casts = [\n        'email_verified_at' => 'datetime',\n        'password' => 'hashed',\n    ];\n}\n",
+  "composer.json": "{\n    \"name\": \"laravel/laravel\",\n    \"type\": \"project\",\n    \"description\": \"The Laravel Framework.\",\n    \"keywords\": [\"framework\", \"laravel\"],\n    \"license\": \"MIT\",\n    \"require\": {\n        \"php\": \"^8.1\",\n        \"guzzlehttp/guzzle\": \"^7.2\",\n        \"laravel/framework\": \"^10.0\",\n        \"laravel/sanctum\": \"^3.2\",\n        \"laravel/tinker\": \"^2.8\"\n    },\n    \"require-dev\": {\n        \"fakerphp/faker\": \"^1.9.1\",\n        \"laravel/pint\": \"^1.0\",\n        \"laravel/sail\": \"^1.18\",\n        \"mockery/mockery\": \"^1.4.4\",\n        \"nunomaduro/collision\": \"^7.0\",\n        \"phpunit/phpunit\": \"^10.0\",\n        \"spatie/laravel-ignition\": \"^2.0\"\n    },\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"app/\",\n            \"Database\\\\Factories\\\\\": \"database/factories/\",\n            \"Database\\\\Seeders\\\\\": \"database/seeders/\"\n        }\n    },\n    \"autoload-dev\": {\n        \"psr-4\": {\n            \"Tests\\\\\": \"tests/\"\n        }\n    },\n    \"scripts\": {\n        \"post-autoload-dump\": [\n            \"Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump\",\n            \"@php artisan package:discover --ansi\"\n        ],\n        \"post-update-cmd\": [\n            \"@php artisan vendor:publish --tag=laravel-assets --ansi --force\"\n        ],\n        \"post-root-package-install\": [\n            \"@php -r \\\"file_exists('.env') || copy('.env.example', '.env');\\\"\"\n        ],\n        \"post-create-project-cmd\": [\n            \"@php artisan key:generate --ansi\"\n        ]\n    },\n    \"extra\": {\n        \"laravel\": {\n            \"dont-discover\": []\n        }\n    },\n    \"config\": {\n        \"optimize-autoloader\": true,\n        \"preferred-install\": \"dist\",\n        \"sort-packages\": true,\n        \"allow-plugins\": {\n            \"pestphp/pest-plugin\": true,\n            \"php-http/discovery\": true\n        }\n    },\n    \"minimum-stability\": \"stable\",\n    \"prefer-stable\": true\n}\n",
+  "package.json": "{\n    \"private\": true,\n    \"type\": \"module\",\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\"\n    },\n    \"devDependencies\": {\n        \"axios\": \"^1.1.2\",\n        \"laravel-vite-plugin\": \"^0.7.5\",\n        \"vite\": \"^4.0.0\"\n    }\n}\n",
+  ".env.example": "APP_NAME=Laravel\nAPP_ENV=local\nAPP_KEY=\nAPP_DEBUG=true\nAPP_URL=http://localhost\n\nLOG_CHANNEL=stack\nLOG_DEPRECATIONS_CHANNEL=null\nLOG_LEVEL=debug\n\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=laravel\nDB_USERNAME=root\nDB_PASSWORD=\n\nBROADCAST_DRIVER=log\nCACHE_DRIVER=file\nFILESYSTEM_DISK=local\nQUEUE_CONNECTION=sync\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\n",
+  "artisan": "#!/usr/bin/env php\n<?php\n\ndefine('LARAVEL_START', microtime(true));\n\nif (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {\n    require $maintenance;\n}\n\nrequire __DIR__.'/vendor/autoload.php';\n\n$app = require_once __DIR__.'/bootstrap/app.php';\n\n$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);\n\n$status = $kernel->handle(\n    $input = new Symfony\\Component\\Console\\Input\\ArgvInput,\n    new Symfony\\Component\\Console\\Output\\ConsoleOutput\n);\n\n$kernel->terminate($input, $status);\n\nexit($status);\n",
+  "bootstrap/app.php": "<?php\n\n$app = new Illuminate\\Foundation\\Application(\n    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Http\\Kernel::class,\n    App\\Http\\Kernel::class\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Console\\Kernel::class,\n    App\\Http\\Console\\Kernel::class\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Debug\\ExceptionHandler::class,\n    App\\Exceptions\\Handler::class\n);\n\nreturn $app;\n",
+  "app/Http/Kernel.php": "<?php\n\nnamespace App\\Http;\n\nuse Illuminate\\Foundation\\Http\\Kernel as HttpKernel;\n\nclass Kernel extends HttpKernel\n{\n    protected $middleware = [\n        \\Illuminate\\Http\\Middleware\\TrustProxies::class,\n        \\Illuminate\\Http\\Middleware\\HandleCors::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize::class,\n        \\App\\Http\\Middleware\\TrimStrings::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull::class,\n    ];\n\n    protected $middlewareGroups = [\n        'web' => [\n            \\App\\Http\\Middleware\\EncryptCookies::class,\n            \\Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse::class,\n            \\Illuminate\\Session\\Middleware\\StartSession::class,\n            \\Illuminate\\View\\Middleware\\ShareErrorsFromSession::class,\n            \\App\\Http\\Middleware\\VerifyCsrfToken::class,\n            \\Illuminate\\Routing\\Middleware\\SubstituteBindings::class,\n        ],\n        'api' => [\n            \\Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful::class,\n            \\Illuminate\\Routing\\Middleware\\ThrottleRequests::class.':api',\n            \\Illuminate\\Routing\\Middleware\\SubstituteBindings::class,\n        ],\n    ];\n\n    protected $middlewareAliases = [\n        'auth' => \\App\\Http\\Middleware\\Authenticate::class,\n        'guest' => \\App\\Http\\Middleware\\RedirectIfAuthenticated::class,\n        'verified' => \\Illuminate\\Auth\\Middleware\\EnsureEmailIsVerified::class,\n    ];\n}\n",
+  "app/Console/Kernel.php": "<?php\n\nnamespace App\\Console;\n\nuse Illuminate\\Foundation\\Console\\Kernel as ConsoleKernel;\n\nclass Kernel extends ConsoleKernel\n{\n    protected function commands(): void\n    {\n        $this->load(__DIR__.'/Commands');\n        require base_path('routes/console.php');\n    }\n}\n",
+  "app/Exceptions/Handler.php": "<?php\n\nnamespace App\\Exceptions;\n\nuse Illuminate\\Foundation\\Exceptions\\Handler as ExceptionHandler;\nuse Throwable;\n\nclass Handler extends ExceptionHandler\n{\n    protected $dontFlash = [\n        'current_password',\n        'password',\n        'password_confirmation',\n    ];\n\n    public function register(): void\n    {\n        $this->reportable(function (Throwable $e) {\n            //\n        });\n    }\n}\n",
+  "app/Http/Middleware/TrimStrings.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Foundation\\Http\\Middleware\\TrimStrings as Middleware;\nclass TrimStrings extends Middleware {}\n",
+  "app/Http/Middleware/EncryptCookies.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Cookie\\Middleware\\EncryptCookies as Middleware;\nclass EncryptCookies extends Middleware {}\n",
+  "app/Http/Middleware/VerifyCsrfToken.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken as Middleware;\nclass VerifyCsrfToken extends Middleware {}\n",
+  "app/Http/Middleware/Authenticate.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Auth\\Middleware\\Authenticate as Middleware;\nuse Illuminate\\Http\\Request;\nclass Authenticate extends Middleware {\n    protected function redirectTo(Request $request): ?string {\n        return $request->expectsJson() ? null : route('login');\n    }\n}\n",
+  "app/Http/Middleware/RedirectIfAuthenticated.php": "<?php\nnamespace App\\Http\\Middleware;\nuse App\\Providers\\RouteServiceProvider;\nuse Closure;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Support\\Facades\\Auth;\nuse Symfony\\Component\\HttpFoundation\\Response;\nclass RedirectIfAuthenticated {\n    public function handle(Request $request, Closure $next, string ...$guards): Response {\n        $guards = empty($guards) ? [null] : $guards;\n        foreach ($guards as $guard) {\n            if (Auth::guard($guard)->check()) {\n                return redirect(RouteServiceProvider::HOME);\n            }\n        }\n        return $next($request);\n    }\n}\n",
+  "app/Providers/RouteServiceProvider.php": "<?php\n\nnamespace App\\Providers;\n\nuse Illuminate\\Cache\\RateLimiting\\Limit;\nuse Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider as ServiceProvider;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Support\\Facades\\RateLimiter;\nuse Illuminate\\Support\\Facades\\Route;\n\nclass RouteServiceProvider extends ServiceProvider\n{\n    public const HOME = '/home';\n\n    public function boot(): void\n    {\n        RateLimiter::for('api', function (Request $request) {\n            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());\n        });\n\n        $this->routes(function () {\n            Route::middleware('api')\n                ->prefix('api')\n                ->group(base_path('routes/api.php'));\n\n            Route::middleware('web')\n                ->group(base_path('routes/web.php'));\n        });\n    }\n}\n",
+  "routes/web.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\nRoute::get('/', function () {\n    return view('welcome');\n});\n",
+  "routes/api.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse Illuminate\\Http\\Request;\n\nRoute::middleware('auth:sanctum')->get('/user', function (Request $request) {\n    return $request->user();\n});\n",
+  "routes/console.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Artisan;\n\nArtisan::command('inspire', function () {\n    $this->comment(Illuminate\\Foundation\\Inspiring::quote());\n})->purpose('Display an inspiring quote');\n",
+  "resources/views/welcome.blade.php": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Antigravity Laravel Application</title>\n    <style>\n        body {\n            font-family: 'Outfit', 'Inter', sans-serif;\n            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);\n            color: #f8fafc;\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            margin: 0;\n        }\n        .container {\n            text-align: center;\n            padding: 3rem;\n            background: rgba(255, 255, 255, 0.03);\n            backdrop-filter: blur(16px);\n            border: 1px solid rgba(255, 255, 255, 0.08);\n            border-radius: 24px;\n            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);\n            max-width: 500px;\n        }\n        h1 {\n            font-size: 2.5rem;\n            margin-bottom: 1rem;\n            background: linear-gradient(to right, #f43f5e, #fb7185);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n        }\n        p {\n            color: #94a3b8;\n            line-height: 1.6;\n        }\n        .badge {\n            display: inline-block;\n            padding: 0.5rem 1rem;\n            background: rgba(244, 63, 94, 0.1);\n            color: #f43f5e;\n            border-radius: 9999px;\n            font-size: 0.875rem;\n            font-weight: 600;\n            margin-bottom: 1.5rem;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"badge\">Laravel 10.x + PHP</div>\n        <h1>\ud83d\ude80 Welcome to Antigravity Laravel</h1>\n        <p>Your production-ready Laravel full-stack MVC application, scaffolded and pre-configured for seamless development with AI coding agents.</p>\n    </div>\n</body>\n</html>\n",
+  "phpunit.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<phpunit xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:noNamespaceSchemaLocation=\"./vendor/phpunit/phpunit/phpunit.xsd\"\n         bootstrap=\"vendor/autoload.php\"\n         colors=\"true\">\n    <testsuites>\n        <testsuite name=\"Unit\">\n            <directory suffix=\"Test.php\">./tests/Unit</directory>\n        </testsuite>\n        <testsuite name=\"Feature\">\n            <directory suffix=\"Test.php\">./tests/Feature</directory>\n        </testsuite>\n    </testsuites>\n</phpunit>\n"
+}
+FALLBACK_TEMPLATES = {
+  "package.json": "{\n  \"name\": \"project\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"src/index.js\",\n  \"scripts\": {\n    \"build\": \"tsc\",\n    \"start\": \"node dist/index.js\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint 'src/**/*.ts'\"\n  },\n  \"dependencies\": {},\n  \"devDependencies\": {}\n}\n",
+  "go.mod": "module project\n\ngo 1.20\n",
+  "src/main.go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Antigravity!\")\n}\n",
+  "src/main.py": "def main():\n    print(\"Hello, Antigravity!\")\n\nif __name__ == \"__main__\":\n    main()\n"
+}
+DOCKER_TEMPLATES = {
+  "db_postgres": "  postgres:\n    image: postgres:15-alpine\n    container_name: postgres_db\n    environment:\n      POSTGRES_USER: postgres\n      POSTGRES_PASSWORD: postgres\n      POSTGRES_DB: postgres\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U postgres\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_mysql": "  mysql:\n    image: mysql:8.0\n    container_name: mysql_db\n    environment:\n      MYSQL_ROOT_PASSWORD: root\n      MYSQL_DATABASE: db\n    ports:\n      - \"3306:3306\"\n    volumes:\n      - mysql_data:/var/lib/mysql\n    healthcheck:\n      test: [\"CMD-SHELL\", \"mysqladmin ping -h localhost\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_mongodb": "  mongodb:\n    image: mongo:6.0\n    container_name: mongodb_db\n    ports:\n      - \"27017:27017\"\n    volumes:\n      - mongo_data:/data/db\n    healthcheck:\n      test: [\"CMD-SHELL\", \"echo 'db.runCommand(\\\"ping\\\")' | mongosh localhost:27017/test --quiet\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_redis": "  redis:\n    image: redis:7-alpine\n    container_name: redis_cache\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redis_data:/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"redis-cli ping | grep PONG\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "nextjs_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "gogin_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/main\"]\n",
+  "fastapi_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "laravel_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=builder /app/dist /usr/share/nginx/html\nEXPOSE 80\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n",
+  "nextjs_dockerignore": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \\\n  elif [ -f package-lock.json ]; then npm ci; \\\n  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \\\n  else npm install; \\\n  fi\nCOPY . .\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then pnpm run build; \\\n  else npm run build; \\\n  fi\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "gogin_dockerignore": "FROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nCMD [\"uvicorn\", \"src.app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "fastapi_dockerignore": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \\\n  elif [ -f package-lock.json ]; then npm ci; \\\n  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \\\n  else npm install; \\\n  fi\nCOPY . .\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then pnpm run build; \\\n  else npm run build; \\\n  fi\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "fallback_node_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "fallback_go_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "fallback_py_dockerfile": "FROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nCMD [\"uvicorn\", \"src.app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "fallback_laravel_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/index.js\"]\n",
+  "compose_multi": "version: '3.8'\n\nservices:\n",
+  "compose_volume": "\nvolumes:\n  pgdata:\n  mysql_data:\n  mongo_data:\n  redis_data:\n",
+  "compose_single": "version: '3.8'\n\nservices:\n"
+}
+MULTIPROJECT_FILES = {
+  "apps/backend/package.json": "{\n  \"name\": \"backend\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"build\": \"nest build\",\n    \"start\": \"nest start\",\n    \"lint\": \"eslint 'src/**/*.ts'\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"@nestjs/common\": \"^10.0.0\",\n    \"@nestjs/core\": \"^10.0.0\",\n    \"reflect-metadata\": \"^0.1.13\",\n    \"rxjs\": \"^7.8.1\"\n  },\n  \"devDependencies\": {\n    \"@nestjs/cli\": \"^10.0.0\",\n    \"@nestjs/testing\": \"^10.0.0\",\n    \"@types/node\": \"^20.0.0\",\n    \"typescript\": \"^5.0.0\",\n    \"eslint\": \"^8.0.0\",\n    \"jest\": \"^29.0.0\"\n  }\n}\n",
+  "apps/backend/src/main.ts": "import { NestFactory } from '@nestjs/core';\nimport { AppModule } from './app.module';\n\nasync function bootstrap() {\n  const app = await NestFactory.create(AppModule);\n  await app.listen(process.env.PORT || 3000);\n}\nbootstrap();\n",
+  "apps/backend/src/app.module.ts": "import { Module } from '@nestjs/common';\n\n@Module({\n  imports: [],\n  controllers: [],\n  providers: [],\n})\nexport class AppModule {}\n",
+  "apps/backend/requirements.txt": "fastapi>=0.110.0\nuvicorn[standard]>=0.28.0\npydantic>=2.6.4\npytest>=8.1.1\nhttpx>=0.27.0\n",
+  "apps/backend/src/app/main.py": "from fastapi import FastAPI\n\napp = FastAPI(title=\"Antigravity Custom Backend\")\n\n@app.get(\"/\")\ndef read_root():\n    return {\"message\": \"Hello from Custom FastAPI Backend!\"}\n",
+  "apps/backend/go.mod": "module backend\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "apps/backend/src/cmd/server/main.go": "package main\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc main() {\n\tr := gin.Default()\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(200, gin.H{\n\t\t\t\"message\": \"Hello from Custom Go Gin Backend!\",\n\t\t})\n\t})\n\tr.Run()\n}\n",
+  "apps/frontend/package.json": "{\n  \"name\": \"frontend\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"tsc && vite build\",\n    \"lint\": \"eslint 'src/**/*.ts'\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\"\n  },\n  \"devDependencies\": {\n    \"vite\": \"^5.0.0\",\n    \"@types/react\": \"^18.0.0\",\n    \"typescript\": \"^5.0.0\",\n    \"eslint\": \"^8.0.0\",\n    \"jest\": \"^29.0.0\"\n  }\n}\n",
+  "apps/frontend/src/app/layout.tsx": "import type { Metadata } from 'next';\n\nexport const metadata: Metadata = {\n  title: 'Antigravity Custom Frontend',\n  description: 'Flexible separate frontend application',\n};\n\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "apps/frontend/src/app/page.tsx": "export default function Home() {\n  return (\n    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>\n      <h1>\ud83d\ude80 Welcome to Antigravity Custom Frontend</h1>\n      <p>Running alongside a decoupled backend service in a clean modular layout.</p>\n    </main>\n  );\n}\n",
+  "apps/frontend/index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Antigravity React SPA</title>\n  </head>\n  <body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\n  </body>\n</html>\n",
+  "apps/frontend/src/main.tsx": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n",
+  "apps/frontend/src/App.tsx": "import React from 'react';\n\nexport default function App() {\n  return (\n    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>\n      <h1>\ud83d\ude80 Welcome to Antigravity React SPA Frontend</h1>\n      <p>Decoupled single-page frontend application.</p>\n    </div>\n  );\n}\n",
+  "apps/frontend/resources/views/welcome.blade.php": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Antigravity Blade Frontend</title>\n    <style>\n        body { font-family: sans-serif; padding: 2rem; background-color: #f8fafc; color: #1e293b; }\n    </style>\n</head>\n<body>\n    <h1>\ud83d\ude80 Welcome to Antigravity Blade/HTML Frontend</h1>\n    <p>Flexible separate frontend application template.</p>\n</body>\n</html>\n"
+}
+
+def get_input(prompt, default):
+    try:
+        val = input(f"{prompt} (default: {default}): ").strip()
+        return val if val else default
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+        sys.exit(1)
+
+def select_choice(prompt, options, default_choice="1"):
+    print(prompt)
+    for opt in options:
+        print(f"  {opt}")
+    try:
+        val = input(f"Select choice (default: {default_choice}): ").strip()
+        return val if val else default_choice
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+        sys.exit(1)
+
+def write_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f"  Created {path}")
+
+def run(args):
+    print("==========================================================")
+    print("  Antigravity Agent Core - Workspace Initialization")
+    print("==========================================================")
+    
+    project_name = args[1] if len(args) > 1 else None
+    tech_stack = args[2] if len(args) > 2 else None
+    arch_pattern = args[3] if len(args) > 3 else None
+    db_orm = args[4] if len(args) > 4 else None
+    env_vars = args[5] if len(args) > 5 else None
+    scaffold = args[6] if len(args) > 6 else None
+    gen_docker = args[7] if len(args) > 7 else None
+    
+    be_choice = "1"
+    be_arch_choice = "2"
+    fe_choice = "1"
+    fe_arch_choice = "2"
+    
+    if not project_name:
+        project_name = get_input("Enter Project Name", "My Project")
+        
+    if not tech_stack:
+        stack_opts = [
+            "[1] Next.js (TypeScript, Tailwind, App Router) [Recommended]",
+            "[2] Go Gin (Clean Architecture REST API)",
+            "[3] FastAPI (Python REST API with pytest)",
+            "[4] Node/TypeScript (Generic Node App)",
+            "[5] Go (Generic Main App)",
+            "[6] Python (Generic Script)",
+            "[7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)",
+            "[8] Custom Multi-Project / Separate Apps (e.g. apps/backend + apps/frontend)",
+            "[9] Laravel (PHP MVC Framework)"
+        ]
+        choice = select_choice("Select Technology Stack:", stack_opts, "1")
+        mapping = {
+            "1": "Next.js", "2": "Go Gin", "3": "FastAPI", "4": "Node/TypeScript",
+            "5": "Go", "6": "Python", "7": "Monorepo", "8": "Multi-Project", "9": "Laravel"
+        }
+        tech_stack = mapping.get(choice, choice)
+        
+    if tech_stack == "Multi-Project":
+        be_opts = ["[1] NestJS (TypeScript)", "[2] FastAPI (Python)", "[3] Go Gin", "[4] None"]
+        be_choice = select_choice("--- Configure Backend Application ---", be_opts, "1")
+        
+        if be_choice != "4":
+            arch_opts = ["[1] Hexagonal Architecture (Ports & Adapters)", "[2] Clean Architecture", "[3] Standard MVC / Modular"]
+            be_arch_choice = select_choice("Configure Backend Architecture:", arch_opts, "2")
+            
+        fe_opts = ["[1] Next.js (TypeScript)", "[2] React SPA (Vite)", "[3] Laravel Blade / PHP HTML", "[4] None"]
+        fe_choice = select_choice("--- Configure Frontend Application ---", fe_opts, "1")
+        
+        if fe_choice != "4":
+            arch_opts = ["[1] Atomic Design", "[2] Standard Components / App Router Layout"]
+            fe_arch_choice = select_choice("Configure Frontend Architecture:", arch_opts, "2")
+            
+        arch_pattern = "Decoupled / Distributed Architecture"
+        db_orm = "None"
+        env_vars = "PORT"
+        
+    default_arch = "MVC"
+    if tech_stack == "Next.js":
+        default_arch = "App Router"
+    elif tech_stack == "Go Gin":
+        default_arch = "Clean Architecture"
+    elif tech_stack == "FastAPI":
+        default_arch = "Modular REST"
+    elif tech_stack == "Monorepo":
+        default_arch = "Decoupled / Distributed"
+    elif tech_stack == "Laravel":
+        default_arch = "MVC"
+        
+    if not arch_pattern:
+        arch_pattern = get_input("Enter Architectural Pattern", default_arch)
+        
+    default_env = "PORT"
+    if tech_stack in ("Go Gin", "FastAPI"):
+        default_env = "PORT,ENV"
+    elif tech_stack == "Next.js":
+        default_env = "PORT"
+    elif tech_stack == "Laravel":
+        default_env = "APP_KEY,DB_CONNECTION,DB_DATABASE"
+        
+    if not db_orm:
+        db_orm = get_input("Enter Database/ORM (e.g. Prisma, PostgreSQL, None)", "None")
+        
+    if not env_vars:
+        env_vars = get_input("Enter config variables (comma-separated)", default_env)
+        
+    if not scaffold:
+        scaffold = get_input("Scaffold initial project folders? (y/n)", "y").lower()
+        
+    if not gen_docker:
+        gen_docker = get_input("Generate Dockerfiles and docker-compose.yml? (y/n)", "y").lower()
+
+    # 1. Initialize Git if not present
+    if not os.path.exists(".git"):
+        print("Initializing Git repository...")
+        subprocess.run(["git", "init"])
+        subprocess.run(["git", "branch", "-m", "main"])
+        
+    # 2. Install Git hooks
+    agents_dir = utils.get_agents_dir()
+    os.makedirs(".git/hooks", exist_ok=True)
+    for h in ('pre-commit', 'post-commit', 'commit-msg'):
+        src = os.path.join(agents_dir, 'hooks', h)
+        dest = os.path.join('.git', 'hooks', h)
+        if os.path.exists(src):
+            shutil.copy(src, dest)
+            os.chmod(dest, 0o755)
+            print(f"Git {h} hook installed.")
+
+    # 3. Scaffold folders if requested
+    if scaffold in ("y", "yes"):
+        print("Scaffolding directory structure...")
+        
+        if tech_stack == "Next.js":
+            if "Atomic" in arch_pattern or "atomic" in arch_pattern:
+                dirs = ['src/app', 'src/components/atoms', 'src/components/molecules', 'src/components/organisms', 'src/components/templates', 'src/lib', 'tests']
+            elif "Clean" in arch_pattern or "clean" in arch_pattern:
+                dirs = ['src/app', 'src/core/entities', 'src/core/usecases', 'src/infrastructure/db', 'src/infrastructure/api', 'src/lib', 'tests']
+            else:
+                dirs = ['src/app', 'src/components', 'src/lib', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in NEXT_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Go Gin":
+            if any(x in arch_pattern for x in ("Hexagonal", "Ports", "Adapters")):
+                dirs = ['src/cmd/server', 'src/internal/core/domain', 'src/internal/core/ports', 'src/internal/adapters/in/web', 'src/internal/adapters/out/db', 'src/internal/config', 'tests']
+            elif "Clean" in arch_pattern:
+                dirs = ['src/cmd/server', 'src/internal/domain/entity', 'src/internal/domain/usecase', 'src/internal/adapter/controller', 'src/internal/adapter/repository', 'src/internal/infrastructure/db', 'src/internal/config', 'tests']
+            else:
+                dirs = ['src/cmd/server', 'src/internal/model', 'src/internal/controller', 'src/internal/view', 'src/internal/config', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in GOGIN_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "FastAPI":
+            if any(x in arch_pattern for x in ("Hexagonal", "Ports", "Adapters")):
+                dirs = ['src/app/domain', 'src/app/ports', 'src/app/adapters/in/api', 'src/app/adapters/out/db', 'src/app/core', 'tests']
+            elif "Clean" in arch_pattern:
+                dirs = ['src/app/entities', 'src/app/usecases', 'src/app/controllers', 'src/app/infrastructure/db', 'src/app/core', 'tests']
+            else:
+                dirs = ['src/app/core', 'src/app/api/endpoints', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in FASTAPI_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Monorepo":
+            dirs = ['apps/web/src/app/api/health', 'apps/web/src/components', 'apps/web/src/lib', 'apps/web/tests',
+                    'apps/api/src/cmd/server', 'apps/api/src/internal/controller', 'apps/api/src/internal/config', 'apps/api/tests',
+                    'packages/shared']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in MONOREPO_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Laravel":
+            dirs = ['app/Http/Controllers', 'app/Models', 'app/Providers', 'bootstrap', 'config', 'database/migrations',
+                    'database/seeders', 'database/factories', 'public', 'resources/views', 'resources/css', 'resources/js',
+                    'routes', 'tests/Feature', 'tests/Unit', 'app/Http/Middleware', 'app/Exceptions', 'app/Console']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in LARAVEL_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Multi-Project":
+            os.makedirs("apps/backend", exist_ok=True)
+            os.makedirs("apps/frontend", exist_ok=True)
+            
+            # 1. Backend
+            if be_choice == "1":
+                # NestJS
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/core/domain', 'apps/backend/src/core/ports', 'apps/backend/src/adapters/in/web', 'apps/backend/src/adapters/out/persistence']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/entities', 'apps/backend/src/usecases', 'apps/backend/src/controllers', 'apps/backend/src/infrastructure/db']
+                else:
+                    dirs = ['apps/backend/src/modules', 'apps/backend/src/common']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/package.json", MULTIPROJECT_FILES["apps/backend/package.json"])
+                write_file("apps/backend/src/main.ts", MULTIPROJECT_FILES["apps/backend/src/main.ts"])
+                write_file("apps/backend/src/app.module.ts", MULTIPROJECT_FILES["apps/backend/src/app.module.ts"])
+            elif be_choice == "2":
+                # FastAPI
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/domain', 'apps/backend/src/ports', 'apps/backend/src/adapters/in/api', 'apps/backend/src/adapters/out/db', 'apps/backend/src/core']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/entities', 'apps/backend/src/usecases', 'apps/backend/src/controllers', 'apps/backend/src/infrastructure/db', 'apps/backend/src/core']
+                else:
+                    dirs = ['apps/backend/src/core', 'apps/backend/src/api/endpoints']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/requirements.txt", MULTIPROJECT_FILES["apps/backend/requirements.txt"])
+                write_file("apps/backend/src/app/main.py", MULTIPROJECT_FILES["apps/backend/src/app/main.py"])
+            elif be_choice == "3":
+                # Go Gin
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/core/domain', 'apps/backend/src/internal/core/ports', 'apps/backend/src/internal/adapters/in/web', 'apps/backend/src/internal/adapters/out/db', 'apps/backend/src/internal/config']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/domain/entity', 'apps/backend/src/internal/domain/usecase', 'apps/backend/src/internal/adapter/controller', 'apps/backend/src/internal/adapter/repository', 'apps/backend/src/internal/infrastructure/db', 'apps/backend/src/internal/config']
+                else:
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/model', 'apps/backend/src/internal/controller', 'apps/backend/src/internal/view', 'apps/backend/src/internal/config']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/go.mod", MULTIPROJECT_FILES["apps/backend/go.mod"])
+                write_file("apps/backend/src/cmd/server/main.go", MULTIPROJECT_FILES["apps/backend/src/cmd/server/main.go"])
+                
+            # 2. Frontend
+            if fe_choice == "1":
+                # Next.js
+                if fe_arch_choice == "1":
+                    dirs = ['apps/frontend/src/app', 'apps/frontend/src/lib', 'apps/frontend/src/components/atoms', 'apps/frontend/src/components/molecules', 'apps/frontend/src/components/organisms', 'apps/frontend/src/components/templates']
+                else:
+                    dirs = ['apps/frontend/src/app', 'apps/frontend/src/lib', 'apps/frontend/src/components']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/frontend/package.json", MULTIPROJECT_FILES["apps/frontend/package.json"])
+                write_file("apps/frontend/src/app/layout.tsx", MULTIPROJECT_FILES["apps/frontend/src/app/layout.tsx"])
+                write_file("apps/frontend/src/app/page.tsx", MULTIPROJECT_FILES["apps/frontend/src/app/page.tsx"])
+            elif fe_choice == "2":
+                # React SPA
+                if fe_arch_choice == "1":
+                    dirs = ['apps/frontend/src', 'apps/frontend/public', 'apps/frontend/src/components/atoms', 'apps/frontend/src/components/molecules', 'apps/frontend/src/components/organisms', 'apps/frontend/src/components/templates']
+                else:
+                    dirs = ['apps/frontend/src', 'apps/frontend/public', 'apps/frontend/src/components']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/frontend/package.json", MULTIPROJECT_FILES["apps/frontend/package.json"])
+                write_file("apps/frontend/index.html", MULTIPROJECT_FILES["apps/frontend/index.html"])
+                write_file("apps/frontend/src/main.tsx", MULTIPROJECT_FILES["apps/frontend/src/main.tsx"])
+                write_file("apps/frontend/src/App.tsx", MULTIPROJECT_FILES["apps/frontend/src/App.tsx"])
+            elif fe_choice == "3":
+                # Laravel Blade
+                os.makedirs("apps/frontend/resources/views", exist_ok=True)
+                write_file("apps/frontend/resources/views/welcome.blade.php", MULTIPROJECT_FILES["apps/frontend/resources/views/welcome.blade.php"])
+                
+        else:
+            # Fallback (Generic/Basic)
+            dirs = ['src', 'tests', 'config']
+            for d in dirs: os.makedirs(d, exist_ok=True)
+            
+            stack_lower = tech_stack.lower()
+            if any(x in stack_lower for x in ("node", "typescript", "ts")):
+                write_file("package.json", FALLBACK_TEMPLATES["package.json"])
+            if any(x in stack_lower for x in ("go", "golang")):
+                write_file("go.mod", FALLBACK_TEMPLATES["go.mod"])
+                write_file("src/main.go", FALLBACK_TEMPLATES["src/main.go"])
+            if any(x in stack_lower for x in ("python", "py")):
+                write_file("src/main.py", FALLBACK_TEMPLATES["src/main.py"])
+
+    # 4. Generate Dockerfiles
+    if gen_docker in ("y", "yes"):
+        print("Generating Dockerfiles and docker-compose.yml...")
+        
+        db_service = ""
+        db_envs = ""
+        db_depends = ""
+        db_lower = db_orm.lower()
+        
+        if "postgres" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_postgres"]
+            db_envs = "      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres\n      - DB_HOST=postgres\n      - DB_PORT=5432"
+            db_depends = "    depends_on:\n      postgres:\n        condition: service_healthy"
+        elif "mysql" in db_lower or "mariadb" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_mysql"]
+            db_envs = "      - DATABASE_URL=mysql://root:root@mysql:3306/db\n      - DB_HOST=mysql\n      - DB_PORT=3306"
+            db_depends = "    depends_on:\n      mysql:\n        condition: service_healthy"
+        elif "mongo" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_mongodb"]
+            db_envs = "      - DATABASE_URL=mongodb://mongodb:27017/db\n      - DB_HOST=mongodb\n      - DB_PORT=27017"
+            db_depends = "    depends_on:\n      mongodb:\n        condition: service_healthy"
+        elif "redis" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_redis"]
+            db_envs = "      - REDIS_URL=redis://redis:6379/0\n      - REDIS_HOST=redis\n      - REDIS_PORT=6379"
+            db_depends = "    depends_on:\n      redis:\n        condition: service_healthy"
+
+        # Multi/Monorepos
+        if tech_stack in ("Monorepo", "Multi-Project"):
+            be_dir = "apps/api" if tech_stack == "Monorepo" else "apps/backend"
+            fe_dir = "apps/web" if tech_stack == "Monorepo" else "apps/frontend"
+            
+            # Backend Dockerfile selection
+            be_docker = ""
+            if tech_stack == "Monorepo" or be_choice == "3":
+                be_docker = DOCKER_TEMPLATES["gogin_dockerfile"]
+            elif be_choice == "2":
+                be_docker = DOCKER_TEMPLATES["fastapi_dockerfile"]
+            elif be_choice == "1":
+                # NestJS
+                be_docker = "FROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\nRUN npm run build\nCMD [\"npm\", \"run\", \"start:prod\"]"
+                
+            # Frontend Dockerfile selection
+            fe_docker = ""
+            if tech_stack == "Monorepo" or fe_choice == "1":
+                fe_docker = DOCKER_TEMPLATES["nextjs_dockerfile"]
+            elif fe_choice == "2":
+                fe_docker = "FROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\nRUN npm run build\nRUN npm install -g serve\nCMD [\"serve\", \"-s\", \"dist\"]"
+            elif fe_choice == "3":
+                fe_docker = DOCKER_TEMPLATES["laravel_dockerfile"]
+                
+            # Write Dockerfiles
+            if be_choice != "4":
+                write_file(f"{be_dir}/Dockerfile", be_docker.replace('\\n', '\n').replace('\"', '"'))
+            if fe_choice != "4":
+                write_file(f"{fe_dir}/Dockerfile", fe_docker.replace('\\n', '\n').replace('\"', '"'))
+                
+            # Compose
+            services = ""
+            if fe_choice != "4":
+                services += f"  frontend:\n    build:\n      context: ./{fe_dir}\n      dockerfile: Dockerfile\n    ports:\n      - \"3000:3000\"\n"
+            if be_choice != "4":
+                services += f"  backend:\n    build:\n      context: ./{be_dir}\n      dockerfile: Dockerfile\n    ports:\n      - \"8080:8080\"\n"
+                if db_depends:
+                    services += f"{db_depends}\n"
+                if db_envs:
+                    services += f"    environment:\n{db_envs}\n"
+                    
+            if db_service:
+                services += f"\n{db_service}\n"
+                
+            compose_content = f"version: '3.8'\n\nservices:\n{services}"
+            if "postgres" in db_lower or "mysql" in db_lower or "mariadb" in db_lower or "mongo" in db_lower:
+                vol_name = "pgdata" if "postgres" in db_lower else ("mysql_data" if "mysql" in db_lower or "mariadb" in db_lower else "mongo_data")
+                compose_content += f"\nvolumes:\n  {vol_name}:\n"
+                
+            write_file("docker-compose.yml", compose_content.replace('\\n', '\n').replace('\"', '"'))
+            
+        else:
+            # Single Project dockerfiles
+            dockerfile_content = ""
+            dockerignore_content = ""
+            
+            if tech_stack == "Next.js":
+                dockerfile_content = DOCKER_TEMPLATES.get("nextjs_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("nextjs_dockerignore", "")
+            elif tech_stack in ("Go Gin", "Go"):
+                dockerfile_content = DOCKER_TEMPLATES.get("gogin_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("gogin_dockerignore", "")
+            elif tech_stack in ("FastAPI", "Python"):
+                dockerfile_content = DOCKER_TEMPLATES.get("fastapi_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("fastapi_dockerignore", "")
+            elif tech_stack == "Laravel":
+                dockerfile_content = DOCKER_TEMPLATES.get("laravel_dockerfile", "")
+            elif any(x in tech_stack.lower() for x in ("node", "typescript", "ts")):
+                dockerfile_content = DOCKER_TEMPLATES.get("fallback_node_dockerfile", "")
+                
+            if dockerfile_content:
+                write_file("Dockerfile", dockerfile_content.replace('\\n', '\n').replace('\"', '"'))
+            if dockerignore_content:
+                write_file(".dockerignore", dockerignore_content.replace('\\n', '\n').replace('\"', '"'))
+                
+            # Compose
+            port = "3000" if tech_stack == "Next.js" else ("8080" if tech_stack in ("Go Gin", "Go") else "8000")
+            services = f"  app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    ports:\n      - \"{port}:{port}\"\n"
+            if db_depends:
+                services += f"{db_depends}\n"
+            if db_envs:
+                services += f"    environment:\n{db_envs}\n"
+                
+            if db_service:
+                services += f"\n{db_service}\n"
+                
+            compose_content = f"version: '3.8'\n\nservices:\n{services}"
+            if "postgres" in db_lower or "mysql" in db_lower or "mariadb" in db_lower or "mongo" in db_lower:
+                vol_name = "pgdata" if "postgres" in db_lower else ("mysql_data" if "mysql" in db_lower or "mariadb" in db_lower else "mongo_data")
+                compose_content += f"\nvolumes:\n  {vol_name}:\n"
+                
+            write_file("docker-compose.yml", compose_content.replace('\\n', '\n').replace('\"', '"'))
+
+    # 5. Create .env and .env.example
+    if env_vars:
+        print("Writing configuration environment variables...")
+        vars_list = [v.strip() for v in env_vars.split(',') if v.strip()]
+        env_content = "\n".join([f"{v}=" for v in vars_list]) + "\n"
+        with open(".env.example", 'w') as f:
+            f.write(env_content)
+        with open(".env", 'w') as f:
+            f.write(env_content)
+        print("Created .env and .env.example templates")
+
+    # 6. Run auto-recon to generate the blueprints
+    print("Running autonomous reconnaissance to populate blueprint files...")
+    recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
+    if os.path.exists(recon_sh):
+        utils.run_shell_script(recon_sh, ["-f"])
+        
+    print("==========================================================")
+    print(f"Workspace initialized successfully for '{project_name}'!")
+    print("==========================================================")
+
+EOF
+
+# Write .agents\scripts\cli\commands\guide.py
+write_template_safe ".agents\scripts\cli\commands\guide.py" << 'EOF'
+import sys
+import utils
+
+# ANSI color codes
+C_HEADER = '\033[95m'
+C_BLUE = '\033[94m'
+C_CYAN = '\033[96m'
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def run(args):
+    print(color("=====================================================================", C_BLUE))
+    print(color("   🚀 Welcome to Antigravity Agent Core Onboarding Guide 🚀", C_BOLD + C_HEADER))
+    print(color("=====================================================================", C_BLUE))
+    print("Antigravity Agent Core (AAC) is a developer protocol and workspace")
+    print("layout designed to coordinate human-agent pair-programming safely,")
+    print("cost-effectively, and securely.")
+    print("")
+    
+    print(color("💡 THE 3-STEP DAILY WORKFLOW FOR DEVELOPERS & AGENTS", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
+    print("When modifying code in this workspace, follow this atomic sequence:")
+    print("")
+    
+    print(f"{color('1. LOCK', C_BOLD + C_GREEN)} the module you want to edit:")
+    print(f"   $ {color('./.agents/scripts/helper.sh lock <module-directory>', C_CYAN)}")
+    print(f"   Example: {color('./.agents/scripts/helper.sh lock cli', C_GRAY if not sys.stdout.isatty() else '\033[90m')}")
+    print("   (This tells other developers/agents not to modify this module.)")
+    print("")
+    
+    print(f"{color('2. WRITE', C_BOLD + C_GREEN)} your code and tests (TDD is highly recommended).")
+    print("")
+    
+    print(f"{color('3. COMMIT', C_BOLD + C_GREEN)} your changes using the helper commit command:")
+    print(f"   $ {color('./.agents/scripts/helper.sh commit <type> <scope> \"description\" [files...]', C_CYAN)}")
+    print(f"   Example: {color('./.agents/scripts/helper.sh commit feat cli \"add push subcommand\"', C_GRAY if not sys.stdout.isatty() else '\033[90m')}")
+    print("   (This runs validation checks, rotates SSH keys/Git profiles, commits,")
+    print("   and automatically releases your lock).")
+    print("")
+    
+    print(color("🩺 KEY DIAGNOSTICS & SYSTEM COMMANDS", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
+    
+    print(f"- {color('Run Health Checks', C_BOLD)}: {color('./.agents/scripts/helper.sh doctor', C_CYAN)}")
+    print("  (Checks Git hooks, execution permissions, and workspace validation status.)")
+    print("")
+    
+    print(f"- {color('Validate Compliance', C_BOLD)}: {color('./.agents/scripts/helper.sh validate', C_CYAN)}")
+    print("  (Audits workspace for hardcoded secrets, environment purity, and budget limits.)")
+    print("")
+    
+    print(f"- {color('Setup Profile Rotation', C_BOLD)}: {color('./.agents/scripts/helper.sh git-profile', C_CYAN)}")
+    print("  (Manages multiple local git config identities and rotates SSH key bindings.)")
+    print("")
+    
+    print(color("📚 DOCUMENTATION & RESOURCES", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
+    print("Detailed guides are located inside the root 'docs/' directory:")
+    print(f"- Setup Guide:        {color('docs/setup_guide.md', C_GREEN)}")
+    print(f"- CLI Reference:      {color('docs/cli_guide.md', C_GREEN)}")
+    print(f"- Agent Workflows:    {color('docs/agent_workflow.md', C_GREEN)}")
+    print(f"- Directory Layout:   {color('docs/directory_blueprint.md', C_GREEN)}")
+    print(color("=====================================================================", C_BLUE))
+
+EOF
+
+# Write .agents\scripts\cli\commands\git_profile.py
+write_template_safe ".agents\scripts\cli\commands\git_profile.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    # args[0] is 'git-profile'
+    if not os.path.isdir('.git'):
+        print("Error: Not a Git repository.", file=sys.stderr)
+        sys.exit(1)
+        
+    name = ""
+    email = ""
+    if len(args) > 1:
+        name = args[1]
+    if len(args) > 2:
+        email = args[2]
+        
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    # Read profiles config key-values
+    config = {}
+    if os.path.exists(profiles_file):
+        with open(profiles_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    is_key_rotate = "rotate.name" in config
+    
+    if (name == "rotate" or name == "--rotate") and not is_key_rotate:
+        if os.path.exists(profiles_file):
+            keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+            if keys:
+                try:
+                    last_email = subprocess.check_output(
+                        ["git", "log", "-n", "1", "--format=%ae"],
+                        stderr=subprocess.DEVNULL
+                    ).decode().strip()
+                except:
+                    last_email = ""
+                    
+                selected_idx = 0
+                for i, k in enumerate(keys):
+                    p_e = config.get(f"{k}.email", "")
+                    if p_e == last_email:
+                        selected_idx = (i + 1) % len(keys)
+                        break
+                name = keys[selected_idx]
+                print(f"Rotating local Git profile to: '{name}'...")
+            else:
+                print(f"Error: No profiles defined in {profiles_file}.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print("Error: No Git profiles configuration found to rotate.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Check if name is a profile key
+    profile_name_key = f"{name}.name"
+    if name and not email and os.path.exists(profiles_file) and profile_name_key in config:
+        p_n = config[profile_name_key]
+        p_e = config.get(f"{name}.email", "")
+        p_s = config.get(f"{name}.ssh_key", "")
+        
+        print(f"Setting local repository Git configuration to profile '{name}'...")
+        subprocess.run(["git", "config", "--local", "user.name", p_n], check=True)
+        subprocess.run(["git", "config", "--local", "user.email", p_e], check=True)
+        
+        if p_s:
+            resolved_ssh = os.path.expanduser(p_s)
+            if os.path.exists(resolved_ssh):
+                subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_s}\" -o IdentitiesOnly=yes"], check=True)
+            else:
+                print(f"  [WARNING] SSH key file at '{p_s}' was not found. Bypassing SSH command setup.", file=sys.stderr)
+                subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+        else:
+            subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+            
+        print("  [SUCCESS] Local Git profile updated.")
+        name = ""
+        email = ""
+        
+    if name and email:
+        print("Setting local repository Git configuration...")
+        subprocess.run(["git", "config", "--local", "user.name", name], check=True)
+        subprocess.run(["git", "config", "--local", "user.email", email], check=True)
+        subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+        print("  [SUCCESS] Local Git profile updated.")
+    elif name or email:
+        if os.path.exists(profiles_file):
+            print(f"Error: Profile '{name}' not found in {profiles_file}.", file=sys.stderr)
+        else:
+            print("Error: Both name and email are required to set a profile.", file=sys.stderr)
+        sys.exit(1)
+        
+    # Display configuration
+    utils.print_title("Current Git User Configuration")
+    
+    def get_git_config(scope, key):
+        try:
+            return subprocess.check_output(["git", "config", f"--{scope}", key], stderr=subprocess.DEVNULL).decode().strip()
+        except:
+            return "<not set>"
+            
+    print("Local Profile (This Repository):")
+    print(f"  user.name:        {get_git_config('local', 'user.name')}")
+    print(f"  user.email:       {get_git_config('local', 'user.email')}")
+    print(f"  core.sshCommand:  {get_git_config('local', 'core.sshCommand')}")
+    print("")
+    print("Global Profile (Default):")
+    print(f"  user.name:        {get_git_config('global', 'user.name')}")
+    print(f"  user.email:       {get_git_config('global', 'user.email')}")
+    print(f"  core.sshCommand:  {get_git_config('global', 'core.sshCommand')}")
+    print("")
+    
+    if os.path.exists(profiles_file):
+        print(f"Available Profiles (from {profiles_file}):")
+        keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+        for k in keys:
+            p_n = config[f"{k}.name"]
+            p_e = config.get(f"{k}.email", "")
+            p_s = config.get(f"{k}.ssh_key", "")
+            if p_s:
+                print(f"  - {k}: \"{p_n}\" <{p_e}> (ssh_key: {p_s})")
+            else:
+                print(f"  - {k}: \"{p_n}\" <{p_e}>")
+
+EOF
+
+# Write .agents\scripts\cli\commands\doctor.py
+write_template_safe ".agents\scripts\cli\commands\doctor.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+# ANSI color codes
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def run(args):
+    utils.print_title("Antigravity Workspace Doctor Diagnostics")
+    
+    errors = 0
+    
+    # Check Git Repository
+    if os.path.isdir('.git'):
+        print(f"  {color('[PASS]', C_GREEN + C_BOLD)} Git repository initialized.")
+    else:
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Git repository not initialized!")
+        errors += 1
+        
+    def check_hook(hook_name):
+        hook_path = os.path.join('.git', 'hooks', hook_name)
+        if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
+            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed and executable.")
+        else:
+            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing or not executable.")
+            print(f"            To install: cp .agents/hooks/{hook_name} .git/hooks/{hook_name} && chmod +x .git/hooks/{hook_name}")
+            
+    check_hook("pre-commit")
+    check_hook("post-commit")
+    check_hook("commit-msg")
+    
+    def check_script(script_name):
+        nonlocal errors
+        script_path = os.path.join(utils.get_agents_dir(), 'scripts', script_name)
+        if os.path.exists(script_path):
+            if os.access(script_path, os.X_OK):
+                print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {script_name} is executable.")
+            else:
+                print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} {script_name} is not executable. Auto-correcting...")
+                try:
+                    os.chmod(script_path, 0o755)
+                except Exception as e:
+                    print(f"            Failed to set executable permission: {e}", file=sys.stderr)
+        else:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} {script_name} is missing!")
+            errors += 1
+            
+    check_script("helper.sh")
+    check_script("recon.sh")
+    check_script("validate.sh")
+    
+    validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+    if os.path.exists(validate_sh):
+        print("----------------------------------------------------------")
+        proc = utils.run_shell_script(validate_sh)
+        if proc.returncode != 0:
+            errors += 1
+            
+    print("==========================================================")
+    if errors == 0:
+        print(color("Doctor diagnostics: ALL SYSTEMS HEALTHY", C_GREEN + C_BOLD))
+        sys.exit(0)
+    else:
+        print(color(f"Doctor diagnostics: FOUND {errors} ERROR(S) / WARNING(S)", C_YELLOW + C_BOLD))
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\create_adr.py
+write_template_safe ".agents\scripts\cli\commands\create_adr.py" << 'EOF'
+import os
+import sys
+import glob
+import re
+from datetime import datetime
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py create-adr <title> [proposed|accepted|superseded]", file=sys.stderr)
+        sys.exit(1)
+        
+    title = args[1]
+    status = args[2].lower() if len(args) > 2 else "proposed"
+    
+    if status not in ("proposed", "accepted", "superseded"):
+        print("Error: Status must be one of: proposed, accepted, superseded", file=sys.stderr)
+        sys.exit(1)
+        
+    status_cap = status.capitalize()
+    adrs_dir = os.path.join(utils.get_agents_dir(), "adrs")
+    os.makedirs(adrs_dir, exist_ok=True)
+    
+    # Determine next ADR number
+    count = 1
+    existing_files = glob.glob(os.path.join(adrs_dir, "[0-9][0-9][0-9]-*.md"))
+    count = len(existing_files) + 1
+    
+    num = f"{count:03d}"
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    filename = os.path.join(adrs_dir, f"{num}-{slug}.md")
+    
+    adr_date = datetime.now().strftime("%Y-%m-%d")
+    
+    adr_content = f"""# ADR-{num}: {title}
+
+- **Date**: {adr_date}
+- **Status**: {status_cap}
+
+## Context
+[Describe the problem context and alternatives]
+
+## Decision
+[Describe the decision made]
+
+## Consequences
+[Describe the result and impact of this decision]
+"""
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(adr_content)
+        
+    index_file = os.path.join(utils.get_agents_dir(), "adr.md")
+    if os.path.isfile(index_file):
+        with open(index_file, 'r', encoding='utf-8') as f:
+            index_content = f.read()
+            
+        if "## 1. Architectural Decisions Index" not in index_content:
+            if not index_content.endswith('\n'):
+                index_content += '\n'
+            index_content += "\n## 1. Architectural Decisions Index\n"
+            
+        if not index_content.endswith('\n'):
+            index_content += '\n'
+            
+        index_content += f"- [ADR-{num}: {title}](file://./adrs/{num}-{slug}.md) - Status: {status_cap}\n"
+        
+        with open(index_file, 'w', encoding='utf-8') as f:
+            f.write(index_content)
+            
+    print(f"Created ADR-{num} at {filename} and registered in {index_file}")
+
+EOF
+
+# Write .agents\scripts\cli\commands\commit.py
+write_template_safe ".agents\scripts\cli\commands\commit.py" << 'EOF'
+import os
+import sys
+import subprocess
+import re
+import utils
+
+def run(args):
+    no_test_flag = False
+    stage_files = []
+    commit_type = ""
+    scope = ""
+    desc = ""
+    
+    # Parse arguments
+    idx = 1
+    while idx < len(args):
+        arg = args[idx]
+        if arg in ("--no-test", "--no-verify"):
+            no_test_flag = True
+            idx += 1
+        elif arg == "commit":
+            idx += 1
+        elif not commit_type:
+            commit_type = arg
+            idx += 1
+        elif not scope:
+            scope = arg
+            idx += 1
+        elif not desc:
+            desc = arg
+            idx += 1
+        else:
+            stage_files.append(arg)
+            idx += 1
+            
+    # Interactive inputs
+    if not commit_type:
+        print("Choose commit type:")
+        print("  [1] feat:     A new feature")
+        print("  [2] fix:      A bug fix")
+        print("  [3] refactor: A code change that neither fixes a bug nor adds a feature")
+        print("  [4] chore:    Changes to the build process or auxiliary tools and libraries")
+        print("  [5] docs:     Documentation only changes")
+        print("  [6] test:     Adding missing tests or correcting existing tests")
+        print("  [7] perf:     A code change that improves performance")
+        try:
+            type_choice = input("Select number or type string (default: feat): ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+            
+        mapping = {
+            "1": "feat", "2": "fix", "3": "refactor", "4": "chore",
+            "5": "docs", "6": "test", "7": "perf", "": "feat"
+        }
+        commit_type = mapping.get(type_choice, type_choice)
+        
+    if not scope:
+        try:
+            scope = input("Enter commit scope (e.g. core, auth, db, shared) (default: core): ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+        if not scope:
+            scope = "core"
+            
+    if not desc:
+        try:
+            desc = input("Enter brief description of change: ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+        if not desc:
+            print("Error: Description cannot be empty.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Workspace Validation
+    print("Running workspace validation checks...")
+    validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
+    if os.path.exists(validate_sh):
+        proc = utils.run_shell_script(validate_sh)
+        if proc.returncode != 0:
+            print("Error: Workspace validation failed. Aborting commit.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Linter and Test commands from project_rules.md
+    linter_cmd = ""
+    test_runner = ""
+    rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+    if os.path.exists(rules_file):
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Linter command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m: linter_cmd = m.group(1)
+                    elif "Test runner command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m: test_runner = m.group(1)
+        except Exception as e:
+            print(f"Warning: Failed to read project rules for lint/test commands: {e}", file=sys.stderr)
+            
+    if os.name == 'nt':
+        python3_works = False
+        try:
+            if subprocess.run("python3 --version", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                python3_works = True
+        except:
+            pass
+        if not python3_works:
+            if linter_cmd.startswith("python3 "):
+                linter_cmd = linter_cmd.replace("python3 ", "python ", 1)
+            elif linter_cmd == "python3":
+                linter_cmd = "python"
+            if test_runner.startswith("python3 "):
+                test_runner = test_runner.replace("python3 ", "python ", 1)
+            elif test_runner == "python3":
+                test_runner = "python"
+                
+    if not no_test_flag:
+        if linter_cmd and linter_cmd != "echo 'No linter found'":
+            print(f"Running linter command: {linter_cmd}...")
+            proc = subprocess.run(linter_cmd, shell=True)
+            if proc.returncode != 0:
+                print("Error: Linter check failed. Aborting commit.", file=sys.stderr)
+                sys.exit(1)
+            print("  [PASS] Linter check passed successfully.")
+            
+        if test_runner and test_runner != "echo 'No test suite found'":
+            print(f"Running test suite: {test_runner}...")
+            proc = subprocess.run(test_runner, shell=True)
+            if proc.returncode != 0:
+                print("Error: Test runner suite failed. Aborting commit.", file=sys.stderr)
+                sys.exit(1)
+            print("  [PASS] All tests passed successfully.")
+    else:
+        print("Linter and Test checks bypassed via --no-test / --no-verify.")
+        
+    # File Staging
+    if stage_files:
+        print(f"Staging specified files: {' '.join(stage_files)}...")
+        subprocess.run(["git", "add"] + stage_files)
+    else:
+        print("Staging all modified and untracked files...")
+        status = subprocess.check_output(["git", "status", "--porcelain"]).decode()
+        # filter out lock files
+        has_changes = False
+        for line in status.splitlines():
+            if not line.strip().endswith(".lock") or ".agents/locks/" not in line:
+                has_changes = True
+                break
+        if has_changes:
+            subprocess.run(["git", "add", "-A", "--", ":!.agents/locks/*"])
+            
+    # Auto-rotate profiles
+    profiles_file = ""
+    local_pf = os.path.join(utils.get_agents_dir(), "git_profiles")
+    home_pf = os.path.expanduser("~/.git_profiles")
+    if os.path.exists(local_pf):
+        profiles_file = local_pf
+    elif os.path.exists(home_pf):
+        profiles_file = home_pf
+        
+    if profiles_file:
+        profiles = {}
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line_strip = line.strip()
+                    m = re.match(r"^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)\s*=\s*(.+)$", line_strip)
+                    if m:
+                        prof_key = m.group(1)
+                        field = m.group(2)
+                        val = m.group(3).strip('\'"')
+                        profiles.setdefault(prof_key, {})[field] = val
+        except Exception as e:
+            print(f"Warning: Failed to parse Git profiles: {e}", file=sys.stderr)
+            
+        profile_keys = sorted(list(profiles.keys()))
+        if profile_keys:
+            try:
+                last_email = subprocess.check_output(
+                    ["git", "log", "-n", 1, "--format=%ae"], 
+                    stderr=subprocess.DEVNULL
+                ).decode().strip()
+            except:
+                last_email = ""
+                
+            selected_idx = 0
+            for i, pk in enumerate(profile_keys):
+                if profiles[pk].get("email") == last_email:
+                    selected_idx = (i + 1) % len(profile_keys)
+                    break
+                    
+            selected_profile = profile_keys[selected_idx]
+            p_name = profiles[selected_profile].get("name")
+            p_email = profiles[selected_profile].get("email")
+            p_ssh = profiles[selected_profile].get("ssh_key", "")
+            
+            if not p_name or not p_email:
+                print(f"Error: Profile '{selected_profile}' is misconfigured in {profiles_file}.", file=sys.stderr)
+                sys.exit(1)
+                
+            print(f"Auto-selecting Git profile: '{selected_profile}' (\"{p_name}\" <{p_email}>) for round-robin commit rotation.")
+            subprocess.run(["git", "config", "--local", "user.name", p_name])
+            subprocess.run(["git", "config", "--local", "user.email", p_email])
+            
+            if p_ssh:
+                p_ssh_expanded = os.path.expanduser(p_ssh)
+                if os.path.exists(p_ssh_expanded):
+                    print(f"Auto-selecting SSH key: '{p_ssh}' for profile '{selected_profile}'.")
+                    subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_ssh_expanded}\" -o IdentitiesOnly=yes"])
+                else:
+                    print(f"Warning: SSH key file at '{p_ssh}' specified for profile '{selected_profile}' does not exist. Bypassing SSH setup.", file=sys.stderr)
+                    subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+            else:
+                subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+        else:
+            print(f"Error: Git profiles file found at {profiles_file} but no valid profiles were parsed.", file=sys.stderr)
+            sys.exit(1)
+    else:
+        # Fallbacks
+        try:
+            active_name = subprocess.check_output(["git", "config", "user.name"]).decode().strip()
+        except:
+            active_name = ""
+        try:
+            active_email = subprocess.check_output(["git", "config", "user.email"]).decode().strip()
+        except:
+            active_email = ""
+            
+        if not active_name or not active_email:
+            print("Warning: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured.", file=sys.stderr)
+            print("  [FALLBACK] Configuring temporary local-only identity: \"Local Developer\" <local-dev@localhost>", file=sys.stderr)
+            subprocess.run(["git", "config", "--local", "user.name", "Local Developer"])
+            subprocess.run(["git", "config", "--local", "user.email", "local-dev@localhost"])
+            subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+        else:
+            if re.match(r"^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$", active_email) and re.match(r"^(Developer|Test|Alice|Bob).*", active_name):
+                print("Warning: Active Git configuration appears to be using a template or placeholder:", file=sys.stderr)
+                print(f"  Name:  {active_name}", file=sys.stderr)
+                print(f"  Email: {active_email}", file=sys.stderr)
+                print("  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance.", file=sys.stderr)
+            print(f"[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"{active_name}\" <{active_email}>")
+
+    # Conventional Commit
+    commit_msg = f"{commit_type}({scope}): {desc}"
+    print(f"Executing conventional commit: '{commit_msg}'...")
+    proc = subprocess.run(["git", "commit", "-m", commit_msg])
+    if proc.returncode == 0:
+        print("Commit successful.")
+        
+        # Check for issue auto-closing in commit message
+        closed_issues = re.findall(r"\b(?:fixes|closes|resolves)\s+#([0-9]+)\b", desc, re.IGNORECASE)
+        if closed_issues:
+            try:
+                import importlib
+                issue_mod = importlib.import_module("commands.issue")
+                staged_any = False
+                for issue_id_str in closed_issues:
+                    print(f"Commit message matches auto-close pattern for issue #{issue_id_str}. Auto-closing issue...")
+                    try:
+                        issue_mod.close_issue(issue_id_str)
+                        issues_dir = issue_mod.get_issues_dir()
+                        filename = f"issue_{int(issue_id_str):03d}.md"
+                        file_path = os.path.join(issues_dir, filename)
+                        if os.path.exists(file_path):
+                            subprocess.run(["git", "add", file_path])
+                            staged_any = True
+                    except SystemExit:
+                        print(f"Warning: Could not auto-close issue #{issue_id_str} (does not exist or invalid ID).", file=sys.stderr)
+                
+                if staged_any:
+                    print("Amending commit to include auto-closed issue files...")
+                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"])
+                    print("Commit amended successfully.")
+            except Exception as e:
+                print(f"Warning: Failed to auto-close issues: {e}", file=sys.stderr)
+    else:
+        print("Error: Git commit failed.", file=sys.stderr)
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\clean.py
+write_template_safe ".agents\scripts\cli\commands\clean.py" << 'EOF'
+import os
+import sys
+import subprocess
+import shutil
+import json
+import utils
+
+def run(args):
+    print("==========================================================")
+    print("  Starting Antigravity Agent Workspace Clean-up...        ")
+    print("==========================================================")
+
+    # 1. Clear locks directory (except cli.lock)
+    locks_dir = os.path.join(utils.get_agents_dir(), "locks")
+    if os.path.exists(locks_dir):
+        print("Cleaning locks...")
+        for item in os.listdir(locks_dir):
+            if item == "cli.lock":
+                continue
+            item_path = os.path.join(locks_dir, item)
+            try:
+                if os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+                else:
+                    os.remove(item_path)
+                print(f"  Removed lock: {item}")
+            except Exception as e:
+                print(f"  Warning: Failed to remove lock {item}: {e}", file=sys.stderr)
+
+    # 2. Clear archives directory
+    archive_dir = os.path.join(utils.get_agents_dir(), "archive")
+    if os.path.exists(archive_dir):
+        print("Cleaning sprint archives...")
+        for item in os.listdir(archive_dir):
+            item_path = os.path.join(archive_dir, item)
+            try:
+                if os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+                else:
+                    os.remove(item_path)
+                print(f"  Removed archive: {item}")
+            except Exception as e:
+                print(f"  Warning: Failed to remove archive {item}: {e}", file=sys.stderr)
+
+    # 3. Clear workflows (except task_workspace_cleanup_command.md)
+    workflows_dir = os.path.join(utils.get_agents_dir(), "workflows")
+    if os.path.exists(workflows_dir):
+        print("Cleaning task workflows...")
+        for item in os.listdir(workflows_dir):
+            if item == "task_workspace_cleanup_command.md":
+                continue
+            item_path = os.path.join(workflows_dir, item)
+            try:
+                if os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+                else:
+                    os.remove(item_path)
+                print(f"  Removed workflow: {item}")
+            except Exception as e:
+                print(f"  Warning: Failed to remove workflow {item}: {e}", file=sys.stderr)
+
+    # 4. Reset token budget json
+    budget_file = os.path.join(utils.get_agents_dir(), "token_budget.json")
+    print("Resetting token budget...")
+    default_budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 0,
+        "alert_threshold_percent": 90,
+        "profiles": {}
+    }
+    try:
+        with open(budget_file, "w") as f:
+            json.dump(default_budget, f, indent=2)
+        print("  [SUCCESS] Token budget reset to default limits.")
+    except Exception as e:
+        print(f"  Error: Failed to reset token budget: {e}", file=sys.stderr)
+
+    # 5. Reset API profile name and active keys
+    profile_name_file = os.path.join(utils.get_agents_dir(), "active_api_profile_name")
+    active_keys_sh = os.path.join(utils.get_agents_dir(), "active_api_keys")
+    active_keys_ps1 = os.path.join(utils.get_agents_dir(), "active_api_keys.ps1")
+
+    print("Resetting active API key configurations...")
+    try:
+        with open(profile_name_file, "w") as f:
+            f.write("default\n")
+            
+        with open(active_keys_sh, "w") as f:
+            f.write("# Active API Keys configuration\n")
+            f.write("export GEMINI_API_KEY=\"\"\n")
+            f.write("export OPENAI_API_KEY=\"\"\n")
+            f.write("export ANTHROPIC_API_KEY=\"\"\n")
+            
+        with open(active_keys_ps1, "w") as f:
+            f.write("# Active API Keys configuration for Windows PowerShell\n")
+            f.write("$env:GEMINI_API_KEY=\"\"\n")
+            f.write("$env:OPENAI_API_KEY=\"\"\n")
+            f.write("$env:ANTHROPIC_API_KEY=\"\"\n")
+        print("  [SUCCESS] API profile configurations and keys reset to clean templates.")
+    except Exception as e:
+        print(f"  Error: Failed to reset active API keys: {e}", file=sys.stderr)
+
+    # 6. Reset memory.md to clean template
+    memory_file = utils.get_memory_file()
+    print("Resetting active memory ledger...")
+    
+    # Resolve branch and commit
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "main"
+        
+    try:
+        commit = subprocess.check_output(
+            ["git", "log", "-n", "1", "--format=%h"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        commit = "none"
+
+    clean_memory_content = f"""# Agent Core Memory
+
+> **Memory Schema Version**: 5.0.0  
+> **Target System**: Antigravity Agent Core
+> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.
+
+---
+
+## 1. Git State & Infrastructure Runtime
+- **Active Branch**: {branch}
+- **Last Commit Reference**: {commit}
+- **Active Pull Request Target**: `main`
+- **Infrastructure Health Status**:
+  - Database: `HEALTHY`
+  - Cache/Broker: `HEALTHY`
+  - Primary API Server: `HEALTHY`
+
+---
+
+## 2. Active Epic & Sub-Tasks Execution Matrix
+- **Primary Epic**: Initial Setup
+- **Current Task Target**: Configure workspace rules and verify stack
+- **State Flag**: `COMPLETED`
+
+### Sprint Tasks Checklist
+- [x] Configure workspace rules and verify stack
+- [x] Run health check doctor
+
+---
+
+## 3. Relayed Context & Handover Notes
+- **Last Active Agent**: None
+- **Last Action Completed**: Initialized clean Antigravity Agent Core workspace.
+- **Next Planned Action**: None. Ready for new features or tasks.
+- **Blockers / Runtime Notes**: None.
+
+---
+
+## 4. Reference Links Index
+- **Core Guidelines**: [AGENTS.md](file://../AGENTS.md)
+- **Project Specific Rules**: [project_rules.md](file://./rules/project_rules.md)
+- **Database Schema**: [schema.md](file://./schema.md)
+- **Design Decisions**: [adr.md](file://./adr.md)
+- **Sprint Archives**: [archive/](file://./archive/)
+"""
+    try:
+        with open(memory_file, "w") as f:
+            f.write(clean_memory_content)
+        print("  [SUCCESS] memory.md reset to default clean template.")
+    except Exception as e:
+        print(f"  Error: Failed to reset memory.md: {e}", file=sys.stderr)
+
+    print("==========================================================")
+    print("  Workspace clean-up completed successfully!             ")
+    print("==========================================================")
+
+EOF
+
+# Write .agents\scripts\cli\commands\build.py
+write_template_safe ".agents\scripts\cli\commands\build.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        print("Monorepo detected. Running build compilation...")
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                # remove any array syntax like SUBPROJECTS+=(...)
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 3:
+                    path = parts[0]
+                    build_cmd = parts[2]
+                    print(f"  Building {path} ({build_cmd})...")
+                    proc = subprocess.run(build_cmd, shell=True, cwd=path)
+                    if proc.returncode != 0:
+                        print(f"  [FAIL] Build failed in {path}", file=sys.stderr)
+                        failed = 1
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        build_cmd = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Build validation" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            build_cmd = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if build_cmd and build_cmd != "echo 'No build command needed'":
+            print(f"Running build command: {build_cmd}...")
+            proc = subprocess.run(build_cmd, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No build configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents\scripts\cli\commands\autocomplete.py
+write_template_safe ".agents\scripts\cli\commands\autocomplete.py" << 'EOF'
+import sys
+
+def get_bash_completion():
+    return """_helper_completion() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="lock unlock validate doctor migrate git-profile api-profile log-usage archive recon list-skills create-skill list-rules create-rule init commit sync-git build lint test sync-api create-adr release"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _helper_completion helper.sh
+complete -F _helper_completion ./.agents/scripts/helper.sh
+"""
+
+def get_zsh_completion():
+    return """#compdef helper.sh ./.agents/scripts/helper.sh
+
+_helper_completion() {
+    local -a commands
+    commands=(
+        'lock:Acquire a module edit lock'
+        'unlock:Release a module edit lock'
+        'validate:Validate workspace compliance, budget, and configurations'
+        'doctor:Run complete diagnostic validation on the workspace'
+        'migrate:Upgrade workspaces to V1.9.0 format'
+        'git-profile:Switch Git user config profiles locally'
+        'api-profile:Switch API configurations locally'
+        'log-usage:Log token usage to budget tracker'
+        'archive:Archive completed sprint checklists to history'
+        'recon:Run autonomous codebase stack discovery'
+        'list-skills:List all registered modular skills'
+        'create-skill:Scaffold a new skill structure'
+        'list-rules:List all project-specific blueprints and rules'
+        'create-rule:Scaffold a new project rule blueprint'
+        'init:Initialize a new workspace with template blueprints'
+        'commit:Execute conventional commit and verification checks'
+        'sync-git:Synchronize local repository configuration with Git'
+        'build:Run project build verification'
+        'lint:Run project workspace linter'
+        'test:Run project unit tests'
+        'sync-api:Synchronize API schemas and configurations'
+        'create-adr:Create a new Architectural Decision Record'
+        'release:Perform a project semantic release bump'
+    )
+    _describe -t commands 'helper command' commands
+}
+
+_helper_completion "$@"
+"""
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.sh autocomplete [bash|zsh]")
+        print("To load autocomplete, run:")
+        print("  source <(./.agents/scripts/helper.sh autocomplete bash)")
+        sys.exit(1)
+        
+    shell = args[1].lower()
+    if shell == "bash":
+        print(get_bash_completion())
+    elif shell == "zsh":
+        print(get_zsh_completion())
+    else:
+        print(f"Unsupported shell: {shell}. Only 'bash' and 'zsh' are supported.", file=sys.stderr)
+        sys.exit(1)
+
+EOF
+
+# Write .agents\scripts\cli\commands\archive.py
+write_template_safe ".agents\scripts\cli\commands\archive.py" << 'EOF'
+import os
+import sys
+import subprocess
+import shutil
+import utils
+
+def run(args):
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"Error: Memory file {memory_file} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    archive_dir = os.path.join(utils.get_agents_dir(), 'archive')
+    os.makedirs(archive_dir, exist_ok=True)
+    
+    # Get git branch
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "detached"
+        
+    branch_clean = branch.replace('/', '_')
+    archive_file = os.path.join(archive_dir, f"sprint_{branch_clean}.md")
+    
+    print(f"Archiving tasks to {archive_file}...")
+    
+    # Read memory.md
+    with open(memory_file, 'r') as f:
+        lines = f.readlines()
+        
+    checklist_lines = []
+    in_checklist = False
+    
+    # Extract the checklist
+    for line in lines:
+        if "### Sprint Tasks Checklist" in line:
+            in_checklist = True
+            checklist_lines.append(line)
+            continue
+        if in_checklist:
+            if line.strip() == "---" or line.startswith("## "):
+                in_checklist = False
+            else:
+                checklist_lines.append(line)
+                
+    # Save/append the checklist to the archive file
+    if checklist_lines:
+        mode = 'a' if os.path.exists(archive_file) else 'w'
+        with open(archive_file, mode) as f:
+            f.write("".join(checklist_lines))
+            f.write("\n")
+            
+    # Relocate workflow and PR files
+    branch_archive_dir = os.path.join(archive_dir, f"sprint_{branch_clean}")
+    os.makedirs(branch_archive_dir, exist_ok=True)
+    
+    workflows_dir = os.path.join(utils.get_agents_dir(), 'workflows')
+    print(f"Archiving workflow and PR review files to {branch_archive_dir}...")
+    
+    if os.path.exists(workflows_dir):
+        for item in os.listdir(workflows_dir):
+            item_path = os.path.join(workflows_dir, item)
+            # Match task_* or pr_review_* files
+            if os.path.isfile(item_path) and (item.startswith("task_") or item.startswith("pr_review_")):
+                shutil.move(item_path, os.path.join(branch_archive_dir, item))
+                
+    # Reset checklist in memory.md
+    new_lines = []
+    skip = False
+    for line in lines:
+        if "### Sprint Tasks Checklist" in line:
+            new_lines.append(line)
+            new_lines.append("- [ ] Implement core logic\n")
+            new_lines.append("- [ ] Write unit tests\n")
+            new_lines.append("- [ ] Verify build and tests pass\n")
+            skip = True
+            continue
+        if skip:
+            if line.strip() == "---":
+                skip = False
+                new_lines.append(line)
+            continue
+        new_lines.append(line)
+        
+    with open(memory_file, 'w') as f:
+        f.writelines(new_lines)
+        
+    print("Checklist reset successfully.")
+
+EOF
+
+# Write .agents\scripts\cli\commands\api_profile.py
+write_template_safe ".agents\scripts\cli\commands\api_profile.py" << 'EOF'
+import os
+import sys
+import json
+import time
+import utils
+
+def run(args):
+    # args[0] is 'api-profile'
+    target_profile = ""
+    if len(args) > 1:
+        target_profile = args[1]
+        
+    api_keys_file = ""
+    agents_keys = os.path.join(utils.get_agents_dir(), 'api_keys')
+    home_keys = os.path.expanduser('~/.antigravity_api_keys')
+    if os.path.exists(agents_keys):
+        api_keys_file = agents_keys
+    elif os.path.exists(home_keys):
+        api_keys_file = home_keys
+        
+    rate_limited = "--rate-limited" in args
+    
+    # Parse available profiles prefix (e.g. name.GEMINI_API_KEY=val)
+    config = {}
+    if os.path.exists(api_keys_file):
+        with open(api_keys_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    profiles_list = sorted(list(set(k.split('.')[0] for k in config.keys() if '.' in k)))
+    num_profiles = len(profiles_list)
+    
+    if target_profile in ("rotate", "--rotate"):
+        if not api_keys_file or not os.path.exists(api_keys_file):
+            print("Error: No API keys configuration found (.agents/api_keys or ~/.antigravity_api_keys) to rotate.", file=sys.stderr)
+            sys.exit(1)
+            
+        if num_profiles == 0:
+            print(f"Error: No API profiles found in {api_keys_file}.", file=sys.stderr)
+            sys.exit(1)
+            
+        current_profile = "none"
+        profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+        if os.path.exists(profile_name_file):
+            with open(profile_name_file, 'r') as f:
+                current_profile = f.read().strip()
+                
+        if rate_limited:
+            current_time = int(time.time())
+            cooldown_sec = int(os.environ.get("API_ROTATION_COOLDOWN_SEC", 60))
+            expiry_time = current_time + cooldown_sec
+            
+            cooldowns_file = os.path.join(utils.get_agents_dir(), 'cooldowns.json')
+            
+            if current_profile != "none":
+                print(f"Putting profile '{current_profile}' on cooldown for {cooldown_sec} seconds...")
+                cooldowns = {}
+                if os.path.exists(cooldowns_file):
+                    try:
+                        with open(cooldowns_file, 'r') as f:
+                            cooldowns = json.load(f)
+                    except: pass
+                cooldowns[current_profile] = expiry_time
+                with open(cooldowns_file, 'w') as f:
+                    json.dump(cooldowns, f, indent=2)
+                    
+            # Choose next profile that is NOT on cooldown
+            cooldowns = {}
+            if os.path.exists(cooldowns_file):
+                try:
+                    with open(cooldowns_file, 'r') as f:
+                        cooldowns = json.load(f)
+                except: pass
+            # Clean expired cooldowns
+            cooldowns = {p: exp for p, exp in cooldowns.items() if exp > current_time}
+            with open(cooldowns_file, 'w') as f:
+                json.dump(cooldowns, f, indent=2)
+                
+            if current_profile in profiles_list:
+                start_idx = profiles_list.index(current_profile)
+                ordered_candidates = profiles_list[start_idx+1:] + profiles_list[:start_idx]
+            else:
+                ordered_candidates = profiles_list
+                
+            selected = None
+            for p in ordered_candidates:
+                if p not in cooldowns:
+                    selected = p
+                    break
+                    
+            if selected:
+                target_profile = selected
+                print(f"Rotating active API profile to: '{target_profile}'...")
+            else:
+                # All profiles in cooldown
+                if cooldowns:
+                    earliest_profile = min(cooldowns, key=cooldowns.get)
+                    earliest_expiry = cooldowns[earliest_profile]
+                    
+                    now_time = int(time.time())
+                    sleep_sec = earliest_expiry - now_time
+                    if sleep_sec > 0:
+                        print(f"All API profiles are in cooldown! Earliest available is '{earliest_profile}' in {sleep_sec}s.")
+                        print(f"Waiting/sleeping for {sleep_sec} seconds before retrying...")
+                        for i in range(sleep_sec, 0, -1):
+                            sys.stdout.write(f"  Retrying in {i} seconds...\r")
+                            sys.stdout.flush()
+                            time.sleep(1)
+                        print(f"\n  Cooldown finished. Selecting profile '{earliest_profile}'...")
+                        
+                    # Clear cooldown entry
+                    if earliest_profile in cooldowns:
+                        del cooldowns[earliest_profile]
+                    with open(cooldowns_file, 'w') as f:
+                        json.dump(cooldowns, f, indent=2)
+                    target_profile = earliest_profile
+                else:
+                    target_profile = profiles_list[0]
+                    print(f"Rotating active API profile to: '{target_profile}'...")
+        else:
+            # Standard round robin
+            selected_idx = 0
+            if current_profile in profiles_list:
+                selected_idx = (profiles_list.index(current_profile) + 1) % num_profiles
+            target_profile = profiles_list[selected_idx]
+            print(f"Rotating active API profile to: '{target_profile}'...")
+            
+    if target_profile and target_profile != "--rate-limited":
+        if os.path.exists(api_keys_file):
+            # Check if profile exists
+            profile_keys = [k for k in config.keys() if k.startswith(f"{target_profile}.")]
+            if profile_keys:
+                print(f"Setting active API profile to '{target_profile}'...")
+                
+                active_keys_sh = os.path.join(utils.get_agents_dir(), 'active_api_keys')
+                active_keys_ps1 = os.path.join(utils.get_agents_dir(), 'active_api_keys.ps1')
+                profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+                
+                # Write bash file
+                with open(active_keys_sh, 'w') as f_sh, open(active_keys_ps1, 'w') as f_ps:
+                    f_sh.write(f"# Active API keys for profile: {target_profile}\n")
+                    f_ps.write(f"# Active API keys for profile: {target_profile}\n")
+                    
+                    for k in profile_keys:
+                        var_name = k.split('.', 1)[1]
+                        var_val = config[k]
+                        f_sh.write(f"export {var_name}=\"{var_val}\"\n")
+                        f_ps.write(f"$env:{var_name} = \"{var_val}\"\n")
+                        
+                with open(profile_name_file, 'w') as f:
+                    f.write(target_profile)
+                    
+                print("  [SUCCESS] Active API keys updated in .agents/active_api_keys and .agents/active_api_keys.ps1")
+            else:
+                print(f"Error: Profile '{target_profile}' not found in {api_keys_file}.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print("Error: API keys file not found.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Display configuration
+    utils.print_title("Current API Profile Configuration")
+    
+    current_profile = "none"
+    profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+    if os.path.exists(profile_name_file):
+        with open(profile_name_file, 'r') as f:
+            current_profile = f.read().strip()
+            
+    print(f"Active Profile: {current_profile}")
+    print("")
+    
+    # Mask key values for display
+    print("Active Keys (masked for security):")
+    for k, v in config.items():
+        if k.startswith(f"{current_profile}."):
+            var_name = k.split('.', 1)[1]
+            masked = v
+            if len(v) > 8:
+                masked = v[:4] + "****" + v[-4:]
+            print(f"  {var_name}: {masked}")
+    print("")
+    
+    if os.path.exists(api_keys_file):
+        print(f"Available API Profiles (from {api_keys_file}):")
+        for p in profiles_list:
+            keys = [k.split('.', 1)[1] for k in config.keys() if k.startswith(f"{p}.")]
+            print(f"  - {p} ({' '.join(keys)} )")
+
+EOF
+
+# Write .agents\scripts\cli\commands\adr_wizard.py
+write_template_safe ".agents\scripts\cli\commands\adr_wizard.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    """
+    Delegate command to the adr-wizard skill main script.
+    """
+    # Find workspace root
+    workspace_root = utils.find_workspace_root()
+    script_path = os.path.join(
+        workspace_root, ".agents", "skills", "adr-wizard", "scripts", "main.py"
+    )
+    
+    if not os.path.exists(script_path):
+        print(f"Error: adr-wizard skill main script not found at {script_path}", file=sys.stderr)
+        sys.exit(1)
+        
+    # Forward all CLI arguments passed after 'adr-wizard'
+    cmd = [sys.executable, script_path] + args[1:]
+    
+    # Execute and connect standard streams to allow interactive console prompts
+    proc = subprocess.run(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents\scripts\cli\__init__.py
+write_template_safe ".agents\scripts\cli\__init__.py" << 'EOF'
+
+
+EOF
+
+# Write .agents\scripts\cli\utils.py
+write_template_safe ".agents\scripts\cli\utils.py" << 'EOF'
+import os
+import sys
+import json
+import time
+
+def find_workspace_root():
+    """
+    Finds the directory containing the '.agents' folder, starting from the current directory
+    and walking up. Defaults to the current directory if not found.
+    """
+    curr = os.path.abspath(os.getcwd())
+    while True:
+        if os.path.isdir(os.path.join(curr, '.agents')):
+            return curr
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            break
+        curr = parent
+    return os.path.abspath(os.getcwd())
+
+def get_agents_dir():
+    return os.path.join(find_workspace_root(), '.agents')
+
+def run_shell_script(script_path, args=None):
+    import subprocess
+    if args is None:
+        args = []
+    if os.name == 'nt':
+        return subprocess.run(['sh', script_path] + args)
+    else:
+        return subprocess.run([script_path] + args)
+
+def get_memory_file():
+    return os.path.join(get_agents_dir(), 'memory.md')
+
+def print_title(title):
+    print("==========================================================")
+    print(f"  {title}")
+    print("==========================================================")
+
+def load_budget():
+    budget_file = os.path.join(get_agents_dir(), 'token_budget.json')
+    budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 0,
+        "alert_threshold_percent": 90,
+        "profiles": {}
+    }
+    if os.path.exists(budget_file):
+        try:
+            with open(budget_file, 'r') as f:
+                budget = json.load(f)
+        except:
+            pass
+            
+    # Process automatic budget resets if configured
+    reset_interval = budget.get("reset_interval")
+    if reset_interval and reset_interval != "none":
+        # Determine interval duration in seconds
+        interval_seconds = None
+        if reset_interval == "hourly":
+            interval_seconds = 3600
+        elif reset_interval == "daily":
+            interval_seconds = 86400
+        elif reset_interval == "weekly":
+            interval_seconds = 604800
+        elif reset_interval == "monthly":
+            interval_seconds = 2592000
+        else:
+            try:
+                interval_seconds = int(reset_interval)
+            except ValueError:
+                pass
+                
+        if interval_seconds is not None:
+            current_time = int(time.time())
+            last_reset = budget.get("last_reset_timestamp")
+            
+            # If last reset is not set, initialize it to the current time
+            if last_reset is None:
+                budget["last_reset_timestamp"] = current_time
+                save_budget(budget)
+            else:
+                try:
+                    last_reset = int(last_reset)
+                except ValueError:
+                    last_reset = current_time
+                    budget["last_reset_timestamp"] = current_time
+                    save_budget(budget)
+                    
+                if current_time - last_reset >= interval_seconds:
+                    print(f"\n[INFO] Token budget reset interval ('{reset_interval}') has expired.")
+                    print("Resetting all current token usage counts to 0.")
+                    budget["current_token_usage"] = 0
+                    if "profiles" in budget:
+                        for profile in budget["profiles"].values():
+                            if isinstance(profile, dict):
+                                profile["current_token_usage"] = 0
+                    budget["last_reset_timestamp"] = current_time
+                    save_budget(budget)
+                    
+    return budget
+
+def save_budget(budget):
+    budget_file = os.path.join(get_agents_dir(), 'token_budget.json')
+    with open(budget_file, 'w') as f:
+        json.dump(budget, f, indent=2)
+
+def log_token_usage(tokens):
+    """
+    Log token usage for both the active profile and globally.
+    """
+    budget = load_budget()
+    
+    # Update global usage
+    budget["current_token_usage"] = budget.get("current_token_usage", 0) + tokens
+    
+    # Read active profile
+    profile_file = os.path.join(get_agents_dir(), 'active_api_profile_name')
+    active_profile = "default"
+    if os.path.exists(profile_file):
+        with open(profile_file, 'r') as f:
+            active_profile = f.read().strip()
+            
+    # Update profile usage
+    profiles = budget.get("profiles", {})
+    if active_profile not in profiles:
+        profiles[active_profile] = {
+            "current_token_usage": 0,
+            "max_token_budget": 500000
+        }
+    profiles[active_profile]["current_token_usage"] = profiles[active_profile].get("current_token_usage", 0) + tokens
+    
+    budget["profiles"] = profiles
+    save_budget(budget)
+    
+    # Calculate warning thresholds
+    global_usage = budget["current_token_usage"]
+    global_limit = budget["max_token_budget"]
+    pct = (global_usage / global_limit) * 100
+    alert_threshold = budget.get("alert_threshold_percent", 90)
+    
+    print(f"Logged {tokens} tokens to profile '{active_profile}'.")
+    print(f"  Active Profile Usage: {profiles[active_profile]['current_token_usage']} / {profiles[active_profile]['max_token_budget']}")
+    print(f"  Global Usage: {global_usage} / {global_limit} ({pct:.1f}%)")
+    
+    if pct >= alert_threshold:
+        print(f"\n[WARNING] Token usage has reached {pct:.1f}% of budget! Threshold is {alert_threshold}%.")
+        print("Please wrap up your task, stage and commit completed tasks, and hand over.")
+
+EOF
+
+# Write .agents\scripts\cli\helper.py
+write_template_safe ".agents\scripts\cli\helper.py" << 'EOF'
+#!/usr/bin/env python3
+import sys
+import os
+
+# Ensure the cli directory is in the import path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+def show_help():
+    print("==========================================================")
+    print("  Antigravity Agent Core Helper CLI (Python Edition)")
+    print("==========================================================")
+    print("Usage: helper.py <command> [arguments...]")
+    print("")
+    print("Core Commands:")
+    print("  menu              Launch the interactive helper dashboard menu")
+    print("  lock              Acquire a module edit lock (transient lock)")
+    print("  unlock            Release a module edit lock")
+    print("  validate          Validate workspace compliance, budget, and configurations")
+    print("  doctor            Run complete diagnostic validation on the workspace")
+    print("  migrate           Upgrade workspaces to V1.9.0 format")
+    print("  push              Push local branch to remote repository securely")
+    print("  clean             Purge workspace locks, archives, and reset memory/configs")
+    print("  issue             Manage local workspace issues (list, create, close, view, checkout, merge)")
+    print("  git-profile       Switch Git user config profiles locally")
+    print("  api-profile       Switch API configurations locally (use 'rotate' to rotate)")
+    print("  log-usage         Log token usage to budget tracker")
+    print("  archive           Archive completed sprint checklists to history")
+    print("  recon             Run autonomous codebase stack discovery")
+    print("  list-skills       List all registered modular skills")
+    print("  create-skill      Scaffold a new skill structure")
+    print("  list-rules        List all project-specific blueprints and rules")
+    print("  create-rule       Scaffold a new project rule blueprint")
+    print("  init              Initialize a new workspace with template blueprints")
+    print("  autocomplete      Output shell completion code (bash/zsh)")
+    print("  adr-wizard        Interactive guided ADR wizard")
+    print("  guide             Print step-by-step developer onboarding tutorial")
+    print("==========================================================")
+    print("Tip: Run 'helper.py guide' for a quick step-by-step developer tutorial!")
+    print("==========================================================")
+
+def main():
+    if len(sys.argv) < 2:
+        if sys.stdin.isatty():
+            cmd = "menu"
+        else:
+            show_help()
+            sys.exit(1)
+    else:
+        cmd = sys.argv[1]
+        
+    cmd_map = {
+        "menu": "menu",
+        "lock": "lock",
+        "unlock": "lock",
+        "validate": "validate",
+        "doctor": "doctor",
+        "migrate": "migrate",
+        "push": "push",
+        "clean": "clean",
+        "git-profile": "git_profile",
+        "api-profile": "api_profile",
+        "log-usage": "log_usage",
+        "archive": "archive",
+        "recon": "recon",
+        "list-skills": "skills",
+        "create-skill": "skills",
+        "list-rules": "rules",
+        "create-rule": "rules",
+        "init": "init",
+        "commit": "commit",
+        "sync-git": "sync_git",
+        "build": "build",
+        "lint": "lint",
+        "test": "test",
+        "sync-api": "sync_api",
+        "create-adr": "create_adr",
+        "adr-wizard": "adr_wizard",
+        "release": "release",
+        "autocomplete": "autocomplete",
+        "guide": "guide",
+        "issue": "issue"
+    }
+    
+    if cmd not in cmd_map:
+        print(f"Unknown command: '{cmd}'", file=sys.stderr)
+        show_help()
+        sys.exit(1)
+        
+    module_name = cmd_map[cmd]
+    try:
+        # Import the command module dynamically
+        cmd_module = __import__(f"commands.{module_name}", fromlist=[module_name])
+        # Execute the module's main function
+        if cmd == "menu" and len(sys.argv) < 2:
+            cmd_module.run(["menu"])
+        else:
+            cmd_module.run(sys.argv[1:])
+    except ImportError as e:
+        print(f"Failed to load command '{cmd}': {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error executing command '{cmd}': {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+
+EOF
+
+# Write .agents/skills/pr-scaffolder/scripts/main.py
+write_template_safe ".agents/skills/pr-scaffolder/scripts/main.py" << 'EOF'
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+import os
+import subprocess
+import re
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def find_workspace_root():
+    """
+    Traverse upwards from script directory to find the workspace root.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    curr = script_dir
+    while True:
+        if os.path.exists(os.path.join(curr, ".agents")):
+            return curr
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            # Fallback
+            return os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+        curr = parent
+
+def run_git(args, cwd):
+    """
+    Run a git command in the specified working directory.
+    """
+    proc = subprocess.run(["git"] + args, cwd=cwd, capture_output=True, text=True)
+    return proc.returncode, proc.stdout, proc.stderr
+
+def resolve_base_branch(workspace_root):
+    """
+    Extract the active PR target branch from memory.md or fallback.
+    """
+    memory_path = os.path.join(workspace_root, ".agents", "memory.md")
+    if os.path.exists(memory_path):
+        try:
+            with open(memory_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                # Look for: - **Active Pull Request Target**: `main`
+                match = re.search(r"-\s+\*\*Active Pull Request Target\*\*:\s*`([^`]+)`", content)
+                if match:
+                    branch = match.group(1).strip()
+                    # Verify if branch exists locally or on remote
+                    if run_git(["rev-parse", "--verify", "--quiet", branch], cwd=workspace_root)[0] == 0:
+                        return branch
+                    origin_branch = f"origin/{branch}"
+                    if run_git(["rev-parse", "--verify", "--quiet", origin_branch], cwd=workspace_root)[0] == 0:
+                        return origin_branch
+        except Exception as e:
+            logging.warning(f"Failed to read/parse memory.md: {str(e)}")
+
+    # Fallback to upstream branch
+    code, out, _ = run_git(["rev-parse", "--abbrev-ref", "@{u}"], cwd=workspace_root)
+    if code == 0 and out.strip():
+        return out.strip()
+
+    # Fallback to main/origin/main/master/origin/master
+    for b in ["main", "origin/main", "master", "origin/master"]:
+        if run_git(["rev-parse", "--verify", "--quiet", b], cwd=workspace_root)[0] == 0:
+            return b
+
+    return "main"
+
+def get_current_branch(workspace_root):
+    """
+    Get the name of the current active Git branch.
+    """
+    code, out, _ = run_git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=workspace_root)
+    if code == 0:
+        return out.strip()
+    return "unknown-branch"
+
+def get_changed_files(workspace_root, base_branch):
+    """
+    List all changed and added files compared to the base branch.
+    """
+    code, out, _ = run_git(["diff", base_branch, "--name-only"], cwd=workspace_root)
+    if code != 0:
+        return []
+    
+    files = []
+    for line in out.splitlines():
+        line = line.strip()
+        if line and os.path.exists(os.path.join(workspace_root, line)):
+            files.append(line)
+    return files
+
+def extract_symbol(line):
+    """
+    Language-agnostic symbol signature extraction from a diff line starting with '+'.
+    """
+    clean_line = line[1:].strip()
+    
+    # Ignore comments
+    if clean_line.startswith("#") or clean_line.startswith("//") or clean_line.startswith("/*"):
+        return None
+        
+    # Search for keywords at start or word boundary
+    match = re.search(r"\b(class|def|func|type|interface|struct|function)\b", clean_line)
+    if not match:
+        return None
+        
+    keyword = match.group(1)
+    after_keyword = clean_line[match.end():].strip()
+    
+    # Handle Go receiver, e.g., func (r *Repo) Read()
+    if keyword == "func" and after_keyword.startswith("("):
+        close_idx = after_keyword.find(")")
+        if close_idx != -1:
+            after_keyword = after_keyword[close_idx + 1:].strip()
+            
+    # Extract the first identifier following the keyword/receiver
+    ident_match = re.match(r"([a-zA-Z0-9_]+)", after_keyword)
+    if ident_match:
+        symbol_name = ident_match.group(1)
+        return f"{keyword} {symbol_name}"
+        
+    return None
+
+def extract_symbols_for_file(workspace_root, base_branch, rel_path):
+    """
+    Get all modified or newly introduced symbols in a specific file.
+    """
+    code, diff_out, _ = run_git(["diff", base_branch, "-U0", "--", rel_path], cwd=workspace_root)
+    if code != 0:
+        return []
+        
+    symbols = []
+    for line in diff_out.splitlines():
+        if line.startswith("+") and not line.startswith("+++"):
+            symbol = extract_symbol(line)
+            if symbol and symbol not in symbols:
+                symbols.append(symbol)
+    return symbols
+
+def extract_test_command(workspace_root):
+    """
+    Read and extract the configured test runner command from project_rules.md.
+    """
+    rules_path = os.path.join(workspace_root, ".agents", "rules", "project_rules.md")
+    if os.path.exists(rules_path):
+        try:
+            with open(rules_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                match = re.search(r"-\s+\*\*Test runner command\*\*:\s*`([^`]+)`", content)
+                if match:
+                    return match.group(1).strip()
+        except Exception as e:
+            logging.warning(f"Failed to read project_rules.md: {str(e)}")
+    return None
+
+def run_tests(workspace_root, test_cmd):
+    """
+    Execute the test runner command and capture output verbatim.
+    """
+    if not test_cmd:
+        return "", False, True
+        
+    logging.info(f"Executing test command: {test_cmd}")
+    proc = subprocess.run(test_cmd, shell=True, cwd=workspace_root, capture_output=True, text=True)
+    test_logs = proc.stdout + "\n" + proc.stderr
+    failed = (proc.returncode != 0)
+    return test_logs, failed, False
+
+def get_schema_diff(workspace_root, base_branch):
+    """
+    Retrieve schema diff from .agents/schemas/ directory.
+    """
+    code, out, _ = run_git(["diff", base_branch, "--", ".agents/schemas/"], cwd=workspace_root)
+    if code == 0:
+        return out.strip()
+    return ""
+
+def format_local_link(absolute_path):
+    """
+    Format file path into file:/// URI style with forward slashes.
+    """
+    formatted = absolute_path.replace("\\", "/")
+    if not formatted.startswith("/"):
+        formatted = "/" + formatted
+    return f"file://{formatted}"
+
+def generate_report(workspace_root, current_branch, base_branch, changed_files, test_cmd, test_logs, test_failed, test_skipped, schema_diff):
+    """
+    Generate the markdown report contents.
+    """
+    lines = []
+    lines.append(f"# PR Review Guide: {current_branch}")
+    lines.append("")
+    lines.append(f"This review guide outlines changes on branch `{current_branch}` relative to base branch `{base_branch}`.")
+    lines.append("")
+    
+    # 1. Scope of Work
+    lines.append("## 1. Scope of Work")
+    if not changed_files:
+        lines.append("No file changes detected between current branch and base branch.")
+    else:
+        lines.append("| File | Local Link | Repo Link | Symbols Modified |")
+        lines.append("| --- | --- | --- | --- |")
+        for rel_path in sorted(changed_files):
+            abs_path = os.path.abspath(os.path.join(workspace_root, rel_path))
+            local_link = f"[File (Local)]({format_local_link(abs_path)})"
+            repo_link = f"[File (Repo)]({rel_path})"
+            
+            # Extract symbols
+            symbols = extract_symbols_for_file(workspace_root, base_branch, rel_path)
+            symbols_str = ", ".join(f"`{s}`" for s in symbols) if symbols else "-"
+            
+            lines.append(f"| `{rel_path}` | {local_link} | {repo_link} | {symbols_str} |")
+            
+    lines.append("")
+    
+    # 2. Verification Logs
+    lines.append("## 2. Verification Logs")
+    if test_skipped:
+        lines.append("> [!NOTE]")
+        lines.append("> No active test runner command configured for this workspace.")
+    else:
+        if test_failed:
+            lines.append("> [!WARNING]")
+            lines.append("> Verification tests failed!")
+        else:
+            lines.append("> [!NOTE]")
+            lines.append("> Verification tests passed successfully.")
+            
+        lines.append("")
+        lines.append("<details>")
+        lines.append("<summary>Click to view verification test logs</summary>")
+        lines.append("")
+        lines.append("````")
+        lines.append(test_logs.strip())
+        lines.append("````")
+        lines.append("</details>")
+        
+    lines.append("")
+    
+    # 3. Schema Changes
+    lines.append("## 3. Schema Changes")
+    if not schema_diff:
+        lines.append("> [!NOTE]")
+        lines.append("> No schema changes detected in this branch.")
+    else:
+        lines.append("```diff")
+        lines.append(schema_diff)
+        lines.append("```")
+        
+    lines.append("")
+    return "\n".join(lines)
+
+def run_skill(args):
+    """
+    Main logic coordinator.
+    """
+    workspace_root = find_workspace_root()
+    base_branch = resolve_base_branch(workspace_root)
+    current_branch = get_current_branch(workspace_root)
+    
+    logging.info(f"Targeting base branch: {base_branch}")
+    logging.info(f"Current branch: {current_branch}")
+    
+    # Get changed files
+    changed_files = get_changed_files(workspace_root, base_branch)
+    
+    # Run tests
+    test_cmd = extract_test_command(workspace_root)
+    test_logs, test_failed, test_skipped = run_tests(workspace_root, test_cmd)
+    
+    # Get schema diff
+    schema_diff = get_schema_diff(workspace_root, base_branch)
+    
+    # Generate report
+    report_content = generate_report(
+        workspace_root=workspace_root,
+        current_branch=current_branch,
+        base_branch=base_branch,
+        changed_files=changed_files,
+        test_cmd=test_cmd,
+        test_logs=test_logs,
+        test_failed=test_failed,
+        test_skipped=test_skipped,
+        schema_diff=schema_diff
+    )
+    
+    # Output path
+    # Replace slashes in branch name to form valid filenames
+    safe_branch_name = current_branch.replace("/", "_")
+    output_dir = os.path.join(workspace_root, ".agents", "workflows")
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"pr_review_{safe_branch_name}.md")
+    
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(report_content)
+        
+    result = {
+        "status": "success",
+        "message": f"Successfully generated PR review guide at {output_file}",
+        "data": {
+            "output_file": output_file,
+            "base_branch": base_branch,
+            "current_branch": current_branch,
+            "changed_files_count": len(changed_files),
+            "test_status": "failed" if test_failed else ("skipped" if test_skipped else "passed")
+        }
+    }
+    return result
+
+def main():
+    parser = argparse.ArgumentParser(description="PR review guide generator.")
+    parser.add_argument('--target', type=str, help="Target path or resource")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {str(e)}")
+        error_output = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+
+EOF
+
+# Write .agents/skills/pr-scaffolder/SKILL.md
+write_template_safe ".agents/skills/pr-scaffolder/SKILL.md" << 'EOF'
+---
+name: pr-scaffolder
+description: Generates GAP-compliant PR review guides
+scripts:
+  - scripts/main.py
+---
+
+# pr-scaffolder Skill
+
+## 1. Input Specification
+- Specify required inputs (e.g., target file paths, options).
+
+## 2. Operational Procedures
+1. Run the associated script.
+2. Verify results.
+
+## 3. Decision Matrix
+- If the script returns success (exit code 0), the action is accepted.
+- If the script returns error, it fails.
+
+## 4. Error Mitigation Tree
+- Retry execution.
+- If it fails, report details back to the user.
+
+## 5. Output Verification Gate
+- [ ] Executable script passes all internal checks.
+
+EOF
+
+# Write .agents/skills/docs-sync/scripts/main.py
+write_template_safe ".agents/skills/docs-sync/scripts/main.py" << 'EOF'
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+import os
+import re
+import ast
+import inspect
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def get_function_signature(node):
+    """
+    Reconstructs the function signature for a FunctionDef or AsyncFunctionDef node.
+    """
+    prefix = "async def" if isinstance(node, ast.AsyncFunctionDef) else "def"
+    name = node.name
+    
+    try:
+        args_str = ast.unparse(node.args)
+    except:
+        args_str = "..."
+        
+    ret_str = ""
+    if node.returns:
+        try:
+            ret_str = f" -> {ast.unparse(node.returns)}"
+        except:
+            pass
+            
+    return f"{prefix} {name}({args_str}){ret_str}"
+
+def parse_python_file(file_path):
+    """
+    Parses a python file using ast and extracts structural docstrings.
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Source file '{file_path}' not found.")
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        source_code = f.read()
+        
+    tree = ast.parse(source_code)
+    entries = []
+    
+    # 1. Module Docstring
+    module_doc = ast.get_docstring(tree)
+    if module_doc:
+        entries.append({
+            "type": "module",
+            "name": os.path.basename(file_path),
+            "docstring": module_doc.strip()
+        })
+        
+    # 2. Walk top-level definitions
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef):
+            class_doc = ast.get_docstring(node)
+            if class_doc:
+                entries.append({
+                    "type": "class",
+                    "name": node.name,
+                    "docstring": class_doc.strip()
+                })
+            
+            # Methods inside class
+            for subnode in node.body:
+                if isinstance(subnode, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    method_doc = ast.get_docstring(subnode)
+                    if method_doc:
+                        sig = get_function_signature(subnode)
+                        entries.append({
+                            "type": "method",
+                            "class": node.name,
+                            "name": subnode.name,
+                            "signature": sig,
+                            "docstring": method_doc.strip()
+                        })
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            func_doc = ast.get_docstring(node)
+            if func_doc:
+                sig = get_function_signature(node)
+                entries.append({
+                    "type": "function",
+                    "name": node.name,
+                    "signature": sig,
+                    "docstring": func_doc.strip()
+                })
+                
+    return entries
+
+def format_docstring(docstring):
+    """
+    Cleans and blockquotes a docstring.
+    """
+    cleaned = inspect.cleandoc(docstring)
+    formatted_lines = [f"> {line}" if line.strip() else ">" for line in cleaned.split("\n")]
+    return "\n".join(formatted_lines)
+
+def format_entries_to_markdown(entries, file_path):
+    """
+    Formats extracted AST docstring entries to structured Markdown.
+    """
+    if not entries:
+        return f"> [!NOTE]\n> No docstrings found in `{file_path}`."
+        
+    lines = []
+    for entry in entries:
+        t = entry["type"]
+        if t == "module":
+            lines.append(f"### Module Reference: `{entry['name']}`\n")
+            lines.append(format_docstring(entry["docstring"]))
+            lines.append("")
+        elif t == "class":
+            lines.append(f"#### Class: `{entry['name']}`\n")
+            lines.append(format_docstring(entry["docstring"]))
+            lines.append("")
+        elif t == "method":
+            lines.append(f"##### Method: `{entry['class']}.{entry['name']}`\n")
+            lines.append("```python")
+            lines.append(entry["signature"])
+            lines.append("```\n")
+            lines.append(format_docstring(entry["docstring"]))
+            lines.append("")
+        elif t == "function":
+            lines.append(f"##### Function: `{entry['name']}`\n")
+            lines.append("```python")
+            lines.append(entry["signature"])
+            lines.append("```\n")
+            lines.append(format_docstring(entry["docstring"]))
+            lines.append("")
+            
+    return "\n".join(lines).strip()
+
+def run_skill(args):
+    """
+    Main logic of the docs-sync skill.
+    """
+    target_path = args.target
+    source_path = args.source
+    
+    if not target_path:
+        raise ValueError("Target Markdown file path (--target) is required.")
+        
+    target_content = ""
+    if os.path.exists(target_path):
+        with open(target_path, "r", encoding="utf-8") as f:
+            target_content = f.read()
+    else:
+        # If target file doesn't exist, start with an empty string
+        logging.info(f"Target file '{target_path}' does not exist. It will be created.")
+        
+    # Determine the sources to process
+    sources_to_process = []
+    
+    if source_path:
+        sources_to_process.append(source_path)
+    else:
+        # Scan target for any existing start placeholders
+        placeholders = re.findall(r"<!--\s*DOCS-SYNC:START\(([^\)]+)\)\s*-->", target_content)
+        sources_to_process.extend(placeholders)
+        if not sources_to_process:
+            logging.info("No placeholders found in target file, and no source file specified. Nothing to sync.")
+            return {
+                "status": "success",
+                "message": "No placeholders or source files processed.",
+                "files_synced": []
+            }
+            
+    modified = False
+    synced_files = []
+    
+    for src in sources_to_process:
+        logging.info(f"Processing docstring sync for source: '{src}'...")
+        
+        # Parse and format the docstrings
+        try:
+            entries = parse_python_file(src)
+            formatted_docs = format_entries_to_markdown(entries, src)
+        except Exception as e:
+            error_msg = f"Failed to sync '{src}': {e}"
+            logging.error(error_msg)
+            formatted_docs = f"> [!WARNING]\n> {error_msg}"
+            
+        start_tag = f"<!-- DOCS-SYNC:START({src}) -->"
+        end_tag = f"<!-- DOCS-SYNC:END({src}) -->"
+        
+        # Regex replacement search
+        # Matches the start tag, any content between, and the end tag
+        pattern = re.compile(
+            re.escape(start_tag) + r"(.*?)" + re.escape(end_tag),
+            re.DOTALL
+        )
+        
+        replacement = f"{start_tag}\n\n{formatted_docs}\n\n{end_tag}"
+        
+        if pattern.search(target_content):
+            target_content = pattern.sub(lambda m: replacement, target_content)
+            modified = True
+            synced_files.append(src)
+        else:
+            # If source was explicitly requested but placeholder was missing, append to target
+            if source_path:
+                logging.info(f"Placeholder for '{src}' not found. Appending to target file.")
+                if target_content and not target_content.endswith("\n"):
+                    target_content += "\n"
+                target_content += f"\n{replacement}\n"
+                modified = True
+                synced_files.append(src)
+            else:
+                logging.warning(f"Start tag found but corresponding end tag '{end_tag}' is missing in target.")
+                
+    if modified:
+        # Write back updated target file
+        with open(target_path, "w", encoding="utf-8") as f:
+            f.write(target_content)
+        logging.info(f"Successfully updated target file: '{target_path}'")
+        
+    return {
+        "status": "success",
+        "message": f"Successfully processed docstring synchronization.",
+        "files_synced": synced_files
+    }
+
+def main():
+    parser = argparse.ArgumentParser(description="Synchronize Python docstrings with Markdown documentation.")
+    parser.add_argument('--target', '-t', type=str, required=True, help="Target markdown file path")
+    parser.add_argument('--source', '-s', type=str, help="Source Python file path (optional)")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {str(e)}")
+        error_output = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+
+EOF
+
+# Write .agents/skills/docs-sync/SKILL.md
+write_template_safe ".agents/skills/docs-sync/SKILL.md" << 'EOF'
+---
+name: docs-sync
+description: Synchronize inline code comments / docstrings with markdown documentation files.
+scripts:
+  - scripts/main.py
+---
+
+# docs-sync Skill
+
+## 1. Input Specification
+- Specify required inputs (e.g., target file paths, options).
+
+## 2. Operational Procedures
+1. Run the associated script.
+2. Verify results.
+
+## 3. Decision Matrix
+- If the script returns success (exit code 0), the action is accepted.
+- If the script returns error, it fails.
+
+## 4. Error Mitigation Tree
+- Retry execution.
+- If it fails, report details back to the user.
+
+## 5. Output Verification Gate
+- [ ] Executable script passes all internal checks.
+
+EOF
+
+# Write .agents/skills/adr-wizard/scripts/main.py
+write_template_safe ".agents/skills/adr-wizard/scripts/main.py" << 'EOF'
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+import os
+import re
+import glob
+from datetime import datetime
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def find_workspace_root():
+    """
+    Traverse upwards from script directory to find the workspace root.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    curr = script_dir
+    while True:
+        if os.path.exists(os.path.join(curr, ".agents")):
+            return curr
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            return os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+        curr = parent
+
+def prompt_input(prompt_text, default=None, validator=None):
+    """
+    Prompt the user via console, ensuring valid input and default fallback.
+    """
+    while True:
+        suffix = f" [{default}]" if default else ""
+        try:
+            val = input(f"{prompt_text}{suffix}: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nAborted.")
+            sys.exit(1)
+            
+        if not val and default:
+            val = default
+            
+        if validator:
+            if validator(val):
+                return val
+        elif val:
+            return val
+            
+        print("Invalid input. Please try again.")
+
+def get_next_number(adrs_dir):
+    """
+    Determine the next ADR sequence number.
+    """
+    existing_files = glob.glob(os.path.join(adrs_dir, "[0-9][0-9][0-9]-*.md"))
+    numbers = []
+    for f in existing_files:
+        name = os.path.basename(f)
+        match = re.match(r"^([0-9]{3})-", name)
+        if match:
+            numbers.append(int(match.group(1)))
+            
+    if numbers:
+        return max(numbers) + 1
+    return 1
+
+def run_skill(args):
+    """
+    Guided logic to run the ADR wizard.
+    """
+    workspace_root = find_workspace_root()
+    adrs_dir = os.path.join(workspace_root, ".agents", "adrs")
+    os.makedirs(adrs_dir, exist_ok=True)
+    
+    title = args.title
+    status = args.status
+    context = args.context
+    decision = args.decision
+    consequences = args.consequences
+    
+    # If JSON path is specified, load from JSON
+    if args.json:
+        if not os.path.exists(args.json):
+            raise FileNotFoundError(f"JSON input file not found at: {args.json}")
+        with open(args.json, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            title = data.get("title", title)
+            status = data.get("status", status)
+            context = data.get("context", context)
+            decision = data.get("decision", decision)
+            consequences = data.get("consequences", consequences)
+            
+    # Check TTY status to determine if we should fall back to interactive console prompts
+    is_interactive = sys.stdin.isatty() and not (title or status or context or decision or consequences or args.json)
+    
+    if is_interactive:
+        print("==========================================================")
+        print("          Architectural Decision Record (ADR) Wizard      ")
+        print("==========================================================")
+        
+        title = prompt_input("1. ADR Title (e.g. Enable CORS rules)")
+        
+        status_validator = lambda s: s.lower() in ("proposed", "accepted", "superseded")
+        status = prompt_input("2. Status (proposed/accepted/superseded)", default="proposed", validator=status_validator).lower()
+        
+        context = prompt_input("3. Context & Problem (What issues are we solving? Alternatives?)")
+        decision = prompt_input("4. Decision (What are we committing to?)")
+        consequences = prompt_input("5. Consequences (What is the impact/result?)")
+        
+        print("==========================================================")
+    else:
+        # Validate inputs are present in non-interactive mode
+        if not title:
+            raise ValueError("Missing required parameter: --title or --json path")
+        if not status:
+            status = "proposed"
+        status = status.lower()
+        if status not in ("proposed", "accepted", "superseded"):
+            raise ValueError("Status must be one of: proposed, accepted, superseded")
+            
+        if not context:
+            context = "[No context provided]"
+        if not decision:
+            decision = "[No decision provided]"
+        if not consequences:
+            consequences = "[No consequences provided]"
+            
+    status_cap = status.capitalize()
+    
+    # Generate index metadata
+    num = f"{get_next_number(adrs_dir):03d}"
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    filename = os.path.join(adrs_dir, f"{num}-{slug}.md")
+    adr_date = datetime.now().strftime("%Y-%m-%d")
+    
+    adr_content = f"""# ADR-{num}: {title}
+
+- **Date**: {adr_date}
+- **Status**: {status_cap}
+
+## Context
+{context}
+
+## Decision
+{decision}
+
+## Consequences
+{consequences}
+"""
+    # Write ADR file
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(adr_content)
+        
+    # Register in index map
+    index_file = os.path.join(workspace_root, ".agents", "adr.md")
+    if os.path.isfile(index_file):
+        with open(index_file, "r", encoding="utf-8") as f:
+            index_content = f.read()
+            
+        if "## 1. Architectural Decisions Index" not in index_content:
+            if not index_content.endswith('\n'):
+                index_content += '\n'
+            index_content += "\n## 1. Architectural Decisions Index\n"
+            
+        if not index_content.endswith('\n'):
+            index_content += '\n'
+            
+        index_content += f"- [ADR-{num}: {title}](file://./adrs/{num}-{slug}.md) - Status: {status_cap}\n"
+        
+        with open(index_file, "w", encoding="utf-8") as f:
+            f.write(index_content)
+            
+    result = {
+        "status": "success",
+        "message": f"Successfully created and indexed ADR-{num} at {filename}",
+        "data": {
+            "adr_number": num,
+            "title": title,
+            "filename": filename,
+            "status": status_cap
+        }
+    }
+    return result
+
+def main():
+    parser = argparse.ArgumentParser(description="Architectural Decision Record (ADR) guided wizard.")
+    parser.add_argument('--title', type=str, help="Title of the ADR")
+    parser.add_argument('--status', type=str, help="Status: proposed, accepted, superseded")
+    parser.add_argument('--context', type=str, help="ADR Context text block")
+    parser.add_argument('--decision', type=str, help="ADR Decision text block")
+    parser.add_argument('--consequences', type=str, help="ADR Consequences text block")
+    parser.add_argument('--json', type=str, help="Path to JSON file containing ADR metadata")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {str(e)}")
+        error_output = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+
+EOF
+
+# Write .agents/skills/adr-wizard/SKILL.md
+write_template_safe ".agents/skills/adr-wizard/SKILL.md" << 'EOF'
+---
+name: adr-wizard
+description: Interactive Architectural Decision Record guided wizard
+scripts:
+  - scripts/main.py
+---
+
+# adr-wizard Skill
+
+## 1. Input Specification
+- Specify required inputs (e.g., target file paths, options).
+
+## 2. Operational Procedures
+1. Run the associated script.
+2. Verify results.
+
+## 3. Decision Matrix
+- If the script returns success (exit code 0), the action is accepted.
+- If the script returns error, it fails.
+
+## 4. Error Mitigation Tree
+- Retry execution.
+- If it fails, report details back to the user.
+
+## 5. Output Verification Gate
+- [ ] Executable script passes all internal checks.
 
 EOF
 
@@ -6449,8 +11766,10 @@ fi
 # 9. Check Token Budget Guard
 echo "Check 9: Token Budget Guard"
 BUDGET_FILE=".agents/token_budget.json"
-if command -v python3 >/dev/null 2>&1; then
+if python3 --version >/dev/null 2>&1; then
     python3 -c "import sys; sys.path.insert(0, '.agents/scripts/cli'); import utils; utils.load_budget()" || true
+elif python --version >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
+    python -c "import sys; sys.path.insert(0, '.agents/scripts/cli'); import utils; utils.load_budget()" || true
 fi
 if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
     # Auto-detect profile from active_api_profile_name
@@ -7286,6 +12605,9 @@ if [ -f .agents/scripts/helper.sh ]; then chmod +x .agents/scripts/helper.sh; fi
 if [ -f .agents/scripts/recon.sh ]; then chmod +x .agents/scripts/recon.sh; fi
 if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi
 if [ -f .agents/skills/api-rotator/scripts/main.py ]; then chmod +x .agents/skills/api-rotator/scripts/main.py; fi
+if [ -f .agents/skills/adr-wizard/scripts/main.py ]; then chmod +x .agents/skills/adr-wizard/scripts/main.py; fi
+if [ -f .agents/skills/docs-sync/scripts/main.py ]; then chmod +x .agents/skills/docs-sync/scripts/main.py; fi
+if [ -f .agents/skills/pr-scaffolder/scripts/main.py ]; then chmod +x .agents/skills/pr-scaffolder/scripts/main.py; fi
 if [ -f .agents/scripts/api-rotate-wrapper.sh ]; then chmod +x .agents/scripts/api-rotate-wrapper.sh; fi
 if [ -f .agents/hooks/pre-commit ]; then chmod +x .agents/hooks/pre-commit; fi
 if [ -f .agents/hooks/post-commit ]; then chmod +x .agents/hooks/post-commit; fi

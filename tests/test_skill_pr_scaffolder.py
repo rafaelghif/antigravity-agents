@@ -19,7 +19,7 @@ class TestSkillPrScaffolder(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(script_path), f"Script not found at {script_path}")
         
-        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, script_path, "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
         self.assertIn("PR review guide generator", proc.stdout)
 
@@ -44,7 +44,7 @@ class TestSkillPrScaffolder(unittest.TestCase):
     def test_report_generation(self):
         """Verify report markdown formatting."""
         report = main.generate_report(
-            workspace_root="/tmp",
+            workspace_root=os.getcwd(),
             current_branch="feature/test",
             base_branch="main",
             changed_files=["file1.py"],

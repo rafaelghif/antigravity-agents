@@ -62,7 +62,7 @@ def run(args):
     validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
     if os.path.exists(validate_sh):
         print("----------------------------------------------------------")
-        proc = subprocess.run([validate_sh])
+        proc = utils.run_shell_script(validate_sh)
         if proc.returncode != 0:
             errors += 1
             

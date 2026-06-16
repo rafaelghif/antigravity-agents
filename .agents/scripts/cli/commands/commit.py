@@ -78,7 +78,7 @@ def run(args):
     print("Running workspace validation checks...")
     validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
     if os.path.exists(validate_sh):
-        proc = subprocess.run([validate_sh])
+        proc = utils.run_shell_script(validate_sh)
         if proc.returncode != 0:
             print("Error: Workspace validation failed. Aborting commit.", file=sys.stderr)
             sys.exit(1)
@@ -100,6 +100,23 @@ def run(args):
         except Exception as e:
             print(f"Warning: Failed to read project rules for lint/test commands: {e}", file=sys.stderr)
             
+    if os.name == 'nt':
+        python3_works = False
+        try:
+            if subprocess.run("python3 --version", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                python3_works = True
+        except:
+            pass
+        if not python3_works:
+            if linter_cmd.startswith("python3 "):
+                linter_cmd = linter_cmd.replace("python3 ", "python ", 1)
+            elif linter_cmd == "python3":
+                linter_cmd = "python"
+            if test_runner.startswith("python3 "):
+                test_runner = test_runner.replace("python3 ", "python ", 1)
+            elif test_runner == "python3":
+                test_runner = "python"
+                
     if not no_test_flag:
         if linter_cmd and linter_cmd != "echo 'No linter found'":
             print(f"Running linter command: {linter_cmd}...")

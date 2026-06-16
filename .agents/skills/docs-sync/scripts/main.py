@@ -197,7 +197,7 @@ def run_skill(args):
         replacement = f"{start_tag}\n\n{formatted_docs}\n\n{end_tag}"
         
         if pattern.search(target_content):
-            target_content = pattern.sub(replacement, target_content)
+            target_content = pattern.sub(lambda m: replacement, target_content)
             modified = True
             synced_files.append(src)
         else:

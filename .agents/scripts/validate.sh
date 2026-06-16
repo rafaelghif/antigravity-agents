@@ -322,8 +322,10 @@ fi
 # 9. Check Token Budget Guard
 echo "Check 9: Token Budget Guard"
 BUDGET_FILE=".agents/token_budget.json"
-if command -v python3 >/dev/null 2>&1; then
+if python3 --version >/dev/null 2>&1; then
     python3 -c "import sys; sys.path.insert(0, '.agents/scripts/cli'); import utils; utils.load_budget()" || true
+elif python --version >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
+    python -c "import sys; sys.path.insert(0, '.agents/scripts/cli'); import utils; utils.load_budget()" || true
 fi
 if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
     # Auto-detect profile from active_api_profile_name

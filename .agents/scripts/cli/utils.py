@@ -21,6 +21,15 @@ def find_workspace_root():
 def get_agents_dir():
     return os.path.join(find_workspace_root(), '.agents')
 
+def run_shell_script(script_path, args=None):
+    import subprocess
+    if args is None:
+        args = []
+    if os.name == 'nt':
+        return subprocess.run(['sh', script_path] + args)
+    else:
+        return subprocess.run([script_path] + args)
+
 def get_memory_file():
     return os.path.join(get_agents_dir(), 'memory.md')
 
