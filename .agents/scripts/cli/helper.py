@@ -20,7 +20,7 @@ def show_help():
     print("  migrate           Upgrade workspaces to V1.9.0 format")
     print("  push              Push local branch to remote repository securely")
     print("  clean             Purge workspace locks, archives, and reset memory/configs")
-    print("  issue             Manage local workspace issues (list, create, close, view)")
+    print("  issue             Manage local workspace issues (list, create, close, view, checkout, merge)")
     print("  git-profile       Switch Git user config profiles locally")
     print("  api-profile       Switch API configurations locally (use 'rotate' to rotate)")
     print("  log-usage         Log token usage to budget tracker")
