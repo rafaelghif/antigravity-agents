@@ -323,7 +323,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: e55bfd1
+- **Last Commit Reference**: 1cdfcd4
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -333,15 +333,14 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: PowerShell Rotation Wrapper & Helper Active Key Loading
-- **Current Task Target**: Implement PowerShell api-rotate-wrapper.ps1 and helper.ps1 loading
+- **Primary Epic**: [epic-name]
+- **Current Task Target**: [task-name]
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement PowerShell api-rotate-wrapper.ps1 and helper.ps1 loading
-- [x] Compile templates and synchronize bootstrap scripts
-- [x] Verify validation and clean workspace
-
+- [ ] Implement core logic
+- [ ] Write unit tests
+- [ ] Verify build and tests pass
 ---
 
 ## 3. Relayed Context & Handover Notes
