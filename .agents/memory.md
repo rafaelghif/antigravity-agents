@@ -7,8 +7,8 @@
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: main
-- **Last Commit Reference**: 536a590
+- **Active Branch**: [branch-name]
+- **Last Commit Reference**: [commit-hash]
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
