@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 75b2eb9
+- **Last Commit Reference**: a66ea62
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,21 +18,18 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Rotation Enhancements
-- **Current Task Target**: Implement API profile cooldowns
+- **Primary Epic**: Python CLI Migration
+- **Current Task Target**: Define Python CLI migration workflow
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement API profile cooldown logic in helper.sh
-- [x] Update wrapper scripts and python skill
-- [x] Implement rotation tests with cooldown verify
-- [x] Run all tests and validation checks
+- [x] Define Python CLI migration workflow
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Implemented rate-limit cooldown persistence (.agents/cooldowns.json) and sleep-wait fallback when all profiles are in cooldown; integrated --rate-limited flag across wrapper scripts and Python skills; added robust Test 3 coverage in tests/test_rotation.py.
-- **Next Planned Action**: None. Workspace is fully clean, validated, and committed.
+- **Last Action Completed**: Defined the design plan and execution workflow for migrating the massive helper.sh CLI to modular Python commands under .agents/scripts/cli/ (task_python_cli_migration.md).
+- **Next Planned Action**: Execute the migration steps in the next sprint, beginning with utils.py and the command dispatcher helper.py.
 - **Blockers / Runtime Notes**: None.
 
 ---
