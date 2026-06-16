@@ -18,16 +18,14 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Key Auto-Rotation Support
-- **Current Task Target**: Implement api-profile subcommand and CLI auto-rotation
+- **Primary Epic**: API Rotator Skill & Per-Profile Quota Tracking
+- **Current Task Target**: Scaffold api-rotator skill and implement per-profile log-usage
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement api-profile subcommand in helper.sh, helper.ps1, and bootstrap.sh
-- [x] Implement api_keys.example template and update .gitignore/.antigravityignore templates
-- [x] Implement runner wrapper script/skill for auto-rotation
-- [x] Update README.md and CHANGELOG.md with API profile features
-- [x] Verify validation and clean workspace
+- [/] Scaffold api-rotator skill and implement per-profile log-usage
+- [ ] Update validate.sh Check 9 budget check for per-profile limit
+- [ ] Verify validation and clean workspace
 
 ---
 
