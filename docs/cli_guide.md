@@ -73,6 +73,8 @@ If you are a developer, you only need to know these **5 essential commands** for
 | `git-profile` | `git-profile [key/name/rotate] [email]` | Switches or displays Git config profiles and automates local SSH key rotation. |
 | `api-profile` | `api-profile [key/rotate]` | Switches or displays API provider key profiles and automates local environment rotation. |
 | `guide` | `guide` | Prints an interactive step-by-step developer onboarding tutorial to the terminal. |
+| `clean` | `clean` | Purges workspace locks, archives, and resets memory/configs. |
+| `menu` | `menu` | Launches the interactive developer dashboard menu (TUI). (Runs automatically when calling helper.sh without arguments in a TTY). |
 
 ---
 
@@ -206,6 +208,14 @@ The `git-profile` command allows developers to switch between multiple Git accou
 ### 4.10 Developer Onboarding Tutorial (`guide`)
 - **Signature**: `./.agents/scripts/helper.sh guide`
 - **Behavior**: Prints a beautifully formatted, easy-to-read developer guide inside the terminal, outlining the daily essentials workflow (locking, editing, and helper commits) and core diagnostics.
+
+### 4.11 Purge Workspace Release (`clean`)
+- **Signature**: `./.agents/scripts/helper.sh clean`
+- **Behavior**: Prepares the workspace for a clean public release. It deletes all sprint archives under `.agents/archive/`, purges all task workflow files under `.agents/workflows/` (except the active cleanup workflow), clears active lock files under `.agents/locks/` (except the active cleanup lock), resets the token budget to default limits, resets the active API profile, and writes a clean template version of `.agents/memory.md` containing dynamically resolved Git branch and commit information.
+
+### 4.12 Interactive Dashboard Menu (`menu`)
+- **Signature**: `./.agents/scripts/helper.sh` (when interactive with no arguments) or `./.agents/scripts/helper.sh menu`
+- **Behavior**: Launches a user-friendly, interactive dashboard menu in the console. It groups commands logically (Daily Development, Diagnostics, Profiles, Utilities) and enables quick number/name selection. When releasing locks, it scans active locks in the repository and shows them as a selection list to prevent typos. It also requires explicit confirmation before executing the `clean` subcommand.
 
 ---
 

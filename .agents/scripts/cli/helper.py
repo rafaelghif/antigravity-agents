@@ -12,12 +12,14 @@ def show_help():
     print("Usage: helper.py <command> [arguments...]")
     print("")
     print("Core Commands:")
+    print("  menu              Launch the interactive helper dashboard menu")
     print("  lock              Acquire a module edit lock (transient lock)")
     print("  unlock            Release a module edit lock")
     print("  validate          Validate workspace compliance, budget, and configurations")
     print("  doctor            Run complete diagnostic validation on the workspace")
     print("  migrate           Upgrade workspaces to V1.9.0 format")
     print("  push              Push local branch to remote repository securely")
+    print("  clean             Purge workspace locks, archives, and reset memory/configs")
     print("  git-profile       Switch Git user config profiles locally")
     print("  api-profile       Switch API configurations locally (use 'rotate' to rotate)")
     print("  log-usage         Log token usage to budget tracker")
@@ -37,18 +39,23 @@ def show_help():
 
 def main():
     if len(sys.argv) < 2:
-        show_help()
-        sys.exit(1)
+        if sys.stdin.isatty():
+            cmd = "menu"
+        else:
+            show_help()
+            sys.exit(1)
+    else:
+        cmd = sys.argv[1]
         
-    cmd = sys.argv[1]
-    
     cmd_map = {
+        "menu": "menu",
         "lock": "lock",
         "unlock": "lock",
         "validate": "validate",
         "doctor": "doctor",
         "migrate": "migrate",
         "push": "push",
+        "clean": "clean",
         "git-profile": "git_profile",
         "api-profile": "api_profile",
         "log-usage": "log_usage",
@@ -82,7 +89,10 @@ def main():
         # Import the command module dynamically
         cmd_module = __import__(f"commands.{module_name}", fromlist=[module_name])
         # Execute the module's main function
-        cmd_module.run(sys.argv[1:])
+        if cmd == "menu" and len(sys.argv) < 2:
+            cmd_module.run(["menu"])
+        else:
+            cmd_module.run(sys.argv[1:])
     except ImportError as e:
         print(f"Failed to load command '{cmd}': {e}", file=sys.stderr)
         sys.exit(1)

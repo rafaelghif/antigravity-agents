@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Interactive onboarding tutorial subcommand `guide` (`guide.py`).
+- Workspace cleanup subcommand `clean` (`clean.py`) to purge locks, archives, reset token budget, reset API key templates, and reset `memory.md`.
+- Interactive CLI dashboard menu subcommand `menu` (`menu.py`) providing a categorized text user interface (TUI) to easily execute daily development, diagnostics, and configurations without command-line arguments.
+- Comprehensive unit tests in `tests/test_clean_command.py` and `tests/test_menu_command.py` verifying clean logic, interactive prompts, and menu routing.
 - Automatic recursive CLI Python scripts packaging in `compile_bootstrap.py` to auto-discover and package CLI files into `bootstrap.sh`.
 - Secure Git push subcommand `push` (`push.py`) implementing workspace validation checks, profile email matching, and SSH key rotation.
 - Comprehensive unit tests in `tests/test_push_command.py` verifying flags, dry-runs, and SSH environment setup.
