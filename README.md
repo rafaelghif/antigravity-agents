@@ -84,6 +84,11 @@ If you are a developer, you only need to know these daily essentials:
   ```bash
   ./.agents/scripts/helper.sh commit
   ```
+- **Manage Local Issues**:
+  ```bash
+  ./.agents/scripts/helper.sh issue <list/create/view/close>
+  ```
+  *(Commit descriptions containing `closes #XX` automatically close the issue and stage it)*
 - **Verify Compliance Manual Check**:
   ```bash
   ./.agents/scripts/helper.sh validate

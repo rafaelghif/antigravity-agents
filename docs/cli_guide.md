@@ -74,6 +74,7 @@ If you are a developer, you only need to know these **5 essential commands** for
 | `api-profile` | `api-profile [key/rotate]` | Switches or displays API provider key profiles and automates local environment rotation. |
 | `guide` | `guide` | Prints an interactive step-by-step developer onboarding tutorial to the terminal. |
 | `clean` | `clean` | Purges workspace locks, archives, and resets memory/configs. |
+| `issue` | `issue <list/create/view/close> [args...]` | Manages local workspace issues stored under `.agents/issues/` and integrates with `helper.sh commit` auto-closing. |
 | `menu` | `menu` | Launches the interactive developer dashboard menu (TUI). (Runs automatically when calling helper.sh without arguments in a TTY). |
 
 ---
@@ -216,6 +217,19 @@ The `git-profile` command allows developers to switch between multiple Git accou
 ### 4.12 Interactive Dashboard Menu (`menu`)
 - **Signature**: `./.agents/scripts/helper.sh` (when interactive with no arguments) or `./.agents/scripts/helper.sh menu`
 - **Behavior**: Launches a user-friendly, interactive dashboard menu in the console. It groups commands logically (Daily Development, Diagnostics, Profiles, Utilities) and enables quick number/name selection. When releasing locks, it scans active locks in the repository and shows them as a selection list to prevent typos. It also requires explicit confirmation before executing the `clean` subcommand.
+
+### 4.13 Local Issue Tracker (`issue`)
+- **Signatures**: 
+  - `./.agents/scripts/helper.sh issue list`
+  - `./.agents/scripts/helper.sh issue create "<title>" ["<desc>"]`
+  - `./.agents/scripts/helper.sh issue view <id>`
+  - `./.agents/scripts/helper.sh issue close <id>`
+- **Behavior**: Manages local workspace issues stored as Markdown files under `.agents/issues/` (e.g., `issue_001.md`). 
+  - `list`: Shows all issues in a clean colored table.
+  - `create`: Scaffolds a new issue file with frontmatter metadata.
+  - `view`: Prints the detailed description and metadata of an issue.
+  - `close`: Closes an issue and records the current timestamp.
+- **Git Commit Integration**: When you run `./.agents/scripts/helper.sh commit` with a message description containing `fixes #XX`, `closes #XX`, or `resolves #XX` (e.g. `closes #1`), the commit command automatically closes the target issue file locally, stages it, and amends the commit.
 
 ---
 

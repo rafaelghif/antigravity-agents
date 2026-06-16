@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Implement local issue tracker with helper.sh issue and commit closes #XX integration
+- **Current Task Target**: Document local issue tracker in README and Changelog
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -27,6 +27,7 @@
 - [x] Run health check doctor
 - [x] Optimize validate.sh find precedence and add Python env scan
 - [x] Implement local issue tracker with helper.sh issue and commit closes #XX integration
+- [x] Document local issue tracker in README and Changelog
 
 ---
 

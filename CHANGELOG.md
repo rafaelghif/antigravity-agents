@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new unit test in `tests/test_rotation.py` to verify budget reset on elapsed interval duration.
 - Specialized `docs-sync` agent skill to parse Python docstrings using Abstract Syntax Trees (AST) and sync them in-place to target Markdown files between placeholders.
 - Comprehensive unit tests in `tests/test_skill_docs_sync.py` covering AST-based parsing, markdown formatting, and placeholder sync.
+- Local Issue Tracker subcommand `issue` (`issue.py`) storing issues under `.agents/issues/` and integrating with `helper.sh commit` to auto-close and stage issues via `closes #XX` / `fixes #XX` / `resolves #XX` patterns.
+- Comprehensive unit tests in `tests/test_issue_command.py` verifying issue listing, creation, viewing, closing, and git auto-close integrations.
 
 ### Changed
 - Registered `push` and `guide` subcommands in CLI helper `helper.py` and documented them in `docs/cli_guide.md`.
