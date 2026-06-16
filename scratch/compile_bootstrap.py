@@ -24,6 +24,8 @@ def compile_bootstrap():
         (".agents/schemas/default_module.md", ".agents/schemas/default_module.md"),
         (".agents/adr.md", ".agents/adr.md"),
         (".agents/adrs/001-initial-workspace-protocol.md", ".agents/adrs/001-initial-workspace-protocol.md"),
+        (".agents/adrs/002-introduce-modular-adrs-and-validation.md", ".agents/adrs/002-introduce-modular-adrs-and-validation.md"),
+        (".agents/adrs/003-api-key-rotation-and-powershell-wrappers.md", ".agents/adrs/003-api-key-rotation-and-powershell-wrappers.md"),
         (".agents/git_profiles.example", ".agents/git_profiles.example"),
         (".agents/api_keys.example", ".agents/api_keys.example"),
         (".github/workflows/antigravity.yml", ".github/workflows/antigravity.yml"),
@@ -48,6 +50,30 @@ def compile_bootstrap():
         (".agents/hooks/commit-msg", ".agents/hooks/commit-msg"),
     ]
     
+    # Check if we need to insert the ADR 002 & 003 template blocks into bootstrap.sh first.
+    # They should be written right after 001-initial-workspace-protocol.md.
+    if 'write_template_safe ".agents/adrs/002-introduce-modular-adrs-and-validation.md"' not in content:
+        print("Inserting .agents/adrs/002-introduce-modular-adrs-and-validation.md block template into bootstrap.sh...")
+        adr_001_pattern = r'(write_template_safe "\.agents/adrs/001-initial-workspace-protocol\.md" << \'EOF\'\n.*?\nEOF\n)'
+        match = re.search(adr_001_pattern, content, re.DOTALL)
+        if match:
+            adr_001_block = match.group(1)
+            adr_002_block = '\n# 7.2 Write .agents/adrs/002-introduce-modular-adrs-and-validation.md template\nwrite_template_safe ".agents/adrs/002-introduce-modular-adrs-and-validation.md" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
+            content = content.replace(adr_001_block, adr_001_block + adr_002_block)
+        else:
+            print("Warning: Could not locate 001-initial-workspace-protocol.md block to insert ADR 002 template.")
+            
+    if 'write_template_safe ".agents/adrs/003-api-key-rotation-and-powershell-wrappers.md"' not in content:
+        print("Inserting .agents/adrs/003-api-key-rotation-and-powershell-wrappers.md block template into bootstrap.sh...")
+        adr_002_pattern = r'(write_template_safe "\.agents/adrs/002-introduce-modular-adrs-and-validation\.md" << \'EOF\'\n.*?\nEOF\n)'
+        match = re.search(adr_002_pattern, content, re.DOTALL)
+        if match:
+            adr_002_block = match.group(1)
+            adr_003_block = '\n# 7.2 Write .agents/adrs/003-api-key-rotation-and-powershell-wrappers.md template\nwrite_template_safe ".agents/adrs/003-api-key-rotation-and-powershell-wrappers.md" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
+            content = content.replace(adr_002_block, adr_002_block + adr_003_block)
+        else:
+            print("Warning: Could not locate 002-introduce-modular-adrs-and-validation.md block to insert ADR 003 template.")
+
     # Check if we need to insert the api_keys.example template block into bootstrap.sh first.
     # It should be written right after git_profiles.example.
     if 'write_template_safe ".agents/api_keys.example"' not in content:

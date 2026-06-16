@@ -12,7 +12,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ---
 
 ## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: Unknown
+- **Primary Language/Framework**: Python 3 & Shell Scripting (Bash / PowerShell)
 - **Directory Structure**:
   - `tests/` -> Project workspace component
   - `config/` -> Project workspace component
@@ -22,10 +22,10 @@ This file defines the specific technical stack, directory boundaries, coding sta
 - **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
 
 ## 3. Spacing & Styling Standards
-- **Linter command**: `echo 'No linter found'`
+- **Linter command**: `python3 -m py_compile tests/test_rotation.py`
 - **Build validation**: `echo 'No build command needed'`
 - **Test runner command**: `python3 tests/test_rotation.py`
-- **Follow formatting**: Follow standard formatting guidelines for Unknown development.
+- **Follow formatting**: Follow PEP 8 guidelines for Python and standard style for shell scripts.
 
 ## 4. Security & External Services
 - **Database/ORM**: None detected

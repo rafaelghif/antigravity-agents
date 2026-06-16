@@ -323,7 +323,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 05b6552
+- **Last Commit Reference**: 739778a
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -376,7 +376,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ---
 
 ## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: Unknown
+- **Primary Language/Framework**: Python 3 & Shell Scripting (Bash / PowerShell)
 - **Directory Structure**:
   - `tests/` -> Project workspace component
   - `config/` -> Project workspace component
@@ -386,10 +386,10 @@ This file defines the specific technical stack, directory boundaries, coding sta
 - **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
 
 ## 3. Spacing & Styling Standards
-- **Linter command**: `echo 'No linter found'`
+- **Linter command**: `python3 -m py_compile tests/test_rotation.py`
 - **Build validation**: `echo 'No build command needed'`
 - **Test runner command**: `python3 tests/test_rotation.py`
-- **Follow formatting**: Follow standard formatting guidelines for Unknown development.
+- **Follow formatting**: Follow PEP 8 guidelines for Python and standard style for shell scripts.
 
 ## 4. Security & External Services
 - **Database/ORM**: None detected
@@ -467,6 +467,7 @@ This document registers the historical technical design decisions, rationales, a
 ## 1. Architectural Decisions Index
 - [ADR-001: Initial Workspace Protocol Adoption](file://./adrs/001-initial-workspace-protocol.md) - Status: Accepted
 - [ADR-002: Introduce Modular ADRs and Validation](file://./adrs/002-introduce-modular-adrs-and-validation.md) - Status: Accepted
+- [ADR-003: API Key Rotation and PowerShell Wrappers](file://./adrs/003-api-key-rotation-and-powershell-wrappers.md) - Status: Accepted
 
 EOF
 
@@ -479,6 +480,52 @@ write_template_safe ".agents/adrs/001-initial-workspace-protocol.md" << 'EOF'
 - **Context**: The workspace needs a structured operational protocol for AI engineering agents to ensure version alignment, zero-hallucination execution, and high token efficiency.
 - **Decision**: Adopt the Antigravity Agent Core (AAC) protocol, establishing `AGENTS.md` and the `.agents/` structure containing locks, rules, schemas, and active task memory ledgers.
 - **Consequences**: Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
+
+EOF
+
+# 7.2 Write .agents/adrs/002-introduce-modular-adrs-and-validation.md template
+write_template_safe ".agents/adrs/002-introduce-modular-adrs-and-validation.md" << 'EOF'
+# ADR-002: Introduce Modular ADRs and Validation
+
+- **Date**: 2026-06-14
+- **Status**: Accepted
+
+## Context
+Architectural Decision Records (ADRs) were previously documented inside a monolithic `.agents/adr.md` file. As the workspace expands with more features, this monolithic file becomes cluttered, makes parsing difficult, and does not support granular tracking.
+
+## Decision
+Modularize the ADR structure:
+1. Store individual ADR files inside `.agents/adrs/` with chronological numerical slug filenames (e.g., `002-introduce-modular-adrs-and-validation.md`).
+2. Keep `.agents/adr.md` strictly as a high-level index map.
+3. Introduce `./.agents/scripts/helper.sh create-adr <title> [status]` to automate ADR creation and index registration.
+4. Add automated ADR compliance verification in `validate.sh` (Check 10).
+
+## Consequences
+- Workspace decisions are easily searchable, modular, and trackable.
+- Automatically prevents committing incomplete ADRs containing placeholders.
+- Simplifies bootstrapping and workspace upgrades.
+
+EOF
+
+# 7.2 Write .agents/adrs/003-api-key-rotation-and-powershell-wrappers.md template
+write_template_safe ".agents/adrs/003-api-key-rotation-and-powershell-wrappers.md" << 'EOF'
+# ADR-003: API Key Rotation and PowerShell Wrappers
+
+## Context
+When running agent operations in environments subject to rate limits or API credit boundaries (such as Gemini/OpenAI), hard limits can block task completion. In multi-platform environments (both Linux and Windows PowerShell), a consistent mechanism is required to automatically rotate API credentials and track per-profile token budgets.
+
+## Decision
+We implemented a hybrid API profile rotation framework consisting of:
+1. **Local Key File (`.agents/api_keys`)**: Configured with multiple named profiles (e.g., `personal`, `work`, `backup`).
+2. **Bash Wrapper (`api-rotate-wrapper.sh`)**: Intercepts command executions on Unix, catches rate limit status codes (including `429`, `129`, `3`, and Unix modulo `173`), and rotates keys at runtime.
+3. **PowerShell Wrapper (`api-rotate-wrapper.ps1`)**: Intercepts command executions on Windows PowerShell, supports equivalent rotation, and allows dot-source auto-loading of keys.
+4. **Token Budget Guard**: Tracks per-profile token consumption dynamically inside `.agents/token_budget.json`, checking usage before requests (proactive) and tracking after success.
+
+## Consequences
+- **Positive**: Seamless rate-limit bypass across both Unix (Bash) and Windows (PowerShell) development setups.
+- **Positive**: Prevention of budget overruns via profile-level tracking.
+- **Neutral**: Modulo wrapping logic (exiting with 173 instead of 429 on Linux) must be accounted for in Unix test suites.
+- **Negative**: Key configuration requires manual setup of `.agents/api_keys` before wrappers can function.
 
 EOF
 
