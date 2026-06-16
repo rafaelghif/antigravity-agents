@@ -44,10 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added automatic Git branch/commit synchronization (`helper.sh sync-git`) at the end of the installation process in `bootstrap.sh` for plug-and-play workspace alignment.
 - Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.
 - Documented system prerequisites (Git, Python 3, Git Bash) in `README.md`.
+- Exempted unit test files and directories from raw environment variable scan warnings, allowing developers to mock configuration values in test suites.
+- Optimized validation performance by adding standard virtual envs, build targets, and vendor directories (`venv`, `env`, `target`, `vendor`, `out`) to search exclusions, preventing token budget bloat and massive scan slowdowns.
 
 ### Fixed
 - Fixed empty Git config email matching bug in secure push command.
 - Made Git profiles properties parser in `commit` command robust to optional whitespace surrounding the `=` operator.
+- Fixed a logical precedence bug with `-o` in `find` queries inside `validate.sh` that was causing the script to search inside excluded directories like `node_modules` and `.agents`.
+- Implemented Python environment access scan (`os.environ`/`os.getenv`) in `validate.sh` to enforce architectural layer boundaries on Python projects.
 
 ## [1.8.0] - 2026-06-16
 
