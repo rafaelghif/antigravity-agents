@@ -30,6 +30,12 @@ def load_active_api_keys():
     else:
         logging.warning("No active API keys file found at .agents/active_api_keys.")
 
+def get_helper_cmd():
+    base = "./.agents/scripts/helper.sh"
+    if os.name == 'nt':
+        return ["sh", base]
+    return [base]
+
 def check_and_rotate_budget():
     """
     Proactively checks the current active profile's token budget.
@@ -70,7 +76,7 @@ def check_and_rotate_budget():
         if usage >= limit:
             logging.info(f"Quota limit reached for profile '{profile}' ({usage}/{limit}). Proactively rotating...")
             # Rotate using helper.sh
-            subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+            subprocess.run(get_helper_cmd() + ["api-profile", "rotate"], check=True)
             load_active_api_keys()
 
 def run_skill(args):
@@ -160,7 +166,7 @@ def run_skill(args):
             # 3. Successful execution: Log Token Usage
             tokens_used = args.tokens
             logging.info(f"API call successful! Logging {tokens_used} tokens for profile '{profile_name}'...")
-            subprocess.run(["./.agents/scripts/helper.sh", "log-usage", str(tokens_used)], check=True)
+            subprocess.run(get_helper_cmd() + ["log-usage", str(tokens_used)], check=True)
             
             return {
                 "status": "success",
@@ -184,7 +190,7 @@ def run_skill(args):
             if is_rate_limit and attempt < max_retries - 1:
                 logging.warning(f"Rate limit hit: {error_msg}. Rotating API profile and retrying...")
                 # Rotate profile
-                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate", "--rate-limited"], check=True)
+                subprocess.run(get_helper_cmd() + ["api-profile", "rotate", "--rate-limited"], check=True)
                 # Reload updated environment keys
                 load_active_api_keys()
             else:

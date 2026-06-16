@@ -370,7 +370,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 7b797b1
+- **Last Commit Reference**: 641db39
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -381,25 +381,20 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Expand issue tracker command with auto checkout and merge subcommands
-- **State Flag**: `COMPLETED`
+- **Current Task Target**: Resolve issue #2: Fix SURIOTA review report findings
+- **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
-- [x] Optimize validate.sh find precedence and add Python env scan
-- [x] Implement local issue tracker with helper.sh issue and commit closes #XX integration
-- [x] Document local issue tracker in README and Changelog
-- [x] Implement strict issue-driven validation in validate.sh and update rules
-- [x] Expand issue tracker command with auto checkout and merge subcommands
 
 ---
 
 ## 3. Relayed Context & Handover Notes
-- **Last Active Agent**: None
-- **Last Action Completed**: Initialized clean Antigravity Agent Core workspace.
-- **Next Planned Action**: None. Ready for new features or tasks.
-- **Blockers / Runtime Notes**: None.
+- **Last Active Agent**: Antigravity
+- **Last Action Completed**: Resolved Windows compatibility issues, fixed bootstrap.sh, doctor, and docs-sync bugs, and compiled complete templates.
+- **Next Planned Action**: All issues resolved and validation passing. Ready for next sprint task.
+- **Blockers / Runtime Notes**: None. Workspace fully validated on Windows.
 
 ---
 
@@ -1104,6 +1099,12 @@ def load_active_api_keys():
     else:
         logging.warning("No active API keys file found at .agents/active_api_keys.")
 
+def get_helper_cmd():
+    base = "./.agents/scripts/helper.sh"
+    if os.name == 'nt':
+        return ["sh", base]
+    return [base]
+
 def check_and_rotate_budget():
     """
     Proactively checks the current active profile's token budget.
@@ -1144,7 +1145,7 @@ def check_and_rotate_budget():
         if usage >= limit:
             logging.info(f"Quota limit reached for profile '{profile}' ({usage}/{limit}). Proactively rotating...")
             # Rotate using helper.sh
-            subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+            subprocess.run(get_helper_cmd() + ["api-profile", "rotate"], check=True)
             load_active_api_keys()
 
 def run_skill(args):
@@ -1234,7 +1235,7 @@ def run_skill(args):
             # 3. Successful execution: Log Token Usage
             tokens_used = args.tokens
             logging.info(f"API call successful! Logging {tokens_used} tokens for profile '{profile_name}'...")
-            subprocess.run(["./.agents/scripts/helper.sh", "log-usage", str(tokens_used)], check=True)
+            subprocess.run(get_helper_cmd() + ["log-usage", str(tokens_used)], check=True)
             
             return {
                 "status": "success",
@@ -1258,7 +1259,7 @@ def run_skill(args):
             if is_rate_limit and attempt < max_retries - 1:
                 logging.warning(f"Rate limit hit: {error_msg}. Rotating API profile and retrying...")
                 # Rotate profile
-                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate", "--rate-limited"], check=True)
+                subprocess.run(get_helper_cmd() + ["api-profile", "rotate", "--rate-limited"], check=True)
                 # Reload updated environment keys
                 load_active_api_keys()
             else:
@@ -11549,6 +11550,8 @@ FILES_TO_SCAN=$(find . -type f \
     -not -path './target/*' \
     -not -path './vendor/*' \
     -not -path './out/*' \
+    -not -path '*/__pycache__/*' \
+    -not -name '*.pyc' \
     -not -name 'bootstrap.sh' \
     -not -path '*.md' \
     -not -path '*.json' \
