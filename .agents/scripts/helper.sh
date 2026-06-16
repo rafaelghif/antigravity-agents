@@ -3071,7 +3071,7 @@ cmd_commit() {
 
 cmd_migrate() {
     echo "=========================================================="
-    echo "  Antigravity Agent Core - Workspace Migration (V1.4.0)"
+    echo "  Antigravity Agent Core - Workspace Migration (V1.7.4)"
     echo "=========================================================="
 
     local backup_suffix=".backup"
@@ -3130,16 +3130,28 @@ cmd_migrate() {
     # 3. Update Git Hooks
     echo "Updating local Git hooks..."
     if [ -f .agents/hooks/pre-commit ]; then
+        if [ -f .git/hooks/pre-commit ] && ! grep -q "Antigravity Agent Git Hook" .git/hooks/pre-commit; then
+            echo "  - Backing up existing custom pre-commit hook"
+            mv .git/hooks/pre-commit .git/hooks/pre-commit.backup
+        fi
         cp .agents/hooks/pre-commit .git/hooks/pre-commit
         chmod +x .git/hooks/pre-commit
         echo "  - Installed pre-commit hook"
     fi
     if [ -f .agents/hooks/post-commit ]; then
+        if [ -f .git/hooks/post-commit ] && ! grep -q "Antigravity Agent Git Hook" .git/hooks/post-commit; then
+            echo "  - Backing up existing custom post-commit hook"
+            mv .git/hooks/post-commit .git/hooks/post-commit.backup
+        fi
         cp .agents/hooks/post-commit .git/hooks/post-commit
         chmod +x .git/hooks/post-commit
         echo "  - Installed post-commit hook"
     fi
     if [ -f .agents/hooks/commit-msg ]; then
+        if [ -f .git/hooks/commit-msg ] && ! grep -q "Antigravity Agent Git Hook" .git/hooks/commit-msg; then
+            echo "  - Backing up existing custom commit-msg hook"
+            mv .git/hooks/commit-msg .git/hooks/commit-msg.backup
+        fi
         cp .agents/hooks/commit-msg .git/hooks/commit-msg
         chmod +x .git/hooks/commit-msg
         echo "  - Installed commit-msg hook"
@@ -3174,6 +3186,17 @@ cmd_migrate() {
         if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
             echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
         fi
+        # ensure API configurations and active state files are ignored
+        local has_secret_header=0
+        for ignore_pattern in ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name"; do
+            if ! grep -q "^$ignore_pattern" "$temp_git"; then
+                if [ "$has_secret_header" -eq 0 ]; then
+                    echo -e "\n# Ignore local agent API key configuration and active state files" >> "$temp_git"
+                    has_secret_header=1
+                fi
+                echo "$ignore_pattern" >> "$temp_git"
+            fi
+        done
         mv "$temp_git" ".gitignore"
         echo "  - .gitignore updated."
     else
@@ -3181,6 +3204,12 @@ cmd_migrate() {
         cat << 'GIT_EOF' > .gitignore
 # Ignore agent transient locks
 .agents/locks/
+
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
 GIT_EOF
     fi
 
