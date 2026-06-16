@@ -120,10 +120,11 @@ When initialized in a project, the directory layout is structured as follows:
         ├── locks/                <-- Dynamic: Module locks preventing parallel edits
         ├── workflows/            <-- Project-specific implementation plans
         ├── scripts/              <-- Workspace management scripts
-        │     ├── helper.sh       <-- Main command dispatcher
-        │     ├── helper.ps1      <-- PowerShell command wrapper for Windows compatibility
+        │     ├── helper.sh       <-- Main command dispatcher (thin wrapper forwarding to Python CLI)
+        │     ├── helper.ps1      <-- Windows command dispatcher (thin wrapper forwarding to Python CLI)
         │     ├── recon.sh        <-- Auto-reconnaissance scanner
-        │     └── validate.sh     <-- Security and standards validator
+        │     ├── validate.sh     <-- Security and standards validator
+        │     └── cli/            <-- Modular Python CLI engine and subcommand modules
         └── archive/              <-- Historical: Completed sprint/checklists archives
 ```
 
@@ -276,9 +277,10 @@ git commit -m "chore(core): initialize antigravity agent workspace"
 
 ---
 
-## 4. Operational Scripts Guide (`helper.sh` / `helper.ps1`)
-
 Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` (or `./.agents/scripts/helper.ps1` for native PowerShell support on Windows) or standard Git commands.
+
+> [!NOTE]
+> **Modular Python CLI Engine**: Starting from version `1.8.0`, AAC uses a modular Python CLI engine situated under `.agents/scripts/cli/`. The `helper.sh` and `helper.ps1` scripts serve as thin wrappers forwarding execution. This architecture isolates individual subcommands into separate modules, which drastically reduces token overhead for developer agents.
 
 ### 💡 Simplified Developer Cheat Sheet (Daily Essentials)
 

@@ -1,0 +1,38 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.8.0] - 2026-06-16
+
+### Added
+- Modular Python CLI framework under `.agents/scripts/cli/` to replace the monolithic 4,600+ lines `helper.sh`.
+- Subcommand command modules in `.agents/scripts/cli/commands/`:
+  - `lock.py`: Handle transient domain/module locks.
+  - `validate.py`: Handle strict workspace validation checks.
+  - `doctor.py`: Diagnostics and syntax auditing.
+  - `migrate.py`: Backup checks, hook updates, and `.gitignore` guard installations.
+  - `git_profile.py`: local git user configuration profiles and SSH keys rotation.
+  - `api_profile.py`: API credential switching and cooldown management.
+  - `log_usage.py`: token budget tracker.
+  - `recon.py`: wraps auto-reconnaissance.
+  - `skills.py`: CLI actions for listing and creating skills.
+  - `rules.py`: CLI actions for listing and creating rules.
+  - `init.py`: Scaffolds tech-stack boilerplate configurations dynamically.
+  - `sync_git.py`: Syncs active Git branch and commit references.
+  - `build.py`: Runs monorepo/single project build validation commands.
+  - `lint.py`: Runs linter commands.
+  - `test.py`: Runs test suites.
+  - `sync_api.py`: Synchronizes API contract endpoints and TypeScript clients.
+  - `create_adr.py`: Creates Architectural Decision Records.
+  - `release.py`: Auto-bumps semver version in changelogs.
+  - `commit.py`: Round-robin git profile and SSH rotation commit runner.
+- Added `utils.py` containing unified token usage budgeting, logging, and warning handlers.
+
+### Changed
+- Refactored `helper.sh` and `helper.ps1` into thin wrappers forwarding commands directly to `python3 .agents/scripts/cli/helper.py`.
+- Optimized prompt cache hit rate and token consumption during daily agent commands.
+
+[1.8.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.7.4...v1.8.0
