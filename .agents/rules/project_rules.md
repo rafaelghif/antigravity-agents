@@ -24,7 +24,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ## 3. Spacing & Styling Standards
 - **Linter command**: `echo 'No linter found'`
 - **Build validation**: `echo 'No build command needed'`
-- **Test runner command**: `echo 'No test suite found'`
+- **Test runner command**: `python3 tests/test_rotation.py`
 - **Follow formatting**: Follow standard formatting guidelines for Unknown development.
 
 ## 4. Security & External Services

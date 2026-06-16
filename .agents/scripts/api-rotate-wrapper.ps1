@@ -68,7 +68,7 @@ while ($retryCount -lt $maxRetries) {
     # - 429: Too Many Requests
     # - 129: Common custom agent rate-limit exit code
     # - 3: Resource exhausted (gRPC status code)
-    } elseif ($exitCode -eq 429 -or $exitCode -eq 129 -or $exitCode -eq 3) {
+    } elseif ($exitCode -eq 429 -or $exitCode -eq 129 -or $exitCode -eq 173 -or $exitCode -eq 3) {
         $retryCount++
         if ($retryCount -lt $maxRetries) {
             Write-Warning "[API-WRAPPER] Command exited with code $exitCode (Rate Limited/Quota Exhausted)."

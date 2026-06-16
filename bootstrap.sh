@@ -323,7 +323,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 1cdfcd4
+- **Last Commit Reference**: 63c1a33
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -333,14 +333,14 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: [epic-name]
-- **Current Task Target**: [task-name]
+- **Primary Epic**: Automated API Key Rotation Test Suite
+- **Current Task Target**: Implement cross-platform Python rotation test suite in tests/test_rotation.py
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
+- [x] Implement cross-platform Python rotation test suite in tests/test_rotation.py
+- [x] Verify test suite execution locally and compile templates
+- [x] Verify validation and clean workspace
 ---
 
 ## 3. Relayed Context & Handover Notes
@@ -388,7 +388,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
 ## 3. Spacing & Styling Standards
 - **Linter command**: `echo 'No linter found'`
 - **Build validation**: `echo 'No build command needed'`
-- **Test runner command**: `echo 'No test suite found'`
+- **Test runner command**: `python3 tests/test_rotation.py`
 - **Follow formatting**: Follow standard formatting guidelines for Unknown development.
 
 ## 4. Security & External Services
@@ -6534,7 +6534,7 @@ while [ $retry_count -lt $MAX_RETRIES ]; do
     # - 429: Too Many Requests
     # - 129: Common custom agent rate-limit exit code
     # - 3: Resource exhausted (gRPC status code)
-    elif [ $exit_code -eq 429 ] || [ $exit_code -eq 129 ] || [ $exit_code -eq 3 ]; then
+    elif [ $exit_code -eq 429 ] || [ $exit_code -eq 129 ] || [ $exit_code -eq 173 ] || [ $exit_code -eq 3 ]; then
         retry_count=$((retry_count + 1))
         if [ $retry_count -lt $MAX_RETRIES ]; then
             echo "[API-WRAPPER] Command exited with code $exit_code (Rate Limited/Quota Exhausted)."
@@ -6625,7 +6625,7 @@ while ($retryCount -lt $maxRetries) {
     # - 429: Too Many Requests
     # - 129: Common custom agent rate-limit exit code
     # - 3: Resource exhausted (gRPC status code)
-    } elseif ($exitCode -eq 429 -or $exitCode -eq 129 -or $exitCode -eq 3) {
+    } elseif ($exitCode -eq 429 -or $exitCode -eq 129 -or $exitCode -eq 173 -or $exitCode -eq 3) {
         $retryCount++
         if ($retryCount -lt $maxRetries) {
             Write-Warning "[API-WRAPPER] Command exited with code $exitCode (Rate Limited/Quota Exhausted)."
