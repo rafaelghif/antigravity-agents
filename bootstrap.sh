@@ -372,12 +372,13 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
+- **Current Task Target**: Optimize validate.sh find precedence and add Python env scan
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
+- [x] Optimize validate.sh find precedence and add Python env scan
 
 ---
 
@@ -5721,6 +5722,11 @@ FILES_TO_SCAN=$(find . -type f \
     -not -path './node_modules/*' \
     -not -path './dist/*' \
     -not -path './build/*' \
+    -not -path './venv/*' \
+    -not -path './env/*' \
+    -not -path './target/*' \
+    -not -path './vendor/*' \
+    -not -path './out/*' \
     -not -name 'bootstrap.sh' \
     -not -path '*.md' \
     -not -path '*.json' \
@@ -5760,10 +5766,10 @@ fi
 echo "Check 4: Raw Environment Access Scan (domain-purity verification)"
 RAW_ENV_FOUND=0
 # Scanning JS/TS, Go, Python files for raw env variable access
-JS_FILES=$(find . -name "*.js" -o -name "*.ts" -o -name "*.tsx" -not -path './.agents/*' -not -path './node_modules/*' -not -path './dist/*' 2>/dev/null || true)
+JS_FILES=$(find . \( -name "*.js" -o -name "*.ts" -o -name "*.tsx" \) -not -path './.agents/*' -not -path './node_modules/*' -not -path './dist/*' -not -path './venv/*' -not -path './env/*' -not -path './target/*' -not -path './vendor/*' -not -path './out/*' 2>/dev/null || true)
 if [ -n "$JS_FILES" ]; then
-    # Look for process.env.something, but ignore common config folders
-    raw_js_env=$(echo "$JS_FILES" | grep -v "config" | xargs grep -rn "process\.env\.[A-Za-z0-9_]" 2>/dev/null || true)
+    # Look for process.env.something, but ignore common config and test folders
+    raw_js_env=$(echo "$JS_FILES" | grep -v "config" | grep -v "test" | xargs grep -rn "process\.env\.[A-Za-z0-9_]" 2>/dev/null || true)
     if [ -n "$raw_js_env" ]; then
         echo "  [WARNING] Raw 'process.env' access found outside configuration modules:"
         echo "$raw_js_env" | sed 's/^/    /'
@@ -5771,12 +5777,22 @@ if [ -n "$JS_FILES" ]; then
     fi
 fi
 
-GO_FILES=$(find . -name "*.go" -not -path './.agents/*' 2>/dev/null || true)
+GO_FILES=$(find . -name "*.go" -not -path './.agents/*' -not -path './vendor/*' -not -path './venv/*' -not -path './env/*' 2>/dev/null || true)
 if [ -n "$GO_FILES" ]; then
-    raw_go_env=$(echo "$GO_FILES" | grep -v "config" | xargs grep -rn "os\.Getenv" 2>/dev/null || true)
+    raw_go_env=$(echo "$GO_FILES" | grep -v "config" | grep -v "test" | xargs grep -rn "os\.Getenv" 2>/dev/null || true)
     if [ -n "$raw_go_env" ]; then
         echo "  [WARNING] Raw 'os.Getenv' access found outside configuration modules:"
         echo "$raw_go_env" | sed 's/^/    /'
+        RAW_ENV_FOUND=1
+    fi
+fi
+
+PY_FILES=$(find . -name "*.py" -not -path './.agents/*' -not -path './venv/*' -not -path './env/*' 2>/dev/null || true)
+if [ -n "$PY_FILES" ]; then
+    raw_py_env=$(echo "$PY_FILES" | grep -v "config" | grep -v "test" | xargs grep -rnE "os\.(environ|getenv|environ\.get)\b" 2>/dev/null || true)
+    if [ -n "$raw_py_env" ]; then
+        echo "  [WARNING] Raw 'os.environ/os.getenv' access found outside configuration modules:"
+        echo "$raw_py_env" | sed 's/^/    /'
         RAW_ENV_FOUND=1
     fi
 fi

@@ -19,12 +19,13 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
+- **Current Task Target**: Optimize validate.sh find precedence and add Python env scan
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
+- [x] Optimize validate.sh find precedence and add Python env scan
 
 ---
 
