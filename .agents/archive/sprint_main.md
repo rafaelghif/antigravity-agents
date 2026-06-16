@@ -11,3 +11,6 @@
 - [x] Replace helper.sh/helper.ps1 with dispatch wrappers
 - [x] Run all tests and validation checks
 
+### Sprint Tasks Checklist
+- [x] Execute task checklist in [task_readme_migration.md](file://./workflows/task_readme_migration.md)
+
