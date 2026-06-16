@@ -63,8 +63,8 @@ while [ $retry_count -lt $MAX_RETRIES ]; do
         if [ $retry_count -lt $MAX_RETRIES ]; then
             echo "[API-WRAPPER] Command exited with code $exit_code (Rate Limited/Quota Exhausted)."
             echo "[API-WRAPPER] Rotating API profile and retrying ($retry_count/$MAX_RETRIES)..."
-            "$HELPER_SH" api-profile rotate
-            sleep 2
+            "$HELPER_SH" api-profile rotate --rate-limited
+            sleep 1
         else
             echo "[API-WRAPPER] Command exited with code $exit_code. All available API profiles exhausted." >&2
             exit $exit_code

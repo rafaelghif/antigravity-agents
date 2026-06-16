@@ -171,7 +171,7 @@ def run_skill(args):
             if is_rate_limit and attempt < max_retries - 1:
                 logging.warning(f"Rate limit hit: {error_msg}. Rotating API profile and retrying...")
                 # Rotate profile
-                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate", "--rate-limited"], check=True)
                 # Reload updated environment keys
                 load_active_api_keys()
             else:

@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: d5bf461
+- **Last Commit Reference**: 75b2eb9
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,17 +18,20 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Injected Agent Isolation
-- **Current Task Target**: Isolate agent files and update gitignore guards
+- **Primary Epic**: API Rotation Enhancements
+- **Current Task Target**: Implement API profile cooldowns
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Isolate agent files and update gitignore guards
+- [x] Implement API profile cooldown logic in helper.sh
+- [x] Update wrapper scripts and python skill
+- [x] Implement rotation tests with cooldown verify
+- [x] Run all tests and validation checks
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Restructured workspace to keep agent files isolated inside .agents/docs/ (moved CHANGELOG.md and MIGRATION.md), updated helper.sh cmd_migrate to support block comment guards inside .gitignore, and committed ADR-004.
+- **Last Action Completed**: Implemented rate-limit cooldown persistence (.agents/cooldowns.json) and sleep-wait fallback when all profiles are in cooldown; integrated --rate-limited flag across wrapper scripts and Python skills; added robust Test 3 coverage in tests/test_rotation.py.
 - **Next Planned Action**: None. Workspace is fully clean, validated, and committed.
 - **Blockers / Runtime Notes**: None.
 

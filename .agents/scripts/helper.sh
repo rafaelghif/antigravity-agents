@@ -4275,6 +4275,13 @@ cmd_api_profile() {
         api_keys_file="$HOME/.antigravity_api_keys"
     fi
 
+    local rate_limited=0
+    for arg in "$@"; do
+        if [ "$arg" = "--rate-limited" ]; then
+            rate_limited=1
+        fi
+    done
+
     # Check if we should rotate
     if [ "$target_profile" = "rotate" ] || [ "$target_profile" = "--rotate" ]; then
         if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
@@ -4291,15 +4298,137 @@ cmd_api_profile() {
                     current_profile=$(cat ".agents/active_api_profile_name" | xargs)
                 fi
                 
-                local selected_idx=0
-                for i in "${!profiles_arr[@]}"; do
-                    if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
-                        selected_idx=$(( (i + 1) % num_profiles ))
-                        break
+                if [ "$rate_limited" -eq 1 ]; then
+                    local current_time
+                    current_time=$(date +%s)
+                    local cooldown_sec=${API_ROTATION_COOLDOWN_SEC:-60}
+                    local expiry_time=$((current_time + cooldown_sec))
+                    
+                    if [ "$current_profile" != "none" ]; then
+                        echo "Putting profile '$current_profile' on cooldown for ${cooldown_sec} seconds..."
+                        python3 -c "
+import json, sys, os
+p = '$current_profile'
+exp = $expiry_time
+data = {}
+if os.path.exists('.agents/cooldowns.json'):
+    try:
+        with open('.agents/cooldowns.json', 'r') as f:
+            data = json.load(f)
+    except: pass
+data[p] = exp
+with open('.agents/cooldowns.json', 'w') as f:
+    json.dump(data, f, indent=2)
+"
                     fi
-                done
-                target_profile="${profiles_arr[$selected_idx]}"
-                echo "Rotating active API profile to: '$target_profile'..."
+                    
+                    # Choose next profile that is NOT on cooldown
+                    local python_result
+                    python_result=$(python3 -c "
+import json, sys, os
+current_time = int(sys.argv[1])
+current_profile = sys.argv[2]
+profiles = sys.argv[3:]
+
+cooldowns = {}
+if os.path.exists('.agents/cooldowns.json'):
+    try:
+        with open('.agents/cooldowns.json', 'r') as f:
+            cooldowns = json.load(f)
+    except: pass
+    
+cooldowns = {p: exp for p, exp in cooldowns.items() if exp > current_time}
+
+with open('.agents/cooldowns.json', 'w') as f:
+    json.dump(cooldowns, f, indent=2)
+    
+if current_profile in profiles:
+    start_idx = profiles.index(current_profile)
+    ordered_candidates = profiles[start_idx+1:] + profiles[:start_idx]
+else:
+    ordered_candidates = profiles
+    
+selected = None
+for p in ordered_candidates:
+    if p not in cooldowns:
+        selected = p
+        break
+        
+if selected:
+    print('OK:' + selected)
+else:
+    if cooldowns:
+        earliest_profile = min(cooldowns, key=cooldowns.get)
+        earliest_expiry = cooldowns[earliest_profile]
+        print('WAIT:' + earliest_profile + ':' + str(earliest_expiry))
+    else:
+        print('OK:' + profiles[0])
+" "$current_time" "$current_profile" "${profiles_arr[@]}")
+
+                    if [[ "$python_result" =~ ^OK: ]]; then
+                        target_profile="${python_result#OK:}"
+                        echo "Rotating active API profile to: '$target_profile'..."
+                    elif [[ "$python_result" =~ ^WAIT: ]]; then
+                        # All profiles are rate-limited. Sleep/wait.
+                        local wait_profile
+                        local expiry_time
+                        # Parse WAIT:<profile>:<expiry> using cut
+                        wait_profile=$(echo "$python_result" | cut -d':' -f2)
+                        expiry_time=$(echo "$python_result" | cut -d':' -f3)
+                        
+                        local now_time
+                        now_time=$(date +%s)
+                        local sleep_sec=$((expiry_time - now_time))
+                        
+                        if [ $sleep_sec -gt 0 ]; then
+                            echo "All API profiles are in cooldown! Earliest available is '$wait_profile' in ${sleep_sec}s."
+                            echo "Waiting/sleeping for ${sleep_sec} seconds before retrying..."
+                            for ((i=sleep_sec; i>0; i--)); do
+                                echo -ne "  Retrying in $i seconds...\r"
+                                sleep 1
+                            done
+                            echo -e "\n  Cooldown finished. Selecting profile '$wait_profile'..."
+                        fi
+                        
+                        # Clear cooldown entry for the selected profile
+                        python3 -c "
+import json, os
+p = '$wait_profile'
+if os.path.exists('.agents/cooldowns.json'):
+    try:
+        with open('.agents/cooldowns.json', 'r') as f:
+            data = json.load(f)
+        if p in data:
+            del data[p]
+        with open('.agents/cooldowns.json', 'w') as f:
+            json.dump(data, f, indent=2)
+    except: pass
+"
+                        target_profile="$wait_profile"
+                    else
+                        # Fallback to standard selection
+                        local selected_idx=0
+                        for i in "${!profiles_arr[@]}"; do
+                            if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
+                                selected_idx=$(( (i + 1) % num_profiles ))
+                                break
+                            fi
+                        done
+                        target_profile="${profiles_arr[$selected_idx]}"
+                        echo "Rotating active API profile to: '$target_profile'..."
+                    fi
+                else
+                    # Standard round-robin (manual rotate call without --rate-limited)
+                    local selected_idx=0
+                    for i in "${!profiles_arr[@]}"; do
+                        if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
+                            selected_idx=$(( (i + 1) % num_profiles ))
+                            break
+                        fi
+                    done
+                    target_profile="${profiles_arr[$selected_idx]}"
+                    echo "Rotating active API profile to: '$target_profile'..."
+                fi
             else
                 echo "Error: No API profiles found in $api_keys_file." >&2
                 exit 1

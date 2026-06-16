@@ -4,6 +4,8 @@ import sys
 import shutil
 import subprocess
 import tempfile
+import json
+import time
 
 # Helper paths
 REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -13,13 +15,15 @@ ACTIVE_KEYS_PATH = os.path.join(AGENTS_DIR, "active_api_keys")
 ACTIVE_KEYS_PS1_PATH = os.path.join(AGENTS_DIR, "active_api_keys.ps1")
 ACTIVE_PROFILE_PATH = os.path.join(AGENTS_DIR, "active_api_profile_name")
 TOKEN_BUDGET_PATH = os.path.join(AGENTS_DIR, "token_budget.json")
+COOLDOWNS_PATH = os.path.join(AGENTS_DIR, "cooldowns.json")
 
 TEST_FILES = [
     API_KEYS_PATH,
     ACTIVE_KEYS_PATH,
     ACTIVE_KEYS_PS1_PATH,
     ACTIVE_PROFILE_PATH,
-    TOKEN_BUDGET_PATH
+    TOKEN_BUDGET_PATH,
+    COOLDOWNS_PATH
 ]
 
 def run_mock_command(always_fail=False):
@@ -122,6 +126,37 @@ def run_bash_wrapper_test():
     # Assert output contains exhaustion warning
     assert "All available API profiles exhausted" in proc.stderr or "All available API profiles exhausted" in proc.stdout, "Wrapper did not print exhaustion warning"
     print("[PASS] Profile Exhaustion Test succeeded!")
+    
+    print("\n=== Test 3: Bash Wrapper - Cooldown Wait fallback ===")
+    setup_mock_config()
+    
+    # Set cooldown to 2 seconds for quick testing
+    os.environ["API_ROTATION_COOLDOWN_SEC"] = "2"
+    
+    helper_path = os.path.join(AGENTS_DIR, "scripts", "helper.sh")
+    
+    # Manually populate cooldowns.json
+    current_time = int(time.time())
+    with open(COOLDOWNS_PATH, "w") as f:
+        json.dump({"mock_p1": current_time + 2, "mock_p2": current_time + 2}, f)
+        
+    # Verify both are on cooldown in json file
+    with open(COOLDOWNS_PATH, "r") as f:
+        cooldown_data = json.load(f)
+    assert "mock_p1" in cooldown_data and "mock_p2" in cooldown_data, "Both profiles should be on cooldown"
+    
+    # Now run rotate again with --rate-limited. It should wait and select mock_p1
+    proc = subprocess.run([helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
+    print("Stdout:")
+    print(proc.stdout)
+    
+    # Assert wait message printed
+    assert "All API profiles are in cooldown" in proc.stdout, "Did not trigger cooldown wait message"
+    assert "Selecting profile" in proc.stdout, "Did not finish wait and select profile"
+    
+    # Clean up environment var
+    os.environ.pop("API_ROTATION_COOLDOWN_SEC", None)
+    print("[PASS] Cooldown Behavior Test succeeded!")
     
     return True
 

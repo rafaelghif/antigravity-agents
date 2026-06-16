@@ -73,8 +73,8 @@ while ($retryCount -lt $maxRetries) {
         if ($retryCount -lt $maxRetries) {
             Write-Warning "[API-WRAPPER] Command exited with code $exitCode (Rate Limited/Quota Exhausted)."
             Write-Host "[API-WRAPPER] Rotating API profile and retrying ($retryCount/$maxRetries)..."
-            & $helperPs1 api-profile rotate
-            Start-Sleep -Seconds 2
+            & $helperPs1 api-profile rotate --rate-limited
+            Start-Sleep -Seconds 1
         } else {
             Write-Error "[API-WRAPPER] Command exited with code $exitCode. All available API profiles exhausted."
             exit $exitCode
