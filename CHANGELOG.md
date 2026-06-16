@@ -1,6 +1,12 @@
 # Agent Core Changelog
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
+## [1.7.2] - 2026-06-16
+### Added
+- Synchronized `README.md` and `CHANGELOG.md` with actual CLI subcommands and parameter behaviors.
+- Added comprehensive documentation for all 22 subcommands inside `helper.sh`/`helper.ps1` with detailed signatures, parameters, and flags.
+- Documented manual profile and SSH key rotation action via `git-profile rotate` or `git-profile --rotate`.
+- Documented Bootstrapper command-line arguments including `-f` / `--force`, `-u` / `--update`, and `-Version`.
 
 ## [1.7.1] - 2026-06-16
 ### Added
@@ -135,6 +141,8 @@ This document tracks all version updates, script refinements, and protocol chang
 - Module lock validation, credentials scanning, and domain-purity env scanning in `validate.sh`.
 - Tech stack auto-detection in `recon.sh`.
 
+[1.7.2]: https://github.com/rafaelghif/antigravity-agents/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/rafaelghif/antigravity-agents/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.4.1...v1.5.0
@@ -146,4 +154,5 @@ This document tracks all version updates, script refinements, and protocol chang
 [1.2.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rafaelghif/antigravity-agents/releases/tag/v1.0.0
+
 

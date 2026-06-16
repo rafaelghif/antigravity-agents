@@ -207,6 +207,16 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 powershell -ExecutionPolicy Bypass -File \path\to\antigravity-agents\bootstrap.ps1
 ```
 
+##### **Bootstrapper CLI Options & Flags**
+
+Both `bootstrap.sh` and `bootstrap.ps1` accept command-line arguments to customize their run behavior:
+
+| Linux/macOS Flag | Windows PowerShell Option | Description |
+|---|---|---|
+| `-f`, `--force` | `-Force` | **Force Overwrite**: Forces the script to overwrite existing files, templates, hooks, and configurations in `.agents/`. (Default: `false`, preserves user changes). |
+| `-u`, `--update` | `-Update` | **Update Only**: Performs an update of the core scripts in `.agents/scripts/` to the latest version, without overwriting custom workspace configurations, rules, or the active memory ledger. |
+| *N/A* | `-Version <version>` | **Target Version**: (PowerShell wrapper only) Downloads and executes a specific version/branch of the bootstrapper (defaults to `main`). |
+
 > [!NOTE]
 > The script will automatically initialize Git for you and clean itself up from the root when done.
 
@@ -250,6 +260,9 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 
 The script will autodetect your programming language, linter, tests, and database migrations, and write the project settings to `.agents/rules/project_rules.md` automatically!
 
+> [!TIP]
+> Just like in Scenario A, you can pass optional CLI flags to the bootstrapper (e.g. `-u` / `-Update` to perform update-only of core scripts, or `-f` / `-Force` to overwrite existing configuration templates).
+
 #### **Step 3: Run Diagnostics & Commit**
 Verify that your existing workspace passes the agent safety checks:
 ```bash
@@ -269,21 +282,28 @@ Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` 
 
 | Command | Usage | Description |
 |---|---|---|
-| `init` | `./.agents/scripts/helper.sh init` | Launches the interactive setup questionnaire to scaffold directories, configurations, and file templates. |
-| `recon` | `./.agents/scripts/helper.sh recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
-| `validate` | `./.agents/scripts/helper.sh validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
-| `doctor` | `./.agents/scripts/helper.sh doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
-| `sync-git` | `./.agents/scripts/helper.sh sync-git` | *(Automated)* Synchronizes active branch and last commit hash in `memory.md`. |
-| `lock` | `./.agents/scripts/helper.sh lock <module>` | Locks a specific module to prevent parallel developers or agents from modifying the same files simultaneously. |
-| `unlock` | `./.agents/scripts/helper.sh unlock <module>` | *(Automated)* Releases the lock on a module. |
-| `archive` | `./.agents/scripts/helper.sh archive` | Archives completed checklists and moves dynamic workflow files to `archive/` pre-merge to prevent conflicts. |
-| `sync-api` | `./.agents/scripts/helper.sh sync-api` | Automatically extracts backend OpenAPI schema and generates a zero-dependency typed TypeScript fetch client in the frontend. |
-| `create-skill` | `./.agents/scripts/helper.sh create-skill <name> [description]` | Scaffolds a new specialized skill directory containing SKILL.md and a Python script template. |
-| `list-skills` | `./.agents/scripts/helper.sh list-skills` | Audits all registered skills in `.agents/skills/` for compliance and lists them. |
-| `create-rule` | `./.agents/scripts/helper.sh create-rule <name> <activation> [param]` | Scaffolds a new workspace rule file under `.agents/rules/` with specified activation mode. |
-| `list-rules` | `./.agents/scripts/helper.sh list-rules` | Audits all registered workspace rules in `.agents/rules/` for compliance and lists them. |
-| `log-usage` | `./.agents/scripts/helper.sh log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json` to prevent budget exhaustion. |
-| `git-profile` | `./.agents/scripts/helper.sh git-profile [key/name] [email]` | Switch or display local repository Git configurations. Supports multiple profiles with name, email, and local SSH key rotation. |
+| `init` | `init [name] [stack] [arch] [db_orm] [env_vars]` | Launches the setup questionnaire to scaffold directories, configurations, and file templates. |
+| `recon` | `recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
+| `validate` | `validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
+| `doctor` | `doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
+| `commit` | `commit [--no-test] [type] [scope] [desc] [files...]` | Runs validations, tests, automates Git profile rotation, and makes a Conventional Commit. |
+| `sync-git` | `sync-git` | *(Automated)* Synchronizes active branch and last commit hash in `memory.md`. |
+| `lock` | `lock <module>` | Locks a specific module to prevent parallel edits. |
+| `unlock` | `unlock <module>` | *(Automated)* Releases the lock on a module. |
+| `archive` | `archive` | Archives completed checklists to prevent merge conflicts. |
+| `migrate` | `migrate` | Safely upgrades older agent setups to the current standard. |
+| `build` | `build` | Monorepo-aware command to compile code in modified subfolders. |
+| `lint` | `lint` | Monorepo-aware command to lint code in modified subfolders. |
+| `test` | `test` | Monorepo-aware command to test code in modified subfolders. |
+| `sync-api` | `sync-api` | Extracts OpenAPI schema and generates frontend TypeScript fetch API client. |
+| `create-skill` | `create-skill <name> [description]` | Scaffolds a new specialized skill directory (lowercase kebab-case). |
+| `list-skills` | `list-skills` | Audits all registered skills in `.agents/skills/` for compliance and lists them. |
+| `create-rule` | `create-rule <name> <activation> [param]` | Scaffolds a new workspace rule file under `.agents/rules/`. |
+| `list-rules` | `list-rules` | Audits all registered workspace rules in `.agents/rules/` for compliance. |
+| `log-usage` | `log-usage <count>` | Records token consumption counts inside `.agents/token_budget.json`. |
+| `release` | `release <major/minor/patch>` | Auto-increments version and scaffolds release notes in `CHANGELOG.md`. |
+| `create-adr` | `create-adr <title> [status]` | Scaffolds a new Architectural Decision Record under `.agents/adrs/`. |
+| `git-profile` | `git-profile [key/name/rotate] [email]` | Switches or displays Git config profiles and automates local SSH key rotation. |
 
 ### 4.1 API Contract Synchronization (`sync-api`)
 
@@ -359,6 +379,14 @@ Git keeps configurations locally inside the `.git/config` folder of your project
   ./.agents/scripts/helper.sh git-profile
   ```
 
+- **Manual Profile Rotation**:
+  To manually trigger profile rotation to the next configured identity in your `.agents/git_profiles` based on the last commit email (without making a commit), run:
+  ```bash
+  ./.agents/scripts/helper.sh git-profile rotate
+  # Or
+  ./.agents/scripts/helper.sh git-profile --rotate
+  ```
+
 - **Automated Round-Robin Commit Rotation**:
   If multiple profiles are configured in `.agents/git_profiles`, running:
   ```bash
@@ -420,7 +448,89 @@ The system is built to handle extreme edge cases gracefully:
 - **Missing SSH Key Files**: If a configured SSH key file is missing on your system, the tool warns you and unsets the local SSH command config (falling back to system default SSH keys) rather than letting connection commands crash.
 - **Zero Global/Local Git Identity**: If a developer has no Git identity configured on their machine and no profiles configuration is set, the tool automatically sets up a temporary, local-only identity (`Local Developer <local-dev@localhost>`) so they can still commit locally out-of-the-box.
 
-### 4.5 Windows PowerShell Wrapper (`helper.ps1`)
+### 4.5 Detailed Helper Command Reference
+
+For users and agents, the helper script supports explicit parameters and flags to run operations in non-interactive, automated, or specific modes:
+
+#### 1. Project Scaffolding Wizard (`init`)
+- **Signature**: `./.agents/scripts/helper.sh init [name] [stack] [architecture] [db_orm] [env_vars]`
+- **Parameters**:
+  - `[name]`: Name of the project (e.g., `MyService`).
+  - `[stack]`: Target language/stack (choices: `Next.js`, `Go Gin`, `FastAPI`, `Node/TypeScript`, `Go`, `Python`, `Monorepo`, `Multi-Project`, `Laravel`).
+  - `[architecture]`: Architecture pattern (e.g., `clean`, `hexagonal`, `mvc`).
+  - `[db_orm]`: Relational DB or ORM framework (e.g., `PostgreSQL`, `MongoDB`, `Prisma`, `None`).
+  - `[env_vars]`: Space-separated configuration environment variables (e.g., `"PORT DATABASE_URL"`).
+- **Behavior**: If any arguments are missing, the command falls back to an interactive setup menu automatically.
+
+#### 2. Conventional Commit Builder (`commit`)
+- **Signature**: `./.agents/scripts/helper.sh commit [--no-test|--no-verify] [type] [scope] [description] [files...]`
+- **Options & Flags**:
+  - `--no-test`, `--no-verify`: Bypasses pre-commit test suites and workspace sanity validation checks.
+  - `[type]`: Commit type (choices: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `perf`).
+  - `[scope]`: Component scope of the modification (e.g., `core`, `auth`, `db`, `shared`).
+  - `[description]`: Short conventional commit description.
+  - `[files...]`: Optional paths to specific files to stage and commit. If omitted, all modified tracked files are staged.
+- **Behavior**: Automatically performs the linter/test checks (unless bypassed), rotates the local Git profile and SSH key to simulate collaborating developers, and commits atomic changes. If parameters are omitted, it defaults to interactive prompts.
+
+#### 3. Module Locking (`lock` / `unlock`)
+- **Signature**:
+  - Lock: `./.agents/scripts/helper.sh lock <module>`
+  - Unlock: `./.agents/scripts/helper.sh unlock <module>`
+- **Parameters**:
+  - `<module>`: Kebab-case or directory-path name of the module/domain to lock (e.g., `apps/backend`).
+- **Behavior**: Acquires a transient lock by creating `.agents/locks/<module_sanitized>.lock`. Checking locks prevents parallel developers or agents from modifying the same files simultaneously.
+
+#### 4. API Schema Sync (`sync-api`)
+- **Signature**: `./.agents/scripts/helper.sh sync-api`
+- **Behavior**: Programmatically boots or scans the backend API application, dumps the latest OpenAPI schema to `openapi.json`, and compiles a zero-dependency type-safe fetch client wrapper in the frontend.
+
+#### 5. Skill Creation (`create-skill`)
+- **Signature**: `./.agents/scripts/helper.sh create-skill <name> [description]`
+- **Parameters**:
+  - `<name>`: Unique name for the skill. Must be strictly lowercase kebab-case (e.g., `db-optimization`).
+  - `[description]`: A brief summary of the skill's purpose.
+- **Behavior**: Scaffolds a compliant directory under `.agents/skills/<name>/` including `SKILL.md` template and an executable main script.
+
+#### 6. Custom Workspace Rules (`create-rule`)
+- **Signature**: `./.agents/scripts/helper.sh create-rule <name> <activation> [description_or_pattern]`
+- **Parameters**:
+  - `<name>`: Unique name for the rule. Must be strictly lowercase kebab-case (e.g., `no-raw-queries`).
+  - `<activation>`: Rule activation mode. Valid modes are:
+    - `manual`: User explicitly calls the rule.
+    - `always-on`: Rule is always active for all files.
+    - `model-decision`: Evaluated by AI agent decision. Needs a natural language description as the third parameter.
+    - `glob`: Applies to files matching a glob pattern. Needs a glob pattern as the third parameter.
+  - `[description_or_pattern]`: The activation argument (glob pattern or natural language rule description).
+- **Behavior**: Scaffolds a new compliant markdown rule under `.agents/rules/<name>.md`.
+
+#### 7. Architectural Decision Records (`create-adr`)
+- **Signature**: `./.agents/scripts/helper.sh create-adr <title> [proposed|accepted|superseded]`
+- **Parameters**:
+  - `<title>`: Space-separated title of the ADR.
+  - `[status]`: Initial status of the decision (defaults to `proposed`).
+- **Behavior**: Scaffolds a new ADR file under `.agents/adrs/` with correct headers and status tags.
+
+#### 8. Project Releases (`release`)
+- **Signature**: `./.agents/scripts/helper.sh release <major|minor|patch>`
+- **Parameters**:
+  - `<major|minor|patch>`: Type of semantic version bump.
+- **Behavior**: Automatically extracts the current version from `CHANGELOG.md`, calculates the bumped version, scaffolds the new release header, and prepares the version comparison links.
+
+#### 9. Token Usage Tracker (`log-usage`)
+- **Signature**: `./.agents/scripts/helper.sh log-usage <token_count>`
+- **Parameters**:
+  - `<token_count>`: Number of tokens consumed by the AI agent during the execution turn.
+- **Behavior**: Accumulates usage inside `.agents/token_budget.json` to prevent exceeding agent token constraints.
+
+#### 10. Local Git Profile Manager (`git-profile`)
+- **Signature**: `./.agents/scripts/helper.sh git-profile [profile-key | name] [email]`
+- **Usage Patterns**:
+  - `./.agents/scripts/helper.sh git-profile`: Displays local/global configurations and lists available profiles.
+  - `./.agents/scripts/helper.sh git-profile [profile-key]`: Loads a specific profile identity and sets up the local SSH key command.
+  - `./.agents/scripts/helper.sh git-profile [name] [email]`: Configures user identity directly without config files.
+  - `./.agents/scripts/helper.sh git-profile rotate` or `--rotate`: Rotates the repository's identity/SSH key config to the next profile based on the last commit email.
+
+### 4.6 Windows PowerShell Wrapper (`helper.ps1`)
 
 For developers working natively on Windows without standard Bash shells, a native PowerShell wrapper is available at `.agents/scripts/helper.ps1`.
 
