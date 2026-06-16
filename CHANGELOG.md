@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.
 - Documented system prerequisites (Git, Python 3, Git Bash) in `README.md`.
 
+### Fixed
+- Fixed empty Git config email matching bug in secure push command.
+- Made Git profiles properties parser in `commit` command robust to optional whitespace surrounding the `=` operator.
+
 ## [1.8.0] - 2026-06-16
 
 ### Added

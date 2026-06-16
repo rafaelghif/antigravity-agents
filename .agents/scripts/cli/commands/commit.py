@@ -150,7 +150,7 @@ def run(args):
             with open(profiles_file, 'r', encoding='utf-8') as f:
                 for line in f:
                     line_strip = line.strip()
-                    m = re.match(r"^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)=(.+)$", line_strip)
+                    m = re.match(r"^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)\s*=\s*(.+)$", line_strip)
                     if m:
                         prof_key = m.group(1)
                         field = m.group(2)

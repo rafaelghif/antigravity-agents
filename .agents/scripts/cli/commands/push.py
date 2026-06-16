@@ -76,7 +76,7 @@ def run(args):
         profile_names = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
         for p_name in profile_names:
             p_email = config.get(f"{p_name}.email", "")
-            if p_email == current_email:
+            if current_email and p_email == current_email:
                 matching_profile = p_name
                 p_ssh = config.get(f"{p_name}.ssh_key", "")
                 if p_ssh:
