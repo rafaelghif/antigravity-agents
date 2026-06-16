@@ -7,6 +7,8 @@ This document tracks all version updates, script refinements, and protocol chang
 - Added comprehensive documentation for all 22 subcommands inside `helper.sh`/`helper.ps1` with detailed signatures, parameters, and flags.
 - Documented manual profile and SSH key rotation action via `git-profile rotate` or `git-profile --rotate`.
 - Documented Bootstrapper command-line arguments including `-f` / `--force`, `-u` / `--update`, and `-Version`.
+- Simplified helper script `show_help` menu output by grouping commands logically (Daily, Scaffolding, and Automated).
+- Added a "Simplified Developer Cheat Sheet (Daily Essentials)" in `README.md` for quick-start clarity.
 
 ## [1.7.1] - 2026-06-16
 ### Added

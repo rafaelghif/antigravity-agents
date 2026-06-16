@@ -278,7 +278,45 @@ git commit -m "chore(core): initialize antigravity agent workspace"
 
 ## 4. Operational Scripts Guide (`helper.sh` / `helper.ps1`)
 
-Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` (or `./.agents/scripts/helper.ps1` for native PowerShell support on Windows) or standard Git commands. Here is a quick reference:
+Once bootstrapped, operations are managed through `./.agents/scripts/helper.sh` (or `./.agents/scripts/helper.ps1` for native PowerShell support on Windows) or standard Git commands.
+
+### 💡 Simplified Developer Cheat Sheet (Daily Essentials)
+
+If you are a developer, you only need to know these **5 essential commands** for daily work. All other complex options and background tasks are handled automatically:
+
+1. **Start a Project**:
+   ```bash
+   ./.agents/scripts/helper.sh init
+   ```
+   *Launches a friendly questionnaire to set up your project folder structure and stack settings!*
+
+2. **Check Workspace Health**:
+   ```bash
+   ./.agents/scripts/helper.sh doctor
+   ```
+   *Diagnoses if something is wrong. Checks permissions, Git hooks, and module locks.*
+
+3. **Lock a Module (Before Editing)**:
+   ```bash
+   ./.agents/scripts/helper.sh lock <module-name>
+   ```
+   *Tells agents and other developers: "I am currently editing this directory, please do not touch it!"*
+
+4. **Unlock a Module (When Done)**:
+   ```bash
+   ./.agents/scripts/helper.sh unlock <module-name>
+   ```
+   *Releases the lock. (Note: Making a commit via the tool automatically releases all active locks for you).*
+
+5. **Commit Your Code Safely**:
+   ```bash
+   ./.agents/scripts/helper.sh commit
+   ```
+   *Launches an interactive wizard to write your commit message. It runs verification tests and switches profiles automatically to keep your workspace safe!*
+
+---
+
+Here is a quick reference table of all commands:
 
 | Command | Usage | Description |
 |---|---|---|
