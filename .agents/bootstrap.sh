@@ -280,6 +280,8 @@ The active checklist inside [.agents/memory.md](file://./.agents/memory.md) and 
   2. Workspace validation checks via \`.agents/scripts/helper.sh validate\` pass.
   3. Changes have been staged and committed to Git (meaning the task is committed in a completed state).
 
+- **Strict Issue Alignment (Issue-Driven Development)**: Before initializing a sprint task, the agent MUST inspect the `.agents/issues/` directory for any open issues (status `open`). The agent MUST select one open issue, map its title to the `Current Task Target` and checklist in `memory.md`, and set the status flag to `IN_PROGRESS`. The task commit MUST include an auto-closing pattern (e.g. `closes #XX`, `fixes #XX`, or `resolves #XX`) referencing the issue ID to ensure the closed issue file is staged and committed atomically with the source changes.
+
 - **Handover Protocol (Relayed Context)**: Before completing a turn, finishing a milestone, or handing over the repository to another agent/developer account, the agent MUST write a concise summary (under 5 lines) in [.agents/memory.md](file://./.agents/memory.md) under \`## 3. Relayed Context & Handover Notes\`. This allows the incoming agent to seamlessly resume work in a new session without reading long transcripts or wasting tokens.
 
 ---
@@ -372,7 +374,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Document local issue tracker in README and Changelog
+- **Current Task Target**: Implement strict issue-driven validation in validate.sh and update rules
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -381,6 +383,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 - [x] Optimize validate.sh find precedence and add Python env scan
 - [x] Implement local issue tracker with helper.sh issue and commit closes #XX integration
 - [x] Document local issue tracker in README and Changelog
+- [x] Implement strict issue-driven validation in validate.sh and update rules
 
 ---
 
@@ -453,6 +456,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
   - Technologies/libraries must be documented in `.agents/rules/project_rules.md` and their respective workspace configuration files (`package.json`, `go.mod`, etc.).
   - Architectural decisions must be documented as a new ADR entry in `.agents/adr.md`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked `[/]` at a time across the entire workspace. Do not change a task checklist state to `[x]` until verification has passed and the changes have been staged and committed in the completed state.
+- **Strict Issue Alignment**: You MUST align all active coding work with an open local issue file under `.agents/issues/`. Set the `Current Task Target` and active checklist item in `memory.md` to map to the issue, set the state flag to `IN_PROGRESS`, and commit the changes using `helper.sh commit` with an auto-closing pattern (e.g. `closes #XX`) to automatically close, stage, and commit the issue changes atomically.
 - **Git Profile Rotation Enforcement**: All commits MUST be executed via `./.agents/scripts/helper.sh commit` to enforce round-robin profile and SSH key rotation. Running raw `git commit` directly is prohibited.
 - **README & Changelog Update Gate**: Any functional change affecting CLI subcommands, options, prerequisites, or core behavior MUST immediately be documented in `README.md`. Every completed sprint task must add a changelog entry to `CHANGELOG.md` under the current version section following "Keep a Changelog" standards.
 - **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under `## 3. Relayed Context & Handover Notes`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
@@ -6508,6 +6512,61 @@ fi
 
 if [ "$LEAK_ERRORS" -eq 0 ]; then
     echo "  [PASS] No transient files or credentials are staged."
+else
+    FAILED=1
+fi
+
+# 16. Local Workspace Issues Schema Validation
+echo "Check 16: Local Workspace Issues Validation"
+ISSUE_ERRORS=0
+if [ -d ".agents/issues" ]; then
+    for issue_file in .agents/issues/issue_*.md; do
+        if [ -f "$issue_file" ]; then
+            base_name=$(basename "$issue_file")
+            
+            # Check if YAML frontmatter exists
+            # It must start with --- on the first line
+            first_line=$(head -n 1 "$issue_file")
+            if [ "$first_line" != "---" ]; then
+                echo "  [FAIL] Issue file '$base_name' does not start with YAML frontmatter delimiter '---'!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                continue
+            fi
+            
+            # Must have a closing --- delimiter
+            if ! grep -n "^---$" "$issue_file" | tail -n +2 >/dev/null; then
+                echo "  [FAIL] Issue file '$base_name' is missing closing YAML frontmatter delimiter '---'!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                continue
+            fi
+            
+            # Check for required fields inside the frontmatter (between first and second '---')
+            fm_lines=$(grep -n "^---$" "$issue_file" | head -n 2 | cut -d: -f1)
+            start_line=$(echo "$fm_lines" | head -n 1)
+            end_line=$(echo "$fm_lines" | tail -n 1)
+            
+            frontmatter=$(sed -n "$((start_line + 1)),$((end_line - 1))p" "$issue_file")
+            
+            # Validate required keys
+            for key in "id" "title" "status" "created_at" "closed_at"; do
+                if ! echo "$frontmatter" | grep -q "^${key}:"; then
+                    echo "  [FAIL] Issue file '$base_name' is missing required frontmatter field '${key}:'!"
+                    ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                fi
+            done
+            
+            # Validate status value
+            status_val=$(echo "$frontmatter" | grep "^status:" | cut -d: -f2- | tr -d ' "' | tr -d "'" | tr '[:upper:]' '[:lower:]')
+            if [ "$status_val" != "open" ] && [ "$status_val" != "closed" ]; then
+                echo "  [FAIL] Issue file '$base_name' has invalid status value '$status_val' (must be 'open' or 'closed')!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+            fi
+        fi
+    done
+fi
+
+if [ "$ISSUE_ERRORS" -eq 0 ]; then
+    echo "  [PASS] All local issue files are validated and compliant."
 else
     FAILED=1
 fi

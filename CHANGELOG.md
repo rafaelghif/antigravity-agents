@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive unit tests in `tests/test_skill_docs_sync.py` covering AST-based parsing, markdown formatting, and placeholder sync.
 - Local Issue Tracker subcommand `issue` (`issue.py`) storing issues under `.agents/issues/` and integrating with `helper.sh commit` to auto-close and stage issues via `closes #XX` / `fixes #XX` / `resolves #XX` patterns.
 - Comprehensive unit tests in `tests/test_issue_command.py` verifying issue listing, creation, viewing, closing, and git auto-close integrations.
+- Strict Issue-Driven Validation check in `validate.sh` (Check 16) enforcing frontmatter schema format and status compliance for local workspace issues.
+- Added rules guidelines for Strict Issue Alignment in `AGENTS.md` and `.agents/rules/project_rules.md` requiring agents to map active development tasks 1-to-1 with local issues.
 
 ### Changed
 - Registered `push` and `guide` subcommands in CLI helper `helper.py` and documented them in `docs/cli_guide.md`.

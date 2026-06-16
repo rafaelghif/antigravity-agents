@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Document local issue tracker in README and Changelog
+- **Current Task Target**: Implement strict issue-driven validation in validate.sh and update rules
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -28,6 +28,7 @@
 - [x] Optimize validate.sh find precedence and add Python env scan
 - [x] Implement local issue tracker with helper.sh issue and commit closes #XX integration
 - [x] Document local issue tracker in README and Changelog
+- [x] Implement strict issue-driven validation in validate.sh and update rules
 
 ---
 

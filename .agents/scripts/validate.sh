@@ -607,6 +607,61 @@ else
     FAILED=1
 fi
 
+# 16. Local Workspace Issues Schema Validation
+echo "Check 16: Local Workspace Issues Validation"
+ISSUE_ERRORS=0
+if [ -d ".agents/issues" ]; then
+    for issue_file in .agents/issues/issue_*.md; do
+        if [ -f "$issue_file" ]; then
+            base_name=$(basename "$issue_file")
+            
+            # Check if YAML frontmatter exists
+            # It must start with --- on the first line
+            first_line=$(head -n 1 "$issue_file")
+            if [ "$first_line" != "---" ]; then
+                echo "  [FAIL] Issue file '$base_name' does not start with YAML frontmatter delimiter '---'!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                continue
+            fi
+            
+            # Must have a closing --- delimiter
+            if ! grep -n "^---$" "$issue_file" | tail -n +2 >/dev/null; then
+                echo "  [FAIL] Issue file '$base_name' is missing closing YAML frontmatter delimiter '---'!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                continue
+            fi
+            
+            # Check for required fields inside the frontmatter (between first and second '---')
+            fm_lines=$(grep -n "^---$" "$issue_file" | head -n 2 | cut -d: -f1)
+            start_line=$(echo "$fm_lines" | head -n 1)
+            end_line=$(echo "$fm_lines" | tail -n 1)
+            
+            frontmatter=$(sed -n "$((start_line + 1)),$((end_line - 1))p" "$issue_file")
+            
+            # Validate required keys
+            for key in "id" "title" "status" "created_at" "closed_at"; do
+                if ! echo "$frontmatter" | grep -q "^${key}:"; then
+                    echo "  [FAIL] Issue file '$base_name' is missing required frontmatter field '${key}:'!"
+                    ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+                fi
+            done
+            
+            # Validate status value
+            status_val=$(echo "$frontmatter" | grep "^status:" | cut -d: -f2- | tr -d ' "' | tr -d "'" | tr '[:upper:]' '[:lower:]')
+            if [ "$status_val" != "open" ] && [ "$status_val" != "closed" ]; then
+                echo "  [FAIL] Issue file '$base_name' has invalid status value '$status_val' (must be 'open' or 'closed')!"
+                ISSUE_ERRORS=$((ISSUE_ERRORS + 1))
+            fi
+        fi
+    done
+fi
+
+if [ "$ISSUE_ERRORS" -eq 0 ]; then
+    echo "  [PASS] All local issue files are validated and compliant."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
