@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive unit tests in `tests/test_skill_adr_wizard.py` covering help execution and non-interactive generation.
 - Automatic token budget reset feature based on configurable intervals (`hourly`, `daily`, `weekly`, `monthly` or custom seconds) in `token_budget.json`.
 - Added new unit test in `tests/test_rotation.py` to verify budget reset on elapsed interval duration.
+- Specialized `docs-sync` agent skill to parse Python docstrings using Abstract Syntax Trees (AST) and sync them in-place to target Markdown files between placeholders.
+- Comprehensive unit tests in `tests/test_skill_docs_sync.py` covering AST-based parsing, markdown formatting, and placeholder sync.
 
 ### Changed
 - Updated CLI utils `utils.py` to automatically trigger token budget reset checks on load.

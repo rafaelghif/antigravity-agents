@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 380f60b
+- **Last Commit Reference**: 0c1c07d
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,19 +18,19 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Key Rotation and Budget Auto-Reset
-- **Current Task Target**: Implement automatic token usage reset
+- **Primary Epic**: Specialized Agent Skill Scaffolding
+- **Current Task Target**: Implement docs-sync specialized skill
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement automatic token usage reset in budget tracker and api-rotator
+- [x] Implement docs-sync specialized skill
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Implemented automatic token usage reset based on configurable intervals in `token_budget.json`, integrated with `validate.sh` and `api-rotator`, and verified via unit tests.
+- **Last Action Completed**: Designed, scaffolded, and implemented the `docs-sync` specialized agent skill using `ast` for parsing Python docstrings and sync-updating Markdown file placeholders.
 - **Next Planned Action**: Ready for next session.
-- **Blockers / Runtime Notes**: Workspace is fully validated and all tests pass. Lock 'cli' acquired.
+- **Blockers / Runtime Notes**: Workspace is fully validated and all tests pass. Lock 'skills' acquired.
 ---
 
 ## 4. Reference Links Index
