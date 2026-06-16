@@ -50,6 +50,16 @@ def compile_bootstrap():
         (".agents/hooks/commit-msg", ".agents/hooks/commit-msg"),
     ]
     
+    # Dynamically scan and package all Python CLI scripts
+    cli_dir = os.path.join(repo_dir, ".agents", "scripts", "cli")
+    if os.path.exists(cli_dir):
+        for root, dirs, files in os.walk(cli_dir):
+            for file in files:
+                if file.endswith(".py"):
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, repo_dir)
+                    templates.append((rel_path, rel_path))
+    
     # Check if we need to insert the ADR 002 & 003 template blocks into bootstrap.sh first.
     # They should be written right after 001-initial-workspace-protocol.md.
     if 'write_template_safe ".agents/adrs/002-introduce-modular-adrs-and-validation.md"' not in content:
@@ -186,8 +196,21 @@ def compile_bootstrap():
         # Using a regex that finds the exact write_template_safe and matches up to the closing EOF
         pattern = r'(write_template_safe "' + escaped_target + r'" << \'' + eof_marker + r'\'\n)(.*?)(\n' + eof_marker + r'\b)'
         
-        # Replace content
+        # Check if the block template exists in bootstrap.sh, if not, insert placeholder
         match = re.search(pattern, content, re.DOTALL)
+        if not match:
+            print(f"Inserting {target_path} block template into bootstrap.sh...")
+            helper_sh_pattern = r'(write_template_safe "\.agents/scripts/helper\.sh" << \'EOF\'\n.*?\nEOF\n)'
+            helper_match = re.search(helper_sh_pattern, content, re.DOTALL)
+            if helper_match:
+                helper_block = helper_match.group(1)
+                new_block = f'\n# Write {target_path}\nwrite_template_safe "{target_path}" << \'{eof_marker}\'\n# PLACEHOLDER\n{eof_marker}\n'
+                content = content.replace(helper_block, helper_block + new_block)
+                # Re-search the pattern since we just inserted it
+                match = re.search(pattern, content, re.DOTALL)
+            else:
+                print(f"Error: Could not locate helper.sh block to insert template for {target_path}")
+                continue
         if match:
             print(f"Updating template for {target_path} in bootstrap.sh...")
             # We want to replace group 2 (the placeholder/contents) with source_content

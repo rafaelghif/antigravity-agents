@@ -103,8 +103,7 @@ Verify that your existing workspace passes the agent safety checks:
 ```bash
 ./.agents/scripts/helper.sh doctor
 ```
-If everything is healthy, stage the configurations and make your first validated commit:
+If everything is healthy, make your first validated commit:
 ```bash
-git add AGENTS.md .agents/ .antigravityignore
-git commit -m "chore(core): initialize antigravity agent workspace"
+./.agents/scripts/helper.sh commit chore core "initialize antigravity agent workspace" AGENTS.md .agents/ .antigravityignore
 ```

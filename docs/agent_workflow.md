@@ -17,11 +17,10 @@ When an AI Agent starts working on a task, it must strictly follow these steps t
    ./.agents/scripts/helper.sh lock <module_name>
    ```
 3. **Implement Feature**: Write code & tests under Test-Driven Development (TDD) guidelines.
-4. **Staging & Commit**: Stage files and execute a standard Git commit:
+4. **Staging & Commit**: Stage files and execute the helper commit command:
    ```bash
-   git add -A
-   git commit -m "feat(core): add new feature implementation"
+   ./.agents/scripts/helper.sh commit feat core "add new feature implementation"
    ```
-   *(The Git `pre-commit` hook automatically runs validations/tests, and the `post-commit` hook automatically syncs memory and releases all active locks).*
+   *(This automatically stages changed files, verifies compliance/tests, rotates Git profile and SSH keys securely, commits, and releases all active locks).*
 5. **Handover Relay (Next Turn)**: Before ending a session or switching agent accounts, the agent writes a brief state summary (under 5 lines) in `.agents/memory.md` under `## 3. Relayed Context & Handover Notes` to guide the incoming agent.
 6. **Merge Preparation**: Run `./.agents/scripts/helper.sh archive` to compact checklists before merging to `main`/`master`.

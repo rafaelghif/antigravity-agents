@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0] - 2026-06-16
 
 ### Added
+- Interactive onboarding tutorial subcommand `guide` (`guide.py`).
+- Automatic recursive CLI Python scripts packaging in `compile_bootstrap.py` to auto-discover and package CLI files into `bootstrap.sh`.
 - Secure Git push subcommand `push` (`push.py`) implementing workspace validation checks, profile email matching, and SSH key rotation.
 - Comprehensive unit tests in `tests/test_push_command.py` verifying flags, dry-runs, and SSH environment setup.
 - Shell autocompletion subcommand `autocomplete` (`autocomplete.py`) for Bash and Zsh.
@@ -27,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive unit tests in `tests/test_skill_docs_sync.py` covering AST-based parsing, markdown formatting, and placeholder sync.
 
 ### Changed
-- Registered `push` subcommand in CLI helper `helper.py` and documented it in `docs/cli_guide.md`.
+- Registered `push` and `guide` subcommands in CLI helper `helper.py` and documented them in `docs/cli_guide.md`.
+- Updated `README.md`, `docs/cli_guide.md`, `docs/agent_workflow.md`, and `docs/setup_guide.md` to reference the onboarding guide and replace raw Git commit commands with secure helper commits.
 - Updated CLI utils `utils.py` to automatically trigger token budget reset checks on load.
 - Updated `validate.sh` Check 9 to run Python budget reset checks before validating with `jq`.
 - Refactored `api-rotator` skill script `main.py` to import CLI `utils` and load the budget through the centralized budget tracker.

@@ -287,8 +287,9 @@ Every code mutation must execute in an atomic, sequential loop:
 1. **Sync**: Verify that the workspace is on the correct branch and that there are no uncommitted changes (other than locks or memory files).
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
-4. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
-5. **Commit**: Stage files and execute the commit using the helper command: `./.agents/scripts/helper.sh commit <type> <scope> "description" [files...]` to enforce automated Git profile and SSH key rotation. **Raw `git commit` is strictly forbidden** for agents and developers to prevent profile or authentication key misalignment.
+4. **Documentation Gate**: If the changes introduce or modify features, CLI subcommands, prerequisites, or installation requirements, the agent MUST immediately update `README.md`. For every feature, bugfix, or chore task completed, the agent MUST record the changes under the current version section in `CHANGELOG.md` following the "Keep a Changelog" format.
+5. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
+6. **Commit**: Stage files and execute the commit using the helper command: `./.agents/scripts/helper.sh commit <type> <scope> "description" [files...]` to enforce automated Git profile and SSH key rotation. **Raw `git commit` is strictly forbidden** for agents and developers to prevent profile or authentication key misalignment.
    - **Automated Validation**: The Git `pre-commit` hook automatically runs `./.agents/scripts/validate.sh` and the project linter/tests. The commit will automatically abort on failure.
    - **Automated Sync & Unlock**: Upon a successful commit, the Git `post-commit` hook automatically updates `memory.md` with the new branch/commit hash and releases all active locks.
 
@@ -358,7 +359,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: none
+- **Last Commit Reference**: 5cbbf75
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -368,21 +369,19 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: [epic-name]
-- **Current Task Target**: [task-name]
+- **Primary Epic**: CLI Helper Push Automation
+- **Current Task Target**: Implement CLI push subcommand
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
+- [x] Implement CLI push subcommand
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Initialized Antigravity Agent Core workspace and templates.
-- **Next Planned Action**: Perform codebase exploration and start the first task.
-- **Blockers / Runtime Notes**: None. Workspace is fully validated and ready for agent operations.
+- **Last Action Completed**: Reviewed CLI Python and Bash/PowerShell scripts. Fixed empty email matching in `push` and properties parsing in `commit`. Committed successfully.
+- **Next Planned Action**: None. All tasks and code reviews are completed.
+- **Blockers / Runtime Notes**: None. Workspace is validated, locks released, and tests passed.
 
 ---
 
@@ -448,6 +447,7 @@ This file defines the specific technical stack, directory boundaries, coding sta
   - Architectural decisions must be documented as a new ADR entry in `.agents/adr.md`.
 - **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked `[/]` at a time across the entire workspace. Do not change a task checklist state to `[x]` until verification has passed and the changes have been staged and committed in the completed state.
 - **Git Profile Rotation Enforcement**: All commits MUST be executed via `./.agents/scripts/helper.sh commit` to enforce round-robin profile and SSH key rotation. Running raw `git commit` directly is prohibited.
+- **README & Changelog Update Gate**: Any functional change affecting CLI subcommands, options, prerequisites, or core behavior MUST immediately be documented in `README.md`. Every completed sprint task must add a changelog entry to `CHANGELOG.md` under the current version section following "Keep a Changelog" standards.
 - **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under `## 3. Relayed Context & Handover Notes`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
 
 ## 7. Autonomous Operational Scripts & Commands
@@ -503,6 +503,8 @@ This document registers the historical technical design decisions, rationales, a
 - [ADR-001: Initial Workspace Protocol Adoption](file://./adrs/001-initial-workspace-protocol.md) - Status: Accepted
 - [ADR-002: Introduce Modular ADRs and Validation](file://./adrs/002-introduce-modular-adrs-and-validation.md) - Status: Accepted
 - [ADR-003: API Key Rotation and PowerShell Wrappers](file://./adrs/003-api-key-rotation-and-powershell-wrappers.md) - Status: Accepted
+- [ADR-004: Clean Project Isolation for Injected Agent Setup](file://./adrs/004-framework-isolation.md) - Status: Accepted
+- [ADR-005: Standardize Documentation Layout](file://./adrs/005-standardize-documentation-layout.md) - Status: Accepted
 
 EOF
 
@@ -512,9 +514,15 @@ write_template_safe ".agents/adrs/001-initial-workspace-protocol.md" << 'EOF'
 
 - **Date**: 2026-06-13
 - **Status**: Accepted
-- **Context**: The workspace needs a structured operational protocol for AI engineering agents to ensure version alignment, zero-hallucination execution, and high token efficiency.
-- **Decision**: Adopt the Antigravity Agent Core (AAC) protocol, establishing `AGENTS.md` and the `.agents/` structure containing locks, rules, schemas, and active task memory ledgers.
-- **Consequences**: Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
+
+## Context
+The workspace needs a structured operational protocol for AI engineering agents to ensure version alignment, zero-hallucination execution, and high token efficiency.
+
+## Decision
+Adopt the Antigravity Agent Core (AAC) protocol, establishing `AGENTS.md` and the `.agents/` structure containing locks, rules, schemas, and active task memory ledgers.
+
+## Consequences
+Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
 
 EOF
 
@@ -1080,17 +1088,30 @@ def check_and_rotate_budget():
     Proactively checks the current active profile's token budget.
     Rotates to the next profile if the limit is exceeded.
     """
-    budget_file = ".agents/token_budget.json"
     profile_file = ".agents/active_api_profile_name"
-    if not os.path.exists(budget_file) or not os.path.exists(profile_file):
+    if not os.path.exists(profile_file):
         return
         
     with open(profile_file, "r") as f:
         profile = f.read().strip()
         
-    with open(budget_file, "r") as f:
+    # Import CLI utils dynamically
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    cli_dir = os.path.abspath(os.path.join(script_dir, "../../../scripts/cli"))
+    if cli_dir not in sys.path:
+        sys.path.insert(0, cli_dir)
+        
+    try:
+        import utils
+        budget = utils.load_budget()
+    except Exception as e:
+        logging.warning(f"Failed to load budget via CLI utils: {e}. Falling back to manual read.")
+        budget_file = ".agents/token_budget.json"
+        if not os.path.exists(budget_file):
+            return
         try:
-            budget = json.load(f)
+            with open(budget_file, "r") as f:
+                budget = json.load(f)
         except Exception:
             return
         
@@ -1216,7 +1237,7 @@ def run_skill(args):
             if is_rate_limit and attempt < max_retries - 1:
                 logging.warning(f"Rate limit hit: {error_msg}. Rotating API profile and retrying...")
                 # Rotate profile
-                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate", "--rate-limited"], check=True)
                 # Reload updated environment keys
                 load_active_api_keys()
             else:
@@ -1258,3293 +1279,389 @@ EOF
 # 9. Write helper.sh script
 write_template_safe ".agents/scripts/helper.sh" << 'EOF'
 #!/usr/bin/env bash
-# Antigravity Agent Core Helper Script
-set -euo pipefail
 
-MEMORY_FILE=".agents/memory.md"
-LOCKS_DIR=".agents/locks"
-ARCHIVE_DIR=".agents/archive"
-
-show_help() {
-    echo "=========================================================="
-    echo "            Antigravity Agent Command-Line Helper"
-    echo "=========================================================="
-    echo "Usage: \$0 [command] [args]"
-    echo ""
-    echo "Daily Developer Commands:"
-    echo "  init              Start scaffolding wizard (interactive or with arguments)"
-    echo "  doctor            Diagnose workspace health and check active locks"
-    echo "  lock <module>     Lock a directory module to prevent parallel edits"
-    echo "  unlock <module>   Unlock a directory module"
-    echo "  commit            Run tests, rotate profiles, and create Conventional Commit"
-    echo "  git-profile       Switch Git configurations locally (use 'rotate' to rotate)"
-    echo "  api-profile       Switch API configurations locally (use 'rotate' to rotate)"
-    echo ""
-    echo "Rules & Skill Extending Commands:"
-    echo "  create-skill      Scaffold a new specialized skill directory"
-    echo "  list-skills       Audit all registered skills for compliance"
-    echo "  create-rule       Scaffold a new workspace rule file under .agents/rules/"
-    echo "  list-rules        Audit all workspace rules for compliance"
-    echo "  create-adr        Scaffold a new Architectural Decision Record"
-    echo "  release           Auto-increment version and update CHANGELOG.md"
-    echo ""
-    echo "Automated & CI/CD Commands:"
-    echo "  validate          Audit secrets, memory limits, and domain isolation"
-    echo "  recon             Run stack auto-detection and regenerate blueprints"
-    echo "  sync-git          Synchronize active branch/commit with memory.md"
-    echo "  archive           Archive completed checklists before PR merges"
-    echo "  migrate           Upgrade older workspaces to current version format"
-    echo "  build/lint/test   Monorepo-aware builder, linter, and testing runners"
-    echo "  sync-api          Generate a typed TypeScript client from backend API"
-    echo "  log-usage         Log token usage stats to token_budget.json"
-    echo ""
-    echo "Use '\$0 help' to show this message."
-    echo "=========================================================="
-}
-
-cmd_sync_git() {
-    if [ ! -f "$MEMORY_FILE" ]; then
-        echo "Error: Memory file $MEMORY_FILE not found." >&2
-        exit 1
-    fi
-    local branch
-    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-    local commit
-    commit=$(git log -n 1 --format="%h" 2>/dev/null || echo "none")
-
-    # Update memory.md using sed
-    sed -i -E "s|- \*\*Active Branch\*\*: .*|- **Active Branch**: $branch|" "$MEMORY_FILE"
-    sed -i -E "s|- \*\*Last Commit Reference\*\*: .*|- **Last Commit Reference**: $commit|" "$MEMORY_FILE"
-    echo "Synchronized: Branch=$branch, Commit=$commit in $MEMORY_FILE"
-}
-
-cmd_lock() {
-    local module="${1:-}"
-    if [ -z "$module" ]; then
-        echo "Error: Please specify a module name to lock." >&2
-        exit 1
-    fi
-    mkdir -p "$LOCKS_DIR"
-    # Replace slashes with underscores for nested monorepo paths
-    local lock_name="${module//\//_}"
-    local lockfile="$LOCKS_DIR/$lock_name.lock"
-    if [ -f "$lockfile" ]; then
-        echo "Error: Module '$module' is already locked!" >&2
-        cat "$lockfile" >&2
-        exit 1
-    fi
-
-    local branch
-    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-    local timestamp
-    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-    cat << INNER_EOF > "$lockfile"
-Branch: $branch
-Owner: Agent
-Timestamp: $timestamp
-INNER_EOF
-    echo "Acquired lock for module '$module' at $lockfile"
-}
-
-cmd_unlock() {
-    local module="${1:-}"
-    if [ -z "$module" ]; then
-        echo "Error: Please specify a module name to unlock." >&2
-        exit 1
-    fi
-    # Replace slashes with underscores for nested monorepo paths
-    local lock_name="${module//\//_}"
-    local lockfile="$LOCKS_DIR/$lock_name.lock"
-    if [ ! -f "$lockfile" ]; then
-        echo "Warning: Module '$module' is not locked." >&2
-        exit 0
-    fi
-    rm -f "$lockfile"
-    echo "Released lock for module '$module'"
-}
-
-cmd_build() {
-    local subprojects_file=".agents/subprojects.sh"
-    if [ -f "$subprojects_file" ]; then
-        source "$subprojects_file"
-        echo "Monorepo detected. Running build compilation..."
-        local failed=0
-        for sp in "${SUBPROJECTS[@]}"; do
-            local path=$(echo "$sp" | cut -d'|' -f1)
-            local build_cmd=$(echo "$sp" | cut -d'|' -f3)
-            echo "  Building $path ($build_cmd)..."
-            if ! (cd "$path" && eval "$build_cmd"); then
-                echo "  [FAIL] Build failed in $path" >&2
-                failed=1
-            fi
-        done
-        return $failed
-    else
-        # Fallback to project_rules build command
-        local build_line=$(grep "Build validation" .agents/rules/project_rules.md || echo "")
-        local build_cmd=$(echo "$build_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
-        if [ -n "$build_cmd" ] && [ "$build_cmd" != "echo 'No build command needed'" ]; then
-            eval "$build_cmd"
-        else
-            echo "No build configuration found."
-        fi
-    fi
-}
-
-cmd_lint() {
-    local subprojects_file=".agents/subprojects.sh"
-    if [ -f "$subprojects_file" ]; then
-        source "$subprojects_file"
-        local changed_files=""
-        changed_files=$(git diff --cached --name-only 2>/dev/null || echo "")
-        local failed=0
-        local run_all=0
-        if [ -z "$changed_files" ]; then
-            run_all=1
-            echo "No staged changes detected. Running linter on all monorepo modules..."
-        else
-            echo "Analyzing staged file boundaries for monorepo-aware linting..."
-        fi
-        
-        for sp in "${SUBPROJECTS[@]}"; do
-            local path=$(echo "$sp" | cut -d'|' -f1)
-            local lint_cmd=$(echo "$sp" | cut -d'|' -f5)
-            local should_run=$run_all
-            if [ "$should_run" = "0" ]; then
-                if echo "$changed_files" | grep -q "^$path/"; then
-                    should_run=1
-                fi
-            fi
-            if [ "$should_run" = "1" ]; then
-                echo "  Linting $path ($lint_cmd)..."
-                if ! (cd "$path" && eval "$lint_cmd"); then
-                    echo "  [FAIL] Linter errors found in $path" >&2
-                    failed=1
-                fi
-            else
-                echo "  Skipping $path (no staged modifications)."
-            fi
-        done
-        return $failed
-    else
-        # Fallback to project_rules linter
-        local linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
-        local linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
-        if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
-            eval "$linter_cmd"
-        else
-            echo "No linter configuration found."
-        fi
-    fi
-}
-
-cmd_test() {
-    local subprojects_file=".agents/subprojects.sh"
-    if [ -f "$subprojects_file" ]; then
-        source "$subprojects_file"
-        local changed_files=""
-        changed_files=$(git diff --cached --name-only 2>/dev/null || echo "")
-        local failed=0
-        local run_all=0
-        if [ -z "$changed_files" ]; then
-            run_all=1
-            echo "No staged changes detected. Running tests on all monorepo modules..."
-        else
-            echo "Analyzing staged file boundaries for monorepo-aware testing..."
-        fi
-        
-        for sp in "${SUBPROJECTS[@]}"; do
-            local path=$(echo "$sp" | cut -d'|' -f1)
-            local test_cmd=$(echo "$sp" | cut -d'|' -f4)
-            local should_run=$run_all
-            if [ "$should_run" = "0" ]; then
-                if echo "$changed_files" | grep -q "^$path/"; then
-                    should_run=1
-                fi
-            fi
-            if [ "$should_run" = "1" ]; then
-                echo "  Testing $path ($test_cmd)..."
-                if ! (cd "$path" && eval "$test_cmd"); then
-                    echo "  [FAIL] Testing suite failed in $path" >&2
-                    failed=1
-                fi
-            else
-                echo "  Skipping $path (no staged modifications)."
-            fi
-        done
-        return $failed
-    else
-        # Fallback to project_rules test runner
-        local test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
-        local test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
-        if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
-            eval "$test_runner"
-        else
-            echo "No test runner configuration found."
-        fi
-    fi
-}
-
-cmd_archive() {
-    if [ ! -f "$MEMORY_FILE" ]; then
-        echo "Error: Memory file $MEMORY_FILE not found." >&2
-        exit 1
-    fi
-    mkdir -p "$ARCHIVE_DIR"
-    local branch
-    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-    # replace slashes in branch name to avoid path issues
-    branch_clean=${branch//\//_}
-    local archive_file="$ARCHIVE_DIR/sprint_${branch_clean}.md"
-
-    echo "Archiving tasks to $archive_file..."
-    
-    # Extract checklist from memory.md
-    sed -n '/### Sprint Tasks Checklist/,/---/p' "$MEMORY_FILE" | grep -v -- '---' > "$archive_file"
-
-    # Relocate workflow and PR review files to a branch-specific subdirectory
-    local branch_archive_dir="$ARCHIVE_DIR/sprint_${branch_clean}"
-    mkdir -p "$branch_archive_dir"
-    echo "Archiving workflow and PR review files to $branch_archive_dir..."
-    find .agents/workflows -maxdepth 1 -name "task_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
-    find .agents/workflows -maxdepth 1 -name "pr_review_*.md" -exec mv {} "$branch_archive_dir/" \; 2>/dev/null || true
-
-
-    # Reset checklist in memory.md
-    local start_line
-    start_line=$(grep -n "### Sprint Tasks Checklist" "$MEMORY_FILE" | cut -d: -f1)
-    if [ -z "$start_line" ]; then
-        echo "Error: Could not locate checklist section in $MEMORY_FILE" >&2
-        exit 1
-    fi
-
-    local end_line
-    end_line=$(tail -n +$start_line "$MEMORY_FILE" | grep -n "^---" | head -n 1 | cut -d: -f1)
-    if [ -z "$end_line" ]; then
-        end_line=$(wc -l < "$MEMORY_FILE")
-    else
-        end_line=$((start_line + end_line - 1))
-    fi
-
-    local temp_file
-    temp_file=$(mktemp)
-    head -n "$start_line" "$MEMORY_FILE" > "$temp_file"
-    cat << 'INNER_EOF' >> "$temp_file"
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
-INNER_EOF
-    tail -n +"$end_line" "$MEMORY_FILE" >> "$temp_file"
-    mv "$temp_file" "$MEMORY_FILE"
-    echo "Checklist reset successfully."
-}
-
-cmd_init() {
-    echo "=========================================================="
-    echo "  Antigravity Agent Core - Workspace Initialization"
-    echo "=========================================================="
-    
-    local project_name="${2:-}"
-    local tech_stack="${3:-}"
-    local arch_pattern="${4:-}"
-    local db_orm="${5:-}"
-    local env_vars="${6:-}"
-    local scaffold=""
-    local be_choice="1"
-    local be_arch_choice="2"
-    local fe_choice="1"
-    local fe_arch_choice="2"
-    local gen_docker=""
-
-    if [ -z "$project_name" ]; then
-        read -p "Enter Project Name (default: My Project): " project_name
-        if [ -z "$project_name" ]; then project_name="My Project"; fi
-    fi
-    
-    if [ -z "$tech_stack" ]; then
-        echo "Select Technology Stack:"
-        echo "  [1] Next.js (TypeScript, Tailwind, App Router) [Recommended]"
-        echo "  [2] Go Gin (Clean Architecture REST API)"
-        echo "  [3] FastAPI (Python REST API with pytest)"
-        echo "  [4] Node/TypeScript (Generic Node App)"
-        echo "  [5] Go (Generic Main App)"
-        echo "  [6] Python (Generic Script)"
-        echo "  [7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)"
-        echo "  [8] Custom Multi-Project / Separate Apps (e.g. apps/backend + apps/frontend)"
-        echo "  [9] Laravel (PHP MVC Framework)"
-        read -p "Select choice [1-9] (default: 1): " stack_choice
-        case "$stack_choice" in
-            2) tech_stack="Go Gin" ;;
-            3) tech_stack="FastAPI" ;;
-            4) tech_stack="Node/TypeScript" ;;
-            5) tech_stack="Go" ;;
-            6) tech_stack="Python" ;;
-            7) tech_stack="Monorepo" ;;
-            8) tech_stack="Multi-Project" ;;
-            9) tech_stack="Laravel" ;;
-            1|"") tech_stack="Next.js" ;;
-            *) tech_stack="$stack_choice" ;;
-        esac
-    fi
-
-    if [ "$tech_stack" = "Multi-Project" ]; then
-        echo ""
-        echo "--- Configure Backend Application ---"
-        echo "  [1] NestJS (TypeScript)"
-        echo "  [2] FastAPI (Python)"
-        echo "  [3] Go Gin"
-        echo "  [4] None"
-        read -p "Select Backend Choice [1-4] (default: 1): " be_choice
-        if [ -z "$be_choice" ]; then be_choice="1"; fi
-
-        if [ "$be_choice" != "4" ]; then
-            echo "Configure Backend Architecture:"
-            echo "  [1] Hexagonal Architecture (Ports & Adapters)"
-            echo "  [2] Clean Architecture"
-            echo "  [3] Standard MVC / Modular"
-            read -p "Select Architecture [1-3] (default: 2): " be_arch_choice
-            if [ -z "$be_arch_choice" ]; then be_arch_choice="2"; fi
-        fi
-
-        echo ""
-        echo "--- Configure Frontend Application ---"
-        echo "  [1] Next.js (TypeScript)"
-        echo "  [2] React SPA (Vite)"
-        echo "  [3] Laravel Blade / PHP HTML"
-        echo "  [4] None"
-        read -p "Select Frontend Choice [1-4] (default: 1): " fe_choice
-        if [ -z "$fe_choice" ]; then fe_choice="1"; fi
-
-        if [ "$fe_choice" != "4" ]; then
-            echo "Configure Frontend Architecture:"
-            echo "  [1] Atomic Design"
-            echo "  [2] Standard Components / App Router Layout"
-            read -p "Select Architecture [1-2] (default: 2): " fe_arch_choice
-            if [ -z "$fe_arch_choice" ]; then fe_arch_choice="2"; fi
-        fi
-        
-        arch_pattern="Decoupled / Distributed Architecture"
-        db_orm="None"
-        env_vars="PORT"
-    fi
-
-    # Auto-suggest architecture based on stack
-    local default_arch="MVC"
-    if [ "$tech_stack" = "Next.js" ]; then
-        default_arch="App Router"
-    elif [ "$tech_stack" = "Go Gin" ]; then
-        default_arch="Clean Architecture"
-    elif [ "$tech_stack" = "FastAPI" ]; then
-        default_arch="Modular REST"
-    elif [ "$tech_stack" = "Monorepo" ]; then
-        default_arch="Decoupled / Distributed"
-    elif [ "$tech_stack" = "Laravel" ]; then
-        default_arch="MVC"
-    fi
-
-    if [ -z "$arch_pattern" ]; then
-        read -p "Enter Architectural Pattern (default: $default_arch): " arch_pattern
-        if [ -z "$arch_pattern" ]; then arch_pattern="$default_arch"; fi
-    fi
-
-    # Auto-suggest env vars based on stack
-    local default_env="PORT"
-    if [ "$tech_stack" = "Go Gin" ] || [ "$tech_stack" = "FastAPI" ]; then
-        default_env="PORT,ENV"
-    elif [ "$tech_stack" = "Next.js" ]; then
-        default_env="PORT"
-    elif [ "$tech_stack" = "Laravel" ]; then
-        default_env="APP_KEY,DB_CONNECTION,DB_DATABASE"
-    fi
-
-    if [ -z "$db_orm" ]; then
-        read -p "Enter Database/ORM (e.g. Prisma, PostgreSQL, None) (default: None): " db_orm
-        if [ -z "$db_orm" ]; then db_orm="None"; fi
-    fi
-
-    if [ -z "$env_vars" ]; then
-        read -p "Enter config variables (comma-separated) (default: $default_env): " env_vars
-        if [ -z "$env_vars" ]; then env_vars="$default_env"; fi
-    fi
-
-    if [ -z "${7:-}" ]; then
-        read -p "Scaffold initial project folders? (y/n) (default: y): " scaffold
-        if [ -z "$scaffold" ]; then scaffold="y"; fi
-    else
-        scaffold="${7:-}"
-    fi
-
-    if [ -z "${8:-}" ]; then
-        read -p "Generate Dockerfiles and docker-compose.yml? (y/n) (default: y): " gen_docker
-        if [ -z "$gen_docker" ]; then gen_docker="y"; fi
-    else
-        gen_docker="${8:-}"
-    fi
-
-    # Initialize Git if not present
-    if [ ! -d .git ]; then
-        echo "Initializing Git repository..."
-        git init
-        git branch -m main
-    fi
-
-    # Install Git hooks (pre-commit & post-commit)
-    mkdir -p .git/hooks
-    if [ -f .agents/hooks/pre-commit ]; then
-        cp .agents/hooks/pre-commit .git/hooks/pre-commit
-        chmod +x .git/hooks/pre-commit
-        echo "Git pre-commit hook installed."
-    fi
-    if [ -f .agents/hooks/post-commit ]; then
-        cp .agents/hooks/post-commit .git/hooks/post-commit
-        chmod +x .git/hooks/post-commit
-        echo "Git post-commit hook installed."
-    fi
-    if [ -f .agents/hooks/commit-msg ]; then
-        cp .agents/hooks/commit-msg .git/hooks/commit-msg
-        chmod +x .git/hooks/commit-msg
-        echo "Git commit-msg hook installed."
-    fi
-
-    # Scaffolding folders if requested
-    if [ "$scaffold" = "y" ] || [ "$scaffold" = "yes" ]; then
-        echo "Scaffolding directory structure..."
-        
-        if [ "$tech_stack" = "Next.js" ]; then
-            if [[ "$arch_pattern" =~ "Atomic" || "$arch_pattern" =~ "atomic" ]]; then
-                mkdir -p src/app src/components/atoms src/components/molecules src/components/organisms src/components/templates src/lib tests
-            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
-                mkdir -p src/app src/core/entities src/core/usecases src/infrastructure/db src/infrastructure/api src/lib tests
-            else
-                mkdir -p src/app src/components src/lib tests
-            fi
-            # Write package.json
-            cat << 'JSON_EOF' > package.json
-{
-  "name": "nextjs-boilerplate",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
-  },
-  "dependencies": {
-    "next": "^14.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.5",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.3",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.4"
-  }
-}
-JSON_EOF
-            # Write next.config.js
-            cat << 'JS_EOF' > next.config.js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-};
-
-module.exports = nextConfig;
-JS_EOF
-            # Write tailwind.config.js
-            cat << 'JS_EOF' > tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-JS_EOF
-            # Write postcss.config.js
-            cat << 'JS_EOF' > postcss.config.js
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
-JS_EOF
-            # Write tsconfig.json
-            cat << 'JSON_EOF' > tsconfig.json
-{
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-JSON_EOF
-            # Write jest.config.js
-            cat << 'JS_EOF' > jest.config.js
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.ts'],
-};
-JS_EOF
-            # Write src/app/globals.css
-            cat << 'CSS_EOF' > src/app/globals.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  color-scheme: dark;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #020617;
-  color: #f8fafc;
-}
-CSS_EOF
-            # Write src/app/layout.tsx
-            cat << 'TSX_EOF' > src/app/layout.tsx
-import React from 'react';
-import './globals.css';
-
-export const metadata = {
-  title: 'Antigravity Next.js Boilerplate',
-  description: 'Scaffolded Next.js workspace for AI software agents',
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-TSX_EOF
-            # Write src/app/page.tsx
-            cat << 'TSX_EOF' > src/app/page.tsx
-import React from 'react';
-
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
-      <div className="max-w-4xl w-full text-center space-y-8">
-        <header className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse">
-            🚀 Antigravity Workspace Active
-          </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Antigravity Next.js Boilerplate
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Your production-ready Next.js application, scaffolded and pre-configured for seamless development with AI coding agents.
-          </p>
-        </header>
-
-        <main className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">⚡ App Router</h2>
-            <p className="text-slate-400 text-sm">
-              Scaffolded with React Server Components, layout sharing, and clean directory structure inside <code className="text-indigo-400">src/app</code>.
-            </p>
-          </div>
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">🎨 Styling & UI</h2>
-            <p className="text-slate-400 text-sm">
-              Pre-integrated with Tailwind CSS, custom fonts, CSS variables, and modern dark-mode aesthetics ready for immediate extension.
-            </p>
-          </div>
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">🛡️ AI Agent Guard</h2>
-            <p className="text-slate-400 text-sm">
-              Wrapped inside Antigravity's cognitive alignment gates (automated pre-commit validators, secret scanning, and memory sync).
-            </p>
-          </div>
-        </main>
-
-        <footer className="text-slate-500 text-sm border-t border-slate-900 pt-8 mt-12 flex justify-between items-center">
-          <div> Muhammad Rafael Ghifari &copy; 2026</div>
-          <div className="flex gap-4">
-            <a href="https://github.com/rafaelghif/antigravity-agents" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">GitHub Repository</a>
-            <a href="/api/health" className="hover:text-indigo-400 transition-colors">API Health Check</a>
-          </div>
-        </footer>
-      </div>
-    </div>
-  );
-}
-TSX_EOF
-            # Write src/app/api/health/route.ts
-            mkdir -p src/app/api/health
-            cat << 'TS_EOF' > src/app/api/health/route.ts
-import { NextResponse } from 'next/server';
-
-export async function GET() {
-  return NextResponse.json({
-    status: 'HEALTHY',
-    timestamp: new Date().toISOString(),
-    system: 'Antigravity Workspace Core',
-  });
-}
-TS_EOF
-            # Write tests/health.test.ts
-            cat << 'TS_EOF' > tests/health.test.ts
-describe('Next.js Boilerplate Test Suite', () => {
-  it('should pass initial unit test check', () => {
-    expect(true).toBe(true);
-  });
-});
-TS_EOF
-            echo "Scaffolded Next.js application template successfully!"
-
-        elif [ "$tech_stack" = "Go Gin" ]; then
-            if [[ "$arch_pattern" =~ "Hexagonal" || "$arch_pattern" =~ "hexagonal" || "$arch_pattern" =~ "Ports" || "$arch_pattern" =~ "ports" ]]; then
-                mkdir -p src/cmd/server src/internal/core/domain src/internal/core/ports src/internal/adapters/in/web src/internal/adapters/out/db src/internal/config tests
-            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
-                mkdir -p src/cmd/server src/internal/domain/entity src/internal/domain/usecase src/internal/adapter/controller src/internal/adapter/repository src/internal/infrastructure/db src/internal/config tests
-            else
-                mkdir -p src/cmd/server src/internal/model src/internal/controller src/internal/view src/internal/config tests
-            fi
-            # Write go.mod
-            cat << 'GO_EOF' > go.mod
-module project
-
-go 1.20
-
-require (
-	github.com/gin-gonic/gin v1.9.1
-)
-GO_EOF
-            # Write src/cmd/server/main.go
-            cat << 'GO_EOF' > src/cmd/server/main.go
-package main
-
-import (
-	"fmt"
-	"log"
-	"net/http"
-	"project/src/internal/config"
-	"project/src/internal/controller"
-
-	"github.com/gin-gonic/gin"
-)
-
-func main() {
-	cfg := config.LoadConfig()
-
-	if cfg.Env == "production" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	r := gin.Default()
-	r.Use(gin.Recovery())
-
-	healthCtrl := controller.NewHealthController()
-
-	api := r.Group("/api")
-	{
-		api.GET("/health", healthCtrl.Check)
-	}
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Welcome to Antigravity Go Gin Boilerplate!",
-			"status":  "Active",
-		})
-	})
-
-	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("Server starting on port %s...", cfg.Port)
-	if err := r.Run(addr); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
-	}
-}
-GO_EOF
-            # Write src/internal/config/config.go
-            cat << 'GO_EOF' > src/internal/config/config.go
-package config
-
-import "os"
-
-type Config struct {
-	Port string
-	Env  string
-}
-
-func LoadConfig() *Config {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
-	return &Config{
-		Port: port,
-		Env:  env,
-	}
-}
-GO_EOF
-            # Write src/internal/controller/health_controller.go
-            cat << 'GO_EOF' > src/internal/controller/health_controller.go
-package controller
-
-import (
-	"net/http"
-	"time"
-
-	"github.com/gin-gonic/gin"
-)
-
-type HealthController struct{}
-
-func NewHealthController() *HealthController {
-	return &HealthController{}
-}
-
-func (h *HealthController) Check(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":    "HEALTHY",
-		"timestamp": time.Now().Format(time.RFC3339),
-		"system":    "Antigravity Go Gin Core",
-	})
-}
-GO_EOF
-            # Write tests/health_test.go
-            cat << 'GO_EOF' > tests/health_test.go
-package tests
-
-import (
-	"net/http"
-	"net/http/httptest"
-	"project/src/internal/controller"
-	"testing"
-
-	"github.com/gin-gonic/gin"
-)
-
-func TestHealthCheck(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.Default()
-	healthCtrl := controller.NewHealthController()
-	r.GET("/api/health", healthCtrl.Check)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/health", nil)
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code 200, got %d", w.Code)
-	}
-}
-GO_EOF
-            # Write Makefile
-            cat << 'MAKE_EOF' > Makefile
-.PHONY: run test build clean
-
-run:
-	go run src/cmd/server/main.go
-
-test:
-	go test -v ./tests/...
-
-build:
-	go build -o bin/server src/cmd/server/main.go
-
-clean:
-	rm -rf bin/
-MAKE_EOF
-            echo "Scaffolded Go Gin application template successfully!"
-
-        elif [ "$tech_stack" = "FastAPI" ]; then
-            if [[ "$arch_pattern" =~ "Hexagonal" || "$arch_pattern" =~ "hexagonal" || "$arch_pattern" =~ "Ports" || "$arch_pattern" =~ "ports" ]]; then
-                mkdir -p src/app/domain src/app/ports src/app/adapters/in/api src/app/adapters/out/db src/app/core tests
-            elif [[ "$arch_pattern" =~ "Clean" || "$arch_pattern" =~ "clean" ]]; then
-                mkdir -p src/app/entities src/app/usecases src/app/controllers src/app/infrastructure/db src/app/core tests
-            else
-                mkdir -p src/app/core src/app/api/endpoints tests
-            fi
-            # Write requirements.txt
-            cat << 'TXT_EOF' > requirements.txt
-fastapi>=0.110.0
-uvicorn[standard]>=0.28.0
-pydantic>=2.6.4
-pytest>=8.1.1
-httpx>=0.27.0
-TXT_EOF
-            # Write pyproject.toml
-            cat << 'TOML_EOF' > pyproject.toml
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
-TOML_EOF
-            # Write src/app/main.py
-            cat << 'PY_EOF' > src/app/main.py
-import uvicorn
-from fastapi import FastAPI
-from src.app.core.config import settings
-from src.app.api.endpoints import health
-
-app = FastAPI(
-    title="Antigravity FastAPI Boilerplate",
-    description="Production-ready FastAPI setup for AI software agents",
-    version="1.0.0",
-)
-
-app.include_router(health.router, prefix="/api")
-
-@app.get("/")
-def read_root():
-    return {
-        "message": "Welcome to Antigravity FastAPI Boilerplate!",
-        "status": "Active",
-    }
-
-if __name__ == "__main__":
-    uvicorn.run("src.app.main:app", host="0.0.0.0", port=settings.PORT, reload=True)
-PY_EOF
-            # Write src/app/core/config.py
-            cat << 'PY_EOF' > src/app/core/config.py
+# Check for Python 3 (prefer virtual environment if available)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [ -f "$PROJECT_ROOT/.venv/bin/python" ] && [ -x "$PROJECT_ROOT/.venv/bin/python" ]; then
+    PY_CMD="$PROJECT_ROOT/.venv/bin/python"
+elif [ -f "$PROJECT_ROOT/.venv/bin/python3" ] && [ -x "$PROJECT_ROOT/.venv/bin/python3" ]; then
+    PY_CMD="$PROJECT_ROOT/.venv/bin/python3"
+elif command -v python3 >/dev/null 2>&1; then
+    PY_CMD="python3"
+elif command -v python >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
+    PY_CMD="python"
+else
+    echo "Error: Python 3 is required to run the Antigravity helper CLI." >&2
+    echo "Please install Python 3 and ensure it is in your PATH." >&2
+    exit 1
+fi
+
+"$PY_CMD" "$(dirname "${BASH_SOURCE[0]}")/cli/helper.py" "$@"
+
+EOF
+
+# Write .agents/scripts/cli/commands/commit.py
+write_template_safe ".agents/scripts/cli/commands/commit.py" << 'EOF'
 import os
-
-class Settings:
-    PORT: int = int(os.getenv("PORT", 8000))
-    ENV: str = os.getenv("ENV", "development")
-
-settings = Settings()
-PY_EOF
-            # Write src/app/api/endpoints/health.py
-            cat << 'PY_EOF' > src/app/api/endpoints/health.py
-from datetime import datetime
-from fastapi import APIRouter
-
-router = APIRouter()
-
-@router.get("/health", tags=["system"])
-def check_health():
-    return {
-        "status": "HEALTHY",
-        "timestamp": datetime.utcnow().isoformat(),
-        "system": "Antigravity FastAPI Core",
-    }
-PY_EOF
-            # Write tests/test_health.py
-            cat << 'PY_EOF' > tests/test_health.py
-from fastapi.testclient import TestClient
-from src.app.main import app
-
-client = TestClient(app)
-
-def test_health_check():
-    response = client.get("/api/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "HEALTHY"
-    assert "timestamp" in data
-    assert data["system"] == "Antigravity FastAPI Core"
-PY_EOF
-            echo "Scaffolded FastAPI application template successfully!"
-
-        elif [ "$tech_stack" = "Monorepo" ]; then
-            # Scaffold Turborepo monorepo structure
-            mkdir -p apps/web apps/api packages/shared
-
-            # Write root pnpm-workspace.yaml
-            cat << 'YAML_EOF' > pnpm-workspace.yaml
-packages:
-  - 'apps/*'
-  - 'packages/*'
-YAML_EOF
-
-            # Write root turbo.json
-            cat << 'JSON_EOF' > turbo.json
-{
-  "$schema": "https://turbo.build/schema.json",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**", "bin/**"]
-    },
-    "lint": {},
-    "test": {},
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
-  }
-}
-JSON_EOF
-
-            # Write root package.json
-            cat << 'JSON_EOF' > package.json
-{
-  "name": "monorepo-root",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "test": "turbo run test"
-  },
-  "devDependencies": {
-    "turbo": "^2.0.0"
-  }
-}
-JSON_EOF
-
-            # ----------------------------------------------------
-            # 1. Apps: apps/web (Next.js)
-            # ----------------------------------------------------
-            mkdir -p apps/web/src/app apps/web/src/components apps/web/src/lib apps/web/tests
-            
-            # package.json for web app
-            cat << 'JSON_EOF' > apps/web/package.json
-{
-  "name": "web",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
-  },
-  "dependencies": {
-    "next": "^14.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@monorepo/shared": "workspace:*"
-  },
-  "devDependencies": {
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.5",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.3",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.4"
-  }
-}
-JSON_EOF
-
-            # next.config.js for web app
-            cat << 'JS_EOF' > apps/web/next.config.js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-};
-module.exports = nextConfig;
-JS_EOF
-
-            # tailwind.config.js for web app
-            cat << 'JS_EOF' > apps/web/tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-JS_EOF
-
-            # postcss.config.js for web app
-            cat << 'JS_EOF' > apps/web/postcss.config.js
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
-JS_EOF
-
-            # tsconfig.json for web app
-            cat << 'JSON_EOF' > apps/web/tsconfig.json
-{
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-JSON_EOF
-
-            # jest.config.js for web app
-            cat << 'JS_EOF' > apps/web/jest.config.js
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.ts'],
-};
-JS_EOF
-
-            # globals.css for web app
-            cat << 'CSS_EOF' > apps/web/src/app/globals.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-:root {
-  color-scheme: dark;
-}
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #020617;
-  color: #f8fafc;
-}
-CSS_EOF
-
-            # layout.tsx for web app
-            cat << 'TSX_EOF' > apps/web/src/app/layout.tsx
-import React from 'react';
-import './globals.css';
-export const metadata = {
-  title: 'Antigravity Monorepo Frontend',
-  description: 'Scaffolded Turborepo Frontend Web Application',
-};
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-TSX_EOF
-
-            # page.tsx for web app
-            cat << 'TSX_EOF' > apps/web/src/app/page.tsx
-import React from 'react';
-import { appName, version } from '@monorepo/shared';
-
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
-      <div className="max-w-4xl w-full text-center space-y-8">
-        <header className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse">
-            🚀 Antigravity Monorepo Active
-          </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            {appName}
-          </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Monorepo Web Client (v{version}) running alongside an isolated Go Gin backend service.
-          </p>
-        </header>
-        <main className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">⚡ Next.js</h2>
-            <p className="text-slate-400 text-sm">
-              Frontend web client running Next.js App Router inside <code className="text-indigo-400">apps/web</code>.
-            </p>
-          </div>
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">🐹 Go Gin API</h2>
-            <p className="text-slate-400 text-sm">
-              Isolated REST API backend service with Go Gin inside <code className="text-purple-400">apps/api</code>.
-            </p>
-          </div>
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">📦 Shared Workspace</h2>
-            <p className="text-slate-400 text-sm">
-              Shared package containing index exports, interfaces, and types inside <code className="text-pink-400">packages/shared</code>.
-            </p>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-TSX_EOF
-
-            # health route for web app
-            mkdir -p apps/web/src/app/api/health
-            cat << 'TS_EOF' > apps/web/src/app/api/health/route.ts
-import { NextResponse } from 'next/server';
-export async function GET() {
-  return NextResponse.json({
-    status: 'HEALTHY',
-    timestamp: new Date().toISOString(),
-    system: 'Antigravity Monorepo Frontend',
-  });
-}
-TS_EOF
-
-            # tests for web app
-            cat << 'TS_EOF' > apps/web/tests/health.test.ts
-describe('Monorepo Web Client Test Suite', () => {
-  it('should pass initial tests', () => {
-    expect(true).toBe(true);
-  });
-});
-TS_EOF
-
-            # ----------------------------------------------------
-            # 2. Apps: apps/api (Go Gin)
-            # ----------------------------------------------------
-            mkdir -p apps/api/src/cmd/server apps/api/src/internal/controller apps/api/src/internal/config apps/api/tests
-
-            # go.mod for api app
-            cat << 'GO_EOF' > apps/api/go.mod
-module api
-
-go 1.20
-
-require (
-	github.com/gin-gonic/gin v1.9.1
-)
-GO_EOF
-
-            # main.go for api app
-            cat << 'GO_EOF' > apps/api/src/cmd/server/main.go
-package main
-import (
-	"fmt"
-	"log"
-	"net/http"
-	"api/src/internal/config"
-	"api/src/internal/controller"
-	"github.com/gin-gonic/gin"
-)
-func main() {
-	cfg := config.LoadConfig()
-	if cfg.Env == "production" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	r := gin.Default()
-	r.Use(gin.Recovery())
-	healthCtrl := controller.NewHealthController()
-	api := r.Group("/api")
-	{
-		api.GET("/health", healthCtrl.Check)
-	}
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Welcome to Antigravity Go Gin Backend in Monorepo!",
-			"status":  "Active",
-		})
-	})
-	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("Backend starting on port %s...", cfg.Port)
-	if err := r.Run(addr); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
-	}
-}
-GO_EOF
-
-            # config.go for api app
-            cat << 'GO_EOF' > apps/api/src/internal/config/config.go
-package config
-import "os"
-type Config struct {
-	Port string
-	Env  string
-}
-func LoadConfig() *Config {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "development"
-	}
-	return &Config{
-		Port: port,
-		Env:  env,
-	}
-}
-GO_EOF
-
-            # health_controller.go for api app
-            cat << 'GO_EOF' > apps/api/src/internal/controller/health_controller.go
-package controller
-import (
-	"net/http"
-	"time"
-	"github.com/gin-gonic/gin"
-)
-type HealthController struct{}
-func NewHealthController() *HealthController {
-	return &HealthController{}
-}
-func (h *HealthController) Check(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":    "HEALTHY",
-		"timestamp": time.Now().Format(time.RFC3339),
-		"system":    "Antigravity Monorepo Backend API",
-	})
-}
-GO_EOF
-
-            # test for api app
-            cat << 'GO_EOF' > apps/api/tests/health_test.go
-package tests
-import (
-	"net/http"
-	"net/http/httptest"
-	"api/src/internal/controller"
-	"testing"
-	"github.com/gin-gonic/gin"
-)
-func TestHealthCheck(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.Default()
-	healthCtrl := controller.NewHealthController()
-	r.GET("/api/health", healthCtrl.Check)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/api/health", nil)
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected status code 200, got %d", w.Code)
-	}
-}
-GO_EOF
-
-            # Makefile for api app
-            cat << 'MAKE_EOF' > apps/api/Makefile
-.PHONY: run test build clean
-run:
-	go run src/cmd/server/main.go
-test:
-	go test -v ./tests/...
-build:
-	go build -o bin/server src/cmd/server/main.go
-clean:
-	rm -rf bin/
-MAKE_EOF
-
-            # ----------------------------------------------------
-            # 3. Packages: packages/shared
-            # ----------------------------------------------------
-            cat << 'JSON_EOF' > packages/shared/package.json
-{
-  "name": "@monorepo/shared",
-  "version": "1.0.0",
-  "private": true,
-  "main": "index.js",
-  "types": "index.d.ts"
-}
-JSON_EOF
-
-            cat << 'JS_EOF' > packages/shared/index.js
-module.exports = {
-  appName: "Antigravity Monorepo",
-  version: "1.0.0"
-};
-JS_EOF
-
-            cat << 'TS_EOF' > packages/shared/index.d.ts
-export const appName: string;
-export const version: string;
-TS_EOF
-
-            echo "Scaffolded Monorepo application template successfully!"
-
-        elif [ "$tech_stack" = "Multi-Project" ]; then
-            # Scaffold Custom Multi-Project / Separate Apps layout
-            mkdir -p apps/backend apps/frontend
-            
-            echo "Scaffolding Custom Multi-Project layout..."
-
-            # 1. Scaffold Backend App
-            if [ "$be_choice" = "1" ]; then
-                # NestJS Boilerplate
-                echo "  Scaffolding NestJS backend..."
-                mkdir -p apps/backend/src
-                
-                # Check Architecture
-                if [ "$be_arch_choice" = "1" ]; then
-                    # Hexagonal Architecture
-                    mkdir -p apps/backend/src/core/domain apps/backend/src/core/ports apps/backend/src/adapters/in/web apps/backend/src/adapters/out/persistence
-                elif [ "$be_arch_choice" = "2" ]; then
-                    # Clean Architecture
-                    mkdir -p apps/backend/src/entities apps/backend/src/usecases apps/backend/src/controllers apps/backend/src/infrastructure/db
-                else
-                    # Standard NestJS Modular
-                    mkdir -p apps/backend/src/modules apps/backend/src/common
-                fi
-                
-                cat << 'JSON_EOF' > apps/backend/package.json
-{
-  "name": "backend",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "build": "nest build",
-    "start": "nest start",
-    "lint": "eslint 'src/**/*.ts'",
-    "test": "jest"
-  },
-  "dependencies": {
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/core": "^10.0.0",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
-  },
-  "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
-    "@nestjs/testing": "^10.0.0",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "jest": "^29.0.0"
-  }
-}
-JSON_EOF
-
-                cat << 'TS_EOF' > apps/backend/src/main.ts
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT || 3000);
-}
-bootstrap();
-TS_EOF
-
-                cat << 'TS_EOF' > apps/backend/src/app.module.ts
-import { Module } from '@nestjs/common';
-
-@Module({
-  imports: [],
-  controllers: [],
-  providers: [],
-})
-export class AppModule {}
-TS_EOF
-
-            elif [ "$be_choice" = "2" ]; then
-                # FastAPI Boilerplate
-                echo "  Scaffolding FastAPI backend..."
-                mkdir -p apps/backend/src/app
-                
-                if [ "$be_arch_choice" = "1" ]; then
-                    # Hexagonal Architecture
-                    mkdir -p apps/backend/src/app/domain apps/backend/src/app/ports apps/backend/src/app/adapters/in/api apps/backend/src/app/adapters/out/db apps/backend/src/app/core
-                elif [ "$be_arch_choice" = "2" ]; then
-                    # Clean Architecture
-                    mkdir -p apps/backend/src/app/entities apps/backend/src/app/usecases apps/backend/src/app/controllers apps/backend/src/app/infrastructure/db apps/backend/src/app/core
-                else
-                    # Standard Modular API
-                    mkdir -p apps/backend/src/app/core apps/backend/src/app/api/endpoints
-                fi
-                
-                cat << 'TXT_EOF' > apps/backend/requirements.txt
-fastapi>=0.110.0
-uvicorn[standard]>=0.28.0
-pydantic>=2.6.4
-pytest>=8.1.1
-httpx>=0.27.0
-TXT_EOF
-
-                cat << 'PY_EOF' > apps/backend/src/app/main.py
-from fastapi import FastAPI
-
-app = FastAPI(title="Antigravity Custom Backend")
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello from Custom FastAPI Backend!"}
-PY_EOF
-
-            elif [ "$be_choice" = "3" ]; then
-                # Go Gin Boilerplate
-                echo "  Scaffolding Go Gin backend..."
-                mkdir -p apps/backend/src/cmd/server
-                
-                if [ "$be_arch_choice" = "1" ]; then
-                    # Hexagonal Architecture
-                    mkdir -p apps/backend/src/internal/core/domain apps/backend/src/internal/core/ports apps/backend/src/internal/adapters/in/web apps/backend/src/internal/adapters/out/db apps/backend/src/internal/config
-                elif [ "$be_arch_choice" = "2" ]; then
-                    # Clean Architecture
-                    mkdir -p apps/backend/src/internal/domain/entity apps/backend/src/internal/domain/usecase apps/backend/src/internal/adapter/controller apps/backend/src/internal/adapter/repository apps/backend/src/internal/infrastructure/db apps/backend/src/internal/config
-                else
-                    # Standard Go Gin MVC
-                    mkdir -p apps/backend/src/internal/model apps/backend/src/internal/controller apps/backend/src/internal/view apps/backend/src/internal/config
-                fi
-                
-                cat << 'GO_EOF' > apps/backend/go.mod
-module backend
-
-go 1.20
-
-require (
-	github.com/gin-gonic/gin v1.9.1
-)
-GO_EOF
-
-                cat << 'GO_EOF' > apps/backend/src/cmd/server/main.go
-package main
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func main() {
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello from Custom Go Gin Backend!",
-		})
-	})
-	r.Run()
-}
-GO_EOF
-            fi
-
-            # 2. Scaffold Frontend App
-            if [ "$fe_choice" = "1" ]; then
-                # Next.js Boilerplate
-                echo "  Scaffolding Next.js frontend..."
-                mkdir -p apps/frontend/src/app apps/frontend/src/lib
-                
-                if [ "$fe_arch_choice" = "1" ]; then
-                    # Atomic Design
-                    mkdir -p apps/frontend/src/components/atoms apps/frontend/src/components/molecules apps/frontend/src/components/organisms apps/frontend/src/components/templates
-                else
-                    # Standard Next.js App Router
-                    mkdir -p apps/frontend/src/components
-                fi
-                
-                cat << 'JSON_EOF' > apps/frontend/package.json
-{
-  "name": "frontend",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
-  },
-  "dependencies": {
-    "next": "^14.2.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.0.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "jest": "^29.0.0"
-  }
-}
-JSON_EOF
-
-                cat << 'TSX_EOF' > apps/frontend/src/app/layout.tsx
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Antigravity Custom Frontend',
-  description: 'Flexible separate frontend application',
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-TSX_EOF
-
-                cat << 'TSX_EOF' > apps/frontend/src/app/page.tsx
-export default function Home() {
-  return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>🚀 Welcome to Antigravity Custom Frontend</h1>
-      <p>Running alongside a decoupled backend service in a clean modular layout.</p>
-    </main>
-  );
-}
-TSX_EOF
-
-            elif [ "$fe_choice" = "2" ]; then
-                # React SPA (Vite) Boilerplate
-                echo "  Scaffolding React SPA frontend..."
-                mkdir -p apps/frontend/src apps/frontend/public
-                
-                if [ "$fe_arch_choice" = "1" ]; then
-                    # Atomic Design
-                    mkdir -p apps/frontend/src/components/atoms apps/frontend/src/components/molecules apps/frontend/src/components/organisms apps/frontend/src/components/templates
-                else
-                    # Standard React Components
-                    mkdir -p apps/frontend/src/components
-                fi
-                
-                cat << 'JSON_EOF' > apps/frontend/package.json
-{
-  "name": "frontend",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint 'src/**/*.ts'",
-    "test": "jest"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "vite": "^5.0.0",
-    "@types/react": "^18.0.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "jest": "^29.0.0"
-  }
-}
-JSON_EOF
-
-                cat << 'HTML_EOF' > apps/frontend/index.html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antigravity React SPA</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
-HTML_EOF
-
-                cat << 'TSX_EOF' > apps/frontend/src/main.tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-TSX_EOF
-
-                cat << 'TSX_EOF' > apps/frontend/src/App.tsx
-import React from 'react';
-
-export default function App() {
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>🚀 Welcome to Antigravity React SPA Frontend</h1>
-      <p>Decoupled single-page frontend application.</p>
-    </div>
-  );
-}
-TSX_EOF
-
-            elif [ "$fe_choice" = "3" ]; then
-                # Laravel Blade / PHP HTML Boilerplate
-                echo "  Scaffolding Laravel Blade/HTML frontend..."
-                mkdir -p apps/frontend/resources/views apps/frontend/public/css apps/frontend/public/js
-                
-                cat << 'HTML_EOF' > apps/frontend/resources/views/welcome.blade.php
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antigravity Blade Frontend</title>
-    <style>
-        body { font-family: sans-serif; padding: 2rem; background-color: #f8fafc; color: #1e293b; }
-    </style>
-</head>
-<body>
-    <h1>🚀 Welcome to Antigravity Blade/HTML Frontend</h1>
-    <p>Flexible separate frontend application template.</p>
-</body>
-</html>
-HTML_EOF
-            fi
-
-            echo "Scaffolded Custom Multi-Project application template successfully!"
-
-        elif [ "$tech_stack" = "Laravel" ]; then
-            # Scaffold Laravel Full-stack PHP application
-            echo "Scaffolding Laravel Application..."
-            # Create standard Laravel directories
-            mkdir -p app/Http/Controllers app/Models app/Providers bootstrap config database/migrations database/seeders database/factories public resources/views resources/css resources/js routes tests/Feature tests/Unit
-            
-            # Write Controller.php
-            cat << 'PHP_EOF' > app/Http/Controllers/Controller.php
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
-
-class Controller extends BaseController
-{
-    use AuthorizesRequests, ValidatesRequests;
-}
-PHP_EOF
-
-            # Write User.php Model
-            cat << 'PHP_EOF' > app/Models/User.php
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-
-class User extends Authenticatable
-{
-    use HasApiTokens, HasFactory, Notifiable;
-
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-}
-PHP_EOF
-
-            # Write composer.json
-            cat << 'JSON_EOF' > composer.json
-{
-    "name": "laravel/laravel",
-    "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
-    "license": "MIT",
-    "require": {
-        "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.2",
-        "laravel/framework": "^10.0",
-        "laravel/sanctum": "^3.2",
-        "laravel/tinker": "^2.8"
-    },
-    "require-dev": {
-        "fakerphp/faker": "^1.9.1",
-        "laravel/pint": "^1.0",
-        "laravel/sail": "^1.18",
-        "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^7.0",
-        "phpunit/phpunit": "^10.0",
-        "spatie/laravel-ignition": "^2.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ],
-        "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-        ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
-        ]
-    },
-    "extra": {
-        "laravel": {
-            "dont-discover": []
-        }
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
-}
-JSON_EOF
-
-            # Write package.json
-            cat << 'JSON_EOF' > package.json
-{
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "devDependencies": {
-        "axios": "^1.1.2",
-        "laravel-vite-plugin": "^0.7.5",
-        "vite": "^4.0.0"
-    }
-}
-JSON_EOF
-
-            # Write .env.example
-            cat << 'ENV_EOF' > .env.example
-APP_NAME=Laravel
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-LOG_CHANNEL=stack
-LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=debug
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=root
-DB_PASSWORD=
-
-BROADCAST_DRIVER=log
-CACHE_DRIVER=file
-FILESYSTEM_DISK=local
-QUEUE_CONNECTION=sync
-SESSION_DRIVER=file
-SESSION_LIFETIME=120
-ENV_EOF
-
-            cp .env.example .env
-
-            # Write Artisan executable
-            cat << 'ARTISAN_EOF' > artisan
-#!/usr/bin/env php
-<?php
-
-define('LARAVEL_START', microtime(true));
-
-if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
-    require $maintenance;
-}
-
-require __DIR__.'/vendor/autoload.php';
-
-$app = require_once __DIR__.'/bootstrap/app.php';
-
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-
-$status = $kernel->handle(
-    $input = new Symfony\Component\Console\Input\ArgvInput,
-    new Symfony\Component\Console\Output\ConsoleOutput
-);
-
-$kernel->terminate($input, $status);
-
-exit($status);
-ARTISAN_EOF
-            chmod +x artisan
-
-            # Write bootstrap/app.php
-            cat << 'BOOTSTRAP_EOF' > bootstrap/app.php
-<?php
-
-$app = new Illuminate\Foundation\Application(
-    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
-);
-
-$app->singleton(
-    Illuminate\Contracts\Http\Kernel::class,
-    App\Http\Kernel::class
-);
-
-$app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
-    App\Http\Console\Kernel::class
-);
-
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    App\Exceptions\Handler::class
-);
-
-return $app;
-BOOTSTRAP_EOF
-
-            # Write App HTTP Kernel, Exceptions, Console, Web routes, Controllers, Welcome views etc.
-            mkdir -p app/Http app/Exceptions app/Console
-            
-            cat << 'KERNEL_EOF' > app/Http/Kernel.php
-<?php
-
-namespace App\Http;
-
-use Illuminate\Foundation\Http\Kernel as HttpKernel;
-
-class Kernel extends HttpKernel
-{
-    protected $middleware = [
-        \Illuminate\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
-        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
-        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-        \App\Http\Middleware\TrimStrings::class,
-        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-    ];
-
-    protected $middlewareGroups = [
-        'web' => [
-            \App\Http\Middleware\EncryptCookies::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            \Illuminate\Session\Middleware\StartSession::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \App\Http\Middleware\VerifyCsrfToken::class,
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ],
-        'api' => [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ],
-    ];
-
-    protected $middlewareAliases = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-    ];
-}
-KERNEL_EOF
-
-            cat << 'CONSOLE_EOF' > app/Console/Kernel.php
-<?php
-
-namespace App\Console;
-
-use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-
-class Kernel extends ConsoleKernel
-{
-    protected function commands(): void
-    {
-        $this->load(__DIR__.'/Commands');
-        require base_path('routes/console.php');
-    }
-}
-CONSOLE_EOF
-
-            cat << 'HANDLER_EOF' > app/Exceptions/Handler.php
-<?php
-
-namespace App\Exceptions;
-
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Throwable;
-
-class Handler extends ExceptionHandler
-{
-    protected $dontFlash = [
-        'current_password',
-        'password',
-        'password_confirmation',
-    ];
-
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
-    }
-}
-HANDLER_EOF
-
-            # Middlewares: app/Http/Middleware/
-            mkdir -p app/Http/Middleware
-            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/TrimStrings.php
-<?php
-namespace App\Http\Middleware;
-use Illuminate\Foundation\Http\Middleware\TrimStrings as Middleware;
-class TrimStrings extends Middleware {}
-MIDDLEWARE_EOF
-
-            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/EncryptCookies.php
-<?php
-namespace App\Http\Middleware;
-use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
-class EncryptCookies extends Middleware {}
-MIDDLEWARE_EOF
-
-            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/VerifyCsrfToken.php
-<?php
-namespace App\Http\Middleware;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
-class VerifyCsrfToken extends Middleware {}
-MIDDLEWARE_EOF
-
-            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/Authenticate.php
-<?php
-namespace App\Http\Middleware;
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
-use Illuminate\Http\Request;
-class Authenticate extends Middleware {
-    protected function redirectTo(Request $request): ?string {
-        return $request->expectsJson() ? null : route('login');
-    }
-}
-MIDDLEWARE_EOF
-
-            cat << 'MIDDLEWARE_EOF' > app/Http/Middleware/RedirectIfAuthenticated.php
-<?php
-namespace App\Http\Middleware;
-use App\Providers\RouteServiceProvider;
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
-class RedirectIfAuthenticated {
-    public function handle(Request $request, Closure $next, string ...$guards): Response {
-        $guards = empty($guards) ? [null] : $guards;
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
-            }
-        }
-        return $next($request);
-    }
-}
-MIDDLEWARE_EOF
-
-            # Providers: app/Providers/
-            mkdir -p app/Providers
-            cat << 'PROVIDER_EOF' > app/Providers/RouteServiceProvider.php
-<?php
-
-namespace App\Providers;
-
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
-
-class RouteServiceProvider extends ServiceProvider
-{
-    public const HOME = '/home';
-
-    public function boot(): void
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
-
-        $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
-
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
-        });
-    }
-}
-PROVIDER_EOF
-
-            # Write standard routes
-            cat << 'ROUTES_EOF' > routes/web.php
-<?php
-
-use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
-});
-ROUTES_EOF
-
-            cat << 'ROUTES_EOF' > routes/api.php
-<?php
-
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-ROUTES_EOF
-
-            cat << 'ROUTES_EOF' > routes/console.php
-<?php
-
-use Illuminate\Support\Facades\Artisan;
-
-Artisan::command('inspire', function () {
-    $this->comment(Illuminate\Foundation\Inspiring::quote());
-})->purpose('Display an inspiring quote');
-ROUTES_EOF
-
-            # Write welcome view
-            cat << 'HTML_EOF' > resources/views/welcome.blade.php
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antigravity Laravel Application</title>
-    <style>
-        body {
-            font-family: 'Outfit', 'Inter', sans-serif;
-            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
-            color: #f8fafc;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            padding: 3rem;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #f43f5e, #fb7185);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        p {
-            color: #94a3b8;
-            line-height: 1.6;
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: rgba(244, 63, 94, 0.1);
-            color: #f43f5e;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="badge">Laravel 10.x + PHP</div>
-        <h1>🚀 Welcome to Antigravity Laravel</h1>
-        <p>Your production-ready Laravel full-stack MVC application, scaffolded and pre-configured for seamless development with AI coding agents.</p>
-    </div>
-</body>
-</html>
-HTML_EOF
-
-            # Write phpunit.xml
-            cat << 'XML_EOF' > phpunit.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true">
-    <testsuites>
-        <testsuite name="Unit">
-            <directory suffix="Test.php">./tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Feature">
-            <directory suffix="Test.php">./tests/Feature</directory>
-        </testsuite>
-    </testsuites>
-</phpunit>
-XML_EOF
-
-            echo "Scaffolded Laravel application template successfully!"
-
-        else
-            # Generic/Basic Scaffolding Fallback
-            mkdir -p src tests config
-            if [[ "$tech_stack" =~ "Node" || "$tech_stack" =~ "TypeScript" || "$tech_stack" =~ "TS" ]]; then
-                if [ ! -f package.json ]; then
-                    cat << 'JSON_EOF' > package.json
-{
-  "name": "project",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "jest",
-    "lint": "eslint 'src/**/*.ts'"
-  },
-  "dependencies": {},
-  "devDependencies": {}
-}
-JSON_EOF
-                    echo "Created package.json scaffolding"
-                fi
-            fi
-            
-            if [[ "$tech_stack" =~ "Go" || "$tech_stack" =~ "Golang" ]]; then
-                if [ ! -f go.mod ]; then
-                    cat << 'GO_EOF' > go.mod
-module project
-
-go 1.20
-GO_EOF
-                    echo "Created go.mod scaffolding"
-                fi
-                if [ ! -f src/main.go ]; then
-                    cat << 'GO_EOF' > src/main.go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, Antigravity!")
-}
-GO_EOF
-                    echo "Created src/main.go template"
-                fi
-            fi
-
-            if [[ "$tech_stack" =~ "Python" || "$tech_stack" =~ "Py" ]]; then
-                if [ ! -f src/main.py ]; then
-                    cat << 'PY_EOF' > src/main.py
-def main():
-    print("Hello, Antigravity!")
-
-if __name__ == "__main__":
-    main()
-PY_EOF
-                    echo "Created src/main.py template"
-                fi
-            fi
-        fi
-
-        if [ "$gen_docker" = "y" ] || [ "$gen_docker" = "yes" ]; then
-            echo "Generating Dockerfiles and docker-compose.yml..."
-            
-            # Helper variables for database
-            local db_service=""
-            local db_envs=""
-            local db_depends=""
-            
-            local db_lower
-            db_lower=$(echo "$db_orm" | tr '[:upper:]' '[:lower:]')
-            
-            if [[ "$db_lower" =~ "postgres" ]]; then
-                db_service=$(cat << 'DB_POSTGRES'
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-DB_POSTGRES
-)
-                db_envs="      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres\n      - DB_HOST=postgres\n      - DB_PORT=5432"
-                db_depends="    depends_on:\n      postgres:\n        condition: service_healthy"
-            elif [[ "$db_lower" =~ "mysql" || "$db_lower" =~ "mariadb" ]]; then
-                db_service=$(cat << 'DB_MYSQL'
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_db
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: db
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-DB_MYSQL
-)
-                db_envs="      - DATABASE_URL=mysql://root:root@mysql:3306/db\n      - DB_HOST=mysql\n      - DB_PORT=3306"
-                db_depends="    depends_on:\n      mysql:\n        condition: service_healthy"
-            elif [[ "$db_lower" =~ "mongo" ]]; then
-                db_service=$(cat << 'DB_MONGO'
-  mongodb:
-    image: mongo:6.0
-    container_name: mongodb_db
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\")' | mongosh localhost:27017/test --quiet"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-DB_MONGO
-)
-                db_envs="      - DATABASE_URL=mongodb://mongodb:27017/db\n      - DB_HOST=mongodb\n      - DB_PORT=27017"
-                db_depends="    depends_on:\n      mongodb:\n        condition: service_healthy"
-            elif [[ "$db_lower" =~ "redis" ]]; then
-                db_service=$(cat << 'DB_REDIS'
-  redis:
-    image: redis:7-alpine
-    container_name: redis_cache
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-DB_REDIS
-)
-                db_envs="      - REDIS_URL=redis://redis:6379"
-                db_depends="    depends_on:\n      redis:\n        condition: service_healthy"
-            fi
-
-            # 1. Monorepo / Multi-Project Scaffolding
-            if [ "$tech_stack" = "Monorepo" ] || [ "$tech_stack" = "Multi-Project" ]; then
-                local be_dir=""
-                local fe_dir=""
-                local be_port="3000"
-                local fe_port="3000"
-                local be_dockerfile=""
-                local fe_dockerfile=""
-                
-                if [ "$tech_stack" = "Monorepo" ]; then
-                    be_dir="apps/api"
-                    fe_dir="apps/web"
-                    be_port="8080" # Go Gin
-                    fe_port="3000" # Next.js
-                    
-                    be_dockerfile=$(cat << 'MONO_BE'
-FROM golang:1.20-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum* ./
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
-
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/main .
-EXPOSE 8080
-CMD ["./main"]
-MONO_BE
-)
-                    fe_dockerfile=$(cat << 'MONO_FE'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-  else npm install; \
-  fi
-COPY . .
-RUN \
-  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
-  else npm run build; \
-  fi
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-CMD ["npm", "start"]
-MONO_FE
-)
-                else
-                    # Multi-Project
-                    be_dir="apps/backend"
-                    fe_dir="apps/frontend"
-                    
-                    # Backend Dockerfile selection
-                    if [ "$be_choice" = "1" ]; then
-                        be_port="3000"
-                        be_dockerfile=$(cat << 'MULTI_NEST'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-CMD ["node", "dist/main"]
-MULTI_NEST
-)
-                    elif [ "$be_choice" = "2" ]; then
-                        be_port="8000"
-                        be_dockerfile=$(cat << 'MULTI_PY'
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-MULTI_PY
-)
-                    elif [ "$be_choice" = "3" ]; then
-                        be_port="8080"
-                        be_dockerfile=$(cat << 'MULTI_GO'
-FROM golang:1.20-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum* ./
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
-
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/main .
-EXPOSE 8080
-CMD ["./main"]
-MULTI_GO
-)
-                    fi
-
-                    # Frontend Dockerfile selection
-                    if [ "$fe_choice" = "1" ]; then
-                        fe_port="3000"
-                        fe_dockerfile=$(cat << 'MULTI_NEXT'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-  else npm install; \
-  fi
-COPY . .
-RUN \
-  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
-  else npm run build; \
-  fi
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-CMD ["npm", "start"]
-MULTI_NEXT
-)
-                    elif [ "$fe_choice" = "2" ]; then
-                        fe_port="80"
-                        fe_dockerfile=$(cat << 'MULTI_VITE'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-MULTI_VITE
-)
-                    elif [ "$fe_choice" = "3" ]; then
-                        fe_port="80"
-                        fe_dockerfile=$(cat << 'MULTI_PHP'
-FROM php:8.2-apache
-COPY . /var/www/html/
-RUN chown -R www-data:www-data /var/www/html
-EXPOSE 80
-MULTI_PHP
-)
-                    fi
-                fi
-                
-                # Write Dockerfiles
-                if [ -n "$be_dockerfile" ] && [ -d "$be_dir" ]; then
-                    echo "$be_dockerfile" > "$be_dir/Dockerfile"
-                    echo "  Created $be_dir/Dockerfile"
-                fi
-                if [ -n "$fe_dockerfile" ] && [ -d "$fe_dir" ]; then
-                    echo "$fe_dockerfile" > "$fe_dir/Dockerfile"
-                    echo "  Created $fe_dir/Dockerfile"
-                fi
-
-                # Build docker-compose services
-                local services=""
-                if [ -d "$be_dir" ] && [ "$be_choice" != "4" ]; then
-                    services="${services}\n  backend:\n    build:\n      context: ./${be_dir}\n    ports:\n      - \"${be_port}:${be_port}\"\n"
-                    if [ -n "$db_depends" ]; then
-                        services="${services}$(echo -e "$db_depends")\n"
-                    fi
-                    if [ -n "$db_envs" ]; then
-                        services="${services}    environment:\n$(echo -e "$db_envs")\n"
-                    fi
-                fi
-                
-                if [ -d "$fe_dir" ] && [ "$fe_choice" != "4" ]; then
-                    local host_fe_port="3000"
-                    if [ "$be_choice" != "4" ] && [ "$be_port" = "3000" ]; then
-                        host_fe_port="3001"
-                    fi
-                    services="${services}\n  frontend:\n    build:\n      context: ./${fe_dir}\n    ports:\n      - \"${host_fe_port}:${fe_port}\"\n"
-                    if [ -d "$be_dir" ] && [ "$be_choice" != "4" ]; then
-                        services="${services}    depends_on:\n      backend:\n        condition: service_started\n"
-                        services="${services}    environment:\n      - BACKEND_URL=http://backend:${be_port}\n"
-                    fi
-                fi
-                
-                if [ -n "$db_service" ]; then
-                    services="${services}\n$(echo -e "$db_service")"
-                fi
-                
-                # Write docker-compose.yml
-                cat << 'COMPOSE_MULTI' > docker-compose.yml
-version: '3.8'
-
-services:
-COMPOSE_MULTI
-                echo -e "$services" >> docker-compose.yml
-                cat << 'COMPOSE_VOLUME' >> docker-compose.yml
-
-volumes:
-  pgdata:
-  mysql_data:
-  mongo_data:
-  redis_data:
-COMPOSE_VOLUME
-                echo "  Created docker-compose.yml at root"
-
-            else
-                # 2. Single Project Scaffolding
-                local port="3000"
-                local dockerfile=""
-                
-                if [ "$tech_stack" = "Next.js" ]; then
-                    port="3000"
-                    dockerfile=$(cat << 'SINGLE_NEXT'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-CMD ["npm", "start"]
-SINGLE_NEXT
-)
-                elif [ "$tech_stack" = "Go Gin" ] || [ "$tech_stack" = "Go" ]; then
-                    port="8080"
-                    dockerfile=$(cat << 'SINGLE_GO'
-FROM golang:1.20-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum* ./
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go
-
-FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/main .
-EXPOSE 8080
-CMD ["./main"]
-SINGLE_GO
-)
-                elif [ "$tech_stack" = "FastAPI" ] || [ "$tech_stack" = "Python" ]; then
-                    port="8000"
-                    dockerfile=$(cat << 'SINGLE_PY'
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-SINGLE_PY
-)
-                elif [ "$tech_stack" = "Node/TypeScript" ]; then
-                    port="3000"
-                    dockerfile=$(cat << 'SINGLE_NODE'
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 3000
-CMD ["node", "dist/index.js"]
-SINGLE_NODE
-)
-                fi
-                
-                if [ -n "$dockerfile" ]; then
-                    echo "$dockerfile" > Dockerfile
-                    echo "  Created Dockerfile"
-                fi
-
-                # Build services for docker-compose.yml
-                local services="  app:\n    build:\n      context: .\n    ports:\n      - \"${port}:${port}\"\n"
-                if [ -n "$db_depends" ]; then
-                    services="${services}$(echo -e "$db_depends")\n"
-                fi
-                if [ -n "$db_envs" ]; then
-                    services="${services}    environment:\n$(echo -e "$db_envs")\n"
-                fi
-                if [ -n "$db_service" ]; then
-                    services="${services}\n$(echo -e "$db_service")"
-                fi
-                
-                # Write docker-compose.yml
-                cat << 'COMPOSE_SINGLE' > docker-compose.yml
-version: '3.8'
-
-services:
-COMPOSE_SINGLE
-                echo -e "$services" >> docker-compose.yml
-                cat << 'COMPOSE_VOLUME' >> docker-compose.yml
-
-volumes:
-  pgdata:
-  mysql_data:
-  mongo_data:
-  redis_data:
-COMPOSE_VOLUME
-                echo "  Created docker-compose.yml"
-            fi
-        fi
-    fi
-
-
-    # Create .env and .env.example if env_vars exist
-    if [ -n "$env_vars" ]; then
-        echo "Writing configuration environment variables..."
-        IFS=',' read -ra ADDR <<< "$env_vars"
-        # Reset files
-        > .env.example
-        > .env
-        for i in "${ADDR[@]}"; do
-            echo "$i=" >> .env.example
-            echo "$i=" >> .env
-        done
-        echo "Created .env and .env.example templates"
-    fi
-
-    # Run auto-recon to generate the blueprints
-    echo "Running autonomous reconnaissance to populate blueprint files..."
-    if [ -f .agents/scripts/recon.sh ]; then
-        .agents/scripts/recon.sh -f
-    fi
-
-    echo "=========================================================="
-    echo "Workspace initialized successfully for '$project_name'!"
-    echo "=========================================================="
-}
-
-cmd_recon() {
-    if [ -f .agents/scripts/recon.sh ]; then
-        .agents/scripts/recon.sh
-    else
-        echo "Error: recon.sh not found at .agents/scripts/recon.sh" >&2
-        exit 1
-    fi
-}
-
-cmd_validate() {
-    if [ -f .agents/scripts/validate.sh ]; then
-        .agents/scripts/validate.sh
-    else
-        echo "Error: validate.sh not found at .agents/scripts/validate.sh" >&2
-        exit 1
-    fi
-}
-
-cmd_doctor() {
-    echo "=========================================================="
-    echo "  Antigravity Workspace Doctor Diagnostics"
-    echo "=========================================================="
+import sys
+import subprocess
+import re
+import utils
+
+def run(args):
+    no_test_flag = False
+    stage_files = []
+    commit_type = ""
+    scope = ""
+    desc = ""
     
-    local errors=0
-    
-    # Check Git Repository
-    if [ -d .git ]; then
-        echo "  [PASS] Git repository initialized."
-    else
-        echo "  [FAIL] Git repository not initialized!"
-        errors=$((errors + 1))
-    fi
-    
-    # Check Git hooks
-    if [ -f .git/hooks/pre-commit ] && [ -x .git/hooks/pre-commit ]; then
-        echo "  [PASS] pre-commit Git hook is installed and executable."
-    else
-        echo "  [WARNING] Git pre-commit hook is missing or not executable."
-        echo "            To install: cp .agents/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
-    fi
-    if [ -f .git/hooks/post-commit ] && [ -x .git/hooks/post-commit ]; then
-        echo "  [PASS] post-commit Git hook is installed and executable."
-    else
-        echo "  [WARNING] Git post-commit hook is missing or not executable."
-        echo "            To install: cp .agents/hooks/post-commit .git/hooks/post-commit && chmod +x .git/hooks/post-commit"
-    fi
-    if [ -f .git/hooks/commit-msg ] && [ -x .git/hooks/commit-msg ]; then
-        echo "  [PASS] commit-msg Git hook is installed and executable."
-    else
-        echo "  [WARNING] Git commit-msg hook is missing or not executable."
-        echo "            To install: cp .agents/hooks/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg"
-    fi
-    
-    # Check helper script executability
-    if [ -x .agents/scripts/helper.sh ]; then
-        echo "  [PASS] helper.sh is executable."
-    else
-        echo "  [WARNING] helper.sh is not executable."
-        chmod +x .agents/scripts/helper.sh
-    fi
-    
-    # Check recon script
-    if [ -f .agents/scripts/recon.sh ]; then
-        if [ -x .agents/scripts/recon.sh ]; then
-            echo "  [PASS] recon.sh is executable."
-        else
-            echo "  [WARNING] recon.sh is not executable. Auto-correcting..."
-            chmod +x .agents/scripts/recon.sh
-        fi
-    else
-        echo "  [FAIL] recon.sh is missing!"
-        errors=$((errors + 1))
-    fi
-
-    # Check validate script
-    if [ -f .agents/scripts/validate.sh ]; then
-        if [ -x .agents/scripts/validate.sh ]; then
-            echo "  [PASS] validate.sh is executable."
-        else
-            echo "  [WARNING] validate.sh is not executable. Auto-correcting..."
-            chmod +x .agents/scripts/validate.sh
-        fi
-    else
-        echo "  [FAIL] validate.sh is missing!"
-        errors=$((errors + 1))
-    fi
-
-    # Run validate.sh checks
-    if [ -f .agents/scripts/validate.sh ]; then
-        echo "----------------------------------------------------------"
-        if ! .agents/scripts/validate.sh; then
-            errors=$((errors + 1))
-        fi
-    fi
-    
-    echo "=========================================================="
-    if [ $errors -eq 0 ]; then
-        echo "Doctor diagnostics: ALL SYSTEMS HEALTHY"
-        exit 0
-    else
-        echo "Doctor diagnostics: FOUND $errors ERROR(S) / WARNING(S)"
-        exit 1
-    fi
-}
-
-cmd_commit() {
-    local no_test_flag="false"
-    local stage_files=()
-    local type=""
-    local scope=""
-    local desc=""
-
     # Parse arguments
-    while [ $# -gt 0 ]; do
-        case "$1" in
-            --no-test|--no-verify)
-                no_test_flag="true"
-                shift
-                ;;
-            *)
-                if [ "$1" = "commit" ]; then
-                    shift
-                elif [ -z "$type" ]; then
-                    type="$1"
-                    shift
-                elif [ -z "$scope" ]; then
-                    scope="$1"
-                    shift
-                elif [ -z "$desc" ]; then
-                    desc="$1"
-                    shift
-                else
-                    stage_files+=("$1")
-                    shift
-                fi
-                ;;
-        esac
-    done
-
-    # Interactive inputs if parameters are missing
-    if [ -z "$type" ]; then
-        echo "Choose commit type:"
-        echo "  [1] feat:     A new feature"
-        echo "  [2] fix:      A bug fix"
-        echo "  [3] refactor: A code change that neither fixes a bug nor adds a feature"
-        echo "  [4] chore:    Changes to the build process or auxiliary tools and libraries"
-        echo "  [5] docs:     Documentation only changes"
-        echo "  [6] test:     Adding missing tests or correcting existing tests"
-        echo "  [7] perf:     A code change that improves performance"
-        read -p "Select number or type string (default: feat): " type_choice
-        case "$type_choice" in
-            1) type="feat" ;;
-            2) type="fix" ;;
-            3) type="refactor" ;;
-            4) type="chore" ;;
-            5) type="docs" ;;
-            6) type="test" ;;
-            7) type="perf" ;;
-            "") type="feat" ;;
-            *) type="$type_choice" ;;
-        esac
-    fi
-
-    if [ -z "$scope" ]; then
-        read -p "Enter commit scope (e.g. core, auth, db, shared) (default: core): " scope
-        if [ -z "$scope" ]; then scope="core"; fi
-    fi
-
-    if [ -z "$desc" ]; then
-        read -p "Enter brief description of change: " desc
-        if [ -z "$desc" ]; then
-            echo "Error: Description cannot be empty." >&2
-            exit 1
-        fi
-    fi
-
+    idx = 1
+    while idx < len(args):
+        arg = args[idx]
+        if arg in ("--no-test", "--no-verify"):
+            no_test_flag = True
+            idx += 1
+        elif arg == "commit":
+            idx += 1
+        elif not commit_type:
+            commit_type = arg
+            idx += 1
+        elif not scope:
+            scope = arg
+            idx += 1
+        elif not desc:
+            desc = arg
+            idx += 1
+        else:
+            stage_files.append(arg)
+            idx += 1
+            
+    # Interactive inputs
+    if not commit_type:
+        print("Choose commit type:")
+        print("  [1] feat:     A new feature")
+        print("  [2] fix:      A bug fix")
+        print("  [3] refactor: A code change that neither fixes a bug nor adds a feature")
+        print("  [4] chore:    Changes to the build process or auxiliary tools and libraries")
+        print("  [5] docs:     Documentation only changes")
+        print("  [6] test:     Adding missing tests or correcting existing tests")
+        print("  [7] perf:     A code change that improves performance")
+        try:
+            type_choice = input("Select number or type string (default: feat): ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+            
+        mapping = {
+            "1": "feat", "2": "fix", "3": "refactor", "4": "chore",
+            "5": "docs", "6": "test", "7": "perf", "": "feat"
+        }
+        commit_type = mapping.get(type_choice, type_choice)
+        
+    if not scope:
+        try:
+            scope = input("Enter commit scope (e.g. core, auth, db, shared) (default: core): ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+        if not scope:
+            scope = "core"
+            
+    if not desc:
+        try:
+            desc = input("Enter brief description of change: ").strip()
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(1)
+        if not desc:
+            print("Error: Description cannot be empty.", file=sys.stderr)
+            sys.exit(1)
+            
     # Workspace Validation
-    echo "Running workspace validation checks..."
-    if ! .agents/scripts/validate.sh; then
-        echo "Error: Workspace validation failed. Aborting commit." >&2
-        exit 1
-    fi
-
-    # Linter Execution
-    if [ "$no_test_flag" = "false" ]; then
-        local linter_cmd=""
-        if [ -f .agents/rules/project_rules.md ]; then
-            local linter_line
-            linter_line=$(grep "Linter command" .agents/rules/project_rules.md || echo "")
-            linter_cmd=$(echo "$linter_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
-        fi
-
-        if [ -n "$linter_cmd" ] && [ "$linter_cmd" != "echo 'No linter found'" ]; then
-            echo "Running linter command: $linter_cmd..."
-            if ! eval "$linter_cmd"; then
-                echo "Error: Linter check failed. Aborting commit." >&2
-                exit 1
-            fi
-            echo "  [PASS] Linter check passed successfully."
-        else
-            echo "No linter configured in project_rules.md. Skipping linting."
-        fi
-    else
-        echo "Linter check bypassed via --no-test / --no-verify."
-    fi
-
-    # Test Execution
-    if [ "$no_test_flag" = "false" ]; then
-        local test_runner=""
-        if [ -f .agents/rules/project_rules.md ]; then
-            local test_line
-            test_line=$(grep "Test runner command" .agents/rules/project_rules.md || echo "")
-            test_runner=$(echo "$test_line" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^`//' -e 's/`$//')
-        fi
-
-        if [ -n "$test_runner" ] && [ "$test_runner" != "echo 'No test suite found'" ]; then
-            echo "Running test suite: $test_runner..."
-            if ! eval "$test_runner"; then
-                echo "Error: Test runner suite failed. Aborting commit." >&2
-                exit 1
-            fi
-            echo "  [PASS] All tests passed successfully."
-        else
-            echo "No test runner configured in project_rules.md. Skipping tests."
-        fi
-    else
-        echo "Test execution bypassed via --no-test / --no-verify."
-    fi
-
+    print("Running workspace validation checks...")
+    validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
+    if os.path.exists(validate_sh):
+        proc = subprocess.run([validate_sh])
+        if proc.returncode != 0:
+            print("Error: Workspace validation failed. Aborting commit.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Linter and Test commands from project_rules.md
+    linter_cmd = ""
+    test_runner = ""
+    rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+    if os.path.exists(rules_file):
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Linter command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m: linter_cmd = m.group(1)
+                    elif "Test runner command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m: test_runner = m.group(1)
+        except Exception as e:
+            print(f"Warning: Failed to read project rules for lint/test commands: {e}", file=sys.stderr)
+            
+    if not no_test_flag:
+        if linter_cmd and linter_cmd != "echo 'No linter found'":
+            print(f"Running linter command: {linter_cmd}...")
+            proc = subprocess.run(linter_cmd, shell=True)
+            if proc.returncode != 0:
+                print("Error: Linter check failed. Aborting commit.", file=sys.stderr)
+                sys.exit(1)
+            print("  [PASS] Linter check passed successfully.")
+            
+        if test_runner and test_runner != "echo 'No test suite found'":
+            print(f"Running test suite: {test_runner}...")
+            proc = subprocess.run(test_runner, shell=True)
+            if proc.returncode != 0:
+                print("Error: Test runner suite failed. Aborting commit.", file=sys.stderr)
+                sys.exit(1)
+            print("  [PASS] All tests passed successfully.")
+    else:
+        print("Linter and Test checks bypassed via --no-test / --no-verify.")
+        
     # File Staging
-    if [ ${#stage_files[@]} -gt 0 ]; then
-        echo "Staging specified files: ${stage_files[*]}..."
-        git add "${stage_files[@]}"
-    else
-        echo "Staging all modified and untracked files..."
-        # Check if there are changes to stage
-        if [ -n "$(git status --porcelain | grep -v '^\?\? .agents/locks/')" ]; then
-            git add -A -- ':!.agents/locks/*'
-        fi
-    fi
-
-    # Auto-rotate profiles if configured
-    local profiles_file=""
-    if [ -f ".agents/git_profiles" ]; then
-        profiles_file=".agents/git_profiles"
-    elif [ -f "$HOME/.git_profiles" ]; then
-        profiles_file="$HOME/.git_profiles"
-    fi
-
-    if [ -n "$profiles_file" ] && [ -f "$profiles_file" ]; then
-        # Get list of profile keys
-        local profile_keys
-        profile_keys=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
-        
-        # Convert to array or list
-        local keys_arr=($profile_keys)
-        local num_profiles=${#keys_arr[@]}
-        
-        if [ $num_profiles -gt 0 ]; then
-            # Get last commit's author email
-            local last_email
-            last_email=$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
+    if stage_files:
+        print(f"Staging specified files: {' '.join(stage_files)}...")
+        subprocess.run(["git", "add"] + stage_files)
+    else:
+        print("Staging all modified and untracked files...")
+        status = subprocess.check_output(["git", "status", "--porcelain"]).decode()
+        # filter out lock files
+        has_changes = False
+        for line in status.splitlines():
+            if not line.strip().endswith(".lock") or ".agents/locks/" not in line:
+                has_changes = True
+                break
+        if has_changes:
+            subprocess.run(["git", "add", "-A", "--", ":!.agents/locks/*"])
             
-            local selected_idx=0
-            # Search if last_email matches any profile's email
-            for i in "${!keys_arr[@]}"; do
-                local p="${keys_arr[$i]}"
-                local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
-                if [ "$p_e" = "$last_email" ]; then
-                    # Select the next profile (round-robin)
-                    selected_idx=$(( (i + 1) % num_profiles ))
+    # Auto-rotate profiles
+    profiles_file = ""
+    local_pf = os.path.join(utils.get_agents_dir(), "git_profiles")
+    home_pf = os.path.expanduser("~/.git_profiles")
+    if os.path.exists(local_pf):
+        profiles_file = local_pf
+    elif os.path.exists(home_pf):
+        profiles_file = home_pf
+        
+    if profiles_file:
+        profiles = {}
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line_strip = line.strip()
+                    m = re.match(r"^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)\s*=\s*(.+)$", line_strip)
+                    if m:
+                        prof_key = m.group(1)
+                        field = m.group(2)
+                        val = m.group(3).strip('\'"')
+                        profiles.setdefault(prof_key, {})[field] = val
+        except Exception as e:
+            print(f"Warning: Failed to parse Git profiles: {e}", file=sys.stderr)
+            
+        profile_keys = sorted(list(profiles.keys()))
+        if profile_keys:
+            try:
+                last_email = subprocess.check_output(
+                    ["git", "log", "-n", 1, "--format=%ae"], 
+                    stderr=subprocess.DEVNULL
+                ).decode().strip()
+            except:
+                last_email = ""
+                
+            selected_idx = 0
+            for i, pk in enumerate(profile_keys):
+                if profiles[pk].get("email") == last_email:
+                    selected_idx = (i + 1) % len(profile_keys)
                     break
-                fi
-            done
+                    
+            selected_profile = profile_keys[selected_idx]
+            p_name = profiles[selected_profile].get("name")
+            p_email = profiles[selected_profile].get("email")
+            p_ssh = profiles[selected_profile].get("ssh_key", "")
             
-            local selected_profile="${keys_arr[$selected_idx]}"
-            local p_name=$(grep "^${selected_profile}\.name=" "$profiles_file" | cut -d'=' -f2-)
-            local p_email=$(grep "^${selected_profile}\.email=" "$profiles_file" | cut -d'=' -f2-)
-            local p_ssh=$(grep "^${selected_profile}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
+            if not p_name or not p_email:
+                print(f"Error: Profile '{selected_profile}' is misconfigured in {profiles_file}.", file=sys.stderr)
+                sys.exit(1)
+                
+            print(f"Auto-selecting Git profile: '{selected_profile}' (\"{p_name}\" <{p_email}>) for round-robin commit rotation.")
+            subprocess.run(["git", "config", "--local", "user.name", p_name])
+            subprocess.run(["git", "config", "--local", "user.email", p_email])
             
-            # Strict Validation of profile fields
-            if [ -z "$p_name" ] || [ -z "$p_email" ]; then
-                echo "Error: Profile '$selected_profile' is misconfigured in $profiles_file (name and email are required)." >&2
-                exit 1
-            fi
+            if p_ssh:
+                p_ssh_expanded = os.path.expanduser(p_ssh)
+                if os.path.exists(p_ssh_expanded):
+                    print(f"Auto-selecting SSH key: '{p_ssh}' for profile '{selected_profile}'.")
+                    subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_ssh_expanded}\" -o IdentitiesOnly=yes"])
+                else:
+                    print(f"Warning: SSH key file at '{p_ssh}' specified for profile '{selected_profile}' does not exist. Bypassing SSH setup.", file=sys.stderr)
+                    subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+            else:
+                subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+        else:
+            print(f"Error: Git profiles file found at {profiles_file} but no valid profiles were parsed.", file=sys.stderr)
+            sys.exit(1)
+    else:
+        # Fallbacks
+        try:
+            active_name = subprocess.check_output(["git", "config", "user.name"]).decode().strip()
+        except:
+            active_name = ""
+        try:
+            active_email = subprocess.check_output(["git", "config", "user.email"]).decode().strip()
+        except:
+            active_email = ""
+            
+        if not active_name or not active_email:
+            print("Warning: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured.", file=sys.stderr)
+            print("  [FALLBACK] Configuring temporary local-only identity: \"Local Developer\" <local-dev@localhost>", file=sys.stderr)
+            subprocess.run(["git", "config", "--local", "user.name", "Local Developer"])
+            subprocess.run(["git", "config", "--local", "user.email", "local-dev@localhost"])
+            subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"])
+        else:
+            if re.match(r"^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$", active_email) and re.match(r"^(Developer|Test|Alice|Bob).*", active_name):
+                print("Warning: Active Git configuration appears to be using a template or placeholder:", file=sys.stderr)
+                print(f"  Name:  {active_name}", file=sys.stderr)
+                print(f"  Email: {active_email}", file=sys.stderr)
+                print("  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance.", file=sys.stderr)
+            print(f"[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"{active_name}\" <{active_email}>")
 
-            echo "Auto-selecting Git profile: '$selected_profile' (\"$p_name\" <$p_email>) for round-robin commit rotation."
-            # Set locally
-            git config --local user.name "$p_name"
-            git config --local user.email "$p_email"
-            if [ -n "$p_ssh" ]; then
-                local resolved_ssh="$p_ssh"
-                if [[ "$resolved_ssh" == \~/* ]]; then
-                    resolved_ssh="${resolved_ssh/\~/$HOME}"
-                fi
-                if [ -f "$resolved_ssh" ]; then
-                    echo "Auto-selecting SSH key: '$p_ssh' for profile '$selected_profile'."
-                    git config --local core.sshCommand "ssh -i \"$p_ssh\" -o IdentitiesOnly=yes"
-                else
-                    echo "Warning: SSH key file at '$p_ssh' specified for profile '$selected_profile' does not exist. Bypassing SSH setup." >&2
-                    git config --local --unset core.sshCommand 2>/dev/null || true
-                fi
-            else
-                git config --local --unset core.sshCommand 2>/dev/null || true
-            fi
-        else
-            echo "Error: Git profiles file found at $profiles_file but no valid profiles were parsed." >&2
-            exit 1
-        fi
-    else
-        # Strict fallback behavior if no profiles file is found
-        local active_name=$(git config user.name 2>/dev/null || echo "")
-        local active_email=$(git config user.email 2>/dev/null || echo "")
+    # Conventional Commit
+    commit_msg = f"{commit_type}({scope}): {desc}"
+    print(f"Executing conventional commit: '{commit_msg}'...")
+    proc = subprocess.run(["git", "commit", "-m", commit_msg])
+    if proc.returncode == 0:
+        print("Commit successful.")
+    else:
+        print("Error: Git commit failed.", file=sys.stderr)
+        sys.exit(1)
+
+EOF
+
+# Write .agents/scripts/cli/commands/sync_api.py
+write_template_safe ".agents/scripts/cli/commands/sync_api.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    print("==========================================================")
+    print("Starting API Contract Synchronization...")
+    print("==========================================================")
+    
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    be_path = ""
+    fe_path = ""
+    be_stack = ""
+    
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except:
+            lines = []
+            
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 2:
+                    path = parts[0]
+                    stack = parts[1]
+                    if any(x in path or x in stack for x in ("api", "backend", "Go", "Python")):
+                        be_path = path
+                        be_stack = stack
+                    elif any(x in path or x in stack for x in ("web", "frontend", "Next.js")):
+                        fe_path = path
+    else:
+        # Fallbacks
+        if os.path.isdir("apps/backend"): be_path = "apps/backend"
+        if os.path.isdir("apps/frontend"): fe_path = "apps/frontend"
+        if os.path.isdir("apps/api"): be_path = "apps/api"
+        if os.path.isdir("apps/web"): fe_path = "apps/web"
         
-        if [ -z "$active_name" ] || [ -z "$active_email" ]; then
-            # Fall back to a default local-only profile for convenience
-            echo "Warning: No Git profiles config found (.agents/git_profiles) and no default Git identity (user.name/user.email) is configured." >&2
-            echo "  [FALLBACK] Configuring temporary local-only identity: \"Local Developer\" <local-dev@localhost>" >&2
-            git config --local user.name "Local Developer"
-            git config --local user.email "local-dev@localhost"
-            git config --local --unset core.sshCommand 2>/dev/null || true
-        else
-            # Warn if using generic mock emails to prevent bad commits
-            if [[ "$active_email" =~ ^[a-zA-Z0-9_\.-]+@(company\.com|gmail\.com|example\.com)$ ]] && [[ "$active_name" =~ ^(Developer|Test|Alice|Bob).* ]]; then
-                echo "Warning: Active Git configuration appears to be using a template or placeholder:" >&2
-                echo "  Name:  $active_name" >&2
-                echo "  Email: $active_email" >&2
-                echo "  Please update your credentials or set up '.agents/git_profiles' for enterprise-grade compliance." >&2
-            fi
-
-            echo "[INFO] Auto-rotation bypassed (no profiles config). Using active Git identity: \"$active_name\" <$active_email>"
-        fi
-    fi
-
-    # Conventional Commit Execution
-    local commit_msg="$type($scope): $desc"
-    echo "Executing conventional commit: '$commit_msg'..."
-    if git commit -m "$commit_msg"; then
-        echo "Commit successful."
-    else
-        echo "Error: Git commit failed." >&2
-        exit 1
-    fi
-}
-
-cmd_migrate() {
-    echo "=========================================================="
-    echo "  Antigravity Agent Core - Workspace Migration (V1.4.0)"
-    echo "=========================================================="
-
-    local backup_suffix=".backup"
-
-    # 1. Back up user-controlled files if they exist
-    if [ -f "$MEMORY_FILE" ]; then
-        echo "Warning: Existing memory file found. Backing up to ${MEMORY_FILE}${backup_suffix}"
-        cp "$MEMORY_FILE" "${MEMORY_FILE}${backup_suffix}"
-    fi
-
-    if [ -f ".agents/rules/project_rules.md" ]; then
-        echo "Warning: Existing project rules blueprint found. Backing up to .agents/rules/project_rules.md${backup_suffix}"
-        cp ".agents/rules/project_rules.md" ".agents/rules/project_rules.md${backup_suffix}"
-    fi
-
-    if [ -f ".agents/schema.md" ]; then
-        echo "Warning: Existing schema index found. Backing up to .agents/schema.md${backup_suffix}"
-        cp ".agents/schema.md" ".agents/schema.md${backup_suffix}"
-    fi
-
-    # 2. Ensure directories exist
-    echo "Re-creating directory structure..."
-    mkdir -p .agents/skills/codebase-recon
-    mkdir -p .agents/skills/git-ops
-    mkdir -p .agents/skills/test-driven-patch
-    mkdir -p .agents/skills/infra-provisioner
-    mkdir -p .agents/skills/security-ci-audit
-    mkdir -p .agents/skills/code-review
-    mkdir -p .agents/skills/impact-analysis
-    mkdir -p .agents/workflows
-    mkdir -p .agents/archive
-    mkdir -p .agents/locks
-    mkdir -p .agents/schemas
-    mkdir -p .agents/scripts
-    mkdir -p .agents/hooks
-    mkdir -p .agents/rules
-
-    # Check for legacy rules folder and migrate
-    if [ -d ".agent/rules" ]; then
-        echo "Legacy rules folder .agent/rules found. Migrating to .agents/rules/..."
-        if [ "$(ls -A .agent/rules 2>/dev/null)" ]; then
-            cp -r .agent/rules/* .agents/rules/
-        fi
-        rm -rf .agent/rules
-        if [ -d ".agent" ] && [ ! "$(ls -A .agent 2>/dev/null)" ]; then
-            rm -rf .agent
-        fi
-        echo "Migration of legacy rules complete."
-        if [ -f "$MEMORY_FILE" ]; then
-            if ! grep -q "Legacy rules migrated" "$MEMORY_FILE"; then
-                sed -i '/## 3. Relayed Context/a - **Migration Log**: Legacy rules migrated from .agent/rules to .agents/rules.' "$MEMORY_FILE"
-            fi
-        fi
-    fi
-
-    # 3. Update Git Hooks
-    echo "Updating local Git hooks..."
-    if [ -f .agents/hooks/pre-commit ]; then
-        cp .agents/hooks/pre-commit .git/hooks/pre-commit
-        chmod +x .git/hooks/pre-commit
-        echo "  - Installed pre-commit hook"
-    fi
-    if [ -f .agents/hooks/post-commit ]; then
-        cp .agents/hooks/post-commit .git/hooks/post-commit
-        chmod +x .git/hooks/post-commit
-        echo "  - Installed post-commit hook"
-    fi
-    if [ -f .agents/hooks/commit-msg ]; then
-        cp .agents/hooks/commit-msg .git/hooks/commit-msg
-        chmod +x .git/hooks/commit-msg
-        echo "  - Installed commit-msg hook"
-    fi
-
-    # 4. Update memory.md schema version
-    if [ -f "$MEMORY_FILE" ]; then
-        echo "Updating memory ledger schema version to 5.0.0..."
-        if grep -Fq "Memory Schema Version" "$MEMORY_FILE"; then
-            local temp_mem
-            temp_mem=$(mktemp)
-            sed -E "s|Memory Schema Version\*\*: [0-9]+\.[0-9]+\.[0-9]+|Memory Schema Version**: 5.0.0|" "$MEMORY_FILE" > "$temp_mem"
-            mv "$temp_mem" "$MEMORY_FILE"
-        else
-            # Prepend schema version header if not found
-            local temp_mem
-            temp_mem=$(mktemp)
-            echo -e "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.\n" > "$temp_mem"
-            tail -n +2 "$MEMORY_FILE" >> "$temp_mem"
-            mv "$temp_mem" "$MEMORY_FILE"
-        fi
-    fi
-
-    # 5. Fix .gitignore configuration
-    if [ -f ".gitignore" ]; then
-        echo "Validating .gitignore compliance..."
-        local temp_git
-        temp_git=$(mktemp)
-        # remove any lines that ignore .agents or AGENTS.md globally
-        grep -v -E "^\.agents/?$" .gitignore | grep -v "^AGENTS.md$" > "$temp_git" || true
-        # ensure Locks directory is ignored
-        if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
-            echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
-        fi
-        mv "$temp_git" ".gitignore"
-        echo "  - .gitignore updated."
-    else
-        echo "Creating default compliant .gitignore..."
-        cat << 'GIT_EOF' > .gitignore
-# Ignore agent transient locks
-.agents/locks/
-GIT_EOF
-    fi
-
-    # 6. Re-run codebase stack reconstruction (forces regeneration of blueprints)
-    echo "Running autonomous stack reconstruction..."
-    if [ -f .agents/scripts/recon.sh ]; then
-        .agents/scripts/recon.sh -f
-    fi
-
-    echo "=========================================================="
-    echo "Migration Complete! Workspace successfully upgraded."
-    echo "=========================================================="
-}
-
-cmd_sync_api() {
-    echo "=========================================================="
-    echo "Starting API Contract Synchronization..."
-    echo "=========================================================="
-    
-    local subprojects_file=".agents/subprojects.sh"
-    local be_path=""
-    local fe_path=""
-    local be_stack=""
-    
-    # 1. Detect backend and frontend directories
-    if [ -f "$subprojects_file" ]; then
-        source "$subprojects_file"
-        for sp in "${SUBPROJECTS[@]}"; do
-            local path=$(echo "$sp" | cut -d'|' -f1)
-            local stack=$(echo "$sp" | cut -d'|' -f2)
+    if not be_path:
+        if os.path.isfile("go.mod") or os.path.isfile("main.go"):
+            be_path = "."
+            be_stack = "Go"
+        elif os.path.isfile("requirements.txt") or os.path.isfile("pyproject.toml"):
+            be_path = "."
+            be_stack = "Python"
             
-            # Simple heuristics to identify backend vs frontend
-            if [[ "$path" =~ "api" || "$path" =~ "backend" || "$stack" =~ "Go" || "$stack" =~ "Python" ]]; then
-                be_path="$path"
-                be_stack="$stack"
-            elif [[ "$path" =~ "web" || "$path" =~ "frontend" || "$stack" =~ "Next.js" ]]; then
-                fe_path="$path"
-            fi
-        done
-    else
-        # Fallback search if no subprojects config file
-        if [ -d "apps/backend" ]; then be_path="apps/backend"; fi
-        if [ -d "apps/frontend" ]; then fe_path="apps/frontend"; fi
-        if [ -d "apps/api" ]; then be_path="apps/api"; fi
-        if [ -d "apps/web" ]; then fe_path="apps/web"; fi
-    fi
+    if not fe_path:
+        if os.path.isdir("src/app") or os.path.isfile("package.json"):
+            fe_path = "."
+            
+    if not be_path:
+        print("  [INFO] Backend application path could not be auto-detected. Operating in root fallback mode.")
+        be_path = "."
+        be_stack = "Unknown"
+        
+    print(f"  Detected Backend: {be_path} ({be_stack})")
+    if fe_path:
+        print(f"  Detected Frontend: {fe_path}")
+        
+    openapi_file = "openapi.json"
+    print("  Extracting OpenAPI contract schema...")
     
-    # If still not found, search directories
-    if [ -z "$be_path" ]; then
-        if [ -f "go.mod" ] || [ -f "main.go" ]; then
-            be_path="."
-            be_stack="Go"
-        elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
-            be_path="."
-            be_stack="Python"
-        fi
-    fi
-    if [ -z "$fe_path" ]; then
-        if [ -d "src/app" ] || [ -f "package.json" ]; then
-            fe_path="."
-        fi
-    fi
-
-    if [ -z "$be_path" ]; then
-        echo "  [INFO] Backend application path could not be auto-detected. Operating in root fallback mode."
-        be_path="."
-        be_stack="Unknown"
-    fi
+    extracted = False
     
-    echo "  Detected Backend: $be_path ($be_stack)"
-    if [ -n "$fe_path" ]; then
-        echo "  Detected Frontend: $fe_path"
-    fi
-
-    local openapi_file="openapi.json"
-    
-    # 2. Extract OpenAPI schema from backend
-    echo "  Extracting OpenAPI contract schema..."
-    
-    if [[ "$be_stack" =~ "Python" || -f "$be_path/requirements.txt" || -f "$be_path/pyproject.toml" ]]; then
-        # Python / FastAPI extraction
-        if [ "$be_path" = "." ]; then
-            python3 -c "import json; from src.app.main import app; print(json.dumps(app.openapi()))" > "$openapi_file" 2>/dev/null || \
-            python3 -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > "$openapi_file" 2>/dev/null || \
-            echo "Failed to extract FastAPI schema. Ensure FastAPI app is importable."
-        else
-            (cd "$be_path" && python3 -c "import json; from src.app.main import app; print(json.dumps(app.openapi()))" > "../../../$openapi_file" 2>/dev/null || \
-            (cd "$be_path" && python3 -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > "../../../$openapi_file" 2>/dev/null)) || \
-            echo "Failed to extract FastAPI schema. Ensure FastAPI app is importable."
-        fi
-    elif [[ "$be_stack" =~ "Go" || -f "$be_path/go.mod" ]]; then
-        # Go Swagger check
-        if command -v swag &> /dev/null; then
-            echo "  Running swag init in $be_path..."
-            (cd "$be_path" && swag init -g src/cmd/server/main.go -o . --ot json && cp swagger.json ../../$openapi_file) 2>/dev/null || \
-            (cd "$be_path" && swag init -g cmd/server/main.go -o . --ot json && cp swagger.json ../../$openapi_file) 2>/dev/null || \
-            echo "Swag command failed. Creating mockup/fallback schema."
-        fi
-    fi
-
-    # Fallback/Mockup schema if extraction failed or file is empty/missing
-    if [ ! -f "$openapi_file" ] || [ ! -s "$openapi_file" ]; then
-        echo "  Warning: Schema extraction returned empty. Writing a compliant mock/fallback openapi.json..."
-        cat << 'MOCK_OPENAPI' > "$openapi_file"
-{
+    # Python
+    if "Python" in be_stack or os.path.isfile(os.path.join(be_path, "requirements.txt")) or os.path.isfile(os.path.join(be_path, "pyproject.toml")):
+        cmd1 = f"python3 -c \"import json; from src.app.main import app; print(json.dumps(app.openapi()))\" > {openapi_file}"
+        cmd2 = f"python3 -c \"import json; from app.main import app; print(json.dumps(app.openapi()))\" > {openapi_file}"
+        
+        cwd = None if be_path == "." else be_path
+        target_path = openapi_file if be_path == "." else os.path.join("..", "..", "..", openapi_file)
+        
+        cmd1_run = f"python3 -c \"import json; from src.app.main import app; print(json.dumps(app.openapi()))\" > {target_path}"
+        cmd2_run = f"python3 -c \"import json; from app.main import app; print(json.dumps(app.openapi()))\" > {target_path}"
+        
+        proc = subprocess.run(cmd1_run, shell=True, cwd=cwd, stderr=subprocess.DEVNULL)
+        if proc.returncode == 0:
+            extracted = True
+        else:
+            proc = subprocess.run(cmd2_run, shell=True, cwd=cwd, stderr=subprocess.DEVNULL)
+            if proc.returncode == 0:
+                extracted = True
+                
+    # Go
+    elif "Go" in be_stack or os.path.isfile(os.path.join(be_path, "go.mod")):
+        # check if swag command exists
+        try:
+            subprocess.run(["swag", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            swag_exists = True
+        except:
+            swag_exists = False
+            
+        if swag_exists:
+            print(f"  Running swag init in {be_path}...")
+            cwd = None if be_path == "." else be_path
+            # try different main locations
+            proc1 = subprocess.run("swag init -g src/cmd/server/main.go -o . --ot json", shell=True, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if proc1.returncode == 0:
+                shutil_copy = True
+            else:
+                proc2 = subprocess.run("swag init -g cmd/server/main.go -o . --ot json", shell=True, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                shutil_copy = proc2.returncode == 0
+                
+            if shutil_copy:
+                src_swagger = os.path.join(be_path, "swagger.json")
+                if os.path.exists(src_swagger):
+                    import shutil
+                    shutil.copy(src_swagger, openapi_file)
+                    extracted = True
+                    
+    if not extracted or not os.path.exists(openapi_file) or os.path.getsize(openapi_file) == 0:
+        print("  Warning: Schema extraction returned empty. Writing a compliant mock/fallback openapi.json...")
+        mock_content = """{
   "openapi": "3.0.0",
   "info": {
     "title": "Antigravity Mock API",
@@ -4621,388 +1738,457 @@ cmd_sync_api() {
     }
   }
 }
-MOCK_OPENAPI
-    fi
+"""
+        with open(openapi_file, 'w', encoding='utf-8') as f:
+            f.write(mock_content)
+            
+    # Generate client
+    if fe_path and os.path.isdir(fe_path):
+        target_client = os.path.join(fe_path, "src", "lib", "api-client.ts")
+        if fe_path == "." and os.path.isdir("src/app"):
+            target_client = os.path.join("src", "lib", "api-client.ts")
+            
+        print(f"  Generating TypeScript client wrapper to {target_client}...")
+        client_js = os.path.join(utils.get_agents_dir(), "scripts", "generate-client.js")
+        proc = subprocess.run(["node", client_js, openapi_file, target_client])
+        sys.exit(proc.returncode)
+    else:
+        print("  Frontend directory not detected. Generated openapi.json is saved in root.")
+        sys.exit(0)
 
-    # 3. Generate TypeScript API client
-    if [ -n "$fe_path" ] && [ -d "$fe_path" ]; then
-        local target_client="$fe_path/src/lib/api-client.ts"
-        if [ "$fe_path" = "." ] && [ -d "src/app" ]; then
-            target_client="src/lib/api-client.ts"
-        fi
+EOF
+
+# Write .agents/scripts/cli/commands/autocomplete.py
+write_template_safe ".agents/scripts/cli/commands/autocomplete.py" << 'EOF'
+import sys
+
+def get_bash_completion():
+    return """_helper_completion() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="lock unlock validate doctor migrate git-profile api-profile log-usage archive recon list-skills create-skill list-rules create-rule init commit sync-git build lint test sync-api create-adr release"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _helper_completion helper.sh
+complete -F _helper_completion ./.agents/scripts/helper.sh
+"""
+
+def get_zsh_completion():
+    return """#compdef helper.sh ./.agents/scripts/helper.sh
+
+_helper_completion() {
+    local -a commands
+    commands=(
+        'lock:Acquire a module edit lock'
+        'unlock:Release a module edit lock'
+        'validate:Validate workspace compliance, budget, and configurations'
+        'doctor:Run complete diagnostic validation on the workspace'
+        'migrate:Upgrade workspaces to V1.9.0 format'
+        'git-profile:Switch Git user config profiles locally'
+        'api-profile:Switch API configurations locally'
+        'log-usage:Log token usage to budget tracker'
+        'archive:Archive completed sprint checklists to history'
+        'recon:Run autonomous codebase stack discovery'
+        'list-skills:List all registered modular skills'
+        'create-skill:Scaffold a new skill structure'
+        'list-rules:List all project-specific blueprints and rules'
+        'create-rule:Scaffold a new project rule blueprint'
+        'init:Initialize a new workspace with template blueprints'
+        'commit:Execute conventional commit and verification checks'
+        'sync-git:Synchronize local repository configuration with Git'
+        'build:Run project build verification'
+        'lint:Run project workspace linter'
+        'test:Run project unit tests'
+        'sync-api:Synchronize API schemas and configurations'
+        'create-adr:Create a new Architectural Decision Record'
+        'release:Perform a project semantic release bump'
+    )
+    _describe -t commands 'helper command' commands
+}
+
+_helper_completion "$@"
+"""
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.sh autocomplete [bash|zsh]")
+        print("To load autocomplete, run:")
+        print("  source <(./.agents/scripts/helper.sh autocomplete bash)")
+        sys.exit(1)
         
-        echo "  Generating TypeScript client wrapper to $target_client..."
-        node .agents/scripts/generate-client.js "$openapi_file" "$target_client"
-    else
-        echo "  Frontend directory not detected. Generated openapi.json is saved in root."
-    fi
+    shell = args[1].lower()
+    if shell == "bash":
+        print(get_bash_completion())
+    elif shell == "zsh":
+        print(get_zsh_completion())
+    else:
+        print(f"Unsupported shell: {shell}. Only 'bash' and 'zsh' are supported.", file=sys.stderr)
+        sys.exit(1)
 
-    echo "=========================================================="
-    echo "API Sync Complete!"
-    echo "=========================================================="
-}
+EOF
 
-cmd_log_usage() {
-    if [ $# -lt 2 ]; then
-        echo "Usage: $0 log-usage <token_count> [profile_name]"
-        exit 1
-    fi
-    local count="$2"
-    local profile="${3:-}"
+# Write .agents/scripts/cli/commands/migrate.py
+write_template_safe ".agents/scripts/cli/commands/migrate.py" << 'EOF'
+import os
+import sys
+import shutil
+import subprocess
+import utils
+
+def run(args):
+    utils.print_title("Antigravity Agent Core - Workspace Migration (V1.9.0)")
     
-    # Auto-detect profile from active_api_profile_name if not specified
-    if [ -z "$profile" ]; then
-        if [ -f ".agents/active_api_profile_name" ]; then
-            profile=$(cat ".agents/active_api_profile_name" | xargs)
-        else
-            profile="default"
-        fi
-    fi
-
-    local file=".agents/token_budget.json"
-    if [ ! -f "$file" ]; then
-        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90, \"profiles\": {}}" > "$file"
-    fi
-
-    if command -v jq >/dev/null 2>&1; then
-        local current_global=$(jq -r '.current_token_usage // 0' "$file")
-        local new_global=$((current_global + count))
+    backup_suffix = ".backup"
+    agents_dir = utils.get_agents_dir()
+    
+    # 1. Back up files if they exist
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+        print(f"Warning: Existing memory file found. Backing up to {memory_file}{backup_suffix}")
+        shutil.copy(memory_file, memory_file + backup_suffix)
         
-        local current_profile=$(jq -r --arg prof "$profile" '.profiles[$prof].current_token_usage // 0' "$file")
-        local new_profile_usage=$((current_profile + count))
+    project_rules = os.path.join(agents_dir, 'rules', 'project_rules.md')
+    if os.path.exists(project_rules):
+        print(f"Warning: Existing project rules blueprint found. Backing up to {project_rules}{backup_suffix}")
+        shutil.copy(project_rules, project_rules + backup_suffix)
         
-        local temp=$(mktemp)
-        jq --argjson g_use "$new_global" \
-           --arg prof "$profile" \
-           --argjson p_use "$new_profile_usage" \
-           '.current_token_usage = $g_use | .profiles[$prof].current_token_usage = $p_use | .profiles[$prof].max_token_budget //= 500000' \
-           "$file" > "$temp"
-        mv "$temp" "$file"
-        echo "Logged $count tokens for profile '$profile'. Total profile usage: $new_profile_usage. Global usage: $new_global."
-    elif command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
-        local py_cmd="python3"
-        if ! command -v python3 >/dev/null 2>&1; then py_cmd="python"; fi
-        $py_cmd -c "
-import json
-file_path = '$file'
-count = $count
-profile = '$profile'
-try:
-    with open(file_path, 'r') as f:
-        data = json.load(f)
-except Exception:
-    data = {'max_token_budget': 500000, 'current_token_usage': 0, 'alert_threshold_percent': 90, 'profiles': {}}
-
-data['current_token_usage'] = data.get('current_token_usage', 0) + count
-if 'profiles' not in data:
-    data['profiles'] = {}
-if profile not in data['profiles']:
-    data['profiles'][profile] = {'max_token_budget': 500000, 'current_token_usage': 0}
-data['profiles'][profile]['current_token_usage'] = data['profiles'][profile].get('current_token_usage', 0) + count
-
-with open(file_path, 'w') as f:
-    json.dump(data, f, indent=2)
-"
-        echo "Logged $count tokens for profile '$profile' (fallback). Updated $file."
-    else
-        # minimal fallback using sed (global only)
-        local current=$(grep -o '"current_token_usage":\s*[0-9]*' "$file" | grep -o '[0-9]*' || echo "0")
-        local new_usage=$((current + count))
-        sed -i "s/\"current_token_usage\":\s*[0-9]*/\"current_token_usage\": $new_usage/" "$file"
-        echo "Logged $count tokens (global fallback). Updated $file."
-    fi
-}
-
-cmd_create_adr() {
-    if [ $# -lt 2 ]; then
-        echo "Usage: $0 create-adr <title> [proposed|accepted|superseded]"
-        exit 1
-    fi
-    local title="$2"
-    local status="${3:-proposed}"
-    
-    # Normalize status to lowercase
-    status=$(echo "$status" | tr '[:upper:]' '[:lower:]')
-    
-    if [ "$status" != "proposed" ] && [ "$status" != "accepted" ] && [ "$status" != "superseded" ]; then
-        echo "Error: Status must be one of: proposed, accepted, superseded" >&2
-        exit 1
-    fi
-    
-    # Capitalize status for presentation (Proposed, Accepted, Superseded)
-    local status_cap
-    if [ "$status" = "proposed" ]; then
-        status_cap="Proposed"
-    elif [ "$status" = "accepted" ]; then
-        status_cap="Accepted"
-    else
-        status_cap="Superseded"
-    fi
-
-    local adrs_dir=".agents/adrs"
-    mkdir -p "$adrs_dir"
-    
-    # Determine the next ADR number
-    local count=1
-    for f in "$adrs_dir"/[0-9][0-9][0-9]-*.md; do
-        if [ -e "$f" ]; then
-            count=$((count + 1))
-        fi
-    done
-    
-    local num
-    num=$(printf "%03d" "$count")
-    
-    # Convert title to kebab-case for filename (lowercase, replace non-alphanumeric with hyphens)
-    local slug
-    slug=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
-    
-    local filename="$adrs_dir/${num}-${slug}.md"
-    
-    local adr_date
-    adr_date=$(date +%Y-%m-%d)
-    
-    # Write ADR template
-    cat << INNER_EOF > "$filename"
-# ADR-${num}: ${title}
-
-- **Date**: ${adr_date}
-- **Status**: ${status_cap}
-
-## Context
-[Describe the problem context and alternatives]
-
-## Decision
-[Describe the decision made]
-
-## Consequences
-[Describe the result and impact of this decision]
-INNER_EOF
-
-    # Register in .agents/adr.md
-    local index_file=".agents/adr.md"
-    if [ -f "$index_file" ]; then
-        # Check if "## 1. Architectural Decisions Index" exists, if not create it
-        if ! grep -q "## 1. Architectural Decisions Index" "$index_file"; then
-            echo -e "\n## 1. Architectural Decisions Index" >> "$index_file"
-        fi
-        # Append the link
-        echo "- [ADR-${num}: ${title}](file://./adrs/${num}-${slug}.md) - Status: ${status_cap}" >> "$index_file"
-    fi
-    
-    echo "Created ADR-${num} at $filename and registered in $index_file"
-}
-
-cmd_release() {
-    if [ $# -lt 2 ]; then
-        echo "Usage: $0 release <major|minor|patch>"
-        exit 1
-    fi
-    local bump_type="$2"
-    local changelog_file="CHANGELOG.md"
-    
-    if [ ! -f "$changelog_file" ]; then
-        echo "Error: CHANGELOG.md not found!"
-        exit 1
-    fi
-    
-    # Extract latest version from CHANGELOG.md (e.g. ## [1.4.0] - 2026-06-13)
-    local current_version
-    current_version=$(grep -m 1 -E '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' "$changelog_file" | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
-    
-    if [ -z "$current_version" ]; then
-        echo "Error: Could not parse current version from CHANGELOG.md."
-        exit 1
-    fi
-    
-    local major=$(echo "$current_version" | cut -d. -f1)
-    local minor=$(echo "$current_version" | cut -d. -f2)
-    local patch=$(echo "$current_version" | cut -d. -f3)
-    
-    case "$bump_type" in
-        major)
-            major=$((major + 1))
-            minor=0
-            patch=0
-            ;;
-        minor)
-            minor=$((minor + 1))
-            patch=0
-            ;;
-        patch)
-            patch=$((patch + 1))
-            ;;
-        *)
-            echo "Error: Invalid bump type '$bump_type'. Must be major, minor, or patch."
-            exit 1
-            ;;
-    esac
-    
-    local next_version="$major.$minor.$patch"
-    local current_date=$(date +%Y-%m-%d)
-    
-    echo "Bumping version: $current_version -> $next_version ($bump_type)"
-    
-    # 1. Insert new version section at the top of the version list in CHANGELOG.md
-    local temp_changelog=$(mktemp)
-    awk -v next_ver="$next_version" -v date="$current_date" '
-        BEGIN { done = 0 }
-        /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ && done == 0 {
-            print "## [" next_ver "] - " date;
-            print "### Added";
-            print "- ";
-            print "";
-            done = 1
-        }
-        { print }
-    ' "$changelog_file" > "$temp_changelog"
-    
-    # 2. Update version comparison links at the bottom
-    local repo_url="https://github.com/rafaelghif/antigravity-agents"
-    local temp_links=$(mktemp)
-    awk -v next_ver="$next_version" -v curr_ver="$current_version" -v url="$repo_url" '
-        BEGIN { link_inserted = 0 }
-        /^\[[0-9]+\.[0-9]+\.[0-9]+\]:/ && link_inserted == 0 {
-            print "[" next_ver "]: " url "/compare/v" curr_ver "...v" next_ver;
-            link_inserted = 1
-        }
-        { print }
-    ' "$temp_changelog" > "$temp_links"
-    
-    mv "$temp_links" "$changelog_file"
-    rm -f "$temp_changelog"
-    
-    echo "Successfully bumped version to $next_version and updated CHANGELOG.md."
-}
-
-audit_skill() {
-    local skill_dir="$1"
-    local skill_name=$(basename "$skill_dir")
-    local skill_md="$skill_dir/SKILL.md"
-    
-    # Check 1: SKILL.md exists
-    if [ ! -f "$skill_md" ]; then
-        echo "FAIL: $skill_name is missing SKILL.md"
-        return 1
-    fi
-    
-    # Check 2: Parse YAML frontmatter
-    local line1=$(head -n 1 "$skill_md" | tr -d '\r')
-    if [ "$line1" != "---" ]; then
-        echo "FAIL: $skill_name SKILL.md does not start with YAML frontmatter delimiter (---)"
-        return 1
-    fi
-    
-    local closing_line=$(grep -n "^---" "$skill_md" | sed -n '2p' | cut -d':' -f1)
-    if [ -z "$closing_line" ]; then
-        echo "FAIL: $skill_name SKILL.md has unclosed YAML frontmatter"
-        return 1
-    fi
-    
-    local frontmatter=$(sed -n "2,$((closing_line - 1))p" "$skill_md")
-    
-    local parsed_name=$(echo "$frontmatter" | grep "^name:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-    local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-    
-    if [ -z "$parsed_name" ]; then
-        echo "FAIL: $skill_name frontmatter missing 'name'"
-        return 1
-    fi
-    if [ -z "$parsed_desc" ]; then
-        echo "FAIL: $skill_name frontmatter missing 'description'"
-        return 1
-    fi
-    
-    # Check 3: Check for placeholders in SKILL.md
-    if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$skill_md"; then
-        echo "FAIL: $skill_name SKILL.md contains placeholder text (TODO/FIXME/placeholder)"
-        return 1
-    fi
-    
-    # Check 4: Verify referenced scripts
-    local in_scripts=0
-    local script_lines=""
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^scripts:[[:space:]]*$ ]]; then
-            in_scripts=1
-            continue
-        elif [[ "$line" =~ ^[a-zA-Z_]+: ]]; then
-            in_scripts=0
-        fi
+    schema_index = os.path.join(agents_dir, 'schema.md')
+    if os.path.exists(schema_index):
+        print(f"Warning: Existing schema index found. Backing up to {schema_index}{backup_suffix}")
+        shutil.copy(schema_index, schema_index + backup_suffix)
         
-        if [ "$in_scripts" -eq 1 ]; then
-            script_lines="$script_lines"$'\n'"$line"
-        fi
-    done <<INNER_EOF
-$frontmatter
-INNER_EOF
+    # 2. Re-create directory structure
+    print("Re-creating directory structure...")
+    skills = ['codebase-recon', 'git-ops', 'test-driven-patch', 'infra-provisioner', 'security-ci-audit', 'code-review', 'impact-analysis']
+    for s in skills:
+        os.makedirs(os.path.join(agents_dir, 'skills', s), exist_ok=True)
+        
+    os.makedirs(os.path.join(agents_dir, 'workflows'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'archive'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'locks'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'schemas'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'scripts'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'hooks'), exist_ok=True)
+    os.makedirs(os.path.join(agents_dir, 'rules'), exist_ok=True)
+    
+    # 3. Update Git Hooks with custom backup checks
+    print("Updating local Git hooks...")
+    hooks = ['pre-commit', 'post-commit', 'commit-msg']
+    for h in hooks:
+        src_hook = os.path.join(agents_dir, 'hooks', h)
+        dest_hook = os.path.join('.git', 'hooks', h)
+        if os.path.exists(src_hook):
+            # Check if custom hooks exist and backup if not ours
+            if os.path.exists(dest_hook):
+                is_ours = False
+                try:
+                    with open(dest_hook, 'r') as f:
+                        if "Antigravity Agent Git Hook" in f.read():
+                            is_ours = True
+                except: pass
+                
+                if not is_ours:
+                    print(f"  - Backing up existing custom {h} hook")
+                    shutil.move(dest_hook, dest_hook + ".backup")
+                    
+            shutil.copy(src_hook, dest_hook)
+            try:
+                os.chmod(dest_hook, 0o755)
+            except: pass
+            print(f"  - Installed {h} hook")
+            
+    # 4. Update memory.md schema version
+    if os.path.exists(memory_file):
+        print("Updating memory ledger schema version to 5.0.0...")
+        try:
+            with open(memory_file, 'r') as f:
+                content = f.read()
+            if "Memory Schema Version" in content:
+                import re
+                content = re.sub(r"Memory Schema Version\*\*: [0-9]+\.[0-9]+\.[0-9]+", "Memory Schema Version**: 5.0.0", content)
+            else:
+                header = "# Agent Core Memory\n\n> **Memory Schema Version**: 5.0.0  \n> **Target System**: Antigravity Agent Core\n> **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.\n\n"
+                # skip first line if it's the title
+                lines = content.splitlines()
+                if lines and lines[0].startswith("# "):
+                    content = header + "\n".join(lines[1:])
+                else:
+                    content = header + content
+            with open(memory_file, 'w') as f:
+                f.write(content)
+        except Exception as e:
+            print(f"Warning: Failed to update memory schema version: {e}", file=sys.stderr)
+            
+    # 5. Fix .gitignore configuration
+    gitignore = ".gitignore"
+    if os.path.exists(gitignore):
+        print("Validating .gitignore compliance...")
+        try:
+            with open(gitignore, 'r') as f:
+                content = f.read()
+            block = """# <<< ANTIGRAVITY AGENT START >>>
+# Ignore agent transient locks
+.agents/locks/
 
-    while IFS= read -r s_line; do
-        s_line=$(echo "$s_line" | sed -e 's/^[[:space:]]*-//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-        if [ -n "$s_line" ]; then
-            local script_path="$skill_dir/$s_line"
-            if [ ! -f "$script_path" ]; then
-                echo "FAIL: $skill_name referenced script $s_line does not exist"
-                return 1
-            fi
-            if [ ! -x "$script_path" ]; then
-                echo "FAIL: $skill_name referenced script $s_line is not executable (missing chmod +x)"
-                return 1
-            fi
-        fi
-    done <<INNER_EOF
-$script_lines
-INNER_EOF
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>"""
 
-    if [ -d "$skill_dir/scripts" ]; then
-        for f in "$skill_dir/scripts"/*; do
-            if [ -f "$f" ]; then
-                if [ ! -x "$f" ]; then
-                    echo "FAIL: $skill_name script $(basename "$f") is not executable"
-                    return 1
-                fi
-                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$f"; then
-                    echo "FAIL: $skill_name script $(basename "$f") contains placeholder text (TODO/FIXME/placeholder)"
-                    return 1
-                fi
-            fi
-        done
-    fi
-    
-    echo "PASS: $parsed_name ($parsed_desc)"
-    return 0
-}
+            start_guard = '# <<< ANTIGRAVITY AGENT START >>>'
+            end_guard = '# <<< ANTIGRAVITY AGENT END >>>'
+            
+            ignored_patterns = {
+                '.agents', '.agents/', 'AGENTS.md', '.agents/locks/', '.agents/locks',
+                '.agents/git_profiles', '.agents/api_keys', '.agents/active_api_keys',
+                '.agents/active_api_keys.ps1', '.agents/active_api_profile_name'
+            }
+            
+            lines = content.splitlines()
+            lines = [l for l in lines if l.strip() not in ignored_patterns]
+            content = '\n'.join(lines) + '\n'
+            
+            if start_guard in content and end_guard in content:
+                start_idx = content.find(start_guard)
+                end_idx = content.find(end_guard) + len(end_guard)
+                new_content = content[:start_idx] + block + content[end_idx:]
+            else:
+                if not content.endswith('\n'):
+                    content += '\n'
+                new_content = content + '\n' + block + '\n'
+                
+            while new_content.endswith('\n\n'):
+                new_content = new_content[:-1]
+                
+            with open(gitignore, 'w') as f:
+                f.write(new_content)
+            print("  - .gitignore updated with Antigravity Agent block guards.")
+        except Exception as e:
+            print(f"Warning: Failed to update .gitignore: {e}", file=sys.stderr)
+    else:
+        print("Creating default compliant .gitignore...")
+        try:
+            with open(gitignore, 'w') as f:
+                f.write("""# <<< ANTIGRAVITY AGENT START >>>
+# Ignore agent transient locks
+.agents/locks/
 
-cmd_create_skill() {
-    if [ $# -lt 2 ]; then
-        echo "Usage: $0 create-skill <name> [description]"
-        exit 1
-    fi
-    local name="$2"
-    local desc="${3:-}"
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>
+""")
+        except Exception as e:
+            print(f"Warning: Failed to create default .gitignore: {e}", file=sys.stderr)
+            
+    # 6. Re-run stack discovery
+    print("Running autonomous stack reconstruction...")
+    recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
+    if os.path.exists(recon_sh):
+        subprocess.run([recon_sh, "-f"])
+        
+    print("==========================================================")
+    print("Migration Complete! Workspace successfully upgraded.")
+    print("==========================================================")
+
+EOF
+
+# Write .agents/scripts/cli/commands/__init__.py
+write_template_safe ".agents/scripts/cli/commands/__init__.py" << 'EOF'
+
+
+EOF
+
+# Write .agents/scripts/cli/commands/push.py
+write_template_safe ".agents/scripts/cli/commands/push.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    # Parse options
+    force = False
+    no_validate = False
     
-    if [[ ! "$name" =~ ^[a-z0-9-]+$ ]]; then
-        echo "Error: Skill name must be lowercase kebab-case (e.g., custom-skill-name)." >&2
-        exit 1
-    fi
+    if len(args) > 1:
+        if '--help' in args[1:] or '-h' in args[1:]:
+            print("==========================================================")
+            print("  Antigravity Helper CLI - git push wrapper")
+            print("==========================================================")
+            print("Usage: helper.sh push [options]")
+            print("")
+            print("Options:")
+            print("  -f, --force         Force push to remote origin")
+            print("  -n, --no-validate   Skip workspace validation and Git profile warnings")
+            print("  -h, --help          Show this help message")
+            sys.exit(0)
+            
+        for arg in args[1:]:
+            if arg in ('--force', '-f'):
+                force = True
+            elif arg in ('--no-validate', '-n'):
+                no_validate = True
+
+    # 1. Run Workspace Validation
+    if not no_validate:
+        validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+        if os.path.exists(validate_sh):
+            print("Running workspace validation...")
+            proc = subprocess.run([validate_sh])
+            if proc.returncode != 0:
+                print("Error: Workspace validation failed. Push aborted.", file=sys.stderr)
+                sys.exit(proc.returncode)
+        else:
+            print(f"Warning: validate.sh not found at {validate_sh}. Skipping validation.", file=sys.stderr)
+
+    # 2. Check Git user profile mapping
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
     
-    local skill_dir=".agents/skills/$name"
-    if [ -d "$skill_dir" ]; then
-        echo "Error: Skill '$name' already exists at $skill_dir." >&2
-        exit 1
-    fi
+    profiles_file = ""
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if profiles_file:
+        try:
+            with open(profiles_file, 'r') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
+        except Exception as e:
+            print(f"Warning: Failed to read profiles from {profiles_file}: {e}", file=sys.stderr)
+
+    current_email = ""
+    try:
+        current_email = subprocess.check_output(
+            ["git", "config", "user.email"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception as e:
+        pass
+
+    matching_profile = None
+    ssh_key_path = None
+
+    if config:
+        profile_names = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+        for p_name in profile_names:
+            p_email = config.get(f"{p_name}.email", "")
+            if current_email and p_email == current_email:
+                matching_profile = p_name
+                p_ssh = config.get(f"{p_name}.ssh_key", "")
+                if p_ssh:
+                    resolved_ssh = os.path.expanduser(p_ssh)
+                    if os.path.exists(resolved_ssh):
+                        ssh_key_path = resolved_ssh
+                    else:
+                        print(f"[WARNING] SSH key file for profile '{p_name}' at '{p_ssh}' was not found.", file=sys.stderr)
+                break
+
+    if not no_validate:
+        if not profiles_file:
+            print("[WARNING] No Git profiles configuration found. Cannot verify user profile alignment.", file=sys.stderr)
+        elif not matching_profile:
+            print(f"[WARNING] Current Git user email '{current_email}' does not match any profile in {profiles_file}.", file=sys.stderr)
+        else:
+            print(f"[INFO] Active Git profile matched: '{matching_profile}'")
+
+    # 3. Detect current branch
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception as e:
+        print(f"Error: Failed to resolve current Git branch: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if not branch or branch == "HEAD":
+        print("Error: Cannot push in detached HEAD state.", file=sys.stderr)
+        sys.exit(1)
+
+    # 4. Prepare and run git push
+    cmd = ["git", "push", "origin", branch]
+    if force:
+        cmd.append("--force")
+
+    env = os.environ.copy()
+    if ssh_key_path:
+        env["GIT_SSH_COMMAND"] = f"ssh -i \"{ssh_key_path}\" -o IdentitiesOnly=yes"
+        print(f"[INFO] Using SSH key rotation: '{ssh_key_path}'")
+
+    print(f"Running: {' '.join(cmd)}")
+    proc = subprocess.run(cmd, env=env)
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents/scripts/cli/commands/skills.py
+write_template_safe ".agents/scripts/cli/commands/skills.py" << 'EOF'
+import os
+import sys
+import re
+import utils
+
+def run(args):
+    if len(args) == 0:
+        print("Usage: helper.py <command> [arguments...]", file=sys.stderr)
+        sys.exit(1)
+        
+    command = args[0]
     
-    mkdir -p "$skill_dir/scripts"
+    if command == "create-skill":
+        create_skill(args)
+    elif command == "list-skills":
+        list_skills(args)
+    else:
+        print(f"Unknown skills command: {command}", file=sys.stderr)
+        sys.exit(1)
+
+def create_skill(args):
+    if len(args) < 2:
+        print("Usage: helper.py create-skill <name> [description]", file=sys.stderr)
+        sys.exit(1)
+        
+    name = args[1]
+    desc = args[2] if len(args) > 2 else ""
     
-    cat << INNER_EOF > "$skill_dir/SKILL.md"
----
-name: $name
-description: ${desc:-Specialized skill for $name automation.}
+    if not re.match(r"^[a-z0-9-]+$", name):
+        print("Error: Skill name must be lowercase kebab-case (e.g., custom-skill-name).", file=sys.stderr)
+        sys.exit(1)
+        
+    workspace_root = utils.find_workspace_root()
+    skill_dir = os.path.join(workspace_root, ".agents", "skills", name)
+    
+    if os.path.exists(skill_dir):
+        print(f"Error: Skill '{name}' already exists at {skill_dir}.", file=sys.stderr)
+        sys.exit(1)
+        
+    os.makedirs(os.path.join(skill_dir, "scripts"), exist_ok=True)
+    
+    skill_md_content = f"""---
+name: {name}
+description: {desc if desc else f"Specialized skill for {name} automation."}
 scripts:
   - scripts/main.py
 ---
 
-# ${name} Skill
+# {name} Skill
 
 ## 1. Input Specification
 - Specify required inputs (e.g., target file paths, options).
@@ -5021,10 +2207,9 @@ scripts:
 
 ## 5. Output Verification Gate
 - [ ] Executable script passes all internal checks.
-INNER_EOF
+"""
 
-    cat << INNER_EOF > "$skill_dir/scripts/main.py"
-#!/usr/bin/env python3
+    script_content = f"""#!/usr/bin/env python3
 import argparse
 import sys
 import json
@@ -5034,21 +2219,21 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def run_skill(args):
-    """
+    \"\"\"
     Main logic of the skill script.
-    """
-    logging.info(f"Running skill with arguments: {args}")
+    \"\"\"
+    logging.info(f"Running skill with arguments: {{args}}")
     # Implement operational logic here
     
-    result = {
+    result = {{
         "status": "success",
-        "message": "Skill $name executed successfully",
-        "data": {}
-    }
+        "message": "Skill {name} executed successfully",
+        "data": {{}}
+    }}
     return result
 
 def main():
-    parser = argparse.ArgumentParser(description="Default Python script for agent skill $name.")
+    parser = argparse.ArgumentParser(description="Default Python script for agent skill {name}.")
     parser.add_argument('--target', type=str, help="Target path or resource")
     parser.add_argument('--debug', action='store_true', help="Enable debug mode")
     
@@ -5059,684 +2244,2383 @@ def main():
         print(json.dumps(output, indent=2))
         sys.exit(0)
     except Exception as e:
-        logging.error(f"Execution failed: {str(e)}")
-        error_output = {
+        logging.error(f"Execution failed: {{str(e)}}")
+        error_output = {{
             "status": "error",
             "message": str(e)
-        }
+        }}
         print(json.dumps(error_output, indent=2))
         sys.exit(1)
 
 if __name__ == '__main__':
     main()
-INNER_EOF
+"""
 
-    chmod +x "$skill_dir/scripts/main.py"
-    echo "Skill '$name' created successfully at $skill_dir"
-}
+    skill_md_path = os.path.join(skill_dir, "SKILL.md")
+    script_path = os.path.join(skill_dir, "scripts", "main.py")
+    
+    with open(skill_md_path, 'w', encoding='utf-8') as f:
+        f.write(skill_md_content)
+        
+    with open(script_path, 'w', encoding='utf-8') as f:
+        f.write(script_content)
+        
+    os.chmod(script_path, 0o755)
+    
+    # Scaffold skeleton unit test for the skill
+    tests_dir = os.path.join(workspace_root, "tests")
+    os.makedirs(tests_dir, exist_ok=True)
+    name_with_underscores = name.replace("-", "_")
+    test_file_path = os.path.join(tests_dir, f"test_skill_{name_with_underscores}.py")
+    
+    camel_name = "".join(part.capitalize() for part in name.split("-"))
+    test_content = f"""import unittest
+import subprocess
+import os
 
-cmd_list_skills() {
-    local skills_dir=".agents/skills"
-    if [ ! -d "$skills_dir" ]; then
-        echo "Error: Skills directory $skills_dir not found." >&2
-        exit 1
-    fi
-    
-    echo "=========================================================="
-    echo "          Antigravity Agent Skills Audit & Registry"
-    echo "=========================================================="
-    
-    local audit_failed=0
-    printf "%-25s | %-12s | %s\n" "Skill Name" "Status" "Description"
-    echo "----------------------------------------------------------"
-    
-    for dir in "$skills_dir"/*; do
-        if [ -d "$dir" ]; then
-            local skill_name=$(basename "$dir")
-            local audit_res
-            local exit_code=0
-            if ! audit_res=$(audit_skill "$dir" 2>&1); then
-                exit_code=1
-            fi
-            
-            local status="[PASS]"
-            local detail=""
-            if [ $exit_code -eq 0 ]; then
-                detail=$(echo "$audit_res" | sed -E 's/^PASS: [^ ]+ \((.*)\)/\1/')
-            else
-                status="[FAIL]"
-                detail=$(echo "$audit_res" | sed -E 's/^FAIL: //')
-                audit_failed=$((audit_failed + 1))
-            fi
-            
-            printf "%-25s | %-12s | %s\n" "$skill_name" "$status" "$detail"
-        fi
-    done
-    
-    echo "=========================================================="
-    if [ $audit_failed -eq 0 ]; then
-        echo "All skills are compliant and ready for use."
-        return 0
-    else
-        echo "Audit failed! Found $audit_failed non-compliant skill(s)." >&2
-        return 1
-    fi
-}
+class TestSkill{camel_name}(unittest.TestCase):
+    def test_help_execution(self):
+        \"\"\"Verify that the skill script can be executed with --help.\"\"\"
+        script_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            ".agents", "skills", "{name}", "scripts", "main.py"
+        )
+        self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
+        
+        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Default Python script for agent skill {name}", proc.stdout)
 
-audit_rule() {
-    local rule_file="$1"
-    local rule_name=$(basename "$rule_file" .md)
+if __name__ == '__main__':
+    unittest.main()
+"""
+    with open(test_file_path, 'w', encoding='utf-8') as f:
+        f.write(test_content)
+        
+    print(f"Skill '{name}' created successfully at {skill_dir}")
+    print(f"Skeleton unit test scaffolded at {test_file_path}")
+
+def audit_skill(skill_dir):
+    skill_name = os.path.basename(skill_dir)
+    skill_md = os.path.join(skill_dir, "SKILL.md")
     
-    # Check 1: Must be .md extension
-    if [[ ! "$rule_file" =~ \.md$ ]]; then
-        echo "FAIL: $rule_name is not a markdown file"
-        return 1
-    fi
-    
+    # Check 1: SKILL.md exists
+    if not os.path.isfile(skill_md):
+        return False, f"{skill_name} is missing SKILL.md"
+        
     # Check 2: Parse YAML frontmatter
-    local line1=$(head -n 1 "$rule_file" | tr -d '\r')
-    if [ "$line1" != "---" ]; then
-        echo "FAIL: $rule_name does not start with YAML frontmatter delimiter (---)"
-        return 1
-    fi
+    try:
+        with open(skill_md, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except Exception as e:
+        return False, f"failed to read SKILL.md: {e}"
+        
+    if not lines or lines[0].strip() != "---":
+        return False, f"{skill_name} SKILL.md does not start with YAML frontmatter delimiter (---)"
+        
+    closing_idx = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            closing_idx = i
+            break
+            
+    if closing_idx == -1:
+        return False, f"{skill_name} SKILL.md has unclosed YAML frontmatter"
+        
+    frontmatter_lines = lines[1:closing_idx]
+    frontmatter_text = "".join(frontmatter_lines)
     
-    local closing_line=$(grep -n "^---" "$rule_file" | sed -n '2p' | cut -d':' -f1)
-    if [ -z "$closing_line" ]; then
-        echo "FAIL: $rule_name has unclosed YAML frontmatter"
-        return 1
-    fi
-    
-    local frontmatter=$(sed -n "2,$((closing_line - 1))p" "$rule_file")
-    
-    local parsed_name=$(echo "$frontmatter" | grep "^name:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-    local parsed_activation=$(echo "$frontmatter" | grep "^activation:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-    
-    if [ -z "$parsed_name" ]; then
-        echo "FAIL: $rule_name frontmatter missing 'name'"
-        return 1
-    fi
-    
-    if [ -z "$parsed_activation" ]; then
-        echo "FAIL: $rule_name frontmatter missing 'activation'"
-        return 1
-    fi
-    
-    # Check 3: Validate activation parameters
-    case "$parsed_activation" in
-        "Manual"|"Always On")
-            ;;
-        "Glob")
-            local parsed_pattern=$(echo "$frontmatter" | grep "^pattern:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-            if [ -z "$parsed_pattern" ]; then
-                echo "FAIL: $rule_name activation is Glob but missing 'pattern'"
-                return 1
-            fi
-            ;;
-        "Model Decision")
-            local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-            if [ -z "$parsed_desc" ]; then
-                echo "FAIL: $rule_name activation is Model Decision but missing 'description'"
-                return 1
-            fi
-            ;;
-        *)
-            echo "FAIL: $rule_name has invalid activation mode '$parsed_activation'"
-            return 1
-            ;;
-    esac
-    
-    # Check 4: Check for placeholders in rule body
-    if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$rule_file"; then
-        echo "FAIL: $rule_name contains placeholder text (TODO/FIXME/placeholder)"
-        return 1
-    fi
-    
-    # Return activation details for tabulated output
-    local details="$parsed_activation"
-    if [ "$parsed_activation" = "Glob" ]; then
-        local parsed_pattern=$(echo "$frontmatter" | grep "^pattern:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-        details="Glob ($parsed_pattern)"
-    elif [ "$parsed_activation" = "Model Decision" ]; then
-        local parsed_desc=$(echo "$frontmatter" | grep "^description:" | cut -d':' -f2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e "s/^'//" -e "s/'$//" -e 's/^"//' -e 's/"$//')
-        details="Model Decision ($parsed_desc)"
-    fi
-    
-    echo "PASS: $parsed_name ($details)"
-    return 0
-}
+    # Parse fields
+    parsed_name = None
+    parsed_desc = None
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("name:"):
+            parsed_name = line_strip[len("name:"):].strip().strip("'\"")
+        elif line_strip.startswith("description:"):
+            parsed_desc = line_strip[len("description:"):].strip().strip("'\"")
+            
+    if not parsed_name:
+        return False, f"{skill_name} frontmatter missing 'name'"
+    if not parsed_desc:
+        return False, f"{skill_name} frontmatter missing 'description'"
+        
+    # Check 3: Check for placeholders in SKILL.md
+    try:
+        with open(skill_md, 'r', encoding='utf-8') as f:
+            full_content = f.read()
+    except Exception as e:
+        return False, f"failed to read SKILL.md content: {e}"
+        
+    if re.search(r"TODO|FIXME|\[placeholder\]", full_content, re.IGNORECASE):
+        return False, f"{skill_name} SKILL.md contains placeholder text (TODO/FIXME/placeholder)"
+        
+    # Check 4: Verify referenced scripts
+    in_scripts = False
+    script_paths = []
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("scripts:"):
+            in_scripts = True
+            continue
+        elif in_scripts and ":" in line_strip and not line_strip.startswith("-"):
+            in_scripts = False
+            
+        if in_scripts:
+            if line_strip.startswith("-"):
+                script_path_val = line_strip[1:].strip().strip("'\"")
+                if script_path_val:
+                    script_paths.append(script_path_val)
+                    
+    for s_path in script_paths:
+        full_script_path = os.path.join(skill_dir, s_path)
+        if not os.path.isfile(full_script_path):
+            return False, f"{skill_name} referenced script {s_path} does not exist"
+        if not os.access(full_script_path, os.X_OK):
+            return False, f"{skill_name} referenced script {s_path} is not executable (missing chmod +x)"
+            
+    # Check the scripts directory files if scripts dir exists
+    scripts_dir = os.path.join(skill_dir, "scripts")
+    if os.path.isdir(scripts_dir):
+        for entry in os.listdir(scripts_dir):
+            entry_path = os.path.join(scripts_dir, entry)
+            if os.path.isfile(entry_path):
+                if not os.access(entry_path, os.X_OK):
+                    return False, f"{skill_name} script {entry} is not executable"
+                try:
+                    with open(entry_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        script_code = f.read()
+                except Exception as e:
+                    return False, f"failed to read script {entry}: {e}"
+                if re.search(r"TODO|FIXME|\[placeholder\]", script_code, re.IGNORECASE):
+                    return False, f"{skill_name} script {entry} contains placeholder text (TODO/FIXME/placeholder)"
+                    
+    return True, parsed_desc
 
-cmd_create_rule() {
-    if [ $# -lt 3 ]; then
-        echo "Usage: $0 create-rule <name> <activation> [description_or_pattern]"
-        exit 1
-    fi
-    local name="$2"
-    local activation="$3"
-    local param="${4:-}"
+def list_skills(args):
+    skills_dir = os.path.join(utils.get_agents_dir(), "skills")
+    if not os.path.isdir(skills_dir):
+        print(f"Error: Skills directory {skills_dir} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    print("==========================================================")
+    print("          Antigravity Agent Skills Audit & Registry")
+    print("==========================================================")
     
-    if [[ ! "$name" =~ ^[a-z0-9-]+$ ]]; then
-        echo "Error: Rule name must be lowercase kebab-case (e.g., custom-rule-name)." >&2
-        exit 1
-    fi
+    audit_failed = 0
+    print(f"{'Skill Name':<25} | {'Status':<12} | Description")
+    print("----------------------------------------------------------")
     
-    local activation_mode=""
-    case "$activation" in
-        manual) activation_mode="Manual" ;;
-        always-on) activation_mode="Always On" ;;
-        model-decision) activation_mode="Model Decision" ;;
-        glob) activation_mode="Glob" ;;
-        *)
-            echo "Error: Invalid activation mode '$activation'. Must be: manual, always-on, model-decision, or glob." >&2
-            exit 1
-            ;;
-    esac
-    
-    local pattern=""
-    local description=""
-    if [ "$activation_mode" = "Glob" ]; then
-        if [ -z "$param" ]; then
-            echo "Error: Glob activation requires a glob pattern parameter (e.g., 'src/**/*.ts')." >&2
-            exit 1
-        fi
-        pattern="$param"
-    elif [ "$activation_mode" = "Model Decision" ]; then
-        if [ -z "$param" ]; then
-            echo "Error: Model Decision activation requires a natural language description parameter." >&2
-            exit 1
-        fi
-        description="$param"
-    fi
-    
-    local rule_file=".agents/rules/$name.md"
-    if [ -f "$rule_file" ]; then
-        echo "Error: Rule '$name' already exists at $rule_file." >&2
-        exit 1
-    fi
-    
-    mkdir -p ".agents/rules"
-    
-    cat << INNER_EOF > "$rule_file"
----
-name: $name
-activation: $activation_mode
-$( [ -n "$pattern" ] && echo "pattern: \"$pattern\"" )
-$( [ -n "$description" ] && echo "description: \"$description\"" )
----
+    entries = sorted(os.listdir(skills_dir))
+    for entry in entries:
+        dir_path = os.path.join(skills_dir, entry)
+        if os.path.isdir(dir_path):
+            passed, detail = audit_skill(dir_path)
+            status = "[PASS]" if passed else "[FAIL]"
+            if not passed:
+                audit_failed += 1
+            print(f"{entry:<25} | {status:<12} | {detail}")
+            
+    print("==========================================================")
+    if audit_failed == 0:
+        print("All skills are compliant and ready for use.")
+        sys.exit(0)
+    else:
+        print(f"Audit failed! Found {audit_failed} non-compliant skill(s).", file=sys.stderr)
+        sys.exit(1)
 
-# ${name} Workspace Rule
+EOF
+
+# Write .agents/scripts/cli/commands/archive.py
+write_template_safe ".agents/scripts/cli/commands/archive.py" << 'EOF'
+import os
+import sys
+import subprocess
+import shutil
+import utils
+
+def run(args):
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"Error: Memory file {memory_file} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    archive_dir = os.path.join(utils.get_agents_dir(), 'archive')
+    os.makedirs(archive_dir, exist_ok=True)
+    
+    # Get git branch
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "detached"
+        
+    branch_clean = branch.replace('/', '_')
+    archive_file = os.path.join(archive_dir, f"sprint_{branch_clean}.md")
+    
+    print(f"Archiving tasks to {archive_file}...")
+    
+    # Read memory.md
+    with open(memory_file, 'r') as f:
+        lines = f.readlines()
+        
+    checklist_lines = []
+    in_checklist = False
+    
+    # Extract the checklist
+    for line in lines:
+        if "### Sprint Tasks Checklist" in line:
+            in_checklist = True
+            checklist_lines.append(line)
+            continue
+        if in_checklist:
+            if line.strip() == "---" or line.startswith("## "):
+                in_checklist = False
+            else:
+                checklist_lines.append(line)
+                
+    # Save/append the checklist to the archive file
+    if checklist_lines:
+        mode = 'a' if os.path.exists(archive_file) else 'w'
+        with open(archive_file, mode) as f:
+            f.write("".join(checklist_lines))
+            f.write("\n")
+            
+    # Relocate workflow and PR files
+    branch_archive_dir = os.path.join(archive_dir, f"sprint_{branch_clean}")
+    os.makedirs(branch_archive_dir, exist_ok=True)
+    
+    workflows_dir = os.path.join(utils.get_agents_dir(), 'workflows')
+    print(f"Archiving workflow and PR review files to {branch_archive_dir}...")
+    
+    if os.path.exists(workflows_dir):
+        for item in os.listdir(workflows_dir):
+            item_path = os.path.join(workflows_dir, item)
+            # Match task_* or pr_review_* files
+            if os.path.isfile(item_path) and (item.startswith("task_") or item.startswith("pr_review_")):
+                shutil.move(item_path, os.path.join(branch_archive_dir, item))
+                
+    # Reset checklist in memory.md
+    new_lines = []
+    skip = False
+    for line in lines:
+        if "### Sprint Tasks Checklist" in line:
+            new_lines.append(line)
+            new_lines.append("- [ ] Implement core logic\n")
+            new_lines.append("- [ ] Write unit tests\n")
+            new_lines.append("- [ ] Verify build and tests pass\n")
+            skip = True
+            continue
+        if skip:
+            if line.strip() == "---":
+                skip = False
+                new_lines.append(line)
+            continue
+        new_lines.append(line)
+        
+    with open(memory_file, 'w') as f:
+        f.writelines(new_lines)
+        
+    print("Checklist reset successfully.")
+
+EOF
+
+# Write .agents/scripts/cli/commands/doctor.py
+write_template_safe ".agents/scripts/cli/commands/doctor.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    utils.print_title("Antigravity Workspace Doctor Diagnostics")
+    
+    errors = 0
+    
+    # Check Git Repository
+    if os.path.isdir('.git'):
+        print("  [PASS] Git repository initialized.")
+    else:
+        print("  [FAIL] Git repository not initialized!")
+        errors += 1
+        
+    def check_hook(hook_name):
+        hook_path = os.path.join('.git', 'hooks', hook_name)
+        if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
+            print(f"  [PASS] {hook_name} Git hook is installed and executable.")
+        else:
+            print(f"  [WARNING] Git {hook_name} hook is missing or not executable.")
+            print(f"            To install: cp .agents/hooks/{hook_name} .git/hooks/{hook_name} && chmod +x .git/hooks/{hook_name}")
+            
+    check_hook("pre-commit")
+    check_hook("post-commit")
+    check_hook("commit-msg")
+    
+    def check_script(script_name):
+        nonlocal errors
+        script_path = os.path.join(utils.get_agents_dir(), 'scripts', script_name)
+        if os.path.exists(script_path):
+            if os.access(script_path, os.X_OK):
+                print(f"  [PASS] {script_name} is executable.")
+            else:
+                print(f"  [WARNING] {script_name} is not executable. Auto-correcting...")
+                try:
+                    os.chmod(script_path, 0o755)
+                except Exception as e:
+                    print(f"            Failed to set executable permission: {e}", file=sys.stderr)
+        else:
+            print(f"  [FAIL] {script_name} is missing!")
+            errors += 1
+            
+    check_script("helper.sh")
+    check_script("recon.sh")
+    check_script("validate.sh")
+    
+    validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+    if os.path.exists(validate_sh):
+        print("----------------------------------------------------------")
+        proc = subprocess.run([validate_sh])
+        if proc.returncode != 0:
+            errors += 1
+            
+    print("==========================================================")
+    if errors == 0:
+        print("Doctor diagnostics: ALL SYSTEMS HEALTHY")
+        sys.exit(0)
+    else:
+        print(f"Doctor diagnostics: FOUND {errors} ERROR(S) / WARNING(S)")
+        sys.exit(1)
+
+EOF
+
+# Write .agents/scripts/cli/commands/lock.py
+write_template_safe ".agents/scripts/cli/commands/lock.py" << 'EOF'
+import os
+import sys
+import subprocess
+from datetime import datetime
+import utils
+
+def run(args):
+    command = args[0]
+    
+    if len(args) < 2:
+        print(f"Error: Please specify a module name to {command}.", file=sys.stderr)
+        sys.exit(1)
+        
+    module = args[1]
+    # Replace slashes with underscores for nested monorepo paths
+    lock_name = module.replace('/', '_')
+    locks_dir = os.path.join(utils.get_agents_dir(), 'locks')
+    os.makedirs(locks_dir, exist_ok=True)
+    lockfile = os.path.join(locks_dir, f"{lock_name}.lock")
+    
+    if command == "lock":
+        if os.path.exists(lockfile):
+            print(f"Error: Module '{module}' is already locked!", file=sys.stderr)
+            with open(lockfile, 'r') as f:
+                print(f.read(), file=sys.stderr)
+            sys.exit(1)
+            
+        # Get git branch
+        try:
+            branch = subprocess.check_output(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            branch = "detached"
+            
+        timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        
+        with open(lockfile, 'w') as f:
+            f.write(f"Branch: {branch}\n")
+            f.write(f"Owner: Agent\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            
+        print(f"Acquired lock for module '{module}' at {lockfile}")
+        
+    elif command == "unlock":
+        if os.path.exists(lockfile):
+            os.remove(lockfile)
+            print(f"Released lock for module '{module}'")
+        else:
+            print(f"Warning: No active lock found for module '{module}'")
+
+EOF
+
+# Write .agents/scripts/cli/commands/log_usage.py
+write_template_safe ".agents/scripts/cli/commands/log_usage.py" << 'EOF'
+import sys
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py log-usage <token_count>", file=sys.stderr)
+        sys.exit(1)
+        
+    try:
+        tokens = int(args[1])
+    except ValueError:
+        print("Error: Token count must be an integer.", file=sys.stderr)
+        sys.exit(1)
+        
+    utils.log_token_usage(tokens)
+
+EOF
+
+# Write .agents/scripts/cli/commands/lint.py
+write_template_safe ".agents/scripts/cli/commands/lint.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        try:
+            changed_files = subprocess.check_output(
+                ["git", "diff", "--cached", "--name-only"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            changed_files = ""
+            
+        run_all = 0
+        if not changed_files:
+            run_all = 1
+            print("No staged changes detected. Running linter on all monorepo modules...")
+        else:
+            print("Analyzing staged file boundaries for monorepo-aware linting...")
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 5:
+                    path = parts[0]
+                    lint_cmd = parts[4]
+                    
+                    should_run = run_all
+                    if should_run == 0:
+                        # check if any changed file starts with path/
+                        if any(f.startswith(f"{path}/") for f in changed_files.splitlines()):
+                            should_run = 1
+                            
+                    if should_run == 1:
+                        print(f"  Linting {path} ({lint_cmd})...")
+                        proc = subprocess.run(lint_cmd, shell=True, cwd=path)
+                        if proc.returncode != 0:
+                            print(f"  [FAIL] Linter errors found in {path}", file=sys.stderr)
+                            failed = 1
+                    else:
+                        print(f"  Skipping {path} (no staged modifications).")
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        linter_cmd = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Linter command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            linter_cmd = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if linter_cmd and linter_cmd != "echo 'No linter found'":
+            print(f"Running linter command: {linter_cmd}...")
+            proc = subprocess.run(linter_cmd, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No linter configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents/scripts/cli/commands/sync_git.py
+write_template_safe ".agents/scripts/cli/commands/sync_git.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"Error: Memory file {memory_file} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        branch = "detached"
+        
+    try:
+        commit = subprocess.check_output(
+            ["git", "log", "-n", "1", "--format=%h"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        commit = "none"
+        
+    with open(memory_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    content = re.sub(r"- \*\*Active Branch\*\*: .*", f"- **Active Branch**: {branch}", content)
+    content = re.sub(r"- \*\*Last Commit Reference\*\*: .*", f"- **Last Commit Reference**: {commit}", content)
+    
+    with open(memory_file, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    print(f"Synchronized: Branch={branch}, Commit={commit} in {memory_file}")
+
+EOF
+
+# Write .agents/scripts/cli/commands/test.py
+write_template_safe ".agents/scripts/cli/commands/test.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        try:
+            changed_files = subprocess.check_output(
+                ["git", "diff", "--cached", "--name-only"], 
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            changed_files = ""
+            
+        run_all = 0
+        if not changed_files:
+            run_all = 1
+            print("No staged changes detected. Running tests on all monorepo modules...")
+        else:
+            print("Analyzing staged file boundaries for monorepo-aware testing...")
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 4:
+                    path = parts[0]
+                    test_cmd = parts[3]
+                    
+                    should_run = run_all
+                    if should_run == 0:
+                        if any(f.startswith(f"{path}/") for f in changed_files.splitlines()):
+                            should_run = 1
+                            
+                    if should_run == 1:
+                        print(f"  Testing {path} ({test_cmd})...")
+                        proc = subprocess.run(test_cmd, shell=True, cwd=path)
+                        if proc.returncode != 0:
+                            print(f"  [FAIL] Testing suite failed in {path}", file=sys.stderr)
+                            failed = 1
+                    else:
+                        print(f"  Skipping {path} (no staged modifications).")
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        test_runner = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Test runner command" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            test_runner = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if test_runner and test_runner != "echo 'No test suite found'":
+            print(f"Running test suite: {test_runner}...")
+            proc = subprocess.run(test_runner, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No test runner configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents/scripts/cli/commands/create_adr.py
+write_template_safe ".agents/scripts/cli/commands/create_adr.py" << 'EOF'
+import os
+import sys
+import glob
+import re
+from datetime import datetime
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py create-adr <title> [proposed|accepted|superseded]", file=sys.stderr)
+        sys.exit(1)
+        
+    title = args[1]
+    status = args[2].lower() if len(args) > 2 else "proposed"
+    
+    if status not in ("proposed", "accepted", "superseded"):
+        print("Error: Status must be one of: proposed, accepted, superseded", file=sys.stderr)
+        sys.exit(1)
+        
+    status_cap = status.capitalize()
+    adrs_dir = os.path.join(utils.get_agents_dir(), "adrs")
+    os.makedirs(adrs_dir, exist_ok=True)
+    
+    # Determine next ADR number
+    count = 1
+    existing_files = glob.glob(os.path.join(adrs_dir, "[0-9][0-9][0-9]-*.md"))
+    count = len(existing_files) + 1
+    
+    num = f"{count:03d}"
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    filename = os.path.join(adrs_dir, f"{num}-{slug}.md")
+    
+    adr_date = datetime.now().strftime("%Y-%m-%d")
+    
+    adr_content = f"""# ADR-{num}: {title}
+
+- **Date**: {adr_date}
+- **Status**: {status_cap}
+
+## Context
+[Describe the problem context and alternatives]
+
+## Decision
+[Describe the decision made]
+
+## Consequences
+[Describe the result and impact of this decision]
+"""
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(adr_content)
+        
+    index_file = os.path.join(utils.get_agents_dir(), "adr.md")
+    if os.path.isfile(index_file):
+        with open(index_file, 'r', encoding='utf-8') as f:
+            index_content = f.read()
+            
+        if "## 1. Architectural Decisions Index" not in index_content:
+            if not index_content.endswith('\n'):
+                index_content += '\n'
+            index_content += "\n## 1. Architectural Decisions Index\n"
+            
+        if not index_content.endswith('\n'):
+            index_content += '\n'
+            
+        index_content += f"- [ADR-{num}: {title}](file://./adrs/{num}-{slug}.md) - Status: {status_cap}\n"
+        
+        with open(index_file, 'w', encoding='utf-8') as f:
+            f.write(index_content)
+            
+    print(f"Created ADR-{num} at {filename} and registered in {index_file}")
+
+EOF
+
+# Write .agents/scripts/cli/commands/rules.py
+write_template_safe ".agents/scripts/cli/commands/rules.py" << 'EOF'
+import os
+import sys
+import re
+import utils
+
+def run(args):
+    if len(args) == 0:
+        print("Usage: helper.py <command> [arguments...]", file=sys.stderr)
+        sys.exit(1)
+        
+    command = args[0]
+    
+    if command == "create-rule":
+        create_rule(args)
+    elif command == "list-rules":
+        list_rules(args)
+    else:
+        print(f"Unknown rules command: {command}", file=sys.stderr)
+        sys.exit(1)
+
+def create_rule(args):
+    if len(args) < 3:
+        print("Usage: helper.py create-rule <name> <activation> [description_or_pattern]", file=sys.stderr)
+        sys.exit(1)
+        
+    name = args[1]
+    activation = args[2]
+    param = args[3] if len(args) > 3 else ""
+    
+    if not re.match(r"^[a-z0-9-]+$", name):
+        print("Error: Rule name must be lowercase kebab-case (e.g., custom-rule-name).", file=sys.stderr)
+        sys.exit(1)
+        
+    activation_mode = ""
+    if activation == "manual":
+        activation_mode = "Manual"
+    elif activation == "always-on":
+        activation_mode = "Always On"
+    elif activation == "model-decision":
+        activation_mode = "Model Decision"
+    elif activation == "glob":
+        activation_mode = "Glob"
+    else:
+        print(f"Error: Invalid activation mode '{activation}'. Must be: manual, always-on, model-decision, or glob.", file=sys.stderr)
+        sys.exit(1)
+        
+    pattern = ""
+    description = ""
+    if activation_mode == "Glob":
+        if not param:
+            print("Error: Glob activation requires a glob pattern parameter (e.g., 'src/**/*.ts').", file=sys.stderr)
+            sys.exit(1)
+        pattern = param
+    elif activation_mode == "Model Decision":
+        if not param:
+            print("Error: Model Decision activation requires a natural language description parameter.", file=sys.stderr)
+            sys.exit(1)
+        description = param
+        
+    workspace_root = utils.find_workspace_root()
+    rule_file = os.path.join(workspace_root, ".agents", "rules", f"{name}.md")
+    
+    if os.path.exists(rule_file):
+        print(f"Error: Rule '{name}' already exists at {rule_file}.", file=sys.stderr)
+        sys.exit(1)
+        
+    os.makedirs(os.path.dirname(rule_file), exist_ok=True)
+    
+    frontmatter_lines = [
+        "---",
+        f"name: {name}",
+        f"activation: {activation_mode}"
+    ]
+    if pattern:
+        frontmatter_lines.append(f'pattern: "{pattern}"')
+    if description:
+        frontmatter_lines.append(f'description: "{description}"')
+    frontmatter_lines.append("---")
+    
+    rule_content = "\n".join(frontmatter_lines) + f"""
+
+# {name} Workspace Rule
 
 ## Guidelines
 - Define the coding standard or instructions for this rule here.
 - Example: Prefer arrow functions over traditional function syntax.
-INNER_EOF
+"""
 
-    echo "Rule '$name' created successfully at $rule_file"
-}
+    with open(rule_file, 'w', encoding='utf-8') as f:
+        f.write(rule_content)
+        
+    print(f"Rule '{name}' created successfully at {rule_file}")
 
-cmd_list_rules() {
-    local rules_dir=".agents/rules"
-    if [ ! -d "$rules_dir" ]; then
-        echo "Error: Rules directory $rules_dir not found." >&2
-        exit 1
-    fi
+def audit_rule(rule_file):
+    rule_name = os.path.splitext(os.path.basename(rule_file))[0]
     
-    echo "=========================================================="
-    echo "          Antigravity Agent Rules Audit & Registry"
-    echo "=========================================================="
-    
-    local audit_failed=0
-    printf "%-25s | %-12s | %s\n" "Rule Name" "Status" "Activation Mode"
-    echo "----------------------------------------------------------"
-    
-    local file_found=0
-    for file in "$rules_dir"/*; do
-        if [ -f "$file" ]; then
-            file_found=1
-            local rule_name=$(basename "$file")
-            local audit_res
-            local exit_code=0
-            if ! audit_res=$(audit_rule "$file" 2>&1); then
-                exit_code=1
-            fi
+    if not rule_file.endswith(".md"):
+        return False, f"{rule_name} is not a markdown file"
+        
+    try:
+        with open(rule_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except Exception as e:
+        return False, f"failed to read rule: {e}"
+        
+    if not lines or lines[0].strip() != "---":
+        return False, f"{rule_name} does not start with YAML frontmatter delimiter (---)"
+        
+    closing_idx = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            closing_idx = i
+            break
             
-            local status="[PASS]"
-            local detail=""
-            if [ $exit_code -eq 0 ]; then
-                detail=$(echo "$audit_res" | sed -E 's/^PASS: [^ ]+ \((.*)\)/\1/')
-            else
-                status="[FAIL]"
-                detail=$(echo "$audit_res" | sed -E 's/^FAIL: //')
-                audit_failed=$((audit_failed + 1))
-            fi
+    if closing_idx == -1:
+        return False, f"{rule_name} has unclosed YAML frontmatter"
+        
+    frontmatter_lines = lines[1:closing_idx]
+    
+    # Parse fields
+    parsed_name = None
+    parsed_activation = None
+    parsed_pattern = None
+    parsed_desc = None
+    
+    for line in frontmatter_lines:
+        line_strip = line.strip()
+        if line_strip.startswith("name:"):
+            parsed_name = line_strip[len("name:"):].strip().strip("'\"")
+        elif line_strip.startswith("activation:"):
+            parsed_activation = line_strip[len("activation:"):].strip().strip("'\"")
+        elif line_strip.startswith("pattern:"):
+            parsed_pattern = line_strip[len("pattern:"):].strip().strip("'\"")
+        elif line_strip.startswith("description:"):
+            parsed_desc = line_strip[len("description:"):].strip().strip("'\"")
             
-            printf "%-25s | %-12s | %s\n" "$rule_name" "$status" "$detail"
-        fi
-    done
+    if not parsed_name:
+        return False, f"{rule_name} frontmatter missing 'name'"
+    if not parsed_activation:
+        return False, f"{rule_name} frontmatter missing 'activation'"
+        
+    if parsed_activation in ("Manual", "Always On"):
+        pass
+    elif parsed_activation == "Glob":
+        if not parsed_pattern:
+            return False, f"{rule_name} activation is Glob but missing 'pattern'"
+    elif parsed_activation == "Model Decision":
+        if not parsed_desc:
+            return False, f"{rule_name} activation is Model Decision but missing 'description'"
+    else:
+        return False, f"{rule_name} has invalid activation mode '{parsed_activation}'"
+        
+    # Check body for placeholders
+    try:
+        with open(rule_file, 'r', encoding='utf-8') as f:
+            full_content = f.read()
+    except Exception as e:
+        return False, f"failed to read rule content: {e}"
+        
+    if re.search(r"TODO|FIXME|\[placeholder\]", full_content, re.IGNORECASE):
+        return False, f"{rule_name} contains placeholder text (TODO/FIXME/placeholder)"
+        
+    # Return activation details
+    details = parsed_activation
+    if parsed_activation == "Glob":
+        details = f"Glob ({parsed_pattern})"
+    elif parsed_activation == "Model Decision":
+        details = f"Model Decision ({parsed_desc})"
+        
+    return True, details
+
+def list_rules(args):
+    rules_dir = os.path.join(utils.get_agents_dir(), "rules")
+    if not os.path.isdir(rules_dir):
+        print(f"Error: Rules directory {rules_dir} not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    print("==========================================================")
+    print("          Antigravity Agent Rules Audit & Registry")
+    print("==========================================================")
     
-    if [ $file_found -eq 0 ]; then
-        echo "No rules registered in $rules_dir."
-    fi
+    audit_failed = 0
+    print(f"{'Rule Name':<25} | {'Status':<12} | Activation Mode")
+    print("----------------------------------------------------------")
     
-    echo "=========================================================="
-    if [ $audit_failed -eq 0 ]; then
-        echo "All rules are compliant and active."
-        return 0
-    else
-        echo "Audit failed! Found $audit_failed non-compliant rule(s)." >&2
-        return 1
-    fi
-}
+    file_found = False
+    entries = sorted(os.listdir(rules_dir))
+    for entry in entries:
+        file_path = os.path.join(rules_dir, entry)
+        if os.path.isfile(file_path):
+            file_found = True
+            passed, detail = audit_rule(file_path)
+            status = "[PASS]" if passed else "[FAIL]"
+            if not passed:
+                audit_failed += 1
+            print(f"{entry:<25} | {status:<12} | {detail}")
+            
+    if not file_found:
+        print(f"No rules registered in {rules_dir}.")
+        
+    print("==========================================================")
+    if audit_failed == 0:
+        print("All rules are compliant and active.")
+        sys.exit(0)
+    else:
+        print(f"Audit failed! Found {audit_failed} non-compliant rule(s).", file=sys.stderr)
+        sys.exit(1)
 
-cmd_git_profile() {
-    if [ ! -d .git ]; then
-        echo "Error: Not a Git repository." >&2
-        exit 1
-    fi
+EOF
 
-    local name=""
-    local email=""
-    if [ "${2:-}" = "git-profile" ]; then
-        name="${3:-}"
-        email="${4:-}"
-    else
-        name="${2:-}"
-        email="${3:-}"
-    fi
+# Write .agents/scripts/cli/commands/git_profile.py
+write_template_safe ".agents/scripts/cli/commands/git_profile.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
 
-    # Find profiles config file
-    local profiles_file=""
-    if [ -f ".agents/git_profiles" ]; then
-        profiles_file=".agents/git_profiles"
-    elif [ -f "$HOME/.git_profiles" ]; then
-        profiles_file="$HOME/.git_profiles"
-    fi
-
-    # Check if we should rotate manually
-    local is_key_rotate=0
-    if [ -n "$profiles_file" ] && grep -q "^rotate\.name=" "$profiles_file"; then
-        is_key_rotate=1
-    fi
-
-    if ( [ "$name" = "rotate" ] || [ "$name" = "--rotate" ] ) && [ $is_key_rotate -eq 0 ]; then
-        if [ -n "$profiles_file" ] && [ -f "$profiles_file" ]; then
-            local profile_keys
-            profile_keys=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u || echo "")
-            local keys_arr=($profile_keys)
-            local num_profiles=${#keys_arr[@]}
-            if [ $num_profiles -gt 0 ]; then
-                local last_email
-                last_email=$(git log -n 1 --format="%ae" 2>/dev/null || echo "")
-                local selected_idx=0
-                for i in "${!keys_arr[@]}"; do
-                    local p="${keys_arr[$i]}"
-                    local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
-                    if [ "$p_e" = "$last_email" ]; then
-                        selected_idx=$(( (i + 1) % num_profiles ))
+def run(args):
+    # args[0] is 'git-profile'
+    if not os.path.isdir('.git'):
+        print("Error: Not a Git repository.", file=sys.stderr)
+        sys.exit(1)
+        
+    name = ""
+    email = ""
+    if len(args) > 1:
+        name = args[1]
+    if len(args) > 2:
+        email = args[2]
+        
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    # Read profiles config key-values
+    config = {}
+    if os.path.exists(profiles_file):
+        with open(profiles_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    is_key_rotate = "rotate.name" in config
+    
+    if (name == "rotate" or name == "--rotate") and not is_key_rotate:
+        if os.path.exists(profiles_file):
+            keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+            if keys:
+                try:
+                    last_email = subprocess.check_output(
+                        ["git", "log", "-n", "1", "--format=%ae"],
+                        stderr=subprocess.DEVNULL
+                    ).decode().strip()
+                except:
+                    last_email = ""
+                    
+                selected_idx = 0
+                for i, k in enumerate(keys):
+                    p_e = config.get(f"{k}.email", "")
+                    if p_e == last_email:
+                        selected_idx = (i + 1) % len(keys)
                         break
-                    fi
-                done
-                name="${keys_arr[$selected_idx]}"
-                echo "Rotating local Git profile to: '$name'..."
-            else
-                echo "Error: No profiles defined in $profiles_file." >&2
-                exit 1
-            fi
-        else
-            echo "Error: No Git profiles configuration found (.agents/git_profiles) to rotate." >&2
-            exit 1
-        fi
-    fi
-
-    # Check if a single argument matches a profile key in the config file
-    if [ -n "$name" ] && [ -z "$email" ] && [ -n "$profiles_file" ] && grep -q "^${name}\.name=" "$profiles_file"; then
-        local p_n=$(grep "^${name}\.name=" "$profiles_file" | cut -d'=' -f2-)
-        local p_e=$(grep "^${name}\.email=" "$profiles_file" | cut -d'=' -f2-)
-        local p_s=$(grep "^${name}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
-        echo "Setting local repository Git configuration to profile '$name'..."
-        git config --local user.name "$p_n"
-        git config --local user.email "$p_e"
-        if [ -n "$p_s" ]; then
-            local resolved_ssh="$p_s"
-            if [[ "$resolved_ssh" == \~/* ]]; then
-                resolved_ssh="${resolved_ssh/\~/$HOME}"
-            fi
-            if [ -f "$resolved_ssh" ]; then
-                git config --local core.sshCommand "ssh -i \"$p_s\" -o IdentitiesOnly=yes"
-            else
-                echo "  [WARNING] SSH key file at '$p_s' was not found on your system. Bypassing SSH command setup." >&2
-                git config --local --unset core.sshCommand 2>/dev/null || true
-            fi
-        else
-            git config --local --unset core.sshCommand 2>/dev/null || true
-        fi
-        echo "  [SUCCESS] Local Git profile updated."
-        name=""
-        email=""
-    fi
-
-    if [ -n "$name" ] && [ -n "$email" ]; then
-        echo "Setting local repository Git configuration..."
-        git config --local user.name "$name"
-        git config --local user.email "$email"
-        git config --local --unset core.sshCommand 2>/dev/null || true
-        echo "  [SUCCESS] Local Git profile updated."
-    elif [ -n "$name" ] || [ -n "$email" ]; then
-        if [ -n "$profiles_file" ]; then
-            echo "Error: Profile '$name' not found in $profiles_file." >&2
-        else
-            echo "Error: Both name and email are required to set a profile." >&2
-        fi
-        echo "Usage:" >&2
-        echo "  $0 git-profile [name] [email]   (Set profile directly)" >&2
-        echo "  $0 git-profile [profile-key]   (Set from profiles config file)" >&2
-        exit 1
-    fi
-
-    echo "=========================================================="
-    echo "          Current Git User Configuration"
-    echo "=========================================================="
-    local local_name=$(git config --local user.name 2>/dev/null || echo "<not set>")
-    local local_email=$(git config --local user.email 2>/dev/null || echo "<not set>")
-    local local_ssh=$(git config --local core.sshCommand 2>/dev/null || echo "<not set>")
-    local global_name=$(git config --global user.name 2>/dev/null || echo "<not set>")
-    local global_email=$(git config --global user.email 2>/dev/null || echo "<not set>")
-    local global_ssh=$(git config --global core.sshCommand 2>/dev/null || echo "<not set>")
-
-    echo "Local Profile (This Repository):"
-    echo "  user.name:        $local_name"
-    echo "  user.email:       $local_email"
-    echo "  core.sshCommand:  $local_ssh"
-    echo ""
-    echo "Global Profile (Default):"
-    echo "  user.name:        $global_name"
-    echo "  user.email:       $global_email"
-    echo "  core.sshCommand:  $global_ssh"
-    echo ""
-
-    if [ -f "$profiles_file" ]; then
-        echo "Available Profiles (from $profiles_file):"
-        local profiles
-        profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.name=" "$profiles_file" | cut -d'.' -f1 | sort -u)
-        for p in $profiles; do
-            local p_n=$(grep "^${p}\.name=" "$profiles_file" | cut -d'=' -f2-)
-            local p_e=$(grep "^${p}\.email=" "$profiles_file" | cut -d'=' -f2-)
-            local p_s=$(grep "^${p}\.ssh_key=" "$profiles_file" | cut -d'=' -f2- || echo "")
-            if [ -n "$p_s" ]; then
-                echo "  - $p: \"$p_n\" <$p_e> (ssh_key: $p_s)"
-            else
-                echo "  - $p: \"$p_n\" <$p_e>"
-            fi
-        done
-    fi
-    echo "=========================================================="
-}
-
-cmd_api_profile() {
-    local target_profile="${2:-}"
-    
-    # Find api_keys config file
-    local api_keys_file=""
-    if [ -f ".agents/api_keys" ]; then
-        api_keys_file=".agents/api_keys"
-    elif [ -f "$HOME/.antigravity_api_keys" ]; then
-        api_keys_file="$HOME/.antigravity_api_keys"
-    fi
-
-    # Check if we should rotate
-    if [ "$target_profile" = "rotate" ] || [ "$target_profile" = "--rotate" ]; then
-        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
-            # Parse all profile prefixes
-            local api_profiles
-            api_profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
-            local profiles_arr=($api_profiles)
-            local num_profiles=${#profiles_arr[@]}
+                name = keys[selected_idx]
+                print(f"Rotating local Git profile to: '{name}'...")
+            else:
+                print(f"Error: No profiles defined in {profiles_file}.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print("Error: No Git profiles configuration found to rotate.", file=sys.stderr)
+            sys.exit(1)
             
-            if [ $num_profiles -gt 0 ]; then
-                # Find current profile name from .agents/active_api_profile_name
-                local current_profile="none"
-                if [ -f ".agents/active_api_profile_name" ]; then
-                    current_profile=$(cat ".agents/active_api_profile_name" | xargs)
-                fi
-                
-                local selected_idx=0
-                for i in "${!profiles_arr[@]}"; do
-                    if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
-                        selected_idx=$(( (i + 1) % num_profiles ))
-                        break
-                    fi
-                done
-                target_profile="${profiles_arr[$selected_idx]}"
-                echo "Rotating active API profile to: '$target_profile'..."
-            else
-                echo "Error: No API profiles found in $api_keys_file." >&2
-                exit 1
-            fi
-        else
-            echo "Error: No API keys configuration found (.agents/api_keys or ~/.antigravity_api_keys) to rotate." >&2
-            exit 1
-        fi
-    fi
+    # Check if name is a profile key
+    profile_name_key = f"{name}.name"
+    if name and not email and os.path.exists(profiles_file) and profile_name_key in config:
+        p_n = config[profile_name_key]
+        p_e = config.get(f"{name}.email", "")
+        p_s = config.get(f"{name}.ssh_key", "")
+        
+        print(f"Setting local repository Git configuration to profile '{name}'...")
+        subprocess.run(["git", "config", "--local", "user.name", p_n], check=True)
+        subprocess.run(["git", "config", "--local", "user.email", p_e], check=True)
+        
+        if p_s:
+            resolved_ssh = os.path.expanduser(p_s)
+            if os.path.exists(resolved_ssh):
+                subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_s}\" -o IdentitiesOnly=yes"], check=True)
+            else:
+                print(f"  [WARNING] SSH key file at '{p_s}' was not found. Bypassing SSH command setup.", file=sys.stderr)
+                subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+        else:
+            subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+            
+        print("  [SUCCESS] Local Git profile updated.")
+        name = ""
+        email = ""
+        
+    if name and email:
+        print("Setting local repository Git configuration...")
+        subprocess.run(["git", "config", "--local", "user.name", name], check=True)
+        subprocess.run(["git", "config", "--local", "user.email", email], check=True)
+        subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+        print("  [SUCCESS] Local Git profile updated.")
+    elif name or email:
+        if os.path.exists(profiles_file):
+            print(f"Error: Profile '{name}' not found in {profiles_file}.", file=sys.stderr)
+        else:
+            print("Error: Both name and email are required to set a profile.", file=sys.stderr)
+        sys.exit(1)
+        
+    # Display configuration
+    utils.print_title("Current Git User Configuration")
+    
+    def get_git_config(scope, key):
+        try:
+            return subprocess.check_output(["git", "config", f"--{scope}", key], stderr=subprocess.DEVNULL).decode().strip()
+        except:
+            return "<not set>"
+            
+    print("Local Profile (This Repository):")
+    print(f"  user.name:        {get_git_config('local', 'user.name')}")
+    print(f"  user.email:       {get_git_config('local', 'user.email')}")
+    print(f"  core.sshCommand:  {get_git_config('local', 'core.sshCommand')}")
+    print("")
+    print("Global Profile (Default):")
+    print(f"  user.name:        {get_git_config('global', 'user.name')}")
+    print(f"  user.email:       {get_git_config('global', 'user.email')}")
+    print(f"  core.sshCommand:  {get_git_config('global', 'core.sshCommand')}")
+    print("")
+    
+    if os.path.exists(profiles_file):
+        print(f"Available Profiles (from {profiles_file}):")
+        keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+        for k in keys:
+            p_n = config[f"{k}.name"]
+            p_e = config.get(f"{k}.email", "")
+            p_s = config.get(f"{k}.ssh_key", "")
+            if p_s:
+                print(f"  - {k}: \"{p_n}\" <{p_e}> (ssh_key: {p_s})")
+            else:
+                print(f"  - {k}: \"{p_n}\" <{p_e}>")
 
-    if [ -n "$target_profile" ]; then
-        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
-            if grep -E -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
-                echo "Setting active API profile to '$target_profile'..."
+EOF
+
+# Write .agents/scripts/cli/commands/adr_wizard.py
+write_template_safe ".agents/scripts/cli/commands/adr_wizard.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    """
+    Delegate command to the adr-wizard skill main script.
+    """
+    # Find workspace root
+    workspace_root = utils.find_workspace_root()
+    script_path = os.path.join(
+        workspace_root, ".agents", "skills", "adr-wizard", "scripts", "main.py"
+    )
+    
+    if not os.path.exists(script_path):
+        print(f"Error: adr-wizard skill main script not found at {script_path}", file=sys.stderr)
+        sys.exit(1)
+        
+    # Forward all CLI arguments passed after 'adr-wizard'
+    cmd = [sys.executable, script_path] + args[1:]
+    
+    # Execute and connect standard streams to allow interactive console prompts
+    proc = subprocess.run(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents/scripts/cli/commands/validate.py
+write_template_safe ".agents/scripts/cli/commands/validate.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
+    if not os.path.exists(validate_sh):
+        print(f"Error: validate.sh not found at {validate_sh}", file=sys.stderr)
+        sys.exit(1)
+        
+    proc = subprocess.run([validate_sh])
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents/scripts/cli/commands/release.py
+write_template_safe ".agents/scripts/cli/commands/release.py" << 'EOF'
+import os
+import sys
+import re
+from datetime import datetime
+import utils
+
+def run(args):
+    if len(args) < 2:
+        print("Usage: helper.py release <major|minor|patch>", file=sys.stderr)
+        sys.exit(1)
+        
+    bump_type = args[1].lower()
+    changelog_file = "CHANGELOG.md"
+    
+    if not os.path.exists(changelog_file):
+        print("Error: CHANGELOG.md not found!", file=sys.stderr)
+        sys.exit(1)
+        
+    with open(changelog_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        
+    # Extract latest version
+    m = re.search(r'^##\s+\[([0-9]+\.[0-9]+\.[0-9]+)\]', content, re.MULTILINE)
+    if not m:
+        print("Error: Could not parse current version from CHANGELOG.md.", file=sys.stderr)
+        sys.exit(1)
+        
+    current_version = m.group(1)
+    major, minor, patch = map(int, current_version.split('.'))
+    
+    if bump_type == "major":
+        major += 1
+        minor = 0
+        patch = 0
+    elif bump_type == "minor":
+        minor += 1
+        patch = 0
+    elif bump_type == "patch":
+        patch += 1
+    else:
+        print(f"Error: Invalid bump type '{bump_type}'. Must be major, minor, or patch.", file=sys.stderr)
+        sys.exit(1)
+        
+    next_version = f"{major}.{minor}.{patch}"
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    print(f"Bumping version: {current_version} -> {next_version} ({bump_type})")
+    
+    # 1. Insert new version section at the top of version list (right before the first ## [version])
+    # We find the first line starting with ## [version]
+    lines = content.splitlines()
+    new_lines = []
+    inserted_version = False
+    
+    for line in lines:
+        if line.startswith("## [") and not inserted_version:
+            new_lines.append(f"## [{next_version}] - {current_date}")
+            new_lines.append("### Added")
+            new_lines.append("- ")
+            new_lines.append("")
+            inserted_version = True
+        new_lines.append(line)
+        
+    # 2. Update version comparison links at the bottom (right before the first link mapping [version]: )
+    content = "\n".join(new_lines)
+    lines = content.splitlines()
+    final_lines = []
+    inserted_link = False
+    repo_url = "https://github.com/rafaelghif/antigravity-agents"
+    
+    for line in lines:
+        if re.match(r'^\[[0-9]+\.[0-9]+\.[0-9]+\]:', line) and not inserted_link:
+            final_lines.append(f"[{next_version}]: {repo_url}/compare/v{current_version}...v{next_version}")
+            inserted_link = True
+        final_lines.append(line)
+        
+    new_content = "\n".join(final_lines)
+    if not new_content.endswith('\n'):
+        new_content += '\n'
+        
+    with open(changelog_file, 'w', encoding='utf-8') as f:
+        f.write(new_content)
+        
+    print(f"Successfully bumped version to {next_version} and updated CHANGELOG.md.")
+
+EOF
+
+# Write .agents/scripts/cli/commands/build.py
+write_template_safe ".agents/scripts/cli/commands/build.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+import re
+
+def run(args):
+    subprojects_file = os.path.join(utils.get_agents_dir(), "subprojects.sh")
+    if os.path.exists(subprojects_file):
+        print("Monorepo detected. Running build compilation...")
+        try:
+            with open(subprojects_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        except Exception as e:
+            print(f"Error reading {subprojects_file}: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        failed = 0
+        for line in lines:
+            line_strip = line.strip()
+            if '|' in line_strip:
+                # remove any array syntax like SUBPROJECTS+=(...)
+                clean_line = re.sub(r'^[A-Z_a-z0-9\+]+=\s*\(?\s*', '', line_strip).strip(') \'"')
+                parts = clean_line.split('|')
+                if len(parts) >= 3:
+                    path = parts[0]
+                    build_cmd = parts[2]
+                    print(f"  Building {path} ({build_cmd})...")
+                    proc = subprocess.run(build_cmd, shell=True, cwd=path)
+                    if proc.returncode != 0:
+                        print(f"  [FAIL] Build failed in {path}", file=sys.stderr)
+                        failed = 1
+        sys.exit(failed)
+    else:
+        rules_file = os.path.join(utils.get_agents_dir(), "rules", "project_rules.md")
+        if not os.path.exists(rules_file):
+            print("No project rules found.", file=sys.stderr)
+            sys.exit(0)
+            
+        build_cmd = None
+        try:
+            with open(rules_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if "Build validation" in line:
+                        m = re.search(r"`([^`]+)`", line)
+                        if m:
+                            build_cmd = m.group(1)
+                            break
+        except Exception as e:
+            print(f"Error reading project rules: {e}", file=sys.stderr)
+            sys.exit(1)
+            
+        if build_cmd and build_cmd != "echo 'No build command needed'":
+            print(f"Running build command: {build_cmd}...")
+            proc = subprocess.run(build_cmd, shell=True)
+            sys.exit(proc.returncode)
+        else:
+            print("No build configuration found.")
+            sys.exit(0)
+
+EOF
+
+# Write .agents/scripts/cli/commands/api_profile.py
+write_template_safe ".agents/scripts/cli/commands/api_profile.py" << 'EOF'
+import os
+import sys
+import json
+import time
+import utils
+
+def run(args):
+    # args[0] is 'api-profile'
+    target_profile = ""
+    if len(args) > 1:
+        target_profile = args[1]
+        
+    api_keys_file = ""
+    agents_keys = os.path.join(utils.get_agents_dir(), 'api_keys')
+    home_keys = os.path.expanduser('~/.antigravity_api_keys')
+    if os.path.exists(agents_keys):
+        api_keys_file = agents_keys
+    elif os.path.exists(home_keys):
+        api_keys_file = home_keys
+        
+    rate_limited = "--rate-limited" in args
+    
+    # Parse available profiles prefix (e.g. name.GEMINI_API_KEY=val)
+    config = {}
+    if os.path.exists(api_keys_file):
+        with open(api_keys_file, 'r') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+                    
+    profiles_list = sorted(list(set(k.split('.')[0] for k in config.keys() if '.' in k)))
+    num_profiles = len(profiles_list)
+    
+    if target_profile in ("rotate", "--rotate"):
+        if not api_keys_file or not os.path.exists(api_keys_file):
+            print("Error: No API keys configuration found (.agents/api_keys or ~/.antigravity_api_keys) to rotate.", file=sys.stderr)
+            sys.exit(1)
+            
+        if num_profiles == 0:
+            print(f"Error: No API profiles found in {api_keys_file}.", file=sys.stderr)
+            sys.exit(1)
+            
+        current_profile = "none"
+        profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+        if os.path.exists(profile_name_file):
+            with open(profile_name_file, 'r') as f:
+                current_profile = f.read().strip()
                 
-                # Write to .agents/active_api_keys (bash format)
-                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys
-                # Write to .agents/active_api_keys.ps1 (powershell format)
-                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys.ps1
+        if rate_limited:
+            current_time = int(time.time())
+            cooldown_sec = int(os.environ.get("API_ROTATION_COOLDOWN_SEC", 60))
+            expiry_time = current_time + cooldown_sec
+            
+            cooldowns_file = os.path.join(utils.get_agents_dir(), 'cooldowns.json')
+            
+            if current_profile != "none":
+                print(f"Putting profile '{current_profile}' on cooldown for {cooldown_sec} seconds...")
+                cooldowns = {}
+                if os.path.exists(cooldowns_file):
+                    try:
+                        with open(cooldowns_file, 'r') as f:
+                            cooldowns = json.load(f)
+                    except: pass
+                cooldowns[current_profile] = expiry_time
+                with open(cooldowns_file, 'w') as f:
+                    json.dump(cooldowns, f, indent=2)
+                    
+            # Choose next profile that is NOT on cooldown
+            cooldowns = {}
+            if os.path.exists(cooldowns_file):
+                try:
+                    with open(cooldowns_file, 'r') as f:
+                        cooldowns = json.load(f)
+                except: pass
+            # Clean expired cooldowns
+            cooldowns = {p: exp for p, exp in cooldowns.items() if exp > current_time}
+            with open(cooldowns_file, 'w') as f:
+                json.dump(cooldowns, f, indent=2)
                 
-                # Extract all keys for target_profile
-                local key_lines
-                key_lines=$(grep -E "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
+            if current_profile in profiles_list:
+                start_idx = profiles_list.index(current_profile)
+                ordered_candidates = profiles_list[start_idx+1:] + profiles_list[:start_idx]
+            else:
+                ordered_candidates = profiles_list
                 
-                while IFS= read -r line; do
-                    if [ -n "$line" ]; then
-                        # format is: prefix.VAR_NAME=value
-                        local var_name_val="${line#*.}"  # VAR_NAME=value
-                        local var_name="${var_name_val%%=*}"
-                        local var_val="${var_name_val#*=}"
+            selected = None
+            for p in ordered_candidates:
+                if p not in cooldowns:
+                    selected = p
+                    break
+                    
+            if selected:
+                target_profile = selected
+                print(f"Rotating active API profile to: '{target_profile}'...")
+            else:
+                # All profiles in cooldown
+                if cooldowns:
+                    earliest_profile = min(cooldowns, key=cooldowns.get)
+                    earliest_expiry = cooldowns[earliest_profile]
+                    
+                    now_time = int(time.time())
+                    sleep_sec = earliest_expiry - now_time
+                    if sleep_sec > 0:
+                        print(f"All API profiles are in cooldown! Earliest available is '{earliest_profile}' in {sleep_sec}s.")
+                        print(f"Waiting/sleeping for {sleep_sec} seconds before retrying...")
+                        for i in range(sleep_sec, 0, -1):
+                            sys.stdout.write(f"  Retrying in {i} seconds...\r")
+                            sys.stdout.flush()
+                            time.sleep(1)
+                        print(f"\n  Cooldown finished. Selecting profile '{earliest_profile}'...")
                         
-                        echo "export $var_name=\"$var_val\"" >> .agents/active_api_keys
-                        echo "\$env:$var_name = \"$var_val\"" >> .agents/active_api_keys.ps1
-                    fi
-                done <<< "$key_lines"
+                    # Clear cooldown entry
+                    if earliest_profile in cooldowns:
+                        del cooldowns[earliest_profile]
+                    with open(cooldowns_file, 'w') as f:
+                        json.dump(cooldowns, f, indent=2)
+                    target_profile = earliest_profile
+                else:
+                    target_profile = profiles_list[0]
+                    print(f"Rotating active API profile to: '{target_profile}'...")
+        else:
+            # Standard round robin
+            selected_idx = 0
+            if current_profile in profiles_list:
+                selected_idx = (profiles_list.index(current_profile) + 1) % num_profiles
+            target_profile = profiles_list[selected_idx]
+            print(f"Rotating active API profile to: '{target_profile}'...")
+            
+    if target_profile and target_profile != "--rate-limited":
+        if os.path.exists(api_keys_file):
+            # Check if profile exists
+            profile_keys = [k for k in config.keys() if k.startswith(f"{target_profile}.")]
+            if profile_keys:
+                print(f"Setting active API profile to '{target_profile}'...")
                 
-                # Store active profile name
-                echo "$target_profile" > .agents/active_api_profile_name
-                echo "  [SUCCESS] Active API keys updated in .agents/active_api_keys and .agents/active_api_keys.ps1"
-            else
-                echo "Error: Profile '$target_profile' not found in $api_keys_file." >&2
-                exit 1
-            fi
-        else
-            echo "Error: API keys file not found (.agents/api_keys or ~/.antigravity_api_keys)." >&2
-            exit 1
-        fi
-    fi
+                active_keys_sh = os.path.join(utils.get_agents_dir(), 'active_api_keys')
+                active_keys_ps1 = os.path.join(utils.get_agents_dir(), 'active_api_keys.ps1')
+                profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+                
+                # Write bash file
+                with open(active_keys_sh, 'w') as f_sh, open(active_keys_ps1, 'w') as f_ps:
+                    f_sh.write(f"# Active API keys for profile: {target_profile}\n")
+                    f_ps.write(f"# Active API keys for profile: {target_profile}\n")
+                    
+                    for k in profile_keys:
+                        var_name = k.split('.', 1)[1]
+                        var_val = config[k]
+                        f_sh.write(f"export {var_name}=\"{var_val}\"\n")
+                        f_ps.write(f"$env:{var_name} = \"{var_val}\"\n")
+                        
+                with open(profile_name_file, 'w') as f:
+                    f.write(target_profile)
+                    
+                print("  [SUCCESS] Active API keys updated in .agents/active_api_keys and .agents/active_api_keys.ps1")
+            else:
+                print(f"Error: Profile '{target_profile}' not found in {api_keys_file}.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print("Error: API keys file not found.", file=sys.stderr)
+            sys.exit(1)
+            
+    # Display configuration
+    utils.print_title("Current API Profile Configuration")
+    
+    current_profile = "none"
+    profile_name_file = os.path.join(utils.get_agents_dir(), 'active_api_profile_name')
+    if os.path.exists(profile_name_file):
+        with open(profile_name_file, 'r') as f:
+            current_profile = f.read().strip()
+            
+    print(f"Active Profile: {current_profile}")
+    print("")
+    
+    # Mask key values for display
+    print("Active Keys (masked for security):")
+    for k, v in config.items():
+        if k.startswith(f"{current_profile}."):
+            var_name = k.split('.', 1)[1]
+            masked = v
+            if len(v) > 8:
+                masked = v[:4] + "****" + v[-4:]
+            print(f"  {var_name}: {masked}")
+    print("")
+    
+    if os.path.exists(api_keys_file):
+        print(f"Available API Profiles (from {api_keys_file}):")
+        for p in profiles_list:
+            keys = [k.split('.', 1)[1] for k in config.keys() if k.startswith(f"{p}.")]
+            print(f"  - {p} ({' '.join(keys)} )")
 
-    # Display active profile details
-    echo "=========================================================="
-    echo "          Current API Profile Configuration"
-    echo "=========================================================="
-    local active_profile="<none>"
-    if [ -f ".agents/active_api_profile_name" ]; then
-        active_profile=$(cat ".agents/active_api_profile_name" | xargs)
-    fi
-    echo "Active Profile: $active_profile"
-    echo ""
-    if [ -f ".agents/active_api_keys" ]; then
-        echo "Active Keys (masked for security):"
-        while IFS= read -r line; do
-            if [[ "$line" =~ ^export\ ([A-Z0-9_]+)=\"(.+)\"$ ]]; then
-                local var_name="${BASH_REMATCH[1]}"
-                local var_val="${BASH_REMATCH[2]}"
-                local val_len=${#var_val}
-                local masked_val="..."
-                if [ $val_len -gt 8 ]; then
-                    masked_val="${var_val:0:4}****${var_val: -4}"
-                fi
-                echo "  $var_name: $masked_val"
-            fi
-        done < .agents/active_api_keys
-    else
-        echo "Active Keys: <none>"
-    fi
-    echo ""
-    if [ -f "$api_keys_file" ]; then
-        echo "Available API Profiles (from $api_keys_file):"
-        local profiles
-        profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
-        for p in $profiles; do
-            local keys_in_p
-            keys_in_p=$(grep -E "^${p}\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f2- | cut -d'=' -f1 | tr '\n' ' ' || echo "")
-            echo "  - $p ($keys_in_p)"
-        done
-    fi
-    echo "=========================================================="
+EOF
+
+# Write .agents/scripts/cli/commands/init.py
+write_template_safe ".agents/scripts/cli/commands/init.py" << 'EOF'
+import os
+import sys
+import shutil
+import subprocess
+import utils
+
+NEXT_TEMPLATES = {
+  "package.json": "{\n  \"name\": \"nextjs-boilerplate\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"next\": \"^14.2.3\",\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"^20.12.12\",\n    \"@types/react\": \"^18.3.3\",\n    \"@types/react-dom\": \"^18.3.0\",\n    \"autoprefixer\": \"^10.4.19\",\n    \"postcss\": \"^8.4.38\",\n    \"tailwindcss\": \"^3.4.3\",\n    \"typescript\": \"^5.4.5\",\n    \"eslint\": \"^8.57.0\",\n    \"eslint-config-next\": \"^14.2.3\",\n    \"jest\": \"^29.7.0\",\n    \"ts-jest\": \"^29.1.4\"\n  }\n}\n",
+  "next.config.js": "/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  reactStrictMode: true,\n};\n\nmodule.exports = nextConfig;\n",
+  "tailwind.config.js": "/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  content: [\n    \"./src/app/**/*.{js,ts,jsx,tsx,mdx}\",\n    \"./src/components/**/*.{js,ts,jsx,tsx,mdx}\",\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\n",
+  "postcss.config.js": "module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}\n",
+  "tsconfig.json": "{\n  \"compilerOptions\": {\n    \"target\": \"es5\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"preserve\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./src/*\"]\n    }\n  },\n  \"include\": [\"next-env.d.ts\", \"**/*.ts\", \"**/*.tsx\", \".next/types/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n",
+  "jest.config.js": "module.exports = {\n  preset: 'ts-jest',\n  testEnvironment: 'node',\n  testMatch: ['**/tests/**/*.test.ts'],\n};\n",
+  "src/app/globals.css": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n:root {\n  color-scheme: dark;\n}\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #020617;\n  color: #f8fafc;\n}\n",
+  "src/app/layout.tsx": "import React from 'react';\nimport './globals.css';\n\nexport const metadata = {\n  title: 'Antigravity Next.js Boilerplate',\n  description: 'Scaffolded Next.js workspace for AI software agents',\n};\n\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "src/app/page.tsx": "import React from 'react';\n\nexport default function Home() {\n  return (\n    <div className=\"min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans\">\n      <div className=\"max-w-4xl w-full text-center space-y-8\">\n        <header className=\"space-y-4\">\n          <div className=\"inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse\">\n            \ud83d\ude80 Antigravity Workspace Active\n          </div>\n          <h1 className=\"text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent\">\n            Antigravity Next.js Boilerplate\n          </h1>\n          <p className=\"text-slate-400 text-lg max-w-2xl mx-auto\">\n            Your production-ready Next.js application, scaffolded and pre-configured for seamless development with AI coding agents.\n          </p>\n        </header>\n\n        <main className=\"grid grid-cols-1 md:grid-cols-3 gap-6 text-left\">\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\u26a1 App Router</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Scaffolded with React Server Components, layout sharing, and clean directory structure inside <code className=\"text-indigo-400\">src/app</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83c\udfa8 Styling & UI</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Pre-integrated with Tailwind CSS, custom fonts, CSS variables, and modern dark-mode aesthetics ready for immediate extension.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udee1\ufe0f AI Agent Guard</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Wrapped inside Antigravity's cognitive alignment gates (automated pre-commit validators, secret scanning, and memory sync).\n            </p>\n          </div>\n        </main>\n\n        <footer className=\"text-slate-500 text-sm border-t border-slate-900 pt-8 mt-12 flex justify-between items-center\">\n          <div> Muhammad Rafael Ghifari &copy; 2026</div>\n          <div className=\"flex gap-4\">\n            <a href=\"https://github.com/rafaelghif/antigravity-agents\" target=\"_blank\" rel=\"noopener noreferrer\" className=\"hover:text-indigo-400 transition-colors\">GitHub Repository</a>\n            <a href=\"/api/health\" className=\"hover:text-indigo-400 transition-colors\">API Health Check</a>\n          </div>\n        </footer>\n      </div>\n    </div>\n  );\n}\n",
+  "src/app/api/health/route.ts": "import { NextResponse } from 'next/server';\n\nexport async function GET() {\n  return NextResponse.json({\n    status: 'HEALTHY',\n    timestamp: new Date().toISOString(),\n    system: 'Antigravity Workspace Core',\n  });\n}\n",
+  "tests/health.test.ts": "describe('Next.js Boilerplate Test Suite', () => {\n  it('should pass initial unit test check', () => {\n    expect(true).toBe(true);\n  });\n});\n"
+}
+GOGIN_TEMPLATES = {
+  "go.mod": "module project\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "src/cmd/server/main.go": "package main\n\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n\t\"project/src/internal/config\"\n\t\"project/src/internal/controller\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc main() {\n\tcfg := config.LoadConfig()\n\n\tif cfg.Env == \"production\" {\n\t\tgin.SetMode(gin.ReleaseMode)\n\t}\n\n\tr := gin.Default()\n\tr.Use(gin.Recovery())\n\n\thealthCtrl := controller.NewHealthController()\n\n\tapi := r.Group(\"/api\")\n\t{\n\t\tapi.GET(\"/health\", healthCtrl.Check)\n\t}\n\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"message\": \"Welcome to Antigravity Go Gin Boilerplate!\",\n\t\t\t\"status\":  \"Active\",\n\t\t})\n\t})\n\n\taddr := fmt.Sprintf(\":%s\", cfg.Port)\n\tlog.Printf(\"Server starting on port %s...\", cfg.Port)\n\tif err := r.Run(addr); err != nil {\n\t\tlog.Fatalf(\"Failed to run server: %v\", err)\n\t}\n}\n",
+  "src/internal/config/config.go": "package config\n\nimport \"os\"\n\ntype Config struct {\n\tPort string\n\tEnv  string\n}\n\nfunc LoadConfig() *Config {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"8080\"\n\t}\n\tenv := os.Getenv(\"ENV\")\n\tif env == \"\" {\n\t\tenv = \"development\"\n\t}\n\treturn &Config{\n\t\tPort: port,\n\t\tEnv:  env,\n\t}\n}\n",
+  "src/internal/controller/health_controller.go": "package controller\n\nimport (\n\t\"net/http\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\ntype HealthController struct{}\n\nfunc NewHealthController() *HealthController {\n\treturn &HealthController{}\n}\n\nfunc (h *HealthController) Check(c *gin.Context) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"status\":    \"HEALTHY\",\n\t\t\"timestamp\": time.Now().Format(time.RFC3339),\n\t\t\"system\":    \"Antigravity Go Gin Core\",\n\t})\n}\n",
+  "tests/health_test.go": "package tests\n\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"project/src/internal/controller\"\n\t\"testing\"\n\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc TestHealthCheck(t *testing.T) {\n\tgin.SetMode(gin.TestMode)\n\tr := gin.Default()\n\thealthCtrl := controller.NewHealthController()\n\tr.GET(\"/api/health\", healthCtrl.Check)\n\n\tw := httptest.NewRecorder()\n\treq, _ := http.NewRequest(\"GET\", \"/api/health\", nil)\n\tr.ServeHTTP(w, req)\n\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected status code 200, got %d\", w.Code)\n\t}\n}\n",
+  "Makefile": ".PHONY: run test build clean\n\nrun:\n\tgo run src/cmd/server/main.go\n\ntest:\n\tgo test -v ./tests/...\n\nbuild:\n\tgo build -o bin/server src/cmd/server/main.go\n\nclean:\n\trm -rf bin/\n"
+}
+FASTAPI_TEMPLATES = {
+  "requirements.txt": "fastapi>=0.110.0\nuvicorn[standard]>=0.28.0\npydantic>=2.6.4\npytest>=8.1.1\nhttpx>=0.27.0\n",
+  "pyproject.toml": "[tool.pytest.ini_options]\npythonpath = [\".\"]\ntestpaths = [\"tests\"]\n",
+  "src/app/main.py": "import uvicorn\nfrom fastapi import FastAPI\nfrom src.app.core.config import settings\nfrom src.app.api.endpoints import health\n\napp = FastAPI(\n    title=\"Antigravity FastAPI Boilerplate\",\n    description=\"Production-ready FastAPI setup for AI software agents\",\n    version=\"1.0.0\",\n)\n\napp.include_router(health.router, prefix=\"/api\")\n\n@app.get(\"/\")\ndef read_root():\n    return {\n        \"message\": \"Welcome to Antigravity FastAPI Boilerplate!\",\n        \"status\": \"Active\",\n    }\n\nif __name__ == \"__main__\":\n    uvicorn.run(\"src.app.main:app\", host=\"0.0.0.0\", port=settings.PORT, reload=True)\n",
+  "src/app/core/config.py": "import os\n\nclass Settings:\n    PORT: int = int(os.getenv(\"PORT\", 8000))\n    ENV: str = os.getenv(\"ENV\", \"development\")\n\nsettings = Settings()\n",
+  "src/app/api/endpoints/health.py": "from datetime import datetime\nfrom fastapi import APIRouter\n\nrouter = APIRouter()\n\n@router.get(\"/health\", tags=[\"system\"])\ndef check_health():\n    return {\n        \"status\": \"HEALTHY\",\n        \"timestamp\": datetime.utcnow().isoformat(),\n        \"system\": \"Antigravity FastAPI Core\",\n    }\n",
+  "tests/test_health.py": "from fastapi.testclient import TestClient\nfrom src.app.main import app\n\nclient = TestClient(app)\n\ndef test_health_check():\n    response = client.get(\"/api/health\")\n    assert response.status_code == 200\n    data = response.json()\n    assert data[\"status\"] == \"HEALTHY\"\n    assert \"timestamp\" in data\n    assert data[\"system\"] == \"Antigravity FastAPI Core\"\n"
+}
+MONOREPO_TEMPLATES = {
+  "pnpm-workspace.yaml": "packages:\n  - 'apps/*'\n  - 'packages/*'\n",
+  "turbo.json": "{\n  \"$schema\": \"https://turbo.build/schema.json\",\n  \"tasks\": {\n    \"build\": {\n      \"dependsOn\": [\"^build\"],\n      \"outputs\": [\".next/**\", \"dist/**\", \"bin/**\"]\n    },\n    \"lint\": {},\n    \"test\": {},\n    \"dev\": {\n      \"cache\": false,\n      \"persistent\": true\n    }\n  }\n}\n",
+  "package.json": "{\n  \"name\": \"monorepo-root\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"build\": \"turbo run build\",\n    \"dev\": \"turbo run dev\",\n    \"lint\": \"turbo run lint\",\n    \"test\": \"turbo run test\"\n  },\n  \"devDependencies\": {\n    \"turbo\": \"^2.0.0\"\n  }\n}\n",
+  "apps/web/package.json": "{\n  \"name\": \"web\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"next lint\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"next\": \"^14.2.3\",\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\",\n    \"@monorepo/shared\": \"workspace:*\"\n  },\n  \"devDependencies\": {\n    \"@types/node\": \"^20.12.12\",\n    \"@types/react\": \"^18.3.3\",\n    \"@types/react-dom\": \"^18.3.0\",\n    \"autoprefixer\": \"^10.4.19\",\n    \"postcss\": \"^8.4.38\",\n    \"tailwindcss\": \"^3.4.3\",\n    \"typescript\": \"^5.4.5\",\n    \"eslint\": \"^8.57.0\",\n    \"eslint-config-next\": \"^14.2.3\",\n    \"jest\": \"^29.7.0\",\n    \"ts-jest\": \"^29.1.4\"\n  }\n}\n",
+  "apps/web/next.config.js": "/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  reactStrictMode: true,\n};\nmodule.exports = nextConfig;\n",
+  "apps/web/tailwind.config.js": "/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n  content: [\n    \"./src/app/**/*.{js,ts,jsx,tsx,mdx}\",\n    \"./src/components/**/*.{js,ts,jsx,tsx,mdx}\",\n  ],\n  theme: {\n    extend: {},\n  },\n  plugins: [],\n}\n",
+  "apps/web/postcss.config.js": "module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}\n",
+  "apps/web/tsconfig.json": "{\n  \"compilerOptions\": {\n    \"target\": \"es5\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"preserve\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./src/*\"]\n    }\n  },\n  \"include\": [\"next-env.d.ts\", \"**/*.ts\", \"**/*.tsx\", \".next/types/**/*.ts\"],\n  \"exclude\": [\"node_modules\"]\n}\n",
+  "apps/web/jest.config.js": "module.exports = {\n  preset: 'ts-jest',\n  testEnvironment: 'node',\n  testMatch: ['**/tests/**/*.test.ts'],\n};\n",
+  "apps/web/src/app/globals.css": "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n:root {\n  color-scheme: dark;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #020617;\n  color: #f8fafc;\n}\n",
+  "apps/web/src/app/layout.tsx": "import React from 'react';\nimport './globals.css';\nexport const metadata = {\n  title: 'Antigravity Monorepo Frontend',\n  description: 'Scaffolded Turborepo Frontend Web Application',\n};\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "apps/web/src/app/page.tsx": "import React from 'react';\nimport { appName, version } from '@monorepo/shared';\n\nexport default function Home() {\n  return (\n    <div className=\"min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans\">\n      <div className=\"max-w-4xl w-full text-center space-y-8\">\n        <header className=\"space-y-4\">\n          <div className=\"inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-sm font-semibold tracking-wide animate-pulse\">\n            \ud83d\ude80 Antigravity Monorepo Active\n          </div>\n          <h1 className=\"text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent\">\n            {appName}\n          </h1>\n          <p className=\"text-slate-400 text-lg max-w-2xl mx-auto\">\n            Monorepo Web Client (v{version}) running alongside an isolated Go Gin backend service.\n          </p>\n        </header>\n        <main className=\"grid grid-cols-1 md:grid-cols-3 gap-6 text-left\">\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\u26a1 Next.js</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Frontend web client running Next.js App Router inside <code className=\"text-indigo-400\">apps/web</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-purple-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udc39 Go Gin API</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Isolated REST API backend service with Go Gin inside <code className=\"text-purple-400\">apps/api</code>.\n            </p>\n          </div>\n          <div className=\"bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm hover:border-pink-500/30 transition-all duration-300\">\n            <h2 className=\"text-xl font-bold text-slate-100 mb-2\">\ud83d\udce6 Shared Workspace</h2>\n            <p className=\"text-slate-400 text-sm\">\n              Shared package containing index exports, interfaces, and types inside <code className=\"text-pink-400\">packages/shared</code>.\n            </p>\n          </div>\n        </main>\n      </div>\n    </div>\n  );\n}\n",
+  "apps/web/src/app/api/health/route.ts": "import { NextResponse } from 'next/server';\nexport async function GET() {\n  return NextResponse.json({\n    status: 'HEALTHY',\n    timestamp: new Date().toISOString(),\n    system: 'Antigravity Monorepo Frontend',\n  });\n}\n",
+  "apps/web/tests/health.test.ts": "describe('Monorepo Web Client Test Suite', () => {\n  it('should pass initial tests', () => {\n    expect(true).toBe(true);\n  });\n});\n",
+  "apps/api/go.mod": "module api\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "apps/api/src/cmd/server/main.go": "package main\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n\t\"api/src/internal/config\"\n\t\"api/src/internal/controller\"\n\t\"github.com/gin-gonic/gin\"\n)\nfunc main() {\n\tcfg := config.LoadConfig()\n\tif cfg.Env == \"production\" {\n\t\tgin.SetMode(gin.ReleaseMode)\n\t}\n\tr := gin.Default()\n\tr.Use(gin.Recovery())\n\thealthCtrl := controller.NewHealthController()\n\tapi := r.Group(\"/api\")\n\t{\n\t\tapi.GET(\"/health\", healthCtrl.Check)\n\t}\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(http.StatusOK, gin.H{\n\t\t\t\"message\": \"Welcome to Antigravity Go Gin Backend in Monorepo!\",\n\t\t\t\"status\":  \"Active\",\n\t\t})\n\t})\n\taddr := fmt.Sprintf(\":%s\", cfg.Port)\n\tlog.Printf(\"Backend starting on port %s...\", cfg.Port)\n\tif err := r.Run(addr); err != nil {\n\t\tlog.Fatalf(\"Failed to run server: %v\", err)\n\t}\n}\n",
+  "apps/api/src/internal/config/config.go": "package config\nimport \"os\"\ntype Config struct {\n\tPort string\n\tEnv  string\n}\nfunc LoadConfig() *Config {\n\tport := os.Getenv(\"PORT\")\n\tif port == \"\" {\n\t\tport = \"8080\"\n\t}\n\tenv := os.Getenv(\"ENV\")\n\tif env == \"\" {\n\t\tenv = \"development\"\n\t}\n\treturn &Config{\n\t\tPort: port,\n\t\tEnv:  env,\n\t}\n}\n",
+  "apps/api/src/internal/controller/health_controller.go": "package controller\nimport (\n\t\"net/http\"\n\t\"time\"\n\t\"github.com/gin-gonic/gin\"\n)\ntype HealthController struct{}\nfunc NewHealthController() *HealthController {\n\treturn &HealthController{}\n}\nfunc (h *HealthController) Check(c *gin.Context) {\n\tc.JSON(http.StatusOK, gin.H{\n\t\t\"status\":    \"HEALTHY\",\n\t\t\"timestamp\": time.Now().Format(time.RFC3339),\n\t\t\"system\":    \"Antigravity Monorepo Backend API\",\n\t})\n}\n",
+  "apps/api/tests/health_test.go": "package tests\nimport (\n\t\"net/http\"\n\t\"net/http/httptest\"\n\t\"api/src/internal/controller\"\n\t\"testing\"\n\t\"github.com/gin-gonic/gin\"\n)\nfunc TestHealthCheck(t *testing.T) {\n\tgin.SetMode(gin.TestMode)\n\tr := gin.Default()\n\thealthCtrl := controller.NewHealthController()\n\tr.GET(\"/api/health\", healthCtrl.Check)\n\tw := httptest.NewRecorder()\n\treq, _ := http.NewRequest(\"GET\", \"/api/health\", nil)\n\tr.ServeHTTP(w, req)\n\tif w.Code != http.StatusOK {\n\t\tt.Errorf(\"Expected status code 200, got %d\", w.Code)\n\t}\n}\n",
+  "apps/api/Makefile": ".PHONY: run test build clean\nrun:\n\tgo run src/cmd/server/main.go\ntest:\n\tgo test -v ./tests/...\nbuild:\n\tgo build -o bin/server src/cmd/server/main.go\nclean:\n\trm -rf bin/\n",
+  "packages/shared/package.json": "{\n  \"name\": \"@monorepo/shared\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"main\": \"index.js\",\n  \"types\": \"index.d.ts\"\n}\n",
+  "packages/shared/index.js": "module.exports = {\n  appName: \"Antigravity Monorepo\",\n  version: \"1.0.0\"\n};\n",
+  "packages/shared/index.d.ts": "export const appName: string;\nexport const version: string;\n"
+}
+LARAVEL_TEMPLATES = {
+  "app/Http/Controllers/Controller.php": "<?php\n\nnamespace App\\Http\\Controllers;\n\nuse Illuminate\\Foundation\\Auth\\Access\\AuthorizesRequests;\nuse Illuminate\\Foundation\\Validation\\ValidatesRequests;\nuse Illuminate\\Routing\\Controller as BaseController;\n\nclass Controller extends BaseController\n{\n    use AuthorizesRequests, ValidatesRequests;\n}\n",
+  "app/Models/User.php": "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Database\\Eloquent\\Factories\\HasFactory;\nuse Illuminate\\Foundation\\Auth\\User as Authenticatable;\nuse Illuminate\\Notifications\\Notifiable;\nuse Laravel\\Sanctum\\HasApiTokens;\n\nclass User extends Authenticatable\n{\n    use HasApiTokens, HasFactory, Notifiable;\n\n    protected $fillable = [\n        'name',\n        'email',\n        'password',\n    ];\n\n    protected $hidden = [\n        'password',\n        'remember_token',\n    ];\n\n    protected $casts = [\n        'email_verified_at' => 'datetime',\n        'password' => 'hashed',\n    ];\n}\n",
+  "composer.json": "{\n    \"name\": \"laravel/laravel\",\n    \"type\": \"project\",\n    \"description\": \"The Laravel Framework.\",\n    \"keywords\": [\"framework\", \"laravel\"],\n    \"license\": \"MIT\",\n    \"require\": {\n        \"php\": \"^8.1\",\n        \"guzzlehttp/guzzle\": \"^7.2\",\n        \"laravel/framework\": \"^10.0\",\n        \"laravel/sanctum\": \"^3.2\",\n        \"laravel/tinker\": \"^2.8\"\n    },\n    \"require-dev\": {\n        \"fakerphp/faker\": \"^1.9.1\",\n        \"laravel/pint\": \"^1.0\",\n        \"laravel/sail\": \"^1.18\",\n        \"mockery/mockery\": \"^1.4.4\",\n        \"nunomaduro/collision\": \"^7.0\",\n        \"phpunit/phpunit\": \"^10.0\",\n        \"spatie/laravel-ignition\": \"^2.0\"\n    },\n    \"autoload\": {\n        \"psr-4\": {\n            \"App\\\\\": \"app/\",\n            \"Database\\\\Factories\\\\\": \"database/factories/\",\n            \"Database\\\\Seeders\\\\\": \"database/seeders/\"\n        }\n    },\n    \"autoload-dev\": {\n        \"psr-4\": {\n            \"Tests\\\\\": \"tests/\"\n        }\n    },\n    \"scripts\": {\n        \"post-autoload-dump\": [\n            \"Illuminate\\\\Foundation\\\\ComposerScripts::postAutoloadDump\",\n            \"@php artisan package:discover --ansi\"\n        ],\n        \"post-update-cmd\": [\n            \"@php artisan vendor:publish --tag=laravel-assets --ansi --force\"\n        ],\n        \"post-root-package-install\": [\n            \"@php -r \\\"file_exists('.env') || copy('.env.example', '.env');\\\"\"\n        ],\n        \"post-create-project-cmd\": [\n            \"@php artisan key:generate --ansi\"\n        ]\n    },\n    \"extra\": {\n        \"laravel\": {\n            \"dont-discover\": []\n        }\n    },\n    \"config\": {\n        \"optimize-autoloader\": true,\n        \"preferred-install\": \"dist\",\n        \"sort-packages\": true,\n        \"allow-plugins\": {\n            \"pestphp/pest-plugin\": true,\n            \"php-http/discovery\": true\n        }\n    },\n    \"minimum-stability\": \"stable\",\n    \"prefer-stable\": true\n}\n",
+  "package.json": "{\n    \"private\": true,\n    \"type\": \"module\",\n    \"scripts\": {\n        \"dev\": \"vite\",\n        \"build\": \"vite build\"\n    },\n    \"devDependencies\": {\n        \"axios\": \"^1.1.2\",\n        \"laravel-vite-plugin\": \"^0.7.5\",\n        \"vite\": \"^4.0.0\"\n    }\n}\n",
+  ".env.example": "APP_NAME=Laravel\nAPP_ENV=local\nAPP_KEY=\nAPP_DEBUG=true\nAPP_URL=http://localhost\n\nLOG_CHANNEL=stack\nLOG_DEPRECATIONS_CHANNEL=null\nLOG_LEVEL=debug\n\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=laravel\nDB_USERNAME=root\nDB_PASSWORD=\n\nBROADCAST_DRIVER=log\nCACHE_DRIVER=file\nFILESYSTEM_DISK=local\nQUEUE_CONNECTION=sync\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\n",
+  "artisan": "#!/usr/bin/env php\n<?php\n\ndefine('LARAVEL_START', microtime(true));\n\nif (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {\n    require $maintenance;\n}\n\nrequire __DIR__.'/vendor/autoload.php';\n\n$app = require_once __DIR__.'/bootstrap/app.php';\n\n$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);\n\n$status = $kernel->handle(\n    $input = new Symfony\\Component\\Console\\Input\\ArgvInput,\n    new Symfony\\Component\\Console\\Output\\ConsoleOutput\n);\n\n$kernel->terminate($input, $status);\n\nexit($status);\n",
+  "bootstrap/app.php": "<?php\n\n$app = new Illuminate\\Foundation\\Application(\n    $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Http\\Kernel::class,\n    App\\Http\\Kernel::class\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Console\\Kernel::class,\n    App\\Http\\Console\\Kernel::class\n);\n\n$app->singleton(\n    Illuminate\\Contracts\\Debug\\ExceptionHandler::class,\n    App\\Exceptions\\Handler::class\n);\n\nreturn $app;\n",
+  "app/Http/Kernel.php": "<?php\n\nnamespace App\\Http;\n\nuse Illuminate\\Foundation\\Http\\Kernel as HttpKernel;\n\nclass Kernel extends HttpKernel\n{\n    protected $middleware = [\n        \\Illuminate\\Http\\Middleware\\TrustProxies::class,\n        \\Illuminate\\Http\\Middleware\\HandleCors::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize::class,\n        \\App\\Http\\Middleware\\TrimStrings::class,\n        \\Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull::class,\n    ];\n\n    protected $middlewareGroups = [\n        'web' => [\n            \\App\\Http\\Middleware\\EncryptCookies::class,\n            \\Illuminate\\Cookie\\Middleware\\AddQueuedCookiesToResponse::class,\n            \\Illuminate\\Session\\Middleware\\StartSession::class,\n            \\Illuminate\\View\\Middleware\\ShareErrorsFromSession::class,\n            \\App\\Http\\Middleware\\VerifyCsrfToken::class,\n            \\Illuminate\\Routing\\Middleware\\SubstituteBindings::class,\n        ],\n        'api' => [\n            \\Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful::class,\n            \\Illuminate\\Routing\\Middleware\\ThrottleRequests::class.':api',\n            \\Illuminate\\Routing\\Middleware\\SubstituteBindings::class,\n        ],\n    ];\n\n    protected $middlewareAliases = [\n        'auth' => \\App\\Http\\Middleware\\Authenticate::class,\n        'guest' => \\App\\Http\\Middleware\\RedirectIfAuthenticated::class,\n        'verified' => \\Illuminate\\Auth\\Middleware\\EnsureEmailIsVerified::class,\n    ];\n}\n",
+  "app/Console/Kernel.php": "<?php\n\nnamespace App\\Console;\n\nuse Illuminate\\Foundation\\Console\\Kernel as ConsoleKernel;\n\nclass Kernel extends ConsoleKernel\n{\n    protected function commands(): void\n    {\n        $this->load(__DIR__.'/Commands');\n        require base_path('routes/console.php');\n    }\n}\n",
+  "app/Exceptions/Handler.php": "<?php\n\nnamespace App\\Exceptions;\n\nuse Illuminate\\Foundation\\Exceptions\\Handler as ExceptionHandler;\nuse Throwable;\n\nclass Handler extends ExceptionHandler\n{\n    protected $dontFlash = [\n        'current_password',\n        'password',\n        'password_confirmation',\n    ];\n\n    public function register(): void\n    {\n        $this->reportable(function (Throwable $e) {\n            //\n        });\n    }\n}\n",
+  "app/Http/Middleware/TrimStrings.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Foundation\\Http\\Middleware\\TrimStrings as Middleware;\nclass TrimStrings extends Middleware {}\n",
+  "app/Http/Middleware/EncryptCookies.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Cookie\\Middleware\\EncryptCookies as Middleware;\nclass EncryptCookies extends Middleware {}\n",
+  "app/Http/Middleware/VerifyCsrfToken.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken as Middleware;\nclass VerifyCsrfToken extends Middleware {}\n",
+  "app/Http/Middleware/Authenticate.php": "<?php\nnamespace App\\Http\\Middleware;\nuse Illuminate\\Auth\\Middleware\\Authenticate as Middleware;\nuse Illuminate\\Http\\Request;\nclass Authenticate extends Middleware {\n    protected function redirectTo(Request $request): ?string {\n        return $request->expectsJson() ? null : route('login');\n    }\n}\n",
+  "app/Http/Middleware/RedirectIfAuthenticated.php": "<?php\nnamespace App\\Http\\Middleware;\nuse App\\Providers\\RouteServiceProvider;\nuse Closure;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Support\\Facades\\Auth;\nuse Symfony\\Component\\HttpFoundation\\Response;\nclass RedirectIfAuthenticated {\n    public function handle(Request $request, Closure $next, string ...$guards): Response {\n        $guards = empty($guards) ? [null] : $guards;\n        foreach ($guards as $guard) {\n            if (Auth::guard($guard)->check()) {\n                return redirect(RouteServiceProvider::HOME);\n            }\n        }\n        return $next($request);\n    }\n}\n",
+  "app/Providers/RouteServiceProvider.php": "<?php\n\nnamespace App\\Providers;\n\nuse Illuminate\\Cache\\RateLimiting\\Limit;\nuse Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider as ServiceProvider;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Support\\Facades\\RateLimiter;\nuse Illuminate\\Support\\Facades\\Route;\n\nclass RouteServiceProvider extends ServiceProvider\n{\n    public const HOME = '/home';\n\n    public function boot(): void\n    {\n        RateLimiter::for('api', function (Request $request) {\n            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());\n        });\n\n        $this->routes(function () {\n            Route::middleware('api')\n                ->prefix('api')\n                ->group(base_path('routes/api.php'));\n\n            Route::middleware('web')\n                ->group(base_path('routes/web.php'));\n        });\n    }\n}\n",
+  "routes/web.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\n\nRoute::get('/', function () {\n    return view('welcome');\n});\n",
+  "routes/api.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse Illuminate\\Http\\Request;\n\nRoute::middleware('auth:sanctum')->get('/user', function (Request $request) {\n    return $request->user();\n});\n",
+  "routes/console.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Artisan;\n\nArtisan::command('inspire', function () {\n    $this->comment(Illuminate\\Foundation\\Inspiring::quote());\n})->purpose('Display an inspiring quote');\n",
+  "resources/views/welcome.blade.php": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Antigravity Laravel Application</title>\n    <style>\n        body {\n            font-family: 'Outfit', 'Inter', sans-serif;\n            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);\n            color: #f8fafc;\n            min-height: 100vh;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            margin: 0;\n        }\n        .container {\n            text-align: center;\n            padding: 3rem;\n            background: rgba(255, 255, 255, 0.03);\n            backdrop-filter: blur(16px);\n            border: 1px solid rgba(255, 255, 255, 0.08);\n            border-radius: 24px;\n            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);\n            max-width: 500px;\n        }\n        h1 {\n            font-size: 2.5rem;\n            margin-bottom: 1rem;\n            background: linear-gradient(to right, #f43f5e, #fb7185);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n        }\n        p {\n            color: #94a3b8;\n            line-height: 1.6;\n        }\n        .badge {\n            display: inline-block;\n            padding: 0.5rem 1rem;\n            background: rgba(244, 63, 94, 0.1);\n            color: #f43f5e;\n            border-radius: 9999px;\n            font-size: 0.875rem;\n            font-weight: 600;\n            margin-bottom: 1.5rem;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"badge\">Laravel 10.x + PHP</div>\n        <h1>\ud83d\ude80 Welcome to Antigravity Laravel</h1>\n        <p>Your production-ready Laravel full-stack MVC application, scaffolded and pre-configured for seamless development with AI coding agents.</p>\n    </div>\n</body>\n</html>\n",
+  "phpunit.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<phpunit xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:noNamespaceSchemaLocation=\"./vendor/phpunit/phpunit/phpunit.xsd\"\n         bootstrap=\"vendor/autoload.php\"\n         colors=\"true\">\n    <testsuites>\n        <testsuite name=\"Unit\">\n            <directory suffix=\"Test.php\">./tests/Unit</directory>\n        </testsuite>\n        <testsuite name=\"Feature\">\n            <directory suffix=\"Test.php\">./tests/Feature</directory>\n        </testsuite>\n    </testsuites>\n</phpunit>\n"
+}
+FALLBACK_TEMPLATES = {
+  "package.json": "{\n  \"name\": \"project\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"src/index.js\",\n  \"scripts\": {\n    \"build\": \"tsc\",\n    \"start\": \"node dist/index.js\",\n    \"test\": \"jest\",\n    \"lint\": \"eslint 'src/**/*.ts'\"\n  },\n  \"dependencies\": {},\n  \"devDependencies\": {}\n}\n",
+  "go.mod": "module project\n\ngo 1.20\n",
+  "src/main.go": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Antigravity!\")\n}\n",
+  "src/main.py": "def main():\n    print(\"Hello, Antigravity!\")\n\nif __name__ == \"__main__\":\n    main()\n"
+}
+DOCKER_TEMPLATES = {
+  "db_postgres": "  postgres:\n    image: postgres:15-alpine\n    container_name: postgres_db\n    environment:\n      POSTGRES_USER: postgres\n      POSTGRES_PASSWORD: postgres\n      POSTGRES_DB: postgres\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U postgres\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_mysql": "  mysql:\n    image: mysql:8.0\n    container_name: mysql_db\n    environment:\n      MYSQL_ROOT_PASSWORD: root\n      MYSQL_DATABASE: db\n    ports:\n      - \"3306:3306\"\n    volumes:\n      - mysql_data:/var/lib/mysql\n    healthcheck:\n      test: [\"CMD-SHELL\", \"mysqladmin ping -h localhost\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_mongodb": "  mongodb:\n    image: mongo:6.0\n    container_name: mongodb_db\n    ports:\n      - \"27017:27017\"\n    volumes:\n      - mongo_data:/data/db\n    healthcheck:\n      test: [\"CMD-SHELL\", \"echo 'db.runCommand(\\\"ping\\\")' | mongosh localhost:27017/test --quiet\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "db_redis": "  redis:\n    image: redis:7-alpine\n    container_name: redis_cache\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redis_data:/data\n    healthcheck:\n      test: [\"CMD-SHELL\", \"redis-cli ping | grep PONG\"]\n      interval: 5s\n      timeout: 5s\n      retries: 5\n",
+  "nextjs_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "gogin_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/main\"]\n",
+  "fastapi_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "laravel_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=builder /app/dist /usr/share/nginx/html\nEXPOSE 80\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n",
+  "nextjs_dockerignore": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \\\n  elif [ -f package-lock.json ]; then npm ci; \\\n  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \\\n  else npm install; \\\n  fi\nCOPY . .\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then pnpm run build; \\\n  else npm run build; \\\n  fi\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "gogin_dockerignore": "FROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nCMD [\"uvicorn\", \"src.app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "fastapi_dockerignore": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm i --frozen-lockfile; \\\n  elif [ -f package-lock.json ]; then npm ci; \\\n  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \\\n  else npm install; \\\n  fi\nCOPY . .\nRUN \\\n  if [ -f pnpm-lock.yaml ]; then pnpm run build; \\\n  else npm run build; \\\n  fi\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "fallback_node_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/public ./public\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n",
+  "fallback_go_dockerfile": "FROM golang:1.20-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum* ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 GOOS=linux go build -o main ./src/cmd/server/main.go\n\nFROM alpine:latest\nWORKDIR /root/\nCOPY --from=builder /app/main .\nEXPOSE 8080\nCMD [\"./main\"]\n",
+  "fallback_py_dockerfile": "FROM python:3.11-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nCMD [\"uvicorn\", \"src.app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "fallback_laravel_dockerfile": "FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package.json package-lock.json* ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nENV NODE_ENV=production\nCOPY --from=builder /app/package.json ./\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD [\"node\", \"dist/index.js\"]\n",
+  "compose_multi": "version: '3.8'\n\nservices:\n",
+  "compose_volume": "\nvolumes:\n  pgdata:\n  mysql_data:\n  mongo_data:\n  redis_data:\n",
+  "compose_single": "version: '3.8'\n\nservices:\n"
+}
+MULTIPROJECT_FILES = {
+  "apps/backend/package.json": "{\n  \"name\": \"backend\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"build\": \"nest build\",\n    \"start\": \"nest start\",\n    \"lint\": \"eslint 'src/**/*.ts'\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"@nestjs/common\": \"^10.0.0\",\n    \"@nestjs/core\": \"^10.0.0\",\n    \"reflect-metadata\": \"^0.1.13\",\n    \"rxjs\": \"^7.8.1\"\n  },\n  \"devDependencies\": {\n    \"@nestjs/cli\": \"^10.0.0\",\n    \"@nestjs/testing\": \"^10.0.0\",\n    \"@types/node\": \"^20.0.0\",\n    \"typescript\": \"^5.0.0\",\n    \"eslint\": \"^8.0.0\",\n    \"jest\": \"^29.0.0\"\n  }\n}\n",
+  "apps/backend/src/main.ts": "import { NestFactory } from '@nestjs/core';\nimport { AppModule } from './app.module';\n\nasync function bootstrap() {\n  const app = await NestFactory.create(AppModule);\n  await app.listen(process.env.PORT || 3000);\n}\nbootstrap();\n",
+  "apps/backend/src/app.module.ts": "import { Module } from '@nestjs/common';\n\n@Module({\n  imports: [],\n  controllers: [],\n  providers: [],\n})\nexport class AppModule {}\n",
+  "apps/backend/requirements.txt": "fastapi>=0.110.0\nuvicorn[standard]>=0.28.0\npydantic>=2.6.4\npytest>=8.1.1\nhttpx>=0.27.0\n",
+  "apps/backend/src/app/main.py": "from fastapi import FastAPI\n\napp = FastAPI(title=\"Antigravity Custom Backend\")\n\n@app.get(\"/\")\ndef read_root():\n    return {\"message\": \"Hello from Custom FastAPI Backend!\"}\n",
+  "apps/backend/go.mod": "module backend\n\ngo 1.20\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.9.1\n)\n",
+  "apps/backend/src/cmd/server/main.go": "package main\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n)\n\nfunc main() {\n\tr := gin.Default()\n\tr.GET(\"/\", func(c *gin.Context) {\n\t\tc.JSON(200, gin.H{\n\t\t\t\"message\": \"Hello from Custom Go Gin Backend!\",\n\t\t})\n\t})\n\tr.Run()\n}\n",
+  "apps/frontend/package.json": "{\n  \"name\": \"frontend\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"tsc && vite build\",\n    \"lint\": \"eslint 'src/**/*.ts'\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.3.1\",\n    \"react-dom\": \"^18.3.1\"\n  },\n  \"devDependencies\": {\n    \"vite\": \"^5.0.0\",\n    \"@types/react\": \"^18.0.0\",\n    \"typescript\": \"^5.0.0\",\n    \"eslint\": \"^8.0.0\",\n    \"jest\": \"^29.0.0\"\n  }\n}\n",
+  "apps/frontend/src/app/layout.tsx": "import type { Metadata } from 'next';\n\nexport const metadata: Metadata = {\n  title: 'Antigravity Custom Frontend',\n  description: 'Flexible separate frontend application',\n};\n\nexport default function RootLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  );\n}\n",
+  "apps/frontend/src/app/page.tsx": "export default function Home() {\n  return (\n    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>\n      <h1>\ud83d\ude80 Welcome to Antigravity Custom Frontend</h1>\n      <p>Running alongside a decoupled backend service in a clean modular layout.</p>\n    </main>\n  );\n}\n",
+  "apps/frontend/index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Antigravity React SPA</title>\n  </head>\n  <body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\n  </body>\n</html>\n",
+  "apps/frontend/src/main.tsx": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nReactDOM.createRoot(document.getElementById('root')!).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n",
+  "apps/frontend/src/App.tsx": "import React from 'react';\n\nexport default function App() {\n  return (\n    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>\n      <h1>\ud83d\ude80 Welcome to Antigravity React SPA Frontend</h1>\n      <p>Decoupled single-page frontend application.</p>\n    </div>\n  );\n}\n",
+  "apps/frontend/resources/views/welcome.blade.php": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Antigravity Blade Frontend</title>\n    <style>\n        body { font-family: sans-serif; padding: 2rem; background-color: #f8fafc; color: #1e293b; }\n    </style>\n</head>\n<body>\n    <h1>\ud83d\ude80 Welcome to Antigravity Blade/HTML Frontend</h1>\n    <p>Flexible separate frontend application template.</p>\n</body>\n</html>\n"
 }
 
-# Dispatch command
-if [ $# -lt 1 ]; then
-    show_help
-    exit 1
-fi
+def get_input(prompt, default):
+    try:
+        val = input(f"{prompt} (default: {default}): ").strip()
+        return val if val else default
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+        sys.exit(1)
 
-case "$1" in
-    init)
-        cmd_init "$@"
-        ;;
-    recon)
-        cmd_recon
-        ;;
-    validate)
-        cmd_validate
-        ;;
-    doctor)
-        cmd_doctor
-        ;;
-    commit)
-        cmd_commit "$@"
-        ;;
-    sync-git)
-        cmd_sync_git
-        ;;
-    lock)
-        cmd_lock "${2:-}"
-        ;;
-    unlock)
-        cmd_unlock "${2:-}"
-        ;;
-    archive)
-        cmd_archive
-        ;;
-    migrate)
-        cmd_migrate
-        ;;
-    build)
-        cmd_build
-        ;;
-    lint)
-        cmd_lint
-        ;;
-    test)
-        cmd_test
-        ;;
-    sync-api)
-        cmd_sync_api
-        ;;
-    log-usage)
-        cmd_log_usage "$@"
-        ;;
-    create-adr)
-        cmd_create_adr "$@"
-        ;;
-    release)
-        cmd_release "$@"
-        ;;
-    create-skill)
-        cmd_create_skill "$@"
-        ;;
-    list-skills)
-        cmd_list_skills
-        ;;
-    create-rule)
-        cmd_create_rule "$@"
-        ;;
-    list-rules)
-        cmd_list_rules
-        ;;
-    git-profile)
-        cmd_git_profile "$@"
-        ;;
-    api-profile)
-        cmd_api_profile "$@"
-        ;;
-    help)
-        show_help
-        ;;
-    *)
-        echo "Unknown command: $1" >&2
-        show_help
-        exit 1
-        ;;
-esac
+def select_choice(prompt, options, default_choice="1"):
+    print(prompt)
+    for opt in options:
+        print(f"  {opt}")
+    try:
+        val = input(f"Select choice (default: {default_choice}): ").strip()
+        return val if val else default_choice
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+        sys.exit(1)
+
+def write_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print(f"  Created {path}")
+
+def run(args):
+    print("==========================================================")
+    print("  Antigravity Agent Core - Workspace Initialization")
+    print("==========================================================")
+    
+    project_name = args[1] if len(args) > 1 else None
+    tech_stack = args[2] if len(args) > 2 else None
+    arch_pattern = args[3] if len(args) > 3 else None
+    db_orm = args[4] if len(args) > 4 else None
+    env_vars = args[5] if len(args) > 5 else None
+    scaffold = args[6] if len(args) > 6 else None
+    gen_docker = args[7] if len(args) > 7 else None
+    
+    be_choice = "1"
+    be_arch_choice = "2"
+    fe_choice = "1"
+    fe_arch_choice = "2"
+    
+    if not project_name:
+        project_name = get_input("Enter Project Name", "My Project")
+        
+    if not tech_stack:
+        stack_opts = [
+            "[1] Next.js (TypeScript, Tailwind, App Router) [Recommended]",
+            "[2] Go Gin (Clean Architecture REST API)",
+            "[3] FastAPI (Python REST API with pytest)",
+            "[4] Node/TypeScript (Generic Node App)",
+            "[5] Go (Generic Main App)",
+            "[6] Python (Generic Script)",
+            "[7] Monorepo (Turborepo: Next.js Frontend + Go Gin Backend)",
+            "[8] Custom Multi-Project / Separate Apps (e.g. apps/backend + apps/frontend)",
+            "[9] Laravel (PHP MVC Framework)"
+        ]
+        choice = select_choice("Select Technology Stack:", stack_opts, "1")
+        mapping = {
+            "1": "Next.js", "2": "Go Gin", "3": "FastAPI", "4": "Node/TypeScript",
+            "5": "Go", "6": "Python", "7": "Monorepo", "8": "Multi-Project", "9": "Laravel"
+        }
+        tech_stack = mapping.get(choice, choice)
+        
+    if tech_stack == "Multi-Project":
+        be_opts = ["[1] NestJS (TypeScript)", "[2] FastAPI (Python)", "[3] Go Gin", "[4] None"]
+        be_choice = select_choice("--- Configure Backend Application ---", be_opts, "1")
+        
+        if be_choice != "4":
+            arch_opts = ["[1] Hexagonal Architecture (Ports & Adapters)", "[2] Clean Architecture", "[3] Standard MVC / Modular"]
+            be_arch_choice = select_choice("Configure Backend Architecture:", arch_opts, "2")
+            
+        fe_opts = ["[1] Next.js (TypeScript)", "[2] React SPA (Vite)", "[3] Laravel Blade / PHP HTML", "[4] None"]
+        fe_choice = select_choice("--- Configure Frontend Application ---", fe_opts, "1")
+        
+        if fe_choice != "4":
+            arch_opts = ["[1] Atomic Design", "[2] Standard Components / App Router Layout"]
+            fe_arch_choice = select_choice("Configure Frontend Architecture:", arch_opts, "2")
+            
+        arch_pattern = "Decoupled / Distributed Architecture"
+        db_orm = "None"
+        env_vars = "PORT"
+        
+    default_arch = "MVC"
+    if tech_stack == "Next.js":
+        default_arch = "App Router"
+    elif tech_stack == "Go Gin":
+        default_arch = "Clean Architecture"
+    elif tech_stack == "FastAPI":
+        default_arch = "Modular REST"
+    elif tech_stack == "Monorepo":
+        default_arch = "Decoupled / Distributed"
+    elif tech_stack == "Laravel":
+        default_arch = "MVC"
+        
+    if not arch_pattern:
+        arch_pattern = get_input("Enter Architectural Pattern", default_arch)
+        
+    default_env = "PORT"
+    if tech_stack in ("Go Gin", "FastAPI"):
+        default_env = "PORT,ENV"
+    elif tech_stack == "Next.js":
+        default_env = "PORT"
+    elif tech_stack == "Laravel":
+        default_env = "APP_KEY,DB_CONNECTION,DB_DATABASE"
+        
+    if not db_orm:
+        db_orm = get_input("Enter Database/ORM (e.g. Prisma, PostgreSQL, None)", "None")
+        
+    if not env_vars:
+        env_vars = get_input("Enter config variables (comma-separated)", default_env)
+        
+    if not scaffold:
+        scaffold = get_input("Scaffold initial project folders? (y/n)", "y").lower()
+        
+    if not gen_docker:
+        gen_docker = get_input("Generate Dockerfiles and docker-compose.yml? (y/n)", "y").lower()
+
+    # 1. Initialize Git if not present
+    if not os.path.exists(".git"):
+        print("Initializing Git repository...")
+        subprocess.run(["git", "init"])
+        subprocess.run(["git", "branch", "-m", "main"])
+        
+    # 2. Install Git hooks
+    agents_dir = utils.get_agents_dir()
+    os.makedirs(".git/hooks", exist_ok=True)
+    for h in ('pre-commit', 'post-commit', 'commit-msg'):
+        src = os.path.join(agents_dir, 'hooks', h)
+        dest = os.path.join('.git', 'hooks', h)
+        if os.path.exists(src):
+            shutil.copy(src, dest)
+            os.chmod(dest, 0o755)
+            print(f"Git {h} hook installed.")
+
+    # 3. Scaffold folders if requested
+    if scaffold in ("y", "yes"):
+        print("Scaffolding directory structure...")
+        
+        if tech_stack == "Next.js":
+            if "Atomic" in arch_pattern or "atomic" in arch_pattern:
+                dirs = ['src/app', 'src/components/atoms', 'src/components/molecules', 'src/components/organisms', 'src/components/templates', 'src/lib', 'tests']
+            elif "Clean" in arch_pattern or "clean" in arch_pattern:
+                dirs = ['src/app', 'src/core/entities', 'src/core/usecases', 'src/infrastructure/db', 'src/infrastructure/api', 'src/lib', 'tests']
+            else:
+                dirs = ['src/app', 'src/components', 'src/lib', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in NEXT_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Go Gin":
+            if any(x in arch_pattern for x in ("Hexagonal", "Ports", "Adapters")):
+                dirs = ['src/cmd/server', 'src/internal/core/domain', 'src/internal/core/ports', 'src/internal/adapters/in/web', 'src/internal/adapters/out/db', 'src/internal/config', 'tests']
+            elif "Clean" in arch_pattern:
+                dirs = ['src/cmd/server', 'src/internal/domain/entity', 'src/internal/domain/usecase', 'src/internal/adapter/controller', 'src/internal/adapter/repository', 'src/internal/infrastructure/db', 'src/internal/config', 'tests']
+            else:
+                dirs = ['src/cmd/server', 'src/internal/model', 'src/internal/controller', 'src/internal/view', 'src/internal/config', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in GOGIN_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "FastAPI":
+            if any(x in arch_pattern for x in ("Hexagonal", "Ports", "Adapters")):
+                dirs = ['src/app/domain', 'src/app/ports', 'src/app/adapters/in/api', 'src/app/adapters/out/db', 'src/app/core', 'tests']
+            elif "Clean" in arch_pattern:
+                dirs = ['src/app/entities', 'src/app/usecases', 'src/app/controllers', 'src/app/infrastructure/db', 'src/app/core', 'tests']
+            else:
+                dirs = ['src/app/core', 'src/app/api/endpoints', 'tests']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in FASTAPI_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Monorepo":
+            dirs = ['apps/web/src/app/api/health', 'apps/web/src/components', 'apps/web/src/lib', 'apps/web/tests',
+                    'apps/api/src/cmd/server', 'apps/api/src/internal/controller', 'apps/api/src/internal/config', 'apps/api/tests',
+                    'packages/shared']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in MONOREPO_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Laravel":
+            dirs = ['app/Http/Controllers', 'app/Models', 'app/Providers', 'bootstrap', 'config', 'database/migrations',
+                    'database/seeders', 'database/factories', 'public', 'resources/views', 'resources/css', 'resources/js',
+                    'routes', 'tests/Feature', 'tests/Unit', 'app/Http/Middleware', 'app/Exceptions', 'app/Console']
+            for d in dirs:
+                os.makedirs(d, exist_ok=True)
+                
+            for path, content in LARAVEL_TEMPLATES.items():
+                write_file(path, content)
+                
+        elif tech_stack == "Multi-Project":
+            os.makedirs("apps/backend", exist_ok=True)
+            os.makedirs("apps/frontend", exist_ok=True)
+            
+            # 1. Backend
+            if be_choice == "1":
+                # NestJS
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/core/domain', 'apps/backend/src/core/ports', 'apps/backend/src/adapters/in/web', 'apps/backend/src/adapters/out/persistence']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/entities', 'apps/backend/src/usecases', 'apps/backend/src/controllers', 'apps/backend/src/infrastructure/db']
+                else:
+                    dirs = ['apps/backend/src/modules', 'apps/backend/src/common']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/package.json", MULTIPROJECT_FILES["apps/backend/package.json"])
+                write_file("apps/backend/src/main.ts", MULTIPROJECT_FILES["apps/backend/src/main.ts"])
+                write_file("apps/backend/src/app.module.ts", MULTIPROJECT_FILES["apps/backend/src/app.module.ts"])
+            elif be_choice == "2":
+                # FastAPI
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/domain', 'apps/backend/src/ports', 'apps/backend/src/adapters/in/api', 'apps/backend/src/adapters/out/db', 'apps/backend/src/core']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/entities', 'apps/backend/src/usecases', 'apps/backend/src/controllers', 'apps/backend/src/infrastructure/db', 'apps/backend/src/core']
+                else:
+                    dirs = ['apps/backend/src/core', 'apps/backend/src/api/endpoints']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/requirements.txt", MULTIPROJECT_FILES["apps/backend/requirements.txt"])
+                write_file("apps/backend/src/app/main.py", MULTIPROJECT_FILES["apps/backend/src/app/main.py"])
+            elif be_choice == "3":
+                # Go Gin
+                if be_arch_choice == "1":
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/core/domain', 'apps/backend/src/internal/core/ports', 'apps/backend/src/internal/adapters/in/web', 'apps/backend/src/internal/adapters/out/db', 'apps/backend/src/internal/config']
+                elif be_arch_choice == "2":
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/domain/entity', 'apps/backend/src/internal/domain/usecase', 'apps/backend/src/internal/adapter/controller', 'apps/backend/src/internal/adapter/repository', 'apps/backend/src/internal/infrastructure/db', 'apps/backend/src/internal/config']
+                else:
+                    dirs = ['apps/backend/src/cmd/server', 'apps/backend/src/internal/model', 'apps/backend/src/internal/controller', 'apps/backend/src/internal/view', 'apps/backend/src/internal/config']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/backend/go.mod", MULTIPROJECT_FILES["apps/backend/go.mod"])
+                write_file("apps/backend/src/cmd/server/main.go", MULTIPROJECT_FILES["apps/backend/src/cmd/server/main.go"])
+                
+            # 2. Frontend
+            if fe_choice == "1":
+                # Next.js
+                if fe_arch_choice == "1":
+                    dirs = ['apps/frontend/src/app', 'apps/frontend/src/lib', 'apps/frontend/src/components/atoms', 'apps/frontend/src/components/molecules', 'apps/frontend/src/components/organisms', 'apps/frontend/src/components/templates']
+                else:
+                    dirs = ['apps/frontend/src/app', 'apps/frontend/src/lib', 'apps/frontend/src/components']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/frontend/package.json", MULTIPROJECT_FILES["apps/frontend/package.json"])
+                write_file("apps/frontend/src/app/layout.tsx", MULTIPROJECT_FILES["apps/frontend/src/app/layout.tsx"])
+                write_file("apps/frontend/src/app/page.tsx", MULTIPROJECT_FILES["apps/frontend/src/app/page.tsx"])
+            elif fe_choice == "2":
+                # React SPA
+                if fe_arch_choice == "1":
+                    dirs = ['apps/frontend/src', 'apps/frontend/public', 'apps/frontend/src/components/atoms', 'apps/frontend/src/components/molecules', 'apps/frontend/src/components/organisms', 'apps/frontend/src/components/templates']
+                else:
+                    dirs = ['apps/frontend/src', 'apps/frontend/public', 'apps/frontend/src/components']
+                for d in dirs: os.makedirs(d, exist_ok=True)
+                write_file("apps/frontend/package.json", MULTIPROJECT_FILES["apps/frontend/package.json"])
+                write_file("apps/frontend/index.html", MULTIPROJECT_FILES["apps/frontend/index.html"])
+                write_file("apps/frontend/src/main.tsx", MULTIPROJECT_FILES["apps/frontend/src/main.tsx"])
+                write_file("apps/frontend/src/App.tsx", MULTIPROJECT_FILES["apps/frontend/src/App.tsx"])
+            elif fe_choice == "3":
+                # Laravel Blade
+                os.makedirs("apps/frontend/resources/views", exist_ok=True)
+                write_file("apps/frontend/resources/views/welcome.blade.php", MULTIPROJECT_FILES["apps/frontend/resources/views/welcome.blade.php"])
+                
+        else:
+            # Fallback (Generic/Basic)
+            dirs = ['src', 'tests', 'config']
+            for d in dirs: os.makedirs(d, exist_ok=True)
+            
+            stack_lower = tech_stack.lower()
+            if any(x in stack_lower for x in ("node", "typescript", "ts")):
+                write_file("package.json", FALLBACK_TEMPLATES["package.json"])
+            if any(x in stack_lower for x in ("go", "golang")):
+                write_file("go.mod", FALLBACK_TEMPLATES["go.mod"])
+                write_file("src/main.go", FALLBACK_TEMPLATES["src/main.go"])
+            if any(x in stack_lower for x in ("python", "py")):
+                write_file("src/main.py", FALLBACK_TEMPLATES["src/main.py"])
+
+    # 4. Generate Dockerfiles
+    if gen_docker in ("y", "yes"):
+        print("Generating Dockerfiles and docker-compose.yml...")
+        
+        db_service = ""
+        db_envs = ""
+        db_depends = ""
+        db_lower = db_orm.lower()
+        
+        if "postgres" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_postgres"]
+            db_envs = "      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres\n      - DB_HOST=postgres\n      - DB_PORT=5432"
+            db_depends = "    depends_on:\n      postgres:\n        condition: service_healthy"
+        elif "mysql" in db_lower or "mariadb" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_mysql"]
+            db_envs = "      - DATABASE_URL=mysql://root:root@mysql:3306/db\n      - DB_HOST=mysql\n      - DB_PORT=3306"
+            db_depends = "    depends_on:\n      mysql:\n        condition: service_healthy"
+        elif "mongo" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_mongodb"]
+            db_envs = "      - DATABASE_URL=mongodb://mongodb:27017/db\n      - DB_HOST=mongodb\n      - DB_PORT=27017"
+            db_depends = "    depends_on:\n      mongodb:\n        condition: service_healthy"
+        elif "redis" in db_lower:
+            db_service = DOCKER_TEMPLATES["db_redis"]
+            db_envs = "      - REDIS_URL=redis://redis:6379/0\n      - REDIS_HOST=redis\n      - REDIS_PORT=6379"
+            db_depends = "    depends_on:\n      redis:\n        condition: service_healthy"
+
+        # Multi/Monorepos
+        if tech_stack in ("Monorepo", "Multi-Project"):
+            be_dir = "apps/api" if tech_stack == "Monorepo" else "apps/backend"
+            fe_dir = "apps/web" if tech_stack == "Monorepo" else "apps/frontend"
+            
+            # Backend Dockerfile selection
+            be_docker = ""
+            if tech_stack == "Monorepo" or be_choice == "3":
+                be_docker = DOCKER_TEMPLATES["gogin_dockerfile"]
+            elif be_choice == "2":
+                be_docker = DOCKER_TEMPLATES["fastapi_dockerfile"]
+            elif be_choice == "1":
+                # NestJS
+                be_docker = "FROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\nRUN npm run build\nCMD [\"npm\", \"run\", \"start:prod\"]"
+                
+            # Frontend Dockerfile selection
+            fe_docker = ""
+            if tech_stack == "Monorepo" or fe_choice == "1":
+                fe_docker = DOCKER_TEMPLATES["nextjs_dockerfile"]
+            elif fe_choice == "2":
+                fe_docker = "FROM node:18-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install\nCOPY . .\nRUN npm run build\nRUN npm install -g serve\nCMD [\"serve\", \"-s\", \"dist\"]"
+            elif fe_choice == "3":
+                fe_docker = DOCKER_TEMPLATES["laravel_dockerfile"]
+                
+            # Write Dockerfiles
+            if be_choice != "4":
+                write_file(f"{be_dir}/Dockerfile", be_docker.replace('\\n', '\n').replace('\"', '"'))
+            if fe_choice != "4":
+                write_file(f"{fe_dir}/Dockerfile", fe_docker.replace('\\n', '\n').replace('\"', '"'))
+                
+            # Compose
+            services = ""
+            if fe_choice != "4":
+                services += f"  frontend:\n    build:\n      context: ./{fe_dir}\n      dockerfile: Dockerfile\n    ports:\n      - \"3000:3000\"\n"
+            if be_choice != "4":
+                services += f"  backend:\n    build:\n      context: ./{be_dir}\n      dockerfile: Dockerfile\n    ports:\n      - \"8080:8080\"\n"
+                if db_depends:
+                    services += f"{db_depends}\n"
+                if db_envs:
+                    services += f"    environment:\n{db_envs}\n"
+                    
+            if db_service:
+                services += f"\n{db_service}\n"
+                
+            compose_content = f"version: '3.8'\n\nservices:\n{services}"
+            if "postgres" in db_lower or "mysql" in db_lower or "mariadb" in db_lower or "mongo" in db_lower:
+                vol_name = "pgdata" if "postgres" in db_lower else ("mysql_data" if "mysql" in db_lower or "mariadb" in db_lower else "mongo_data")
+                compose_content += f"\nvolumes:\n  {vol_name}:\n"
+                
+            write_file("docker-compose.yml", compose_content.replace('\\n', '\n').replace('\"', '"'))
+            
+        else:
+            # Single Project dockerfiles
+            dockerfile_content = ""
+            dockerignore_content = ""
+            
+            if tech_stack == "Next.js":
+                dockerfile_content = DOCKER_TEMPLATES.get("nextjs_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("nextjs_dockerignore", "")
+            elif tech_stack in ("Go Gin", "Go"):
+                dockerfile_content = DOCKER_TEMPLATES.get("gogin_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("gogin_dockerignore", "")
+            elif tech_stack in ("FastAPI", "Python"):
+                dockerfile_content = DOCKER_TEMPLATES.get("fastapi_dockerfile", "")
+                dockerignore_content = DOCKER_TEMPLATES.get("fastapi_dockerignore", "")
+            elif tech_stack == "Laravel":
+                dockerfile_content = DOCKER_TEMPLATES.get("laravel_dockerfile", "")
+            elif any(x in tech_stack.lower() for x in ("node", "typescript", "ts")):
+                dockerfile_content = DOCKER_TEMPLATES.get("fallback_node_dockerfile", "")
+                
+            if dockerfile_content:
+                write_file("Dockerfile", dockerfile_content.replace('\\n', '\n').replace('\"', '"'))
+            if dockerignore_content:
+                write_file(".dockerignore", dockerignore_content.replace('\\n', '\n').replace('\"', '"'))
+                
+            # Compose
+            port = "3000" if tech_stack == "Next.js" else ("8080" if tech_stack in ("Go Gin", "Go") else "8000")
+            services = f"  app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    ports:\n      - \"{port}:{port}\"\n"
+            if db_depends:
+                services += f"{db_depends}\n"
+            if db_envs:
+                services += f"    environment:\n{db_envs}\n"
+                
+            if db_service:
+                services += f"\n{db_service}\n"
+                
+            compose_content = f"version: '3.8'\n\nservices:\n{services}"
+            if "postgres" in db_lower or "mysql" in db_lower or "mariadb" in db_lower or "mongo" in db_lower:
+                vol_name = "pgdata" if "postgres" in db_lower else ("mysql_data" if "mysql" in db_lower or "mariadb" in db_lower else "mongo_data")
+                compose_content += f"\nvolumes:\n  {vol_name}:\n"
+                
+            write_file("docker-compose.yml", compose_content.replace('\\n', '\n').replace('\"', '"'))
+
+    # 5. Create .env and .env.example
+    if env_vars:
+        print("Writing configuration environment variables...")
+        vars_list = [v.strip() for v in env_vars.split(',') if v.strip()]
+        env_content = "\n".join([f"{v}=" for v in vars_list]) + "\n"
+        with open(".env.example", 'w') as f:
+            f.write(env_content)
+        with open(".env", 'w') as f:
+            f.write(env_content)
+        print("Created .env and .env.example templates")
+
+    # 6. Run auto-recon to generate the blueprints
+    print("Running autonomous reconnaissance to populate blueprint files...")
+    recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
+    if os.path.exists(recon_sh):
+        subprocess.run([recon_sh, "-f"])
+        
+    print("==========================================================")
+    print(f"Workspace initialized successfully for '{project_name}'!")
+    print("==========================================================")
+
+EOF
+
+# Write .agents/scripts/cli/commands/guide.py
+write_template_safe ".agents/scripts/cli/commands/guide.py" << 'EOF'
+import sys
+import utils
+
+def run(args):
+    print("=====================================================================")
+    print("   🚀 Welcome to Antigravity Agent Core Onboarding Guide 🚀")
+    print("=====================================================================")
+    print("Antigravity Agent Core (AAC) is a developer protocol and workspace")
+    print("layout designed to coordinate human-agent pair-programming safely,")
+    print("cost-effectively, and securely.")
+    print("")
+    print("---------------------------------------------------------------------")
+    print("💡 THE 3-STEP DAILY WORKFLOW FOR DEVELOPERS & AGENTS")
+    print("---------------------------------------------------------------------")
+    print("When modifying code in this workspace, follow this atomic sequence:")
+    print("")
+    print("1. LOCK the module you want to edit:")
+    print("   $ ./.agents/scripts/helper.sh lock <module-directory>")
+    print("   Example: ./.agents/scripts/helper.sh lock cli")
+    print("   (This tells other developers/agents not to modify this module.)")
+    print("")
+    print("2. WRITE your code and tests (TDD is highly recommended).")
+    print("")
+    print("3. COMMIT your changes using the helper commit command:")
+    print("   $ ./.agents/scripts/helper.sh commit <type> <scope> \"description\" [files...]")
+    print("   Example: ./.agents/scripts/helper.sh commit feat cli \"add push subcommand\"")
+    print("   (This runs validation checks, rotates SSH keys/Git profiles, commits,")
+    print("   and automatically releases your lock).")
+    print("")
+    print("---------------------------------------------------------------------")
+    print("🩺 KEY DIAGNOSTICS & SYSTEM COMMANDS")
+    print("---------------------------------------------------------------------")
+    print("- Run Health Checks: ./.agents/scripts/helper.sh doctor")
+    print("  (Checks Git hooks, execution permissions, and workspace validation status.)")
+    print("")
+    print("- Validate Compliance: ./.agents/scripts/helper.sh validate")
+    print("  (Audits workspace for hardcoded secrets, environment purity, and budget limits.)")
+    print("")
+    print("- Setup Profile Rotation: ./.agents/scripts/helper.sh git-profile")
+    print("  (Manages multiple local git config identities and rotates SSH key bindings.)")
+    print("")
+    print("---------------------------------------------------------------------")
+    print("📚 DOCUMENTATION & RESOURCES")
+    print("---------------------------------------------------------------------")
+    print("Detailed guides are located inside the root 'docs/' directory:")
+    print("- Setup Guide:        docs/setup_guide.md")
+    print("- CLI Reference:      docs/cli_guide.md")
+    print("- Agent Workflows:    docs/agent_workflow.md")
+    print("- Directory Layout:   docs/directory_blueprint.md")
+    print("=====================================================================")
+
+EOF
+
+# Write .agents/scripts/cli/commands/recon.py
+write_template_safe ".agents/scripts/cli/commands/recon.py" << 'EOF'
+import os
+import sys
+import subprocess
+import utils
+
+def run(args):
+    recon_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'recon.sh')
+    if not os.path.exists(recon_sh):
+        print(f"Error: recon.sh not found at {recon_sh}", file=sys.stderr)
+        sys.exit(1)
+        
+    proc = subprocess.run([recon_sh] + args[1:])
+    sys.exit(proc.returncode)
+
+EOF
+
+# Write .agents/scripts/cli/__init__.py
+write_template_safe ".agents/scripts/cli/__init__.py" << 'EOF'
+
+
+EOF
+
+# Write .agents/scripts/cli/utils.py
+write_template_safe ".agents/scripts/cli/utils.py" << 'EOF'
+import os
+import sys
+import json
+import time
+
+def find_workspace_root():
+    """
+    Finds the directory containing the '.agents' folder, starting from the current directory
+    and walking up. Defaults to the current directory if not found.
+    """
+    curr = os.path.abspath(os.getcwd())
+    while True:
+        if os.path.isdir(os.path.join(curr, '.agents')):
+            return curr
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            break
+        curr = parent
+    return os.path.abspath(os.getcwd())
+
+def get_agents_dir():
+    return os.path.join(find_workspace_root(), '.agents')
+
+def get_memory_file():
+    return os.path.join(get_agents_dir(), 'memory.md')
+
+def print_title(title):
+    print("==========================================================")
+    print(f"  {title}")
+    print("==========================================================")
+
+def load_budget():
+    budget_file = os.path.join(get_agents_dir(), 'token_budget.json')
+    budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 0,
+        "alert_threshold_percent": 90,
+        "profiles": {}
+    }
+    if os.path.exists(budget_file):
+        try:
+            with open(budget_file, 'r') as f:
+                budget = json.load(f)
+        except:
+            pass
+            
+    # Process automatic budget resets if configured
+    reset_interval = budget.get("reset_interval")
+    if reset_interval and reset_interval != "none":
+        # Determine interval duration in seconds
+        interval_seconds = None
+        if reset_interval == "hourly":
+            interval_seconds = 3600
+        elif reset_interval == "daily":
+            interval_seconds = 86400
+        elif reset_interval == "weekly":
+            interval_seconds = 604800
+        elif reset_interval == "monthly":
+            interval_seconds = 2592000
+        else:
+            try:
+                interval_seconds = int(reset_interval)
+            except ValueError:
+                pass
+                
+        if interval_seconds is not None:
+            current_time = int(time.time())
+            last_reset = budget.get("last_reset_timestamp")
+            
+            # If last reset is not set, initialize it to the current time
+            if last_reset is None:
+                budget["last_reset_timestamp"] = current_time
+                save_budget(budget)
+            else:
+                try:
+                    last_reset = int(last_reset)
+                except ValueError:
+                    last_reset = current_time
+                    budget["last_reset_timestamp"] = current_time
+                    save_budget(budget)
+                    
+                if current_time - last_reset >= interval_seconds:
+                    print(f"\n[INFO] Token budget reset interval ('{reset_interval}') has expired.")
+                    print("Resetting all current token usage counts to 0.")
+                    budget["current_token_usage"] = 0
+                    if "profiles" in budget:
+                        for profile in budget["profiles"].values():
+                            if isinstance(profile, dict):
+                                profile["current_token_usage"] = 0
+                    budget["last_reset_timestamp"] = current_time
+                    save_budget(budget)
+                    
+    return budget
+
+def save_budget(budget):
+    budget_file = os.path.join(get_agents_dir(), 'token_budget.json')
+    with open(budget_file, 'w') as f:
+        json.dump(budget, f, indent=2)
+
+def log_token_usage(tokens):
+    """
+    Log token usage for both the active profile and globally.
+    """
+    budget = load_budget()
+    
+    # Update global usage
+    budget["current_token_usage"] = budget.get("current_token_usage", 0) + tokens
+    
+    # Read active profile
+    profile_file = os.path.join(get_agents_dir(), 'active_api_profile_name')
+    active_profile = "default"
+    if os.path.exists(profile_file):
+        with open(profile_file, 'r') as f:
+            active_profile = f.read().strip()
+            
+    # Update profile usage
+    profiles = budget.get("profiles", {})
+    if active_profile not in profiles:
+        profiles[active_profile] = {
+            "current_token_usage": 0,
+            "max_token_budget": 500000
+        }
+    profiles[active_profile]["current_token_usage"] = profiles[active_profile].get("current_token_usage", 0) + tokens
+    
+    budget["profiles"] = profiles
+    save_budget(budget)
+    
+    # Calculate warning thresholds
+    global_usage = budget["current_token_usage"]
+    global_limit = budget["max_token_budget"]
+    pct = (global_usage / global_limit) * 100
+    alert_threshold = budget.get("alert_threshold_percent", 90)
+    
+    print(f"Logged {tokens} tokens to profile '{active_profile}'.")
+    print(f"  Active Profile Usage: {profiles[active_profile]['current_token_usage']} / {profiles[active_profile]['max_token_budget']}")
+    print(f"  Global Usage: {global_usage} / {global_limit} ({pct:.1f}%)")
+    
+    if pct >= alert_threshold:
+        print(f"\n[WARNING] Token usage has reached {pct:.1f}% of budget! Threshold is {alert_threshold}%.")
+        print("Please wrap up your task, stage and commit completed tasks, and hand over.")
+
+EOF
+
+# Write .agents/scripts/cli/helper.py
+write_template_safe ".agents/scripts/cli/helper.py" << 'EOF'
+#!/usr/bin/env python3
+import sys
+import os
+
+# Ensure the cli directory is in the import path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+def show_help():
+    print("==========================================================")
+    print("  Antigravity Agent Core Helper CLI (Python Edition)")
+    print("==========================================================")
+    print("Usage: helper.py <command> [arguments...]")
+    print("")
+    print("Core Commands:")
+    print("  lock              Acquire a module edit lock (transient lock)")
+    print("  unlock            Release a module edit lock")
+    print("  validate          Validate workspace compliance, budget, and configurations")
+    print("  doctor            Run complete diagnostic validation on the workspace")
+    print("  migrate           Upgrade workspaces to V1.9.0 format")
+    print("  push              Push local branch to remote repository securely")
+    print("  git-profile       Switch Git user config profiles locally")
+    print("  api-profile       Switch API configurations locally (use 'rotate' to rotate)")
+    print("  log-usage         Log token usage to budget tracker")
+    print("  archive           Archive completed sprint checklists to history")
+    print("  recon             Run autonomous codebase stack discovery")
+    print("  list-skills       List all registered modular skills")
+    print("  create-skill      Scaffold a new skill structure")
+    print("  list-rules        List all project-specific blueprints and rules")
+    print("  create-rule       Scaffold a new project rule blueprint")
+    print("  init              Initialize a new workspace with template blueprints")
+    print("  autocomplete      Output shell completion code (bash/zsh)")
+    print("  adr-wizard        Interactive guided ADR wizard")
+    print("  guide             Print step-by-step developer onboarding tutorial")
+    print("==========================================================")
+    print("Tip: Run 'helper.py guide' for a quick step-by-step developer tutorial!")
+    print("==========================================================")
+
+def main():
+    if len(sys.argv) < 2:
+        show_help()
+        sys.exit(1)
+        
+    cmd = sys.argv[1]
+    
+    cmd_map = {
+        "lock": "lock",
+        "unlock": "lock",
+        "validate": "validate",
+        "doctor": "doctor",
+        "migrate": "migrate",
+        "push": "push",
+        "git-profile": "git_profile",
+        "api-profile": "api_profile",
+        "log-usage": "log_usage",
+        "archive": "archive",
+        "recon": "recon",
+        "list-skills": "skills",
+        "create-skill": "skills",
+        "list-rules": "rules",
+        "create-rule": "rules",
+        "init": "init",
+        "commit": "commit",
+        "sync-git": "sync_git",
+        "build": "build",
+        "lint": "lint",
+        "test": "test",
+        "sync-api": "sync_api",
+        "create-adr": "create_adr",
+        "adr-wizard": "adr_wizard",
+        "release": "release",
+        "autocomplete": "autocomplete",
+        "guide": "guide"
+    }
+    
+    if cmd not in cmd_map:
+        print(f"Unknown command: '{cmd}'", file=sys.stderr)
+        show_help()
+        sys.exit(1)
+        
+    module_name = cmd_map[cmd]
+    try:
+        # Import the command module dynamically
+        cmd_module = __import__(f"commands.{module_name}", fromlist=[module_name])
+        # Execute the module's main function
+        cmd_module.run(sys.argv[1:])
+    except ImportError as e:
+        print(f"Failed to load command '{cmd}': {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error executing command '{cmd}': {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
 
 EOF
 
 # Write helper.ps1 wrapper script
 write_template_safe ".agents/scripts/helper.ps1" << 'EOF'
-# Antigravity Agent Workspace Helper Wrapper for Windows PowerShell
-# Forwards arguments to helper.sh running inside Git Bash and auto-loads API keys if dot-sourced.
-
-$gitBash = "C:\Program Files\Git\bin\bash.exe"
-if (-not (Test-Path $gitBash)) {
-    $gitBash = (Get-Command bash.exe -ErrorAction SilentlyContinue).Source
-}
-
-if (-not $gitBash) {
-    Write-Error "Git Bash is required to run Antigravity helper scripts on Windows. Please install Git for Windows (https://git-scm.com/)."
-    exit 1
-}
-
-# Resolve target helper.sh script path relative to this script
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$helperSh = Join-Path $scriptPath "helper.sh"
+$helperPy = Join-Path $scriptPath "cli" "helper.py"
 
-# Format target path for Bash environment (ensure Unix style slashes)
-$helperShUnix = $helperSh.Replace('\', '/')
+$projectRoot = Split-Path -Parent (Split-Path -Parent $scriptPath)
+$venvPython1 = Join-Path $projectRoot ".venv" "Scripts" "python.exe"
+$venvPython2 = Join-Path $projectRoot ".venv" "bin" "python"
+$venvPython3 = Join-Path $projectRoot ".venv" "bin" "python3"
 
-# Execute helper.sh inside Git Bash, forwarding all arguments exactly
-if ($args) {
-    & $gitBash $helperShUnix @args
+$pyCmd = ""
+if (Test-Path $venvPython1) {
+    $pyCmd = $venvPython1
+} elseif (Test-Path $venvPython2) {
+    $pyCmd = $venvPython2
+} elseif (Test-Path $venvPython3) {
+    $pyCmd = $venvPython3
 } else {
-    & $gitBash $helperShUnix
-}
-
-# Detect if the script was run with api-profile subcommand
-$isApiProfile = $args -and ($args[0] -eq "api-profile")
-
-if ($isApiProfile) {
-    $activeKeysFile = Join-Path (Split-Path $scriptPath) "active_api_keys.ps1"
-    
-    # Check if script is dot-sourced
-    $isDotSourced = $MyInvocation.InvocationName -eq '.' -or $MyInvocation.InvocationName -eq '..'
-    
-    if ($isDotSourced) {
-        if (Test-Path $activeKeysFile) {
-            Write-Host "[INFO] Auto-loading active API keys into PowerShell session..."
-            . $activeKeysFile
+    # Fallback to system Python
+    if (Get-Command python3 -ErrorAction SilentlyContinue) {
+        $pyCmd = "python3"
+    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
+        $pyVersion = & python -c 'import sys; print(sys.version_info[0])' 2>$null
+        if ($pyVersion -eq "3") {
+            $pyCmd = "python"
+        } else {
+            Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
+            exit 1
         }
     } else {
-        if (Test-Path $activeKeysFile) {
-            Write-Host ""
-            Write-Host "[INFO] To load these keys into your current PowerShell session, run:" -ForegroundColor Cyan
-            Write-Host "       . .agents/active_api_keys.ps1" -ForegroundColor Yellow
-            Write-Host ""
-        }
+        Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
+        exit 1
     }
 }
+
+& $pyCmd $helperPy $args
 
 EOF
 
@@ -6688,6 +5572,7 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
+
 EOF
 
 # Write .agents/scripts/api-rotate-wrapper.sh
@@ -6757,8 +5642,8 @@ while [ $retry_count -lt $MAX_RETRIES ]; do
         if [ $retry_count -lt $MAX_RETRIES ]; then
             echo "[API-WRAPPER] Command exited with code $exit_code (Rate Limited/Quota Exhausted)."
             echo "[API-WRAPPER] Rotating API profile and retrying ($retry_count/$MAX_RETRIES)..."
-            "$HELPER_SH" api-profile rotate
-            sleep 2
+            "$HELPER_SH" api-profile rotate --rate-limited
+            sleep 1
         else
             echo "[API-WRAPPER] Command exited with code $exit_code. All available API profiles exhausted." >&2
             exit $exit_code
@@ -6848,8 +5733,8 @@ while ($retryCount -lt $maxRetries) {
         if ($retryCount -lt $maxRetries) {
             Write-Warning "[API-WRAPPER] Command exited with code $exitCode (Rate Limited/Quota Exhausted)."
             Write-Host "[API-WRAPPER] Rotating API profile and retrying ($retryCount/$maxRetries)..."
-            & $helperPs1 api-profile rotate
-            Start-Sleep -Seconds 2
+            & $helperPs1 api-profile rotate --rate-limited
+            Start-Sleep -Seconds 1
         } else {
             Write-Error "[API-WRAPPER] Command exited with code $exitCode. All available API profiles exhausted."
             exit $exitCode
@@ -7142,7 +6027,7 @@ if [ -z "$commit_msg" ] || [[ "$commit_msg" =~ ^Merge\ branch ]] || [[ "$commit_
 fi
 
 # Conventional Commits regex: type(scope): description
-convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\-\/]+\))?: .+$"
+convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\/-]+\))?: .+$"
 
 if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
     echo "==========================================================" >&2

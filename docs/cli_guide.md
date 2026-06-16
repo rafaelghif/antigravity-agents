@@ -72,6 +72,7 @@ If you are a developer, you only need to know these **5 essential commands** for
 | `adr-wizard` | `adr-wizard [args...]` | Interactive guided Architectural Decision Record (ADR) wizard. |
 | `git-profile` | `git-profile [key/name/rotate] [email]` | Switches or displays Git config profiles and automates local SSH key rotation. |
 | `api-profile` | `api-profile [key/rotate]` | Switches or displays API provider key profiles and automates local environment rotation. |
+| `guide` | `guide` | Prints an interactive step-by-step developer onboarding tutorial to the terminal. |
 
 ---
 
@@ -201,6 +202,10 @@ The `git-profile` command allows developers to switch between multiple Git accou
   - `-f`, `--force`: Executes a force push (`git push origin <branch> --force`).
   - `-n`, `--no-validate`: Bypasses the workspace validation checks and matches warnings for non-aligned Git profiles.
 - **Behavior**: Auto-detects the active local branch name, verifies that the current Git user email matches an identity inside `.agents/git_profiles`, dynamically injects `GIT_SSH_COMMAND="ssh -i <key> -o IdentitiesOnly=yes"` if the profile has a configured SSH key, runs workspace sanity validation checks, and executes `git push`.
+
+### 4.10 Developer Onboarding Tutorial (`guide`)
+- **Signature**: `./.agents/scripts/helper.sh guide`
+- **Behavior**: Prints a beautifully formatted, easy-to-read developer guide inside the terminal, outlining the daily essentials workflow (locking, editing, and helper commits) and core diagnostics.
 
 ---
 

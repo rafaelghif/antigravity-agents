@@ -56,18 +56,26 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 
 ---
 
-### 🩺 2. Verify Workspace Health
-Run the doctor tool to inspect active hooks, locks, script permissions, and security validation checks:
+### 🩺 2. Verify Workspace Health & Onboarding Tutorial
+Run the doctor tool to inspect active hooks, locks, script permissions, and validation checks:
 ```bash
 ./.agents/scripts/helper.sh doctor
+```
+Or view the friendly step-by-step interactive developer guide:
+```bash
+./.agents/scripts/helper.sh guide
 ```
 
 ---
 
 ### 💡 3. Simplified Developer Cheat Sheet (Daily Essentials)
 
-If you are a developer, you only need to know these **3 essential commands** for daily work:
+If you are a developer, you only need to know these daily essentials:
 
+- **Interactive Onboarding Tutorial**:
+  ```bash
+  ./.agents/scripts/helper.sh guide
+  ```
 - **Lock a Module (Before Editing)**:
   ```bash
   ./.agents/scripts/helper.sh lock <module-name>

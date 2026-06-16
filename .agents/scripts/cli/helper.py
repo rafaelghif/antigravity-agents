@@ -30,6 +30,9 @@ def show_help():
     print("  init              Initialize a new workspace with template blueprints")
     print("  autocomplete      Output shell completion code (bash/zsh)")
     print("  adr-wizard        Interactive guided ADR wizard")
+    print("  guide             Print step-by-step developer onboarding tutorial")
+    print("==========================================================")
+    print("Tip: Run 'helper.py guide' for a quick step-by-step developer tutorial!")
     print("==========================================================")
 
 def main():
@@ -65,7 +68,8 @@ def main():
         "create-adr": "create_adr",
         "adr-wizard": "adr_wizard",
         "release": "release",
-        "autocomplete": "autocomplete"
+        "autocomplete": "autocomplete",
+        "guide": "guide"
     }
     
     if cmd not in cmd_map:
