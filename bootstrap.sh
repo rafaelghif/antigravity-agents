@@ -323,7 +323,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: fccc369
+- **Last Commit Reference**: f968f14
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -345,9 +345,9 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 3. Relayed Context & Handover Notes
-- **Last Active Agent**: Antigravity Gemini 3.5 Flash
-- **Last Action Completed**: Implemented api-profile subcommand, validation checks, and wrapper script for API key auto-rotation
-- **Next Planned Action**: Push changes to origin (git push) and deploy the updated bootstrap.sh on new workspaces
+- **Last Active Agent**: Antigravity
+- **Last Action Completed**: Successfully implemented api-rotator skill, per-profile token budget tracking, compiled all templates into bootstrap scripts, and committed changes.
+- **Next Planned Action**: push commits to origin (git push)
 - **Blockers / Runtime Notes**: None. Workspace is fully clean, validated, and committed.
 
 ---
