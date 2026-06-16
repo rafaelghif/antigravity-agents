@@ -232,6 +232,33 @@ def run(args):
     proc = subprocess.run(["git", "commit", "-m", commit_msg])
     if proc.returncode == 0:
         print("Commit successful.")
+        
+        # Check for issue auto-closing in commit message
+        closed_issues = re.findall(r"\b(?:fixes|closes|resolves)\s+#([0-9]+)\b", desc, re.IGNORECASE)
+        if closed_issues:
+            try:
+                import importlib
+                issue_mod = importlib.import_module("commands.issue")
+                staged_any = False
+                for issue_id_str in closed_issues:
+                    print(f"Commit message matches auto-close pattern for issue #{issue_id_str}. Auto-closing issue...")
+                    try:
+                        issue_mod.close_issue(issue_id_str)
+                        issues_dir = issue_mod.get_issues_dir()
+                        filename = f"issue_{int(issue_id_str):03d}.md"
+                        file_path = os.path.join(issues_dir, filename)
+                        if os.path.exists(file_path):
+                            subprocess.run(["git", "add", file_path])
+                            staged_any = True
+                    except SystemExit:
+                        print(f"Warning: Could not auto-close issue #{issue_id_str} (does not exist or invalid ID).", file=sys.stderr)
+                
+                if staged_any:
+                    print("Amending commit to include auto-closed issue files...")
+                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"])
+                    print("Commit amended successfully.")
+            except Exception as e:
+                print(f"Warning: Failed to auto-close issues: {e}", file=sys.stderr)
     else:
         print("Error: Git commit failed.", file=sys.stderr)
         sys.exit(1)
