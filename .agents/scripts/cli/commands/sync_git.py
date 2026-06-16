@@ -20,7 +20,7 @@ def run(args):
         
     try:
         commit = subprocess.check_output(
-            ["git", "log", "-n", 1, "--format=%h"], 
+            ["git", "log", "-n", "1", "--format=%h"], 
             stderr=subprocess.DEVNULL
         ).decode().strip()
     except:
