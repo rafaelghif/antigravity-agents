@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #2: Fix SURIOTA review report findings
+- **Current Task Target**: Resolve issue #3: Ignore sample directory in git
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
