@@ -87,15 +87,16 @@ If you are a developer, you only need to know these **3 essential commands** for
 
 For in-depth guides on the layout, configuration, and advanced commands, refer to the sub-documentations below:
 
-1. 📂 [Directory Structure Blueprint](file://./.agents/docs/directory_blueprint.md) — Map of the generated operational structures and workspace components.
-2. ⚡ [Core Features & Capabilities](file://./.agents/docs/features_capabilities.md) — Initialization wizard, adaptation, monorepo handling, and Docker provisioning.
-3. ⚙️ [Step-by-Step Setup Guide](file://./.agents/docs/setup_guide.md) — Detailed integration workflows for new and existing projects.
-4. 🛠️ [Operational Scripts Guide (helper.sh)](file://./.agents/docs/cli_guide.md) — Detailed subcommand documentation, arguments, and PowerShell parameters.
-5. 🔄 [Typical Workflow for the Agent](file://./.agents/docs/agent_workflow.md) — Step-by-step task loop execution process.
-6. 🛡️ [Core Rules & Architecture Purity](file://./.agents/docs/rules_architecture.md) — Enforced rules, boundary guidelines, and caching protocols.
-7. 🚀 [Migration Guide](file://./.agents/docs/migration_guide.md) — How to upgrade older AAC setups to modern standards.
-8. 📅 [Agent Core Changelog](file://./CHANGELOG.md) — Log of version releases and update details.
-9. 📌 [Architectural Decision Records (ADRs)](file://./.agents/adr.md) — Historical architectural decisions ledger.
+1. 📂 [Directory Structure Blueprint](file://./docs/directory_blueprint.md) — Map of the generated operational structures and workspace components.
+2. ⚡ [Core Features & Capabilities](file://./docs/features_capabilities.md) — Initialization wizard, adaptation, monorepo handling, and Docker provisioning.
+3. ⚙️ [Step-by-Step Setup Guide](file://./docs/setup_guide.md) — Detailed integration workflows for new and existing projects.
+4. 🛠️ [Operational Scripts Guide (helper.sh)](file://./docs/cli_guide.md) — Detailed subcommand documentation, arguments, and PowerShell parameters.
+5. 🔄 [Typical Workflow for the Agent](file://./docs/agent_workflow.md) — Step-by-step task loop execution process.
+6. 🛡️ [Core Rules & Architecture Purity](file://./docs/rules_architecture.md) — Enforced rules, boundary guidelines, and caching protocols.
+7. 🚀 [Migration Guide](file://./docs/migration_guide.md) — How to upgrade older AAC setups to modern standards.
+8. 🔑 [API Profile Rotation & Budget Tracking](file://./docs/api_rotation.md) — Multi-platform auto-rotation, PowerShell integration, and token budget limits.
+9. 📅 [Agent Core Changelog](file://./CHANGELOG.md) — Log of version releases and update details.
+10. 📌 [Architectural Decision Records (ADRs)](file://./.agents/adr.md) — Historical architectural decisions ledger.
 
 ---
 

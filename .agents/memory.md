@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 9c9527e
+- **Last Commit Reference**: 536a590
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,19 +18,19 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: AAC Workspace Alignment
+- **Primary Epic**: Standardize Workspace Documentation Layout
 - **Current Task Target**: Ready for next session
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [ ] Ready for next sprint
+- [x] Standardize docs folder and update README/memory links
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Migrated README.md sections into modular documentation files under `.agents/docs/` and linked them cleanly.
+- **Last Action Completed**: Standardized documentation layout by consolidating all files under root `docs/` and updating references/ADR-005/changelog.
 - **Next Planned Action**: Ready for next session.
-- **Blockers / Runtime Notes**: Workspace is fully validated, all tests pass, and locks are released.
+- **Blockers / Runtime Notes**: Workspace is fully validated, clean, and ready for push/merge. All locks released.
 
 ---
 
