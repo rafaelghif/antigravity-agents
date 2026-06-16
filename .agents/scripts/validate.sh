@@ -4,6 +4,50 @@
 
 set -euo pipefail
 
+# Color Definitions (TTY-aware)
+if [ -t 1 ]; then
+    RED='\033[91m'
+    GREEN='\033[92m'
+    YELLOW='\033[93m'
+    BLUE='\033[94m'
+    CYAN='\033[96m'
+    BOLD='\033[1m'
+    NC='\033[0m'
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    CYAN=''
+    BOLD=''
+    NC=''
+fi
+
+# Override echo to support colors dynamically
+echo() {
+    local msg="$*"
+    if [ -t 1 ]; then
+        msg="${msg//\[PASS\]/[${GREEN}${BOLD}PASS${NC}]}"
+        msg="${msg//\[WARNING\]/[${YELLOW}${BOLD}WARNING${NC}]}"
+        msg="${msg//\[FAIL\]/[${RED}${BOLD}FAIL${NC}]}"
+        if [[ "$msg" =~ ^Check\ [0-9]+: ]]; then
+            msg="${msg/Check /${CYAN}${BOLD}Check }"
+            msg="${msg/: /:${NC} }"
+        fi
+        if [[ "$msg" == "Starting Antigravity Agent Workspace Validation..." ]]; then
+            msg="${CYAN}${BOLD}${msg}${NC}"
+        fi
+        if [[ "$msg" == "Workspace Status:"* ]]; then
+            if [[ "$msg" == *"VALIDATED"* ]]; then
+                msg="${msg/VALIDATED/${GREEN}${BOLD}VALIDATED${NC}}"
+            else
+                msg="${msg/DEGRADED/${RED}${BOLD}DEGRADED${NC}}"
+            fi
+        fi
+    fi
+    command echo -e "$msg"
+}
+
 MEMORY_FILE=".agents/memory.md"
 LOCKS_DIR=".agents/locks"
 PROJECT_RULES=".agents/rules/project_rules.md"

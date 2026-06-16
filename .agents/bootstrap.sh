@@ -359,7 +359,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: cbbdccd
+- **Last Commit Reference**: 7dfd7c9
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -370,13 +370,14 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: CLI UX and Usability Modernization
-- **Current Task Target**: Modernize CLI TUI Dashboard UX
+- **Current Task Target**: Modernize onboarding, doctor, and validation outputs
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
 - [x] Implement CLI clean subcommand
 - [x] Implement Interactive CLI Menu Dashboard
-- [/] Modernize CLI TUI Dashboard UX
+- [x] Modernize CLI TUI Dashboard UX
+- [/] Modernize onboarding, doctor, and validation outputs
 
 ---
 
@@ -3096,6 +3097,18 @@ import sys
 import subprocess
 import utils
 
+# ANSI color codes
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
 def run(args):
     utils.print_title("Antigravity Workspace Doctor Diagnostics")
     
@@ -3103,17 +3116,17 @@ def run(args):
     
     # Check Git Repository
     if os.path.isdir('.git'):
-        print("  [PASS] Git repository initialized.")
+        print(f"  {color('[PASS]', C_GREEN + C_BOLD)} Git repository initialized.")
     else:
-        print("  [FAIL] Git repository not initialized!")
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Git repository not initialized!")
         errors += 1
         
     def check_hook(hook_name):
         hook_path = os.path.join('.git', 'hooks', hook_name)
         if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
-            print(f"  [PASS] {hook_name} Git hook is installed and executable.")
+            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed and executable.")
         else:
-            print(f"  [WARNING] Git {hook_name} hook is missing or not executable.")
+            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing or not executable.")
             print(f"            To install: cp .agents/hooks/{hook_name} .git/hooks/{hook_name} && chmod +x .git/hooks/{hook_name}")
             
     check_hook("pre-commit")
@@ -3125,15 +3138,15 @@ def run(args):
         script_path = os.path.join(utils.get_agents_dir(), 'scripts', script_name)
         if os.path.exists(script_path):
             if os.access(script_path, os.X_OK):
-                print(f"  [PASS] {script_name} is executable.")
+                print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {script_name} is executable.")
             else:
-                print(f"  [WARNING] {script_name} is not executable. Auto-correcting...")
+                print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} {script_name} is not executable. Auto-correcting...")
                 try:
                     os.chmod(script_path, 0o755)
                 except Exception as e:
                     print(f"            Failed to set executable permission: {e}", file=sys.stderr)
         else:
-            print(f"  [FAIL] {script_name} is missing!")
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} {script_name} is missing!")
             errors += 1
             
     check_script("helper.sh")
@@ -3149,10 +3162,10 @@ def run(args):
             
     print("==========================================================")
     if errors == 0:
-        print("Doctor diagnostics: ALL SYSTEMS HEALTHY")
+        print(color("Doctor diagnostics: ALL SYSTEMS HEALTHY", C_GREEN + C_BOLD))
         sys.exit(0)
     else:
-        print(f"Doctor diagnostics: FOUND {errors} ERROR(S) / WARNING(S)")
+        print(color(f"Doctor diagnostics: FOUND {errors} ERROR(S) / WARNING(S)", C_YELLOW + C_BOLD))
         sys.exit(1)
 
 EOF
@@ -4827,53 +4840,73 @@ write_template_safe ".agents/scripts/cli/commands/guide.py" << 'EOF'
 import sys
 import utils
 
+# ANSI color codes
+C_HEADER = '\033[95m'
+C_BLUE = '\033[94m'
+C_CYAN = '\033[96m'
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
 def run(args):
-    print("=====================================================================")
-    print("   🚀 Welcome to Antigravity Agent Core Onboarding Guide 🚀")
-    print("=====================================================================")
+    print(color("=====================================================================", C_BLUE))
+    print(color("   🚀 Welcome to Antigravity Agent Core Onboarding Guide 🚀", C_BOLD + C_HEADER))
+    print(color("=====================================================================", C_BLUE))
     print("Antigravity Agent Core (AAC) is a developer protocol and workspace")
     print("layout designed to coordinate human-agent pair-programming safely,")
     print("cost-effectively, and securely.")
     print("")
-    print("---------------------------------------------------------------------")
-    print("💡 THE 3-STEP DAILY WORKFLOW FOR DEVELOPERS & AGENTS")
-    print("---------------------------------------------------------------------")
+    
+    print(color("💡 THE 3-STEP DAILY WORKFLOW FOR DEVELOPERS & AGENTS", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
     print("When modifying code in this workspace, follow this atomic sequence:")
     print("")
-    print("1. LOCK the module you want to edit:")
-    print("   $ ./.agents/scripts/helper.sh lock <module-directory>")
-    print("   Example: ./.agents/scripts/helper.sh lock cli")
+    
+    print(f"{color('1. LOCK', C_BOLD + C_GREEN)} the module you want to edit:")
+    print(f"   $ {color('./.agents/scripts/helper.sh lock <module-directory>', C_CYAN)}")
+    print(f"   Example: {color('./.agents/scripts/helper.sh lock cli', C_GRAY if not sys.stdout.isatty() else '\033[90m')}")
     print("   (This tells other developers/agents not to modify this module.)")
     print("")
-    print("2. WRITE your code and tests (TDD is highly recommended).")
+    
+    print(f"{color('2. WRITE', C_BOLD + C_GREEN)} your code and tests (TDD is highly recommended).")
     print("")
-    print("3. COMMIT your changes using the helper commit command:")
-    print("   $ ./.agents/scripts/helper.sh commit <type> <scope> \"description\" [files...]")
-    print("   Example: ./.agents/scripts/helper.sh commit feat cli \"add push subcommand\"")
+    
+    print(f"{color('3. COMMIT', C_BOLD + C_GREEN)} your changes using the helper commit command:")
+    print(f"   $ {color('./.agents/scripts/helper.sh commit <type> <scope> \"description\" [files...]', C_CYAN)}")
+    print(f"   Example: {color('./.agents/scripts/helper.sh commit feat cli \"add push subcommand\"', C_GRAY if not sys.stdout.isatty() else '\033[90m')}")
     print("   (This runs validation checks, rotates SSH keys/Git profiles, commits,")
     print("   and automatically releases your lock).")
     print("")
-    print("---------------------------------------------------------------------")
-    print("🩺 KEY DIAGNOSTICS & SYSTEM COMMANDS")
-    print("---------------------------------------------------------------------")
-    print("- Run Health Checks: ./.agents/scripts/helper.sh doctor")
+    
+    print(color("🩺 KEY DIAGNOSTICS & SYSTEM COMMANDS", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
+    
+    print(f"- {color('Run Health Checks', C_BOLD)}: {color('./.agents/scripts/helper.sh doctor', C_CYAN)}")
     print("  (Checks Git hooks, execution permissions, and workspace validation status.)")
     print("")
-    print("- Validate Compliance: ./.agents/scripts/helper.sh validate")
+    
+    print(f"- {color('Validate Compliance', C_BOLD)}: {color('./.agents/scripts/helper.sh validate', C_CYAN)}")
     print("  (Audits workspace for hardcoded secrets, environment purity, and budget limits.)")
     print("")
-    print("- Setup Profile Rotation: ./.agents/scripts/helper.sh git-profile")
+    
+    print(f"- {color('Setup Profile Rotation', C_BOLD)}: {color('./.agents/scripts/helper.sh git-profile', C_CYAN)}")
     print("  (Manages multiple local git config identities and rotates SSH key bindings.)")
     print("")
-    print("---------------------------------------------------------------------")
-    print("📚 DOCUMENTATION & RESOURCES")
-    print("---------------------------------------------------------------------")
+    
+    print(color("📚 DOCUMENTATION & RESOURCES", C_BOLD + C_CYAN))
+    print(color("---------------------------------------------------------------------", C_BLUE))
     print("Detailed guides are located inside the root 'docs/' directory:")
-    print("- Setup Guide:        docs/setup_guide.md")
-    print("- CLI Reference:      docs/cli_guide.md")
-    print("- Agent Workflows:    docs/agent_workflow.md")
-    print("- Directory Layout:   docs/directory_blueprint.md")
-    print("=====================================================================")
+    print(f"- Setup Guide:        {color('docs/setup_guide.md', C_GREEN)}")
+    print(f"- CLI Reference:      {color('docs/cli_guide.md', C_GREEN)}")
+    print(f"- Agent Workflows:    {color('docs/agent_workflow.md', C_GREEN)}")
+    print(f"- Directory Layout:   {color('docs/directory_blueprint.md', C_GREEN)}")
+    print(color("=====================================================================", C_BLUE))
 
 EOF
 
@@ -5591,6 +5624,50 @@ write_template_safe ".agents/scripts/validate.sh" << 'EOF'
 # Validates workspace rules, scans for credentials, checks memory size, and details active locks.
 
 set -euo pipefail
+
+# Color Definitions (TTY-aware)
+if [ -t 1 ]; then
+    RED='\033[91m'
+    GREEN='\033[92m'
+    YELLOW='\033[93m'
+    BLUE='\033[94m'
+    CYAN='\033[96m'
+    BOLD='\033[1m'
+    NC='\033[0m'
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    CYAN=''
+    BOLD=''
+    NC=''
+fi
+
+# Override echo to support colors dynamically
+echo() {
+    local msg="$*"
+    if [ -t 1 ]; then
+        msg="${msg//\[PASS\]/[${GREEN}${BOLD}PASS${NC}]}"
+        msg="${msg//\[WARNING\]/[${YELLOW}${BOLD}WARNING${NC}]}"
+        msg="${msg//\[FAIL\]/[${RED}${BOLD}FAIL${NC}]}"
+        if [[ "$msg" =~ ^Check\ [0-9]+: ]]; then
+            msg="${msg/Check /${CYAN}${BOLD}Check }"
+            msg="${msg/: /:${NC} }"
+        fi
+        if [[ "$msg" == "Starting Antigravity Agent Workspace Validation..." ]]; then
+            msg="${CYAN}${BOLD}${msg}${NC}"
+        fi
+        if [[ "$msg" == "Workspace Status:"* ]]; then
+            if [[ "$msg" == *"VALIDATED"* ]]; then
+                msg="${msg/VALIDATED/${GREEN}${BOLD}VALIDATED${NC}}"
+            else
+                msg="${msg/DEGRADED/${RED}${BOLD}DEGRADED${NC}}"
+            fi
+        fi
+    fi
+    command echo -e "$msg"
+}
 
 MEMORY_FILE=".agents/memory.md"
 LOCKS_DIR=".agents/locks"
