@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Virtual environment creation flag `-v` / `--venv` / `--create-venv` support in `bootstrap.sh`.
 - Compliant Git PR Review Scaffolder skill `pr-scaffolder` (`.agents/skills/pr-scaffolder/`) to generate review guides with symbol tracking, verification logging, and schema diffing.
 - Comprehensive unit tests in `tests/test_skill_pr_scaffolder.py` covering language-agnostic symbol parser and report formatter.
+- Interactive guided ADR wizard skill `adr-wizard` (`.agents/skills/adr-wizard/`) with helper subcommand delegation supporting both interactive console prompts and non-interactive JSON parameter modes.
+- Enhanced ADR validation checks in `validate.sh` enforcing numeric sequence continuity, bidirectional index sync, and content validation.
+- Comprehensive unit tests in `tests/test_skill_adr_wizard.py` covering help execution and non-interactive generation.
 
 ### Changed
 - Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.

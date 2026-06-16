@@ -28,6 +28,7 @@ def show_help():
     print("  create-rule       Scaffold a new project rule blueprint")
     print("  init              Initialize a new workspace with template blueprints")
     print("  autocomplete      Output shell completion code (bash/zsh)")
+    print("  adr-wizard        Interactive guided ADR wizard")
     print("==========================================================")
 
 def main():
@@ -60,6 +61,7 @@ def main():
         "test": "test",
         "sync-api": "sync_api",
         "create-adr": "create_adr",
+        "adr-wizard": "adr_wizard",
         "release": "release",
         "autocomplete": "autocomplete"
     }

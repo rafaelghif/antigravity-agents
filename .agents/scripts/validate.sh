@@ -318,6 +318,7 @@ echo "Check 10: ADR Compliance Check"
 ADR_ERRORS=0
 if [ -f ".agents/adr.md" ]; then
     if [ -d ".agents/adrs" ]; then
+        max_num=0
         for adr_file in .agents/adrs/*.md; do
             if [ -f "$adr_file" ]; then
                 base_name=$(basename "$adr_file")
@@ -326,11 +327,51 @@ if [ -f ".agents/adr.md" ]; then
                     echo "  [FAIL] Architectural Decision Record file '$base_name' is NOT registered in '.agents/adr.md'!"
                     ADR_ERRORS=$((ADR_ERRORS + 1))
                 fi
-                # Check for placeholders
-                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$adr_file"; then
-                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder)!"
+                # Check for placeholders and template defaults
+                if grep -i -q -E "TODO|FIXME|\[placeholder\]|Describe the problem|Describe the decision|Describe the result" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder/template default)!"
                     ADR_ERRORS=$((ADR_ERRORS + 1))
                 fi
+                # Check for required sections
+                if ! grep -q "## Context" "$adr_file" || ! grep -q "## Decision" "$adr_file" || ! grep -q "## Consequences" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' is missing required sections (Context, Decision, Consequences)!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+                
+                # Extract sequence number to check for gaps later
+                if [[ "$base_name" =~ ^([0-9]{3})- ]]; then
+                    num=$((10#${BASH_REMATCH[1]}))
+                    if [ "$num" -gt "$max_num" ]; then
+                        max_num=$num
+                    fi
+                fi
+            fi
+        done
+        
+        # Gaps check
+        if [ "$max_num" -gt 0 ]; then
+            for ((i=1; i<=max_num; i++)); do
+                padded_num=$(printf "%03d" $i)
+                found=0
+                for f in .agents/adrs/${padded_num}-*.md; do
+                    if [ -e "$f" ]; then
+                        found=1
+                        break
+                    fi
+                done
+                if [ "$found" -eq 0 ]; then
+                    echo "  [FAIL] Missing ADR in sequence: ADR-${padded_num} is not found!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+            done
+        fi
+        
+        # Bidirectional sync: check if registered files in adr.md actually exist
+        links=$(grep -o -E "file://\./adrs/[^)]+\.md" ".agents/adr.md" | sed 's|file://./||' || true)
+        for link in $links; do
+            if [ ! -f ".agents/$link" ]; then
+                echo "  [FAIL] ADR index references non-existent file '.agents/$link'!"
+                ADR_ERRORS=$((ADR_ERRORS + 1))
             fi
         done
     fi
