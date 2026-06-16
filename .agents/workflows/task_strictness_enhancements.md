@@ -20,16 +20,16 @@ This task implements the strictness enhancements aligned during the `/grill-me` 
 
 ## 2. Checklist & Implementation Status
 
-- [ ] **Boundary Auto-Heal Implementation**
-  - [ ] Implement `.gitignore` and `.antigravityignore` checks in validation logic
-  - [ ] Add auto-heal capability for incorrect ignores
-- [ ] **Strict Budget Block**
-  - [ ] Update helper CLI and validation script to enforce 95% threshold blockade
-- [ ] **Leak Prevention Hook Guard**
-  - [ ] Implement pre-commit checks for staged transient files and git user configurations
-- [ ] **Quality & Changelog Parser Gate**
-  - [ ] Add Keep a Changelog parser validation check
-  - [ ] Add staged code check for new `TODO` / `FIXME` comments
-- [ ] **Verification & Validation**
-  - [ ] Run validation suite `./.agents/scripts/helper.sh validate`
-  - [ ] Perform commit via `./.agents/scripts/helper.sh commit`
+- [x] **Boundary Auto-Heal Implementation**
+  - [x] Implement `.gitignore` and `.antigravityignore` checks in validation logic
+  - [x] Add auto-heal capability for incorrect ignores
+- [x] **Strict Budget Block**
+  - [x] Update helper CLI and validation script to enforce 95% threshold blockade
+- [x] **Leak Prevention Hook Guard**
+  - [x] Implement pre-commit checks for staged transient files and git user configurations
+- [x] **Quality & Changelog Parser Gate**
+  - [x] Add Keep a Changelog parser validation check
+  - [x] Add staged code check for new `TODO` / `FIXME` comments
+- [x] **Verification & Validation**
+  - [x] Run validation suite `./.agents/scripts/helper.sh validate`
+  - [x] Perform commit via `./.agents/scripts/helper.sh commit`

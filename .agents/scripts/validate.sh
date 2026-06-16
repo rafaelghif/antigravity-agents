@@ -183,8 +183,8 @@ else
     FAILED=1
 fi
 
-# 7. Check Gitignore Configuration Compliance
-echo "Check 7: Gitignore Configuration Compliance"
+# 7. Check Gitignore & Antigravityignore Configuration Compliance
+echo "Check 7: Gitignore & Antigravityignore Compliance"
 GITIGNORE_ERRORS=0
 if [ -f ".gitignore" ]; then
     # Verify that .gitignore does NOT ignore .agents/ or AGENTS.md globally
@@ -196,16 +196,40 @@ if [ -f ".gitignore" ]; then
         echo "  [FAIL] .gitignore ignores 'AGENTS.md'! Please remove it."
         GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
     fi
-    # Verify that .agents/locks/ is ignored
-    if ! grep -E -q "^\.agents/locks/?" .gitignore; then
-        echo "  [WARNING] .gitignore does not ignore transient locks ('.agents/locks/')."
+
+    # Auto-heal transient files ignore in .gitignore
+    HEALED_GI=0
+    for pattern in ".agents/locks/" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+        if ! grep -q "^$pattern" .gitignore; then
+            echo "  [WARNING] .gitignore does not ignore transient: '$pattern'. Auto-healing..."
+            echo "$pattern" >> .gitignore
+            HEALED_GI=1
+        fi
+    done
+    if [ $HEALED_GI -eq 1 ]; then
+        echo "  [PASS] .gitignore auto-healed successfully."
     fi
 else
     echo "  [WARNING] No .gitignore file found in project root."
 fi
 
+if [ -f ".antigravityignore" ]; then
+    # Auto-heal transient files ignore in .antigravityignore
+    HEALED_AG=0
+    for pattern in ".agents/locks/" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+        if ! grep -q "^$pattern" .antigravityignore; then
+            echo "  [WARNING] .antigravityignore does not ignore transient: '$pattern'. Auto-healing..."
+            echo "$pattern" >> .antigravityignore
+            HEALED_AG=1
+        fi
+    done
+    if [ $HEALED_AG -eq 1 ]; then
+        echo "  [PASS] .antigravityignore auto-healed successfully."
+    fi
+fi
+
 if [ "$GITIGNORE_ERRORS" -eq 0 ]; then
-    echo "  [PASS] Gitignore is correctly configured."
+    echo "  [PASS] Gitignore & Antigravityignore configurations are validated."
 else
     FAILED=1
 fi
@@ -274,6 +298,10 @@ if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
         if [ "$CURRENT_USAGE" -ge "$MAX_BUDGET" ]; then
             echo "  [FAIL] Token budget exceeded! Current: $CURRENT_USAGE, Limit: $MAX_BUDGET."
             echo "         Please save your task checkpoint in workflows/ and handover the task."
+            FAILED=1
+        elif [ "$PERCENT" -ge 95 ]; then
+            echo "  [FAIL] Token usage has reached critical threshold ($PERCENT% >= 95%)! All operations blocked."
+            echo "         Please request a budget increase or manually reset the usage log."
             FAILED=1
         elif [ "$PERCENT" -ge "$THRESHOLD" ]; then
             echo "  [WARNING] Token usage is at $PERCENT% of budget. Consider saving and handing over."
@@ -407,6 +435,71 @@ fi
 
 if [ "$API_ERRORS" -eq 0 ]; then
     echo "  [PASS] API configurations and profiles are validated and secure."
+else
+    FAILED=1
+fi
+
+# 13. Check CHANGELOG.md Format (Keep a Changelog Compliance)
+echo "Check 13: Keep a Changelog Compliance"
+CHANGELOG_ERRORS=0
+if [ -f "CHANGELOG.md" ]; then
+    if ! head -n 1 CHANGELOG.md | grep -q "^# Changelog" ; then
+        echo "  [FAIL] CHANGELOG.md must start with '# Changelog' header."
+        CHANGELOG_ERRORS=$((CHANGELOG_ERRORS + 1))
+    fi
+    INVALID_HEADERS=$(grep "^## " CHANGELOG.md | grep -Ev "^## \[(Unreleased|[0-9]+\.[0-9]+\.[0-9]+)\]( - [0-9]{4}-[0-9]{2}-[0-9]{2})?" || true)
+    if [ -n "$INVALID_HEADERS" ]; then
+        echo "  [FAIL] CHANGELOG.md contains invalid version headers:"
+        echo "$INVALID_HEADERS" | sed 's/^/         /'
+        CHANGELOG_ERRORS=$((CHANGELOG_ERRORS + 1))
+    fi
+else
+    echo "  [WARNING] No CHANGELOG.md file found in project root."
+fi
+
+if [ "$CHANGELOG_ERRORS" -eq 0 ]; then
+    echo "  [PASS] CHANGELOG.md matches Keep a Changelog compliance."
+else
+    FAILED=1
+fi
+
+# 14. Check for TODO/FIXME Annotations in Staged Code
+echo "Check 14: Staged Code Quality (TODO/FIXME Guard)"
+TODO_ERRORS=0
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    # Get staged files excluding .md files and files inside .agents/
+    STAGED_CODE_FILES=$(git diff --cached --name-only | grep -Ev "\.md$" | grep -Ev "^\.agents/" || true)
+    for file in $STAGED_CODE_FILES; do
+        TODO_LINES=$(git diff --cached -- "$file" | grep "^+[^+]" | grep -Ei "\b(TODO|FIXME)\b" || true)
+        if [ -n "$TODO_LINES" ]; then
+            echo "  [FAIL] Quality Guard: Staged file '$file' contains TODO or FIXME annotations:"
+            echo "$TODO_LINES" | sed 's/^/         /'
+            TODO_ERRORS=$((TODO_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$TODO_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Staged changes contain no TODO or FIXME annotations."
+else
+    FAILED=1
+fi
+
+# 15. Check for Staged Transient Files & Config Leak Guard
+echo "Check 15: Staged Transient Files & Leak Guard"
+LEAK_ERRORS=0
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    STAGED_FILES=$(git diff --cached --name-only)
+    for file in $STAGED_FILES; do
+        if [[ "$file" =~ \.lock$ ]] || [[ "$file" =~ active_api_keys ]] || [[ "$file" =~ cooldowns\.json$ ]]; then
+            echo "  [FAIL] Leak Guard: Transient file '$file' is staged for commit! Please unstage it."
+            LEAK_ERRORS=$((LEAK_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$LEAK_ERRORS" -eq 0 ]; then
+    echo "  [PASS] No transient files or credentials are staged."
 else
     FAILED=1
 fi
