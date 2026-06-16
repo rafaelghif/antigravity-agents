@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Centralized and standardized all modular documentation files under root `docs/` directory, removing the redundant `.agents/docs/` folder.
 - Updated root `README.md` documentation index to link to the new standardized `docs/` paths and included the `api_rotation.md` guide.
 - Consolidated all migration documentation into a single, unified `docs/migration_guide.md` file, deleting the redundant `MIGRATION.md` file and updating all CLI command version descriptions to version V1.9.0.
+- Refined the default `memory.md` template written by `bootstrap.sh` to be generic, professional, and free of hardcoded project history.
+- Added automatic Git branch/commit synchronization (`helper.sh sync-git`) at the end of the installation process in `bootstrap.sh` for plug-and-play workspace alignment.
 - Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.
 - Documented system prerequisites (Git, Python 3, Git Bash) in `README.md`.
 

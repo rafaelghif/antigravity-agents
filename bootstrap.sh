@@ -347,7 +347,6 @@ To prevent technical debt and ensure the system remains maintainable, secure, an
 - **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/rules/project_rules.md` to prevent future errors.
 
 EOF
-# 3. Write .agents/memory.md template
 write_template_safe ".agents/memory.md" << 'EOF'
 # Agent Core Memory
 
@@ -359,7 +358,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 739778a
+- **Last Commit Reference**: none
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -381,9 +380,9 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Implemented cross-platform Python test suite (tests/test_rotation.py) for wrapper testing, registered it as project test runner, compiled templates, and committed changes.
-- **Next Planned Action**: push commits to origin (git push)
-- **Blockers / Runtime Notes**: None. Workspace is fully clean, validated, and committed.
+- **Last Action Completed**: Initialized Antigravity Agent Core workspace and templates.
+- **Next Planned Action**: Perform codebase exploration and start the first task.
+- **Blockers / Runtime Notes**: None. Workspace is fully validated and ready for agent operations.
 
 ---
 
@@ -7064,6 +7063,11 @@ if [ -f .agents/scripts/recon.sh ]; then
     else
         .agents/scripts/recon.sh
     fi
+fi
+
+# Synchronize Git branch and commit reference to memory.md
+if [ -f .agents/scripts/helper.sh ]; then
+    .agents/scripts/helper.sh sync-git >/dev/null 2>&1 || true
 fi
 
 echo "=========================================================="
