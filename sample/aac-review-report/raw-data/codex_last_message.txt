@@ -1,3 +1,0 @@
-Fixed [buggy.py](C:/Users/Administrator/Desktop/cc-bench/codex-run/buggy.py:18) by passing a function to `pattern.sub`, so backslashes in Windows paths are inserted literally instead of being interpreted as regex replacement escapes.
-
-Verification: `python -m pytest -q` passes: `1 passed`. Pytest emitted a cache permission warning for `.pytest_cache`, but the test succeeded.
