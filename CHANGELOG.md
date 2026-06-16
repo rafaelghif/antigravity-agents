@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0] - 2026-06-16
 
 ### Added
+- Secure Git push subcommand `push` (`push.py`) implementing workspace validation checks, profile email matching, and SSH key rotation.
+- Comprehensive unit tests in `tests/test_push_command.py` verifying flags, dry-runs, and SSH environment setup.
 - Shell autocompletion subcommand `autocomplete` (`autocomplete.py`) for Bash and Zsh.
 - Automatic unit test scaffolding for newly created skills (`tests/test_skill_<name>.py`).
 - Test runner integration in `tests/test_rotation.py` to automatically discover and run all `test_skill_*.py` files.
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive unit tests in `tests/test_skill_docs_sync.py` covering AST-based parsing, markdown formatting, and placeholder sync.
 
 ### Changed
+- Registered `push` subcommand in CLI helper `helper.py` and documented it in `docs/cli_guide.md`.
 - Updated CLI utils `utils.py` to automatically trigger token budget reset checks on load.
 - Updated `validate.sh` Check 9 to run Python budget reset checks before validating with `jq`.
 - Refactored `api-rotator` skill script `main.py` to import CLI `utils` and load the budget through the centralized budget tracker.

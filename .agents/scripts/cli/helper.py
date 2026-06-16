@@ -17,6 +17,7 @@ def show_help():
     print("  validate          Validate workspace compliance, budget, and configurations")
     print("  doctor            Run complete diagnostic validation on the workspace")
     print("  migrate           Upgrade workspaces to V1.9.0 format")
+    print("  push              Push local branch to remote repository securely")
     print("  git-profile       Switch Git user config profiles locally")
     print("  api-profile       Switch API configurations locally (use 'rotate' to rotate)")
     print("  log-usage         Log token usage to budget tracker")
@@ -44,6 +45,7 @@ def main():
         "validate": "validate",
         "doctor": "doctor",
         "migrate": "migrate",
+        "push": "push",
         "git-profile": "git_profile",
         "api-profile": "api_profile",
         "log-usage": "log_usage",

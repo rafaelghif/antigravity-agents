@@ -50,6 +50,7 @@ If you are a developer, you only need to know these **5 essential commands** for
 | `init` | `init [name] [stack] [arch] [db_orm] [env_vars]` | Launches the setup questionnaire to scaffold directories, configurations, and file templates. |
 | `recon` | `recon` | Runs the autonomous codebase scanner to map stacks, directories, databases, and routes. |
 | `validate` | `validate` | Audits the project for secrets, memory cap limits, and domain decoupling. |
+| `push` | `push [-f/--force] [-n/--no-validate]` | Runs workspace validation and pushes the current branch to origin using rotated SSH profile keys. |
 | `doctor` | `doctor` | Checks workspace health, script permissions, Git hook installation, and active locks. |
 | `commit` | `commit [--no-test] [type] [scope] [desc] [files...]` | Runs validations, tests, automates Git profile rotation, and makes a Conventional Commit. |
 | `sync-git` | `sync-git` | *(Automated)* Synchronizes active branch and last commit hash in `memory.md`. |
@@ -193,6 +194,13 @@ The `git-profile` command allows developers to switch between multiple Git accou
 
 ### 4.8 Token Usage Tracker (`log-usage`)
 - **Signature**: `./.agents/scripts/helper.sh log-usage <token_count>`
+
+### 4.9 Secure Git Push (`push`)
+- **Signature**: `./.agents/scripts/helper.sh push [-f|--force] [-n|--no-validate]`
+- **Options & Flags**:
+  - `-f`, `--force`: Executes a force push (`git push origin <branch> --force`).
+  - `-n`, `--no-validate`: Bypasses the workspace validation checks and matches warnings for non-aligned Git profiles.
+- **Behavior**: Auto-detects the active local branch name, verifies that the current Git user email matches an identity inside `.agents/git_profiles`, dynamically injects `GIT_SSH_COMMAND="ssh -i <key> -o IdentitiesOnly=yes"` if the profile has a configured SSH key, runs workspace sanity validation checks, and executes `git push`.
 
 ---
 
