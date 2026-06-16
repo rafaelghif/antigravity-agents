@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 4f95eb7
+- **Last Commit Reference**: 619427b
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -28,7 +28,7 @@
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Fully implemented and tested the `adr-wizard` skill and integrated it with enhanced ADR sequence, sync, and content validators.
+- **Last Action Completed**: Migrated README.md sections into modular documentation files under `.agents/docs/` and linked them cleanly.
 - **Next Planned Action**: Ready for next session.
 - **Blockers / Runtime Notes**: Workspace is fully validated, all tests pass, and locks are released.
 
