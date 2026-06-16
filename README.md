@@ -84,11 +84,11 @@ If you are a developer, you only need to know these daily essentials:
   ```bash
   ./.agents/scripts/helper.sh commit
   ```
-- **Manage Local Issues**:
+- **Manage & Automate Local Issues**:
   ```bash
-  ./.agents/scripts/helper.sh issue <list/create/view/close>
+  ./.agents/scripts/helper.sh issue <list/create/view/close/checkout/merge>
   ```
-  *(Commit descriptions containing `closes #XX` automatically close the issue and stage it)*
+  *(checkout auto-creates feature branches; merge runs validation, commits, and merges into main)*
 - **Verify Compliance Manual Check**:
   ```bash
   ./.agents/scripts/helper.sh validate

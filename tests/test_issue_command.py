@@ -64,5 +64,65 @@ class TestIssueCommand(unittest.TestCase):
         self.assertEqual(meta.get("status"), "closed")
         self.assertNotEqual(meta.get("closed_at"), "null")
 
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    def test_checkout_issue(self, mock_run, mock_check_output):
+        # Setup git branch output
+        mock_check_output.side_effect = [
+            b"user",             # git config user.name
+            b"  main\n"          # git branch
+        ]
+        
+        # Create issue
+        issue.run(["issue", "create", "Fix Login", "Login fails..."])
+        
+        # Mock memory file path
+        memory_file = os.path.join(self.test_dir, "memory.md")
+        with open(memory_file, 'w') as f:
+            f.write("### Sprint Tasks Checklist\n- **Current Task Target**: Configure\n- **State Flag**: `COMPLETED`\n")
+            
+        with patch('utils.get_memory_file', return_value=memory_file):
+            issue.run(["issue", "checkout", "1"])
+            
+        # Verify git checkout -b was run
+        mock_run.assert_any_call(["git", "checkout", "-b", "issue-1-fix-login"])
+        
+        # Verify memory.md updated
+        with open(memory_file, 'r') as f:
+            content = f.read()
+            self.assertIn("Resolve issue #1: Fix Login", content)
+            self.assertIn("- **State Flag**: `IN_PROGRESS`", content)
+
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    def test_merge_issue(self, mock_run, mock_check_output):
+        # Current branch is issue-1-fix-login
+        mock_check_output.side_effect = [
+            b"issue-1-fix-login", # git rev-parse --abbrev-ref HEAD
+        ]
+        
+        # Create issue
+        issue.run(["issue", "create", "Fix Login", "Login fails..."])
+        issue_file = os.path.join(self.test_dir, "issues", "issue_001.md")
+        
+        # Mock memory file
+        memory_file = os.path.join(self.test_dir, "memory.md")
+        with open(memory_file, 'w') as f:
+            f.write("Active Pull Request Target: `main`\n### Sprint Tasks Checklist\n- [/] Resolve issue #1: Fix Login\n- **Current Task Target**: Resolve\n- **State Flag**: `IN_PROGRESS`\n")
+            
+        orig_exists = os.path.exists
+        with patch('utils.get_memory_file', return_value=memory_file):
+            # Patch validate.sh check to do nothing
+            with patch('os.path.exists', side_effect=lambda path: False if "validate.sh" in path or "compile_bootstrap.py" in path else orig_exists(path)):
+                issue.run(["issue", "merge", "1"])
+                
+        # Verify status is closed
+        meta, _ = issue.parse_frontmatter(issue_file)
+        self.assertEqual(meta.get("status"), "closed")
+        
+        # Verify git checkout main and git merge issue-1-fix-login were called
+        mock_run.assert_any_call(["git", "checkout", "main"])
+        mock_run.assert_any_call(["git", "merge", "issue-1-fix-login", "--no-ff", "-m", "merge branch 'issue-1-fix-login' into 'main'"])
+
 if __name__ == '__main__':
     unittest.main()

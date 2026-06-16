@@ -58,6 +58,8 @@ def show_help():
     print("  create \"<title>\" [\"<desc>\"] Create a new local issue")
     print("  view <id>                  View details of a specific issue")
     print("  close <id>                 Close an open issue")
+    print("  checkout <id>              Create/checkout branch for an issue and update memory.md")
+    print("  merge <id>                 Validate workspace, commit issue branch, and merge it")
     print("==========================================================")
 
 def list_issues():
@@ -213,6 +215,208 @@ def view_issue(issue_id_str):
     print(f"\n{desc}\n")
     print(color("="*58, C_CYAN) + "\n")
 
+def checkout_issue(issue_id_str):
+    import subprocess
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    title = meta.get("title", "issue")
+    # Slugify title
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    if not slug:
+        slug = "task"
+    branch_name = f"issue-{issue_id}-{slug}"
+    
+    # Update issue assignee
+    git_user = "Agent"
+    try:
+        git_user = subprocess.check_output(["git", "config", "user.name"], stderr=subprocess.DEVNULL).decode().strip()
+    except:
+        pass
+    
+    meta["assignee"] = git_user
+    
+    closed_at_str = meta.get("closed_at", "null")
+    content = f"""---
+id: {issue_id}
+title: "{meta.get('title')}"
+status: {meta.get('status', 'open')}
+assignee: {meta.get('assignee')}
+created_at: {meta.get('created_at')}
+closed_at: {closed_at_str if closed_at_str else 'null'}
+---
+
+# Description
+{desc}
+"""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+        
+    print(color(f"Preparing Git branch '{branch_name}'...", C_CYAN))
+    
+    # Check if branch exists
+    try:
+        branches = subprocess.check_output(["git", "branch"]).decode()
+    except Exception as e:
+        branches = ""
+        
+    if re.search(fr'\b{re.escape(branch_name)}\b', branches):
+        subprocess.run(["git", "checkout", branch_name])
+    else:
+        subprocess.run(["git", "checkout", "-b", branch_name])
+        
+    # Update memory.md
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                mem_content = f.read()
+                
+            mem_content = re.sub(r'^- \*\*Current Task Target\*\*:.*', f'- **Current Task Target**: Resolve issue #{issue_id}: {title}', mem_content, flags=re.M)
+            mem_content = re.sub(r'^- \*\*State Flag\*\*:.*', '- **State Flag**: `IN_PROGRESS`', mem_content, flags=re.M)
+            
+            checklist_line = f"- [/] Resolve issue #{issue_id}: {title}"
+            if f"Resolve issue #{issue_id}:" not in mem_content:
+                m = re.search(r'### Sprint Tasks Checklist\n', mem_content)
+                if m:
+                    idx = m.end()
+                    mem_content = mem_content[:idx] + checklist_line + "\n" + mem_content[idx:]
+                    
+            with open(memory_file, 'w', encoding='utf-8') as f:
+                f.write(mem_content)
+            print(color(f"[SUCCESS] Updated memory.md with issue #{issue_id} task checklist.", C_GREEN))
+        except Exception as e:
+            print(color(f"Warning: Failed to update memory.md: {e}", C_YELLOW))
+            
+    print(color(f"[SUCCESS] Checked out branch '{branch_name}' and initialized task.", C_GREEN + C_BOLD))
+
+def merge_issue(issue_id_str):
+    import subprocess
+    try:
+        issue_id = int(issue_id_str)
+    except ValueError:
+        print(color(f"Error: Invalid issue ID '{issue_id_str}'", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    issues_dir = get_issues_dir()
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(color(f"Error: Issue #{issue_id} not found.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    meta, desc = parse_frontmatter(file_path)
+    title = meta.get("title", "issue")
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    if not slug:
+        slug = "task"
+    branch_name = f"issue-{issue_id}-{slug}"
+    
+    # Check current branch
+    current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode().strip()
+    if current_branch != branch_name:
+        print(color(f"Error: You are currently on branch '{current_branch}', but merging issue #{issue_id} requires being on issue branch '{branch_name}'.", C_RED), file=sys.stderr)
+        sys.exit(1)
+        
+    # 1. Run validation checks
+    validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
+    if os.path.exists(validate_sh):
+        print(color("Running workspace validation checks...", C_CYAN))
+        memory_file = utils.get_memory_file()
+        orig_mem = ""
+        if os.path.exists(memory_file):
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                orig_mem = f.read()
+            temp_mem = re.sub(r'^- \*\*State Flag\*\*:.*', '- **State Flag**: `COMPLETED`', orig_mem, flags=re.M)
+            temp_mem = temp_mem.replace(f"[/] Resolve issue #{issue_id}:", f"[x] Resolve issue #{issue_id}:")
+            with open(memory_file, 'w', encoding='utf-8') as f:
+                f.write(temp_mem)
+                
+        try:
+             proc = subprocess.run([validate_sh])
+             if proc.returncode != 0:
+                 if orig_mem:
+                     with open(memory_file, 'w', encoding='utf-8') as f:
+                         f.write(orig_mem)
+                 print(color("Error: Workspace validation failed. Merge aborted.", C_RED), file=sys.stderr)
+                 sys.exit(proc.returncode)
+        except Exception as e:
+             if orig_mem:
+                 with open(memory_file, 'w', encoding='utf-8') as f:
+                     f.write(orig_mem)
+             raise e
+             
+        # Compile bootstrap
+        try:
+             repo_dir = os.path.dirname(os.path.dirname(utils.get_agents_dir()))
+             compile_script = os.path.join(repo_dir, "scratch", "compile_bootstrap.py")
+             if os.path.exists(compile_script):
+                 print(color("Re-compiling bootstrap.sh with completed task...", C_CYAN))
+                 subprocess.run([sys.executable, compile_script])
+        except Exception as e:
+             print(color(f"Warning: Failed to compile bootstrap: {e}", C_YELLOW))
+    else:
+        print(color("Warning: validate.sh not found. Skipping workspace validation.", C_YELLOW))
+         
+    # 2. Close the issue locally
+    close_issue(issue_id_str)
+     
+    # 3. Commit issue branch
+    print(color(f"Committing changes on branch '{branch_name}'...", C_CYAN))
+    commit_cmd = [
+         sys.executable,
+         os.path.join(utils.get_agents_dir(), "scripts", "cli", "helper.py"),
+         "commit",
+         "feat",
+         "issue",
+         f"resolve issue #{issue_id}: {title} closes #{issue_id}"
+    ]
+    subprocess.run(commit_cmd)
+     
+    # 4. Merge branch into base branch
+    base_branch = "main"
+    memory_file = utils.get_memory_file()
+    if os.path.exists(memory_file):
+         with open(memory_file, 'r', encoding='utf-8') as f:
+             for line in f:
+                 if "Active Pull Request Target" in line:
+                     m = re.search(r'`([^`]+)`', line)
+                     if m:
+                         base_branch = m.group(1)
+                         
+    print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
+    subprocess.run(["git", "checkout", base_branch])
+    subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+     
+    # 5. Clean up local issue branch
+    print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))
+    subprocess.run(["git", "branch", "-d", branch_name])
+     
+    # 6. Clean workspace
+    clean_cmd = [
+         sys.executable,
+         os.path.join(utils.get_agents_dir(), "scripts", "cli", "helper.py"),
+         "clean"
+    ]
+    subprocess.run(clean_cmd)
+    
+    # Restore memory.md reference
+    subprocess.run(["git", "checkout", "--", memory_file])
+    print(color(f"\n[SUCCESS] Issue #{issue_id} branch merged successfully into '{base_branch}' and cleaned up!\n", C_GREEN + C_BOLD))
+
 def run(args):
     if len(args) < 2:
         show_help()
@@ -239,6 +443,16 @@ def run(args):
             print(color("Error: Issue ID is required. Usage: helper.sh issue view <id>", C_RED), file=sys.stderr)
             sys.exit(1)
         view_issue(args[2])
+    elif subcmd == "checkout":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue checkout <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        checkout_issue(args[2])
+    elif subcmd == "merge":
+        if len(args) < 3:
+            print(color("Error: Issue ID is required. Usage: helper.sh issue merge <id>", C_RED), file=sys.stderr)
+            sys.exit(1)
+        merge_issue(args[2])
     elif subcmd in ("-h", "--help", "help"):
         show_help()
     else:

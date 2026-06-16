@@ -74,7 +74,7 @@ If you are a developer, you only need to know these **5 essential commands** for
 | `api-profile` | `api-profile [key/rotate]` | Switches or displays API provider key profiles and automates local environment rotation. |
 | `guide` | `guide` | Prints an interactive step-by-step developer onboarding tutorial to the terminal. |
 | `clean` | `clean` | Purges workspace locks, archives, and resets memory/configs. |
-| `issue` | `issue <list/create/view/close> [args...]` | Manages local workspace issues stored under `.agents/issues/` and integrates with `helper.sh commit` auto-closing. |
+| `issue` | `issue <list/create/view/close/checkout/merge> [args...]` | Manages local workspace issues and automates branch checkout and git-flow merges. |
 | `menu` | `menu` | Launches the interactive developer dashboard menu (TUI). (Runs automatically when calling helper.sh without arguments in a TTY). |
 
 ---
@@ -224,11 +224,15 @@ The `git-profile` command allows developers to switch between multiple Git accou
   - `./.agents/scripts/helper.sh issue create "<title>" ["<desc>"]`
   - `./.agents/scripts/helper.sh issue view <id>`
   - `./.agents/scripts/helper.sh issue close <id>`
+  - `./.agents/scripts/helper.sh issue checkout <id>`
+  - `./.agents/scripts/helper.sh issue merge <id>`
 - **Behavior**: Manages local workspace issues stored as Markdown files under `.agents/issues/` (e.g., `issue_001.md`). 
   - `list`: Shows all issues in a clean colored table.
   - `create`: Scaffolds a new issue file with frontmatter metadata.
   - `view`: Prints the detailed description and metadata of an issue.
   - `close`: Closes an issue and records the current timestamp.
+  - `checkout`: Slugifies the issue title and automatically checks out/creates a Git branch named `issue-<id>-<slug>`. It assigns the issue to the active developer profile and updates `memory.md` with the task target and state.
+  - `merge`: Automatically validates the workspace (`validate.sh`), closes the issue, commits changes on the issue branch, switches to the base branch (e.g., `main`), merges the issue branch via a non-fast-forward merge, deletes the issue branch, and clean-resets memory/configs.
 - **Git Commit Integration**: When you run `./.agents/scripts/helper.sh commit` with a message description containing `fixes #XX`, `closes #XX`, or `resolves #XX` (e.g. `closes #1`), the commit command automatically closes the target issue file locally, stages it, and amends the commit.
 
 ---

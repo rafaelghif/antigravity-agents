@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Implement strict issue-driven validation in validate.sh and update rules
+- **Current Task Target**: Expand issue tracker command with auto checkout and merge subcommands
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -29,6 +29,7 @@
 - [x] Implement local issue tracker with helper.sh issue and commit closes #XX integration
 - [x] Document local issue tracker in README and Changelog
 - [x] Implement strict issue-driven validation in validate.sh and update rules
+- [x] Expand issue tracker command with auto checkout and merge subcommands
 
 ---
 
