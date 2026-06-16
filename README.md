@@ -535,8 +535,10 @@ API keys are stored in a Git-ignored file (`.agents/api_keys`). When you select 
   ./.agents/scripts/helper.sh api-profile --rotate
   ```
 
-#### C. Automated Runtime Rotation (Wrapper Script)
-To automatically rotate API keys when encountering rate-limiting (HTTP status code `429` or resource exhaustion), use the provided execution wrapper script:
+#### C. Automated Runtime Rotation (Wrapper Scripts)
+To automatically rotate API keys when encountering rate-limiting (HTTP status code `429`, exit code `129`, or resource exhaustion), use the provided execution wrapper scripts:
+
+**For Unix/Linux environments (Bash):**
 ```bash
 ./.agents/scripts/api-rotate-wrapper.sh [command_to_run] [args...]
 ```
@@ -544,7 +546,21 @@ To automatically rotate API keys when encountering rate-limiting (HTTP status co
 ```bash
 ./.agents/scripts/api-rotate-wrapper.sh npx antigravity-cli task-run
 ```
-If the command fails due to a rate limit, the wrapper script will automatically rotate to the next configured API key profile and retry the execution.
+
+**For Windows environments (PowerShell):**
+```powershell
+.\.agents\scripts\api-rotate-wrapper.ps1 [command_to_run] [args...]
+```
+**Example:**
+```powershell
+.\.agents\scripts\api-rotate-wrapper.ps1 npx antigravity-cli task-run
+```
+If the command fails due to a rate limit, the wrapper script will automatically rotate to the next configured API key profile, reload the active keys, and retry the execution.
+
+In PowerShell, you can also automatically import/load the selected active API profile's keys into your current terminal session by dot-sourcing `helper.ps1`:
+```powershell
+. .\.agents\scripts\helper.ps1 api-profile work
+```
 
 #### D. Specialized Python Rotator Skill (`api-rotator`)
 For developers writing custom Python agent scripts, the framework provides a native skill at `.agents/skills/api-rotator/scripts/main.py`. This script implements the hybrid rotation design pattern:

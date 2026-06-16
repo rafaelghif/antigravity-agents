@@ -2,6 +2,12 @@
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
 
+## [1.7.4] - 2026-06-16
+### Added
+- Created native Windows PowerShell wrapper `api-rotate-wrapper.ps1` for runtime API profile rotation on rate-limiting.
+- Updated `helper.ps1` to automatically import active API keys into the caller's session when dot-sourced.
+- Integrated PowerShell rotation wrapper into `compile_bootstrap.py` build compilation.
+
 ## [1.7.3] - 2026-06-16
 ### Added
 - Added `api-profile` command in `helper.sh` to switch and rotate active API provider profiles/keys locally.

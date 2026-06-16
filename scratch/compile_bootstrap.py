@@ -41,6 +41,7 @@ def compile_bootstrap():
         (".agents/scripts/recon.sh", ".agents/scripts/recon.sh"),
         (".agents/scripts/validate.sh", ".agents/scripts/validate.sh"),
         (".agents/scripts/api-rotate-wrapper.sh", ".agents/scripts/api-rotate-wrapper.sh"),
+        (".agents/scripts/api-rotate-wrapper.ps1", ".agents/scripts/api-rotate-wrapper.ps1"),
         (".agents/scripts/generate-client.js", ".agents/scripts/generate-client.js"),
         (".agents/hooks/pre-commit", ".agents/hooks/pre-commit"),
         (".agents/hooks/post-commit", ".agents/hooks/post-commit"),
@@ -71,7 +72,21 @@ def compile_bootstrap():
             validate_block = match.group(1)
             wrapper_template_block = '\n# Write .agents/scripts/api-rotate-wrapper.sh\nwrite_template_safe ".agents/scripts/api-rotate-wrapper.sh" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
             content = content.replace(validate_block, validate_block + wrapper_template_block)
+        else:
             print("Warning: Could not locate validate.sh block to insert api-rotate-wrapper.sh template.")
+            
+    # Check if we need to insert the api-rotate-wrapper.ps1 template block into bootstrap.sh first.
+    # It should be written right after api-rotate-wrapper.sh.
+    if 'write_template_safe ".agents/scripts/api-rotate-wrapper.ps1"' not in content:
+        print("Inserting .agents/scripts/api-rotate-wrapper.ps1 block template into bootstrap.sh...")
+        sh_pattern = r'(write_template_safe "\.agents/scripts/api-rotate-wrapper\.sh" << \'EOF\'\n.*?\nEOF\n)'
+        match = re.search(sh_pattern, content, re.DOTALL)
+        if match:
+            sh_block = match.group(1)
+            ps_template_block = '\n# Write .agents/scripts/api-rotate-wrapper.ps1\nwrite_template_safe ".agents/scripts/api-rotate-wrapper.ps1" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
+            content = content.replace(sh_block, sh_block + ps_template_block)
+        else:
+            print("Warning: Could not locate api-rotate-wrapper.sh block to insert api-rotate-wrapper.ps1 template.")
             
     # Check if we need to insert the api-rotator skill blocks into bootstrap.sh first.
     # It should be written right after impact-analysis/SKILL.md.

@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: f968f14
+- **Last Commit Reference**: 47babca
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,13 +18,13 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Rotator Skill & Per-Profile Quota Tracking
-- **Current Task Target**: Scaffold api-rotator skill and implement per-profile log-usage
+- **Primary Epic**: PowerShell Rotation Wrapper & Helper Active Key Loading
+- **Current Task Target**: Implement PowerShell api-rotate-wrapper.ps1 and helper.ps1 loading
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Scaffold api-rotator skill and implement per-profile log-usage
-- [x] Update validate.sh Check 9 budget check for per-profile limit
+- [x] Implement PowerShell api-rotate-wrapper.ps1 and helper.ps1 loading
+- [x] Compile templates and synchronize bootstrap scripts
 - [x] Verify validation and clean workspace
 
 ---
