@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-# Check for Python 3
-if command -v python3 >/dev/null 2>&1; then
+# Check for Python 3 (prefer virtual environment if available)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [ -f "$PROJECT_ROOT/.venv/bin/python" ] && [ -x "$PROJECT_ROOT/.venv/bin/python" ]; then
+    PY_CMD="$PROJECT_ROOT/.venv/bin/python"
+elif [ -f "$PROJECT_ROOT/.venv/bin/python3" ] && [ -x "$PROJECT_ROOT/.venv/bin/python3" ]; then
+    PY_CMD="$PROJECT_ROOT/.venv/bin/python3"
+elif command -v python3 >/dev/null 2>&1; then
     PY_CMD="python3"
 elif command -v python >/dev/null 2>&1 && [ "$(python -c 'import sys; print(sys.version_info[0])' 2>/dev/null)" = "3" ]; then
     PY_CMD="python"

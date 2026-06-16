@@ -124,7 +124,39 @@ if __name__ == '__main__':
         f.write(script_content)
         
     os.chmod(script_path, 0o755)
+    
+    # Scaffold skeleton unit test for the skill
+    tests_dir = os.path.join(workspace_root, "tests")
+    os.makedirs(tests_dir, exist_ok=True)
+    name_with_underscores = name.replace("-", "_")
+    test_file_path = os.path.join(tests_dir, f"test_skill_{name_with_underscores}.py")
+    
+    camel_name = "".join(part.capitalize() for part in name.split("-"))
+    test_content = f"""import unittest
+import subprocess
+import os
+
+class TestSkill{camel_name}(unittest.TestCase):
+    def test_help_execution(self):
+        \"\"\"Verify that the skill script can be executed with --help.\"\"\"
+        script_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            ".agents", "skills", "{name}", "scripts", "main.py"
+        )
+        self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
+        
+        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Default Python script for agent skill {name}", proc.stdout)
+
+if __name__ == '__main__':
+    unittest.main()
+"""
+    with open(test_file_path, 'w', encoding='utf-8') as f:
+        f.write(test_content)
+        
     print(f"Skill '{name}' created successfully at {skill_dir}")
+    print(f"Skeleton unit test scaffolded at {test_file_path}")
 
 def audit_skill(skill_dir):
     skill_name = os.path.basename(skill_dir)

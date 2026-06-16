@@ -194,6 +194,16 @@ def main():
         else:
             print(f"[FAIL] PowerShell wrapper does not exist at {ps_wrapper_path}!")
             success = False
+
+        # 4. Run discovered skill unit tests
+        print("\n=== Test 4: Discovered Skill Unit Tests Execution ===")
+        import unittest
+        loader = unittest.TestLoader()
+        suite = loader.discover(start_dir=os.path.dirname(os.path.abspath(__file__)), pattern='test_skill_*.py')
+        runner = unittest.TextTestRunner()
+        result = runner.run(suite)
+        if not result.wasSuccessful():
+            success = False
             
     except Exception as e:
         print(f"\n[ERROR] Test runner crashed: {str(e)}")

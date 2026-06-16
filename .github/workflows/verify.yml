@@ -1,0 +1,30 @@
+name: Verify Workspace
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Run Workspace Validation
+      run: |
+        chmod +x .agents/scripts/helper.sh
+        ./.agents/scripts/helper.sh validate
+
+    - name: Run Rotation Unit Tests
+      run: |
+        python3 tests/test_rotation.py

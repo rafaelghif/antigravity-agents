@@ -8,6 +8,7 @@ set -euo pipefail
 # Parse arguments
 FORCE_OVERWRITE=false
 UPDATE_ONLY=false
+CREATE_VENV=false
 while [ $# -gt 0 ]; do
     case "$1" in
         -f|--force)
@@ -16,6 +17,10 @@ while [ $# -gt 0 ]; do
             ;;
         -u|--update)
             UPDATE_ONLY=true
+            shift
+            ;;
+        -v|--venv|--create-venv)
+            CREATE_VENV=true
             shift
             ;;
         *)
@@ -74,6 +79,20 @@ if [ "$PY_VERSION" != "3" ]; then
     exit 1
 fi
 log_success "Python 3 is installed."
+
+if [ "$CREATE_VENV" = "true" ]; then
+    log_info "Creating Python virtual environment (.venv)..."
+    if ! $PY_CMD -m venv .venv; then
+        log_warning "Failed to create virtual environment! Continuing with system Python."
+    else
+        log_success "Virtual environment (.venv) created successfully."
+        if [ -f ".venv/bin/python" ]; then
+            PY_CMD=".venv/bin/python"
+        elif [ -f ".venv/bin/python3" ]; then
+            PY_CMD=".venv/bin/python3"
+        fi
+    fi
+fi
 
 # Helper function to write templates safely (preserves existing files unless -f/--force or -u/--update is specified)
 write_template_safe() {

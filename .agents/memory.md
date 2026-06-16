@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 1381d3b
+- **Last Commit Reference**: 112d33f
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,13 +18,13 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Document Prerequisites & Improve Python CLI Robustness
-- **Current Task Target**: Add Python 3 requirement to README, check in bootstrap and helper scripts
+- **Primary Epic**: Framework Python & Shell Improvements
+- **Current Task Target**: Implement 4 core improvements (venv, autocomplete, CI/CD, and skill tests)
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Add Python 3 check to bootstrap, helper, and document in README
-- [x] Verify build and validation checks pass
+- [x] Execute task checklist in [task_prerequisites_improvements.md](file://./workflows/task_prerequisites_improvements.md)
+- [x] Verify validation and commit changes
 ---
 
 ## 3. Relayed Context & Handover Notes

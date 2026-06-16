@@ -27,6 +27,7 @@ def show_help():
     print("  list-rules        List all project-specific blueprints and rules")
     print("  create-rule       Scaffold a new project rule blueprint")
     print("  init              Initialize a new workspace with template blueprints")
+    print("  autocomplete      Output shell completion code (bash/zsh)")
     print("==========================================================")
 
 def main():
@@ -59,7 +60,8 @@ def main():
         "test": "test",
         "sync-api": "sync_api",
         "create-adr": "create_adr",
-        "release": "release"
+        "release": "release",
+        "autocomplete": "autocomplete"
     }
     
     if cmd not in cmd_map:
