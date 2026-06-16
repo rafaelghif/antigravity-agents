@@ -64,6 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing `CYAN` color initialization and skill directory creation bugs in `bootstrap.sh`.
 - Compiled missing skill template files for `adr-wizard`, `docs-sync`, and `pr-scaffolder` into `bootstrap.sh` by updating `compile_bootstrap.py`.
 - Fixed docstring backslash regex backreference injection bug in `docs-sync` main script using lambda replacement.
+- Fixed subprocess WinError 193 in `api-rotator` script by executing helper commands through `sh` on Windows.
+- Resolved slash/backslash mismatch in `test_clean_command.py` path assertions for Windows compatibility.
 
 ## [1.8.0] - 2026-06-16
 

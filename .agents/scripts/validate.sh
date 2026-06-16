@@ -105,6 +105,8 @@ FILES_TO_SCAN=$(find . -type f \
     -not -path './target/*' \
     -not -path './vendor/*' \
     -not -path './out/*' \
+    -not -path '*/__pycache__/*' \
+    -not -name '*.pyc' \
     -not -name 'bootstrap.sh' \
     -not -path '*.md' \
     -not -path '*.json' \

@@ -47,18 +47,18 @@ class TestCleanCommand(unittest.TestCase):
         
         # Check locks removal
         # other.lock should be removed, nested_dir (directory) should be rmtree'd, cli.lock must NOT be removed
-        mock_remove.assert_any_call("/mock/agents/locks/other.lock")
-        mock_rmtree.assert_any_call("/mock/agents/locks/nested_dir")
+        mock_remove.assert_any_call(os.path.join("/mock/agents", "locks", "other.lock"))
+        mock_rmtree.assert_any_call(os.path.join("/mock/agents", "locks", "nested_dir"))
         # Ensure cli.lock is not deleted
         for call_args in mock_remove.call_args_list:
             self.assertNotIn("cli.lock", call_args[0][0])
             
         # Check archive removal
-        mock_remove.assert_any_call("/mock/agents/archive/sprint_main.md")
-        mock_rmtree.assert_any_call("/mock/agents/archive/sprint_main_dir")
+        mock_remove.assert_any_call(os.path.join("/mock/agents", "archive", "sprint_main.md"))
+        mock_rmtree.assert_any_call(os.path.join("/mock/agents", "archive", "sprint_main_dir"))
         
         # Check workflows removal
-        mock_remove.assert_any_call("/mock/agents/workflows/task_other.md")
+        mock_remove.assert_any_call(os.path.join("/mock/agents", "workflows", "task_other.md"))
         # Ensure task_workspace_cleanup_command.md is not deleted
         for call_args in mock_remove.call_args_list:
             self.assertNotIn("task_workspace_cleanup_command.md", call_args[0][0])
