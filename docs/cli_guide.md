@@ -143,6 +143,22 @@ The `git-profile` command allows developers to switch between multiple Git accou
   ```cmd
   ssh-keygen -t ed25519 -C "your_email@domain.com" -f %USERPROFILE%\.ssh\id_rsa_name
   ```
+ 
+#### C. GitHub Personal Access Token (PAT) Integration
+The CLI supports optional real-time synchronization between local workspace issue tracking commands (`helper.sh issue`) and native GitHub repository issues. When configured, creating or closing issues locally will automatically reflect on GitHub's web UI.
+
+To configure this:
+1. **Generate a GitHub Personal Access Token (PAT)**:
+   - Navigate to **GitHub** -> click your profile -> **Settings** -> **Developer Settings** -> **Personal Access Tokens**.
+   - You can use either **Tokens (classic)** or **Fine-grained tokens**:
+     - *Classic token*: Select the `repo` scope (Full control of private repositories).
+     - *Fine-grained token*: Select the target repository, and grant **Read and Write** permissions for **Issues**.
+   - Click **Generate token** and copy the generated key (usually starts with `ghp_` or `github_pat_`).
+2. **Add the token** to `.agents/git_profiles` under the relevant profile:
+   ```ini
+   work.github_token=ghp_xxxxxxxxxxxxxxxxxxxx
+   ```
+3. **Run commands**: Use the `helper.sh issue create` or `helper.sh issue close`/`merge` commands normally. If the active profile email matches, the token will be fetched and used to synchronize state with the remote GitHub repository automatically. If no token is provided, the CLI gracefully falls back to local-only issue tracking.
 
 ---
 
