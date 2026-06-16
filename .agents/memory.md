@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
+- **Current Task Target**: Resolve issue #2: Fix SURIOTA review report findings
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1080px; }
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(1100px 700px at 22% -10%, rgba(217,119,87,.18), transparent 60%),
+      radial-gradient(1100px 700px at 80% 110%, rgba(99,91,255,.20), transparent 60%),
+      #0b0d12;
+    color:#e8eaf0; overflow:hidden; position:relative;
+  }
+  .grid{position:absolute;inset:0;background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+      background-size:54px 54px;mask:radial-gradient(circle at 50% 45%,#000 55%,transparent 100%);}
+  .wrap{position:relative;height:100%;padding:64px 70px;display:flex;flex-direction:column;}
+  .eyebrow{display:flex;align-items:center;gap:14px;font-size:20px;letter-spacing:4px;
+    text-transform:uppercase;color:#9aa3b2;font-weight:600;}
+  .dot{width:11px;height:11px;border-radius:50%;background:#3ddc84;box-shadow:0 0 16px #3ddc84;}
+  h1{font-size:88px;line-height:.98;font-weight:800;margin-top:22px;letter-spacing:-2px;}
+  h1 .g{background:linear-gradient(90deg,#f0a07d,#9b8cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{margin-top:18px;font-size:25px;color:#aeb6c6;font-weight:500;max-width:880px;line-height:1.4;}
+
+  .row{display:flex;align-items:stretch;gap:26px;margin-top:50px;}
+  .card{flex:1;border-radius:26px;padding:36px 38px;position:relative;overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);backdrop-filter:blur(4px);}
+  .card.claude{box-shadow:inset 0 0 0 1px rgba(217,119,87,.25), 0 20px 60px rgba(217,119,87,.10);}
+  .card.codex{box-shadow:inset 0 0 0 1px rgba(120,110,255,.25), 0 20px 60px rgba(99,91,255,.12);}
+  .badge{display:inline-flex;align-items:center;gap:10px;font-size:16px;font-weight:700;
+    letter-spacing:1.5px;text-transform:uppercase;padding:8px 14px;border-radius:999px;}
+  .claude .badge{color:#ffd9c6;background:rgba(217,119,87,.16);}
+  .codex .badge{color:#d7d2ff;background:rgba(120,110,255,.16);}
+  .name{font-size:40px;font-weight:800;margin-top:18px;letter-spacing:-.5px;}
+  .model{font-size:18px;color:#8e97a8;margin-top:4px;font-weight:600;}
+  .pass{margin-top:22px;display:flex;align-items:center;gap:10px;font-size:24px;font-weight:700;color:#3ddc84;}
+  .metrics{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:18px 14px;}
+  .m .k{font-size:15px;color:#8e97a8;letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+  .m .v{font-size:38px;font-weight:800;margin-top:2px;letter-spacing:-1px;}
+  .claude .v{color:#f3b79b;}
+  .codex .v{color:#b9b1ff;}
+
+  .vs{position:absolute;left:50%;top:560px;transform:translate(-50%,-50%);z-index:5;
+    width:92px;height:92px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:34px;font-weight:900;color:#0b0d12;background:linear-gradient(135deg,#f0a07d,#9b8cff);
+    box-shadow:0 0 0 8px #0b0d12, 0 0 40px rgba(155,140,255,.5);letter-spacing:-1px;}
+
+  .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;
+    padding-top:34px;border-top:1px solid rgba(255,255,255,.09);}
+  .verdict{font-size:23px;color:#cdd3df;font-weight:600;max-width:760px;line-height:1.4;}
+  .verdict b{color:#fff;}
+  .brand{text-align:right;flex-shrink:0;}
+  .brand .s{font-size:30px;font-weight:900;letter-spacing:1px;
+    background:linear-gradient(90deg,#f0a07d,#9b8cff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .brand .t{font-size:14px;color:#8e97a8;letter-spacing:1px;margin-top:2px;}
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> Live benchmark · headless · 2026</div>
+    <h1>Same bug. <span class="g">Same fix.</span></h1>
+    <div class="sub">Claude Code vs Codex on one identical bug-fix task (a Windows-path <code>re.sub</code> regression), run headless &amp; isolated.</div>
+
+    <div class="row">
+      <div class="card claude">
+        <span class="badge">🟠 Claude Code</span>
+        <div class="name">Opus 4.8</div>
+        <div class="model">claude-opus-4-8 · 5 turns</div>
+        <div class="pass">✔ pytest — 1 passed</div>
+        <div class="metrics">
+          <div class="m"><div class="k">Time</div><div class="v">34.4s</div></div>
+          <div class="m"><div class="k">Cost</div><div class="v">$0.52</div></div>
+        </div>
+      </div>
+      <div class="card codex">
+        <span class="badge">🟣 Codex</span>
+        <div class="name">gpt-5.5</div>
+        <div class="model">reasoning high · 1 turn / 9 cmd</div>
+        <div class="pass">✔ pytest — 1 passed</div>
+        <div class="metrics">
+          <div class="m"><div class="k">Time</div><div class="v">75.0s</div></div>
+          <div class="m"><div class="k">Cost (est.)</div><div class="v">~$0.38</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="vs">VS</div>
+
+    <div class="foot">
+      <div class="verdict">Both diagnosed the <b>same root cause</b> and produced the <b>identical fix</b> (<code>re.sub</code> callback). Quality on par — Claude ~2.2× faster, Codex ~27% cheaper.</div>
+      <div class="brand"><div class="s">SURIOTA</div><div class="t">technical review</div></div>
+    </div>
+  </div>
+</body>
+</html>
