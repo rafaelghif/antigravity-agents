@@ -3178,30 +3178,10 @@ cmd_migrate() {
     # 5. Fix .gitignore configuration
     if [ -f ".gitignore" ]; then
         echo "Validating .gitignore compliance..."
-        local temp_git
-        temp_git=$(mktemp)
-        # remove any lines that ignore .agents or AGENTS.md globally
-        grep -v -E "^\.agents/?$" .gitignore | grep -v "^AGENTS.md$" > "$temp_git" || true
-        # ensure Locks directory is ignored
-        if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
-            echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
-        fi
-        # ensure API configurations and active state files are ignored
-        local has_secret_header=0
-        for ignore_pattern in ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name"; do
-            if ! grep -q "^$ignore_pattern" "$temp_git"; then
-                if [ "$has_secret_header" -eq 0 ]; then
-                    echo -e "\n# Ignore local agent API key configuration and active state files" >> "$temp_git"
-                    has_secret_header=1
-                fi
-                echo "$ignore_pattern" >> "$temp_git"
-            fi
-        done
-        mv "$temp_git" ".gitignore"
-        echo "  - .gitignore updated."
-    else
-        echo "Creating default compliant .gitignore..."
-        cat << 'GIT_EOF' > .gitignore
+        python3 -c "
+import os
+content = open('.gitignore', 'r').read()
+block = '''# <<< ANTIGRAVITY AGENT START >>>
 # Ignore agent transient locks
 .agents/locks/
 
@@ -3210,6 +3190,49 @@ cmd_migrate() {
 .agents/active_api_keys
 .agents/active_api_keys.ps1
 .agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>'''
+
+start_guard = '# <<< ANTIGRAVITY AGENT START >>>'
+end_guard = '# <<< ANTIGRAVITY AGENT END >>>'
+
+# Clean up legacy global ignores if they exist outside the block
+ignored_patterns = {
+    '.agents', '.agents/', 'AGENTS.md', '.agents/locks/', '.agents/locks',
+    '.agents/git_profiles', '.agents/api_keys', '.agents/active_api_keys',
+    '.agents/active_api_keys.ps1', '.agents/active_api_profile_name'
+}
+lines = content.splitlines()
+lines = [l for l in lines if l.strip() not in ignored_patterns]
+content = '\n'.join(lines) + '\n'
+
+if start_guard in content and end_guard in content:
+    start_idx = content.find(start_guard)
+    end_idx = content.find(end_guard) + len(end_guard)
+    new_content = content[:start_idx] + block + content[end_idx:]
+else:
+    if not content.endswith('\n'):
+        content += '\n'
+    new_content = content + '\n' + block + '\n'
+
+while new_content.endswith('\n\n'):
+    new_content = new_content[:-1]
+
+open('.gitignore', 'w').write(new_content)
+"
+        echo "  - .gitignore updated with Antigravity Agent block guards."
+    else
+        echo "Creating default compliant .gitignore..."
+        cat << 'GIT_EOF' > .gitignore
+# <<< ANTIGRAVITY AGENT START >>>
+# Ignore agent transient locks
+.agents/locks/
+
+# Ignore local agent API key configuration and active state files
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+# <<< ANTIGRAVITY AGENT END >>>
 GIT_EOF
     fi
 

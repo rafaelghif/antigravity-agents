@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 9ec9b13
+- **Last Commit Reference**: d5bf461
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,18 +18,18 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Rotation Enhancements
-- **Current Task Target**: Define API profile cooldown workflow
+- **Primary Epic**: Injected Agent Isolation
+- **Current Task Target**: Isolate agent files and update gitignore guards
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Define API profile cooldown workflow
+- [x] Isolate agent files and update gitignore guards
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Defined the design plan and execution workflow for implementing API profile cooldowns (.agents/workflows/task_api_cooldowns.md) after a /grill-me alignment session.
-- **Next Planned Action**: Implement cooldown check and write logic in helper.sh and wrapper scripts.
+- **Last Action Completed**: Restructured workspace to keep agent files isolated inside .agents/docs/ (moved CHANGELOG.md and MIGRATION.md), updated helper.sh cmd_migrate to support block comment guards inside .gitignore, and committed ADR-004.
+- **Next Planned Action**: None. Workspace is fully clean, validated, and committed.
 - **Blockers / Runtime Notes**: None.
 
 ---
