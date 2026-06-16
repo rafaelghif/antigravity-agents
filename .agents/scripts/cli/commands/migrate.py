@@ -5,7 +5,7 @@ import subprocess
 import utils
 
 def run(args):
-    utils.print_title("Antigravity Agent Core - Workspace Migration (V1.7.4)")
+    utils.print_title("Antigravity Agent Core - Workspace Migration (V1.9.0)")
     
     backup_suffix = ".backup"
     agents_dir = utils.get_agents_dir()

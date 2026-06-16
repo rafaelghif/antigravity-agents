@@ -18,17 +18,17 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Standardize Workspace Documentation Layout
+- **Primary Epic**: Consolidate and Update Migration Documentation
 - **Current Task Target**: Ready for next session
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Standardize docs folder and update README/memory links
+- [x] Consolidate migration files and update version references to 1.9.0
 ---
 
 ## 3. Relayed Context & Handover Notes
 - **Last Active Agent**: Antigravity
-- **Last Action Completed**: Standardized documentation layout by consolidating all files under root `docs/` and updating references/ADR-005/changelog.
+- **Last Action Completed**: Consolidated and standardized migration documentation and updated CLI version descriptions to V1.9.0.
 - **Next Planned Action**: Ready for next session.
 - **Blockers / Runtime Notes**: Workspace is fully validated, clean, and ready for push/merge. All locks released.
 

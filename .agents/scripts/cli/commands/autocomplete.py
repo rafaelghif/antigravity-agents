@@ -27,7 +27,7 @@ _helper_completion() {
         'unlock:Release a module edit lock'
         'validate:Validate workspace compliance, budget, and configurations'
         'doctor:Run complete diagnostic validation on the workspace'
-        'migrate:Upgrade workspaces to V1.7.4 format'
+        'migrate:Upgrade workspaces to V1.9.0 format'
         'git-profile:Switch Git user config profiles locally'
         'api-profile:Switch API configurations locally'
         'log-usage:Log token usage to budget tracker'
