@@ -7,6 +7,10 @@ This document tracks all version updates, script refinements, and protocol chang
 - Created native Windows PowerShell wrapper `api-rotate-wrapper.ps1` for runtime API profile rotation on rate-limiting.
 - Updated `helper.ps1` to automatically import active API keys into the caller's session when dot-sourced.
 - Integrated PowerShell rotation wrapper into `compile_bootstrap.py` build compilation.
+- Implemented a cross-platform Python integration test suite (`tests/test_rotation.py`) to verify Successful Rotation and Profile Exhaustion cases, with modulo-256 Unix exit code handles.
+- Configured a Python syntax compilation linter in `project_rules.md` to run tests on commit gates automatically.
+- Recorded Architectural Decision Record `ADR-003` to track multi-platform rotation decisions.
+- Created `docs/api_rotation.md` to house detailed technical documentation and Mermaid flow charts.
 
 ## [1.7.3] - 2026-06-16
 ### Added

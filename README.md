@@ -490,6 +490,9 @@ The system is built to handle extreme edge cases gracefully:
 
 ### 4.5 API Profile Management & Auto-Rotation (`api-profile`)
 
+> [!NOTE]
+> For a comprehensive guide on API rotation architecture, PowerShell integration, token budgeting, and test suites, please see the [API Profile Rotation and Budget Tracking Documentation](file:///docs/api_rotation.md).
+
 The `api-profile` command allows developers to define and rotate active API keys (such as `GEMINI_API_KEY`, `OPENAI_API_KEY`, etc.) locally inside the workspace. This is useful for rotating between different accounts, managing token quota limits, or automatically switching keys when encountering rate limits.
 
 #### A. How it Works
