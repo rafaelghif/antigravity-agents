@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 7c395d4
+- **Last Commit Reference**: 1381d3b
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -18,14 +18,13 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Python CLI Migration
-- **Current Task Target**: Implement modular Python helper CLI
+- **Primary Epic**: Document Prerequisites & Improve Python CLI Robustness
+- **Current Task Target**: Add Python 3 requirement to README, check in bootstrap and helper scripts
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
+- [x] Add Python 3 check to bootstrap, helper, and document in README
+- [x] Verify build and validation checks pass
 ---
 
 ## 3. Relayed Context & Handover Notes

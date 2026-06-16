@@ -58,6 +58,23 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 log_success "Git is installed."
 
+if ! command -v python3 >/dev/null 2>&1 && ! command -v python >/dev/null 2>&1; then
+    log_error "Python 3 is required but not installed! Please install Python 3 first."
+    exit 1
+fi
+
+PY_CMD="python3"
+if ! command -v python3 >/dev/null 2>&1; then
+    PY_CMD="python"
+fi
+
+PY_VERSION=$($PY_CMD -c 'import sys; print(sys.version_info[0])' 2>/dev/null)
+if [ "$PY_VERSION" != "3" ]; then
+    log_error "Python 3 is required! Found Python version $PY_VERSION. Please install Python 3."
+    exit 1
+fi
+log_success "Python 3 is installed."
+
 # Helper function to write templates safely (preserves existing files unless -f/--force or -u/--update is specified)
 write_template_safe() {
     local target_file="$1"

@@ -40,6 +40,13 @@ This project is **100% Free, Open Source, and Openly Licensed** under the MIT Li
 
 Get any local repository agent-ready in a single command. The bootstrapper automatically configures the environment blueprints, installs Git hooks, and sets up active memory and schemas.
 
+### 📋 Prerequisites
+
+Before running the bootstrapper or using the helper CLI, ensure your system meets these prerequisites:
+- **Git**: Installed and available in your system `PATH`.
+- **Python 3.8+**: Installed and available as `python3` (or `python` on Windows) in your system `PATH`. The framework uses a modular Python engine for subcommands.
+- **Git Bash** (Windows only): Required to execute the shell scripts on Windows.
+
 ### 💻 1. Installation
 
 Open your terminal in your project root folder and execute the appropriate command for your operating system:
