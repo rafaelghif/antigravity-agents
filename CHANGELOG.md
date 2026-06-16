@@ -1,6 +1,15 @@
 # Agent Core Changelog
 
 This document tracks all version updates, script refinements, and protocol changes made to the Antigravity Agent Core workspace setup.
+
+## [1.7.3] - 2026-06-16
+### Added
+- Added `api-profile` command in `helper.sh` to switch and rotate active API provider profiles/keys locally.
+- Created `api-rotate-wrapper.sh` execution wrapper script to automatically catch rate limits (HTTP 429 / resource exhaustion) and rotate active API profiles at runtime.
+- Added `.agents/api_keys.example` template for user API keys setup.
+- Configured Check 12 in `validate.sh` / `validate` to verify API configuration syntax and protect credentials from being committed to Git.
+- Updated `.gitignore` and `.antigravityignore` template rules to automatically exclude API keys and active state files.
+
 ## [1.7.2] - 2026-06-16
 ### Added
 - Synchronized `README.md` and `CHANGELOG.md` with actual CLI subcommands and parameter behaviors.

@@ -346,6 +346,47 @@ else
     FAILED=1
 fi
 
+# 12. Check API Configuration & Profile Compliance
+echo "Check 12: API Configuration & Profile Compliance"
+API_ERRORS=0
+API_KEYS_FILE=".agents/api_keys"
+if [ -f "$API_KEYS_FILE" ]; then
+    # Verify profiles syntax and check for placeholder values
+    while IFS= read -r line || [ -n "$line" ]; do
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+        
+        if [[ "$line" =~ ^([a-zA-Z0-9_\-]+)\.([A-Z0-9_]+)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"
+            prop="${BASH_REMATCH[2]}"
+            val="${BASH_REMATCH[3]}"
+            
+            if [[ "$val" =~ _key_here$ ]] || [ "$val" = "your_api_key_here" ]; then
+                echo "  [WARNING] API Profile '$key' uses a placeholder value for '$prop': '$val'."
+            fi
+        else
+            echo "  [FAIL] Invalid syntax in $API_KEYS_FILE: '$line'. Must be in format: profile.VARIABLE_NAME=value"
+            API_ERRORS=$((API_ERRORS + 1))
+        fi
+    done < "$API_KEYS_FILE"
+fi
+
+# Ensure secrets and active state files are in .gitignore
+if [ -f ".gitignore" ]; then
+    for ignore_pattern in ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name"; do
+        if ! grep -q "^$ignore_pattern" .gitignore; then
+            echo "  [FAIL] .gitignore compliance: '$ignore_pattern' is not ignored. Please add it to your .gitignore to protect credentials."
+            API_ERRORS=$((API_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$API_ERRORS" -eq 0 ]; then
+    echo "  [PASS] API configurations and profiles are validated and secure."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"

@@ -1,3 +1,7 @@
 .agents/locks/
 .agents/git_profiles
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
 openapi.json

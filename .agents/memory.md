@@ -18,12 +18,15 @@
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: Git Multi-Account Configuration
-- **Current Task Target**: Synchronize README/CHANGELOG and detail all command parameters/flags
+- **Primary Epic**: API Key Auto-Rotation Support
+- **Current Task Target**: Implement api-profile subcommand and CLI auto-rotation
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Detail bootstrap and helper CLI parameters/flags, manual rotation, and update README/CHANGELOG
+- [x] Implement api-profile subcommand in helper.sh, helper.ps1, and bootstrap.sh
+- [x] Implement api_keys.example template and update .gitignore/.antigravityignore templates
+- [x] Implement runner wrapper script/skill for auto-rotation
+- [x] Update README.md and CHANGELOG.md with API profile features
 - [x] Verify validation and clean workspace
 
 ---

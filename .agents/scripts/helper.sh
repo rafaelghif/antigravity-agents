@@ -19,6 +19,7 @@ show_help() {
     echo "  unlock <module>   Unlock a directory module"
     echo "  commit            Run tests, rotate profiles, and create Conventional Commit"
     echo "  git-profile       Switch Git configurations locally (use 'rotate' to rotate)"
+    echo "  api-profile       Switch API configurations locally (use 'rotate' to rotate)"
     echo ""
     echo "Rules & Skill Extending Commands:"
     echo "  create-skill      Scaffold a new specialized skill directory"
@@ -4166,6 +4167,132 @@ cmd_git_profile() {
     echo "=========================================================="
 }
 
+cmd_api_profile() {
+    local target_profile="${2:-}"
+    
+    # Find api_keys config file
+    local api_keys_file=""
+    if [ -f ".agents/api_keys" ]; then
+        api_keys_file=".agents/api_keys"
+    elif [ -f "$HOME/.antigravity_api_keys" ]; then
+        api_keys_file="$HOME/.antigravity_api_keys"
+    fi
+
+    # Check if we should rotate
+    if [ "$target_profile" = "rotate" ] || [ "$target_profile" = "--rotate" ]; then
+        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
+            # Parse all profile prefixes
+            local api_profiles
+            api_profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
+            local profiles_arr=($api_profiles)
+            local num_profiles=${#profiles_arr[@]}
+            
+            if [ $num_profiles -gt 0 ]; then
+                # Find current profile name from .agents/active_api_profile_name
+                local current_profile="none"
+                if [ -f ".agents/active_api_profile_name" ]; then
+                    current_profile=$(cat ".agents/active_api_profile_name" | xargs)
+                fi
+                
+                local selected_idx=0
+                for i in "${!profiles_arr[@]}"; do
+                    if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
+                        selected_idx=$(( (i + 1) % num_profiles ))
+                        break
+                    fi
+                done
+                target_profile="${profiles_arr[$selected_idx]}"
+                echo "Rotating active API profile to: '$target_profile'..."
+            else
+                echo "Error: No API profiles found in $api_keys_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: No API keys configuration found (.agents/api_keys or ~/.antigravity_api_keys) to rotate." >&2
+            exit 1
+        fi
+    fi
+
+    if [ -n "$target_profile" ]; then
+        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
+            if grep -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
+                echo "Setting active API profile to '$target_profile'..."
+                
+                # Write to .agents/active_api_keys (bash format)
+                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys
+                # Write to .agents/active_api_keys.ps1 (powershell format)
+                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys.ps1
+                
+                # Extract all keys for target_profile
+                local key_lines
+                key_lines=$(grep "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
+                
+                while IFS= read -r line; do
+                    if [ -n "$line" ]; then
+                        # format is: prefix.VAR_NAME=value
+                        local var_name_val="${line#*.}"  # VAR_NAME=value
+                        local var_name="${var_name_val%%=*}"
+                        local var_val="${var_name_val#*=}"
+                        
+                        echo "export $var_name=\"$var_val\"" >> .agents/active_api_keys
+                        echo "\$env:$var_name = \"$var_val\"" >> .agents/active_api_keys.ps1
+                    fi
+                done <<< "$key_lines"
+                
+                # Store active profile name
+                echo "$target_profile" > .agents/active_api_profile_name
+                echo "  [SUCCESS] Active API keys updated in .agents/active_api_keys and .agents/active_api_keys.ps1"
+            else
+                echo "Error: Profile '$target_profile' not found in $api_keys_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: API keys file not found (.agents/api_keys or ~/.antigravity_api_keys)." >&2
+            exit 1
+        fi
+    fi
+
+    # Display active profile details
+    echo "=========================================================="
+    echo "          Current API Profile Configuration"
+    echo "=========================================================="
+    local active_profile="<none>"
+    if [ -f ".agents/active_api_profile_name" ]; then
+        active_profile=$(cat ".agents/active_api_profile_name" | xargs)
+    fi
+    echo "Active Profile: $active_profile"
+    echo ""
+    if [ -f ".agents/active_api_keys" ]; then
+        echo "Active Keys (masked for security):"
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^export\ ([A-Z0-9_]+)=\"(.+)\"$ ]]; then
+                local var_name="${BASH_REMATCH[1]}"
+                local var_val="${BASH_REMATCH[2]}"
+                local val_len=${#var_val}
+                local masked_val="..."
+                if [ $val_len -gt 8 ]; then
+                    masked_val="${var_val:0:4}****${var_val: -4}"
+                fi
+                echo "  $var_name: $masked_val"
+            fi
+        done < .agents/active_api_keys
+    else
+        echo "Active Keys: <none>"
+    fi
+    echo ""
+    if [ -f "$api_keys_file" ]; then
+        echo "Available API Profiles (from $api_keys_file):"
+        local profiles
+        profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
+        for p in $profiles; do
+            local keys_in_p
+            keys_in_p=$(grep -E "^${p}\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f2- | cut -d'=' -f1 | tr '\n' ' ' || echo "")
+            echo "  - $p ($keys_in_p)"
+        done
+    fi
+    echo "=========================================================="
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -4238,6 +4365,9 @@ case "$1" in
         ;;
     git-profile)
         cmd_git_profile "$@"
+        ;;
+    api-profile)
+        cmd_api_profile "$@"
         ;;
     help)
         show_help

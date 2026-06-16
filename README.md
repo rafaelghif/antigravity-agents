@@ -342,6 +342,8 @@ Here is a quick reference table of all commands:
 | `release` | `release <major/minor/patch>` | Auto-increments version and scaffolds release notes in `CHANGELOG.md`. |
 | `create-adr` | `create-adr <title> [status]` | Scaffolds a new Architectural Decision Record under `.agents/adrs/`. |
 | `git-profile` | `git-profile [key/name/rotate] [email]` | Switches or displays Git config profiles and automates local SSH key rotation. |
+| `api-profile` | `api-profile [key/rotate]` | Switches or displays API provider key profiles and automates local environment rotation. |
+
 
 ### 4.1 API Contract Synchronization (`sync-api`)
 
@@ -486,7 +488,65 @@ The system is built to handle extreme edge cases gracefully:
 - **Missing SSH Key Files**: If a configured SSH key file is missing on your system, the tool warns you and unsets the local SSH command config (falling back to system default SSH keys) rather than letting connection commands crash.
 - **Zero Global/Local Git Identity**: If a developer has no Git identity configured on their machine and no profiles configuration is set, the tool automatically sets up a temporary, local-only identity (`Local Developer <local-dev@localhost>`) so they can still commit locally out-of-the-box.
 
-### 4.5 Detailed Helper Command Reference
+### 4.5 API Profile Management & Auto-Rotation (`api-profile`)
+
+The `api-profile` command allows developers to define and rotate active API keys (such as `GEMINI_API_KEY`, `OPENAI_API_KEY`, etc.) locally inside the workspace. This is useful for rotating between different accounts, managing token quota limits, or automatically switching keys when encountering rate limits.
+
+#### A. How it Works
+API keys are stored in a Git-ignored file (`.agents/api_keys`). When you select a profile (e.g. `work`), the helper script:
+1. Extracts all keys defined for that profile.
+2. Writes them to `.agents/active_api_keys` (for Bash/Zsh) and `.agents/active_api_keys.ps1` (for PowerShell).
+3. The active keys can then be loaded dynamically by runner wrappers before running the agent.
+
+#### B. Quick Start Guide
+
+##### Step 1: Create your API profiles file
+1. Copy the example file to `.agents/api_keys` (which is ignored by Git to keep credentials secure):
+   ```bash
+   cp .agents/api_keys.example .agents/api_keys
+   ```
+2. Open `.agents/api_keys` and fill in your API tokens:
+   ```ini
+   # Profile: personal
+   personal.GEMINI_API_KEY=AIzaSyA_personal_key
+   personal.OPENAI_API_KEY=sk-proj-personal_key
+
+   # Profile: work
+   work.GEMINI_API_KEY=AIzaSyB_work_key
+   work.OPENAI_API_KEY=sk-proj-work_key
+   ```
+
+##### Step 2: Switch accounts
+- **Manual Switch**:
+  To switch the active API keys to your work profile, run:
+  ```bash
+  ./.agents/scripts/helper.sh api-profile work
+  ```
+- **Check Current Status**:
+  To view the active API profile name and masked key values, run:
+  ```bash
+  ./.agents/scripts/helper.sh api-profile
+  ```
+- **Manual API Profile Rotation**:
+  To rotate the active API credentials to the next available profile, run:
+  ```bash
+  ./.agents/scripts/helper.sh api-profile rotate
+  # Or
+  ./.agents/scripts/helper.sh api-profile --rotate
+  ```
+
+#### C. Automated Runtime Rotation (Wrapper Script)
+To automatically rotate API keys when encountering rate-limiting (HTTP status code `429` or resource exhaustion), use the provided execution wrapper script:
+```bash
+./.agents/scripts/api-rotate-wrapper.sh [command_to_run] [args...]
+```
+**Example:**
+```bash
+./.agents/scripts/api-rotate-wrapper.sh npx antigravity-cli task-run
+```
+If the command fails due to a rate limit, the wrapper script will automatically rotate to the next configured API key profile and retry the execution.
+
+### 4.6 Detailed Helper Command Reference
 
 For users and agents, the helper script supports explicit parameters and flags to run operations in non-interactive, automated, or specific modes:
 
@@ -568,7 +628,14 @@ For users and agents, the helper script supports explicit parameters and flags t
   - `./.agents/scripts/helper.sh git-profile [name] [email]`: Configures user identity directly without config files.
   - `./.agents/scripts/helper.sh git-profile rotate` or `--rotate`: Rotates the repository's identity/SSH key config to the next profile based on the last commit email.
 
-### 4.6 Windows PowerShell Wrapper (`helper.ps1`)
+#### 11. Local API Profile Manager (`api-profile`)
+- **Signature**: `./.agents/scripts/helper.sh api-profile [profile-key]`
+- **Usage Patterns**:
+  - `./.agents/scripts/helper.sh api-profile`: Displays the active API profile and lists available ones.
+  - `./.agents/scripts/helper.sh api-profile [profile-key]`: Loads keys belonging to a specific profile and updates the active environment files.
+  - `./.agents/scripts/helper.sh api-profile rotate` or `--rotate`: Rotates active API keys to the next profile in a round-robin cycle.
+
+### 4.7 Windows PowerShell Wrapper (`helper.ps1`)
 
 For developers working natively on Windows without standard Bash shells, a native PowerShell wrapper is available at `.agents/scripts/helper.ps1`.
 

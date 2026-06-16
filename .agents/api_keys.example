@@ -1,0 +1,20 @@
+# Antigravity API Profiles Template
+# Copy this file to '.agents/api_keys' and fill in your API tokens/keys.
+# This file is used by the 'api-profile' subcommand to switch or rotate 
+# API keys locally (e.g. GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY).
+#
+# IMPORTANT: Keep '.agents/api_keys' private and never commit it to Git.
+# The default gitignore and validation rules will block it.
+
+# Profile 1: Personal Account
+personal.GEMINI_API_KEY=AIzaSyA_personal_key_here
+personal.OPENAI_API_KEY=sk-proj-personal_key_here
+
+# Profile 2: Work / Company Account
+work.GEMINI_API_KEY=AIzaSyB_work_key_here
+work.OPENAI_API_KEY=sk-proj-work_key_here
+work.ANTHROPIC_API_KEY=sk-ant-work_key_here
+
+# Profile 3: Backup / Alternative Account
+backup.GEMINI_API_KEY=AIzaSyC_backup_key_here
+backup.OPENAI_API_KEY=sk-proj-backup_key_here

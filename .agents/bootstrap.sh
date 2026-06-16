@@ -252,7 +252,7 @@ Every code mutation must execute in an atomic, sequential loop:
 2. **Lock**: Run `.agents/scripts/helper.sh lock <module>` and set the target task to `[/]` in `memory.md`.
 3. **Edit**: Modify a single file or write a test (under TDD guidelines).
 4. **Commit Preparation**: Update the task checklist state to `[x]` and state flag to `COMPLETED` in `memory.md` (or the dynamic workflow checklist).
-5. **Commit**: Stage files and execute a standard Git commit using conventional format: `git commit -m "type(scope): description"`.
+5. **Commit**: Stage files and execute the commit using the helper command: `./.agents/scripts/helper.sh commit <type> <scope> "description" [files...]` to enforce automated Git profile and SSH key rotation. **Raw `git commit` is strictly forbidden** for agents and developers to prevent profile or authentication key misalignment.
    - **Automated Validation**: The Git `pre-commit` hook automatically runs `./.agents/scripts/validate.sh` and the project linter/tests. The commit will automatically abort on failure.
    - **Automated Sync & Unlock**: Upon a successful commit, the Git `post-commit` hook automatically updates `memory.md` with the new branch/commit hash and releases all active locks.
 
@@ -309,13 +309,14 @@ To prevent technical debt and ensure the system remains maintainable, secure, an
 - **Architectural Boundary Insulation**: Maintain pure layer decoupling. Never mix infrastructure details (like database models, network clients, framework-specific wrappers) with core business logic.
 - **Strict User Consultations**: In situations of ambiguity, high security risk, database schema migrations, or backward-incompatible API changes, the agent MUST halt execution and consult the user with options before writing code.
 - **Self-Improving Memory Feedback Loop**: The agent must continuously audit its performance. If any structural bugs or compilation failures occur multiple times, the agent must proactively update `.agents/rules/project_rules.md` to prevent future errors.
+
 EOF
 # 3. Write .agents/memory.md template
 write_template_safe ".agents/memory.md" << 'EOF'
 # Agent Core Memory
 
 > **Memory Schema Version**: 5.0.0  
-> **Target System**: [Project Name]
+> **Target System**: Antigravity Agent Core
 > **Active Guidelines**: Read [AGENTS.md](file://../AGENTS.md) and [.agents/rules/project_rules.md](file://./rules/project_rules.md) for execution details. Keep this file under 100 lines at all times.
 
 ---
@@ -332,14 +333,16 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: [Active Epic / Feature Group]
-- **Current Task Target**: [Current target being worked on]
+- **Primary Epic**: API Key Auto-Rotation Support
+- **Current Task Target**: Implement api-profile subcommand and CLI auto-rotation
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
-- [ ] Implement core logic
-- [ ] Write unit tests
-- [ ] Verify build and tests pass
+- [/] Implement api-profile subcommand in helper.sh, helper.ps1, and bootstrap.sh
+- [ ] Implement api_keys.example template and update .gitignore/.antigravityignore templates
+- [ ] Implement runner wrapper script/skill for auto-rotation
+- [ ] Update README.md and CHANGELOG.md with API profile features
+- [ ] Verify validation and clean workspace
 
 ---
 
@@ -357,6 +360,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 - **Database Schema**: [schema.md](file://./schema.md)
 - **Design Decisions**: [adr.md](file://./adr.md)
 - **Sprint Archives**: [archive/](file://./archive/)
+
 EOF
 
 # 4. Write .agents/rules/project_rules.md template
@@ -371,29 +375,62 @@ description: "Project architecture blueprint and technical stack rules."
 
 This file defines the specific technical stack, directory boundaries, coding standards, and system dependencies for this project.
 
+
 ---
 
 ## 1. Stack & Directory Boundaries
-- **Primary Language/Framework**: [e.g. Node/TypeScript, Python/FastAPI, Go, Rust]
+- **Primary Language/Framework**: Unknown
 - **Directory Structure**:
-  - `src/` -> Application source code
-  - `tests/` -> Test suites
+  - `tests/` -> Project workspace component
+  - `config/` -> Project workspace component
 
 ## 2. Architectural Conventions
-- [Describe the architecture pattern here, e.g. Clean Architecture, MVC, Hexagonal, simple service-repository layer]
-- [Define rules regarding coupling and boundaries, e.g. UI layers must not call database adapters directly]
+- **Architectural Pattern**: Standard Model-View-Controller (MVC)
+- **Boundary insulation**: Core domain logic must remain completely independent of external libraries, databases, and frameworks.
 
 ## 3. Spacing & Styling Standards
-- [Define layout spacing, form guidelines, or styling patterns if frontend project, or code style rules]
+- **Linter command**: `echo 'No linter found'`
+- **Build validation**: `echo 'No build command needed'`
+- **Test runner command**: `echo 'No test suite found'`
+- **Follow formatting**: Follow standard formatting guidelines for Unknown development.
 
 ## 4. Security & External Services
-- [Define database transaction rules, third-party adapters (S3, Auth, Payment), and caching protocols]
+- **Database/ORM**: None detected
+- **Required Configuration Variables**:
+  - No configuration parameters detected.
 
 ## 5. Long-Term Impact & 10-Year Maintainability Gates
 - **Impact-Analysis Check**: Before installing new packages, modifying database structures, or altering cross-domain APIs, the agent must run the `impact-analysis` skill and document design rationales.
 - **Architectural Boundary Gate**: Domain business logic must remain completely independent of libraries and frameworks (e.g. database schemas, server frameworks).
 - **Code Sustainability**: Code must prioritize long-term readability over brevity. Avoid complex runtime assumptions, unverified imports, or undocumented configuration requirements.
 - **Ambiguity Gate**: If any implementation details are unclear, halt and ask the user for confirmation first.
+
+## 6. Multi-Agent & Teamwork Constraints
+- **Autonomous Bootstrapping Sequence**: Before performing any edit or script action, you MUST read the core files in sequence: `AGENTS.md`, `.agents/rules/project_rules.md`, `.agents/schema.md`, and `.agents/memory.md`. No file writes or terminal runs are allowed prior to this initialization.
+- **Workspace Git Tracking**: Never ignore `.agents/` or `AGENTS.md` in `.gitignore` (except `.agents/locks/`). Commit all memory, schemas, dynamic workflows, and ADR files to Git to ensure proper multi-agent synchronization.
+- **Upstream Sync Gate**: You must run `./.agents/scripts/helper.sh validate` before beginning code changes to check if the branch is behind origin. If it is behind, stop and ask the user to pull first.
+- **Discussion and Design Plans**: Document all `/grill-me` outcomes and execution plans under `.agents/workflows/task_<task_name>.md`. Never log task-specific plans or checklists globally or in the main memory ledger.
+- **Real-Time Schema & Dependency Updates**: Any discussion on database models, API routes, or third-party libraries must be documented in the repository *immediately* before starting code edits:
+  - Database structures must be saved under `.agents/schemas/` and registered in `.agents/schema.md`.
+  - Technologies/libraries must be documented in `.agents/rules/project_rules.md` and their respective workspace configuration files (`package.json`, `go.mod`, etc.).
+  - Architectural decisions must be documented as a new ADR entry in `.agents/adr.md`.
+- **Strict Checklist Checkbox Rules**: Checklists must follow a strict 3-state lifecycle. Only ONE task can be marked `[/]` at a time across the entire workspace. Do not change a task checklist state to `[x]` until verification has passed and the changes have been staged and committed in the completed state.
+- **Git Profile Rotation Enforcement**: All commits MUST be executed via `./.agents/scripts/helper.sh commit` to enforce round-robin profile and SSH key rotation. Running raw `git commit` directly is prohibited.
+- **Handover Relayed Context**: Before logging off or ending a turn, you MUST write concise handover notes (under 5 lines) in the active memory ledger under `## 3. Relayed Context & Handover Notes`. This ensures any incoming agent or new account knows exactly where to resume work without token waste.
+
+## 7. Autonomous Operational Scripts & Commands
+The agent must execute workspace scripts automatically without manual user guidance or request under the following conditions:
+- **Project Discovery**: If `.agents/rules/project_rules.md` is empty or generic, run `./.agents/scripts/helper.sh recon` immediately.
+- **Initial Verification**: Run `./.agents/scripts/helper.sh validate` and `./.agents/scripts/helper.sh doctor` as the first step of any edit cycle.
+- **Module Lock**: Before editing any code within a directory (e.g. `apps/backend`), run `./.agents/scripts/helper.sh lock <module_name>`.
+- **API Synchronization**: When backend model schemas or API paths change, run `./.agents/scripts/helper.sh sync-api` to sync types to the frontend.
+- **Skill Scaffolding**: To autonomously create new specialized skills when gaps are detected, run `./.agents/scripts/helper.sh create-skill <name> [description]`.
+- **Skill Compliance Check**: To verify that all registered skills conform to Keep-a-Skill compliance and possess executable scripts, run `./.agents/scripts/helper.sh list-skills`.
+- **Code Validation**: Run `./.agents/scripts/helper.sh validate` before staging and preparing any commit.
+- **Pre-Merge Cleanup**: Run `./.agents/scripts/helper.sh archive` before completing a pull request task to clean up dynamic workspaces.
+- **Token Budget Compliance**: The agent must log its token usage using `./.agents/scripts/helper.sh log-usage <token_count>` at the end of each turn. If validation warns that token usage has reached the threshold, the agent must immediately save its progress, update the task checklist target in `memory.md` to `IN_PROGRESS`, and log off for handover.
+
+
 EOF
 
 # 5. Write .agents/schema.md template
@@ -406,6 +443,7 @@ This file serves as the high-level index for the project's technical schemas, da
 
 ## 1. Domain Schemas Index
 - [Default Module](file://./schemas/default_module.md) -> Reference: [default_module.md](file://./schemas/default_module.md)
+
 EOF
 
 # 6. Write default_module.md template
@@ -418,6 +456,7 @@ Description of tables and APIs in this domain.
 
 ## 1. Relational Database Tables
 - `example_table` (id, name)
+
 EOF
 
 # 7. Write .agents/adr.md template
@@ -430,6 +469,8 @@ This document registers the historical technical design decisions, rationales, a
 
 ## 1. Architectural Decisions Index
 - [ADR-001: Initial Workspace Protocol Adoption](file://./adrs/001-initial-workspace-protocol.md) - Status: Accepted
+- [ADR-002: Introduce Modular ADRs and Validation](file://./adrs/002-introduce-modular-adrs-and-validation.md) - Status: Accepted
+
 EOF
 
 # 7.2 Write .agents/adrs/001-initial-workspace-protocol.md template
@@ -441,6 +482,7 @@ write_template_safe ".agents/adrs/001-initial-workspace-protocol.md" << 'EOF'
 - **Context**: The workspace needs a structured operational protocol for AI engineering agents to ensure version alignment, zero-hallucination execution, and high token efficiency.
 - **Decision**: Adopt the Antigravity Agent Core (AAC) protocol, establishing `AGENTS.md` and the `.agents/` structure containing locks, rules, schemas, and active task memory ledgers.
 - **Consequences**: Developers and agents must follow strict bootstrapping sequences and use the helper scripts/Git hooks for validated, atomic commits.
+
 EOF
 
 # 7.3 Write .agents/git_profiles.example template
@@ -464,6 +506,32 @@ personal.email=personal@gmail.com
 sideproject.name=Side Project Name
 sideproject.email=side@project.com
 # sideproject.ssh_key=~/.ssh/id_rsa_side
+
+EOF
+
+# 7.4 Write .agents/api_keys.example template
+write_template_safe ".agents/api_keys.example" << 'EOF'
+# Antigravity API Profiles Template
+# Copy this file to '.agents/api_keys' and fill in your API tokens/keys.
+# This file is used by the 'api-profile' subcommand to switch or rotate 
+# API keys locally (e.g. GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY).
+#
+# IMPORTANT: Keep '.agents/api_keys' private and never commit it to Git.
+# The default gitignore and validation rules will block it.
+
+# Profile 1: Personal Account
+personal.GEMINI_API_KEY=AIzaSyA_personal_key_here
+personal.OPENAI_API_KEY=sk-proj-personal_key_here
+
+# Profile 2: Work / Company Account
+work.GEMINI_API_KEY=AIzaSyB_work_key_here
+work.OPENAI_API_KEY=sk-proj-work_key_here
+work.ANTHROPIC_API_KEY=sk-ant-work_key_here
+
+# Profile 3: Backup / Alternative Account
+backup.GEMINI_API_KEY=AIzaSyC_backup_key_here
+backup.OPENAI_API_KEY=sk-proj-backup_key_here
+
 EOF
 
 # 7.1 Write .github/workflows/antigravity.yml template
@@ -494,6 +562,7 @@ jobs:
         run: |
           chmod +x .agents/scripts/validate.sh
           ./.agents/scripts/validate.sh
+
 EOF
 
 
@@ -543,6 +612,7 @@ Save the reconnaissance summary in the project's memory ledger (e.g., `schema.md
 2. Relational database schema layout.
 3. Active API endpoints and contract directories.
 4. Build tools and local testing environment commands.
+
 EOF
 
 # git-ops SKILL.md
@@ -595,6 +665,7 @@ description: Manages local Git branches and executes version control flows enfor
 
 ## 5. Output Protocol
 Update the project's active memory ledger (`.agents/memory.md`) under the Git/version control section with the active branch, last commit hash, and target PR status.
+
 EOF
 
 # test-driven-patch SKILL.md
@@ -648,6 +719,7 @@ description: Modifies codebase operations or fixes defects under strict TDD cons
 - [ ] Unit/Integration tests run green locally.
 - [ ] Modified or added lines achieve target code coverage thresholds.
 - [ ] Global regression suite passes without regression errors.
+
 EOF
 
 # infra-provisioner SKILL.md
@@ -694,6 +766,7 @@ description: Generates, configures, and orchestrates local Docker and Docker Com
 - Run validation check: `docker compose ps`. Verify all services are listed as healthy.
 - Connect to database and cache dependencies to verify credentials.
 - Record local infrastructure status in the active memory ledger (`.agents/memory.md`).
+
 EOF
 
 # security-ci-audit SKILL.md
@@ -749,6 +822,7 @@ description: Verifies security configurations, scans for hardcoded credentials, 
 - [ ] API endpoints and models explicitly declare return types and validation rules.
 - [ ] Health Check endpoint tracks active services.
 - [ ] Rate limiting and security headers are initialized at the gateway.
+
 EOF
 
 # code-review SKILL.md
@@ -801,6 +875,7 @@ description: Audits production code modifications for type cleanliness, security
 - [ ] Secrets and credential configurations are fully isolated.
 - [ ] Newly added lines satisfy target code coverage limits.
 - [ ] PR Review Handover document generated.
+
 EOF
 
 # Write impact-analysis SKILL.md
@@ -841,6 +916,7 @@ description: Audits the long-term architectural, performance, security, and main
 
 ## 4. Output Protocol
 For all major features or architectural shifts, record the design choices and downstream analysis under a new Architectural Decision Record (ADR) in `.agents/adr.md` or a workflows folder before writing code.
+
 EOF
 
 # 9. Write helper.sh script
@@ -866,6 +942,7 @@ show_help() {
     echo "  unlock <module>   Unlock a directory module"
     echo "  commit            Run tests, rotate profiles, and create Conventional Commit"
     echo "  git-profile       Switch Git configurations locally (use 'rotate' to rotate)"
+    echo "  api-profile       Switch API configurations locally (use 'rotate' to rotate)"
     echo ""
     echo "Rules & Skill Extending Commands:"
     echo "  create-skill      Scaffold a new specialized skill directory"
@@ -4020,10 +4097,6 @@ cmd_migrate() {
         if ! grep -E -q "^\.agents/locks/?" "$temp_git"; then
             echo -e "\n# Ignore agent transient locks\n.agents/locks/" >> "$temp_git"
         fi
-        # ensure local Git profiles config is ignored
-        if ! grep -E -q "^\.agents/git_profiles" "$temp_git"; then
-            echo -e "\n# Ignore local agent git profiles configuration\n.agents/git_profiles" >> "$temp_git"
-        fi
         mv "$temp_git" ".gitignore"
         echo "  - .gitignore updated."
     else
@@ -4031,9 +4104,6 @@ cmd_migrate() {
         cat << 'GIT_EOF' > .gitignore
 # Ignore agent transient locks
 .agents/locks/
-
-# Ignore local agent git profiles configuration
-.agents/git_profiles
 GIT_EOF
     fi
 
@@ -5020,6 +5090,132 @@ cmd_git_profile() {
     echo "=========================================================="
 }
 
+cmd_api_profile() {
+    local target_profile="${2:-}"
+    
+    # Find api_keys config file
+    local api_keys_file=""
+    if [ -f ".agents/api_keys" ]; then
+        api_keys_file=".agents/api_keys"
+    elif [ -f "$HOME/.antigravity_api_keys" ]; then
+        api_keys_file="$HOME/.antigravity_api_keys"
+    fi
+
+    # Check if we should rotate
+    if [ "$target_profile" = "rotate" ] || [ "$target_profile" = "--rotate" ]; then
+        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
+            # Parse all profile prefixes
+            local api_profiles
+            api_profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
+            local profiles_arr=($api_profiles)
+            local num_profiles=${#profiles_arr[@]}
+            
+            if [ $num_profiles -gt 0 ]; then
+                # Find current profile name from .agents/active_api_profile_name
+                local current_profile="none"
+                if [ -f ".agents/active_api_profile_name" ]; then
+                    current_profile=$(cat ".agents/active_api_profile_name" | xargs)
+                fi
+                
+                local selected_idx=0
+                for i in "${!profiles_arr[@]}"; do
+                    if [ "${profiles_arr[$i]}" = "$current_profile" ]; then
+                        selected_idx=$(( (i + 1) % num_profiles ))
+                        break
+                    fi
+                done
+                target_profile="${profiles_arr[$selected_idx]}"
+                echo "Rotating active API profile to: '$target_profile'..."
+            else
+                echo "Error: No API profiles found in $api_keys_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: No API keys configuration found (.agents/api_keys or ~/.antigravity_api_keys) to rotate." >&2
+            exit 1
+        fi
+    fi
+
+    if [ -n "$target_profile" ]; then
+        if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
+            if grep -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
+                echo "Setting active API profile to '$target_profile'..."
+                
+                # Write to .agents/active_api_keys (bash format)
+                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys
+                # Write to .agents/active_api_keys.ps1 (powershell format)
+                echo "# Active API keys for profile: $target_profile" > .agents/active_api_keys.ps1
+                
+                # Extract all keys for target_profile
+                local key_lines
+                key_lines=$(grep "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
+                
+                while IFS= read -r line; do
+                    if [ -n "$line" ]; then
+                        # format is: prefix.VAR_NAME=value
+                        local var_name_val="${line#*.}"  # VAR_NAME=value
+                        local var_name="${var_name_val%%=*}"
+                        local var_val="${var_name_val#*=}"
+                        
+                        echo "export $var_name=\"$var_val\"" >> .agents/active_api_keys
+                        echo "\$env:$var_name = \"$var_val\"" >> .agents/active_api_keys.ps1
+                    fi
+                done <<< "$key_lines"
+                
+                # Store active profile name
+                echo "$target_profile" > .agents/active_api_profile_name
+                echo "  [SUCCESS] Active API keys updated in .agents/active_api_keys and .agents/active_api_keys.ps1"
+            else
+                echo "Error: Profile '$target_profile' not found in $api_keys_file." >&2
+                exit 1
+            fi
+        else
+            echo "Error: API keys file not found (.agents/api_keys or ~/.antigravity_api_keys)." >&2
+            exit 1
+        fi
+    fi
+
+    # Display active profile details
+    echo "=========================================================="
+    echo "          Current API Profile Configuration"
+    echo "=========================================================="
+    local active_profile="<none>"
+    if [ -f ".agents/active_api_profile_name" ]; then
+        active_profile=$(cat ".agents/active_api_profile_name" | xargs)
+    fi
+    echo "Active Profile: $active_profile"
+    echo ""
+    if [ -f ".agents/active_api_keys" ]; then
+        echo "Active Keys (masked for security):"
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^export\ ([A-Z0-9_]+)=\"(.+)\"$ ]]; then
+                local var_name="${BASH_REMATCH[1]}"
+                local var_val="${BASH_REMATCH[2]}"
+                local val_len=${#var_val}
+                local masked_val="..."
+                if [ $val_len -gt 8 ]; then
+                    masked_val="${var_val:0:4}****${var_val: -4}"
+                fi
+                echo "  $var_name: $masked_val"
+            fi
+        done < .agents/active_api_keys
+    else
+        echo "Active Keys: <none>"
+    fi
+    echo ""
+    if [ -f "$api_keys_file" ]; then
+        echo "Available API Profiles (from $api_keys_file):"
+        local profiles
+        profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f1 | sort -u || echo "")
+        for p in $profiles; do
+            local keys_in_p
+            keys_in_p=$(grep -E "^${p}\.[A-Z0-9_]+=" "$api_keys_file" | cut -d'.' -f2- | cut -d'=' -f1 | tr '\n' ' ' || echo "")
+            echo "  - $p ($keys_in_p)"
+        done
+    fi
+    echo "=========================================================="
+}
+
 # Dispatch command
 if [ $# -lt 1 ]; then
     show_help
@@ -5093,6 +5289,9 @@ case "$1" in
     git-profile)
         cmd_git_profile "$@"
         ;;
+    api-profile)
+        cmd_api_profile "$@"
+        ;;
     help)
         show_help
         ;;
@@ -5102,6 +5301,7 @@ case "$1" in
         exit 1
         ;;
 esac
+
 EOF
 
 # Write helper.ps1 wrapper script
@@ -5132,6 +5332,7 @@ if ($args) {
 } else {
     & $gitBash $helperShUnix
 }
+
 EOF
 
 # 10. Write recon.sh script
@@ -5519,6 +5720,7 @@ fi
 echo "=========================================================="
 echo "Reconnaissance Complete! Blueprints updated successfully."
 echo "=========================================================="
+
 EOF
 
 # 11. Write validate.sh script
@@ -5782,6 +5984,8 @@ if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
             echo "  [PASS] Token usage is within safe budget limits."
         fi
     fi
+else
+    echo "  [PASS] No active token budget file or jq tool found. Bypassing check."
 fi
 
 # 10. Check ADR Compliance Check
@@ -5869,6 +6073,47 @@ else
     FAILED=1
 fi
 
+# 12. Check API Configuration & Profile Compliance
+echo "Check 12: API Configuration & Profile Compliance"
+API_ERRORS=0
+API_KEYS_FILE=".agents/api_keys"
+if [ -f "$API_KEYS_FILE" ]; then
+    # Verify profiles syntax and check for placeholder values
+    while IFS= read -r line || [ -n "$line" ]; do
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+        
+        if [[ "$line" =~ ^([a-zA-Z0-9_\-]+)\.([A-Z0-9_]+)=(.*)$ ]]; then
+            key="${BASH_REMATCH[1]}"
+            prop="${BASH_REMATCH[2]}"
+            val="${BASH_REMATCH[3]}"
+            
+            if [[ "$val" =~ _key_here$ ]] || [ "$val" = "your_api_key_here" ]; then
+                echo "  [WARNING] API Profile '$key' uses a placeholder value for '$prop': '$val'."
+            fi
+        else
+            echo "  [FAIL] Invalid syntax in $API_KEYS_FILE: '$line'. Must be in format: profile.VARIABLE_NAME=value"
+            API_ERRORS=$((API_ERRORS + 1))
+        fi
+    done < "$API_KEYS_FILE"
+fi
+
+# Ensure secrets and active state files are in .gitignore
+if [ -f ".gitignore" ]; then
+    for ignore_pattern in ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name"; do
+        if ! grep -q "^$ignore_pattern" .gitignore; then
+            echo "  [FAIL] .gitignore compliance: '$ignore_pattern' is not ignored. Please add it to your .gitignore to protect credentials."
+            API_ERRORS=$((API_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$API_ERRORS" -eq 0 ]; then
+    echo "  [PASS] API configurations and profiles are validated and secure."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -5877,6 +6122,88 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
+
+EOF
+
+# Write .agents/scripts/api-rotate-wrapper.sh
+write_template_safe ".agents/scripts/api-rotate-wrapper.sh" << 'EOF'
+#!/usr/bin/env bash
+# Antigravity API Auto-Rotation Command Wrapper
+# Wraps execution of any agent CLI or command, automatically rotating API profiles 
+# from '.agents/api_keys' if the command fails with a rate-limit error (exit code 429).
+set -uo pipefail
+
+# Find the helper script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HELPER_SH="${SCRIPT_DIR}/helper.sh"
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 [command_to_run] [args...]" >&2
+    echo "Example: $0 npx antigravity-cli task-run" >&2
+    exit 1
+fi
+
+# Find available API profiles to count max retries
+API_KEYS_FILE=""
+if [ -f ".agents/api_keys" ]; then
+    API_KEYS_FILE=".agents/api_keys"
+elif [ -f "$HOME/.antigravity_api_keys" ]; then
+    API_KEYS_FILE="$HOME/.antigravity_api_keys"
+fi
+
+MAX_RETRIES=1
+if [ -n "$API_KEYS_FILE" ] && [ -f "$API_KEYS_FILE" ]; then
+    num_profiles=$(grep -E "^[a-zA-Z0-9_\-]+\.[A-Z0-9_]+=" "$API_KEYS_FILE" | cut -d'.' -f1 | sort -u | wc -l || echo "1")
+    if [ "$num_profiles" -gt 0 ]; then
+        MAX_RETRIES=$num_profiles
+    fi
+fi
+
+retry_count=0
+while [ $retry_count -lt $MAX_RETRIES ]; do
+    # Ensure active API keys are loaded
+    if [ -f ".agents/active_api_keys" ]; then
+        source ".agents/active_api_keys"
+    else
+        # If no profile is active, initialize the first available profile
+        echo "No active API profile set. Initializing first available profile..."
+        "$HELPER_SH" api-profile rotate >/dev/null 2>&1 || true
+        if [ -f ".agents/active_api_keys" ]; then
+            source ".agents/active_api_keys"
+        fi
+    fi
+
+    # Run the wrapped command
+    echo "[API-WRAPPER] Running wrapped command..."
+    # Disable exit on error temporarily so we can catch exit code
+    set +e
+    "$@"
+    exit_code=$?
+    set -e
+
+    if [ $exit_code -eq 0 ]; then
+        exit 0
+    # Catch typical rate limit / exhaustion codes: 
+    # - 429: Too Many Requests
+    # - 129: Common custom agent rate-limit exit code
+    # - 3: Resource exhausted (gRPC status code)
+    elif [ $exit_code -eq 429 ] || [ $exit_code -eq 129 ] || [ $exit_code -eq 3 ]; then
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -lt $MAX_RETRIES ]; then
+            echo "[API-WRAPPER] Command exited with code $exit_code (Rate Limited/Quota Exhausted)."
+            echo "[API-WRAPPER] Rotating API profile and retrying ($retry_count/$MAX_RETRIES)..."
+            "$HELPER_SH" api-profile rotate
+            sleep 2
+        else
+            echo "[API-WRAPPER] Command exited with code $exit_code. All available API profiles exhausted." >&2
+            exit $exit_code
+        fi
+    else
+        # Exit immediately on other execution failures
+        exit $exit_code
+    fi
+done
+
 EOF
 
 # 11.5. Write generate-client.js script
@@ -6059,6 +6386,7 @@ code += `}\n`;
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, code, 'utf8');
 console.log(`Successfully generated API client with ${Object.keys(schema.components?.schemas || {}).length} types to ${outputPath}`);
+
 CLIENT_GEN_EOF
 
 
@@ -6109,6 +6437,7 @@ if [ -f .git/hooks/pre-commit.backup ]; then
         sh .git/hooks/pre-commit.backup "$@"
     fi
 fi
+
 EOF
 
 write_template_safe ".agents/hooks/post-commit" << 'EOF'
@@ -6138,6 +6467,7 @@ if [ -f .git/hooks/post-commit.backup ]; then
         sh .git/hooks/post-commit.backup "$@"
     fi
 fi
+
 EOF
 
 write_template_safe ".agents/hooks/commit-msg" << 'EOF'
@@ -6182,12 +6512,14 @@ if [ -f .git/hooks/commit-msg.backup ]; then
         sh .git/hooks/commit-msg.backup "$@"
     fi
 fi
+
 EOF
 
 if [ -f .agents/bootstrap.sh ]; then chmod +x .agents/bootstrap.sh; fi
 if [ -f .agents/scripts/helper.sh ]; then chmod +x .agents/scripts/helper.sh; fi
 if [ -f .agents/scripts/recon.sh ]; then chmod +x .agents/scripts/recon.sh; fi
 if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi
+if [ -f .agents/scripts/api-rotate-wrapper.sh ]; then chmod +x .agents/scripts/api-rotate-wrapper.sh; fi
 if [ -f .agents/hooks/pre-commit ]; then chmod +x .agents/hooks/pre-commit; fi
 if [ -f .agents/hooks/post-commit ]; then chmod +x .agents/hooks/post-commit; fi
 if [ -f .agents/hooks/commit-msg ]; then chmod +x .agents/hooks/commit-msg; fi
