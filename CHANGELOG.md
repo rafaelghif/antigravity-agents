@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-06-16
+
+### Added
+- Shell autocompletion subcommand `autocomplete` (`autocomplete.py`) for Bash and Zsh.
+- Automatic unit test scaffolding for newly created skills (`tests/test_skill_<name>.py`).
+- Test runner integration in `tests/test_rotation.py` to automatically discover and run all `test_skill_*.py` files.
+- GitHub Actions CI/CD verify workflow `.github/workflows/verify.yml` to automate workspace validation and tests.
+- Python virtual environment `.venv` auto-detection in `helper.sh` and `helper.ps1`.
+- Virtual environment creation flag `-v` / `--venv` / `--create-venv` support in `bootstrap.sh`.
+
+### Changed
+- Improved error handling in CLI wrappers `helper.sh` and `helper.ps1` to check for Python 3 availability.
+- Documented system prerequisites (Git, Python 3, Git Bash) in `README.md`.
+
 ## [1.8.0] - 2026-06-16
 
 ### Added
@@ -35,4 +49,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `helper.sh` and `helper.ps1` into thin wrappers forwarding commands directly to `python3 .agents/scripts/cli/helper.py`.
 - Optimized prompt cache hit rate and token consumption during daily agent commands.
 
+[1.9.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.7.4...v1.8.0
