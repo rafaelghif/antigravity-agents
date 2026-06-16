@@ -8,7 +8,7 @@
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: a66ea62
+- **Last Commit Reference**: 12ca83e
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -19,11 +19,16 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Python CLI Migration
-- **Current Task Target**: Define Python CLI migration workflow
+- **Current Task Target**: Implement modular Python helper CLI
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Define Python CLI migration workflow
+- [x] Create CLI folder structure and base files
+- [x] Implement utils.py and helper.py dispatcher
+- [x] Implement commands (lock, unlock, log_usage, archive, api_profile, git_profile)
+- [x] Implement commands (validate, doctor, migrate, recon, skills, rules, init)
+- [x] Replace helper.sh/helper.ps1 with dispatch wrappers
+- [x] Run all tests and validation checks
 ---
 
 ## 3. Relayed Context & Handover Notes
