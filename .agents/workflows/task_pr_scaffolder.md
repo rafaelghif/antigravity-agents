@@ -12,12 +12,18 @@ This task implements the `pr-scaffolder` skill as aligned during the `/grill-me`
   - Run the test command extracted from `.agents/rules/project_rules.md` (e.g. `python3 tests/test_rotation.py`).
   - Capture stdout/stderr verbatim.
   - If tests fail, add a warning badge `> [!WARNING]\n> Verification tests failed!` to the review guide but do not exit.
+  - If no test command is configured, output a note badge: `> [!NOTE]\n> No active test runner command configured for this workspace.` and bypass test run.
 - **Schema Mapping**:
   - Run `git diff <base_branch> -- .agents/schemas/` to extract schema alterations.
   - Render the differences under the "Schema Changes" section.
 - **Code References**:
   - Render absolute links: `[File (Local)](file:///<absolute_path>)`
   - Render relative links: `[File (Repo)](<relative_path>)`
+- **Symbol Extraction**:
+  - Scan git diff lines for language-agnostic signature regexes (e.g. lines starting with `+def `, `+class `, `+func `, `+type `, etc.) to identify modified classes and functions.
+- **Layout & Structure**:
+  - Use structured Markdown tables for listing changed files and symbols.
+  - Use collapsible `<details>` blocks for rendering verification/test logs to avoid layout clutter.
 
 ## 2. Checklist & Implementation Status
 
