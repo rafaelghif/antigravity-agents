@@ -3,6 +3,9 @@ import sys
 import re
 from datetime import datetime
 import utils
+import urllib.request
+import urllib.error
+import json
 
 # ANSI color codes
 C_GREEN = '\033[92m'
@@ -12,6 +15,124 @@ C_GRAY = '\033[90m'
 C_BOLD = '\033[1m'
 C_CYAN = '\033[96m'
 C_END = '\033[0m'
+
+def get_github_token():
+    # 1. Get current git user email
+    import subprocess
+    try:
+        git_email = subprocess.check_output(
+            ["git", "config", "user.email"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        return None
+        
+    if not git_email:
+        return None
+        
+    # 2. Find profiles file
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    if not profiles_file:
+        return None
+        
+    # 3. Parse profiles
+    config = {}
+    try:
+        with open(profiles_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+    except:
+        return None
+        
+    # 4. Find profile prefix that matches git_email
+    profile_prefix = None
+    for k, v in config.items():
+        if k.endswith('.email') and v == git_email:
+            profile_prefix = k.rsplit('.email', 1)[0]
+            break
+            
+    if not profile_prefix:
+        return None
+        
+    # 5. Get github_token for that profile
+    return config.get(f"{profile_prefix}.github_token")
+
+def get_github_repo():
+    import subprocess
+    try:
+        remote_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        return None
+        
+    m = re.search(r'github\.com[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+    if m:
+        return m.group(1), m.group(2)
+    return None
+
+def sync_github_issue(action, title=None, body=None, github_issue_number=None):
+    token = get_github_token()
+    repo_info = get_github_repo()
+    
+    if not token or not repo_info:
+        return None
+
+    owner, repo = repo_info
+    
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "Antigravity-Agent-Helper"
+    }
+    
+    if action == "create":
+        url = f"https://api.github.com/repos/{owner}/{repo}/issues"
+        data = {
+            "title": title,
+            "body": body or ""
+        }
+        method = "POST"
+    elif action == "close":
+        if not github_issue_number:
+            return None
+        url = f"https://api.github.com/repos/{owner}/{repo}/issues/{github_issue_number}"
+        data = {
+            "state": "closed"
+        }
+        method = "PATCH"
+    else:
+        return None
+        
+    req_data = json.dumps(data).encode('utf-8')
+    req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
+    
+    try:
+        with urllib.request.urlopen(req) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            return res_data
+    except urllib.error.HTTPError as e:
+        print(color(f"\nGitHub API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
+        try:
+            err_body = e.read().decode('utf-8')
+            print(color(f"Details: {err_body}", C_GRAY), file=sys.stderr)
+        except:
+            pass
+    except Exception as e:
+        print(color(f"\nWarning: Failed to connect to GitHub API: {e}", C_YELLOW), file=sys.stderr)
+    return None
 
 def color(text, ansi_code):
     if sys.stdout.isatty():
@@ -113,12 +234,22 @@ def create_issue(title, description="No description provided."):
         if ids:
             next_id = max(ids) + 1
             
+    # Try to sync to GitHub Issues
+    github_id = None
+    gh_res = sync_github_issue("create", title=title, body=description)
+    if gh_res and "number" in gh_res:
+        github_id = gh_res["number"]
+        print(color(f"  [SUCCESS] Synchronized to GitHub: Issue #{github_id} created.", C_GREEN))
+    elif get_github_token() and get_github_repo():
+        print(color("  [WARNING] GitHub integration configured but synchronization failed.", C_YELLOW))
+
     filename = f"issue_{next_id:03d}.md"
     file_path = os.path.join(issues_dir, filename)
     created_at = datetime.now().strftime("%Y-%m-%d")
     
     content = f"""---
 id: {next_id}
+github_id: {github_id if github_id else 'null'}
 title: "{title}"
 status: open
 assignee: Agent
@@ -160,8 +291,20 @@ def close_issue(issue_id_str):
         
     closed_at = datetime.now().strftime("%Y-%m-%d")
     
+    # Try to close on GitHub if github_id is set
+    github_id_val = meta.get("github_id")
+    if github_id_val and github_id_val != "null" and github_id_val != "None":
+        try:
+            gh_num = int(github_id_val)
+            gh_res = sync_github_issue("close", github_issue_number=gh_num)
+            if gh_res:
+                print(color(f"  [SUCCESS] Synchronized to GitHub: Closed Issue #{gh_num}.", C_GREEN))
+        except Exception as e:
+            print(color(f"  [WARNING] Failed to close issue on GitHub: {e}", C_YELLOW))
+            
     content = f"""---
 id: {issue_id}
+github_id: {github_id_val if github_id_val else 'null'}
 title: "{meta.get('title', 'No Title')}"
 status: closed
 assignee: {meta.get('assignee', 'Agent')}
@@ -249,8 +392,10 @@ def checkout_issue(issue_id_str):
     meta["assignee"] = git_user
     
     closed_at_str = meta.get("closed_at", "null")
+    github_id_val = meta.get("github_id", "null")
     content = f"""---
 id: {issue_id}
+github_id: {github_id_val if github_id_val else 'null'}
 title: "{meta.get('title')}"
 status: {meta.get('status', 'open')}
 assignee: {meta.get('assignee')}
