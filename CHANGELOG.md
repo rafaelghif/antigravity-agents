@@ -19,8 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Interactive guided ADR wizard skill `adr-wizard` (`.agents/skills/adr-wizard/`) with helper subcommand delegation supporting both interactive console prompts and non-interactive JSON parameter modes.
 - Enhanced ADR validation checks in `validate.sh` enforcing numeric sequence continuity, bidirectional index sync, and content validation.
 - Comprehensive unit tests in `tests/test_skill_adr_wizard.py` covering help execution and non-interactive generation.
+- Automatic token budget reset feature based on configurable intervals (`hourly`, `daily`, `weekly`, `monthly` or custom seconds) in `token_budget.json`.
+- Added new unit test in `tests/test_rotation.py` to verify budget reset on elapsed interval duration.
 
 ### Changed
+- Updated CLI utils `utils.py` to automatically trigger token budget reset checks on load.
+- Updated `validate.sh` Check 9 to run Python budget reset checks before validating with `jq`.
+- Refactored `api-rotator` skill script `main.py` to import CLI `utils` and load the budget through the centralized budget tracker.
 - Centralized and standardized all modular documentation files under root `docs/` directory, removing the redundant `.agents/docs/` folder.
 - Updated root `README.md` documentation index to link to the new standardized `docs/` paths and included the `api_rotation.md` guide.
 - Consolidated all migration documentation into a single, unified `docs/migration_guide.md` file, deleting the redundant `MIGRATION.md` file and updating all CLI command version descriptions to version V1.9.0.

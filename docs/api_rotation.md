@@ -127,3 +127,35 @@ Run tests manually:
 python3 tests/test_rotation.py
 ```
 This suite is automatically run during project linter checks and pre-commit commit validation.
+
+---
+
+## 7. Automatic Budget Resets
+
+To prevent token limits from permanently blocking API profile usage, you can configure an automatic reset interval in `.agents/token_budget.json`.
+
+### Configuration
+Add the `"reset_interval"` field at the root level of `.agents/token_budget.json`:
+```json
+{
+  "max_token_budget": 500000,
+  "current_token_usage": 0,
+  "alert_threshold_percent": 90,
+  "reset_interval": "daily",
+  "last_reset_timestamp": 1781682136,
+  "profiles": {}
+}
+```
+
+### Supported Intervals
+- `"hourly"`: Resets token counts every 1 hour (3,600 seconds).
+- `"daily"`: Resets token counts every 24 hours (86,400 seconds).
+- `"weekly"`: Resets token counts every 7 days (604,800 seconds).
+- `"monthly"`: Resets token counts every 30 days (2,592,000 seconds).
+- Custom seconds (e.g., `"300"` for every 5 minutes).
+- `"none"` (or missing): Disables automatic resets (default opt-in behavior).
+
+### Operation
+- Whenever any script calls the CLI helper commands (`helper.sh validate`, `helper.sh log-usage`, etc.), the Python loader automatically evaluates if the interval has elapsed.
+- If elapsed, it resets `current_token_usage` and all profile usage logs to `0` and updates `last_reset_timestamp`.
+- A message is printed to notify the developer of the reset: `[INFO] Token budget reset interval ('daily') has expired. Resetting all usage counts to 0.`

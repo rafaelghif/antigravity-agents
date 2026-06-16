@@ -160,6 +160,105 @@ def run_bash_wrapper_test():
     
     return True
 
+def run_budget_autoreset_test():
+    """
+    Validates the automatic token budget reset feature.
+    """
+    print("\n=== Test 5: API Token Budget Auto-Reset Check ===")
+    
+    # Setup import path
+    cli_dir = os.path.join(AGENTS_DIR, "scripts", "cli")
+    if cli_dir not in sys.path:
+        sys.path.insert(0, cli_dir)
+        
+    import utils
+    
+    # 1. Setup mock budget with short interval and expired timestamp
+    current_time = int(time.time())
+    mock_budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 1000,
+        "reset_interval": 2, # 2 seconds
+        "last_reset_timestamp": current_time - 5,
+        "profiles": {
+            "mock_p1": {
+                "current_token_usage": 800,
+                "max_token_budget": 500000
+            }
+        }
+    }
+    
+    # Save the budget
+    utils.save_budget(mock_budget)
+    
+    # Load budget - this should trigger the reset!
+    loaded = utils.load_budget()
+    
+    # Check that usages are reset to 0
+    if loaded.get("current_token_usage") != 0:
+        print("[FAIL] Auto-reset failed to reset global token usage to 0!")
+        return False
+        
+    p_usage = loaded.get("profiles", {}).get("mock_p1", {}).get("current_token_usage")
+    if p_usage != 0:
+        print(f"[FAIL] Auto-reset failed to reset profile token usage to 0! Found: {p_usage}")
+        return False
+        
+    if loaded.get("last_reset_timestamp") < current_time:
+        print("[FAIL] Auto-reset did not update last_reset_timestamp!")
+        return False
+        
+    print("  [PASS] Budget auto-reset on interval expiry verified successfully.")
+    
+    # 2. Test that when reset_interval is "none", no reset occurs
+    mock_budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 1000,
+        "reset_interval": "none",
+        "last_reset_timestamp": current_time - 100,
+        "profiles": {
+            "mock_p1": {
+                "current_token_usage": 800,
+                "max_token_budget": 500000
+            }
+        }
+    }
+    utils.save_budget(mock_budget)
+    loaded = utils.load_budget()
+    if loaded.get("current_token_usage") != 1000 or loaded.get("profiles", {}).get("mock_p1", {}).get("current_token_usage") != 800:
+        print("[FAIL] Auto-reset triggered when reset_interval was set to 'none'!")
+        return False
+        
+    print("  [PASS] Budget did not reset when reset_interval is 'none'.")
+    
+    # 3. Test initialization of last_reset_timestamp when missing
+    mock_budget = {
+        "max_token_budget": 500000,
+        "current_token_usage": 1000,
+        "reset_interval": "daily",
+        "profiles": {
+            "mock_p1": {
+                "current_token_usage": 800,
+                "max_token_budget": 500000
+            }
+        }
+    }
+    # last_reset_timestamp is missing
+    utils.save_budget(mock_budget)
+    loaded = utils.load_budget()
+    
+    # Check that usages are NOT reset (since timestamp was just initialized)
+    if loaded.get("current_token_usage") != 1000:
+        print("[FAIL] Budget reset prematurely on initialization!")
+        return False
+        
+    if loaded.get("last_reset_timestamp") is None:
+        print("[FAIL] Auto-reset failed to initialize missing last_reset_timestamp!")
+        return False
+        
+    print("  [PASS] Missing last_reset_timestamp successfully initialized.")
+    return True
+
 def main():
     # Parse mock command execution
     if "--mock-command" in sys.argv:
@@ -184,6 +283,9 @@ def main():
     try:
         # 2. Run tests
         success = run_bash_wrapper_test()
+        
+        if success:
+            success = run_budget_autoreset_test()
         
         # 3. Skip PowerShell wrapper on non-Windows/non-PowerShell systems
         print("\n=== Test 3: PowerShell Wrapper Execution Check ===")

@@ -35,17 +35,30 @@ def check_and_rotate_budget():
     Proactively checks the current active profile's token budget.
     Rotates to the next profile if the limit is exceeded.
     """
-    budget_file = ".agents/token_budget.json"
     profile_file = ".agents/active_api_profile_name"
-    if not os.path.exists(budget_file) or not os.path.exists(profile_file):
+    if not os.path.exists(profile_file):
         return
         
     with open(profile_file, "r") as f:
         profile = f.read().strip()
         
-    with open(budget_file, "r") as f:
+    # Import CLI utils dynamically
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    cli_dir = os.path.abspath(os.path.join(script_dir, "../../../scripts/cli"))
+    if cli_dir not in sys.path:
+        sys.path.insert(0, cli_dir)
+        
+    try:
+        import utils
+        budget = utils.load_budget()
+    except Exception as e:
+        logging.warning(f"Failed to load budget via CLI utils: {e}. Falling back to manual read.")
+        budget_file = ".agents/token_budget.json"
+        if not os.path.exists(budget_file):
+            return
         try:
-            budget = json.load(f)
+            with open(budget_file, "r") as f:
+                budget = json.load(f)
         except Exception:
             return
         
