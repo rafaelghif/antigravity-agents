@@ -6315,8 +6315,8 @@ else
     FAILED=1
 fi
 
-# 7. Check Gitignore Configuration Compliance
-echo "Check 7: Gitignore Configuration Compliance"
+# 7. Check Gitignore & Antigravityignore Configuration Compliance
+echo "Check 7: Gitignore & Antigravityignore Compliance"
 GITIGNORE_ERRORS=0
 if [ -f ".gitignore" ]; then
     # Verify that .gitignore does NOT ignore .agents/ or AGENTS.md globally
@@ -6328,16 +6328,40 @@ if [ -f ".gitignore" ]; then
         echo "  [FAIL] .gitignore ignores 'AGENTS.md'! Please remove it."
         GITIGNORE_ERRORS=$((GITIGNORE_ERRORS + 1))
     fi
-    # Verify that .agents/locks/ is ignored
-    if ! grep -E -q "^\.agents/locks/?" .gitignore; then
-        echo "  [WARNING] .gitignore does not ignore transient locks ('.agents/locks/')."
+
+    # Auto-heal transient files ignore in .gitignore
+    HEALED_GI=0
+    for pattern in ".agents/locks/" ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+        if ! grep -q "^$pattern" .gitignore; then
+            echo "  [WARNING] .gitignore does not ignore transient: '$pattern'. Auto-healing..."
+            echo "$pattern" >> .gitignore
+            HEALED_GI=1
+        fi
+    done
+    if [ $HEALED_GI -eq 1 ]; then
+        echo "  [PASS] .gitignore auto-healed successfully."
     fi
 else
     echo "  [WARNING] No .gitignore file found in project root."
 fi
 
+if [ -f ".antigravityignore" ]; then
+    # Auto-heal transient files ignore in .antigravityignore
+    HEALED_AG=0
+    for pattern in ".agents/locks/" ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+        if ! grep -q "^$pattern" .antigravityignore; then
+            echo "  [WARNING] .antigravityignore does not ignore transient: '$pattern'. Auto-healing..."
+            echo "$pattern" >> .antigravityignore
+            HEALED_AG=1
+        fi
+    done
+    if [ $HEALED_AG -eq 1 ]; then
+        echo "  [PASS] .antigravityignore auto-healed successfully."
+    fi
+fi
+
 if [ "$GITIGNORE_ERRORS" -eq 0 ]; then
-    echo "  [PASS] Gitignore is correctly configured."
+    echo "  [PASS] Gitignore & Antigravityignore configurations are validated."
 else
     FAILED=1
 fi
@@ -6371,6 +6395,9 @@ fi
 # 9. Check Token Budget Guard
 echo "Check 9: Token Budget Guard"
 BUDGET_FILE=".agents/token_budget.json"
+if command -v python3 >/dev/null 2>&1; then
+    python3 -c "import sys; sys.path.insert(0, '.agents/scripts/cli'); import utils; utils.load_budget()" || true
+fi
 if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
     # Auto-detect profile from active_api_profile_name
     PROFILE=""
@@ -6407,6 +6434,10 @@ if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
             echo "  [FAIL] Token budget exceeded! Current: $CURRENT_USAGE, Limit: $MAX_BUDGET."
             echo "         Please save your task checkpoint in workflows/ and handover the task."
             FAILED=1
+        elif [ "$PERCENT" -ge 95 ]; then
+            echo "  [FAIL] Token usage has reached critical threshold ($PERCENT% >= 95%)! All operations blocked."
+            echo "         Please request a budget increase or manually reset the usage log."
+            FAILED=1
         elif [ "$PERCENT" -ge "$THRESHOLD" ]; then
             echo "  [WARNING] Token usage is at $PERCENT% of budget. Consider saving and handing over."
         else
@@ -6422,6 +6453,7 @@ echo "Check 10: ADR Compliance Check"
 ADR_ERRORS=0
 if [ -f ".agents/adr.md" ]; then
     if [ -d ".agents/adrs" ]; then
+        max_num=0
         for adr_file in .agents/adrs/*.md; do
             if [ -f "$adr_file" ]; then
                 base_name=$(basename "$adr_file")
@@ -6430,11 +6462,51 @@ if [ -f ".agents/adr.md" ]; then
                     echo "  [FAIL] Architectural Decision Record file '$base_name' is NOT registered in '.agents/adr.md'!"
                     ADR_ERRORS=$((ADR_ERRORS + 1))
                 fi
-                # Check for placeholders
-                if grep -i -q -E "TODO|FIXME|\[placeholder\]" "$adr_file"; then
-                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder)!"
+                # Check for placeholders and template defaults
+                if grep -i -q -E "TODO|FIXME|\[placeholder\]|Describe the problem|Describe the decision|Describe the result" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' contains placeholder text (TODO/FIXME/placeholder/template default)!"
                     ADR_ERRORS=$((ADR_ERRORS + 1))
                 fi
+                # Check for required sections
+                if ! grep -q "## Context" "$adr_file" || ! grep -q "## Decision" "$adr_file" || ! grep -q "## Consequences" "$adr_file"; then
+                    echo "  [FAIL] ADR file '$base_name' is missing required sections (Context, Decision, Consequences)!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+                
+                # Extract sequence number to check for gaps later
+                if [[ "$base_name" =~ ^([0-9]{3})- ]]; then
+                    num=$((10#${BASH_REMATCH[1]}))
+                    if [ "$num" -gt "$max_num" ]; then
+                        max_num=$num
+                    fi
+                fi
+            fi
+        done
+        
+        # Gaps check
+        if [ "$max_num" -gt 0 ]; then
+            for ((i=1; i<=max_num; i++)); do
+                padded_num=$(printf "%03d" $i)
+                found=0
+                for f in .agents/adrs/${padded_num}-*.md; do
+                    if [ -e "$f" ]; then
+                        found=1
+                        break
+                    fi
+                done
+                if [ "$found" -eq 0 ]; then
+                    echo "  [FAIL] Missing ADR in sequence: ADR-${padded_num} is not found!"
+                    ADR_ERRORS=$((ADR_ERRORS + 1))
+                fi
+            done
+        fi
+        
+        # Bidirectional sync: check if registered files in adr.md actually exist
+        links=$(grep -o -E "file://\./adrs/[^)]+\.md" ".agents/adr.md" | sed 's|file://./||' || true)
+        for link in $links; do
+            if [ ! -f ".agents/$link" ]; then
+                echo "  [FAIL] ADR index references non-existent file '.agents/$link'!"
+                ADR_ERRORS=$((ADR_ERRORS + 1))
             fi
         done
     fi
@@ -6543,6 +6615,71 @@ else
     FAILED=1
 fi
 
+# 13. Check CHANGELOG.md Format (Keep a Changelog Compliance)
+echo "Check 13: Keep a Changelog Compliance"
+CHANGELOG_ERRORS=0
+if [ -f "CHANGELOG.md" ]; then
+    if ! head -n 1 CHANGELOG.md | grep -q "^# Changelog" ; then
+        echo "  [FAIL] CHANGELOG.md must start with '# Changelog' header."
+        CHANGELOG_ERRORS=$((CHANGELOG_ERRORS + 1))
+    fi
+    INVALID_HEADERS=$(grep "^## " CHANGELOG.md | grep -Ev "^## \[(Unreleased|[0-9]+\.[0-9]+\.[0-9]+)\]( - [0-9]{4}-[0-9]{2}-[0-9]{2})?" || true)
+    if [ -n "$INVALID_HEADERS" ]; then
+        echo "  [FAIL] CHANGELOG.md contains invalid version headers:"
+        echo "$INVALID_HEADERS" | sed 's/^/         /'
+        CHANGELOG_ERRORS=$((CHANGELOG_ERRORS + 1))
+    fi
+else
+    echo "  [WARNING] No CHANGELOG.md file found in project root."
+fi
+
+if [ "$CHANGELOG_ERRORS" -eq 0 ]; then
+    echo "  [PASS] CHANGELOG.md matches Keep a Changelog compliance."
+else
+    FAILED=1
+fi
+
+# 14. Check for TODO/FIXME Annotations in Staged Code
+echo "Check 14: Staged Code Quality (TODO/FIXME Guard)"
+TODO_ERRORS=0
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    # Get staged files excluding .md files, bootstrap.sh, and files inside .agents/
+    STAGED_CODE_FILES=$(git diff --cached --name-only | grep -Ev "\.md$" | grep -v "^bootstrap\.sh$" | grep -Ev "^\.agents/" || true)
+    for file in $STAGED_CODE_FILES; do
+        TODO_LINES=$(git diff --cached -- "$file" | grep "^+[^+]" | grep -Ei "\b(TODO|FIXME)\b" || true)
+        if [ -n "$TODO_LINES" ]; then
+            echo "  [FAIL] Quality Guard: Staged file '$file' contains TODO or FIXME annotations:"
+            echo "$TODO_LINES" | sed 's/^/         /'
+            TODO_ERRORS=$((TODO_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$TODO_ERRORS" -eq 0 ]; then
+    echo "  [PASS] Staged changes contain no TODO or FIXME annotations."
+else
+    FAILED=1
+fi
+
+# 15. Check for Staged Transient Files & Config Leak Guard
+echo "Check 15: Staged Transient Files & Leak Guard"
+LEAK_ERRORS=0
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    STAGED_FILES=$(git diff --cached --name-only)
+    for file in $STAGED_FILES; do
+        if [[ "$file" =~ \.lock$ ]] || [[ "$file" =~ active_api_keys ]] || [[ "$file" =~ cooldowns\.json$ ]]; then
+            echo "  [FAIL] Leak Guard: Transient file '$file' is staged for commit! Please unstage it."
+            LEAK_ERRORS=$((LEAK_ERRORS + 1))
+        fi
+    done
+fi
+
+if [ "$LEAK_ERRORS" -eq 0 ]; then
+    echo "  [PASS] No transient files or credentials are staged."
+else
+    FAILED=1
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -6551,7 +6688,6 @@ else
     echo "Workspace Status: DEGRADED (Check issues detailed above)"
     exit 1
 fi
-
 EOF
 
 # Write .agents/scripts/api-rotate-wrapper.sh

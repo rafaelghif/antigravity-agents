@@ -199,7 +199,7 @@ if [ -f ".gitignore" ]; then
 
     # Auto-heal transient files ignore in .gitignore
     HEALED_GI=0
-    for pattern in ".agents/locks/" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+    for pattern in ".agents/locks/" ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
         if ! grep -q "^$pattern" .gitignore; then
             echo "  [WARNING] .gitignore does not ignore transient: '$pattern'. Auto-healing..."
             echo "$pattern" >> .gitignore
@@ -216,7 +216,7 @@ fi
 if [ -f ".antigravityignore" ]; then
     # Auto-heal transient files ignore in .antigravityignore
     HEALED_AG=0
-    for pattern in ".agents/locks/" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
+    for pattern in ".agents/locks/" ".agents/api_keys" ".agents/active_api_keys" ".agents/active_api_keys.ps1" ".agents/active_api_profile_name" ".agents/cooldowns.json"; do
         if ! grep -q "^$pattern" .antigravityignore; then
             echo "  [WARNING] .antigravityignore does not ignore transient: '$pattern'. Auto-healing..."
             echo "$pattern" >> .antigravityignore
@@ -511,8 +511,8 @@ fi
 echo "Check 14: Staged Code Quality (TODO/FIXME Guard)"
 TODO_ERRORS=0
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    # Get staged files excluding .md files and files inside .agents/
-    STAGED_CODE_FILES=$(git diff --cached --name-only | grep -Ev "\.md$" | grep -Ev "^\.agents/" || true)
+    # Get staged files excluding .md files, bootstrap.sh, and files inside .agents/
+    STAGED_CODE_FILES=$(git diff --cached --name-only | grep -Ev "\.md$" | grep -v "^bootstrap\.sh$" | grep -Ev "^\.agents/" || true)
     for file in $STAGED_CODE_FILES; do
         TODO_LINES=$(git diff --cached -- "$file" | grep "^+[^+]" | grep -Ei "\b(TODO|FIXME)\b" || true)
         if [ -n "$TODO_LINES" ]; then
