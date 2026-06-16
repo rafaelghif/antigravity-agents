@@ -53,9 +53,11 @@ log_success() { echo -e "${GREEN}${BOLD}[PASS]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}${BOLD}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}${BOLD}[FAIL]${NC} $1" >&2; }
 
-echo "=========================================================="
+echo -e "${BLUE}==========================================================${NC}"
+echo -e "${CYAN}${BOLD}   🚀  ANTIGRAVITY AGENT WORKSPACE SETUP INITIALIZER   ${NC}"
+echo -e "${BLUE}==========================================================${NC}"
 log_info "Checking System Prerequisites..."
-echo "=========================================================="
+echo -e "${BLUE}----------------------------------------------------------${NC}"
 
 if ! command -v git >/dev/null 2>&1; then
     log_error "Git is required but not installed! Please install Git first."
@@ -359,7 +361,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 7dfd7c9
+- **Last Commit Reference**: 7b797b1
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -369,15 +371,13 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: CLI UX and Usability Modernization
-- **Current Task Target**: Modernize onboarding, doctor, and validation outputs
-- **State Flag**: `IN_PROGRESS`
+- **Primary Epic**: Initial Setup
+- **Current Task Target**: Configure workspace rules and verify stack
+- **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement CLI clean subcommand
-- [x] Implement Interactive CLI Menu Dashboard
-- [x] Modernize CLI TUI Dashboard UX
-- [/] Modernize onboarding, doctor, and validation outputs
+- [x] Configure workspace rules and verify stack
+- [x] Run health check doctor
 
 ---
 
@@ -6740,22 +6740,26 @@ if [ -f .agents/scripts/helper.sh ]; then
     .agents/scripts/helper.sh sync-git >/dev/null 2>&1 || true
 fi
 
-echo "=========================================================="
-echo "Workspace Initialization Complete!"
-echo "Global Agent Protocol written to: AGENTS.md"
-echo "Active Memory Ledger written to: .agents/memory.md"
-echo "Technical Schema Reference written to: .agents/schema.md"
-echo "Architectural Blueprint written to: .agents/rules/project_rules.md"
-echo "Architectural Decision Records template written to: .agents/adr.md"
-echo "Locks folder created at: .agents/locks/"
-echo "Schemas folder created at: .agents/schemas/"
-echo "Helper Scripts created at: .agents/scripts/"
-echo "Git Hooks created at: .agents/hooks/"
-echo "Generalized Skills loaded in: .agents/skills/"
-echo "=========================================================="
-echo "Workspace diagnostics status:"
+echo -e "${BLUE}==========================================================${NC}"
+echo -e "${GREEN}${BOLD}🎉  Workspace Initialization Complete!${NC}"
+echo -e "${BLUE}==========================================================${NC}"
+echo -e "  ${GREEN}✓${NC} Global Agent Protocol written to:      ${CYAN}AGENTS.md${NC}"
+echo -e "  ${GREEN}✓${NC} Active Memory Ledger written to:       ${CYAN}.agents/memory.md${NC}"
+echo -e "  ${GREEN}✓${NC} Technical Schema Reference written to:  ${CYAN}.agents/schema.md${NC}"
+echo -e "  ${GREEN}✓${NC} Architectural Blueprint written to:    ${CYAN}.agents/rules/project_rules.md${NC}"
+echo -e "  ${GREEN}✓${NC} Architectural Decision Records to:     ${CYAN}.agents/adr.md${NC}"
+echo -e "  ${GREEN}✓${NC} Locks folder created at:               ${CYAN}.agents/locks/${NC}"
+echo -e "  ${GREEN}✓${NC} Schemas folder created at:             ${CYAN}.agents/schemas/${NC}"
+echo -e "  ${GREEN}✓${NC} Helper Scripts created at:             ${CYAN}.agents/scripts/${NC}"
+echo -e "  ${GREEN}✓${NC} Git Hooks created at:                  ${CYAN}.agents/hooks/${NC}"
+echo -e "  ${GREEN}✓${NC} Generalized Skills loaded in:          ${CYAN}.agents/skills/${NC}"
+echo -e "${BLUE}==========================================================${NC}"
+echo -e "${YELLOW}${BOLD}🩺  Workspace Diagnostics Status:${NC}"
 .agents/scripts/helper.sh doctor || true
-echo "=========================================================="
+echo -e "${BLUE}==========================================================${NC}"
+echo -e "${CYAN}${BOLD}👉  To get started, launch the Interactive TUI Dashboard:${NC}"
+echo -e "    ${BOLD}./.agents/scripts/helper.sh${NC}"
+echo -e "${BLUE}==========================================================${NC}"
 
 # Save a copy of the bootstrapper inside .agents/ for future updates/resets
 if [ -f "$0" ]; then
