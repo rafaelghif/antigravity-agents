@@ -7,8 +7,8 @@
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: [branch-name]
-- **Last Commit Reference**: [commit-hash]
+- **Active Branch**: main
+- **Last Commit Reference**: fccc369
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -23,9 +23,9 @@
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [/] Scaffold api-rotator skill and implement per-profile log-usage
-- [ ] Update validate.sh Check 9 budget check for per-profile limit
-- [ ] Verify validation and clean workspace
+- [x] Scaffold api-rotator skill and implement per-profile log-usage
+- [x] Update validate.sh Check 9 budget check for per-profile limit
+- [x] Verify validation and clean workspace
 
 ---
 

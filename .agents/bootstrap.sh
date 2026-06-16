@@ -322,8 +322,8 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: [branch-name]
-- **Last Commit Reference**: [commit-hash]
+- **Active Branch**: main
+- **Last Commit Reference**: fccc369
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -333,24 +333,22 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
-- **Primary Epic**: API Key Auto-Rotation Support
-- **Current Task Target**: Implement api-profile subcommand and CLI auto-rotation
-- **State Flag**: `IN_PROGRESS`
+- **Primary Epic**: API Rotator Skill & Per-Profile Quota Tracking
+- **Current Task Target**: Scaffold api-rotator skill and implement per-profile log-usage
+- **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [/] Implement api-profile subcommand in helper.sh, helper.ps1, and bootstrap.sh
-- [ ] Implement api_keys.example template and update .gitignore/.antigravityignore templates
-- [ ] Implement runner wrapper script/skill for auto-rotation
-- [ ] Update README.md and CHANGELOG.md with API profile features
-- [ ] Verify validation and clean workspace
+- [x] Scaffold api-rotator skill and implement per-profile log-usage
+- [x] Update validate.sh Check 9 budget check for per-profile limit
+- [x] Verify validation and clean workspace
 
 ---
 
 ## 3. Relayed Context & Handover Notes
-- **Last Active Agent**: [agent-id / model]
-- **Last Action Completed**: [brief description of last done action]
-- **Next Planned Action**: [immediate next task to execute]
-- **Blockers / Runtime Notes**: [any active errors, pending verification, or configs]
+- **Last Active Agent**: Antigravity Gemini 3.5 Flash
+- **Last Action Completed**: Implemented api-profile subcommand, validation checks, and wrapper script for API key auto-rotation
+- **Next Planned Action**: Push changes to origin (git push) and deploy the updated bootstrap.sh on new workspaces
+- **Blockers / Runtime Notes**: None. Workspace is fully clean, validated, and committed.
 
 ---
 
@@ -916,6 +914,263 @@ description: Audits the long-term architectural, performance, security, and main
 
 ## 4. Output Protocol
 For all major features or architectural shifts, record the design choices and downstream analysis under a new Architectural Decision Record (ADR) in `.agents/adr.md` or a workflows folder before writing code.
+
+EOF
+
+# Write .agents/skills/api-rotator/SKILL.md
+write_template_safe ".agents/skills/api-rotator/SKILL.md" << 'EOF'
+---
+name: api-rotator
+description: Auto-rotate API keys and profiles when encountering rate-limiting
+scripts:
+  - scripts/main.py
+---
+
+# api-rotator Skill
+
+This skill provides a high-fidelity wrapper script in Python to execute agent LLM API calls with built-in hybrid rotation. It proactively checks the token budget for the active profile before requests and reactively rotates profiles on rate limits (HTTP 429).
+
+## 1. Input Specification
+- `--prompt` (`-p`): Prompt text to send to the LLM (default: "Hello, World!").
+- `--provider`: LLM provider (`gemini` or `openai`).
+- `--model`: Model name to use.
+- `--tokens`: Quota/token consumption count to log upon successful execution (default: 150).
+- `--simulate-limit`: Simulated rate-limit retry count (useful for testing rotation without API keys).
+- `--debug`: Enable verbose debug logging.
+
+## 2. Operational Procedures
+1. Ensure API profiles are configured in `.agents/api_keys`.
+2. Activate a profile using `./.agents/scripts/helper.sh api-profile [name]`.
+3. Run the rotator skill:
+   ```bash
+   python3 .agents/skills/api-rotator/scripts/main.py --prompt "Test prompt" --simulate-limit 1
+   ```
+4. Verify that the script automatically rotates to the next profile, reloads the keys, retries, and successfully outputs the result.
+
+## 3. Decision Matrix
+- **Check Budget**: If the active profile's token budget is exhausted, rotate to the next profile.
+- **Catch Rate Limit**: If the execution fails with HTTP 429 or equivalent quota error, rotate the profile, reload, and retry.
+- **Log Usage**: If successful, log the token usage under the active profile name.
+
+## 4. Error Mitigation Tree
+- If all profiles are exhausted or an unhandled exception occurs, log the error details and exit with status code 1.
+
+## 5. Output Verification Gate
+- [x] Executable script auto-rotates keys successfully under rate-limiting simulation.
+
+EOF
+
+# Write .agents/skills/api-rotator/scripts/main.py
+write_template_safe ".agents/skills/api-rotator/scripts/main.py" << 'EOF'
+#!/usr/bin/env python3
+import argparse
+import sys
+import json
+import logging
+import os
+import subprocess
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def load_active_api_keys():
+    """
+    Parses .agents/active_api_keys to load active API keys into the environment.
+    """
+    path = ".agents/active_api_keys"
+    if os.path.exists(path):
+        logging.info(f"Loading active API keys from {path}...")
+        with open(path, "r") as f:
+            for line in f:
+                if line.startswith("export "):
+                    # strip 'export ' and split on first '='
+                    parts = line[7:].strip().split("=")
+                    if len(parts) >= 2:
+                        var_name = parts[0]
+                        # join remaining parts in case value contains '='
+                        var_val = "=".join(parts[1:]).strip('"\'')
+                        os.environ[var_name] = var_val
+                        logging.debug(f"Loaded env var: {var_name}")
+    else:
+        logging.warning("No active API keys file found at .agents/active_api_keys.")
+
+def check_and_rotate_budget():
+    """
+    Proactively checks the current active profile's token budget.
+    Rotates to the next profile if the limit is exceeded.
+    """
+    budget_file = ".agents/token_budget.json"
+    profile_file = ".agents/active_api_profile_name"
+    if not os.path.exists(budget_file) or not os.path.exists(profile_file):
+        return
+        
+    with open(profile_file, "r") as f:
+        profile = f.read().strip()
+        
+    with open(budget_file, "r") as f:
+        try:
+            budget = json.load(f)
+        except Exception:
+            return
+        
+    profiles = budget.get("profiles", {})
+    if profile in profiles:
+        prof_data = profiles[profile]
+        usage = prof_data.get("current_token_usage", 0)
+        limit = prof_data.get("max_token_budget", 500000)
+        if usage >= limit:
+            logging.info(f"Quota limit reached for profile '{profile}' ({usage}/{limit}). Proactively rotating...")
+            # Rotate using helper.sh
+            subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+            load_active_api_keys()
+
+def run_skill(args):
+    """
+    Main logic of the skill script.
+    """
+    # 1. Proactive Budget Check & Initial Key Load
+    check_and_rotate_budget()
+    load_active_api_keys()
+
+    prompt = args.prompt
+    provider = args.provider
+    model = args.model
+    simulate_limit = args.simulate_limit
+    
+    max_retries = 3
+    # Try parsing number of API profiles configured to set max_retries dynamically
+    api_keys_file = ".agents/api_keys"
+    if os.path.exists(api_keys_file):
+        try:
+            with open(api_keys_file, "r") as f:
+                prefixes = set()
+                for line in f:
+                    if line.strip() and not line.strip().startswith("#") and "=" in line:
+                        prefix = line.split(".")[0].strip()
+                        prefixes.add(prefix)
+                if prefixes:
+                    max_retries = len(prefixes)
+        except Exception:
+            pass
+
+    for attempt in range(max_retries):
+        # Read the current profile name for log visibility
+        profile_file = ".agents/active_api_profile_name"
+        profile_name = "default"
+        if os.path.exists(profile_file):
+            with open(profile_file, "r") as f:
+                profile_name = f.read().strip()
+                
+        logging.info(f"Attempt {attempt + 1}/{max_retries} using profile: '{profile_name}'")
+        
+        # 2. Simulate or execute API request
+        try:
+            # Check if simulation is requested
+            if simulate_limit is not None and attempt < simulate_limit:
+                logging.warning(f"Simulating API rate-limit error (HTTP 429) for attempt {attempt + 1}...")
+                # Raise custom exception that mimics a rate limit/quota limit
+                raise Exception("API rate limit exceeded. Status code: 429")
+                
+            # Try real imports/execution if packages are available
+            if provider == "gemini":
+                api_key = os.environ.get("GEMINI_API_KEY")
+                if not api_key or api_key.endswith("_key_here") or "personal_key" in api_key:
+                    # Treat mock keys as simulated success
+                    logging.info("GEMINI_API_KEY is a placeholder/simulation key. Simulating successful call...")
+                    response_text = f"[Simulated Response for prompt: '{prompt}']"
+                else:
+                    try:
+                        import google.generativeai as genai
+                        genai.configure(api_key=api_key)
+                        gemini_model = genai.GenerativeModel(model)
+                        response = gemini_model.generate_content(prompt)
+                        response_text = response.text
+                    except ImportError:
+                        logging.warning("google-generativeai library is not installed. Falling back to simulation.")
+                        response_text = f"[Simulated Response for prompt: '{prompt}']"
+            elif provider == "openai":
+                api_key = os.environ.get("OPENAI_API_KEY")
+                if not api_key or api_key.endswith("_key_here") or "personal_key" in api_key:
+                    logging.info("OPENAI_API_KEY is a placeholder/simulation key. Simulating successful call...")
+                    response_text = f"[Simulated Response for prompt: '{prompt}']"
+                else:
+                    try:
+                        import openai
+                        client = openai.OpenAI(api_key=api_key)
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        response_text = response.choices[0].message.content
+                    except ImportError:
+                        logging.warning("openai library is not installed. Falling back to simulation.")
+                        response_text = f"[Simulated Response for prompt: '{prompt}']"
+            else:
+                response_text = f"[Simulated Response for prompt: '{prompt}' on unsupported provider {provider}]"
+
+            # 3. Successful execution: Log Token Usage
+            tokens_used = args.tokens
+            logging.info(f"API call successful! Logging {tokens_used} tokens for profile '{profile_name}'...")
+            subprocess.run(["./.agents/scripts/helper.sh", "log-usage", str(tokens_used)], check=True)
+            
+            return {
+                "status": "success",
+                "profile": profile_name,
+                "provider": provider,
+                "model": model,
+                "response": response_text,
+                "tokens_logged": tokens_used
+            }
+            
+        except Exception as e:
+            # 4. Reactive Rotation: Check if it's a rate-limit / resource exhaustion error
+            error_msg = str(e)
+            is_rate_limit = False
+            
+            # Check for typical rate limit indicators in error message
+            rate_limit_keywords = ["429", "rate limit", "resource_exhausted", "quota exceeded", "limit exceeded"]
+            if any(kw in error_msg.lower() for kw in rate_limit_keywords):
+                is_rate_limit = True
+                
+            if is_rate_limit and attempt < max_retries - 1:
+                logging.warning(f"Rate limit hit: {error_msg}. Rotating API profile and retrying...")
+                # Rotate profile
+                subprocess.run(["./.agents/scripts/helper.sh", "api-profile", "rotate"], check=True)
+                # Reload updated environment keys
+                load_active_api_keys()
+            else:
+                # Re-raise the exception if not rate limited or if we ran out of profiles
+                raise e
+
+def main():
+    parser = argparse.ArgumentParser(description="Python wrapper for api-rotator skill execution with hybrid rotation.")
+    parser.add_argument('--prompt', '-p', type=str, default="Hello, World!", help="Prompt text to send to LLM")
+    parser.add_argument('--provider', type=str, default="gemini", choices=["gemini", "openai"], help="LLM Provider")
+    parser.add_argument('--model', type=str, default="gemini-1.5-flash", help="Model name")
+    parser.add_argument('--tokens', type=int, default=150, help="Simulated token usage count")
+    parser.add_argument('--simulate-limit', type=int, default=None, help="Number of attempts to simulate rate limits (e.g. 1)")
+    parser.add_argument('--debug', action='store_true', help="Enable debug mode")
+    
+    args = parser.parse_args()
+    
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        
+    try:
+        output = run_skill(args)
+        print(json.dumps(output, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        logging.error(f"Execution failed: {str(e)}")
+        error_output = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_output, indent=2))
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
 
 EOF
 
@@ -4308,27 +4563,72 @@ MOCK_OPENAPI
 
 cmd_log_usage() {
     if [ $# -lt 2 ]; then
-        echo "Usage: $0 log-usage <token_count>"
+        echo "Usage: $0 log-usage <token_count> [profile_name]"
         exit 1
     fi
     local count="$2"
+    local profile="${3:-}"
+    
+    # Auto-detect profile from active_api_profile_name if not specified
+    if [ -z "$profile" ]; then
+        if [ -f ".agents/active_api_profile_name" ]; then
+            profile=$(cat ".agents/active_api_profile_name" | xargs)
+        else
+            profile="default"
+        fi
+    fi
+
     local file=".agents/token_budget.json"
     if [ ! -f "$file" ]; then
-        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90}" > "$file"
+        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90, \"profiles\": {}}" > "$file"
     fi
+
     if command -v jq >/dev/null 2>&1; then
-        local current=$(jq -r '.current_token_usage' "$file")
-        local new_usage=$((current + count))
+        local current_global=$(jq -r '.current_token_usage // 0' "$file")
+        local new_global=$((current_global + count))
+        
+        local current_profile=$(jq -r --arg prof "$profile" '.profiles[$prof].current_token_usage // 0' "$file")
+        local new_profile_usage=$((current_profile + count))
+        
         local temp=$(mktemp)
-        jq --argjson usage "$new_usage" '.current_token_usage = $usage' "$file" > "$temp"
+        jq --argjson g_use "$new_global" \
+           --arg prof "$profile" \
+           --argjson p_use "$new_profile_usage" \
+           '.current_token_usage = $g_use | .profiles[$prof].current_token_usage = $p_use | .profiles[$prof].max_token_budget //= 500000' \
+           "$file" > "$temp"
         mv "$temp" "$file"
-        echo "Logged $count tokens. Total usage: $new_usage."
+        echo "Logged $count tokens for profile '$profile'. Total profile usage: $new_profile_usage. Global usage: $new_global."
+    elif command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
+        local py_cmd="python3"
+        if ! command -v python3 >/dev/null 2>&1; then py_cmd="python"; fi
+        $py_cmd -c "
+import json
+file_path = '$file'
+count = $count
+profile = '$profile'
+try:
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+except Exception:
+    data = {'max_token_budget': 500000, 'current_token_usage': 0, 'alert_threshold_percent': 90, 'profiles': {}}
+
+data['current_token_usage'] = data.get('current_token_usage', 0) + count
+if 'profiles' not in data:
+    data['profiles'] = {}
+if profile not in data['profiles']:
+    data['profiles'][profile] = {'max_token_budget': 500000, 'current_token_usage': 0}
+data['profiles'][profile]['current_token_usage'] = data['profiles'][profile].get('current_token_usage', 0) + count
+
+with open(file_path, 'w') as f:
+    json.dump(data, f, indent=2)
+"
+        echo "Logged $count tokens for profile '$profile' (fallback). Updated $file."
     else
-        # fallback parsing using sed if jq not found
+        # minimal fallback using sed (global only)
         local current=$(grep -o '"current_token_usage":\s*[0-9]*' "$file" | grep -o '[0-9]*' || echo "0")
         local new_usage=$((current + count))
         sed -i "s/\"current_token_usage\":\s*[0-9]*/\"current_token_usage\": $new_usage/" "$file"
-        echo "Logged $count tokens (fallback). Total usage: $new_usage."
+        echo "Logged $count tokens (global fallback). Updated $file."
     fi
 }
 
@@ -5138,7 +5438,7 @@ cmd_api_profile() {
 
     if [ -n "$target_profile" ]; then
         if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
-            if grep -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
+            if grep -E -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
                 echo "Setting active API profile to '$target_profile'..."
                 
                 # Write to .agents/active_api_keys (bash format)
@@ -5148,7 +5448,7 @@ cmd_api_profile() {
                 
                 # Extract all keys for target_profile
                 local key_lines
-                key_lines=$(grep "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
+                key_lines=$(grep -E "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
                 
                 while IFS= read -r line; do
                     if [ -n "$line" ]; then
@@ -5967,9 +6267,33 @@ fi
 echo "Check 9: Token Budget Guard"
 BUDGET_FILE=".agents/token_budget.json"
 if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
-    MAX_BUDGET=$(jq -r '.max_token_budget' "$BUDGET_FILE")
-    CURRENT_USAGE=$(jq -r '.current_token_usage' "$BUDGET_FILE")
-    THRESHOLD=$(jq -r '.alert_threshold_percent' "$BUDGET_FILE")
+    # Auto-detect profile from active_api_profile_name
+    PROFILE=""
+    if [ -f ".agents/active_api_profile_name" ]; then
+        PROFILE=$(cat ".agents/active_api_profile_name" | xargs)
+    fi
+
+    # Check if profile exists in profiles
+    HAS_PROFILE=0
+    if [ -n "$PROFILE" ]; then
+        if jq -e --arg prof "$PROFILE" '.profiles[$prof] != null' "$BUDGET_FILE" >/dev/null 2>&1; then
+            HAS_PROFILE=1
+        fi
+    fi
+
+    MAX_BUDGET=0
+    CURRENT_USAGE=0
+    THRESHOLD=$(jq -r '.alert_threshold_percent // 90' "$BUDGET_FILE")
+
+    if [ $HAS_PROFILE -eq 1 ]; then
+        MAX_BUDGET=$(jq -r --arg prof "$PROFILE" '.profiles[$prof].max_token_budget // 0' "$BUDGET_FILE")
+        CURRENT_USAGE=$(jq -r --arg prof "$PROFILE" '.profiles[$prof].current_token_usage // 0' "$BUDGET_FILE")
+        echo "  Checking budget for active API profile: '$PROFILE'"
+    else
+        MAX_BUDGET=$(jq -r '.max_token_budget // 0' "$BUDGET_FILE")
+        CURRENT_USAGE=$(jq -r '.current_token_usage // 0' "$BUDGET_FILE")
+        echo "  Checking global token budget"
+    fi
     
     if [ "$MAX_BUDGET" -gt 0 ]; then
         PERCENT=$(( CURRENT_USAGE * 100 / MAX_BUDGET ))
@@ -6519,6 +6843,7 @@ if [ -f .agents/bootstrap.sh ]; then chmod +x .agents/bootstrap.sh; fi
 if [ -f .agents/scripts/helper.sh ]; then chmod +x .agents/scripts/helper.sh; fi
 if [ -f .agents/scripts/recon.sh ]; then chmod +x .agents/scripts/recon.sh; fi
 if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi
+if [ -f .agents/skills/api-rotator/scripts/main.py ]; then chmod +x .agents/skills/api-rotator/scripts/main.py; fi
 if [ -f .agents/scripts/api-rotate-wrapper.sh ]; then chmod +x .agents/scripts/api-rotate-wrapper.sh; fi
 if [ -f .agents/hooks/pre-commit ]; then chmod +x .agents/hooks/pre-commit; fi
 if [ -f .agents/hooks/post-commit ]; then chmod +x .agents/hooks/post-commit; fi

@@ -9,6 +9,9 @@ This document tracks all version updates, script refinements, and protocol chang
 - Added `.agents/api_keys.example` template for user API keys setup.
 - Configured Check 12 in `validate.sh` / `validate` to verify API configuration syntax and protect credentials from being committed to Git.
 - Updated `.gitignore` and `.antigravityignore` template rules to automatically exclude API keys and active state files.
+- Added specialized Python `api-rotator` skill (`.agents/skills/api-rotator/`) integrating proactive quota validation and reactive rate-limit retries.
+- Extended token budget tracking to support per-profile quota management inside `.agents/token_budget.json`, integrated with `helper.sh log-usage` and `validate.sh` Check 9.
+
 
 ## [1.7.2] - 2026-06-16
 ### Added

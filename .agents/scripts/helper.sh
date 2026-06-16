@@ -3385,27 +3385,72 @@ MOCK_OPENAPI
 
 cmd_log_usage() {
     if [ $# -lt 2 ]; then
-        echo "Usage: $0 log-usage <token_count>"
+        echo "Usage: $0 log-usage <token_count> [profile_name]"
         exit 1
     fi
     local count="$2"
+    local profile="${3:-}"
+    
+    # Auto-detect profile from active_api_profile_name if not specified
+    if [ -z "$profile" ]; then
+        if [ -f ".agents/active_api_profile_name" ]; then
+            profile=$(cat ".agents/active_api_profile_name" | xargs)
+        else
+            profile="default"
+        fi
+    fi
+
     local file=".agents/token_budget.json"
     if [ ! -f "$file" ]; then
-        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90}" > "$file"
+        echo "{\"max_token_budget\": 500000, \"current_token_usage\": 0, \"alert_threshold_percent\": 90, \"profiles\": {}}" > "$file"
     fi
+
     if command -v jq >/dev/null 2>&1; then
-        local current=$(jq -r '.current_token_usage' "$file")
-        local new_usage=$((current + count))
+        local current_global=$(jq -r '.current_token_usage // 0' "$file")
+        local new_global=$((current_global + count))
+        
+        local current_profile=$(jq -r --arg prof "$profile" '.profiles[$prof].current_token_usage // 0' "$file")
+        local new_profile_usage=$((current_profile + count))
+        
         local temp=$(mktemp)
-        jq --argjson usage "$new_usage" '.current_token_usage = $usage' "$file" > "$temp"
+        jq --argjson g_use "$new_global" \
+           --arg prof "$profile" \
+           --argjson p_use "$new_profile_usage" \
+           '.current_token_usage = $g_use | .profiles[$prof].current_token_usage = $p_use | .profiles[$prof].max_token_budget //= 500000' \
+           "$file" > "$temp"
         mv "$temp" "$file"
-        echo "Logged $count tokens. Total usage: $new_usage."
+        echo "Logged $count tokens for profile '$profile'. Total profile usage: $new_profile_usage. Global usage: $new_global."
+    elif command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1; then
+        local py_cmd="python3"
+        if ! command -v python3 >/dev/null 2>&1; then py_cmd="python"; fi
+        $py_cmd -c "
+import json
+file_path = '$file'
+count = $count
+profile = '$profile'
+try:
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+except Exception:
+    data = {'max_token_budget': 500000, 'current_token_usage': 0, 'alert_threshold_percent': 90, 'profiles': {}}
+
+data['current_token_usage'] = data.get('current_token_usage', 0) + count
+if 'profiles' not in data:
+    data['profiles'] = {}
+if profile not in data['profiles']:
+    data['profiles'][profile] = {'max_token_budget': 500000, 'current_token_usage': 0}
+data['profiles'][profile]['current_token_usage'] = data['profiles'][profile].get('current_token_usage', 0) + count
+
+with open(file_path, 'w') as f:
+    json.dump(data, f, indent=2)
+"
+        echo "Logged $count tokens for profile '$profile' (fallback). Updated $file."
     else
-        # fallback parsing using sed if jq not found
+        # minimal fallback using sed (global only)
         local current=$(grep -o '"current_token_usage":\s*[0-9]*' "$file" | grep -o '[0-9]*' || echo "0")
         local new_usage=$((current + count))
         sed -i "s/\"current_token_usage\":\s*[0-9]*/\"current_token_usage\": $new_usage/" "$file"
-        echo "Logged $count tokens (fallback). Total usage: $new_usage."
+        echo "Logged $count tokens (global fallback). Updated $file."
     fi
 }
 
@@ -4215,7 +4260,7 @@ cmd_api_profile() {
 
     if [ -n "$target_profile" ]; then
         if [ -n "$api_keys_file" ] && [ -f "$api_keys_file" ]; then
-            if grep -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
+            if grep -E -q "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file"; then
                 echo "Setting active API profile to '$target_profile'..."
                 
                 # Write to .agents/active_api_keys (bash format)
@@ -4225,7 +4270,7 @@ cmd_api_profile() {
                 
                 # Extract all keys for target_profile
                 local key_lines
-                key_lines=$(grep "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
+                key_lines=$(grep -E "^${target_profile}\.[A-Z0-9_]+=" "$api_keys_file" || echo "")
                 
                 while IFS= read -r line; do
                     if [ -n "$line" ]; then

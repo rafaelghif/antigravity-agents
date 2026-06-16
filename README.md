@@ -546,6 +546,23 @@ To automatically rotate API keys when encountering rate-limiting (HTTP status co
 ```
 If the command fails due to a rate limit, the wrapper script will automatically rotate to the next configured API key profile and retry the execution.
 
+#### D. Specialized Python Rotator Skill (`api-rotator`)
+For developers writing custom Python agent scripts, the framework provides a native skill at `.agents/skills/api-rotator/scripts/main.py`. This script implements the hybrid rotation design pattern:
+1. **Proactive Quota Checks**: Before making any LLM call, it checks the local `.agents/token_budget.json` profile usage. If the active profile's token usage exceeds its quota, it automatically rotates early.
+2. **Reactive Rate-Limit Retries**: It intercepts `google-generativeai` and `openai` exception objects for HTTP 429/ResourceExhausted errors, rotates key profiles via `api-profile rotate`, and transparently retries.
+3. **Usage Logging**: Upon success, it automatically logs token counts to the active profile under `profiles` inside `token_budget.json`.
+
+**Usage Example (with rate limit simulation for testing):**
+```bash
+python3 .agents/skills/api-rotator/scripts/main.py --prompt "Explain quantum computing" --simulate-limit 1
+```
+
+#### E. Per-Profile Quota & Token Budget Tracking
+The token budget configuration at `.agents/token_budget.json` supports granular profile limits:
+- `helper.sh log-usage <count>` logs token counts to the active API profile (automatically detected from `.agents/active_api_profile_name`).
+- `helper.sh log-usage <count> [profile-name]` logs to a specific profile manually.
+- `validate.sh` Check 9 automatically validates the active profile's quota usage, preventing budget overrun.
+
 ### 4.6 Detailed Helper Command Reference
 
 For users and agents, the helper script supports explicit parameters and flags to run operations in non-interactive, automated, or specific modes:

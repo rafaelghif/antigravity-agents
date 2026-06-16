@@ -240,9 +240,33 @@ fi
 echo "Check 9: Token Budget Guard"
 BUDGET_FILE=".agents/token_budget.json"
 if [ -f "$BUDGET_FILE" ] && command -v jq >/dev/null 2>&1; then
-    MAX_BUDGET=$(jq -r '.max_token_budget' "$BUDGET_FILE")
-    CURRENT_USAGE=$(jq -r '.current_token_usage' "$BUDGET_FILE")
-    THRESHOLD=$(jq -r '.alert_threshold_percent' "$BUDGET_FILE")
+    # Auto-detect profile from active_api_profile_name
+    PROFILE=""
+    if [ -f ".agents/active_api_profile_name" ]; then
+        PROFILE=$(cat ".agents/active_api_profile_name" | xargs)
+    fi
+
+    # Check if profile exists in profiles
+    HAS_PROFILE=0
+    if [ -n "$PROFILE" ]; then
+        if jq -e --arg prof "$PROFILE" '.profiles[$prof] != null' "$BUDGET_FILE" >/dev/null 2>&1; then
+            HAS_PROFILE=1
+        fi
+    fi
+
+    MAX_BUDGET=0
+    CURRENT_USAGE=0
+    THRESHOLD=$(jq -r '.alert_threshold_percent // 90' "$BUDGET_FILE")
+
+    if [ $HAS_PROFILE -eq 1 ]; then
+        MAX_BUDGET=$(jq -r --arg prof "$PROFILE" '.profiles[$prof].max_token_budget // 0' "$BUDGET_FILE")
+        CURRENT_USAGE=$(jq -r --arg prof "$PROFILE" '.profiles[$prof].current_token_usage // 0' "$BUDGET_FILE")
+        echo "  Checking budget for active API profile: '$PROFILE'"
+    else
+        MAX_BUDGET=$(jq -r '.max_token_budget // 0' "$BUDGET_FILE")
+        CURRENT_USAGE=$(jq -r '.current_token_usage // 0' "$BUDGET_FILE")
+        echo "  Checking global token budget"
+    fi
     
     if [ "$MAX_BUDGET" -gt 0 ]; then
         PERCENT=$(( CURRENT_USAGE * 100 / MAX_BUDGET ))

@@ -34,6 +34,8 @@ def compile_bootstrap():
         (".agents/skills/security-ci-audit/SKILL.md", ".agents/skills/security-ci-audit/SKILL.md"),
         (".agents/skills/code-review/SKILL.md", ".agents/skills/code-review/SKILL.md"),
         (".agents/skills/impact-analysis/SKILL.md", ".agents/skills/impact-analysis/SKILL.md"),
+        (".agents/skills/api-rotator/SKILL.md", ".agents/skills/api-rotator/SKILL.md"),
+        (".agents/skills/api-rotator/scripts/main.py", ".agents/skills/api-rotator/scripts/main.py"),
         (".agents/scripts/helper.sh", ".agents/scripts/helper.sh"),
         (".agents/scripts/helper.ps1", ".agents/scripts/helper.ps1"),
         (".agents/scripts/recon.sh", ".agents/scripts/recon.sh"),
@@ -69,9 +71,29 @@ def compile_bootstrap():
             validate_block = match.group(1)
             wrapper_template_block = '\n# Write .agents/scripts/api-rotate-wrapper.sh\nwrite_template_safe ".agents/scripts/api-rotate-wrapper.sh" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
             content = content.replace(validate_block, validate_block + wrapper_template_block)
-        else:
             print("Warning: Could not locate validate.sh block to insert api-rotate-wrapper.sh template.")
             
+    # Check if we need to insert the api-rotator skill blocks into bootstrap.sh first.
+    # It should be written right after impact-analysis/SKILL.md.
+    if 'write_template_safe ".agents/skills/api-rotator/SKILL.md"' not in content:
+        print("Inserting .agents/skills/api-rotator/SKILL.md block template into bootstrap.sh...")
+        impact_pattern = r'(write_template_safe "\.agents/skills/impact-analysis/SKILL\.md" << \'EOF\'\n.*?\nEOF\n)'
+        match = re.search(impact_pattern, content, re.DOTALL)
+        if match:
+            impact_block = match.group(1)
+            api_rotator_block = '\n# Write .agents/skills/api-rotator/SKILL.md\nwrite_template_safe ".agents/skills/api-rotator/SKILL.md" << \'EOF\'\n# PLACEHOLDER\nEOF\n\n# Write .agents/skills/api-rotator/scripts/main.py\nwrite_template_safe ".agents/skills/api-rotator/scripts/main.py" << \'EOF\'\n# PLACEHOLDER\nEOF\n'
+            content = content.replace(impact_block, impact_block + api_rotator_block)
+        else:
+            print("Warning: Could not locate impact-analysis block to insert api-rotator templates.")
+            
+    # Also ensure chmod permissions for the rotator main.py script are added to bootstrap.sh
+    if 'chmod +x .agents/skills/api-rotator/scripts/main.py' not in content:
+        print("Adding chmod +x for api-rotator/scripts/main.py inside bootstrap.sh...")
+        content = content.replace(
+            'if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi',
+            'if [ -f .agents/scripts/validate.sh ]; then chmod +x .agents/scripts/validate.sh; fi\nif [ -f .agents/skills/api-rotator/scripts/main.py ]; then chmod +x .agents/skills/api-rotator/scripts/main.py; fi'
+        )
+
     # Also ensure chmod permissions for the wrapper script are added to bootstrap.sh
     if 'chmod +x .agents/scripts/api-rotate-wrapper.sh' not in content:
         print("Adding chmod +x for api-rotate-wrapper.sh inside bootstrap.sh...")

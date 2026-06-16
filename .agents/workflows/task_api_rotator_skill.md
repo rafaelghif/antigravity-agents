@@ -18,8 +18,8 @@ This document serves as the single source of truth for the design and implementa
 
 ## 2. Implementation Checklist
 
-- [ ] Modify `helper.sh` (and templates in `bootstrap.sh`) to support per-profile tracking in `log-usage`.
-- [ ] Modify `validate.sh` (and templates in `bootstrap.sh`) Check 9 to support per-profile budget checks.
-- [ ] Scaffold `api-rotator` skill under `.agents/skills/api-rotator/` with `SKILL.md` and `scripts/main.py`.
-- [ ] Document the updates in `README.md` and `CHANGELOG.md`.
-- [ ] Verify validation checks pass and commit the final changes.
+- [x] Modify `helper.sh` (and templates in `bootstrap.sh`) to support per-profile tracking in `log-usage`.
+- [x] Modify `validate.sh` (and templates in `bootstrap.sh`) Check 9 to support per-profile budget checks.
+- [x] Scaffold `api-rotator` skill under `.agents/skills/api-rotator/` with `SKILL.md` and `scripts/main.py`.
+- [x] Document the updates in `README.md` and `CHANGELOG.md`.
+- [x] Verify validation checks pass and commit the final changes.
