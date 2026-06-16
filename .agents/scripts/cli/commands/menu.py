@@ -4,6 +4,36 @@ import subprocess
 import shutil
 import utils
 
+# ANSI Color Escape Codes
+C_HEADER = '\033[95m'
+C_BLUE = '\033[94m'
+C_CYAN = '\033[96m'
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_GRAY = '\033[90m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    """Wrap text in ANSI color codes if stdout is a TTY."""
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def get_progress_bar(pct, length=15):
+    """Generate a visual progress bar string."""
+    filled = int(round(length * pct / 100))
+    filled = max(0, min(filled, length))
+    bar = "█" * filled + "░" * (length - filled)
+    
+    # Color the progress bar based on percentage
+    if pct >= 90:
+        return color(bar, C_RED)
+    elif pct >= 75:
+        return color(bar, C_YELLOW)
+    return color(bar, C_GREEN)
+
 def get_git_info():
     """Resolve active branch and local config email."""
     try:
@@ -83,25 +113,22 @@ def run_subcommand(cmd_name, args_list=None):
     
     module_name = cmd_map.get(cmd_name)
     if not module_name:
-        print(f"Error: Unknown subcommand mapping for '{cmd_name}'", file=sys.stderr)
+        print(color(f"Error: Unknown subcommand mapping for '{cmd_name}'", C_RED), file=sys.stderr)
         return False
         
     try:
         # Import the command module dynamically
-        # Ensure 'commands' is in path (should be since helper.py does it)
         cmd_module = __import__(f"commands.{module_name}", fromlist=[module_name])
         # Execute the run function
         cmd_module.run([cmd_name] + args_list)
         return True
     except SystemExit as e:
         if e.code != 0:
-            print(f"\n[INFO] Command '{cmd_name}' finished with exit code {e.code}")
+            print(color(f"\n[INFO] Command '{cmd_name}' finished with exit code {e.code}", C_YELLOW))
             return False
         return True
     except Exception as e:
-        print(f"\n[ERROR] Failed to execute '{cmd_name}': {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+        print(color(f"\n[ERROR] Failed to execute '{cmd_name}': {e}", C_RED), file=sys.stderr)
         return False
 
 def show_git_profile_menu():
@@ -125,19 +152,19 @@ def show_git_profile_menu():
                     
     keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
     
-    print("\n--- Git Profile Options ---")
+    print(color("\n--- 👥 Git Identity Profiles ---", C_BOLD + C_CYAN))
     for i, k in enumerate(keys):
         p_n = config[f"{k}.name"]
         p_e = config.get(f"{k}.email", "")
-        print(f"  [{i+1}] Switch to Profile '{k}': \"{p_n}\" <{p_e}>")
+        print(f"  [{color(str(i+1), C_GREEN)}] Switch to {color(k, C_BOLD)}: \"{p_n}\" <{p_e}>")
     
     offset = len(keys)
-    print(f"  [{offset+1}] Rotate Profile (round-robin)")
-    print(f"  [{offset+2}] Configure manual user.name and user.email")
-    print("  [0] Cancel")
+    print(f"  [{color(str(offset+1), C_GREEN)}] Rotate Profiles (round-robin)")
+    print(f"  [{color(str(offset+2), C_GREEN)}] Manually enter new Name & Email")
+    print(f"  [{color('0', C_YELLOW)}] Cancel")
     
     try:
-        val = input("\nSelect choice: ").strip()
+        val = input(color("\nSelect choice: ", C_BOLD)).strip()
         if not val or val == "0":
             return
             
@@ -153,9 +180,9 @@ def show_git_profile_menu():
             if name and email:
                 run_subcommand("git-profile", [name, email])
             else:
-                print("Error: name and email cannot be empty.")
+                print(color("Error: name and email cannot be empty.", C_RED))
     except ValueError:
-        print("Invalid choice.")
+        print(color("Invalid choice.", C_RED))
     except KeyboardInterrupt:
         print("\nCancelled.")
 
@@ -179,17 +206,17 @@ def show_api_profile_menu():
                     
     profiles_list = sorted(list(set(k.split('.')[0] for k in config.keys() if '.' in k)))
     
-    print("\n--- API Keys Profile Options ---")
+    print(color("\n--- 🔑 API Provider Key Profiles ---", C_BOLD + C_CYAN))
     for i, p in enumerate(profiles_list):
         keys = [k.split('.', 1)[1] for k in config.keys() if k.startswith(f"{p}.")]
-        print(f"  [{i+1}] Switch to Profile '{p}' ({' '.join(keys)})")
+        print(f"  [{color(str(i+1), C_GREEN)}] Switch to {color(p, C_BOLD)} ({', '.join(keys)})")
         
     offset = len(profiles_list)
-    print(f"  [{offset+1}] Rotate Active API Profile")
-    print("  [0] Cancel")
+    print(f"  [{color(str(offset+1), C_GREEN)}] Rotate Active API Profiles")
+    print(f"  [{color('0', C_YELLOW)}] Cancel")
     
     try:
-        val = input("\nSelect choice: ").strip()
+        val = input(color("\nSelect choice: ", C_BOLD)).strip()
         if not val or val == "0":
             return
             
@@ -200,7 +227,7 @@ def show_api_profile_menu():
         elif choice == offset + 1:
             run_subcommand("api-profile", ["rotate"])
     except ValueError:
-        print("Invalid choice.")
+        print(color("Invalid choice.", C_RED))
     except KeyboardInterrupt:
         print("\nCancelled.")
 
@@ -211,39 +238,58 @@ def run(args):
         api_profile = get_active_api_profile()
         locks = get_active_locks()
         
-        print("\n==========================================================")
-        print("   🚀 Antigravity Agent Core - Interactive Dashboard 🚀   ")
-        print("==========================================================")
-        print(f"  Branch:  {branch:<15} |  API Profile: {api_profile}")
-        print(f"  Email:   {email:<15} |  Active Locks: {', '.join(locks) if locks else 'None'}")
-        print("==========================================================")
+        # Load token budget statistics
+        budget = utils.load_budget()
+        global_usage = budget.get("current_token_usage", 0)
+        global_limit = budget.get("max_token_budget", 500000)
+        pct = (global_usage / global_limit) * 100 if global_limit > 0 else 0
+        bar = get_progress_bar(pct, length=12)
         
-        print("\n  --- Daily Development ---")
-        print("  [1] Lock a module for editing (lock)")
-        print("  [2] Unlock a module (unlock)")
-        print("  [3] Commit changes safely (commit)")
-        print("  [4] Securely push branch to remote (push)")
+        # Draw Beautiful Card Header
+        print("\n" + color("+" + "="*58 + "+", C_BLUE))
+        print(color("|", C_BLUE) + color(f"   🚀  ANTIGRAVITY AGENT WORKSPACE CONTROL PANEL   ", C_BOLD + C_HEADER) + " "*7 + color("|", C_BLUE))
+        print(color("+" + "="*58 + "+", C_BLUE))
         
-        print("\n  --- Diagnostics & Audits ---")
-        print("  [5] Run Health Diagnostics (doctor)")
-        print("  [6] Validate compliance checks (validate)")
+        branch_colored = color(branch, C_GREEN if branch != "unknown" else C_GRAY)
+        email_colored = color(email, C_CYAN if email != "not set" else C_GRAY)
+        api_profile_colored = color(api_profile, C_GREEN)
         
-        print("\n  --- Configurations & Profiles ---")
-        print("  [7] Switch/Rotate Git config profile (git-profile)")
-        print("  [8] Switch/Rotate API key profile (api-profile)")
-        print("  [9] Interactive guided ADR Wizard (adr-wizard)")
+        if locks:
+            locks_colored = color(f"⚠️  Locked: {', '.join(locks)}", C_YELLOW)
+        else:
+            locks_colored = color("🔓 Open", C_GREEN)
+            
+        print(f"  Branch:      {branch_colored:<25} |  API Profile:  {api_profile_colored}")
+        print(f"  Git Email:   {email_colored:<25} |  Locks:        {locks_colored}")
+        print(f"  Token Limit: {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
+        print(color("+" + "-"*58 + "+", C_BLUE))
         
-        print("\n  --- Workspace Utilities ---")
-        print("  [10] View step-by-step Onboarding Tutorial (guide)")
-        print("  [11] Purge Workspace / Clean up (clean)")
-        print("  [12] Archive completed checklists (archive)")
-        print("  [13] Codebase Stack Discovery (recon)")
+        print(color("\n  --- 🛠️  DAILY DEVELOPMENT ---", C_BOLD + C_BLUE))
+        print(f"  [{color('1', C_GREEN)}] 🔒 Lock a folder for editing (prevent parallel edits)")
+        print(f"  [{color('2', C_GREEN)}] 🔓 Unlock a folder (make it available again)")
+        print(f"  [{color('3', C_GREEN)}] 💾 Save & Commit changes (auto-rotates Git profiles + checks)")
+        print(f"  [{color('4', C_GREEN)}] 🚀 Push to Git Repository (runs security checks + pushes)")
         
-        print("\n  [0] Exit Menu")
-        print("==========================================================")
+        print(color("\n  --- 🩺 DIAGNOSTICS & SECURITY ---", C_BOLD + C_BLUE))
+        print(f"  [{color('5', C_GREEN)}] 🩺 Run Doctor Health diagnostics (checks hooks & permissions)")
+        print(f"  [{color('6', C_GREEN)}] 🛡️  Validate Compliance (scan for secrets, budget & rules)")
+        
+        print(color("\n  --- ⚙️  CONFIGURATIONS & PROFILES ---", C_BOLD + C_BLUE))
+        print(f"  [{color('7', C_GREEN)}] 👤 Switch/Rotate local Git identity profiles")
+        print(f"  [{color('8', C_GREEN)}] 🔑 Switch/Rotate API key credentials profiles")
+        print(f"  [{color('9', C_GREEN)}] 📝 Run guided ADR Wizard (document architectural decisions)")
+        
+        print(color("\n  --- 📚 UTILITIES & HELP ---", C_BOLD + C_BLUE))
+        print(f"  [{color('10', C_GREEN)}] 📖 View Step-by-Step Onboarding Tutorial")
+        print(f"  [{color('11', C_GREEN)}] 🧹 Clean Workspace (prepare repo for a clean public clone)")
+        print(f"  [{color('12', C_GREEN)}] 📦 Archive sprint checkpoints (prevents memory merge conflicts)")
+        print(f"  [{color('13', C_GREEN)}] 🔍 Scan codebase tech-stack topology")
+        
+        print(color(f"\n  [{color('0', C_YELLOW)}] Exit Dashboard", C_BOLD))
+        print(color("+" + "="*58 + "+", C_BLUE))
         
         try:
-            choice = input("Select choice [0-13]: ").strip()
+            choice = input(color("Select choice [0-13]: ", C_BOLD)).strip()
         except (KeyboardInterrupt, EOFError):
             print("\nExiting.")
             break
@@ -252,38 +298,38 @@ def run(args):
             print("Goodbye!")
             break
         elif choice == "1":
-            module = input("Enter module name to lock (e.g. core, auth, apps/backend) or [0] to cancel: ").strip()
+            module = input("\nEnter folder/module name to lock (e.g. core, auth, apps/backend) or [0] to cancel: ").strip()
             if module and module != "0":
                 run_subcommand("lock", [module])
         elif choice == "2":
             active_locks = get_active_locks()
             if not active_locks:
-                print("\n[INFO] No active locks found to unlock.")
+                print(color("\n[INFO] No active locks found.", C_CYAN))
                 input("\nPress Enter to continue...")
                 continue
                 
-            print("\n--- Active Module Locks ---")
+            print(color("\n--- Active Module Locks ---", C_BOLD + C_CYAN))
             for i, lock in enumerate(active_locks):
-                print(f"  [{i+1}] Unlock '{lock}'")
-            print("  [0] Cancel")
+                print(f"  [{color(str(i+1), C_GREEN)}] Unlock '{color(lock, C_BOLD)}'")
+            print(f"  [{color('0', C_YELLOW)}] Cancel")
             
             try:
-                sel = input("\nSelect lock to release: ").strip()
+                sel = input(color("\nSelect lock to release: ", C_BOLD)).strip()
                 if sel and sel != "0":
                     idx = int(sel) - 1
                     if 0 <= idx < len(active_locks):
                         run_subcommand("unlock", [active_locks[idx]])
             except ValueError:
-                print("Invalid choice.")
+                print(color("Invalid choice.", C_RED))
         elif choice == "3":
             run_subcommand("commit")
         elif choice == "4":
-            print("\n--- Push Options ---")
-            print("  [1] Secure push (runs validation, rotates SSH key) [Recommended]")
-            print("  [2] Force push securely (--force)")
-            print("  [3] Skip validation checks (--no-validate)")
-            print("  [0] Cancel")
-            push_sel = input("\nSelect push action: ").strip()
+            print(color("\n--- Secure Push Actions ---", C_BOLD + C_CYAN))
+            print(f"  [{color('1', C_GREEN)}] Standard push (runs validation, rotates SSH key) [Recommended]")
+            print(f"  [{color('2', C_GREEN)}] Force push (--force)")
+            print(f"  [{color('3', C_GREEN)}] Skip validation checks (--no-validate)")
+            print(f"  [{color('0', C_YELLOW)}] Cancel")
+            push_sel = input(color("\nSelect push action: ", C_BOLD)).strip()
             if push_sel == "1":
                 run_subcommand("push")
             elif push_sel == "2":
@@ -306,10 +352,10 @@ def run(args):
             run_subcommand("guide")
             input("\nPress Enter to return to menu...")
         elif choice == "11":
-            print("\n⚠️  WARNING: Workspace Clean-up")
+            print(color("\n⚠️  WARNING: Workspace Clean-up", C_YELLOW + C_BOLD))
             print("This will delete active lock files, sprint archives, and reset")
             print("token budgets and active API configuration keys.")
-            confirm = input("Are you sure you want to clean the workspace? (y/N): ").strip().lower()
+            confirm = input(color("Are you sure you want to clean the workspace? (y/N): ", C_BOLD)).strip().lower()
             if confirm in ("y", "yes"):
                 run_subcommand("clean")
                 input("\nPress Enter to return to menu...")
@@ -320,7 +366,6 @@ def run(args):
             run_subcommand("recon")
             input("\nPress Enter to return to menu...")
         else:
-            print("Invalid selection. Please enter a number from 0 to 13.")
+            print(color("Invalid selection. Please enter a number from 0 to 13.", C_RED))
             
-        # Add a small separator line between loop cycles
-        print("\n" + "-" * 58)
+        print("\n" + color("-" * 60, C_BLUE))

@@ -8,12 +8,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import commands.menu as menu
 
 class TestMenuCommand(unittest.TestCase):
+    @patch('sys.stdout.isatty', return_value=False)
     @patch('commands.menu.get_git_info')
     @patch('commands.menu.get_active_api_profile')
     @patch('commands.menu.get_active_locks')
     @patch('commands.menu.run_subcommand')
     @patch('builtins.input')
-    def test_menu_exit(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info):
+    def test_menu_exit(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info, mock_isatty):
         # Setup mocks
         mock_get_git_info.return_value = ("main", "user@example.com")
         mock_get_active_api_profile.return_value = "work"
@@ -28,12 +29,13 @@ class TestMenuCommand(unittest.TestCase):
         mock_input.assert_called_once_with("Select choice [0-13]: ")
         mock_run_subcommand.assert_not_called()
 
+    @patch('sys.stdout.isatty', return_value=False)
     @patch('commands.menu.get_git_info')
     @patch('commands.menu.get_active_api_profile')
     @patch('commands.menu.get_active_locks')
     @patch('commands.menu.run_subcommand')
     @patch('builtins.input')
-    def test_menu_doctor_then_exit(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info):
+    def test_menu_doctor_then_exit(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info, mock_isatty):
         mock_get_git_info.return_value = ("main", "user@example.com")
         mock_get_active_api_profile.return_value = "work"
         mock_get_active_locks.return_value = []
@@ -46,12 +48,13 @@ class TestMenuCommand(unittest.TestCase):
         # doctor should be called
         mock_run_subcommand.assert_any_call("doctor")
 
+    @patch('sys.stdout.isatty', return_value=False)
     @patch('commands.menu.get_git_info')
     @patch('commands.menu.get_active_api_profile')
     @patch('commands.menu.get_active_locks')
     @patch('commands.menu.run_subcommand')
     @patch('builtins.input')
-    def test_menu_lock_unlock(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info):
+    def test_menu_lock_unlock(self, mock_input, mock_run_subcommand, mock_get_active_locks, mock_get_active_api_profile, mock_get_git_info, mock_isatty):
         mock_get_git_info.return_value = ("main", "user@example.com")
         mock_get_active_api_profile.return_value = "work"
         mock_get_active_locks.side_effect = [
