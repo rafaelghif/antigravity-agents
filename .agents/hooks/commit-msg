@@ -13,7 +13,7 @@ if [ -z "$commit_msg" ] || [[ "$commit_msg" =~ ^Merge\ branch ]] || [[ "$commit_
 fi
 
 # Conventional Commits regex: type(scope): description
-convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\-\/]+\))?: .+$"
+convention_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\([A-Za-z0-9_\/-]+\))?: .+$"
 
 if ! echo "$commit_msg" | grep -E -q "$convention_regex"; then
     echo "==========================================================" >&2
