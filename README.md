@@ -88,7 +88,7 @@ If you are a developer, you only need to know these daily essentials:
   ```bash
   ./.agents/scripts/helper.sh issue <list/create/view/close/checkout/merge>
   ```
-  *(checkout auto-creates feature branches; merge runs validation, commits, and merges into main)*
+  *(checkout auto-creates feature branches; merge runs validation, commits, and merges into main; supports optional GitHub Issues synchronization if `github_token` is present in active Git profiles)*
 - **Verify Compliance Manual Check**:
   ```bash
   ./.agents/scripts/helper.sh validate
