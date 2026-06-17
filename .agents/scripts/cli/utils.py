@@ -21,12 +21,70 @@ def find_workspace_root():
 def get_agents_dir():
     return os.path.join(find_workspace_root(), '.agents')
 
+def get_sh_executable():
+    """
+    Locates the 'sh' executable on Windows systems by checking PATH,
+    auto-discovering via Git exec-path, and checking common paths.
+    Returns 'sh' as a fallback or for non-Windows platforms.
+    """
+    import shutil
+    import subprocess
+    
+    if os.name != 'nt':
+        return 'sh'
+        
+    # 1. Check if 'sh' is already in PATH
+    sh_path = shutil.which('sh')
+    if sh_path:
+        return sh_path
+        
+    # 2. Query Git exec-path to locate the Git root directory
+    try:
+        git_exec = subprocess.check_output(
+            ["git", "--exec-path"], 
+            stderr=subprocess.DEVNULL, 
+            text=True
+        ).strip()
+        if git_exec:
+            # git_exec is usually: C:\Program Files\Git\mingw64\libexec\git-core
+            # We want to walk up to C:\Program Files\Git\
+            git_exec_norm = os.path.normpath(git_exec)
+            git_root = git_exec_norm
+            for _ in range(3):
+                git_root = os.path.dirname(git_root)
+            
+            # Check common subdirectories under Git root
+            candidates = [
+                os.path.join(git_root, 'bin', 'sh.exe'),
+                os.path.join(git_root, 'usr', 'bin', 'sh.exe'),
+            ]
+            for candidate in candidates:
+                if os.path.exists(candidate):
+                    return candidate
+    except Exception:
+        pass
+        
+    # 3. Check hardcoded common installation paths on Windows
+    common_paths = [
+        r"C:\Program Files\Git\bin\sh.exe",
+        r"C:\Program Files\Git\usr\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\usr\bin\sh.exe",
+    ]
+    for path in common_paths:
+        if os.path.exists(path):
+            return path
+            
+    # 4. Fallback
+    return 'sh'
+
 def run_shell_script(script_path, args=None):
     import subprocess
     if args is None:
         args = []
     if os.name == 'nt':
-        return subprocess.run(['sh', script_path] + args)
+        sh_exe = get_sh_executable()
+        return subprocess.run([sh_exe, script_path] + args)
     else:
         return subprocess.run([script_path] + args)
 

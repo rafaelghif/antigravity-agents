@@ -19,12 +19,14 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
+- **Current Task Target**: Resolve issue #1: Fix Windows shell script execution compatibility
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Configure workspace rules and verify stack
-- [x] Run health check doctor
+- [x] Implement get_sh_executable and run_shell_script in utils.py
+- [x] Update test_rotation.py to use utils.get_sh_executable
+- [x] Update push.py, migrate.py, and skills.py to use the robust execution helpers
+
 
 ---
 

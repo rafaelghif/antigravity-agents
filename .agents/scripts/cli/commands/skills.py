@@ -145,8 +145,9 @@ class TestSkill{camel_name}(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
         
-        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, script_path, "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
+
         self.assertIn("Default Python script for agent skill {name}", proc.stdout)
 
 if __name__ == '__main__':

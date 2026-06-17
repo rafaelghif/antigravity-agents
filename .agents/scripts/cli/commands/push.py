@@ -32,8 +32,9 @@ def run(args):
         validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
         if os.path.exists(validate_sh):
             print("Running workspace validation...")
-            proc = subprocess.run([validate_sh])
+            proc = utils.run_shell_script(validate_sh)
             if proc.returncode != 0:
+
                 print("Error: Workspace validation failed. Push aborted.", file=sys.stderr)
                 sys.exit(proc.returncode)
         else:

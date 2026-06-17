@@ -381,12 +381,13 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
-- **State Flag**: `COMPLETED`
+- **Current Task Target**: Resolve issue #1: Fix Windows shell script execution compatibility
+- **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
-- [x] Configure workspace rules and verify stack
-- [x] Run health check doctor
+- [x] Implement get_sh_executable and run_shell_script in utils.py
+- [x] Update test_rotation.py to use utils.get_sh_executable
+- [/] Update push.py, migrate.py, and skills.py to use the robust execution helpers
 
 ---
 
@@ -599,16 +600,20 @@ work.name=Developer Work Name
 work.email=work@company.com
 # Optional: Add SSH key path to automatically rotate SSH authentication for Git operations
 # work.ssh_key=~/.ssh/id_rsa_work
+# Optional: Add GitHub Personal Access Token (PAT) for automated GitHub Issues synchronization
+# work.github_token=ghp_xxxxxxxxxxxxxxxxxxxx
 
 # Profile 2 (e.g. Personal account)
 personal.name=Developer Personal Name
 personal.email=personal@gmail.com
 # personal.ssh_key=~/.ssh/id_rsa_personal
+# personal.github_token=ghp_yyyyyyyyyyyyyyyyyyyy
 
 # Profile 3 (e.g. Side project / alternative account)
 sideproject.name=Side Project Name
 sideproject.email=side@project.com
 # sideproject.ssh_key=~/.ssh/id_rsa_side
+# sideproject.github_token=ghp_zzzzzzzzzzzzzzzzzzzz
 
 EOF
 
@@ -1840,8 +1845,9 @@ class TestSkill{camel_name}(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
         
-        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, script_path, "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
+
         self.assertIn("Default Python script for agent skill {name}", proc.stdout)
 
 if __name__ == '__main__':
@@ -2339,8 +2345,9 @@ def run(args):
         validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
         if os.path.exists(validate_sh):
             print("Running workspace validation...")
-            proc = subprocess.run([validate_sh])
+            proc = utils.run_shell_script(validate_sh)
             if proc.returncode != 0:
+
                 print("Error: Workspace validation failed. Push aborted.", file=sys.stderr)
                 sys.exit(proc.returncode)
         else:
@@ -2594,7 +2601,8 @@ def run(args):
     print("Running autonomous stack reconstruction...")
     recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
     if os.path.exists(recon_sh):
-        subprocess.run([recon_sh, "-f"])
+        utils.run_shell_script(recon_sh, ["-f"])
+
         
     print("==========================================================")
     print("Migration Complete! Workspace successfully upgraded.")
@@ -5632,12 +5640,70 @@ def find_workspace_root():
 def get_agents_dir():
     return os.path.join(find_workspace_root(), '.agents')
 
+def get_sh_executable():
+    """
+    Locates the 'sh' executable on Windows systems by checking PATH,
+    auto-discovering via Git exec-path, and checking common paths.
+    Returns 'sh' as a fallback or for non-Windows platforms.
+    """
+    import shutil
+    import subprocess
+    
+    if os.name != 'nt':
+        return 'sh'
+        
+    # 1. Check if 'sh' is already in PATH
+    sh_path = shutil.which('sh')
+    if sh_path:
+        return sh_path
+        
+    # 2. Query Git exec-path to locate the Git root directory
+    try:
+        git_exec = subprocess.check_output(
+            ["git", "--exec-path"], 
+            stderr=subprocess.DEVNULL, 
+            text=True
+        ).strip()
+        if git_exec:
+            # git_exec is usually: C:\Program Files\Git\mingw64\libexec\git-core
+            # We want to walk up to C:\Program Files\Git\
+            git_exec_norm = os.path.normpath(git_exec)
+            git_root = git_exec_norm
+            for _ in range(3):
+                git_root = os.path.dirname(git_root)
+            
+            # Check common subdirectories under Git root
+            candidates = [
+                os.path.join(git_root, 'bin', 'sh.exe'),
+                os.path.join(git_root, 'usr', 'bin', 'sh.exe'),
+            ]
+            for candidate in candidates:
+                if os.path.exists(candidate):
+                    return candidate
+    except Exception:
+        pass
+        
+    # 3. Check hardcoded common installation paths on Windows
+    common_paths = [
+        r"C:\Program Files\Git\bin\sh.exe",
+        r"C:\Program Files\Git\usr\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\usr\bin\sh.exe",
+    ]
+    for path in common_paths:
+        if os.path.exists(path):
+            return path
+            
+    # 4. Fallback
+    return 'sh'
+
 def run_shell_script(script_path, args=None):
     import subprocess
     if args is None:
         args = []
     if os.name == 'nt':
-        return subprocess.run(['sh', script_path] + args)
+        sh_exe = get_sh_executable()
+        return subprocess.run([sh_exe, script_path] + args)
     else:
         return subprocess.run([script_path] + args)
 
