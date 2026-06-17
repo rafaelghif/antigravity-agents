@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Strict Issue-Driven Validation check in `validate.sh` (Check 16) enforcing frontmatter schema format and status compliance for local workspace issues.
 - Added rules guidelines for Strict Issue Alignment in `AGENTS.md` and `.agents/rules/project_rules.md` requiring agents to map active development tasks 1-to-1 with local issues.
 - Optional GitHub, GitLab, and Gitea Issues synchronization support inside the local `issue` command, automatically creating and closing corresponding issues when `github_token`, `gitlab_token`, or `gitea_token` is defined in the active Git profile.
+- Reimplemented the monolithic Bash-based workspace validator (`validate.sh`) as a pure-Python validation suite in `validate.py` to remove dependencies on grep, sed, find, and `sh.exe`, making it fully native on Windows.
+- Created `tests/test_validate_command.py` unit test suite to test successful and degraded python validation execution modes.
+- Refactored Git hooks (`pre-commit` and `post-commit`) to execute the Python validation script directly when Python is available.
 
 
 ### Changed

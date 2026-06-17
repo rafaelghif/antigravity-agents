@@ -3,8 +3,22 @@
 # Git pre-commit hook: Auto-run validations and tests
 set -e
 
-if [ -f .agents/scripts/validate.sh ]; then
-    echo "Running workspace validation checks..."
+if python3 -c "import sys" 2>/dev/null; then
+    PYTHON_CMD="python3"
+elif python -c "import sys; sys.exit(0 if sys.version_info[0] == 3 else 1)" 2>/dev/null; then
+    PYTHON_CMD="python"
+else
+    PYTHON_CMD=""
+fi
+
+if [ -n "$PYTHON_CMD" ] && [ -f .agents/scripts/cli/helper.py ]; then
+    echo "Running workspace validation checks (via Python)..."
+    if ! "$PYTHON_CMD" .agents/scripts/cli/helper.py validate; then
+        echo "Error: Workspace validation failed! Aborting commit." >&2
+        exit 1
+    fi
+elif [ -f .agents/scripts/validate.sh ]; then
+    echo "Running workspace validation checks (via Bash fallback)..."
     if ! .agents/scripts/validate.sh; then
         echo "Error: Workspace validation failed! Aborting commit." >&2
         exit 1
