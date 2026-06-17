@@ -180,12 +180,21 @@ def run(args):
         if profile_keys:
             try:
                 last_email = subprocess.check_output(
-                    ["git", "log", "-n", 1, "--format=%ae"], 
+                    ["git", "config", "user.email"],
                     stderr=subprocess.DEVNULL
                 ).decode().strip()
             except:
                 last_email = ""
                 
+            if not last_email:
+                try:
+                    last_email = subprocess.check_output(
+                        ["git", "log", "-n", 1, "--format=%ae"], 
+                        stderr=subprocess.DEVNULL
+                    ).decode().strip()
+                except:
+                    last_email = ""
+                    
             selected_idx = 0
             for i, pk in enumerate(profile_keys):
                 if profiles[pk].get("email") == last_email:

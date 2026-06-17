@@ -90,7 +90,8 @@ class TestMenuCommand(unittest.TestCase):
         with open(profiles_file, 'w', encoding='utf-8') as f:
             f.write("work.name=Alice Dev\nwork.email=alice@company.com\nwork.github_token=gh_val\nwork.gitlab_token=gl_val\n")
             
-        with patch('utils.get_agents_dir', return_value=test_dir):
+        with patch('utils.get_agents_dir', return_value=test_dir), \
+             patch('subprocess.check_output', return_value=b"Local Developer"):
             p_name, git_name, gh, gl, gt = menu.get_active_git_profile_details("alice@company.com")
             self.assertEqual(p_name, "work")
             self.assertEqual(git_name, "Alice Dev")
