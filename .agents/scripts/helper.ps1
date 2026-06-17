@@ -1,10 +1,10 @@
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$helperPy = Join-Path $scriptPath "cli" "helper.py"
+$helperPy = Join-Path (Join-Path $scriptPath "cli") "helper.py"
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent $scriptPath)
-$venvPython1 = Join-Path $projectRoot ".venv" "Scripts" "python.exe"
-$venvPython2 = Join-Path $projectRoot ".venv" "bin" "python"
-$venvPython3 = Join-Path $projectRoot ".venv" "bin" "python3"
+$venvPython1 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "Scripts") "python.exe"
+$venvPython2 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "bin") "python"
+$venvPython3 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "bin") "python3"
 
 $pyCmd = ""
 if (Test-Path $venvPython1) {
@@ -14,18 +14,17 @@ if (Test-Path $venvPython1) {
 } elseif (Test-Path $venvPython3) {
     $pyCmd = $venvPython3
 } else {
-    # Fallback to system Python
-    if (Get-Command python3 -ErrorAction SilentlyContinue) {
-        $pyCmd = "python3"
-    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
-        $pyVersion = & python -c 'import sys; print(sys.version_info[0])' 2>$null
-        if ($pyVersion -eq "3") {
-            $pyCmd = "python"
-        } else {
-            Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
-            exit 1
+    # Fallback to system Python, testing each command to ensure it's a real Python 3
+    foreach ($cmd in @("python", "python3")) {
+        if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+            $pyVersion = & $cmd -c 'import sys; print(sys.version_info[0])' 2>$null
+            if ($pyVersion -eq "3") {
+                $pyCmd = $cmd
+                break
+            }
         }
-    } else {
+    }
+    if (-not $pyCmd) {
         Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
         exit 1
     }
