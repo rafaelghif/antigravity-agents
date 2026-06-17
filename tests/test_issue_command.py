@@ -133,7 +133,8 @@ class TestIssueCommand(unittest.TestCase):
         
         # Verify git checkout main and git merge issue-1-fix-login were called
         mock_run.assert_any_call(["git", "checkout", "main"])
-        mock_run.assert_any_call(["git", "merge", "issue-1-fix-login", "--no-ff", "-m", "merge branch 'issue-1-fix-login' into 'main'"])
+        import unittest.mock
+        mock_run.assert_any_call(["git", "merge", "issue-1-fix-login", "--no-ff", "-m", "merge(main): branch 'issue-1-fix-login' into 'main'"], env=unittest.mock.ANY)
 
     @patch('subprocess.check_output')
     def test_provider_detection(self, mock_check_output):

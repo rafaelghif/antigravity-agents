@@ -7,8 +7,8 @@
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: issue-13-implement-shell-script-safety-improvements
-- **Last Commit Reference**: b30599b
+- **Active Branch**: issue-14-fix-git-profile-rotation-sequence-bug
+- **Last Commit Reference**: 2c7c681
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -19,10 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #13: Implement shell script safety improvements
+- **Current Task Target**: Resolve issue #14: Fix Git profile rotation sequence bug
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
+- [x] Resolve issue #14: Fix Git profile rotation sequence bug
 - [x] Resolve issue #13: Implement shell script safety improvements
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor

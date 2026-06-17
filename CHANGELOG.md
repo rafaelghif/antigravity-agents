@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git & GitHub CLI Operational Guidelines compliance checks (Check 20: Staging Discipline, Check 21: Protected Branches Guard, Check 22: Git Environment Compliance Audit, Check 23: GitHub CLI Auth Verification) in `validate.py` and `validate.sh`.
 - Updated `README.md` to reflect the 23 comprehensive compliance checks.
 
+### Fixed
+- Fixed Git profile rotation sequence bug in `git-profile` and `commit` subcommands to check the currently configured `user.email` first before falling back to `git log` metadata.
+- Updated outdated git merge message assertion in `tests/test_issue_command.py` and mocked git user.name config in `tests/test_menu_command.py`.
+- Added unit test coverage for Git profile rotation in `tests/test_git_profile_command.py`.
+
 ### Removed
 - Removed the `.kimchi` directory and its operational guidelines documentation.
 

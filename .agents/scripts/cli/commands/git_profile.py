@@ -42,11 +42,20 @@ def run(args):
             if keys:
                 try:
                     last_email = subprocess.check_output(
-                        ["git", "log", "-n", "1", "--format=%ae"],
+                        ["git", "config", "user.email"],
                         stderr=subprocess.DEVNULL
                     ).decode().strip()
                 except:
                     last_email = ""
+                    
+                if not last_email:
+                    try:
+                        last_email = subprocess.check_output(
+                            ["git", "log", "-n", "1", "--format=%ae"],
+                            stderr=subprocess.DEVNULL
+                        ).decode().strip()
+                    except:
+                        last_email = ""
                     
                 selected_idx = 0
                 for i, k in enumerate(keys):
