@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reimplemented the monolithic Bash-based workspace validator (`validate.sh`) as a pure-Python validation suite in `validate.py` to remove dependencies on grep, sed, find, and `sh.exe`, making it fully native on Windows.
 - Created `tests/test_validate_command.py` unit test suite to test successful and degraded python validation execution modes.
 - Refactored Git hooks (`pre-commit` and `post-commit`) to execute the Python validation script directly when Python is available.
+- Created a comprehensive layman-friendly User Guide & Onboarding Manual (docs/user_guide.md) explaining setup, authentication workflows, keyring silent login, SSH OAuth loops, prompting guidelines, and auto-rotation mechanisms.
 
 
 ### Changed

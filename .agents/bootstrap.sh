@@ -381,7 +381,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #5: Document Antigravity CLI Authentication and Onboarding Integration
+- **Current Task Target**: Resolve issue #6: Create comprehensive layman-friendly User Guide
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
@@ -394,6 +394,10 @@ write_template_safe ".agents/memory.md" << 'EOF'
 - [x] Add unit tests for Python validation checks
 - [x] Create task_cli_auth_onboarding_documentation.md workflow file
 - [x] Update docs/setup_guide.md and README.md with CLI auth workflows
+- [x] Run workspace validation suite
+- [x] Create task_user_guide.md workflow file
+- [x] Create docs/user_guide.md detailing layman guides
+- [x] Update README.md to index the User Guide
 - [/] Run workspace validation suite
 
 
