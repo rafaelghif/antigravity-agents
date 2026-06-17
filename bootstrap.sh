@@ -381,11 +381,12 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
+- **Current Task Target**: Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
-- [/] Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
+- [/] Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
+- [x] Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
 - [x] Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - [x] Implement align_col and get_active_git_profile_details in menu.py
 - [x] Redesign control panel header layout in menu.py
@@ -4708,6 +4709,272 @@ closed_at: {closed_at_str if closed_at_str else 'null'}
             
     print(color(f"[SUCCESS] Checked out branch '{branch_name}' and initialized task.", C_GREEN + C_BOLD))
 
+def get_conflicted_files():
+    import subprocess
+    try:
+        out = subprocess.check_output(["git", "diff", "--name-only", "--diff-filter=U"]).decode().strip()
+        if out:
+            return out.splitlines()
+    except:
+        pass
+    return []
+
+def merge_changelog_sections(sec1, sec2):
+    import re
+    lines1 = sec1.splitlines()
+    if not lines1:
+        return sec2
+    version_line = lines1[0]
+    
+    def parse_subsections(content):
+        parts = content.split('### ')
+        subsections = {}
+        for part in parts[1:]:
+            m = re.match(r'^([A-Za-z]+)\n(.*)', part, re.DOTALL)
+            if m:
+                sub_type = m.group(1)
+                items = [line.strip() for line in m.group(2).splitlines() if line.strip().startswith('-')]
+                subsections[sub_type] = items
+        return subsections
+        
+    sub1 = parse_subsections(sec1)
+    sub2 = parse_subsections(sec2)
+    
+    merged_sub = {}
+    all_types = list(set(sub1.keys()) | set(sub2.keys()))
+    
+    type_order = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
+    all_types.sort(key=lambda t: type_order.index(t) if t in type_order else 99)
+    
+    result = version_line + "\n"
+    for t in all_types:
+        items1 = sub1.get(t, [])
+        items2 = sub2.get(t, [])
+        merged_items = []
+        for item in items1 + items2:
+            if item not in merged_items:
+                merged_items.append(item)
+        
+        if merged_items:
+            result += f"### {t}\n"
+            for item in merged_items:
+                result += f"{item}\n"
+            result += "\n"
+            
+    return result.strip()
+
+def try_smart_merge_changelog(filepath):
+    import subprocess
+    import re
+    try:
+        ours = subprocess.check_output(["git", "show", f":2:{filepath}"]).decode('utf-8')
+        theirs = subprocess.check_output(["git", "show", f":3:{filepath}"]).decode('utf-8')
+    except:
+        return False
+        
+    def parse_sections(content):
+        parts = content.split('## [')
+        header = parts[0]
+        sections = {}
+        for part in parts[1:]:
+            m = re.match(r'^([^\]]+)\](.*)', part, re.DOTALL)
+            if m:
+                version = m.group(1)
+                sections[version] = '## [' + part
+        return header, sections
+
+    try:
+        h_ours, sec_ours = parse_sections(ours)
+        h_theirs, sec_theirs = parse_sections(theirs)
+        
+        merged_content = h_ours
+        all_versions = list(set(sec_ours.keys()) | set(sec_theirs.keys()))
+        
+        def semver_key(v):
+            try:
+                return [int(x) for x in re.findall(r'\d+', v)]
+            except:
+                return [0]
+                
+        all_versions.sort(key=semver_key, reverse=True)
+        
+        for v in all_versions:
+            if v in sec_ours and v not in sec_theirs:
+                merged_content += sec_ours[v] + "\n"
+            elif v in sec_theirs and v not in sec_ours:
+                merged_content += sec_theirs[v] + "\n"
+            else:
+                if sec_ours[v].strip() == sec_theirs[v].strip():
+                    merged_content += sec_ours[v] + "\n"
+                else:
+                    merged_content += merge_changelog_sections(sec_ours[v], sec_theirs[v]) + "\n"
+                    
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(merged_content.strip() + "\n")
+        return True
+    except Exception as e:
+        print(f"Smart changelog merge failed: {e}", file=sys.stderr)
+        return False
+
+def try_smart_merge_memory(filepath):
+    import subprocess
+    import re
+    try:
+        ours = subprocess.check_output(["git", "show", f":2:{filepath}"]).decode('utf-8')
+        theirs = subprocess.check_output(["git", "show", f":3:{filepath}"]).decode('utf-8')
+    except:
+        return False
+        
+    try:
+        def get_checklist_items(content):
+            return [line.strip() for line in content.splitlines() if re.match(r'^-\s+\[[ x/]\]', line.strip())]
+            
+        items_ours = get_checklist_items(ours)
+        items_theirs = get_checklist_items(theirs)
+        
+        def parse_task(line):
+            m = re.match(r'^-\s+\[([ x/])\]\s*(.*)', line)
+            if m:
+                return m.group(1), m.group(2).strip()
+            return None, None
+            
+        merged_tasks = {}
+        ordered_keys = []
+        
+        for line in items_theirs + items_ours:
+            status, desc = parse_task(line)
+            if desc:
+                if desc not in merged_tasks:
+                    merged_tasks[desc] = status
+                    ordered_keys.append(desc)
+                else:
+                    curr_status = merged_tasks[desc]
+                    if status == 'x' or (status == '/' and curr_status == ' '):
+                        merged_tasks[desc] = status
+                        
+        new_checklist = ""
+        for desc in ordered_keys:
+            status = merged_tasks[desc]
+            new_checklist += f"- [{status}] {desc}\n"
+            
+        parts = theirs.split('### Sprint Tasks Checklist\n')
+        if len(parts) < 2:
+            parts = theirs.split('### Sprint Tasks Checklist\r\n')
+            
+        if len(parts) >= 2:
+            header = parts[0] + "### Sprint Tasks Checklist\n"
+            rem = parts[1]
+            idx_dash = rem.find('\n---')
+            if idx_dash == -1:
+                idx_dash = rem.find('\r\n---')
+            if idx_dash != -1:
+                footer = rem[idx_dash:]
+            else:
+                footer = "\n---\n"
+                
+            merged_memory = header + new_checklist + footer
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(merged_memory)
+            return True
+    except:
+        pass
+        
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(theirs)
+        return True
+    except:
+        return False
+
+def smart_automerge_file(filepath):
+    filename = os.path.basename(filepath)
+    if filename == "memory.md":
+        return try_smart_merge_memory(filepath)
+    elif filename == "CHANGELOG.md":
+        return try_smart_merge_changelog(filepath)
+    return False
+
+def resolve_merge_conflicts():
+    import subprocess
+    conflicted_files = get_conflicted_files()
+    if not conflicted_files:
+        print(color("No conflicted files found.", C_GREEN))
+        return
+        
+    print(color(f"\nFound {len(conflicted_files)} conflicted file(s):", C_BOLD + C_CYAN))
+    for f in conflicted_files:
+        print(f"  - {f}")
+    print("")
+    
+    for filepath in conflicted_files:
+        filename = os.path.basename(filepath)
+        print(color("="*58, C_CYAN))
+        print(color(f"Resolving conflict in: {filepath}", C_BOLD + C_CYAN))
+        print(color("="*58, C_CYAN))
+        
+        if filename in ("memory.md", "CHANGELOG.md"):
+            print(color(f"Attempting smart auto-merge for {filename}...", C_GRAY))
+            if smart_automerge_file(filepath):
+                print(color(f"[SUCCESS] Smart auto-merge succeeded for {filename}!", C_GREEN))
+                subprocess.run(["git", "add", filepath], check=True)
+                continue
+            else:
+                print(color(f"[WARNING] Smart auto-merge failed for {filename}. Falling back to manual selection.", C_YELLOW))
+                
+        while True:
+            print(f"  [{color('1', C_GREEN)}] Use OURS (Keep changes from base branch/main)")
+            print(f"  [{color('2', C_GREEN)}] Use THEIRS (Keep changes from feature branch)")
+            print(f"  [{color('3', C_GREEN)}] Open in Editor for manual resolution")
+            print(f"  [{color('0', C_YELLOW)}] Abort Merge")
+            
+            try:
+                choice = input(color("\nSelect resolution option [0-3]: ", C_BOLD)).strip()
+            except (KeyboardInterrupt, EOFError):
+                print(color("\nMerge aborted.", C_RED))
+                subprocess.run(["git", "merge", "--abort"])
+                sys.exit(1)
+                
+            if choice == "0":
+                print(color("\nMerge aborted by user.", C_RED))
+                subprocess.run(["git", "merge", "--abort"])
+                sys.exit(1)
+            elif choice == "1":
+                print(color(f"Applying OURS version to {filepath}...", C_GRAY))
+                subprocess.run(["git", "checkout", "--ours", filepath], check=True)
+                subprocess.run(["git", "add", filepath], check=True)
+                break
+            elif choice == "2":
+                print(color(f"Applying THEIRS version to {filepath}...", C_GRAY))
+                subprocess.run(["git", "checkout", "--theirs", filepath], check=True)
+                subprocess.run(["git", "add", filepath], check=True)
+                break
+            elif choice == "3":
+                editor = None
+                try:
+                    editor = subprocess.check_output(["git", "config", "core.editor"]).decode().strip()
+                except:
+                    pass
+                if not editor:
+                    editor = os.environ.get("EDITOR")
+                if not editor:
+                    if sys.platform == "win32":
+                        editor = "notepad.exe"
+                    else:
+                        editor = "nano"
+                        
+                print(color(f"Opening {filepath} in editor: {editor}...", C_GRAY))
+                try:
+                    subprocess.run(f'{editor} "{filepath}"', shell=True)
+                    input(color("\nPress Enter AFTER you have finished resolving conflicts and saved the file: ", C_BOLD))
+                    subprocess.run(["git", "add", filepath], check=True)
+                    break
+                except Exception as editor_err:
+                    print(color(f"Error opening editor: {editor_err}", C_RED), file=sys.stderr)
+            else:
+                print(color("Invalid choice. Please enter 0, 1, 2, or 3.", C_RED))
+                
+    print(color("\n[SUCCESS] All conflicts resolved! Completing merge...", C_GREEN + C_BOLD))
+
 def merge_issue(issue_id_str):
     import subprocess
     try:
@@ -4805,7 +5072,12 @@ def merge_issue(issue_id_str):
                          
     print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
     subprocess.run(["git", "checkout", base_branch])
-    subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    proc_merge = subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    if proc_merge.returncode != 0:
+        print(color("\n[WARN] Merge conflict detected! Launching interactive resolution helper...", C_YELLOW))
+        resolve_merge_conflicts()
+        # Complete the merge commit
+        subprocess.run(["git", "commit", "--no-edit"], check=True)
      
     # 5. Clean up local issue branch
     print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))

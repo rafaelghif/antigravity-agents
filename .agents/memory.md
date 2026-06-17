@@ -19,10 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
+- **Current Task Target**: Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
+- [x] Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
 - [x] Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
 - [x] Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - [x] Implement align_col and get_active_git_profile_details in menu.py
