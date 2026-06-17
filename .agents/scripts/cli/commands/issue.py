@@ -132,100 +132,169 @@ def get_provider_and_repo():
     return None
 
 def sync_remote_issue(action, title=None, body=None, remote_issue_number=None):
+    # 1. Resolve Git remote repository info
     repo_info = get_provider_and_repo()
     if not repo_info:
         return None
         
     provider, default_url, owner, repo = repo_info
-    token, url_override = get_active_profile_token(provider)
+
+    # 2. Find git_profiles config file
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
     
-    if not token:
-        return None
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
         
-    base_url = url_override if url_override else default_url
-    
-    headers = {
-        "User-Agent": "Antigravity-Agent-Helper"
-    }
-    
-    import urllib.parse
-    
-    if provider == "github":
-        headers["Authorization"] = f"Bearer {token}"
-        headers["Accept"] = "application/vnd.github+json"
-        headers["X-GitHub-Api-Version"] = "2022-11-28"
-        
-        if action == "create":
-            url = f"{base_url}/repos/{owner}/{repo}/issues"
-            data = {"title": title, "body": body or ""}
-            method = "POST"
-        elif action == "close":
-            if not remote_issue_number:
-                return None
-            url = f"{base_url}/repos/{owner}/{repo}/issues/{remote_issue_number}"
-            data = {"state": "closed"}
-            method = "PATCH"
-        else:
-            return None
-            
-    elif provider == "gitlab":
-        headers["PRIVATE-TOKEN"] = token
-        headers["Content-Type"] = "application/json"
-        
-        project_path = urllib.parse.quote(f"{owner}/{repo}", safe="")
-        
-        if action == "create":
-            url = f"{base_url}/api/v4/projects/{project_path}/issues"
-            data = {"title": title, "description": body or ""}
-            method = "POST"
-        elif action == "close":
-            if not remote_issue_number:
-                return None
-            url = f"{base_url}/api/v4/projects/{project_path}/issues/{remote_issue_number}"
-            data = {"state_event": "close"}
-            method = "PUT"
-        else:
-            return None
-            
-    elif provider == "gitea":
-        headers["Authorization"] = f"token {token}"
-        headers["Content-Type"] = "application/json"
-        
-        if action == "create":
-            url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues"
-            data = {"title": title, "body": body or ""}
-            method = "POST"
-        elif action == "close":
-            if not remote_issue_number:
-                return None
-            url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues/{remote_issue_number}"
-            data = {"state": "closed"}
-            method = "PATCH"
-        else:
-            return None
-    else:
-        return None
-        
-    req_data = json.dumps(data).encode('utf-8')
-    req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
-    
-    try:
-        with urllib.request.urlopen(req) as response:
-            res_data = json.loads(response.read().decode('utf-8'))
-            if "number" in res_data:
-                res_data["remote_id"] = res_data["number"]
-            elif "iid" in res_data:
-                res_data["remote_id"] = res_data["iid"]
-            return res_data
-    except urllib.error.HTTPError as e:
-        print(color(f"\n{provider.upper()} API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
+    config = {}
+    if os.path.exists(profiles_file):
         try:
-            err_body = e.read().decode('utf-8')
-            print(color(f"Details: {err_body}", C_GRAY), file=sys.stderr)
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
         except:
             pass
-    except Exception as e:
-        print(color(f"\nWarning: Failed to connect to {provider.upper()} API: {e}", C_YELLOW), file=sys.stderr)
+            
+    keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+    max_tries = len(keys) if keys else 1
+    
+    for attempt in range(max_tries):
+        token, url_override = get_active_profile_token(provider)
+        
+        res_data = None
+        if token:
+            base_url = url_override if url_override else default_url
+            headers = {
+                "User-Agent": "Antigravity-Agent-Helper"
+            }
+            
+            import urllib.parse
+            import urllib.request
+            import urllib.error
+            
+            if provider == "github":
+                headers["Authorization"] = f"Bearer {token}"
+                headers["Accept"] = "application/vnd.github+json"
+                headers["X-GitHub-Api-Version"] = "2022-11-28"
+                
+                if action == "create":
+                    url = f"{base_url}/repos/{owner}/{repo}/issues"
+                    data = {"title": title, "body": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/repos/{owner}/{repo}/issues/{remote_issue_number}"
+                    data = {"state": "closed"}
+                    method = "PATCH"
+                else:
+                    return None
+                    
+            elif provider == "gitlab":
+                headers["PRIVATE-TOKEN"] = token
+                headers["Content-Type"] = "application/json"
+                
+                project_path = urllib.parse.quote(f"{owner}/{repo}", safe="")
+                
+                if action == "create":
+                    url = f"{base_url}/api/v4/projects/{project_path}/issues"
+                    data = {"title": title, "description": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/api/v4/projects/{project_path}/issues/{remote_issue_number}"
+                    data = {"state_event": "close"}
+                    method = "PUT"
+                else:
+                    return None
+                    
+            elif provider == "gitea":
+                headers["Authorization"] = f"token {token}"
+                headers["Content-Type"] = "application/json"
+                
+                if action == "create":
+                    url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues"
+                    data = {"title": title, "body": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues/{remote_issue_number}"
+                    data = {"state": "closed"}
+                    method = "PATCH"
+                else:
+                    return None
+            else:
+                return None
+                
+            req_data = json.dumps(data).encode('utf-8')
+            req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
+            
+            try:
+                with urllib.request.urlopen(req) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    if "number" in res_data:
+                        res_data["remote_id"] = res_data["number"]
+                    elif "iid" in res_data:
+                        res_data["remote_id"] = res_data["iid"]
+                    return res_data
+            except urllib.error.HTTPError as e:
+                print(color(f"\n{provider.upper()} API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
+                try:
+                    err_body = e.read().decode('utf-8')
+                    print(color(f"Details: {err_body}", C_GRAY), file=sys.stderr)
+                except:
+                    pass
+            except Exception as e:
+                print(color(f"\nWarning: Failed to connect to {provider.upper()} API: {e}", C_YELLOW), file=sys.stderr)
+        else:
+            print(color(f"\nWarning: Token for remote provider '{provider}' is not configured in the active profile.", C_YELLOW), file=sys.stderr)
+            
+        # Rotate to the next profile locally if sync failed
+        if attempt < max_tries - 1:
+            import subprocess
+            try:
+                git_email = subprocess.check_output(
+                    ["git", "config", "user.email"], 
+                    stderr=subprocess.DEVNULL
+                ).decode().strip()
+            except:
+                git_email = ""
+                
+            selected_idx = 0
+            for i, k in enumerate(keys):
+                p_e = config.get(f"{k}.email", "")
+                if p_e == git_email:
+                    selected_idx = (i + 1) % len(keys)
+                    break
+                    
+            next_profile = keys[selected_idx]
+            p_n = config[f"{next_profile}.name"]
+            p_e = config.get(f"{next_profile}.email", "")
+            p_s = config.get(f"{next_profile}.ssh_key", "")
+            
+            print(color(f"\n[INFO] Rotating local Git configuration to profile '{next_profile}' and retrying sync...", C_YELLOW))
+            try:
+                subprocess.run(["git", "config", "--local", "user.name", p_n], check=True)
+                subprocess.run(["git", "config", "--local", "user.email", p_e], check=True)
+                if p_s:
+                    resolved_ssh = os.path.expanduser(p_s)
+                    if os.path.exists(resolved_ssh):
+                        subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_s}\" -o IdentitiesOnly=yes"], check=True)
+                    else:
+                        subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+                else:
+                    subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+            except Exception as rotation_err:
+                print(color(f"Warning: Failed to rotate Git profile locally: {rotation_err}", C_YELLOW), file=sys.stderr)
+                break
+                
     return None
 
 

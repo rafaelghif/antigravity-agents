@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-06-17
+### Added
+- Dynamic Git profile rotation on remote issue synchronization failures (HTTP 429 rate limit or HTTP 401/403 authentication errors) in `sync_remote_issue()`.
+- Comprehensive unit test `test_sync_remote_issue_rotation_on_failure` in `tests/test_issue_command.py` verifying Git config rotation and retry loop.
+
 ## [1.9.1] - 2026-06-17
 ### Fixed
 - Fixed Windows PowerShell 5.1 compatibility in `.agents/scripts/helper.ps1` by resolving `Join-Path` positional argument errors.
@@ -115,6 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `helper.sh` and `helper.ps1` into thin wrappers forwarding commands directly to `python3 .agents/scripts/cli/helper.py`.
 - Optimized prompt cache hit rate and token consumption during daily agent commands.
 
+[1.9.2]: https://github.com/rafaelghif/antigravity-agents/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/rafaelghif/antigravity-agents/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/rafaelghif/antigravity-agents/compare/v1.7.4...v1.8.0
