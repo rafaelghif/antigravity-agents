@@ -96,6 +96,18 @@ If you are a developer, you only need to know these daily essentials:
 
 ---
 
+## 🔑 CLI Authentication & Onboarding
+
+The `antigravity-cli` (`agy`) outer-wrapper CLI utilizes secure, platform-native credentials to authenticate your local and remote development sessions.
+
+- **Local Silent Keyring Sign-In**: Silent authentication using native OS secure keyrings (macOS Keychain, Linux dbus, Windows Credential Manager).
+- **Remote SSH OAuth Flow**: Interactive authentication when running over SSH by displaying a unique auth URL to authorize via your local browser.
+- **Session Logout**: Purges token profiles and active caches by executing the `/logout` command in the CLI chatbox.
+
+For a detailed guide on authentication setups, refer to the [Step-by-Step Setup Guide](file://./docs/setup_guide.md#4-antigravity-cli-authentication--session-workflows).
+
+---
+
 ## 📖 Detailed Documentation Index
 
 For in-depth guides on the layout, configuration, and advanced commands, refer to the sub-documentations below:
