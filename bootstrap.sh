@@ -370,7 +370,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: issue-10-strict-rules-enforcement
-- **Last Commit Reference**: 48a8334
+- **Last Commit Reference**: 6ef425a
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -9230,6 +9230,8 @@ def merge_issue(issue_id_str):
                          base_branch = m.group(1)
                          
     print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
+    if os.path.exists(memory_file):
+        subprocess.run(["git", "checkout", "--", memory_file])
     subprocess.run(["git", "checkout", base_branch])
     
     env = os.environ.copy()
