@@ -217,5 +217,53 @@ class TestIssueCommand(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertEqual(res.get("remote_id"), 42)
 
+    @patch('subprocess.check_output')
+    def test_try_smart_merge_memory(self, mock_check_output):
+        memory_file = os.path.join(self.test_dir, 'memory.md')
+        ours_content = "### Sprint Tasks Checklist\n- [x] Task 1\n- [/] Task 2\n---\n"
+        theirs_content = "### Sprint Tasks Checklist\n- [/] Task 1\n- [ ] Task 3\n---\n"
+        
+        def check_output_side_effect(args, **kwargs):
+            if ":2:" in args[2]:
+                return ours_content.encode()
+            elif ":3:" in args[2]:
+                return theirs_content.encode()
+            return b""
+        mock_check_output.side_effect = check_output_side_effect
+        
+        res = issue.try_smart_merge_memory(memory_file)
+        self.assertTrue(res)
+        
+        with open(memory_file, 'r') as f:
+            merged = f.read()
+            self.assertIn("- [x] Task 1", merged)
+            self.assertIn("- [/] Task 2", merged)
+            self.assertIn("- [ ] Task 3", merged)
+
+    @patch('subprocess.check_output')
+    def test_try_smart_merge_changelog(self, mock_check_output):
+        changelog_file = os.path.join(self.test_dir, 'CHANGELOG.md')
+        ours_content = "# Changelog\n\n## [1.9.1] - 2026-06-17\n### Fixed\n- Fix A\n"
+        theirs_content = "# Changelog\n\n## [1.9.1] - 2026-06-17\n### Added\n- Add B\n"
+        
+        def check_output_side_effect(args, **kwargs):
+            if ":2:" in args[2]:
+                return ours_content.encode()
+            elif ":3:" in args[2]:
+                return theirs_content.encode()
+            return b""
+        mock_check_output.side_effect = check_output_side_effect
+        
+        res = issue.try_smart_merge_changelog(changelog_file)
+        self.assertTrue(res)
+        
+        with open(changelog_file, 'r') as f:
+            merged = f.read()
+            self.assertIn("## [1.9.1] - 2026-06-17", merged)
+            self.assertIn("### Fixed", merged)
+            self.assertIn("- Fix A", merged)
+            self.assertIn("### Added", merged)
+            self.assertIn("- Add B", merged)
+
 if __name__ == '__main__':
     unittest.main()
