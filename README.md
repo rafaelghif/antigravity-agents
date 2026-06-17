@@ -122,6 +122,7 @@ For in-depth guides on the layout, configuration, and advanced commands, refer t
 8. 🔑 [API Profile Rotation & Budget Tracking](file://./docs/api_rotation.md) — Multi-platform auto-rotation, PowerShell integration, and token budget limits.
 9. 📅 [Agent Core Changelog](file://./CHANGELOG.md) — Log of version releases and update details.
 10. 📌 [Architectural Decision Records (ADRs)](file://./.agents/adr.md) — Historical architectural decisions ledger.
+11. 📘 [Layman User Guide & Onboarding](file://./docs/user_guide.md) — Beginner-friendly guide for CLI setup, prompting, authentication, and key/profile rotation.
 
 ---
 

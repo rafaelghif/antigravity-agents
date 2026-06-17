@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #5: Document Antigravity CLI Authentication and Onboarding Integration
+- **Current Task Target**: Resolve issue #6: Create comprehensive layman-friendly User Guide
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -32,6 +32,10 @@
 - [x] Add unit tests for Python validation checks
 - [x] Create task_cli_auth_onboarding_documentation.md workflow file
 - [x] Update docs/setup_guide.md and README.md with CLI auth workflows
+- [x] Run workspace validation suite
+- [x] Create task_user_guide.md workflow file
+- [x] Create docs/user_guide.md detailing layman guides
+- [x] Update README.md to index the User Guide
 - [x] Run workspace validation suite
 
 
