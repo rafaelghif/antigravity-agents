@@ -107,3 +107,33 @@ If everything is healthy, make your first validated commit:
 ```bash
 ./.agents/scripts/helper.sh commit chore core "initialize antigravity agent workspace" AGENTS.md .agents/ .antigravityignore
 ```
+
+---
+
+## 4. Antigravity CLI Authentication & Session Workflows
+
+The `antigravity-cli` (`agy`) uses secure credentials and token profiles to authenticate sessions and interface with the shared agent harness.
+
+### A. Local Silent Keyring Sign-In
+When launching `agy` on your local machine, the CLI automatically attempts to retrieve active credentials from your operating system's native secure keyring:
+- **macOS**: Apple Keychain
+- **Linux**: Secret Service API (via dbus)
+- **Windows**: Windows Credential Manager
+
+If a valid token profile is found, the CLI authenticates your session silently without opening a browser window.
+
+### B. Remote SSH OAuth Flow
+When running over an SSH connection, the CLI detects the remote shell environment. Since it cannot open a local browser, it initiates a manual URL loop:
+1. Run `agy` in your remote terminal session.
+2. The CLI detects the SSH environment and prints a unique, secure authorization URL.
+3. Copy this URL and paste it into a web browser on your local machine.
+4. Sign in with your approved credentials and complete the authentication.
+5. The browser displays a unique alphanumeric authorization code.
+6. Copy this code, return to your remote SSH terminal, and paste it into the prompt.
+
+### C. Managing Your Session
+Logging out purges saved authentication profiles from your operating system's keyring and clears active local cache directories:
+- To log out of your session, run this command in the CLI prompt box:
+  ```bash
+  /logout
+  ```

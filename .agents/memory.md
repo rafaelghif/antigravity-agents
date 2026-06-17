@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #4: Implement pure-Python workspace validation suite
+- **Current Task Target**: Resolve issue #5: Document Antigravity CLI Authentication and Onboarding Integration
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -30,6 +30,9 @@
 - [x] Implement pure-Python workspace validation rules in validate.py
 - [x] Update Git hooks to call Python validator directly
 - [x] Add unit tests for Python validation checks
+- [x] Create task_cli_auth_onboarding_documentation.md workflow file
+- [x] Update docs/setup_guide.md and README.md with CLI auth workflows
+- [x] Run workspace validation suite
 
 
 
