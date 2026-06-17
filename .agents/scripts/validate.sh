@@ -729,7 +729,7 @@ if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
     echo "  [PASS] Merge commit in progress. Bypassing check."
 else
     STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
-    MOD_FILES=""
+    MOD_FILES=()
     if [ -n "$STATUS_OUT" ]; then
         while IFS= read -r line || [ -n "$line" ]; do
             [ -z "$line" ] && continue
@@ -749,23 +749,23 @@ else
                     if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$subfile" == ".gitignore" ]] || [[ "$subfile" == ".antigravityignore" ]]; then
                         continue
                     fi
-                    MOD_FILES="$MOD_FILES $subfile"
+                    MOD_FILES+=("$subfile")
                 done < <(find "$filepath" -type f 2>/dev/null)
             else
                 ext="${filepath##*.}"
                 if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
                     continue
                 fi
-                MOD_FILES="$MOD_FILES $filepath"
+                MOD_FILES+=("$filepath")
             fi
         done <<< "$STATUS_OUT"
     fi
 
-    if [ -z "$MOD_FILES" ]; then
+    if [ ${#MOD_FILES[@]} -eq 0 ]; then
         echo "  [PASS] No modified files require locking."
     else
         LOCKS_ERR=0
-        for f in $MOD_FILES; do
+        for f in "${MOD_FILES[@]}"; do
             if [[ "$f" != *"/"* ]]; then
                 req_lock="root"
             else
@@ -841,13 +841,16 @@ fi
 
 # 20. Staging Discipline Compliance Check
 echo "Check 20: Staging Discipline Compliance Check"
-staged_files=$(git diff --cached --name-only 2>/dev/null || echo "")
-staged_count=0
-if [ -n "$staged_files" ]; then
-    staged_count=$(echo "$staged_files" | wc -l | tr -d ' ')
+staged_files=()
+if staged_out_raw=$(git diff --cached --name-only 2>/dev/null); then
+    while IFS= read -r line || [ -n "$line" ]; do
+        [ -z "$line" ] && continue
+        staged_files+=("$line")
+    done <<< "$staged_out_raw"
 fi
+staged_count=${#staged_files[@]}
 
-changed_files=""
+changed_files=()
 status_out=$(git status --porcelain 2>/dev/null || echo "")
 if [ -n "$status_out" ]; then
     while IFS= read -r line || [ -n "$line" ]; do
@@ -856,14 +859,10 @@ if [ -n "$status_out" ]; then
         if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
             continue
         fi
-        changed_files="$changed_files $filepath"
+        changed_files+=("$filepath")
     done <<< "$status_out"
 fi
-
-changed_count=0
-if [ -n "$changed_files" ]; then
-    changed_count=$(echo "$changed_files" | wc -w | tr -d ' ')
-fi
+changed_count=${#changed_files[@]}
 
 if [ "$staged_count" -gt 3 ] && [ "$staged_count" -eq "$changed_count" ]; then
     echo "  [WARNING] Bulk staging detected ($staged_count files staged, 0 unstaged)."
@@ -871,19 +870,16 @@ if [ "$staged_count" -gt 3 ] && [ "$staged_count" -eq "$changed_count" ]; then
 fi
 
 secret_found=0
-if [ -n "$staged_files" ]; then
-    while IFS= read -r f || [ -n "$f" ]; do
-        [ -z "$f" ] && continue
-        basename=$(basename "$f" | tr '[:upper:]' '[:lower:]')
-        if [[ "$basename" == *".env"* ]] || [[ "$basename" == *".key"* ]] || [[ "$basename" == *".pem"* ]] || [[ "$basename" == *"credentials"* ]] || [[ "$basename" == *"id_rsa"* ]]; then
-            if [ $secret_found -eq 0 ]; then
-                echo "  [FAIL] Staged files contain potential credentials/secrets:"
-                secret_found=1
-            fi
-            echo "    - $f"
+for f in "${staged_files[@]}"; do
+    basename=$(basename "$f" | tr '[:upper:]' '[:lower:]')
+    if [[ "$basename" == *".env"* ]] || [[ "$basename" == *".key"* ]] || [[ "$basename" == *".pem"* ]] || [[ "$basename" == *"credentials"* ]] || [[ "$basename" == *"id_rsa"* ]]; then
+        if [ $secret_found -eq 0 ]; then
+            echo "  [FAIL] Staged files contain potential credentials/secrets:"
+            secret_found=1
         fi
-    done <<< "$staged_files"
-fi
+        echo "    - $f"
+    fi
+done
 
 if [ $secret_found -eq 1 ]; then
     FAILED=1

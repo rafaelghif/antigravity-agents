@@ -7,7 +7,7 @@
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: main
+- **Active Branch**: issue-13-implement-shell-script-safety-improvements
 - **Last Commit Reference**: b30599b
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
@@ -19,11 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #12: Remove .kimchi directory
+- **Current Task Target**: Resolve issue #13: Implement shell script safety improvements
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Resolve issue #12: Remove .kimchi directory
+- [x] Resolve issue #13: Implement shell script safety improvements
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
 
