@@ -28,12 +28,38 @@ def run(args):
         errors += 1
         
     def check_hook(hook_name):
-        hook_path = os.path.join('.git', 'hooks', hook_name)
-        if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
-            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed and executable.")
+        import filecmp
+        import shutil
+        agents_dir = utils.get_agents_dir()
+        src = os.path.join(agents_dir, 'hooks', hook_name)
+        dest = os.path.join('.git', 'hooks', hook_name)
+        
+        if not os.path.exists(src):
+            return
+            
+        out_of_sync = False
+        if not os.path.exists(dest):
+            out_of_sync = True
+        elif not os.access(dest, os.X_OK):
+            out_of_sync = True
         else:
-            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing or not executable.")
-            print(f"            To install: cp .agents/hooks/{hook_name} .git/hooks/{hook_name} && chmod +x .git/hooks/{hook_name}")
+            try:
+                if not filecmp.cmp(src, dest, shallow=False):
+                    out_of_sync = True
+            except:
+                out_of_sync = True
+                
+        if out_of_sync:
+            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing, out-of-sync, or not executable. Auto-healing...")
+            try:
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.copy(src, dest)
+                os.chmod(dest, 0o755)
+                print(f"            [PASS] Git {hook_name} hook auto-healed successfully.")
+            except Exception as e:
+                print(f"            Failed to copy hook: {e}", file=sys.stderr)
+        else:
+            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed, up-to-date, and executable.")
             
     check_hook("pre-commit")
     check_hook("post-commit")

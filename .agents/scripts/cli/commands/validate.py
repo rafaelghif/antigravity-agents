@@ -121,6 +121,15 @@ def run(args):
     # 16. Local Workspace Issues Schema Validation
     failed = check_local_issues(failed)
     
+    # 17. Base Branch Modification Check
+    failed = check_base_branch_modification(failed)
+    
+    # 18. Staged/Modified Files Module Locking Check
+    failed = check_module_locking(failed)
+    
+    # 19. Issue Branch and Memory Alignment Check
+    failed = check_issue_alignment(failed)
+    
     print("==========================================================")
     if not failed:
         print(color("Workspace Status: VALIDATED", C_GREEN + C_BOLD))
@@ -766,4 +775,192 @@ def check_local_issues(failed_flag):
     if issue_errors > 0:
         return True
     print("  [PASS] All local issue files are validated and compliant.")
+    return failed_flag
+
+def check_base_branch_modification(failed_flag):
+    print("Check 17: Base Branch Modification Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    if current_branch in ("main", "master"):
+        # Check for modified or untracked code files (excluding .agents/, .git/, and metadata files)
+        try:
+            status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+        except Exception:
+            status_output = ""
+            
+        unauthorized_files = []
+        for line in status_output.splitlines():
+            if not line.strip():
+                continue
+            # Format is XY filepath or XY "filepath"
+            filepath = line[3:].strip().strip('"\'')
+            
+            # Exclude metadata / config / lock files
+            if filepath.startswith('.agents/') or filepath.startswith('.git/'):
+                continue
+            ext = os.path.splitext(filepath)[1]
+            if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
+                continue
+                
+            unauthorized_files.append(filepath)
+            
+        if unauthorized_files:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} Unauthorized code modifications found directly on base branch '{current_branch}':")
+            for uf in unauthorized_files:
+                print(f"    - {uf}")
+            print("         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch.")
+            return True
+            
+    print("  [PASS] Base branch check passed (no direct modifications on main/master).")
+    return failed_flag
+
+def check_module_locking(failed_flag):
+    print("Check 18: Staged/Modified Files Module Locking Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
+    try:
+        status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+    except Exception:
+        status_output = ""
+        
+    modified_files = []
+    for line in status_output.splitlines():
+        if not line.strip():
+            continue
+        filepath = line[3:].strip().strip('"\'')
+        
+        # Normalize and filter
+        filepath = filepath.replace('\\', '/')
+        if filepath.startswith('.agents/') or filepath.startswith('.git/'):
+            continue
+        ext = os.path.splitext(filepath)[1]
+        if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
+            continue
+            
+        modified_files.append(filepath)
+        
+    if not modified_files:
+        print("  [PASS] No modified files require locking.")
+        return failed_flag
+        
+    # Get active locks
+    locks_dir = os.path.join(utils.get_agents_dir(), "locks")
+    active_locks = set()
+    if os.path.exists(locks_dir) and os.path.isdir(locks_dir):
+        for f in os.listdir(locks_dir):
+            if f.endswith('.lock'):
+                active_locks.add(os.path.splitext(f)[0])
+                
+    unlock_errors = 0
+    for f in modified_files:
+        # Map file to module lock name
+        if '/' not in f:
+            req_lock = 'root'
+        else:
+            req_lock = f.split('/')[0]
+            
+        if req_lock not in active_locks:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} File '{f}' is modified but module '{req_lock}' is not locked!")
+            print(f"         Please acquire a lock first: './.agents/scripts/helper.sh lock {req_lock}'")
+            unlock_errors += 1
+            
+    if unlock_errors > 0:
+        return True
+        
+    print("  [PASS] All modified files are properly locked.")
+    return failed_flag
+
+def check_issue_alignment(failed_flag):
+    print("Check 19: Issue Branch and Memory Alignment Check")
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    # Check if branch name matches issue-<id>-<slug>
+    m = re.match(r'^issue-(\d+)-(.+)$', current_branch)
+    if not m:
+        print("  [PASS] Not on an issue feature branch. Skipping alignment check.")
+        return failed_flag
+        
+    issue_id = int(m.group(1))
+    issues_dir = os.path.join(utils.get_agents_dir(), "issues")
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Branch '{current_branch}' references non-existent issue #{issue_id}!")
+        return True
+        
+    # Parse title from issue
+    title = ""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('title:'):
+                    title = line.split(':', 1)[1].strip().strip('"\'')
+                    break
+    except Exception:
+        pass
+        
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Memory file 'memory.md' is missing!")
+        return True
+        
+    try:
+        with open(memory_file, 'r', encoding='utf-8') as f:
+            mem_content = f.read()
+    except Exception:
+        mem_content = ""
+        
+    alignment_errors = 0
+    
+    # Verify State Flag is IN_PROGRESS or COMPLETED
+    if not re.search(r'-\s*\*\*State Flag\*\*:\s*`?(IN_PROGRESS|COMPLETED)`?', mem_content, re.IGNORECASE):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md State Flag must be 'IN_PROGRESS' or 'COMPLETED' on issue branch!")
+        alignment_errors += 1
+        
+    # Verify Current Task Target contains the issue title or ID
+    expected_target_pat = f"issue #{issue_id}"
+    if expected_target_pat not in mem_content.lower() and (title.lower() not in mem_content.lower() if title else True):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md Current Task Target is not aligned with issue #{issue_id}!")
+        alignment_errors += 1
+        
+    # Verify issue task checklist is present
+    if f"issue #{issue_id}:" not in mem_content.lower():
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md checklist is missing a task for issue #{issue_id}!")
+        alignment_errors += 1
+        
+    if alignment_errors > 0:
+        return True
+        
+    print(f"  [PASS] Branch '{current_branch}' is fully aligned with memory.md.")
     return failed_flag

@@ -666,6 +666,143 @@ else
     FAILED=1
 fi
 
+# 17. Base Branch Modification Check
+echo "Check 17: Base Branch Modification Check"
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    UNAUTH=0
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+        STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+        if [ -n "$STATUS_OUT" ]; then
+            while IFS= read -r line || [ -n "$line" ]; do
+                [ -z "$line" ] && continue
+                filepath=$(echo "$line" | cut -c4- | xargs)
+                if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                    continue
+                fi
+                ext="${filepath##*.}"
+                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                    continue
+                fi
+                if [ $UNAUTH -eq 0 ]; then
+                    echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                    UNAUTH=1
+                fi
+                echo "    - $filepath"
+            done <<< "$STATUS_OUT"
+            if [ $UNAUTH -eq 1 ]; then
+                echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
+                FAILED=1
+            fi
+        fi
+    fi
+    if [ $UNAUTH -eq 0 ]; then
+        echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
+    fi
+fi
+
+# 18. Staged/Modified Files Module Locking Check
+echo "Check 18: Staged/Modified Files Module Locking Check"
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
+    STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+    MOD_FILES=""
+    if [ -n "$STATUS_OUT" ]; then
+        while IFS= read -r line || [ -n "$line" ]; do
+            [ -z "$line" ] && continue
+            filepath=$(echo "$line" | cut -c4- | xargs)
+            if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                continue
+            fi
+            ext="${filepath##*.}"
+            if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                continue
+            fi
+            MOD_FILES="$MOD_FILES $filepath"
+        done <<< "$STATUS_OUT"
+    fi
+
+    if [ -z "$MOD_FILES" ]; then
+        echo "  [PASS] No modified files require locking."
+    else
+        LOCKS_ERR=0
+        for f in $MOD_FILES; do
+            if [[ "$f" != *"/"* ]]; then
+                req_lock="root"
+            else
+                req_lock=$(echo "$f" | cut -d'/' -f1)
+            fi
+            
+            if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
+                echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
+                echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
+                LOCKS_ERR=1
+            fi
+        done
+        if [ $LOCKS_ERR -eq 1 ]; then
+            FAILED=1
+        else
+            echo "  [PASS] All modified files are properly locked."
+        fi
+    fi
+fi
+
+# 19. Issue Branch and Memory Alignment Check
+echo "Check 19: Issue Branch and Memory Alignment Check"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+if [[ "$CURRENT_BRANCH" =~ ^issue-[0-9]+- ]]; then
+    issue_id=$(echo "$CURRENT_BRANCH" | cut -d'-' -f2)
+    issue_id=$((10#$issue_id))
+    padded_id=$(printf "%03d" $issue_id)
+    issue_file=".agents/issues/issue_${padded_id}.md"
+    
+    if [ ! -f "$issue_file" ]; then
+        echo "  [FAIL] Branch '$CURRENT_BRANCH' references non-existent issue #$issue_id!"
+        FAILED=1
+    else
+        # Parse title
+        issue_title=$(grep "^title:" "$issue_file" | cut -d':' -f2- | tr -d '"'"'" | xargs || echo "")
+        
+        if [ ! -f "$MEMORY_FILE" ]; then
+            echo "  [FAIL] Memory file '$MEMORY_FILE' is missing!"
+            FAILED=1
+        else
+            ALIGN_ERR=0
+            # State Flag must be IN_PROGRESS or COMPLETED
+            if ! grep -qi -E -- "- \*\*State Flag\*\*:\s*\`?(IN_PROGRESS|COMPLETED)\`?" "$MEMORY_FILE"; then
+                echo "  [FAIL] memory.md State Flag must be 'IN_PROGRESS' or 'COMPLETED' on issue branch!"
+                ALIGN_ERR=1
+            fi
+            
+            # Current Task Target
+            target_line=$(grep -i "Current Task Target" "$MEMORY_FILE" | tr '[:upper:]' '[:lower:]' || echo "")
+            issue_title_lower=$(echo "$issue_title" | tr '[:upper:]' '[:lower:]')
+            if [[ "$target_line" != *"issue #$issue_id"* ]] && [[ -n "$issue_title_lower" && "$target_line" != *"$issue_title_lower"* ]]; then
+                echo "  [FAIL] memory.md Current Task Target is not aligned with issue #$issue_id!"
+                ALIGN_ERR=1
+            fi
+            
+            # Checklist
+            checklist_lower=$(grep -i "Resolve issue #$issue_id" "$MEMORY_FILE" | tr '[:upper:]' '[:lower:]' || echo "")
+            if [ -z "$checklist_lower" ]; then
+                echo "  [FAIL] memory.md checklist is missing a task for issue #$issue_id!"
+                ALIGN_ERR=1
+            fi
+            
+            if [ $ALIGN_ERR -eq 1 ]; then
+                FAILED=1
+            else
+                echo "  [PASS] Branch '$CURRENT_BRANCH' is fully aligned with memory.md."
+            fi
+        fi
+    fi
+else
+    echo "  [PASS] Not on an issue feature branch. Skipping alignment check."
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
