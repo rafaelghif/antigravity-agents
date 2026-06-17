@@ -19,13 +19,16 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #1: Fix Windows shell script execution compatibility
+- **Current Task Target**: Resolve issue #2: Add support for Gitea and GitLab issue synchronization
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement get_sh_executable and run_shell_script in utils.py
-- [x] Update test_rotation.py to use utils.get_sh_executable
-- [x] Update push.py, migrate.py, and skills.py to use the robust execution helpers
+- [x] Implement provider auto-detection and token resolution in issue.py
+- [x] Implement GitLab and Gitea API sync functions in issue.py
+- [x] Update issue creation, metadata saving, and closing commands to use the unified sync engine
+- [x] Add unit tests for GitLab and Gitea issue synchronization
+
+
 
 
 ---
