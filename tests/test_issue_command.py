@@ -67,11 +67,16 @@ class TestIssueCommand(unittest.TestCase):
     @patch('subprocess.check_output')
     @patch('subprocess.run')
     def test_checkout_issue(self, mock_run, mock_check_output):
-        # Setup git branch output
-        mock_check_output.side_effect = [
-            b"user",             # git config user.name
-            b"  main\n"          # git branch
-        ]
+        def side_effect(args, **kwargs):
+            if "config" in args:
+                return b"user"
+            elif "branch" in args:
+                return b"  main\n"
+            elif "remote" in args:
+                return b"https://github.com/owner/repo.git"
+            return b""
+        mock_check_output.side_effect = side_effect
+
         
         # Create issue
         issue.run(["issue", "create", "Fix Login", "Login fails..."])
@@ -96,10 +101,16 @@ class TestIssueCommand(unittest.TestCase):
     @patch('subprocess.check_output')
     @patch('subprocess.run')
     def test_merge_issue(self, mock_run, mock_check_output):
-        # Current branch is issue-1-fix-login
-        mock_check_output.side_effect = [
-            b"issue-1-fix-login", # git rev-parse --abbrev-ref HEAD
-        ]
+        def side_effect(args, **kwargs):
+            if "rev-parse" in args:
+                return b"issue-1-fix-login"
+            elif "remote" in args:
+                return b"https://github.com/owner/repo.git"
+            elif "config" in args:
+                return b"Agent"
+            return b""
+        mock_check_output.side_effect = side_effect
+
         
         # Create issue
         issue.run(["issue", "create", "Fix Login", "Login fails..."])
@@ -123,6 +134,42 @@ class TestIssueCommand(unittest.TestCase):
         # Verify git checkout main and git merge issue-1-fix-login were called
         mock_run.assert_any_call(["git", "checkout", "main"])
         mock_run.assert_any_call(["git", "merge", "issue-1-fix-login", "--no-ff", "-m", "merge branch 'issue-1-fix-login' into 'main'"])
+
+    @patch('subprocess.check_output')
+    def test_provider_detection(self, mock_check_output):
+        # Test GitHub detection
+        mock_check_output.return_value = b"https://github.com/owner/repo.git\n"
+        res = issue.get_provider_and_repo()
+        self.assertEqual(res, ("github", "https://api.github.com", "owner", "repo"))
+        
+        # Test GitLab detection
+        mock_check_output.return_value = b"git@gitlab.com:owner/repo.git\n"
+        res = issue.get_provider_and_repo()
+        self.assertEqual(res, ("gitlab", "https://gitlab.com", "owner", "repo"))
+        
+        # Test Gitea detection
+        mock_check_output.return_value = b"http://localhost:3000/owner/repo.git\n"
+        res = issue.get_provider_and_repo()
+        self.assertEqual(res, ("gitea", "http://localhost:3000", "owner", "repo"))
+
+    @patch('subprocess.check_output')
+    def test_active_profile_token_resolution(self, mock_check_output):
+        mock_check_output.return_value = b"work@company.com\n"
+        profiles_file = os.path.join(self.test_dir, 'git_profiles')
+        with open(profiles_file, 'w', encoding='utf-8') as f:
+            f.write("work.email=work@company.com\nwork.github_token=gh_val\nwork.gitlab_token=gl_val\nwork.gitea_token=gt_val\nwork.gitea_url=http://127.0.0.1:3000\n")
+            
+        token, url = issue.get_active_profile_token("github")
+        self.assertEqual(token, "gh_val")
+        self.assertIsNone(url)
+        
+        token, url = issue.get_active_profile_token("gitlab")
+        self.assertEqual(token, "gl_val")
+        self.assertIsNone(url)
+        
+        token, url = issue.get_active_profile_token("gitea")
+        self.assertEqual(token, "gt_val")
+        self.assertEqual(url, "http://127.0.0.1:3000")
 
 if __name__ == '__main__':
     unittest.main()

@@ -36,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended `tests/test_issue_command.py` with unit tests for checkout and merge commands, verifying branch creation, memory updates, and mock merge runs.
 - Strict Issue-Driven Validation check in `validate.sh` (Check 16) enforcing frontmatter schema format and status compliance for local workspace issues.
 - Added rules guidelines for Strict Issue Alignment in `AGENTS.md` and `.agents/rules/project_rules.md` requiring agents to map active development tasks 1-to-1 with local issues.
-- Optional GitHub Issues synchronization integration inside the local `issue` command, automatically creating and closing corresponding issues on GitHub when a `github_token` is defined in the active Git profile.
+- Optional GitHub, GitLab, and Gitea Issues synchronization support inside the local `issue` command, automatically creating and closing corresponding issues when `github_token`, `gitlab_token`, or `gitea_token` is defined in the active Git profile.
+
 
 ### Changed
 - Registered `push` and `guide` subcommands in CLI helper `helper.py` and documented them in `docs/cli_guide.md`.

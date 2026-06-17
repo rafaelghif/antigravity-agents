@@ -381,13 +381,16 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #1: Fix Windows shell script execution compatibility
+- **Current Task Target**: Resolve issue #2: Add support for Gitea and GitLab issue synchronization
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
-- [x] Implement get_sh_executable and run_shell_script in utils.py
-- [x] Update test_rotation.py to use utils.get_sh_executable
-- [/] Update push.py, migrate.py, and skills.py to use the robust execution helpers
+- [/] Implement provider auto-detection and token resolution in issue.py
+- [ ] Implement GitLab and Gitea API sync functions in issue.py
+- [ ] Update issue creation, metadata saving, and closing commands to use the unified sync engine
+- [ ] Add unit tests for GitLab and Gitea issue synchronization
+
+
 
 ---
 
@@ -3169,7 +3172,7 @@ C_BOLD = '\033[1m'
 C_CYAN = '\033[96m'
 C_END = '\033[0m'
 
-def get_github_token():
+def get_active_profile_token(provider):
     # 1. Get current git user email
     import subprocess
     try:
@@ -3178,10 +3181,10 @@ def get_github_token():
             stderr=subprocess.DEVNULL
         ).decode().strip()
     except:
-        return None
+        return None, None
         
     if not git_email:
-        return None
+        return None, None
         
     # 2. Find profiles file
     profiles_file = ""
@@ -3194,7 +3197,7 @@ def get_github_token():
         profiles_file = home_profiles
         
     if not profiles_file:
-        return None
+        return None, None
         
     # 3. Parse profiles
     config = {}
@@ -3205,7 +3208,7 @@ def get_github_token():
                     parts = line.strip().split('=', 1)
                     config[parts[0].strip()] = parts[1].strip()
     except:
-        return None
+        return None, None
         
     # 4. Find profile prefix that matches git_email
     profile_prefix = None
@@ -3215,12 +3218,14 @@ def get_github_token():
             break
             
     if not profile_prefix:
-        return None
+        return None, None
         
-    # 5. Get github_token for that profile
-    return config.get(f"{profile_prefix}.github_token")
+    # 5. Get token & custom URL based on provider
+    token_key = f"{profile_prefix}.{provider}_token"
+    url_key = f"{profile_prefix}.{provider}_url"
+    return config.get(token_key), config.get(url_key)
 
-def get_github_repo():
+def get_provider_and_repo():
     import subprocess
     try:
         remote_url = subprocess.check_output(
@@ -3230,42 +3235,130 @@ def get_github_repo():
     except:
         return None
         
-    m = re.search(r'github\.com[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
-    if m:
-        return m.group(1), m.group(2)
+    if not remote_url:
+        return None
+        
+    # GitHub: github.com[:/]([^/]+)/([^/.]+)(?:\.git)?$
+    if "github.com" in remote_url:
+        m = re.search(r'github\.com[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "github", "https://api.github.com", m.group(1), m.group(2)
+            
+    # GitLab: gitlab.com[:/]([^/]+)/([^/.]+)(?:\.git)?$ (or custom domain with gitlab in it)
+    elif "gitlab" in remote_url:
+        domain = "gitlab.com"
+        m_domain = re.search(r'(?:https?://|git@)([^:/]+)', remote_url)
+        if m_domain:
+            domain = m_domain.group(1)
+            
+        url_prefix = f"https://{domain}"
+        if remote_url.startswith("http"):
+            m_prefix = re.match(r'(https?://[^/]+)', remote_url)
+            if m_prefix:
+                url_prefix = m_prefix.group(1)
+                
+        m = re.search(r'[^:/]+[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "gitlab", url_prefix, m.group(1), m.group(2)
+            
+    # Default to Gitea/local if it's Gitea or custom local/server git hosting
+    else:
+        domain = "localhost:3000"
+        m_domain = re.search(r'(?:https?://|git@)([^:/]+)(?::\d+)?', remote_url)
+        if m_domain:
+            domain = m_domain.group(1)
+            m_port = re.search(r'(?:https?://|git@)[^:/]+:(\d+)', remote_url)
+            if m_port:
+                domain = f"{domain}:{m_port.group(1)}"
+        
+        protocol = "http"
+        if remote_url.startswith("https"):
+            protocol = "https"
+            
+        url_prefix = f"{protocol}://{domain}"
+        if remote_url.startswith("http"):
+            m_prefix = re.match(r'(https?://[^/]+)', remote_url)
+            if m_prefix:
+                url_prefix = m_prefix.group(1)
+                
+        m = re.search(r'[^:/]+[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "gitea", url_prefix, m.group(1), m.group(2)
+            
     return None
 
-def sync_github_issue(action, title=None, body=None, github_issue_number=None):
-    token = get_github_token()
-    repo_info = get_github_repo()
-    
-    if not token or not repo_info:
+def sync_remote_issue(action, title=None, body=None, remote_issue_number=None):
+    repo_info = get_provider_and_repo()
+    if not repo_info:
         return None
-
-    owner, repo = repo_info
+        
+    provider, default_url, owner, repo = repo_info
+    token, url_override = get_active_profile_token(provider)
+    
+    if not token:
+        return None
+        
+    base_url = url_override if url_override else default_url
     
     headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
         "User-Agent": "Antigravity-Agent-Helper"
     }
     
-    if action == "create":
-        url = f"https://api.github.com/repos/{owner}/{repo}/issues"
-        data = {
-            "title": title,
-            "body": body or ""
-        }
-        method = "POST"
-    elif action == "close":
-        if not github_issue_number:
+    import urllib.parse
+    
+    if provider == "github":
+        headers["Authorization"] = f"Bearer {token}"
+        headers["Accept"] = "application/vnd.github+json"
+        headers["X-GitHub-Api-Version"] = "2022-11-28"
+        
+        if action == "create":
+            url = f"{base_url}/repos/{owner}/{repo}/issues"
+            data = {"title": title, "body": body or ""}
+            method = "POST"
+        elif action == "close":
+            if not remote_issue_number:
+                return None
+            url = f"{base_url}/repos/{owner}/{repo}/issues/{remote_issue_number}"
+            data = {"state": "closed"}
+            method = "PATCH"
+        else:
             return None
-        url = f"https://api.github.com/repos/{owner}/{repo}/issues/{github_issue_number}"
-        data = {
-            "state": "closed"
-        }
-        method = "PATCH"
+            
+    elif provider == "gitlab":
+        headers["PRIVATE-TOKEN"] = token
+        headers["Content-Type"] = "application/json"
+        
+        project_path = urllib.parse.quote(f"{owner}/{repo}", safe="")
+        
+        if action == "create":
+            url = f"{base_url}/api/v4/projects/{project_path}/issues"
+            data = {"title": title, "description": body or ""}
+            method = "POST"
+        elif action == "close":
+            if not remote_issue_number:
+                return None
+            url = f"{base_url}/api/v4/projects/{project_path}/issues/{remote_issue_number}"
+            data = {"state_event": "close"}
+            method = "PUT"
+        else:
+            return None
+            
+    elif provider == "gitea":
+        headers["Authorization"] = f"token {token}"
+        headers["Content-Type"] = "application/json"
+        
+        if action == "create":
+            url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues"
+            data = {"title": title, "body": body or ""}
+            method = "POST"
+        elif action == "close":
+            if not remote_issue_number:
+                return None
+            url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues/{remote_issue_number}"
+            data = {"state": "closed"}
+            method = "PATCH"
+        else:
+            return None
     else:
         return None
         
@@ -3275,17 +3368,22 @@ def sync_github_issue(action, title=None, body=None, github_issue_number=None):
     try:
         with urllib.request.urlopen(req) as response:
             res_data = json.loads(response.read().decode('utf-8'))
+            if "number" in res_data:
+                res_data["remote_id"] = res_data["number"]
+            elif "iid" in res_data:
+                res_data["remote_id"] = res_data["iid"]
             return res_data
     except urllib.error.HTTPError as e:
-        print(color(f"\nGitHub API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
+        print(color(f"\n{provider.upper()} API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
         try:
             err_body = e.read().decode('utf-8')
             print(color(f"Details: {err_body}", C_GRAY), file=sys.stderr)
         except:
             pass
     except Exception as e:
-        print(color(f"\nWarning: Failed to connect to GitHub API: {e}", C_YELLOW), file=sys.stderr)
+        print(color(f"\nWarning: Failed to connect to {provider.upper()} API: {e}", C_YELLOW), file=sys.stderr)
     return None
+
 
 def color(text, ansi_code):
     if sys.stdout.isatty():
@@ -3387,14 +3485,20 @@ def create_issue(title, description="No description provided."):
         if ids:
             next_id = max(ids) + 1
             
-    # Try to sync to GitHub Issues
-    github_id = None
-    gh_res = sync_github_issue("create", title=title, body=description)
-    if gh_res and "number" in gh_res:
-        github_id = gh_res["number"]
-        print(color(f"  [SUCCESS] Synchronized to GitHub: Issue #{github_id} created.", C_GREEN))
-    elif get_github_token() and get_github_repo():
-        print(color("  [WARNING] GitHub integration configured but synchronization failed.", C_YELLOW))
+    # Try to sync to Remote Issues
+    remote_id = None
+    provider = None
+    repo_info = get_provider_and_repo()
+    if repo_info:
+        provider = repo_info[0]
+        token, _ = get_active_profile_token(provider)
+        if token:
+            res = sync_remote_issue("create", title=title, body=description)
+            if res and "remote_id" in res:
+                remote_id = res["remote_id"]
+                print(color(f"  [SUCCESS] Synchronized to {provider.upper()}: Issue #{remote_id} created.", C_GREEN))
+            else:
+                print(color(f"  [WARNING] {provider.upper()} integration configured but synchronization failed.", C_YELLOW))
 
     filename = f"issue_{next_id:03d}.md"
     file_path = os.path.join(issues_dir, filename)
@@ -3402,7 +3506,11 @@ def create_issue(title, description="No description provided."):
     
     content = f"""---
 id: {next_id}
-github_id: {github_id if github_id else 'null'}
+github_id: {remote_id if (remote_id and provider == 'github') else 'null'}
+gitlab_id: {remote_id if (remote_id and provider == 'gitlab') else 'null'}
+gitea_id: {remote_id if (remote_id and provider == 'gitea') else 'null'}
+remote_id: {remote_id if remote_id else 'null'}
+remote_provider: {provider if remote_id else 'null'}
 title: "{title}"
 status: open
 assignee: Agent
@@ -3444,20 +3552,49 @@ def close_issue(issue_id_str):
         
     closed_at = datetime.now().strftime("%Y-%m-%d")
     
-    # Try to close on GitHub if github_id is set
-    github_id_val = meta.get("github_id")
-    if github_id_val and github_id_val != "null" and github_id_val != "None":
+    # Try to close on remote if remote_id or provider-specific id is set
+    github_id_val = meta.get("github_id", "null")
+    gitlab_id_val = meta.get("gitlab_id", "null")
+    gitea_id_val = meta.get("gitea_id", "null")
+    remote_id_val = meta.get("remote_id", "null")
+    remote_provider_val = meta.get("remote_provider", "null")
+    
+    resolved_id = None
+    resolved_provider = None
+    
+    if remote_id_val and remote_id_val != "null" and remote_id_val != "None":
+        resolved_id = remote_id_val
+        resolved_provider = remote_provider_val
+    elif github_id_val and github_id_val != "null" and github_id_val != "None":
+        resolved_id = github_id_val
+        resolved_provider = "github"
+    elif gitlab_id_val and gitlab_id_val != "null" and gitlab_id_val != "None":
+        resolved_id = gitlab_id_val
+        resolved_provider = "gitlab"
+    elif gitea_id_val and gitea_id_val != "null" and gitea_id_val != "None":
+        resolved_id = gitea_id_val
+        resolved_provider = "gitea"
+        
+    if resolved_id and resolved_provider:
         try:
-            gh_num = int(github_id_val)
-            gh_res = sync_github_issue("close", github_issue_number=gh_num)
-            if gh_res:
-                print(color(f"  [SUCCESS] Synchronized to GitHub: Closed Issue #{gh_num}.", C_GREEN))
+            gh_num = int(resolved_id)
+            repo_info = get_provider_and_repo()
+            if repo_info and repo_info[0] == resolved_provider:
+                gh_res = sync_remote_issue("close", remote_issue_number=gh_num)
+                if gh_res:
+                    print(color(f"  [SUCCESS] Synchronized to {resolved_provider.upper()}: Closed Issue #{gh_num}.", C_GREEN))
+            else:
+                print(color(f"  [INFO] Bypassing remote sync: Current provider does not match issue's remote provider '{resolved_provider}'.", C_YELLOW))
         except Exception as e:
-            print(color(f"  [WARNING] Failed to close issue on GitHub: {e}", C_YELLOW))
+            print(color(f"  [WARNING] Failed to close issue on {resolved_provider.upper()}: {e}", C_YELLOW))
             
     content = f"""---
 id: {issue_id}
 github_id: {github_id_val if github_id_val else 'null'}
+gitlab_id: {gitlab_id_val if gitlab_id_val else 'null'}
+gitea_id: {gitea_id_val if gitea_id_val else 'null'}
+remote_id: {remote_id_val if remote_id_val else 'null'}
+remote_provider: {remote_provider_val if remote_provider_val else 'null'}
 title: "{meta.get('title', 'No Title')}"
 status: closed
 assignee: {meta.get('assignee', 'Agent')}
@@ -3546,9 +3683,17 @@ def checkout_issue(issue_id_str):
     
     closed_at_str = meta.get("closed_at", "null")
     github_id_val = meta.get("github_id", "null")
+    gitlab_id_val = meta.get("gitlab_id", "null")
+    gitea_id_val = meta.get("gitea_id", "null")
+    remote_id_val = meta.get("remote_id", "null")
+    remote_provider_val = meta.get("remote_provider", "null")
     content = f"""---
 id: {issue_id}
 github_id: {github_id_val if github_id_val else 'null'}
+gitlab_id: {gitlab_id_val if gitlab_id_val else 'null'}
+gitea_id: {gitea_id_val if gitea_id_val else 'null'}
+remote_id: {remote_id_val if remote_id_val else 'null'}
+remote_provider: {remote_provider_val if remote_provider_val else 'null'}
 title: "{meta.get('title')}"
 status: {meta.get('status', 'open')}
 assignee: {meta.get('assignee')}
