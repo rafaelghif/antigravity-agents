@@ -130,6 +130,18 @@ def run(args):
     # 19. Issue Branch and Memory Alignment Check
     failed = check_issue_alignment(failed)
     
+    # 20. Staging Discipline Compliance Check
+    failed = check_staging_discipline(failed)
+    
+    # 21. Protected Branches Guard
+    failed = check_protected_branches(failed)
+    
+    # 22. Git Environment Compliance Audit
+    failed = check_git_environment(failed)
+    
+    # 23. GitHub CLI Auth & Profile Verification
+    failed = check_github_cli_auth(failed)
+    
     print("==========================================================")
     if not failed:
         print(color("Workspace Status: VALIDATED", C_GREEN + C_BOLD))
@@ -810,15 +822,27 @@ def check_base_branch_modification(failed_flag):
                 continue
             # Format is XY filepath or XY "filepath"
             filepath = line[3:].strip().strip('"\'')
+            filepath = filepath.replace('\\', '/')
             
             # Exclude metadata / config / lock files
             if filepath.startswith('.agents/') or filepath.startswith('.git/'):
                 continue
-            ext = os.path.splitext(filepath)[1]
-            if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
-                continue
                 
-            unauthorized_files.append(filepath)
+            files_to_check = []
+            if filepath.endswith('/') or os.path.isdir(filepath):
+                for root, _, files in os.walk(filepath):
+                    for f in files:
+                        files_to_check.append(os.path.join(root, f).replace('\\', '/'))
+            else:
+                files_to_check.append(filepath)
+                
+            for f in files_to_check:
+                if f.startswith('.agents/') or f.startswith('.git/'):
+                    continue
+                ext = os.path.splitext(f)[1]
+                if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or f in ('.gitignore', '.antigravityignore'):
+                    continue
+                unauthorized_files.append(f)
             
         if unauthorized_files:
             print(f"  {color('[FAIL]', C_RED + C_BOLD)} Unauthorized code modifications found directly on base branch '{current_branch}':")
@@ -860,11 +884,22 @@ def check_module_locking(failed_flag):
         filepath = filepath.replace('\\', '/')
         if filepath.startswith('.agents/') or filepath.startswith('.git/'):
             continue
-        ext = os.path.splitext(filepath)[1]
-        if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
-            continue
             
-        modified_files.append(filepath)
+        files_to_check = []
+        if filepath.endswith('/') or os.path.isdir(filepath):
+            for root, _, files in os.walk(filepath):
+                for f in files:
+                    files_to_check.append(os.path.join(root, f).replace('\\', '/'))
+        else:
+            files_to_check.append(filepath)
+            
+        for f in files_to_check:
+            if f.startswith('.agents/') or f.startswith('.git/'):
+                continue
+            ext = os.path.splitext(f)[1]
+            if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or f in ('.gitignore', '.antigravityignore'):
+                continue
+            modified_files.append(f)
         
     if not modified_files:
         print("  [PASS] No modified files require locking.")
@@ -963,4 +998,202 @@ def check_issue_alignment(failed_flag):
         return True
         
     print(f"  [PASS] Branch '{current_branch}' is fully aligned with memory.md.")
+    return failed_flag
+
+def check_staging_discipline(failed_flag):
+    print("Check 20: Staging Discipline Compliance Check")
+    try:
+        # Get staged files
+        staged_output = subprocess.check_output(["git", "diff", "--cached", "--name-only"], stderr=subprocess.DEVNULL).decode().strip()
+        staged_files = [line.strip() for line in staged_output.splitlines() if line.strip()]
+        
+        # Get modified/untracked files
+        status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+        all_changed_files = []
+        for line in status_output.splitlines():
+            if line.strip():
+                filepath = line[3:].strip().strip('"\'').replace('\\', '/')
+                # Ignore .agents, .git
+                if not (filepath.startswith('.agents/') or filepath.startswith('.git/')):
+                    all_changed_files.append(filepath)
+    except Exception:
+        staged_files = []
+        all_changed_files = []
+
+    # Warn if bulk staging detected:
+    # Heuristic: if staged files count > 3, and all changed files are staged (no unstaged files remain), warn about bulk staging.
+    unstaged_files = [f for f in all_changed_files if f not in staged_files]
+    if len(staged_files) > 3 and len(unstaged_files) == 0:
+        print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Bulk staging detected ({len(staged_files)} files staged, 0 unstaged).")
+        print("            Ensure you staged files explicitly by name rather than using 'git add .' or 'git add -A'.")
+        
+    # Check for secret patterns in staged files list
+    secret_patterns = ['.env', '.key', '.pem', 'credentials', 'id_rsa']
+    found_secrets = []
+    for f in staged_files:
+        basename = os.path.basename(f).lower()
+        for pat in secret_patterns:
+            if pat in basename:
+                found_secrets.append(f)
+                break
+                
+    if found_secrets:
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Staged files contain potential credentials/secrets:")
+        for fs in found_secrets:
+            print(f"    - {fs}")
+        return True
+
+    print("  [PASS] Staging discipline checks passed.")
+    return failed_flag
+
+def check_protected_branches(failed_flag):
+    print("Check 21: Protected Branches Guard")
+    # Determine current branch
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    # Determine default branch
+    default_branch = None
+    # 1. Query GitHub via gh
+    try:
+        default_branch = subprocess.check_output(["gh", "repo", "view", "--json", "defaultBranchRef", "-q", ".defaultBranchRef.name"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        pass
+        
+    # 2. Local symbolic ref
+    if not default_branch:
+        try:
+            sym_ref = subprocess.check_output(["git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short"], stderr=subprocess.DEVNULL).decode().strip()
+            if sym_ref.startswith("origin/"):
+                default_branch = sym_ref[7:]
+        except Exception:
+            pass
+            
+    # 3. Parse git remote show origin
+    if not default_branch:
+        try:
+            remote_show = subprocess.check_output(["git", "remote", "show", "origin"], stderr=subprocess.DEVNULL).decode().strip()
+            for line in remote_show.splitlines():
+                if "HEAD branch:" in line:
+                    default_branch = line.split("HEAD branch:", 1)[1].strip()
+                    break
+        except Exception:
+            pass
+            
+    if not default_branch:
+        # Default fallback to common names if discovery fails
+        default_branch = "main"
+
+    protected_patterns = ["main", "master", r"release/.*", r"hotfix/.*"]
+    if default_branch and default_branch not in protected_patterns:
+        protected_patterns.append(default_branch)
+        
+    is_protected = False
+    for pat in protected_patterns:
+        if re.match(f"^{pat}$", current_branch):
+            is_protected = True
+            break
+            
+    if is_protected:
+        # Check if there are modified code files on this protected branch (excluding md, json, txt, yml, etc.)
+        try:
+            status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+        except Exception:
+            status_output = ""
+            
+        unauthorized_files = []
+        for line in status_output.splitlines():
+            if not line.strip():
+                continue
+            filepath = line[3:].strip().strip('"\'').replace('\\', '/')
+            if filepath.startswith('.agents/') or filepath.startswith('.git/'):
+                continue
+                
+            files_to_check = []
+            if filepath.endswith('/') or os.path.isdir(filepath):
+                for root, _, files in os.walk(filepath):
+                    for f in files:
+                        files_to_check.append(os.path.join(root, f).replace('\\', '/'))
+            else:
+                files_to_check.append(filepath)
+                
+            for f in files_to_check:
+                if f.startswith('.agents/') or f.startswith('.git/'):
+                    continue
+                ext = os.path.splitext(f)[1]
+                if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or f in ('.gitignore', '.antigravityignore'):
+                    continue
+                unauthorized_files.append(f)
+                
+        if unauthorized_files:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} Unauthorized code modifications found directly on protected branch '{current_branch}':")
+            for uf in unauthorized_files:
+                print(f"    - {uf}")
+            print("         Code mutations are forbidden on protected branches. Switch to a feature branch.")
+            return True
+            
+    print(f"  [PASS] Branch '{current_branch}' is compliant with branch protection policies.")
+    return failed_flag
+
+def check_git_environment(failed_flag):
+    print("Check 22: Git Environment Compliance Audit")
+    
+    # Check GIT_PAGER
+    git_pager_env = os.environ.get('GIT_PAGER')
+    try:
+        git_pager_config = subprocess.check_output(["git", "config", "core.pager"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        git_pager_config = ""
+        
+    # Check GIT_EDITOR
+    git_editor_env = os.environ.get('GIT_EDITOR')
+    try:
+        git_editor_config = subprocess.check_output(["git", "config", "core.editor"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        git_editor_config = ""
+        
+    print(f"  GIT_PAGER: env='{git_pager_env}', config='{git_pager_config}'")
+    print(f"  GIT_EDITOR: env='{git_editor_env}', config='{git_editor_config}'")
+    
+    pager = git_pager_env or git_pager_config
+    if pager and pager not in ('cat', 'true', 'none', 'false', '/bin/true', '/usr/bin/true'):
+        print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Pager '{pager}' is potentially interactive. Prefer GIT_PAGER=cat.")
+        
+    editor = git_editor_env or git_editor_config
+    if editor and 'true' not in editor.lower() and 'none' not in editor.lower():
+        print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git editor '{editor}' is potentially interactive. Prefer GIT_EDITOR=true.")
+        
+    print("  [PASS] Git environment audit completed.")
+    return failed_flag
+
+def check_github_cli_auth(failed_flag):
+    print("Check 23: GitHub CLI Auth & Profile Verification")
+    
+    gh_path = None
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        tp = os.path.join(path, "gh")
+        if os.path.exists(tp) and os.access(tp, os.X_OK):
+            gh_path = tp
+            break
+            
+    if not gh_path:
+        print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} GitHub CLI ('gh') is not installed or not in PATH.")
+        return failed_flag
+        
+    try:
+        cmd = ["gh", "auth", "status"]
+        env = os.environ.copy()
+        env["GH_TOKEN"] = env.get("GH_TOKEN", "")
+        res = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        output = res.stderr or res.stdout
+        
+        if "Logged in to" in output:
+            print("  [PASS] GitHub CLI is authenticated.")
+        else:
+            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} GitHub CLI is not authenticated. Please run 'gh auth login'.")
+    except Exception as e:
+        print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Failed to check GitHub CLI auth: {e}")
+        
     return failed_flag

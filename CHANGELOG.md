@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Staged/modified files module locking validation check (Check 18) to enforce domain locking protocol before modifications.
 - Issue feature branch and `memory.md` alignment validation check (Check 19) to enforce strict issue-driven alignment.
 - Programmatic unit test coverage for new validation checks in `tests/test_validate_command.py`.
+- Directory expansion fix for Check 17 and Check 18 in `validate.py` and `validate.sh` to correctly inspect contents of untracked/modified directories.
+- Git & GitHub CLI Operational Guidelines compliance checks (Check 20: Staging Discipline, Check 21: Protected Branches Guard, Check 22: Git Environment Compliance Audit, Check 23: GitHub CLI Auth Verification) in `validate.py` and `validate.sh`.
+- Updated `README.md` to reflect the 23 comprehensive compliance checks.
 
 ## [1.9.2] - 2026-06-17
 ### Added
