@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git & GitHub CLI Operational Guidelines compliance checks (Check 20: Staging Discipline, Check 21: Protected Branches Guard, Check 22: Git Environment Compliance Audit, Check 23: GitHub CLI Auth Verification) in `validate.py` and `validate.sh`.
 - Updated `README.md` to reflect the 23 comprehensive compliance checks.
 
+### Removed
+- Removed the `.kimchi` directory and its operational guidelines documentation.
+
 ## [1.9.2] - 2026-06-17
 ### Added
 - Dynamic Git profile rotation on remote issue synchronization failures (HTTP 429 rate limit or HTTP 401/403 authentication errors) in `sync_remote_issue()`.
