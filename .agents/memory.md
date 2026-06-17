@@ -19,7 +19,7 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #3: Add Git profile and credential status display to interactive menu
+- **Current Task Target**: Resolve issue #4: Implement pure-Python workspace validation suite
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
@@ -27,6 +27,9 @@
 - [x] Redesign control panel header layout in menu.py
 - [x] Add unit tests for Git profile menu resolution
 - [x] Conduct /grill-me design interview for GitLab/Gitea rotation
+- [x] Implement pure-Python workspace validation rules in validate.py
+- [x] Update Git hooks to call Python validator directly
+- [x] Add unit tests for Python validation checks
 
 
 
