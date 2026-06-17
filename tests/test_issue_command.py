@@ -171,5 +171,51 @@ class TestIssueCommand(unittest.TestCase):
         self.assertEqual(token, "gt_val")
         self.assertEqual(url, "http://127.0.0.1:3000")
 
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    @patch('urllib.request.urlopen')
+    def test_sync_remote_issue_rotation_on_failure(self, mock_urlopen, mock_run, mock_check_output):
+        # Setup mock git_profiles in the test directory
+        profiles_file = os.path.join(self.test_dir, 'git_profiles')
+        with open(profiles_file, 'w', encoding='utf-8') as f:
+            f.write("profile1.name=Name 1\n")
+            f.write("profile1.email=email1@test.com\n")
+            f.write("profile1.github_token=token1\n")
+            f.write("profile2.name=Name 2\n")
+            f.write("profile2.email=email2@test.com\n")
+            f.write("profile2.github_token=token2\n")
+
+        # Mock git commands
+        def check_output_side_effect(args, **kwargs):
+            if "remote" in args:
+                return b"https://github.com/owner/repo.git\n"
+            elif "user.email" in args:
+                # Mock email rotation: first check is email1, retry is email2
+                if mock_run.call_count == 0:
+                    return b"email1@test.com\n"
+                else:
+                    return b"email2@test.com\n"
+            return b""
+        mock_check_output.side_effect = check_output_side_effect
+
+        # Mock urllib urlopen: first call raises HTTPError, second succeeds
+        from urllib.error import HTTPError
+        import io
+        mock_success_response = io.BytesIO(b'{"number": 42}')
+        err = HTTPError("http://test.com", 401, "Unauthorized", {}, io.BytesIO(b"Auth failed"))
+        mock_urlopen.side_effect = [err, mock_success_response]
+
+        # Call sync_remote_issue
+        with patch('sys.stdout.isatty', return_value=False):
+            res = issue.sync_remote_issue("create", title="Test issue", body="Test body")
+
+        # Verify it rotated the profile locally
+        mock_run.assert_any_call(["git", "config", "--local", "user.name", "Name 2"], check=True)
+        mock_run.assert_any_call(["git", "config", "--local", "user.email", "email2@test.com"], check=True)
+
+        # Verify response returned correctly
+        self.assertIsNotNone(res)
+        self.assertEqual(res.get("remote_id"), 42)
+
 if __name__ == '__main__':
     unittest.main()
