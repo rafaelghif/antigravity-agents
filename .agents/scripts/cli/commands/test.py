@@ -73,6 +73,10 @@ def run(args):
             sys.exit(1)
             
         if test_runner and test_runner != "echo 'No test suite found'":
+            cmd_parts = test_runner.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                test_runner = " ".join(cmd_parts)
             print(f"Running test suite: {test_runner}...")
             proc = subprocess.run(test_runner, shell=True)
             sys.exit(proc.returncode)

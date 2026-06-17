@@ -8,6 +8,7 @@ Selamat datang di **Antigravity Agent Core (AAC)**! Panduan ini dirancang khusus
 
 * **Antigravity Agent Core (AAC)** adalah struktur workspace dan aturan protokol pengkodean (terkumpul di folder `.agents/`) yang membuat Agent AI (seperti Gemini atau OpenAI) bekerja secara disiplin, aman, dan hemat token di dalam folder proyek Anda.
 * **`antigravity-cli` (diakses dengan perintah `agy`)** adalah program CLI utama yang terpasang di komputer Anda. Perintah ini bertindak sebagai pembungkus (*wrapper*) untuk memicu Agent AI, mengelola sesi, dan menghubungkan komputer lokal Anda ke server Agent.
+* **Helper Script (`.\.agents\scripts\helper.ps1` untuk Windows atau `./.agents/scripts/helper.sh` untuk Linux/macOS)** adalah skrip lokal di dalam repositori Anda yang digunakan untuk menjalankan perintah-perintah repositori seperti manajemen issue, mengunci modul, validasi kode, commit, dan push. Perintah repositori lokal dijalankan lewat skrip helper ini, bukan lewat perintah global `agy`.
 
 ---
 
@@ -49,27 +50,30 @@ Jika Anda ingin mengganti akun atau menghapus kredensial tersimpan dari komputer
 Setelah berhasil masuk, Anda dapat langsung berinteraksi dengan Agent AI melalui chatbox `agy`.
 
 ### A. Alur Kerja Menulis Fitur / Memperbaiki Bug
-Untuk menjaga kebersihan kode utama (`main` branch) dan memastikan semua perubahan aman, Agent AI mengikuti alur **Issue-Driven Development** (Pengembangan Berbasis Masalah) secara otomatis:
+Untuk menjaga kebersihan kode utama (`main` branch) dan memastikan semua perubahan aman, Agent AI mengikuti alur **Issue-Driven Development** (Pengembangan Berbasis Masalah) secara otomatis.
+
+> [!NOTE]
+> Jalankan perintah lokal di bawah ini menggunakan `./.agents/scripts/helper.sh` (Linux/macOS) atau `.\.agents\scripts\helper.ps1` (Windows PowerShell).
 
 1. **Membuat Issue**: Anda atau Agent membuat issue untuk mendaftarkan tugas baru:
    ```bash
-   agy issue create "Membuat skema database inventory" "Deskripsi detail..."
+   ./.agents/scripts/helper.sh issue create "Membuat skema database inventory" "Deskripsi detail..."
    ```
 2. **Pindah Branch**: Agent berpindah ke branch terisolasi agar kode utama tidak terganggu:
    ```bash
-   agy issue checkout <nomor_issue>
+   ./.agents/scripts/helper.sh issue checkout <nomor_issue>
    ```
 3. **Penguncian Folder (Locking)**: Agent mengunci folder kerja untuk mencegah tabrakan kode dengan proses lain:
    ```bash
-   agy lock <nama_folder>
+   ./.agents/scripts/helper.sh lock <nama_folder>
    ```
 4. **Menulis Kode & Validasi**: Agent menulis kode, lalu melakukan pengecekan kualitas otomatis dengan perintah:
    ```bash
-   agy validate
+   ./.agents/scripts/helper.sh validate
    ```
 5. **Penggabungan Kode (Merge)**: Jika semua tes lulus, Agent menggabungkan kembali kodenya ke branch utama:
    ```bash
-   agy issue merge <nomor_issue>
+   ./.agents/scripts/helper.sh issue merge <nomor_issue>
    ```
 
 ### B. Tips Prompting bagi Pemula
@@ -107,15 +111,19 @@ Saat Anda sedang mengetik di chatbox `agy` dan kunci API Anda habis limit:
 
 ### C. Alur Rotasi Manual (Manual Rotate)
 Jika Anda ingin mengganti akun API secara sengaja:
-* **Lewat CLI**: Jalankan perintah berikut di terminal:
+* **Lewat CLI**: Jalankan perintah berikut di terminal (gunakan `./.agents/scripts/helper.sh` atau `.\.agents\scripts\helper.ps1` sesuai OS):
   ```bash
-  agy api-profile rotate
+  ./.agents/scripts/helper.sh api-profile rotate
   ```
   Atau langsung pilih nama profil tertentu:
   ```bash
-  agy api-profile cadangan
+  ./.agents/scripts/helper.sh api-profile cadangan
   ```
-* **Lewat Dashboard Menu**: Ketik `agy menu`, pilih nomor **`7`** (**Manage API profiles and keys**), lalu pilih profil yang ingin Anda aktifkan.
+* **Lewat Dashboard Menu**: Jalankan skrip helper tanpa argumen untuk membuka menu dashboard:
+  ```bash
+  ./.agents/scripts/helper.sh menu
+  ```
+  Pilih nomor **`7`** (**Manage API profiles and keys**), lalu pilih profil yang ingin Anda aktifkan.
 
 ---
 

@@ -381,10 +381,11 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #6: Create comprehensive layman-friendly User Guide
+- **Current Task Target**: Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
+- [/] Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - [x] Implement align_col and get_active_git_profile_details in menu.py
 - [x] Redesign control panel header layout in menu.py
 - [x] Add unit tests for Git profile menu resolution
@@ -398,7 +399,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 - [x] Create task_user_guide.md workflow file
 - [x] Create docs/user_guide.md detailing layman guides
 - [x] Update README.md to index the User Guide
-- [/] Run workspace validation suite
+- [x] Run workspace validation suite
 
 
 
@@ -2199,6 +2200,10 @@ def run(args):
             sys.exit(1)
             
         if test_runner and test_runner != "echo 'No test suite found'":
+            cmd_parts = test_runner.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                test_runner = " ".join(cmd_parts)
             print(f"Running test suite: {test_runner}...")
             proc = subprocess.run(test_runner, shell=True)
             sys.exit(proc.returncode)
@@ -4027,6 +4032,10 @@ def run(args):
             sys.exit(1)
             
         if linter_cmd and linter_cmd != "echo 'No linter found'":
+            cmd_parts = linter_cmd.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                linter_cmd = " ".join(cmd_parts)
             print(f"Running linter command: {linter_cmd}...")
             proc = subprocess.run(linter_cmd, shell=True)
             sys.exit(proc.returncode)
@@ -12257,12 +12266,12 @@ EOF
 # Write helper.ps1 wrapper script
 write_template_safe ".agents/scripts/helper.ps1" << 'EOF'
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$helperPy = Join-Path $scriptPath "cli" "helper.py"
+$helperPy = Join-Path (Join-Path $scriptPath "cli") "helper.py"
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent $scriptPath)
-$venvPython1 = Join-Path $projectRoot ".venv" "Scripts" "python.exe"
-$venvPython2 = Join-Path $projectRoot ".venv" "bin" "python"
-$venvPython3 = Join-Path $projectRoot ".venv" "bin" "python3"
+$venvPython1 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "Scripts") "python.exe"
+$venvPython2 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "bin") "python"
+$venvPython3 = Join-Path (Join-Path (Join-Path $projectRoot ".venv") "bin") "python3"
 
 $pyCmd = ""
 if (Test-Path $venvPython1) {
@@ -12272,18 +12281,17 @@ if (Test-Path $venvPython1) {
 } elseif (Test-Path $venvPython3) {
     $pyCmd = $venvPython3
 } else {
-    # Fallback to system Python
-    if (Get-Command python3 -ErrorAction SilentlyContinue) {
-        $pyCmd = "python3"
-    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
-        $pyVersion = & python -c 'import sys; print(sys.version_info[0])' 2>$null
-        if ($pyVersion -eq "3") {
-            $pyCmd = "python"
-        } else {
-            Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
-            exit 1
+    # Fallback to system Python, testing each command to ensure it's a real Python 3
+    foreach ($cmd in @("python", "python3")) {
+        if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+            $pyVersion = & $cmd -c 'import sys; print(sys.version_info[0])' 2>$null
+            if ($pyVersion -eq "3") {
+                $pyCmd = $cmd
+                break
+            }
         }
-    } else {
+    }
+    if (-not $pyCmd) {
         Write-Error "Error: Python 3 is required to run the Antigravity helper CLI. Please install Python 3 and ensure it is in your PATH."
         exit 1
     }

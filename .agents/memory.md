@@ -19,10 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #6: Create comprehensive layman-friendly User Guide
+- **Current Task Target**: Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
+- [x] Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
 - [x] Implement align_col and get_active_git_profile_details in menu.py
 - [x] Redesign control panel header layout in menu.py
 - [x] Add unit tests for Git profile menu resolution

@@ -74,6 +74,10 @@ def run(args):
             sys.exit(1)
             
         if linter_cmd and linter_cmd != "echo 'No linter found'":
+            cmd_parts = linter_cmd.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                linter_cmd = " ".join(cmd_parts)
             print(f"Running linter command: {linter_cmd}...")
             proc = subprocess.run(linter_cmd, shell=True)
             sys.exit(proc.returncode)
