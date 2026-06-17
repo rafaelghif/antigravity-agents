@@ -19,10 +19,11 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Configure workspace rules and verify stack
-- **State Flag**: `COMPLETED`
+- **Current Task Target**: Resolve issue #10: Strict Rules Enforcement
+- **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
+- [/] Resolve issue #10: Strict Rules Enforcement
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
 
