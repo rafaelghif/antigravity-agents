@@ -779,6 +779,19 @@ def check_local_issues(failed_flag):
 
 def check_base_branch_modification(failed_flag):
     print("Check 17: Base Branch Modification Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
     try:
         current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
     except Exception:
@@ -819,6 +832,19 @@ def check_base_branch_modification(failed_flag):
 
 def check_module_locking(failed_flag):
     print("Check 18: Staged/Modified Files Module Locking Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
     try:
         status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
     except Exception:

@@ -369,8 +369,8 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ---
 
 ## 1. Git State & Infrastructure Runtime
-- **Active Branch**: main
-- **Last Commit Reference**: 57a0715
+- **Active Branch**: issue-10-strict-rules-enforcement
+- **Last Commit Reference**: 48a8334
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -382,10 +382,10 @@ write_template_safe ".agents/memory.md" << 'EOF'
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
 - **Current Task Target**: Resolve issue #10: Strict Rules Enforcement
-- **State Flag**: `IN_PROGRESS`
+- **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [/] Resolve issue #10: Strict Rules Enforcement
+- [x] Resolve issue #10: Strict Rules Enforcement
 - [x] Configure workspace rules and verify stack
 - [x] Run health check doctor
 
@@ -9231,12 +9231,18 @@ def merge_issue(issue_id_str):
                          
     print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
     subprocess.run(["git", "checkout", base_branch])
-    proc_merge = subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    
+    env = os.environ.copy()
+    env["AAC_COMMIT_RUNNING"] = "1"
+    proc_merge = subprocess.run(
+        ["git", "merge", branch_name, "--no-ff", "-m", f"merge({base_branch}): branch '{branch_name}' into '{base_branch}'"],
+        env=env
+    )
     if proc_merge.returncode != 0:
         print(color("\n[WARN] Merge conflict detected! Launching interactive resolution helper...", C_YELLOW))
         resolve_merge_conflicts()
         # Complete the merge commit
-        subprocess.run(["git", "commit", "--no-edit"], check=True)
+        subprocess.run(["git", "commit", "--no-edit"], env=env, check=True)
      
     # 5. Clean up local issue branch
     print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))
@@ -11282,12 +11288,38 @@ def run(args):
         errors += 1
         
     def check_hook(hook_name):
-        hook_path = os.path.join('.git', 'hooks', hook_name)
-        if os.path.isfile(hook_path) and os.access(hook_path, os.X_OK):
-            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed and executable.")
+        import filecmp
+        import shutil
+        agents_dir = utils.get_agents_dir()
+        src = os.path.join(agents_dir, 'hooks', hook_name)
+        dest = os.path.join('.git', 'hooks', hook_name)
+        
+        if not os.path.exists(src):
+            return
+            
+        out_of_sync = False
+        if not os.path.exists(dest):
+            out_of_sync = True
+        elif not os.access(dest, os.X_OK):
+            out_of_sync = True
         else:
-            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing or not executable.")
-            print(f"            To install: cp .agents/hooks/{hook_name} .git/hooks/{hook_name} && chmod +x .git/hooks/{hook_name}")
+            try:
+                if not filecmp.cmp(src, dest, shallow=False):
+                    out_of_sync = True
+            except:
+                out_of_sync = True
+                
+        if out_of_sync:
+            print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Git {hook_name} hook is missing, out-of-sync, or not executable. Auto-healing...")
+            try:
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.copy(src, dest)
+                os.chmod(dest, 0o755)
+                print(f"            [PASS] Git {hook_name} hook auto-healed successfully.")
+            except Exception as e:
+                print(f"            Failed to copy hook: {e}", file=sys.stderr)
+        else:
+            print(f"  {color('[PASS]', C_GREEN + C_BOLD)} {hook_name} Git hook is installed, up-to-date, and executable.")
             
     check_hook("pre-commit")
     check_hook("post-commit")
@@ -12870,6 +12902,19 @@ def check_local_issues(failed_flag):
 
 def check_base_branch_modification(failed_flag):
     print("Check 17: Base Branch Modification Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
     try:
         current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
     except Exception:
@@ -12910,6 +12955,19 @@ def check_base_branch_modification(failed_flag):
 
 def check_module_locking(failed_flag):
     print("Check 18: Staged/Modified Files Module Locking Check")
+    # Check if a merge is in progress (bypasses branch/lock checks)
+    is_merging = False
+    try:
+        git_dir = subprocess.check_output(["git", "rev-parse", "--git-dir"], stderr=subprocess.DEVNULL).decode().strip()
+        if os.path.exists(os.path.join(git_dir, "MERGE_HEAD")):
+            is_merging = True
+    except Exception:
+        pass
+        
+    if is_merging:
+        print("  [PASS] Merge commit in progress. Bypassing check.")
+        return failed_flag
+
     try:
         status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
     except Exception:
@@ -15452,10 +15510,48 @@ fi
 
 # 17. Base Branch Modification Check
 echo "Check 17: Base Branch Modification Check"
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-UNAUTH=0
-if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    UNAUTH=0
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+        STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+        if [ -n "$STATUS_OUT" ]; then
+            while IFS= read -r line || [ -n "$line" ]; do
+                [ -z "$line" ] && continue
+                filepath=$(echo "$line" | cut -c4- | xargs)
+                if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                    continue
+                fi
+                ext="${filepath##*.}"
+                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                    continue
+                fi
+                if [ $UNAUTH -eq 0 ]; then
+                    echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                    UNAUTH=1
+                fi
+                echo "    - $filepath"
+            done <<< "$STATUS_OUT"
+            if [ $UNAUTH -eq 1 ]; then
+                echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
+                FAILED=1
+            fi
+        fi
+    fi
+    if [ $UNAUTH -eq 0 ]; then
+        echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
+    fi
+fi
+
+# 18. Staged/Modified Files Module Locking Check
+echo "Check 18: Staged/Modified Files Module Locking Check"
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
     STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+    MOD_FILES=""
     if [ -n "$STATUS_OUT" ]; then
         while IFS= read -r line || [ -n "$line" ]; do
             [ -z "$line" ] && continue
@@ -15467,62 +15563,32 @@ if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
             if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
                 continue
             fi
-            if [ $UNAUTH -eq 0 ]; then
-                echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
-                UNAUTH=1
-            fi
-            echo "    - $filepath"
+            MOD_FILES="$MOD_FILES $filepath"
         done <<< "$STATUS_OUT"
-        if [ $UNAUTH -eq 1 ]; then
-            echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
-            FAILED=1
-        fi
     fi
-fi
-if [ $UNAUTH -eq 0 ]; then
-    echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
-fi
 
-# 18. Staged/Modified Files Module Locking Check
-echo "Check 18: Staged/Modified Files Module Locking Check"
-STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
-MOD_FILES=""
-if [ -n "$STATUS_OUT" ]; then
-    while IFS= read -r line || [ -n "$line" ]; do
-        [ -z "$line" ] && continue
-        filepath=$(echo "$line" | cut -c4- | xargs)
-        if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
-            continue
-        fi
-        ext="${filepath##*.}"
-        if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
-            continue
-        fi
-        MOD_FILES="$MOD_FILES $filepath"
-    done <<< "$STATUS_OUT"
-fi
-
-if [ -z "$MOD_FILES" ]; then
-    echo "  [PASS] No modified files require locking."
-else
-    LOCKS_ERR=0
-    for f in $MOD_FILES; do
-        if [[ "$f" != *"/"* ]]; then
-            req_lock="root"
-        else
-            req_lock=$(echo "$f" | cut -d'/' -f1)
-        fi
-        
-        if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
-            echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
-            echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
-            LOCKS_ERR=1
-        fi
-    done
-    if [ $LOCKS_ERR -eq 1 ]; then
-        FAILED=1
+    if [ -z "$MOD_FILES" ]; then
+        echo "  [PASS] No modified files require locking."
     else
-        echo "  [PASS] All modified files are properly locked."
+        LOCKS_ERR=0
+        for f in $MOD_FILES; do
+            if [[ "$f" != *"/"* ]]; then
+                req_lock="root"
+            else
+                req_lock=$(echo "$f" | cut -d'/' -f1)
+            fi
+            
+            if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
+                echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
+                echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
+                LOCKS_ERR=1
+            fi
+        done
+        if [ $LOCKS_ERR -eq 1 ]; then
+            FAILED=1
+        else
+            echo "  [PASS] All modified files are properly locked."
+        fi
     fi
 fi
 

@@ -1021,12 +1021,18 @@ def merge_issue(issue_id_str):
                          
     print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
     subprocess.run(["git", "checkout", base_branch])
-    proc_merge = subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    
+    env = os.environ.copy()
+    env["AAC_COMMIT_RUNNING"] = "1"
+    proc_merge = subprocess.run(
+        ["git", "merge", branch_name, "--no-ff", "-m", f"merge({base_branch}): branch '{branch_name}' into '{base_branch}'"],
+        env=env
+    )
     if proc_merge.returncode != 0:
         print(color("\n[WARN] Merge conflict detected! Launching interactive resolution helper...", C_YELLOW))
         resolve_merge_conflicts()
         # Complete the merge commit
-        subprocess.run(["git", "commit", "--no-edit"], check=True)
+        subprocess.run(["git", "commit", "--no-edit"], env=env, check=True)
      
     # 5. Clean up local issue branch
     print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))

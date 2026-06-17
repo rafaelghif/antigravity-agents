@@ -668,10 +668,48 @@ fi
 
 # 17. Base Branch Modification Check
 echo "Check 17: Base Branch Modification Check"
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
-UNAUTH=0
-if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+    UNAUTH=0
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+        STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+        if [ -n "$STATUS_OUT" ]; then
+            while IFS= read -r line || [ -n "$line" ]; do
+                [ -z "$line" ] && continue
+                filepath=$(echo "$line" | cut -c4- | xargs)
+                if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                    continue
+                fi
+                ext="${filepath##*.}"
+                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                    continue
+                fi
+                if [ $UNAUTH -eq 0 ]; then
+                    echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                    UNAUTH=1
+                fi
+                echo "    - $filepath"
+            done <<< "$STATUS_OUT"
+            if [ $UNAUTH -eq 1 ]; then
+                echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
+                FAILED=1
+            fi
+        fi
+    fi
+    if [ $UNAUTH -eq 0 ]; then
+        echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
+    fi
+fi
+
+# 18. Staged/Modified Files Module Locking Check
+echo "Check 18: Staged/Modified Files Module Locking Check"
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+    echo "  [PASS] Merge commit in progress. Bypassing check."
+else
     STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+    MOD_FILES=""
     if [ -n "$STATUS_OUT" ]; then
         while IFS= read -r line || [ -n "$line" ]; do
             [ -z "$line" ] && continue
@@ -683,62 +721,32 @@ if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
             if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
                 continue
             fi
-            if [ $UNAUTH -eq 0 ]; then
-                echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
-                UNAUTH=1
-            fi
-            echo "    - $filepath"
+            MOD_FILES="$MOD_FILES $filepath"
         done <<< "$STATUS_OUT"
-        if [ $UNAUTH -eq 1 ]; then
-            echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
-            FAILED=1
-        fi
     fi
-fi
-if [ $UNAUTH -eq 0 ]; then
-    echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
-fi
 
-# 18. Staged/Modified Files Module Locking Check
-echo "Check 18: Staged/Modified Files Module Locking Check"
-STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
-MOD_FILES=""
-if [ -n "$STATUS_OUT" ]; then
-    while IFS= read -r line || [ -n "$line" ]; do
-        [ -z "$line" ] && continue
-        filepath=$(echo "$line" | cut -c4- | xargs)
-        if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
-            continue
-        fi
-        ext="${filepath##*.}"
-        if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
-            continue
-        fi
-        MOD_FILES="$MOD_FILES $filepath"
-    done <<< "$STATUS_OUT"
-fi
-
-if [ -z "$MOD_FILES" ]; then
-    echo "  [PASS] No modified files require locking."
-else
-    LOCKS_ERR=0
-    for f in $MOD_FILES; do
-        if [[ "$f" != *"/"* ]]; then
-            req_lock="root"
-        else
-            req_lock=$(echo "$f" | cut -d'/' -f1)
-        fi
-        
-        if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
-            echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
-            echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
-            LOCKS_ERR=1
-        fi
-    done
-    if [ $LOCKS_ERR -eq 1 ]; then
-        FAILED=1
+    if [ -z "$MOD_FILES" ]; then
+        echo "  [PASS] No modified files require locking."
     else
-        echo "  [PASS] All modified files are properly locked."
+        LOCKS_ERR=0
+        for f in $MOD_FILES; do
+            if [[ "$f" != *"/"* ]]; then
+                req_lock="root"
+            else
+                req_lock=$(echo "$f" | cut -d'/' -f1)
+            fi
+            
+            if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
+                echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
+                echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
+                LOCKS_ERR=1
+            fi
+        done
+        if [ $LOCKS_ERR -eq 1 ]; then
+            FAILED=1
+        else
+            echo "  [PASS] All modified files are properly locked."
+        fi
     fi
 fi
 
