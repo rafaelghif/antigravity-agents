@@ -56,7 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized validation performance by adding standard virtual envs, build targets, and vendor directories (`venv`, `env`, `target`, `vendor`, `out`) to search exclusions, preventing token budget bloat and massive scan slowdowns.
 
 ### Fixed
+- Resolved Windows script execution compatibility when 'sh' is not in the system PATH by dynamically locating the Git installation's sh executable.
 - Fixed empty Git config email matching bug in secure push command.
+
 - Made Git profiles properties parser in `commit` command robust to optional whitespace surrounding the `=` operator.
 - Fixed a logical precedence bug with `-o` in `find` queries inside `validate.sh` that was causing the script to search inside excluded directories like `node_modules` and `.agents`.
 - Implemented Python environment access scan (`os.environ`/`os.getenv`) in `validate.sh` to enforce architectural layer boundaries on Python projects.

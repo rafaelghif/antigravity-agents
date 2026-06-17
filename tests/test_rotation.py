@@ -10,6 +10,13 @@ import time
 # Helper paths
 REPO_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 AGENTS_DIR = os.path.join(REPO_DIR, ".agents")
+
+# Setup CLI import path
+cli_dir = os.path.join(AGENTS_DIR, "scripts", "cli")
+if cli_dir not in sys.path:
+    sys.path.insert(0, cli_dir)
+import utils
+
 API_KEYS_PATH = os.path.join(AGENTS_DIR, "api_keys")
 ACTIVE_KEYS_PATH = os.path.join(AGENTS_DIR, "active_api_keys")
 ACTIVE_KEYS_PS1_PATH = os.path.join(AGENTS_DIR, "active_api_keys.ps1")
@@ -88,7 +95,7 @@ def run_bash_wrapper_test():
     
     # Run: wrapper.sh python3 tests/test_rotation.py --mock-command
     if os.name == 'nt':
-        cmd = ['sh', wrapper_path, sys.executable, __file__, "--mock-command"]
+        cmd = [utils.get_sh_executable(), wrapper_path, sys.executable, __file__, "--mock-command"]
     else:
         cmd = [wrapper_path, sys.executable, __file__, "--mock-command"]
     print(f"Running: {' '.join(cmd)}")
@@ -115,7 +122,7 @@ def run_bash_wrapper_test():
     
     # Run: wrapper.sh python3 tests/test_rotation.py --mock-command-always-fail
     if os.name == 'nt':
-        cmd = ['sh', wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
+        cmd = [utils.get_sh_executable(), wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
     else:
         cmd = [wrapper_path, sys.executable, __file__, "--mock-command-always-fail"]
     print(f"Running: {' '.join(cmd)}")
@@ -153,7 +160,7 @@ def run_bash_wrapper_test():
     
     # Now run rotate again with --rate-limited. It should wait and select mock_p1
     if os.name == 'nt':
-        proc = subprocess.run(['sh', helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
+        proc = subprocess.run([utils.get_sh_executable(), helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
     else:
         proc = subprocess.run([helper_path, "api-profile", "rotate", "--rate-limited"], capture_output=True, text=True)
     print("Stdout:")

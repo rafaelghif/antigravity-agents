@@ -158,7 +158,8 @@ def run(args):
     print("Running autonomous stack reconstruction...")
     recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
     if os.path.exists(recon_sh):
-        subprocess.run([recon_sh, "-f"])
+        utils.run_shell_script(recon_sh, ["-f"])
+
         
     print("==========================================================")
     print("Migration Complete! Workspace successfully upgraded.")
