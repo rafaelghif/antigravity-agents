@@ -19,14 +19,14 @@
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #2: Add support for Gitea and GitLab issue synchronization
+- **Current Task Target**: Resolve issue #3: Add Git profile and credential status display to interactive menu
 - **State Flag**: `COMPLETED`
 
 ### Sprint Tasks Checklist
-- [x] Implement provider auto-detection and token resolution in issue.py
-- [x] Implement GitLab and Gitea API sync functions in issue.py
-- [x] Update issue creation, metadata saving, and closing commands to use the unified sync engine
-- [x] Add unit tests for GitLab and Gitea issue synchronization
+- [/] Implement align_col and get_active_git_profile_details in menu.py
+- [ ] Redesign control panel header layout in menu.py
+- [ ] Add unit tests for Git profile menu resolution
+
 
 
 

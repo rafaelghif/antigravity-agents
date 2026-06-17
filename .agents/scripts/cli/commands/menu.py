@@ -15,11 +15,111 @@ C_GRAY = '\033[90m'
 C_BOLD = '\033[1m'
 C_END = '\033[0m'
 
+def safe_print(*args, **kwargs):
+    file = kwargs.get('file', sys.stdout)
+    sep = kwargs.get('sep', ' ')
+    end = kwargs.get('end', '\n')
+    
+    text = sep.join(str(arg) for arg in args)
+    try:
+        file.write(text + end)
+        file.flush()
+    except UnicodeEncodeError:
+        replacements = {
+            "🚀": "[APP]",
+            "👤": "[Git]",
+            "🔑": "[API]",
+            "📝": "[ADR]",
+            "📖": "[DOC]",
+            "🧹": "[Clean]",
+            "📦": "[Archive]",
+            "🔍": "[Scan]",
+            "🔓": "[Unlocked]",
+            "🔒": "[Locked]",
+            "💾": "[Commit]",
+            "🩺": "[Doctor]",
+            "🛡️": "[Validate]",
+            "⚠️": "[WARN]",
+            "👥": "[Profiles]",
+            "✅": "OK",
+            "❌": "ERR",
+            "█": "#",
+            "░": "-"
+        }
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+        try:
+            encoding = getattr(file, 'encoding', None) or 'ascii'
+            file.write(text.encode(encoding, errors='replace').decode(encoding) + end)
+            file.flush()
+        except:
+            pass
+
+print = safe_print
+
 def color(text, ansi_code):
     """Wrap text in ANSI color codes if stdout is a TTY."""
     if sys.stdout.isatty():
         return f"{ansi_code}{text}{C_END}"
     return text
+
+def align_col(text, raw_text, width=25):
+    """Align column visually based on raw text length, bypassing ANSI escape codes."""
+    padding_len = width - len(raw_text)
+    return text + (" " * max(0, padding_len))
+
+def get_active_git_profile_details(email):
+    """Resolve active Git profile name, user name, and remote token status."""
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
+        except:
+            pass
+            
+    profile_name = "default"
+    git_name = "Local Developer"
+    
+    # Try to find matching profile prefix by email
+    for k, v in config.items():
+        if k.endswith('.email') and v == email:
+            profile_name = k.rsplit('.email', 1)[0]
+            break
+            
+    if profile_name != "default":
+        git_name = config.get(f"{profile_name}.name", "Local Developer")
+    else:
+        # fallback to git config
+        try:
+            git_name = subprocess.check_output(
+                ["git", "config", "user.name"],
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            pass
+            
+    if not git_name:
+        git_name = "Local Developer"
+        
+    # Resolve token existence
+    github_ok = f"{profile_name}.github_token" in config
+    gitlab_ok = f"{profile_name}.gitlab_token" in config
+    gitea_ok = f"{profile_name}.gitea_token" in config
+    
+    return profile_name, git_name, github_ok, gitlab_ok, gitea_ok
 
 def get_progress_bar(pct, length=15):
     """Generate a visual progress bar string."""
@@ -250,18 +350,34 @@ def run(args):
         print(color("|", C_BLUE) + color(f"   🚀  ANTIGRAVITY AGENT WORKSPACE CONTROL PANEL   ", C_BOLD + C_HEADER) + " "*7 + color("|", C_BLUE))
         print(color("+" + "="*58 + "+", C_BLUE))
         
+        profile_name, git_name, github_ok, gitlab_ok, gitea_ok = get_active_git_profile_details(email)
+        
         branch_colored = color(branch, C_GREEN if branch != "unknown" else C_GRAY)
         email_colored = color(email, C_CYAN if email != "not set" else C_GRAY)
         api_profile_colored = color(api_profile, C_GREEN)
+        profile_colored = color(profile_name, C_CYAN + C_BOLD)
+        git_name_colored = color(git_name, C_CYAN)
+        
+        github_status = color("[✅]", C_GREEN) if github_ok else color("[❌]", C_RED)
+        gitlab_status = color("[✅]", C_GREEN) if gitlab_ok else color("[❌]", C_RED)
+        gitea_status = color("[✅]", C_GREEN) if gitea_ok else color("[❌]", C_RED)
+        
+        tokens_str = f"github {github_status}  gitlab {gitlab_status}  gitea {gitea_status}"
         
         if locks:
             locks_colored = color(f"⚠️  Locked: {', '.join(locks)}", C_YELLOW)
         else:
             locks_colored = color("🔓 Open", C_GREEN)
             
-        print(f"  Branch:      {branch_colored:<25} |  API Profile:  {api_profile_colored}")
-        print(f"  Git Email:   {email_colored:<25} |  Locks:        {locks_colored}")
-        print(f"  Token Limit: {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
+        col1_branch = align_col(branch_colored, branch, width=25)
+        col1_profile = align_col(profile_colored, profile_name, width=25)
+        col1_name = align_col(git_name_colored, git_name, width=25)
+        col1_email = align_col(email_colored, email, width=25)
+        
+        print(f"  Branch:      {col1_branch} |  API Profile:  {api_profile_colored}")
+        print(f"  Git Profile: {col1_profile} |  Locks:        {locks_colored}")
+        print(f"  Git Name:    {col1_name} |  Active Tokens: {tokens_str}")
+        print(f"  Git Email:   {col1_email} |  Token Limit:  {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
         print(color("+" + "-"*58 + "+", C_BLUE))
         
         print(color("\n  --- 🛠️  DAILY DEVELOPMENT ---", C_BOLD + C_BLUE))

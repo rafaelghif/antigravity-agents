@@ -75,5 +75,38 @@ class TestMenuCommand(unittest.TestCase):
         mock_run_subcommand.assert_any_call("lock", ["core"])
         mock_run_subcommand.assert_any_call("unlock", ["core"])
 
+    def test_git_profile_details_resolution(self):
+        # Test align_col
+        res = menu.align_col("main_colored", "main", width=10)
+        self.assertEqual(res, "main_colored      ")
+        
+        # Test get_active_git_profile_details
+        import tempfile
+        import shutil
+        test_dir = tempfile.mkdtemp()
+        
+        # Create git_profiles file in temp dir
+        profiles_file = os.path.join(test_dir, 'git_profiles')
+        with open(profiles_file, 'w', encoding='utf-8') as f:
+            f.write("work.name=Alice Dev\nwork.email=alice@company.com\nwork.github_token=gh_val\nwork.gitlab_token=gl_val\n")
+            
+        with patch('utils.get_agents_dir', return_value=test_dir):
+            p_name, git_name, gh, gl, gt = menu.get_active_git_profile_details("alice@company.com")
+            self.assertEqual(p_name, "work")
+            self.assertEqual(git_name, "Alice Dev")
+            self.assertTrue(gh)
+            self.assertTrue(gl)
+            self.assertFalse(gt)
+            
+            # Non-existent profile
+            p_name, git_name, gh, gl, gt = menu.get_active_git_profile_details("unknown@email.com")
+            self.assertEqual(p_name, "default")
+            self.assertEqual(git_name, "Local Developer")
+            self.assertFalse(gh)
+            self.assertFalse(gl)
+            self.assertFalse(gt)
+            
+        shutil.rmtree(test_dir)
+
 if __name__ == '__main__':
     unittest.main()
