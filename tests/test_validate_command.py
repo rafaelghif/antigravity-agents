@@ -86,5 +86,67 @@ class TestValidateCommand(unittest.TestCase):
             validate.run([])
             mock_exit.assert_called_once_with(1)
 
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    def test_base_branch_modification_failed(self, mock_run, mock_check_output):
+        def side_effect(args, **kwargs):
+            if "remote" in args:
+                return b"origin\n"
+            elif "rev-parse" in args:
+                if "--abbrev-ref" in args:
+                    return b"main\n"
+                return b"main\n"
+            elif "status" in args:
+                return b" M src/core.py\n"
+            return b""
+        mock_check_output.side_effect = side_effect
+        
+        with patch('sys.exit') as mock_exit:
+            validate.run([])
+            mock_exit.assert_called_once_with(1)
+
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    def test_module_locking_failed(self, mock_run, mock_check_output):
+        def side_effect(args, **kwargs):
+            if "remote" in args:
+                return b"origin\n"
+            elif "rev-parse" in args:
+                if "--abbrev-ref" in args:
+                    return b"issue-10-test\n"
+                return b"main\n"
+            elif "status" in args:
+                return b" M src/core.py\n"
+            return b""
+        mock_check_output.side_effect = side_effect
+        
+        with patch('sys.exit') as mock_exit:
+            validate.run([])
+            mock_exit.assert_called_once_with(1)
+
+    @patch('subprocess.check_output')
+    @patch('subprocess.run')
+    def test_issue_alignment_failed(self, mock_run, mock_check_output):
+        def side_effect(args, **kwargs):
+            if "remote" in args:
+                return b"origin\n"
+            elif "rev-parse" in args:
+                if "--abbrev-ref" in args:
+                    return b"issue-99-mismatch\n"
+                return b"main\n"
+            elif "status" in args:
+                return b""
+            return b""
+        mock_check_output.side_effect = side_effect
+        
+        # Write issue file #99
+        os.makedirs(os.path.join(self.agents_dir, "issues"), exist_ok=True)
+        with open(os.path.join(self.agents_dir, "issues", "issue_099.md"), 'w') as f:
+            f.write("---\nid: 99\ntitle: \"Mismatch Test\"\nstatus: open\nassignee: Agent\ncreated_at: 2026-06-17\nclosed_at: null\n---\n")
+            
+        with patch('sys.exit') as mock_exit:
+            validate.run([])
+            mock_exit.assert_called_once_with(1)
+
 if __name__ == '__main__':
     unittest.main()

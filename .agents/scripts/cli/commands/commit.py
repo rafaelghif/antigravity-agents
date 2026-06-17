@@ -246,7 +246,9 @@ def run(args):
     # Conventional Commit
     commit_msg = f"{commit_type}({scope}): {desc}"
     print(f"Executing conventional commit: '{commit_msg}'...")
-    proc = subprocess.run(["git", "commit", "-m", commit_msg])
+    env = os.environ.copy()
+    env["AAC_COMMIT_RUNNING"] = "1"
+    proc = subprocess.run(["git", "commit", "-m", commit_msg], env=env)
     if proc.returncode == 0:
         print("Commit successful.")
         
@@ -272,7 +274,7 @@ def run(args):
                 
                 if staged_any:
                     print("Amending commit to include auto-closed issue files...")
-                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"])
+                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"], env=env)
                     print("Commit amended successfully.")
             except Exception as e:
                 print(f"Warning: Failed to auto-close issues: {e}", file=sys.stderr)

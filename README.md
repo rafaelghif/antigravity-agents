@@ -93,6 +93,7 @@ If you are a developer, you only need to know these daily essentials:
   ```bash
   ./.agents/scripts/helper.sh validate
   ```
+  *(runs 19 comprehensive compliance checks, including credential scans, base-branch modifications check, domain-level lock validation, issue branch alignment, and git profile verification)*
 
 ---
 

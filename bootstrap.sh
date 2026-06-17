@@ -370,7 +370,7 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 1. Git State & Infrastructure Runtime
 - **Active Branch**: main
-- **Last Commit Reference**: 3708ebf
+- **Last Commit Reference**: 57a0715
 - **Active Pull Request Target**: `main`
 - **Infrastructure Health Status**:
   - Database: `HEALTHY`
@@ -381,39 +381,21 @@ write_template_safe ".agents/memory.md" << 'EOF'
 
 ## 2. Active Epic & Sub-Tasks Execution Matrix
 - **Primary Epic**: Initial Setup
-- **Current Task Target**: Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
+- **Current Task Target**: Resolve issue #10: Strict Rules Enforcement
 - **State Flag**: `IN_PROGRESS`
 
 ### Sprint Tasks Checklist
-- [/] Resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge
-- [x] Resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation
-- [x] Resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation
-- [x] Implement align_col and get_active_git_profile_details in menu.py
-- [x] Redesign control panel header layout in menu.py
-- [x] Add unit tests for Git profile menu resolution
-- [x] Conduct /grill-me design interview for GitLab/Gitea rotation
-- [x] Implement pure-Python workspace validation rules in validate.py
-- [x] Update Git hooks to call Python validator directly
-- [x] Add unit tests for Python validation checks
-- [x] Create task_cli_auth_onboarding_documentation.md workflow file
-- [x] Update docs/setup_guide.md and README.md with CLI auth workflows
-- [x] Run workspace validation suite
-- [x] Create task_user_guide.md workflow file
-- [x] Create docs/user_guide.md detailing layman guides
-- [x] Update README.md to index the User Guide
-- [x] Run workspace validation suite
-
-
-
-
+- [/] Resolve issue #10: Strict Rules Enforcement
+- [x] Configure workspace rules and verify stack
+- [x] Run health check doctor
 
 ---
 
 ## 3. Relayed Context & Handover Notes
-- **Last Active Agent**: Antigravity
-- **Last Action Completed**: Completed /grill-me alignment interview and saved the plan to task_gitlab_gitea_rotation.md.
-- **Next Planned Action**: Implement the Gitea/GitLab rotation & sync changes based on the execution plan.
-- **Blockers / Runtime Notes**: None. Workspace is fully validated.
+- **Last Active Agent**: None
+- **Last Action Completed**: Initialized clean Antigravity Agent Core workspace.
+- **Next Planned Action**: None. Ready for new features or tasks.
+- **Blockers / Runtime Notes**: None.
 
 ---
 
@@ -8231,6 +8213,9 @@ import sys
 import re
 from datetime import datetime
 import utils
+import urllib.request
+import urllib.error
+import json
 
 # ANSI color codes
 C_GREEN = '\033[92m'
@@ -8240,6 +8225,288 @@ C_GRAY = '\033[90m'
 C_BOLD = '\033[1m'
 C_CYAN = '\033[96m'
 C_END = '\033[0m'
+
+def get_active_profile_token(provider):
+    # 1. Get current git user email
+    import subprocess
+    try:
+        git_email = subprocess.check_output(
+            ["git", "config", "user.email"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        return None, None
+        
+    if not git_email:
+        return None, None
+        
+    # 2. Find profiles file
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    if not profiles_file:
+        return None, None
+        
+    # 3. Parse profiles
+    config = {}
+    try:
+        with open(profiles_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip() and not line.strip().startswith('#') and '=' in line:
+                    parts = line.strip().split('=', 1)
+                    config[parts[0].strip()] = parts[1].strip()
+    except:
+        return None, None
+        
+    # 4. Find profile prefix that matches git_email
+    profile_prefix = None
+    for k, v in config.items():
+        if k.endswith('.email') and v == git_email:
+            profile_prefix = k.rsplit('.email', 1)[0]
+            break
+            
+    if not profile_prefix:
+        return None, None
+        
+    # 5. Get token & custom URL based on provider
+    token_key = f"{profile_prefix}.{provider}_token"
+    url_key = f"{profile_prefix}.{provider}_url"
+    return config.get(token_key), config.get(url_key)
+
+def get_provider_and_repo():
+    import subprocess
+    try:
+        remote_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"], 
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except:
+        return None
+        
+    if not remote_url:
+        return None
+        
+    # GitHub: github.com[:/]([^/]+)/([^/.]+)(?:\.git)?$
+    if "github.com" in remote_url:
+        m = re.search(r'github\.com[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "github", "https://api.github.com", m.group(1), m.group(2)
+            
+    # GitLab: gitlab.com[:/]([^/]+)/([^/.]+)(?:\.git)?$ (or custom domain with gitlab in it)
+    elif "gitlab" in remote_url:
+        domain = "gitlab.com"
+        m_domain = re.search(r'(?:https?://|git@)([^:/]+)', remote_url)
+        if m_domain:
+            domain = m_domain.group(1)
+            
+        url_prefix = f"https://{domain}"
+        if remote_url.startswith("http"):
+            m_prefix = re.match(r'(https?://[^/]+)', remote_url)
+            if m_prefix:
+                url_prefix = m_prefix.group(1)
+                
+        m = re.search(r'[^:/]+[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "gitlab", url_prefix, m.group(1), m.group(2)
+            
+    # Default to Gitea/local if it's Gitea or custom local/server git hosting
+    else:
+        domain = "localhost:3000"
+        m_domain = re.search(r'(?:https?://|git@)([^:/]+)(?::\d+)?', remote_url)
+        if m_domain:
+            domain = m_domain.group(1)
+            m_port = re.search(r'(?:https?://|git@)[^:/]+:(\d+)', remote_url)
+            if m_port:
+                domain = f"{domain}:{m_port.group(1)}"
+        
+        protocol = "http"
+        if remote_url.startswith("https"):
+            protocol = "https"
+            
+        url_prefix = f"{protocol}://{domain}"
+        if remote_url.startswith("http"):
+            m_prefix = re.match(r'(https?://[^/]+)', remote_url)
+            if m_prefix:
+                url_prefix = m_prefix.group(1)
+                
+        m = re.search(r'[^:/]+[:/]([^/]+)/([^/.]+)(?:\.git)?$', remote_url)
+        if m:
+            return "gitea", url_prefix, m.group(1), m.group(2)
+            
+    return None
+
+def sync_remote_issue(action, title=None, body=None, remote_issue_number=None):
+    # 1. Resolve Git remote repository info
+    repo_info = get_provider_and_repo()
+    if not repo_info:
+        return None
+        
+    provider, default_url, owner, repo = repo_info
+
+    # 2. Find git_profiles config file
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
+        except:
+            pass
+            
+    keys = sorted(list(set(k.split('.')[0] for k in config.keys() if k.endswith('.name'))))
+    max_tries = len(keys) if keys else 1
+    
+    for attempt in range(max_tries):
+        token, url_override = get_active_profile_token(provider)
+        
+        res_data = None
+        if token:
+            base_url = url_override if url_override else default_url
+            headers = {
+                "User-Agent": "Antigravity-Agent-Helper"
+            }
+            
+            import urllib.parse
+            import urllib.request
+            import urllib.error
+            
+            if provider == "github":
+                headers["Authorization"] = f"Bearer {token}"
+                headers["Accept"] = "application/vnd.github+json"
+                headers["X-GitHub-Api-Version"] = "2022-11-28"
+                
+                if action == "create":
+                    url = f"{base_url}/repos/{owner}/{repo}/issues"
+                    data = {"title": title, "body": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/repos/{owner}/{repo}/issues/{remote_issue_number}"
+                    data = {"state": "closed"}
+                    method = "PATCH"
+                else:
+                    return None
+                    
+            elif provider == "gitlab":
+                headers["PRIVATE-TOKEN"] = token
+                headers["Content-Type"] = "application/json"
+                
+                project_path = urllib.parse.quote(f"{owner}/{repo}", safe="")
+                
+                if action == "create":
+                    url = f"{base_url}/api/v4/projects/{project_path}/issues"
+                    data = {"title": title, "description": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/api/v4/projects/{project_path}/issues/{remote_issue_number}"
+                    data = {"state_event": "close"}
+                    method = "PUT"
+                else:
+                    return None
+                    
+            elif provider == "gitea":
+                headers["Authorization"] = f"token {token}"
+                headers["Content-Type"] = "application/json"
+                
+                if action == "create":
+                    url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues"
+                    data = {"title": title, "body": body or ""}
+                    method = "POST"
+                elif action == "close":
+                    if not remote_issue_number:
+                        return None
+                    url = f"{base_url}/api/v1/repos/{owner}/{repo}/issues/{remote_issue_number}"
+                    data = {"state": "closed"}
+                    method = "PATCH"
+                else:
+                    return None
+            else:
+                return None
+                
+            req_data = json.dumps(data).encode('utf-8')
+            req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
+            
+            try:
+                with urllib.request.urlopen(req) as response:
+                    res_data = json.loads(response.read().decode('utf-8'))
+                    if "number" in res_data:
+                        res_data["remote_id"] = res_data["number"]
+                    elif "iid" in res_data:
+                        res_data["remote_id"] = res_data["iid"]
+                    return res_data
+            except urllib.error.HTTPError as e:
+                print(color(f"\n{provider.upper()} API Error ({e.code}): {e.reason}", C_YELLOW), file=sys.stderr)
+                try:
+                    err_body = e.read().decode('utf-8')
+                    print(color(f"Details: {err_body}", C_GRAY), file=sys.stderr)
+                except:
+                    pass
+            except Exception as e:
+                print(color(f"\nWarning: Failed to connect to {provider.upper()} API: {e}", C_YELLOW), file=sys.stderr)
+        else:
+            print(color(f"\nWarning: Token for remote provider '{provider}' is not configured in the active profile.", C_YELLOW), file=sys.stderr)
+            
+        # Rotate to the next profile locally if sync failed
+        if attempt < max_tries - 1:
+            import subprocess
+            try:
+                git_email = subprocess.check_output(
+                    ["git", "config", "user.email"], 
+                    stderr=subprocess.DEVNULL
+                ).decode().strip()
+            except:
+                git_email = ""
+                
+            selected_idx = 0
+            for i, k in enumerate(keys):
+                p_e = config.get(f"{k}.email", "")
+                if p_e == git_email:
+                    selected_idx = (i + 1) % len(keys)
+                    break
+                    
+            next_profile = keys[selected_idx]
+            p_n = config[f"{next_profile}.name"]
+            p_e = config.get(f"{next_profile}.email", "")
+            p_s = config.get(f"{next_profile}.ssh_key", "")
+            
+            print(color(f"\n[INFO] Rotating local Git configuration to profile '{next_profile}' and retrying sync...", C_YELLOW))
+            try:
+                subprocess.run(["git", "config", "--local", "user.name", p_n], check=True)
+                subprocess.run(["git", "config", "--local", "user.email", p_e], check=True)
+                if p_s:
+                    resolved_ssh = os.path.expanduser(p_s)
+                    if os.path.exists(resolved_ssh):
+                        subprocess.run(["git", "config", "--local", "core.sshCommand", f"ssh -i \"{p_s}\" -o IdentitiesOnly=yes"], check=True)
+                    else:
+                        subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+                else:
+                    subprocess.run(["git", "config", "--local", "--unset", "core.sshCommand"], stderr=subprocess.DEVNULL)
+            except Exception as rotation_err:
+                print(color(f"Warning: Failed to rotate Git profile locally: {rotation_err}", C_YELLOW), file=sys.stderr)
+                break
+                
+    return None
+
 
 def color(text, ansi_code):
     if sys.stdout.isatty():
@@ -8341,12 +8608,32 @@ def create_issue(title, description="No description provided."):
         if ids:
             next_id = max(ids) + 1
             
+    # Try to sync to Remote Issues
+    remote_id = None
+    provider = None
+    repo_info = get_provider_and_repo()
+    if repo_info:
+        provider = repo_info[0]
+        token, _ = get_active_profile_token(provider)
+        if token:
+            res = sync_remote_issue("create", title=title, body=description)
+            if res and "remote_id" in res:
+                remote_id = res["remote_id"]
+                print(color(f"  [SUCCESS] Synchronized to {provider.upper()}: Issue #{remote_id} created.", C_GREEN))
+            else:
+                print(color(f"  [WARNING] {provider.upper()} integration configured but synchronization failed.", C_YELLOW))
+
     filename = f"issue_{next_id:03d}.md"
     file_path = os.path.join(issues_dir, filename)
     created_at = datetime.now().strftime("%Y-%m-%d")
     
     content = f"""---
 id: {next_id}
+github_id: {remote_id if (remote_id and provider == 'github') else 'null'}
+gitlab_id: {remote_id if (remote_id and provider == 'gitlab') else 'null'}
+gitea_id: {remote_id if (remote_id and provider == 'gitea') else 'null'}
+remote_id: {remote_id if remote_id else 'null'}
+remote_provider: {provider if remote_id else 'null'}
 title: "{title}"
 status: open
 assignee: Agent
@@ -8388,8 +8675,49 @@ def close_issue(issue_id_str):
         
     closed_at = datetime.now().strftime("%Y-%m-%d")
     
+    # Try to close on remote if remote_id or provider-specific id is set
+    github_id_val = meta.get("github_id", "null")
+    gitlab_id_val = meta.get("gitlab_id", "null")
+    gitea_id_val = meta.get("gitea_id", "null")
+    remote_id_val = meta.get("remote_id", "null")
+    remote_provider_val = meta.get("remote_provider", "null")
+    
+    resolved_id = None
+    resolved_provider = None
+    
+    if remote_id_val and remote_id_val != "null" and remote_id_val != "None":
+        resolved_id = remote_id_val
+        resolved_provider = remote_provider_val
+    elif github_id_val and github_id_val != "null" and github_id_val != "None":
+        resolved_id = github_id_val
+        resolved_provider = "github"
+    elif gitlab_id_val and gitlab_id_val != "null" and gitlab_id_val != "None":
+        resolved_id = gitlab_id_val
+        resolved_provider = "gitlab"
+    elif gitea_id_val and gitea_id_val != "null" and gitea_id_val != "None":
+        resolved_id = gitea_id_val
+        resolved_provider = "gitea"
+        
+    if resolved_id and resolved_provider:
+        try:
+            gh_num = int(resolved_id)
+            repo_info = get_provider_and_repo()
+            if repo_info and repo_info[0] == resolved_provider:
+                gh_res = sync_remote_issue("close", remote_issue_number=gh_num)
+                if gh_res:
+                    print(color(f"  [SUCCESS] Synchronized to {resolved_provider.upper()}: Closed Issue #{gh_num}.", C_GREEN))
+            else:
+                print(color(f"  [INFO] Bypassing remote sync: Current provider does not match issue's remote provider '{resolved_provider}'.", C_YELLOW))
+        except Exception as e:
+            print(color(f"  [WARNING] Failed to close issue on {resolved_provider.upper()}: {e}", C_YELLOW))
+            
     content = f"""---
 id: {issue_id}
+github_id: {github_id_val if github_id_val else 'null'}
+gitlab_id: {gitlab_id_val if gitlab_id_val else 'null'}
+gitea_id: {gitea_id_val if gitea_id_val else 'null'}
+remote_id: {remote_id_val if remote_id_val else 'null'}
+remote_provider: {remote_provider_val if remote_provider_val else 'null'}
 title: "{meta.get('title', 'No Title')}"
 status: closed
 assignee: {meta.get('assignee', 'Agent')}
@@ -8477,8 +8805,18 @@ def checkout_issue(issue_id_str):
     meta["assignee"] = git_user
     
     closed_at_str = meta.get("closed_at", "null")
+    github_id_val = meta.get("github_id", "null")
+    gitlab_id_val = meta.get("gitlab_id", "null")
+    gitea_id_val = meta.get("gitea_id", "null")
+    remote_id_val = meta.get("remote_id", "null")
+    remote_provider_val = meta.get("remote_provider", "null")
     content = f"""---
 id: {issue_id}
+github_id: {github_id_val if github_id_val else 'null'}
+gitlab_id: {gitlab_id_val if gitlab_id_val else 'null'}
+gitea_id: {gitea_id_val if gitea_id_val else 'null'}
+remote_id: {remote_id_val if remote_id_val else 'null'}
+remote_provider: {remote_provider_val if remote_provider_val else 'null'}
 title: "{meta.get('title')}"
 status: {meta.get('status', 'open')}
 assignee: {meta.get('assignee')}
@@ -8530,6 +8868,272 @@ closed_at: {closed_at_str if closed_at_str else 'null'}
             
     print(color(f"[SUCCESS] Checked out branch '{branch_name}' and initialized task.", C_GREEN + C_BOLD))
 
+def get_conflicted_files():
+    import subprocess
+    try:
+        out = subprocess.check_output(["git", "diff", "--name-only", "--diff-filter=U"]).decode().strip()
+        if out:
+            return out.splitlines()
+    except:
+        pass
+    return []
+
+def merge_changelog_sections(sec1, sec2):
+    import re
+    lines1 = sec1.splitlines()
+    if not lines1:
+        return sec2
+    version_line = lines1[0]
+    
+    def parse_subsections(content):
+        parts = content.split('### ')
+        subsections = {}
+        for part in parts[1:]:
+            m = re.match(r'^([A-Za-z]+)\n(.*)', part, re.DOTALL)
+            if m:
+                sub_type = m.group(1)
+                items = [line.strip() for line in m.group(2).splitlines() if line.strip().startswith('-')]
+                subsections[sub_type] = items
+        return subsections
+        
+    sub1 = parse_subsections(sec1)
+    sub2 = parse_subsections(sec2)
+    
+    merged_sub = {}
+    all_types = list(set(sub1.keys()) | set(sub2.keys()))
+    
+    type_order = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
+    all_types.sort(key=lambda t: type_order.index(t) if t in type_order else 99)
+    
+    result = version_line + "\n"
+    for t in all_types:
+        items1 = sub1.get(t, [])
+        items2 = sub2.get(t, [])
+        merged_items = []
+        for item in items1 + items2:
+            if item not in merged_items:
+                merged_items.append(item)
+        
+        if merged_items:
+            result += f"### {t}\n"
+            for item in merged_items:
+                result += f"{item}\n"
+            result += "\n"
+            
+    return result.strip()
+
+def try_smart_merge_changelog(filepath):
+    import subprocess
+    import re
+    try:
+        ours = subprocess.check_output(["git", "show", f":2:{filepath}"]).decode('utf-8')
+        theirs = subprocess.check_output(["git", "show", f":3:{filepath}"]).decode('utf-8')
+    except:
+        return False
+        
+    def parse_sections(content):
+        parts = content.split('## [')
+        header = parts[0]
+        sections = {}
+        for part in parts[1:]:
+            m = re.match(r'^([^\]]+)\](.*)', part, re.DOTALL)
+            if m:
+                version = m.group(1)
+                sections[version] = '## [' + part
+        return header, sections
+
+    try:
+        h_ours, sec_ours = parse_sections(ours)
+        h_theirs, sec_theirs = parse_sections(theirs)
+        
+        merged_content = h_ours
+        all_versions = list(set(sec_ours.keys()) | set(sec_theirs.keys()))
+        
+        def semver_key(v):
+            try:
+                return [int(x) for x in re.findall(r'\d+', v)]
+            except:
+                return [0]
+                
+        all_versions.sort(key=semver_key, reverse=True)
+        
+        for v in all_versions:
+            if v in sec_ours and v not in sec_theirs:
+                merged_content += sec_ours[v] + "\n"
+            elif v in sec_theirs and v not in sec_ours:
+                merged_content += sec_theirs[v] + "\n"
+            else:
+                if sec_ours[v].strip() == sec_theirs[v].strip():
+                    merged_content += sec_ours[v] + "\n"
+                else:
+                    merged_content += merge_changelog_sections(sec_ours[v], sec_theirs[v]) + "\n"
+                    
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(merged_content.strip() + "\n")
+        return True
+    except Exception as e:
+        print(f"Smart changelog merge failed: {e}", file=sys.stderr)
+        return False
+
+def try_smart_merge_memory(filepath):
+    import subprocess
+    import re
+    try:
+        ours = subprocess.check_output(["git", "show", f":2:{filepath}"]).decode('utf-8')
+        theirs = subprocess.check_output(["git", "show", f":3:{filepath}"]).decode('utf-8')
+    except:
+        return False
+        
+    try:
+        def get_checklist_items(content):
+            return [line.strip() for line in content.splitlines() if re.match(r'^-\s+\[[ x/]\]', line.strip())]
+            
+        items_ours = get_checklist_items(ours)
+        items_theirs = get_checklist_items(theirs)
+        
+        def parse_task(line):
+            m = re.match(r'^-\s+\[([ x/])\]\s*(.*)', line)
+            if m:
+                return m.group(1), m.group(2).strip()
+            return None, None
+            
+        merged_tasks = {}
+        ordered_keys = []
+        
+        for line in items_theirs + items_ours:
+            status, desc = parse_task(line)
+            if desc:
+                if desc not in merged_tasks:
+                    merged_tasks[desc] = status
+                    ordered_keys.append(desc)
+                else:
+                    curr_status = merged_tasks[desc]
+                    if status == 'x' or (status == '/' and curr_status == ' '):
+                        merged_tasks[desc] = status
+                        
+        new_checklist = ""
+        for desc in ordered_keys:
+            status = merged_tasks[desc]
+            new_checklist += f"- [{status}] {desc}\n"
+            
+        parts = theirs.split('### Sprint Tasks Checklist\n')
+        if len(parts) < 2:
+            parts = theirs.split('### Sprint Tasks Checklist\r\n')
+            
+        if len(parts) >= 2:
+            header = parts[0] + "### Sprint Tasks Checklist\n"
+            rem = parts[1]
+            idx_dash = rem.find('\n---')
+            if idx_dash == -1:
+                idx_dash = rem.find('\r\n---')
+            if idx_dash != -1:
+                footer = rem[idx_dash:]
+            else:
+                footer = "\n---\n"
+                
+            merged_memory = header + new_checklist + footer
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(merged_memory)
+            return True
+    except:
+        pass
+        
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(theirs)
+        return True
+    except:
+        return False
+
+def smart_automerge_file(filepath):
+    filename = os.path.basename(filepath)
+    if filename == "memory.md":
+        return try_smart_merge_memory(filepath)
+    elif filename == "CHANGELOG.md":
+        return try_smart_merge_changelog(filepath)
+    return False
+
+def resolve_merge_conflicts():
+    import subprocess
+    conflicted_files = get_conflicted_files()
+    if not conflicted_files:
+        print(color("No conflicted files found.", C_GREEN))
+        return
+        
+    print(color(f"\nFound {len(conflicted_files)} conflicted file(s):", C_BOLD + C_CYAN))
+    for f in conflicted_files:
+        print(f"  - {f}")
+    print("")
+    
+    for filepath in conflicted_files:
+        filename = os.path.basename(filepath)
+        print(color("="*58, C_CYAN))
+        print(color(f"Resolving conflict in: {filepath}", C_BOLD + C_CYAN))
+        print(color("="*58, C_CYAN))
+        
+        if filename in ("memory.md", "CHANGELOG.md"):
+            print(color(f"Attempting smart auto-merge for {filename}...", C_GRAY))
+            if smart_automerge_file(filepath):
+                print(color(f"[SUCCESS] Smart auto-merge succeeded for {filename}!", C_GREEN))
+                subprocess.run(["git", "add", filepath], check=True)
+                continue
+            else:
+                print(color(f"[WARNING] Smart auto-merge failed for {filename}. Falling back to manual selection.", C_YELLOW))
+                
+        while True:
+            print(f"  [{color('1', C_GREEN)}] Use OURS (Keep changes from base branch/main)")
+            print(f"  [{color('2', C_GREEN)}] Use THEIRS (Keep changes from feature branch)")
+            print(f"  [{color('3', C_GREEN)}] Open in Editor for manual resolution")
+            print(f"  [{color('0', C_YELLOW)}] Abort Merge")
+            
+            try:
+                choice = input(color("\nSelect resolution option [0-3]: ", C_BOLD)).strip()
+            except (KeyboardInterrupt, EOFError):
+                print(color("\nMerge aborted.", C_RED))
+                subprocess.run(["git", "merge", "--abort"])
+                sys.exit(1)
+                
+            if choice == "0":
+                print(color("\nMerge aborted by user.", C_RED))
+                subprocess.run(["git", "merge", "--abort"])
+                sys.exit(1)
+            elif choice == "1":
+                print(color(f"Applying OURS version to {filepath}...", C_GRAY))
+                subprocess.run(["git", "checkout", "--ours", filepath], check=True)
+                subprocess.run(["git", "add", filepath], check=True)
+                break
+            elif choice == "2":
+                print(color(f"Applying THEIRS version to {filepath}...", C_GRAY))
+                subprocess.run(["git", "checkout", "--theirs", filepath], check=True)
+                subprocess.run(["git", "add", filepath], check=True)
+                break
+            elif choice == "3":
+                editor = None
+                try:
+                    editor = subprocess.check_output(["git", "config", "core.editor"]).decode().strip()
+                except:
+                    pass
+                if not editor:
+                    editor = os.environ.get("EDITOR")
+                if not editor:
+                    if sys.platform == "win32":
+                        editor = "notepad.exe"
+                    else:
+                        editor = "nano"
+                        
+                print(color(f"Opening {filepath} in editor: {editor}...", C_GRAY))
+                try:
+                    subprocess.run(f'{editor} "{filepath}"', shell=True)
+                    input(color("\nPress Enter AFTER you have finished resolving conflicts and saved the file: ", C_BOLD))
+                    subprocess.run(["git", "add", filepath], check=True)
+                    break
+                except Exception as editor_err:
+                    print(color(f"Error opening editor: {editor_err}", C_RED), file=sys.stderr)
+            else:
+                print(color("Invalid choice. Please enter 0, 1, 2, or 3.", C_RED))
+                
+    print(color("\n[SUCCESS] All conflicts resolved! Completing merge...", C_GREEN + C_BOLD))
+
 def merge_issue(issue_id_str):
     import subprocess
     try:
@@ -8574,7 +9178,7 @@ def merge_issue(issue_id_str):
                 f.write(temp_mem)
                 
         try:
-             proc = subprocess.run([validate_sh])
+             proc = utils.run_shell_script(validate_sh)
              if proc.returncode != 0:
                  if orig_mem:
                      with open(memory_file, 'w', encoding='utf-8') as f:
@@ -8627,7 +9231,12 @@ def merge_issue(issue_id_str):
                          
     print(color(f"Switching to base branch '{base_branch}' and merging issue branch '{branch_name}'...", C_CYAN))
     subprocess.run(["git", "checkout", base_branch])
-    subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    proc_merge = subprocess.run(["git", "merge", branch_name, "--no-ff", "-m", f"merge branch '{branch_name}' into '{base_branch}'"])
+    if proc_merge.returncode != 0:
+        print(color("\n[WARN] Merge conflict detected! Launching interactive resolution helper...", C_YELLOW))
+        resolve_merge_conflicts()
+        # Complete the merge commit
+        subprocess.run(["git", "commit", "--no-edit"], check=True)
      
     # 5. Clean up local issue branch
     print(color(f"Deleting local issue branch '{branch_name}'...", C_CYAN))
@@ -8892,11 +9501,111 @@ C_GRAY = '\033[90m'
 C_BOLD = '\033[1m'
 C_END = '\033[0m'
 
+def safe_print(*args, **kwargs):
+    file = kwargs.get('file', sys.stdout)
+    sep = kwargs.get('sep', ' ')
+    end = kwargs.get('end', '\n')
+    
+    text = sep.join(str(arg) for arg in args)
+    try:
+        file.write(text + end)
+        file.flush()
+    except UnicodeEncodeError:
+        replacements = {
+            "🚀": "[APP]",
+            "👤": "[Git]",
+            "🔑": "[API]",
+            "📝": "[ADR]",
+            "📖": "[DOC]",
+            "🧹": "[Clean]",
+            "📦": "[Archive]",
+            "🔍": "[Scan]",
+            "🔓": "[Unlocked]",
+            "🔒": "[Locked]",
+            "💾": "[Commit]",
+            "🩺": "[Doctor]",
+            "🛡️": "[Validate]",
+            "⚠️": "[WARN]",
+            "👥": "[Profiles]",
+            "✅": "OK",
+            "❌": "ERR",
+            "█": "#",
+            "░": "-"
+        }
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+        try:
+            encoding = getattr(file, 'encoding', None) or 'ascii'
+            file.write(text.encode(encoding, errors='replace').decode(encoding) + end)
+            file.flush()
+        except:
+            pass
+
+print = safe_print
+
 def color(text, ansi_code):
     """Wrap text in ANSI color codes if stdout is a TTY."""
     if sys.stdout.isatty():
         return f"{ansi_code}{text}{C_END}"
     return text
+
+def align_col(text, raw_text, width=25):
+    """Align column visually based on raw text length, bypassing ANSI escape codes."""
+    padding_len = width - len(raw_text)
+    return text + (" " * max(0, padding_len))
+
+def get_active_git_profile_details(email):
+    """Resolve active Git profile name, user name, and remote token status."""
+    profiles_file = ""
+    agents_profiles = os.path.join(utils.get_agents_dir(), 'git_profiles')
+    home_profiles = os.path.expanduser('~/.git_profiles')
+    
+    if os.path.exists(agents_profiles):
+        profiles_file = agents_profiles
+    elif os.path.exists(home_profiles):
+        profiles_file = home_profiles
+        
+    config = {}
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith('#') and '=' in line:
+                        parts = line.strip().split('=', 1)
+                        config[parts[0].strip()] = parts[1].strip()
+        except:
+            pass
+            
+    profile_name = "default"
+    git_name = "Local Developer"
+    
+    # Try to find matching profile prefix by email
+    for k, v in config.items():
+        if k.endswith('.email') and v == email:
+            profile_name = k.rsplit('.email', 1)[0]
+            break
+            
+    if profile_name != "default":
+        git_name = config.get(f"{profile_name}.name", "Local Developer")
+    else:
+        # fallback to git config
+        try:
+            git_name = subprocess.check_output(
+                ["git", "config", "user.name"],
+                stderr=subprocess.DEVNULL
+            ).decode().strip()
+        except:
+            pass
+            
+    if not git_name:
+        git_name = "Local Developer"
+        
+    # Resolve token existence
+    github_ok = f"{profile_name}.github_token" in config
+    gitlab_ok = f"{profile_name}.gitlab_token" in config
+    gitea_ok = f"{profile_name}.gitea_token" in config
+    
+    return profile_name, git_name, github_ok, gitlab_ok, gitea_ok
 
 def get_progress_bar(pct, length=15):
     """Generate a visual progress bar string."""
@@ -9127,18 +9836,34 @@ def run(args):
         print(color("|", C_BLUE) + color(f"   🚀  ANTIGRAVITY AGENT WORKSPACE CONTROL PANEL   ", C_BOLD + C_HEADER) + " "*7 + color("|", C_BLUE))
         print(color("+" + "="*58 + "+", C_BLUE))
         
+        profile_name, git_name, github_ok, gitlab_ok, gitea_ok = get_active_git_profile_details(email)
+        
         branch_colored = color(branch, C_GREEN if branch != "unknown" else C_GRAY)
         email_colored = color(email, C_CYAN if email != "not set" else C_GRAY)
         api_profile_colored = color(api_profile, C_GREEN)
+        profile_colored = color(profile_name, C_CYAN + C_BOLD)
+        git_name_colored = color(git_name, C_CYAN)
+        
+        github_status = color("[✅]", C_GREEN) if github_ok else color("[❌]", C_RED)
+        gitlab_status = color("[✅]", C_GREEN) if gitlab_ok else color("[❌]", C_RED)
+        gitea_status = color("[✅]", C_GREEN) if gitea_ok else color("[❌]", C_RED)
+        
+        tokens_str = f"github {github_status}  gitlab {gitlab_status}  gitea {gitea_status}"
         
         if locks:
             locks_colored = color(f"⚠️  Locked: {', '.join(locks)}", C_YELLOW)
         else:
             locks_colored = color("🔓 Open", C_GREEN)
             
-        print(f"  Branch:      {branch_colored:<25} |  API Profile:  {api_profile_colored}")
-        print(f"  Git Email:   {email_colored:<25} |  Locks:        {locks_colored}")
-        print(f"  Token Limit: {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
+        col1_branch = align_col(branch_colored, branch, width=25)
+        col1_profile = align_col(profile_colored, profile_name, width=25)
+        col1_name = align_col(git_name_colored, git_name, width=25)
+        col1_email = align_col(email_colored, email, width=25)
+        
+        print(f"  Branch:      {col1_branch} |  API Profile:  {api_profile_colored}")
+        print(f"  Git Profile: {col1_profile} |  Locks:        {locks_colored}")
+        print(f"  Git Name:    {col1_name} |  Active Tokens: {tokens_str}")
+        print(f"  Git Email:   {col1_email} |  Token Limit:  {global_usage:,} / {global_limit:,} tokens [{bar}] {pct:.1f}%")
         print(color("+" + "-"*58 + "+", C_BLUE))
         
         print(color("\n  --- 🛠️  DAILY DEVELOPMENT ---", C_BOLD + C_BLUE))
@@ -9331,7 +10056,7 @@ def run(args):
     print("Running workspace validation checks...")
     validate_sh = os.path.join(utils.get_agents_dir(), "scripts", "validate.sh")
     if os.path.exists(validate_sh):
-        proc = subprocess.run([validate_sh])
+        proc = utils.run_shell_script(validate_sh)
         if proc.returncode != 0:
             print("Error: Workspace validation failed. Aborting commit.", file=sys.stderr)
             sys.exit(1)
@@ -9353,6 +10078,23 @@ def run(args):
         except Exception as e:
             print(f"Warning: Failed to read project rules for lint/test commands: {e}", file=sys.stderr)
             
+    if os.name == 'nt':
+        python3_works = False
+        try:
+            if subprocess.run("python3 --version", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                python3_works = True
+        except:
+            pass
+        if not python3_works:
+            if linter_cmd.startswith("python3 "):
+                linter_cmd = linter_cmd.replace("python3 ", "python ", 1)
+            elif linter_cmd == "python3":
+                linter_cmd = "python"
+            if test_runner.startswith("python3 "):
+                test_runner = test_runner.replace("python3 ", "python ", 1)
+            elif test_runner == "python3":
+                test_runner = "python"
+                
     if not no_test_flag:
         if linter_cmd and linter_cmd != "echo 'No linter found'":
             print(f"Running linter command: {linter_cmd}...")
@@ -9482,7 +10224,9 @@ def run(args):
     # Conventional Commit
     commit_msg = f"{commit_type}({scope}): {desc}"
     print(f"Executing conventional commit: '{commit_msg}'...")
-    proc = subprocess.run(["git", "commit", "-m", commit_msg])
+    env = os.environ.copy()
+    env["AAC_COMMIT_RUNNING"] = "1"
+    proc = subprocess.run(["git", "commit", "-m", commit_msg], env=env)
     if proc.returncode == 0:
         print("Commit successful.")
         
@@ -9508,7 +10252,7 @@ def run(args):
                 
                 if staged_any:
                     print("Amending commit to include auto-closed issue files...")
-                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"])
+                    subprocess.run(["git", "commit", "--amend", "--no-edit", "--no-verify"], env=env)
                     print("Commit amended successfully.")
             except Exception as e:
                 print(f"Warning: Failed to auto-close issues: {e}", file=sys.stderr)
@@ -9971,7 +10715,8 @@ def run(args):
     print("Running autonomous stack reconstruction...")
     recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
     if os.path.exists(recon_sh):
-        subprocess.run([recon_sh, "-f"])
+        utils.run_shell_script(recon_sh, ["-f"])
+
         
     print("==========================================================")
     print("Migration Complete! Workspace successfully upgraded.")
@@ -10021,8 +10766,9 @@ def run(args):
         validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
         if os.path.exists(validate_sh):
             print("Running workspace validation...")
-            proc = subprocess.run([validate_sh])
+            proc = utils.run_shell_script(validate_sh)
             if proc.returncode != 0:
+
                 print("Error: Workspace validation failed. Push aborted.", file=sys.stderr)
                 sys.exit(proc.returncode)
         else:
@@ -10263,8 +11009,9 @@ class TestSkill{camel_name}(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(script_path), f"Script not found at {{script_path}}")
         
-        proc = subprocess.run([script_path, "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, script_path, "--help"], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0)
+
         self.assertIn("Default Python script for agent skill {name}", proc.stdout)
 
 if __name__ == '__main__':
@@ -10569,7 +11316,7 @@ def run(args):
     validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
     if os.path.exists(validate_sh):
         print("----------------------------------------------------------")
-        proc = subprocess.run([validate_sh])
+        proc = utils.run_shell_script(validate_sh)
         if proc.returncode != 0:
             errors += 1
             
@@ -10737,6 +11484,10 @@ def run(args):
             sys.exit(1)
             
         if linter_cmd and linter_cmd != "echo 'No linter found'":
+            cmd_parts = linter_cmd.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                linter_cmd = " ".join(cmd_parts)
             print(f"Running linter command: {linter_cmd}...")
             proc = subprocess.run(linter_cmd, shell=True)
             sys.exit(proc.returncode)
@@ -10866,6 +11617,10 @@ def run(args):
             sys.exit(1)
             
         if test_runner and test_runner != "echo 'No test suite found'":
+            cmd_parts = test_runner.split()
+            if cmd_parts and cmd_parts[0] in ("python3", "python"):
+                cmd_parts[0] = f'"{sys.executable}"'
+                test_runner = " ".join(cmd_parts)
             print(f"Running test suite: {test_runner}...")
             proc = subprocess.run(test_runner, shell=True)
             sys.exit(proc.returncode)
@@ -11336,17 +12091,944 @@ EOF
 write_template_safe ".agents/scripts/cli/commands/validate.py" << 'EOF'
 import os
 import sys
+import re
 import subprocess
+import json
 import utils
 
+# ANSI color codes
+C_GREEN = '\033[92m'
+C_YELLOW = '\033[93m'
+C_RED = '\033[91m'
+C_BLUE = '\033[94m'
+C_CYAN = '\033[96m'
+C_BOLD = '\033[1m'
+C_END = '\033[0m'
+
+def color(text, ansi_code):
+    if sys.stdout.isatty():
+        return f"{ansi_code}{text}{C_END}"
+    return text
+
+def get_files_to_scan():
+    exclude_dirs = {'.git', '.agents', 'node_modules', 'dist', 'build', 'venv', 'env', 'target', 'vendor', 'out', '__pycache__'}
+    exclude_exts = {'.pyc', '.md', '.json', '.lock', '.png', '.jpg', '.gif'}
+    files_to_scan = []
+    for root, dirs, files in os.walk('.'):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs and not d.startswith('.')]
+        for f in files:
+            ext = os.path.splitext(f)[1]
+            if ext in exclude_exts or f == 'bootstrap.sh':
+                continue
+            files_to_scan.append(os.path.join(root, f))
+    return files_to_scan
+
 def run(args):
-    validate_sh = os.path.join(utils.get_agents_dir(), 'scripts', 'validate.sh')
-    if not os.path.exists(validate_sh):
-        print(f"Error: validate.sh not found at {validate_sh}", file=sys.stderr)
-        sys.exit(1)
+    utils.print_title("Starting Antigravity Agent Workspace Validation...")
+    
+    failed = False
+    
+    # 1. Check Active Memory Size
+    memory_file = utils.get_memory_file()
+    print(f"Check 1: Memory File Line Count")
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            line_count = len(lines)
+            print(f"  Memory file: {line_count} lines")
+            if line_count > 100:
+                print(f"  {color('[WARNING]', C_YELLOW + C_BOLD)} Memory file '{memory_file}' exceeds the 100-line limit ({line_count} lines)!")
+                print("            Please run 'python .agents/scripts/cli/helper.py archive' to compact your memory.")
+            else:
+                print("  [PASS] Memory file size is within recommended limits.")
+        except Exception as e:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} Failed to read memory file: {e}")
+            failed = True
+    else:
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Memory file '{memory_file}' does not exist!")
+        failed = True
         
-    proc = subprocess.run([validate_sh])
-    sys.exit(proc.returncode)
+    # 2. Check Active Lockfiles
+    print("Check 2: Active Module Locks")
+    locks_dir = os.path.join(utils.get_agents_dir(), "locks")
+    if os.path.exists(locks_dir) and os.path.isdir(locks_dir):
+        lock_files = [f for f in os.listdir(locks_dir) if f.endswith('.lock')]
+        if lock_files:
+            print("  Found active locks:")
+            for lf in lock_files:
+                mod = os.path.splitext(lf)[0]
+                print(f"  - Module '{mod}':")
+                try:
+                    with open(os.path.join(locks_dir, lf), 'r', encoding='utf-8') as f:
+                        for line in f:
+                            print(f"    {line.strip()}")
+                except Exception:
+                    pass
+        else:
+            print("  [PASS] No active locks found.")
+    else:
+        print("  [PASS] No active locks found.")
+        
+    # 3. Secret and Credential Scanning
+    failed = check_hardcoded_credentials(failed)
+    
+    # 4. Check for Raw Environment Variable Reads
+    check_raw_env()
+    
+    # 5. Check Git Upstream Synchronization
+    failed = check_git_upstream(failed)
+    
+    # 6. Check Schema Index Registration Compliance
+    failed = check_schema_registration(failed)
+    
+    # 7. Check Gitignore & Antigravityignore Configuration Compliance
+    failed = check_gitignore_compliance(failed)
+    
+    # 8. Check Memory State Flag Enforcement
+    failed = check_memory_state_flag(failed)
+    
+    # 9. Check Token Budget Guard
+    failed = check_token_budget(failed)
+    
+    # 10. Check ADR Compliance Check
+    failed = check_adr_compliance(failed)
+    
+    # 11. Check Git Configuration & Profile Compliance
+    failed = check_git_profile_compliance(failed)
+    
+    # 12. Check API Configuration & Profile Compliance
+    failed = check_api_profile_compliance(failed)
+    
+    # 13. Check CHANGELOG.md Format (Keep a Changelog Compliance)
+    failed = check_changelog(failed)
+    
+    # 14. Check for TODO/FIXME Annotations in Staged Code
+    failed = check_staged_todo(failed)
+    
+    # 15. Check for Staged Transient Files & Config Leak Guard
+    failed = check_staged_transient(failed)
+    
+    # 16. Local Workspace Issues Schema Validation
+    failed = check_local_issues(failed)
+    
+    # 17. Base Branch Modification Check
+    failed = check_base_branch_modification(failed)
+    
+    # 18. Staged/Modified Files Module Locking Check
+    failed = check_module_locking(failed)
+    
+    # 19. Issue Branch and Memory Alignment Check
+    failed = check_issue_alignment(failed)
+    
+    print("==========================================================")
+    if not failed:
+        print(color("Workspace Status: VALIDATED", C_GREEN + C_BOLD))
+        sys.exit(0)
+    else:
+        print(color("Workspace Status: DEGRADED (Check issues detailed above)", C_RED + C_BOLD))
+        sys.exit(1)
+
+def check_hardcoded_credentials(failed_flag):
+    print("Check 3: Hardcoded Credentials Scan (excluding .agents/ and .git/)")
+    secret_found = False
+    
+    files_to_scan = get_files_to_scan()
+    patterns = ["apikey", "api_key", "secret", "password", "passwd", "private_key", "jwt_secret"]
+    
+    regexes = [re.compile(rf"{pat}\s*=\s*['\"][a-zA-Z0-9_\-\.]{{8,}}['\"]", re.IGNORECASE) for pat in patterns]
+    
+    for path in files_to_scan:
+        try:
+            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                for idx, line in enumerate(f, 1):
+                    for r, pat in zip(regexes, patterns):
+                        if r.search(line):
+                            print(f"  [FAIL] Potential hardcoded credential found for pattern '{pat}':")
+                            print(f"    {path}:{idx}: {line.strip()}")
+                            secret_found = True
+                    if "BEGIN PRIVATE KEY" in line:
+                        print(f"  [FAIL] Hardcoded Private Key Block found:")
+                        print(f"    {path}:{idx}: {line.strip()}")
+                        secret_found = True
+        except Exception:
+            pass
+            
+    if secret_found:
+        return True
+    print("  [PASS] No hardcoded credentials detected in scan scope.")
+    return failed_flag
+
+def check_raw_env():
+    print("Check 4: Raw Environment Access Scan (domain-purity verification)")
+    raw_env_found = False
+    
+    for root, dirs, files in os.walk('.'):
+        dirs[:] = [d for d in dirs if d not in {'.git', '.agents', 'venv', 'env', 'node_modules', 'dist', 'vendor', 'out', 'target'}]
+        for f in files:
+            path = os.path.join(root, f)
+            path_lower = path.lower()
+            if "config" in path_lower or "test" in path_lower:
+                continue
+                
+            ext = os.path.splitext(f)[1]
+            if ext in ('.js', '.ts', '.tsx'):
+                try:
+                    with open(path, 'r', encoding='utf-8', errors='ignore') as file_obj:
+                        for idx, line in enumerate(file_obj, 1):
+                            if re.search(r'process\.env\.[A-Za-z0-9_]', line):
+                                print(f"  [WARNING] Raw 'process.env' access found outside configuration modules:")
+                                print(f"    {path}:{idx}: {line.strip()}")
+                                raw_env_found = True
+                except Exception:
+                    pass
+            elif ext == '.go':
+                try:
+                    with open(path, 'r', encoding='utf-8', errors='ignore') as file_obj:
+                        for idx, line in enumerate(file_obj, 1):
+                            if 'os.Getenv' in line:
+                                print(f"  [WARNING] Raw 'os.Getenv' access found outside configuration modules:")
+                                print(f"    {path}:{idx}: {line.strip()}")
+                                raw_env_found = True
+                except Exception:
+                    pass
+            elif ext == '.py':
+                try:
+                    with open(path, 'r', encoding='utf-8', errors='ignore') as file_obj:
+                        for idx, line in enumerate(file_obj, 1):
+                            if re.search(r'os\.(environ|getenv|environ\.get)\b', line):
+                                print(f"  [WARNING] Raw 'os.environ/os.getenv' access found outside configuration modules:")
+                                print(f"    {path}:{idx}: {line.strip()}")
+                                raw_env_found = True
+                except Exception:
+                    pass
+                    
+    if not raw_env_found:
+        print("  [PASS] Domain isolation looks healthy (no scattered raw env reads).")
+
+def check_git_upstream(failed_flag):
+    print("Check 5: Git Upstream Synchronization Check")
+    
+    try:
+        remotes = subprocess.check_output(["git", "remote"], stderr=subprocess.DEVNULL).decode().split()
+    except Exception:
+        print("  [WARNING] No upstream tracking branch set or Git repository not initialized.")
+        return failed_flag
+        
+    if "origin" in remotes:
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin"],
+                timeout=5,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        except Exception:
+            pass
+            
+    try:
+        local_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+        remote_commit = subprocess.check_output(["git", "rev-parse", "@{u}"], stderr=subprocess.DEVNULL).decode().strip()
+        base_commit = subprocess.check_output(["git", "merge-base", "HEAD", "@{u}"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        print("  [WARNING] No upstream tracking branch set or Git repository not initialized.")
+        return failed_flag
+        
+    if local_commit == remote_commit:
+        print("  [PASS] Local branch is up-to-date with upstream.")
+    elif local_commit == base_commit:
+        print("  [FAIL] Workspace is behind upstream! Run 'git pull' before letting the agent modify files.")
+        return True
+    elif remote_commit == base_commit:
+        print("  [PASS] Local branch is ahead of upstream (unpushed commits).")
+    else:
+        print("  [FAIL] Workspace has diverged from upstream! Please reconcile branches before modifying files.")
+        return True
+    return failed_flag
+
+def check_schema_registration(failed_flag):
+    print("Check 6: Schema Index Registration Compliance")
+    schema_errors = 0
+    schema_index = ".agents/schema.md"
+    schemas_dir = ".agents/schemas"
+    
+    if not os.path.exists(schema_index):
+        print("  [FAIL] Primary schema index '.agents/schema.md' is missing!")
+        return True
+        
+    try:
+        with open(schema_index, 'r', encoding='utf-8') as f:
+            schema_content = f.read()
+    except Exception:
+        schema_content = ""
+        
+    if os.path.exists(schemas_dir) and os.path.isdir(schemas_dir):
+        for f in os.listdir(schemas_dir):
+            if f.endswith('.md'):
+                if f not in schema_content:
+                    print(f"  [FAIL] Domain schema file '{f}' is NOT registered in '.agents/schema.md'!")
+                    schema_errors += 1
+                    
+    if schema_errors > 0:
+        return True
+    print("  [PASS] All domain schemas are correctly indexed.")
+    return failed_flag
+
+def check_gitignore_compliance(failed_flag):
+    print("Check 7: Gitignore & Antigravityignore Compliance")
+    gitignore_errors = 0
+    
+    gitignore_path = ".gitignore"
+    transients = [
+        ".agents/locks/",
+        ".agents/api_keys",
+        ".agents/active_api_keys",
+        ".agents/active_api_keys.ps1",
+        ".agents/active_api_profile_name",
+        ".agents/cooldowns.json"
+    ]
+    
+    if os.path.exists(gitignore_path):
+        try:
+            with open(gitignore_path, 'r', encoding='utf-8') as f:
+                gi_content = f.read()
+                gi_lines = gi_content.splitlines()
+        except Exception:
+            gi_content = ""
+            gi_lines = []
+            
+        for line in gi_lines:
+            clean = line.strip()
+            if re.match(r'^\.agents/?$', clean):
+                print("  [FAIL] .gitignore ignores '.agents/' folder globally! Please remove it.")
+                gitignore_errors += 1
+            if clean == "AGENTS.md":
+                print("  [FAIL] .gitignore ignores 'AGENTS.md'! Please remove it.")
+                gitignore_errors += 1
+                
+        healed = False
+        with open(gitignore_path, 'a', encoding='utf-8') as f:
+            for t in transients:
+                ignored = False
+                for line in gi_lines:
+                    clean = line.strip()
+                    if clean == t or clean == t.rstrip('/'):
+                        ignored = True
+                        break
+                if not ignored:
+                    print(f"  [WARNING] .gitignore does not ignore transient: '{t}'. Auto-healing...")
+                    f.write(f"\n{t}\n")
+                    healed = True
+        if healed:
+            print("  [PASS] .gitignore auto-healed successfully.")
+    else:
+        print("  [WARNING] No .gitignore file found in project root.")
+        
+    ag_path = ".antigravityignore"
+    if os.path.exists(ag_path):
+        try:
+            with open(ag_path, 'r', encoding='utf-8') as f:
+                ag_content = f.read()
+                ag_lines = ag_content.splitlines()
+        except Exception:
+            ag_content = ""
+            ag_lines = []
+            
+        healed = False
+        with open(ag_path, 'a', encoding='utf-8') as f:
+            for t in transients:
+                ignored = False
+                for line in ag_lines:
+                    clean = line.strip()
+                    if clean == t or clean == t.rstrip('/'):
+                        ignored = True
+                        break
+                if not ignored:
+                    print(f"  [WARNING] .antigravityignore does not ignore transient: '{t}'. Auto-healing...")
+                    f.write(f"\n{t}\n")
+                    healed = True
+        if healed:
+            print("  [PASS] .antigravityignore auto-healed successfully.")
+            
+    if gitignore_errors > 0:
+        return True
+    print("  [PASS] Gitignore & Antigravityignore configurations are validated.")
+    return failed_flag
+
+def check_memory_state_flag(failed_flag):
+    print("Check 8: Memory State Flag Enforcement")
+    state_errors = 0
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    if current_branch in ("main", "master"):
+        memory_file = utils.get_memory_file()
+        if os.path.exists(memory_file):
+            try:
+                with open(memory_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                if "- **State Flag**:" in content or "- State Flag:" in content:
+                    m = re.search(r'-\s*\*\*State Flag\*\*:\s*`?COMPLETED`?', content, re.IGNORECASE)
+                    if not m:
+                        print(f"  [FAIL] Commit rejected on branch '{current_branch}' because State Flag is not 'COMPLETED'!")
+                        print("         Please complete your tasks and update memory.md State Flag to 'COMPLETED' first.")
+                        state_errors += 1
+            except Exception:
+                pass
+        else:
+            print("  [FAIL] Memory file does not exist!")
+            state_errors += 1
+    else:
+        print(f"  [PASS] Memory state flag checks bypassed on local feature branch '{current_branch}'.")
+        
+    if state_errors > 0:
+        return True
+    if current_branch in ("main", "master"):
+        print("  [PASS] Memory state flag is 'COMPLETED' for production commit.")
+    return failed_flag
+
+def check_token_budget(failed_flag):
+    print("Check 9: Token Budget Guard")
+    budget_file = ".agents/token_budget.json"
+    if not os.path.exists(budget_file):
+        print("  [PASS] No active token budget file or jq tool found. Bypassing check.")
+        return failed_flag
+        
+    try:
+        budget = utils.load_budget()
+    except Exception:
+        print("  [PASS] No active token budget file or jq tool found. Bypassing check.")
+        return failed_flag
+        
+    active_profile = ""
+    profile_path = ".agents/active_api_profile_name"
+    if os.path.exists(profile_path):
+        try:
+            with open(profile_path, 'r') as f:
+                active_profile = f.read().strip()
+        except:
+            pass
+            
+    profiles = budget.get("profiles", {})
+    has_profile = active_profile and active_profile in profiles
+    
+    if has_profile:
+        prof_data = profiles[active_profile]
+        max_budget = prof_data.get("max_token_budget", 0)
+        current_usage = prof_data.get("current_token_usage", 0)
+        print(f"  Checking budget for active API profile: '{active_profile}'")
+    else:
+        max_budget = budget.get("max_token_budget", 0)
+        current_usage = budget.get("current_token_usage", 0)
+        print("  Checking global token budget")
+        
+    threshold = budget.get("alert_threshold_percent", 90)
+    
+    if max_budget > 0:
+        percent = int(current_usage * 100 / max_budget)
+        print(f"  Current token usage: {current_usage} / {max_budget} ({percent}%)")
+        if current_usage >= max_budget:
+            print(f"  [FAIL] Token budget exceeded! Current: {current_usage}, Limit: {max_budget}.")
+            print("         Please save your task checkpoint in workflows/ and handover the task.")
+            return True
+        elif percent >= 95:
+            print(f"  [FAIL] Token usage has reached critical threshold ({percent}% >= 95%)! All operations blocked.")
+            print("         Please request a budget increase or manually reset the usage log.")
+            return True
+        elif percent >= threshold:
+            print(f"  [WARNING] Token usage is at {percent}% of budget. Consider saving and handing over.")
+        else:
+            print("  [PASS] Token usage is within safe budget limits.")
+    else:
+        print("  [PASS] Token usage is within safe budget limits.")
+        
+    return failed_flag
+
+def check_adr_compliance(failed_flag):
+    print("Check 10: ADR Compliance Check")
+    adr_errors = 0
+    adr_index = ".agents/adr.md"
+    adrs_dir = ".agents/adrs"
+    
+    if not os.path.exists(adr_index):
+        print("  [FAIL] Primary ADR index '.agents/adr.md' is missing!")
+        return True
+        
+    adr_content = ""
+    try:
+        with open(adr_index, 'r', encoding='utf-8') as f:
+            adr_content = f.read()
+    except Exception:
+        adr_content = ""
+        
+    if os.path.exists(adrs_dir) and os.path.isdir(adrs_dir):
+        max_num = 0
+        adr_files = []
+        for f in os.listdir(adrs_dir):
+            if f.endswith('.md'):
+                adr_files.append(f)
+                
+        for base_name in adr_files:
+            adr_file_path = os.path.join(adrs_dir, base_name)
+            
+            if base_name not in adr_content:
+                print(f"  [FAIL] Architectural Decision Record file '{base_name}' is NOT registered in '.agents/adr.md'!")
+                adr_errors += 1
+                
+            try:
+                with open(adr_file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except Exception:
+                content = ""
+                
+            placeholders = ["TODO", "FIXME", "[placeholder]", "Describe the problem", "Describe the decision", "Describe the result"]
+            if any(p in content for p in placeholders):
+                print(f"  [FAIL] ADR file '{base_name}' contains placeholder text (TODO/FIXME/placeholder/template default)!")
+                adr_errors += 1
+                
+            if "## Context" not in content or "## Decision" not in content or "## Consequences" not in content:
+                print(f"  [FAIL] ADR file '{base_name}' is missing required sections (Context, Decision, Consequences)!")
+                adr_errors += 1
+                
+            m = re.match(r'^([0-9]{3})-', base_name)
+            if m:
+                num = int(m.group(1))
+                if num > max_num:
+                    max_num = num
+                    
+        if max_num > 0:
+            for i in range(1, max_num + 1):
+                padded_num = f"{i:03d}"
+                found = False
+                for f in adr_files:
+                    if f.startswith(f"{padded_num}-"):
+                        found = True
+                        break
+                if not found:
+                    print(f"  [FAIL] Missing ADR in sequence: ADR-{padded_num} is not found!")
+                    adr_errors += 1
+                    
+        links = re.findall(r'file://\./adrs/([^)]+\.md)', adr_content)
+        for link in links:
+            link_path = os.path.join(adrs_dir, link)
+            if not os.path.exists(link_path):
+                print(f"  [FAIL] ADR index references non-existent file '.agents/adrs/{link}'!")
+                adr_errors += 1
+    else:
+        print("  [FAIL] ADR directory is missing!")
+        adr_errors += 1
+                
+    if adr_errors == 0:
+        print("  [PASS] All Architectural Decision Records are correctly indexed and complete.")
+    else:
+        return True
+    return failed_flag
+
+def check_git_profile_compliance(failed_flag):
+    print("Check 11: Git Configuration & Profile Compliance")
+    git_errors = 0
+    profiles_file = ".agents/git_profiles"
+    
+    placeholders = {"work@company.com", "personal@gmail.com", "side@project.com"}
+    
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    clean = line.strip()
+                    if not clean or clean.startswith('#'):
+                        continue
+                    if '=' in clean:
+                        k, v = clean.split('=', 1)
+                        k = k.strip()
+                        v = v.strip()
+                        
+                        m = re.match(r'^([a-zA-Z0-9_\-]+)\.(name|email|ssh_key)$', k)
+                        if m:
+                            key = m.group(1)
+                            prop = m.group(2)
+                            
+                            if prop == "email" and v in placeholders:
+                                print(f"  [WARNING] Profile '{key}' uses a default template email: '{v}'.")
+                            elif prop == "ssh_key" and v:
+                                resolved_key = os.path.expanduser(v)
+                                if not os.path.exists(resolved_key):
+                                    print(f"  [WARNING] Profile '{key}' specifies an SSH key file that does not exist: '{v}'.")
+        except Exception:
+            pass
+            
+    try:
+        local_email = subprocess.check_output(["git", "config", "--local", "user.email"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        local_email = ""
+        
+    if local_email in placeholders:
+        print(f"  [WARNING] Local Git config user.email uses a placeholder email: '{local_email}'.")
+        
+    if git_errors > 0:
+        return True
+    print("  [PASS] Git configurations and profiles are validated.")
+    return failed_flag
+
+def check_api_profile_compliance(failed_flag):
+    print("Check 12: API Configuration & Profile Compliance")
+    api_errors = 0
+    api_keys_file = ".agents/api_keys"
+    
+    if os.path.exists(api_keys_file):
+        try:
+            with open(api_keys_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    clean = line.strip()
+                    if not clean or clean.startswith('#'):
+                        continue
+                    if '=' in clean:
+                        k, v = clean.split('=', 1)
+                        k = k.strip()
+                        v = v.strip()
+                        
+                        m = re.match(r'^([a-zA-Z0-9_\-]+)\.([A-Z0-9_]+)$', k)
+                        if m:
+                            key = m.group(1)
+                            prop = m.group(2)
+                            if v == "your_api_key_here" or v.endswith('_key_here'):
+                                print(f"  [WARNING] API Profile '{key}' uses a placeholder value for '{prop}': '{v}'.")
+                        else:
+                            print(f"  [FAIL] Invalid syntax in {api_keys_file}: '{clean}'. Must be in format: profile.VARIABLE_NAME=value")
+                            api_errors += 1
+        except Exception:
+            pass
+            
+    gitignore_path = ".gitignore"
+    if os.path.exists(gitignore_path):
+        try:
+            with open(gitignore_path, 'r', encoding='utf-8') as f:
+                gi_content = f.read()
+        except Exception:
+            gi_content = ""
+            
+        for pattern in (".agents/api_keys", ".agents/active_api_keys", ".agents/active_api_keys.ps1", ".agents/active_api_profile_name"):
+            if pattern not in gi_content:
+                print(f"  [FAIL] .gitignore compliance: '{pattern}' is not ignored. Please add it to your .gitignore to protect credentials.")
+                api_errors += 1
+                
+    if api_errors > 0:
+        return True
+    print("  [PASS] API configurations and profiles are validated and secure.")
+    return failed_flag
+
+def check_changelog(failed_flag):
+    print("Check 13: Keep a Changelog Compliance")
+    changelog_errors = 0
+    changelog_path = "CHANGELOG.md"
+    
+    if os.path.exists(changelog_path):
+        try:
+            with open(changelog_path, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                f.seek(0)
+                content = f.read()
+        except Exception:
+            first_line = ""
+            content = ""
+            
+        if not first_line.startswith("# Changelog"):
+            print("  [FAIL] CHANGELOG.md must start with '# Changelog' header.")
+            changelog_errors += 1
+            
+        for line in content.splitlines():
+            if line.startswith("## "):
+                m = re.match(r'^## \[(Unreleased|\d+\.\d+\.\d+)\]( - \d{4}-\d{2}-\d{2})?$', line)
+                if not m:
+                    print(f"  [FAIL] CHANGELOG.md contains invalid version header: '{line}'")
+                    changelog_errors += 1
+    else:
+        print("  [WARNING] No CHANGELOG.md file found in project root.")
+        
+    if changelog_errors > 0:
+        return True
+    print("  [PASS] CHANGELOG.md matches Keep a Changelog compliance.")
+    return failed_flag
+
+def check_staged_todo(failed_flag):
+    print("Check 14: Staged Code Quality (TODO/FIXME Guard)")
+    todo_errors = 0
+    
+    try:
+        subprocess.check_call(["git", "rev-parse", "--is-inside-work-tree"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        print("  [PASS] Staged changes contain no TODO or FIXME annotations.")
+        return failed_flag
+        
+    try:
+        staged_files = subprocess.check_output(["git", "diff", "--cached", "--name-only"]).decode().splitlines()
+    except Exception:
+        staged_files = []
+        
+    for f in staged_files:
+        if f.endswith('.md') or f == 'bootstrap.sh' or f.startswith('.agents/'):
+            continue
+            
+        if os.path.exists(f):
+            try:
+                diff_output = subprocess.check_output(["git", "diff", "--cached", "--", f]).decode(errors='ignore')
+                for line in diff_output.splitlines():
+                    if line.startswith('+') and not line.startswith('++'):
+                        if re.search(r'\b(TODO|FIXME)\b', line, re.IGNORECASE):
+                            print(f"  [FAIL] Quality Guard: Staged file '{f}' contains TODO or FIXME annotations:")
+                            print(f"         {line}")
+                            todo_errors += 1
+            except Exception:
+                pass
+                
+    if todo_errors > 0:
+        return True
+    print("  [PASS] Staged changes contain no TODO or FIXME annotations.")
+    return failed_flag
+
+def check_staged_transient(failed_flag):
+    print("Check 15: Staged Transient Files & Leak Guard")
+    leak_errors = 0
+    
+    try:
+        subprocess.check_call(["git", "rev-parse", "--is-inside-work-tree"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        staged_files = subprocess.check_output(["git", "diff", "--cached", "--name-only"]).decode().splitlines()
+    except Exception:
+        staged_files = []
+        
+    for f in staged_files:
+        if f.endswith('.lock') or 'active_api_keys' in f or f.endswith('cooldowns.json'):
+            print(f"  [FAIL] Leak Guard: Transient file '{f}' is staged for commit! Please unstage it.")
+            leak_errors += 1
+            
+    if leak_errors > 0:
+        return True
+    print("  [PASS] No transient files or credentials are staged.")
+    return failed_flag
+
+def check_local_issues(failed_flag):
+    print("Check 16: Local Workspace Issues Validation")
+    issue_errors = 0
+    issues_dir = ".agents/issues"
+    
+    if os.path.exists(issues_dir) and os.path.isdir(issues_dir):
+        for f in os.listdir(issues_dir):
+            if f.startswith('issue_') and f.endswith('.md'):
+                path = os.path.join(issues_dir, f)
+                
+                try:
+                    with open(path, 'r', encoding='utf-8') as file_obj:
+                        lines = file_obj.readlines()
+                except Exception:
+                    lines = []
+                    
+                if not lines:
+                    print(f"  [FAIL] Issue file '{f}' is empty!")
+                    issue_errors += 1
+                    continue
+                    
+                if lines[0].strip() != "---":
+                    print(f"  [FAIL] Issue file '{f}' does not start with YAML frontmatter delimiter '---'!")
+                    issue_errors += 1
+                    continue
+                    
+                closing_idx = -1
+                for idx, line in enumerate(lines[1:], 1):
+                    if line.strip() == "---":
+                        closing_idx = idx
+                        break
+                        
+                if closing_idx == -1:
+                    print(f"  [FAIL] Issue file '{f}' is missing closing YAML frontmatter delimiter '---'!")
+                    issue_errors += 1
+                    continue
+                    
+                frontmatter_lines = lines[1:closing_idx]
+                frontmatter = {}
+                for line in frontmatter_lines:
+                    if ':' in line:
+                        k, v = line.split(':', 1)
+                        frontmatter[k.strip()] = v.strip().strip('"\'')
+                        
+                required_keys = ["id", "title", "status", "created_at", "closed_at"]
+                for key in required_keys:
+                    if key not in frontmatter:
+                        print(f"  [FAIL] Issue file '{f}' is missing required frontmatter field '{key}:'!")
+                        issue_errors += 1
+                        
+                status_val = frontmatter.get("status", "").lower()
+                if status_val not in ("open", "closed"):
+                    print(f"  [FAIL] Issue file '{f}' has invalid status value '{status_val}' (must be 'open' or 'closed')!")
+                    issue_errors += 1
+                    
+    if issue_errors > 0:
+        return True
+    print("  [PASS] All local issue files are validated and compliant.")
+    return failed_flag
+
+def check_base_branch_modification(failed_flag):
+    print("Check 17: Base Branch Modification Check")
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    if current_branch in ("main", "master"):
+        # Check for modified or untracked code files (excluding .agents/, .git/, and metadata files)
+        try:
+            status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+        except Exception:
+            status_output = ""
+            
+        unauthorized_files = []
+        for line in status_output.splitlines():
+            if not line.strip():
+                continue
+            # Format is XY filepath or XY "filepath"
+            filepath = line[3:].strip().strip('"\'')
+            
+            # Exclude metadata / config / lock files
+            if filepath.startswith('.agents/') or filepath.startswith('.git/'):
+                continue
+            ext = os.path.splitext(filepath)[1]
+            if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
+                continue
+                
+            unauthorized_files.append(filepath)
+            
+        if unauthorized_files:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} Unauthorized code modifications found directly on base branch '{current_branch}':")
+            for uf in unauthorized_files:
+                print(f"    - {uf}")
+            print("         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch.")
+            return True
+            
+    print("  [PASS] Base branch check passed (no direct modifications on main/master).")
+    return failed_flag
+
+def check_module_locking(failed_flag):
+    print("Check 18: Staged/Modified Files Module Locking Check")
+    try:
+        status_output = subprocess.check_output(["git", "status", "--porcelain"], stderr=subprocess.DEVNULL).decode()
+    except Exception:
+        status_output = ""
+        
+    modified_files = []
+    for line in status_output.splitlines():
+        if not line.strip():
+            continue
+        filepath = line[3:].strip().strip('"\'')
+        
+        # Normalize and filter
+        filepath = filepath.replace('\\', '/')
+        if filepath.startswith('.agents/') or filepath.startswith('.git/'):
+            continue
+        ext = os.path.splitext(filepath)[1]
+        if ext in ('.md', '.json', '.txt', '.yml', '.yaml', '.lock') or filepath in ('.gitignore', '.antigravityignore'):
+            continue
+            
+        modified_files.append(filepath)
+        
+    if not modified_files:
+        print("  [PASS] No modified files require locking.")
+        return failed_flag
+        
+    # Get active locks
+    locks_dir = os.path.join(utils.get_agents_dir(), "locks")
+    active_locks = set()
+    if os.path.exists(locks_dir) and os.path.isdir(locks_dir):
+        for f in os.listdir(locks_dir):
+            if f.endswith('.lock'):
+                active_locks.add(os.path.splitext(f)[0])
+                
+    unlock_errors = 0
+    for f in modified_files:
+        # Map file to module lock name
+        if '/' not in f:
+            req_lock = 'root'
+        else:
+            req_lock = f.split('/')[0]
+            
+        if req_lock not in active_locks:
+            print(f"  {color('[FAIL]', C_RED + C_BOLD)} File '{f}' is modified but module '{req_lock}' is not locked!")
+            print(f"         Please acquire a lock first: './.agents/scripts/helper.sh lock {req_lock}'")
+            unlock_errors += 1
+            
+    if unlock_errors > 0:
+        return True
+        
+    print("  [PASS] All modified files are properly locked.")
+    return failed_flag
+
+def check_issue_alignment(failed_flag):
+    print("Check 19: Issue Branch and Memory Alignment Check")
+    try:
+        current_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        current_branch = "detached"
+        
+    # Check if branch name matches issue-<id>-<slug>
+    m = re.match(r'^issue-(\d+)-(.+)$', current_branch)
+    if not m:
+        print("  [PASS] Not on an issue feature branch. Skipping alignment check.")
+        return failed_flag
+        
+    issue_id = int(m.group(1))
+    issues_dir = os.path.join(utils.get_agents_dir(), "issues")
+    filename = f"issue_{issue_id:03d}.md"
+    file_path = os.path.join(issues_dir, filename)
+    
+    if not os.path.exists(file_path):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Branch '{current_branch}' references non-existent issue #{issue_id}!")
+        return True
+        
+    # Parse title from issue
+    title = ""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('title:'):
+                    title = line.split(':', 1)[1].strip().strip('"\'')
+                    break
+    except Exception:
+        pass
+        
+    memory_file = utils.get_memory_file()
+    if not os.path.exists(memory_file):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} Memory file 'memory.md' is missing!")
+        return True
+        
+    try:
+        with open(memory_file, 'r', encoding='utf-8') as f:
+            mem_content = f.read()
+    except Exception:
+        mem_content = ""
+        
+    alignment_errors = 0
+    
+    # Verify State Flag is IN_PROGRESS or COMPLETED
+    if not re.search(r'-\s*\*\*State Flag\*\*:\s*`?(IN_PROGRESS|COMPLETED)`?', mem_content, re.IGNORECASE):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md State Flag must be 'IN_PROGRESS' or 'COMPLETED' on issue branch!")
+        alignment_errors += 1
+        
+    # Verify Current Task Target contains the issue title or ID
+    expected_target_pat = f"issue #{issue_id}"
+    if expected_target_pat not in mem_content.lower() and (title.lower() not in mem_content.lower() if title else True):
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md Current Task Target is not aligned with issue #{issue_id}!")
+        alignment_errors += 1
+        
+    # Verify issue task checklist is present
+    if f"issue #{issue_id}:" not in mem_content.lower():
+        print(f"  {color('[FAIL]', C_RED + C_BOLD)} memory.md checklist is missing a task for issue #{issue_id}!")
+        alignment_errors += 1
+        
+    if alignment_errors > 0:
+        return True
+        
+    print(f"  [PASS] Branch '{current_branch}' is fully aligned with memory.md.")
+    return failed_flag
 
 EOF
 
@@ -12240,7 +13922,7 @@ def run(args):
     print("Running autonomous reconnaissance to populate blueprint files...")
     recon_sh = os.path.join(agents_dir, 'scripts', 'recon.sh')
     if os.path.exists(recon_sh):
-        subprocess.run([recon_sh, "-f"])
+        utils.run_shell_script(recon_sh, ["-f"])
         
     print("==========================================================")
     print(f"Workspace initialized successfully for '{project_name}'!")
@@ -12336,7 +14018,7 @@ def run(args):
         print(f"Error: recon.sh not found at {recon_sh}", file=sys.stderr)
         sys.exit(1)
         
-    proc = subprocess.run([recon_sh] + args[1:])
+    proc = utils.run_shell_script(recon_sh, args[1:])
     sys.exit(proc.returncode)
 
 EOF
@@ -12371,6 +14053,73 @@ def find_workspace_root():
 
 def get_agents_dir():
     return os.path.join(find_workspace_root(), '.agents')
+
+def get_sh_executable():
+    """
+    Locates the 'sh' executable on Windows systems by checking PATH,
+    auto-discovering via Git exec-path, and checking common paths.
+    Returns 'sh' as a fallback or for non-Windows platforms.
+    """
+    import shutil
+    import subprocess
+    
+    if os.name != 'nt':
+        return 'sh'
+        
+    # 1. Check if 'sh' is already in PATH
+    sh_path = shutil.which('sh')
+    if sh_path:
+        return sh_path
+        
+    # 2. Query Git exec-path to locate the Git root directory
+    try:
+        git_exec = subprocess.check_output(
+            ["git", "--exec-path"], 
+            stderr=subprocess.DEVNULL, 
+            text=True
+        ).strip()
+        if git_exec:
+            # git_exec is usually: C:\Program Files\Git\mingw64\libexec\git-core
+            # We want to walk up to C:\Program Files\Git\
+            git_exec_norm = os.path.normpath(git_exec)
+            git_root = git_exec_norm
+            for _ in range(3):
+                git_root = os.path.dirname(git_root)
+            
+            # Check common subdirectories under Git root
+            candidates = [
+                os.path.join(git_root, 'bin', 'sh.exe'),
+                os.path.join(git_root, 'usr', 'bin', 'sh.exe'),
+            ]
+            for candidate in candidates:
+                if os.path.exists(candidate):
+                    return candidate
+    except Exception:
+        pass
+        
+    # 3. Check hardcoded common installation paths on Windows
+    common_paths = [
+        r"C:\Program Files\Git\bin\sh.exe",
+        r"C:\Program Files\Git\usr\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\bin\sh.exe",
+        r"C:\Program Files (x86)\Git\usr\bin\sh.exe",
+    ]
+    for path in common_paths:
+        if os.path.exists(path):
+            return path
+            
+    # 4. Fallback
+    return 'sh'
+
+def run_shell_script(script_path, args=None):
+    import subprocess
+    if args is None:
+        args = []
+    if os.name == 'nt':
+        sh_exe = get_sh_executable()
+        return subprocess.run([sh_exe, script_path] + args)
+    else:
+        return subprocess.run([script_path] + args)
 
 def get_memory_file():
     return os.path.join(get_agents_dir(), 'memory.md')
@@ -13701,6 +15450,135 @@ else
     FAILED=1
 fi
 
+# 17. Base Branch Modification Check
+echo "Check 17: Base Branch Modification Check"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+UNAUTH=0
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+    STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+    if [ -n "$STATUS_OUT" ]; then
+        while IFS= read -r line || [ -n "$line" ]; do
+            [ -z "$line" ] && continue
+            filepath=$(echo "$line" | cut -c4- | xargs)
+            if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                continue
+            fi
+            ext="${filepath##*.}"
+            if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                continue
+            fi
+            if [ $UNAUTH -eq 0 ]; then
+                echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                UNAUTH=1
+            fi
+            echo "    - $filepath"
+        done <<< "$STATUS_OUT"
+        if [ $UNAUTH -eq 1 ]; then
+            echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
+            FAILED=1
+        fi
+    fi
+fi
+if [ $UNAUTH -eq 0 ]; then
+    echo "  [PASS] Base branch check passed (no direct modifications on main/master)."
+fi
+
+# 18. Staged/Modified Files Module Locking Check
+echo "Check 18: Staged/Modified Files Module Locking Check"
+STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+MOD_FILES=""
+if [ -n "$STATUS_OUT" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        [ -z "$line" ] && continue
+        filepath=$(echo "$line" | cut -c4- | xargs)
+        if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+            continue
+        fi
+        ext="${filepath##*.}"
+        if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+            continue
+        fi
+        MOD_FILES="$MOD_FILES $filepath"
+    done <<< "$STATUS_OUT"
+fi
+
+if [ -z "$MOD_FILES" ]; then
+    echo "  [PASS] No modified files require locking."
+else
+    LOCKS_ERR=0
+    for f in $MOD_FILES; do
+        if [[ "$f" != *"/"* ]]; then
+            req_lock="root"
+        else
+            req_lock=$(echo "$f" | cut -d'/' -f1)
+        fi
+        
+        if [ ! -f ".agents/locks/${req_lock}.lock" ]; then
+            echo "  [FAIL] File '$f' is modified but module '$req_lock' is not locked!"
+            echo "         Please acquire a lock first: './.agents/scripts/helper.sh lock $req_lock'"
+            LOCKS_ERR=1
+        fi
+    done
+    if [ $LOCKS_ERR -eq 1 ]; then
+        FAILED=1
+    else
+        echo "  [PASS] All modified files are properly locked."
+    fi
+fi
+
+# 19. Issue Branch and Memory Alignment Check
+echo "Check 19: Issue Branch and Memory Alignment Check"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+if [[ "$CURRENT_BRANCH" =~ ^issue-[0-9]+- ]]; then
+    issue_id=$(echo "$CURRENT_BRANCH" | cut -d'-' -f2)
+    issue_id=$((10#$issue_id))
+    padded_id=$(printf "%03d" $issue_id)
+    issue_file=".agents/issues/issue_${padded_id}.md"
+    
+    if [ ! -f "$issue_file" ]; then
+        echo "  [FAIL] Branch '$CURRENT_BRANCH' references non-existent issue #$issue_id!"
+        FAILED=1
+    else
+        # Parse title
+        issue_title=$(grep "^title:" "$issue_file" | cut -d':' -f2- | tr -d '"'"'" | xargs || echo "")
+        
+        if [ ! -f "$MEMORY_FILE" ]; then
+            echo "  [FAIL] Memory file '$MEMORY_FILE' is missing!"
+            FAILED=1
+        else
+            ALIGN_ERR=0
+            # State Flag must be IN_PROGRESS or COMPLETED
+            if ! grep -qi -E -- "- \*\*State Flag\*\*:\s*\`?(IN_PROGRESS|COMPLETED)\`?" "$MEMORY_FILE"; then
+                echo "  [FAIL] memory.md State Flag must be 'IN_PROGRESS' or 'COMPLETED' on issue branch!"
+                ALIGN_ERR=1
+            fi
+            
+            # Current Task Target
+            target_line=$(grep -i "Current Task Target" "$MEMORY_FILE" | tr '[:upper:]' '[:lower:]' || echo "")
+            issue_title_lower=$(echo "$issue_title" | tr '[:upper:]' '[:lower:]')
+            if [[ "$target_line" != *"issue #$issue_id"* ]] && [[ -n "$issue_title_lower" && "$target_line" != *"$issue_title_lower"* ]]; then
+                echo "  [FAIL] memory.md Current Task Target is not aligned with issue #$issue_id!"
+                ALIGN_ERR=1
+            fi
+            
+            # Checklist
+            checklist_lower=$(grep -i "Resolve issue #$issue_id" "$MEMORY_FILE" | tr '[:upper:]' '[:lower:]' || echo "")
+            if [ -z "$checklist_lower" ]; then
+                echo "  [FAIL] memory.md checklist is missing a task for issue #$issue_id!"
+                ALIGN_ERR=1
+            fi
+            
+            if [ $ALIGN_ERR -eq 1 ]; then
+                FAILED=1
+            else
+                echo "  [PASS] Branch '$CURRENT_BRANCH' is fully aligned with memory.md."
+            fi
+        fi
+    fi
+else
+    echo "  [PASS] Not on an issue feature branch. Skipping alignment check."
+fi
+
 echo "=========================================================="
 if [ "$FAILED" -eq 0 ]; then
     echo "Workspace Status: VALIDATED"
@@ -14074,6 +15952,17 @@ write_template_safe ".agents/hooks/pre-commit" << 'EOF'
 # Antigravity Agent Git Hook
 # Git pre-commit hook: Auto-run validations and tests
 set -e
+
+# Enforce that git commit is run via helper.sh commit
+if [ "${AAC_COMMIT_RUNNING:-0}" -ne 1 ]; then
+    echo "==========================================================" >&2
+    echo "  [FAIL] Raw git commit is prohibited!" >&2
+    echo "==========================================================" >&2
+    echo "You must commit your changes via './.agents/scripts/helper.sh commit'." >&2
+    echo "This ensures proper Git profile/SSH key rotation and validation." >&2
+    echo "==========================================================" >&2
+    exit 1
+fi
 
 if python3 -c "import sys" 2>/dev/null; then
     PYTHON_CMD="python3"

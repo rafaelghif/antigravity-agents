@@ -3,6 +3,17 @@
 # Git pre-commit hook: Auto-run validations and tests
 set -e
 
+# Enforce that git commit is run via helper.sh commit
+if [ "${AAC_COMMIT_RUNNING:-0}" -ne 1 ]; then
+    echo "==========================================================" >&2
+    echo "  [FAIL] Raw git commit is prohibited!" >&2
+    echo "==========================================================" >&2
+    echo "You must commit your changes via './.agents/scripts/helper.sh commit'." >&2
+    echo "This ensures proper Git profile/SSH key rotation and validation." >&2
+    echo "==========================================================" >&2
+    exit 1
+fi
+
 if python3 -c "import sys" 2>/dev/null; then
     PYTHON_CMD="python3"
 elif python -c "import sys; sys.exit(0 if sys.version_info[0] == 3 else 1)" 2>/dev/null; then
