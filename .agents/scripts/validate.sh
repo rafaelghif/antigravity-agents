@@ -682,15 +682,35 @@ else
                 if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
                     continue
                 fi
-                ext="${filepath##*.}"
-                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
-                    continue
+                
+                # Expand directory if it exists
+                if [ -d "$filepath" ]; then
+                    while read -r subfile; do
+                        [ -z "$subfile" ] && continue
+                        if [[ "$subfile" =~ ^\.agents/ ]] || [[ "$subfile" =~ ^\.git/ ]]; then
+                            continue
+                        fi
+                        ext="${subfile##*.}"
+                        if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$subfile" == ".gitignore" ]] || [[ "$subfile" == ".antigravityignore" ]]; then
+                            continue
+                        fi
+                        if [ $UNAUTH -eq 0 ]; then
+                            echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                            UNAUTH=1
+                        fi
+                        echo "    - $subfile"
+                    done < <(find "$filepath" -type f 2>/dev/null)
+                else
+                    ext="${filepath##*.}"
+                    if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                        continue
+                    fi
+                    if [ $UNAUTH -eq 0 ]; then
+                        echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
+                        UNAUTH=1
+                    fi
+                    echo "    - $filepath"
                 fi
-                if [ $UNAUTH -eq 0 ]; then
-                    echo "  [FAIL] Unauthorized code modifications found directly on base branch '$CURRENT_BRANCH':"
-                    UNAUTH=1
-                fi
-                echo "    - $filepath"
             done <<< "$STATUS_OUT"
             if [ $UNAUTH -eq 1 ]; then
                 echo "         Please run './.agents/scripts/helper.sh issue checkout <id>' to work in an isolated feature branch."
@@ -717,11 +737,27 @@ else
             if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
                 continue
             fi
-            ext="${filepath##*.}"
-            if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
-                continue
+            
+            # Expand directory if it exists
+            if [ -d "$filepath" ]; then
+                while read -r subfile; do
+                    [ -z "$subfile" ] && continue
+                    if [[ "$subfile" =~ ^\.agents/ ]] || [[ "$subfile" =~ ^\.git/ ]]; then
+                        continue
+                    fi
+                    ext="${subfile##*.}"
+                    if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$subfile" == ".gitignore" ]] || [[ "$subfile" == ".antigravityignore" ]]; then
+                        continue
+                    fi
+                    MOD_FILES="$MOD_FILES $subfile"
+                done < <(find "$filepath" -type f 2>/dev/null)
+            else
+                ext="${filepath##*.}"
+                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                    continue
+                fi
+                MOD_FILES="$MOD_FILES $filepath"
             fi
-            MOD_FILES="$MOD_FILES $filepath"
         done <<< "$STATUS_OUT"
     fi
 
@@ -801,6 +837,169 @@ if [[ "$CURRENT_BRANCH" =~ ^issue-[0-9]+- ]]; then
     fi
 else
     echo "  [PASS] Not on an issue feature branch. Skipping alignment check."
+fi
+
+# 20. Staging Discipline Compliance Check
+echo "Check 20: Staging Discipline Compliance Check"
+staged_files=$(git diff --cached --name-only 2>/dev/null || echo "")
+staged_count=0
+if [ -n "$staged_files" ]; then
+    staged_count=$(echo "$staged_files" | wc -l | tr -d ' ')
+fi
+
+changed_files=""
+status_out=$(git status --porcelain 2>/dev/null || echo "")
+if [ -n "$status_out" ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+        [ -z "$line" ] && continue
+        filepath=$(echo "$line" | cut -c4- | xargs)
+        if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+            continue
+        fi
+        changed_files="$changed_files $filepath"
+    done <<< "$status_out"
+fi
+
+changed_count=0
+if [ -n "$changed_files" ]; then
+    changed_count=$(echo "$changed_files" | wc -w | tr -d ' ')
+fi
+
+if [ "$staged_count" -gt 3 ] && [ "$staged_count" -eq "$changed_count" ]; then
+    echo "  [WARNING] Bulk staging detected ($staged_count files staged, 0 unstaged)."
+    echo "            Ensure you staged files explicitly by name rather than using 'git add .' or 'git add -A'."
+fi
+
+secret_found=0
+if [ -n "$staged_files" ]; then
+    while IFS= read -r f || [ -n "$f" ]; do
+        [ -z "$f" ] && continue
+        basename=$(basename "$f" | tr '[:upper:]' '[:lower:]')
+        if [[ "$basename" == *".env"* ]] || [[ "$basename" == *".key"* ]] || [[ "$basename" == *".pem"* ]] || [[ "$basename" == *"credentials"* ]] || [[ "$basename" == *"id_rsa"* ]]; then
+            if [ $secret_found -eq 0 ]; then
+                echo "  [FAIL] Staged files contain potential credentials/secrets:"
+                secret_found=1
+            fi
+            echo "    - $f"
+        fi
+    done <<< "$staged_files"
+fi
+
+if [ $secret_found -eq 1 ]; then
+    FAILED=1
+else
+    echo "  [PASS] Staging discipline checks passed."
+fi
+
+# 21. Protected Branches Guard
+echo "Check 21: Protected Branches Guard"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "detached")
+default_branch=""
+if command -v gh >/dev/null 2>&1; then
+    default_branch=$(GH_TOKEN="" gh repo view --json defaultBranchRef -q '.defaultBranchRef.name' 2>/dev/null || echo "")
+fi
+if [ -z "$default_branch" ]; then
+    sym_ref=$(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null || echo "")
+    if [[ "$sym_ref" == "origin/"* ]]; then
+        default_branch="${sym_ref#origin/}"
+    fi
+fi
+if [ -z "$default_branch" ]; then
+    default_branch=$(git remote show origin 2>/dev/null | grep "HEAD branch" | cut -d: -f2 | xargs || echo "")
+fi
+if [ -z "$default_branch" ]; then
+    default_branch="main"
+fi
+
+is_protected=0
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ] || [[ "$CURRENT_BRANCH" == "release/"* ]] || [[ "$CURRENT_BRANCH" == "hotfix/"* ]] || [ "$CURRENT_BRANCH" = "$default_branch" ]; then
+    is_protected=1
+fi
+
+if [ $is_protected -eq 1 ]; then
+    STATUS_OUT=$(git status --porcelain 2>/dev/null || echo "")
+    unauthorized_count=0
+    if [ -n "$STATUS_OUT" ]; then
+        while IFS= read -r line || [ -n "$line" ]; do
+            [ -z "$line" ] && continue
+            filepath=$(echo "$line" | cut -c4- | xargs)
+            if [[ "$filepath" =~ ^\.agents/ ]] || [[ "$filepath" =~ ^\.git/ ]]; then
+                continue
+            fi
+            
+            if [ -d "$filepath" ]; then
+                while read -r subfile; do
+                    [ -z "$subfile" ] && continue
+                    if [[ "$subfile" =~ ^\.agents/ ]] || [[ "$subfile" =~ ^\.git/ ]]; then
+                        continue
+                    fi
+                    ext="${subfile##*.}"
+                    if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$subfile" == ".gitignore" ]] || [[ "$subfile" == ".antigravityignore" ]]; then
+                        continue
+                    fi
+                    if [ $unauthorized_count -eq 0 ]; then
+                        echo "  [FAIL] Unauthorized code modifications found directly on protected branch '$CURRENT_BRANCH':"
+                        unauthorized_count=1
+                    fi
+                    echo "    - $subfile"
+                done < <(find "$filepath" -type f 2>/dev/null)
+            else
+                ext="${filepath##*.}"
+                if [[ "$ext" =~ ^(md|json|txt|yml|yaml|lock)$ ]] || [[ "$filepath" == ".gitignore" ]] || [[ "$filepath" == ".antigravityignore" ]]; then
+                    continue
+                fi
+                if [ $unauthorized_count -eq 0 ]; then
+                    echo "  [FAIL] Unauthorized code modifications found directly on protected branch '$CURRENT_BRANCH':"
+                    unauthorized_count=1
+                fi
+                echo "    - $filepath"
+            fi
+        done <<< "$STATUS_OUT"
+    fi
+    if [ $unauthorized_count -eq 1 ]; then
+        echo "         Code mutations are forbidden on protected branches. Switch to a feature branch."
+        FAILED=1
+    else
+        echo "  [PASS] Branch '$CURRENT_BRANCH' is compliant with branch protection policies."
+    fi
+else
+    echo "  [PASS] Branch '$CURRENT_BRANCH' is compliant with branch protection policies."
+fi
+
+# 22. Git Environment Compliance Audit
+echo "Check 22: Git Environment Compliance Audit"
+git_pager_config=$(git config core.pager 2>/dev/null || echo "")
+git_editor_config=$(git config core.editor 2>/dev/null || echo "")
+
+echo "  GIT_PAGER: env='${GIT_PAGER:-}', config='$git_pager_config'"
+echo "  GIT_EDITOR: env='${GIT_EDITOR:-}', config='$git_editor_config'"
+
+pager="${GIT_PAGER:-}"
+[ -z "$pager" ] && pager="$git_pager_config"
+if [ -n "$pager" ] && [ "$pager" != "cat" ] && [ "$pager" != "true" ] && [ "$pager" != "none" ] && [ "$pager" != "false" ] && [ "$pager" != "/bin/true" ] && [ "$pager" != "/usr/bin/true" ]; then
+    echo "  [WARNING] Pager '$pager' is potentially interactive. Prefer GIT_PAGER=cat."
+fi
+
+editor="${GIT_EDITOR:-}"
+[ -z "$editor" ] && editor="$git_editor_config"
+editor_lower=$(echo "$editor" | tr '[:upper:]' '[:lower:]')
+if [ -n "$editor" ] && [[ "$editor_lower" != *"true"* ]] && [[ "$editor_lower" != *"none"* ]]; then
+    echo "  [WARNING] Git editor '$editor' is potentially interactive. Prefer GIT_EDITOR=true."
+fi
+
+echo "  [PASS] Git environment audit completed."
+
+# 23. GitHub CLI Auth & Profile Verification
+echo "Check 23: GitHub CLI Auth & Profile Verification"
+if ! command -v gh >/dev/null 2>&1; then
+    echo "  [WARNING] GitHub CLI ('gh') is not installed or not in PATH."
+else
+    auth_out=$(GH_TOKEN="" gh auth status 2>&1 || echo "")
+    if [[ "$auth_out" == *"Logged in to"* ]]; then
+        echo "  [PASS] GitHub CLI is authenticated."
+    else
+        echo "  [WARNING] GitHub CLI is not authenticated. Please run 'gh auth login'."
+    fi
 fi
 
 echo "=========================================================="
