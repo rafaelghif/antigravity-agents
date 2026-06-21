@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `README.md` to reflect the 23 comprehensive compliance checks.
 
 ### Fixed
+- Fixed bootstrap installation failures by recursively creating `.agents/scripts/cli/commands` directory and normalizing all backslash paths in `bootstrap.sh` to forward slash paths.
 - Fixed Git profile rotation sequence bug in `git-profile` and `commit` subcommands to check the currently configured `user.email` first before falling back to `git log` metadata.
 - Updated outdated git merge message assertion in `tests/test_issue_command.py` and mocked git user.name config in `tests/test_menu_command.py`.
 - Added unit test coverage for Git profile rotation in `tests/test_git_profile_command.py`.
