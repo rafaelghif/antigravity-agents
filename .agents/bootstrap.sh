@@ -177,7 +177,7 @@ mkdir -p .agents/workflows
 mkdir -p .agents/archive
 mkdir -p .agents/locks
 mkdir -p .agents/schemas
-mkdir -p .agents/scripts
+mkdir -p .agents/scripts/cli/commands
 mkdir -p .agents/hooks
 mkdir -p .agents/rules
 mkdir -p .agents/adrs
@@ -1327,14 +1327,14 @@ fi
 
 EOF
 
-# Write .agents\scripts\cli\commands\__init__.py
-write_template_safe ".agents\scripts\cli\commands\__init__.py" << 'EOF'
+# Write .agents/scripts/cli/commands/__init__.py
+write_template_safe ".agents/scripts/cli/commands/__init__.py" << 'EOF'
 
 
 EOF
 
-# Write .agents\scripts\cli\commands\validate.py
-write_template_safe ".agents\scripts\cli\commands\validate.py" << 'EOF'
+# Write .agents/scripts/cli/commands/validate.py
+write_template_safe ".agents/scripts/cli/commands/validate.py" << 'EOF'
 import os
 import sys
 import re
@@ -2107,8 +2107,8 @@ def check_local_issues(failed_flag):
 
 EOF
 
-# Write .agents\scripts\cli\commands\test.py
-write_template_safe ".agents\scripts\cli\commands\test.py" << 'EOF'
+# Write .agents/scripts/cli/commands/test.py
+write_template_safe ".agents/scripts/cli/commands/test.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -2197,8 +2197,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\sync_git.py
-write_template_safe ".agents\scripts\cli\commands\sync_git.py" << 'EOF'
+# Write .agents/scripts/cli/commands/sync_git.py
+write_template_safe ".agents/scripts/cli/commands/sync_git.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -2240,8 +2240,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\sync_api.py
-write_template_safe ".agents\scripts\cli\commands\sync_api.py" << 'EOF'
+# Write .agents/scripts/cli/commands/sync_api.py
+write_template_safe ".agents/scripts/cli/commands/sync_api.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -2456,8 +2456,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\skills.py
-write_template_safe ".agents\scripts\cli\commands\skills.py" << 'EOF'
+# Write .agents/scripts/cli/commands/skills.py
+write_template_safe ".agents/scripts/cli/commands/skills.py" << 'EOF'
 import os
 import sys
 import re
@@ -2750,8 +2750,8 @@ def list_skills(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\rules.py
-write_template_safe ".agents\scripts\cli\commands\rules.py" << 'EOF'
+# Write .agents/scripts/cli/commands/rules.py
+write_template_safe ".agents/scripts/cli/commands/rules.py" << 'EOF'
 import os
 import sys
 import re
@@ -2962,8 +2962,8 @@ def list_rules(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\release.py
-write_template_safe ".agents\scripts\cli\commands\release.py" << 'EOF'
+# Write .agents/scripts/cli/commands/release.py
+write_template_safe ".agents/scripts/cli/commands/release.py" << 'EOF'
 import os
 import sys
 import re
@@ -3051,8 +3051,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\recon.py
-write_template_safe ".agents\scripts\cli\commands\recon.py" << 'EOF'
+# Write .agents/scripts/cli/commands/recon.py
+write_template_safe ".agents/scripts/cli/commands/recon.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -3069,8 +3069,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\push.py
-write_template_safe ".agents\scripts\cli\commands\push.py" << 'EOF'
+# Write .agents/scripts/cli/commands/push.py
+write_template_safe ".agents/scripts/cli/commands/push.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -3199,8 +3199,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\migrate.py
-write_template_safe ".agents\scripts\cli\commands\migrate.py" << 'EOF'
+# Write .agents/scripts/cli/commands/migrate.py
+write_template_safe ".agents/scripts/cli/commands/migrate.py" << 'EOF'
 import os
 import sys
 import shutil
@@ -3370,8 +3370,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\menu.py
-write_template_safe ".agents\scripts\cli\commands\menu.py" << 'EOF'
+# Write .agents/scripts/cli/commands/menu.py
+write_template_safe ".agents/scripts/cli/commands/menu.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -3862,8 +3862,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\log_usage.py
-write_template_safe ".agents\scripts\cli\commands\log_usage.py" << 'EOF'
+# Write .agents/scripts/cli/commands/log_usage.py
+write_template_safe ".agents/scripts/cli/commands/log_usage.py" << 'EOF'
 import sys
 import utils
 
@@ -3882,8 +3882,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\lock.py
-write_template_safe ".agents\scripts\cli\commands\lock.py" << 'EOF'
+# Write .agents/scripts/cli/commands/lock.py
+write_template_safe ".agents/scripts/cli/commands/lock.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -3938,8 +3938,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\lint.py
-write_template_safe ".agents\scripts\cli\commands\lint.py" << 'EOF'
+# Write .agents/scripts/cli/commands/lint.py
+write_template_safe ".agents/scripts/cli/commands/lint.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -4029,8 +4029,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\issue.py
-write_template_safe ".agents\scripts\cli\commands\issue.py" << 'EOF'
+# Write .agents/scripts/cli/commands/issue.py
+write_template_safe ".agents/scripts/cli/commands/issue.py" << 'EOF'
 import os
 import sys
 import re
@@ -5122,8 +5122,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\init.py
-write_template_safe ".agents\scripts\cli\commands\init.py" << 'EOF'
+# Write .agents/scripts/cli/commands/init.py
+write_template_safe ".agents/scripts/cli/commands/init.py" << 'EOF'
 import os
 import sys
 import shutil
@@ -5672,8 +5672,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\guide.py
-write_template_safe ".agents\scripts\cli\commands\guide.py" << 'EOF'
+# Write .agents/scripts/cli/commands/guide.py
+write_template_safe ".agents/scripts/cli/commands/guide.py" << 'EOF'
 import sys
 import utils
 
@@ -5747,8 +5747,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\git_profile.py
-write_template_safe ".agents\scripts\cli\commands\git_profile.py" << 'EOF'
+# Write .agents/scripts/cli/commands/git_profile.py
+write_template_safe ".agents/scripts/cli/commands/git_profile.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -5886,8 +5886,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\doctor.py
-write_template_safe ".agents\scripts\cli\commands\doctor.py" << 'EOF'
+# Write .agents/scripts/cli/commands/doctor.py
+write_template_safe ".agents/scripts/cli/commands/doctor.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -5966,8 +5966,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\create_adr.py
-write_template_safe ".agents\scripts\cli\commands\create_adr.py" << 'EOF'
+# Write .agents/scripts/cli/commands/create_adr.py
+write_template_safe ".agents/scripts/cli/commands/create_adr.py" << 'EOF'
 import os
 import sys
 import glob
@@ -6042,8 +6042,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\commit.py
-write_template_safe ".agents\scripts\cli\commands\commit.py" << 'EOF'
+# Write .agents/scripts/cli/commands/commit.py
+write_template_safe ".agents/scripts/cli/commands/commit.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -6328,8 +6328,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\clean.py
-write_template_safe ".agents\scripts\cli\commands\clean.py" << 'EOF'
+# Write .agents/scripts/cli/commands/clean.py
+write_template_safe ".agents/scripts/cli/commands/clean.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -6511,8 +6511,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\build.py
-write_template_safe ".agents\scripts\cli\commands\build.py" << 'EOF'
+# Write .agents/scripts/cli/commands/build.py
+write_template_safe ".agents/scripts/cli/commands/build.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -6575,8 +6575,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\autocomplete.py
-write_template_safe ".agents\scripts\cli\commands\autocomplete.py" << 'EOF'
+# Write .agents/scripts/cli/commands/autocomplete.py
+write_template_safe ".agents/scripts/cli/commands/autocomplete.py" << 'EOF'
 import sys
 
 def get_bash_completion():
@@ -6650,8 +6650,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\archive.py
-write_template_safe ".agents\scripts\cli\commands\archive.py" << 'EOF'
+# Write .agents/scripts/cli/commands/archive.py
+write_template_safe ".agents/scripts/cli/commands/archive.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -6746,8 +6746,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\api_profile.py
-write_template_safe ".agents\scripts\cli\commands\api_profile.py" << 'EOF'
+# Write .agents/scripts/cli/commands/api_profile.py
+write_template_safe ".agents/scripts/cli/commands/api_profile.py" << 'EOF'
 import os
 import sys
 import json
@@ -6941,8 +6941,8 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\commands\adr_wizard.py
-write_template_safe ".agents\scripts\cli\commands\adr_wizard.py" << 'EOF'
+# Write .agents/scripts/cli/commands/adr_wizard.py
+write_template_safe ".agents/scripts/cli/commands/adr_wizard.py" << 'EOF'
 import os
 import sys
 import subprocess
@@ -6971,14 +6971,14 @@ def run(args):
 
 EOF
 
-# Write .agents\scripts\cli\__init__.py
-write_template_safe ".agents\scripts\cli\__init__.py" << 'EOF'
+# Write .agents/scripts/cli/__init__.py
+write_template_safe ".agents/scripts/cli/__init__.py" << 'EOF'
 
 
 EOF
 
-# Write .agents\scripts\cli\utils.py
-write_template_safe ".agents\scripts\cli\utils.py" << 'EOF'
+# Write .agents/scripts/cli/utils.py
+write_template_safe ".agents/scripts/cli/utils.py" << 'EOF'
 import os
 import sys
 import json
@@ -7189,8 +7189,8 @@ def log_token_usage(tokens):
 
 EOF
 
-# Write .agents\scripts\cli\helper.py
-write_template_safe ".agents\scripts\cli\helper.py" << 'EOF'
+# Write .agents/scripts/cli/helper.py
+write_template_safe ".agents/scripts/cli/helper.py" << 'EOF'
 #!/usr/bin/env python3
 import sys
 import os
