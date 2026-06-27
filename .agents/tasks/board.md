@@ -8,7 +8,7 @@ This board tracks active development tasks for AAC V2.
 - [ ] Add CLI unit testing suite (`test/cli-v2`)
 
 ## Doing
-- [/] Initialize V2 layout (rules, schemas, ADRs, skills) (`feat/init-v2`) <!-- id: task-001 -->
 
 ## Done
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`)
+- [x] Initialize V2 layout (rules, schemas, ADRs, skills) (`feat/init-v2`) <!-- id: task-001 -->
