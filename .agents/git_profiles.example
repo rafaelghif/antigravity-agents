@@ -1,5 +1,3 @@
-# Save this file as 'git_profiles.json' in your .agents/ folder to configure local credentials rotation.
-
 {
   "profiles": [
     {
