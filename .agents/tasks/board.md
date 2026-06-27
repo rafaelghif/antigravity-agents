@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Force non-fast-forward merges for strict branch tracking in Git history (feat/issue-031) <!-- id: issue-031 -->
 - [x] Fallback to git local account when git_profiles.json is not configured (feat/issue-030) <!-- id: issue-030 -->
 - [x] Implement automated branch merge and board transition in issue close command (feat/issue-029) <!-- id: issue-029 -->
 - [x] Enforce strict git branch flow, merge procedures, and profile identity validation (feat/issue-028) <!-- id: issue-028 -->

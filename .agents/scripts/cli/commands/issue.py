@@ -373,8 +373,9 @@ created_at: {current_date}
             print(f"Switching to base branch '{base_branch}'...")
             subprocess.run(['git', 'checkout', base_branch], check=True)
 
-            print(f"Merging branch '{found_branch}' into '{base_branch}'...")
-            merge_res = subprocess.run(['git', 'merge', found_branch])
+            print(f"Merging branch '{found_branch}' into '{base_branch}' with --no-ff...")
+            merge_msg = f"chore(git): merge branch {found_branch}"
+            merge_res = subprocess.run(['git', 'merge', found_branch, '--no-ff', '-m', merge_msg, '-m', issue_id])
             if merge_res.returncode != 0:
                 print("Error: Git merge failed with conflict! Please resolve manually.")
                 sys.exit(1)
