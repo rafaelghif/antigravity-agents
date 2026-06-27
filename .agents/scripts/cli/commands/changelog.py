@@ -326,12 +326,13 @@ def run(args: List[str]) -> None:
     
     # Inject current branch issue if not already present
     current_branch = get_current_branch()
-    if current_branch and (current_branch.startswith("feat/") or current_branch.startswith("fix/")):
-        parts = current_branch.split('/')
-        if len(parts) == 2:
-            branch_type = parts[0]
-            branch_slug = parts[1]
-            
+    if current_branch and '/' in current_branch:
+        parts = current_branch.split('/', 1)
+        branch_type = parts[0].lower()
+        branch_slug = parts[1]
+        
+        valid_types = ["breaking", "feat", "fix", "chore", "refactor", "docs", "test"]
+        if branch_type in valid_types:
             # Normalize slug to issue ID (e.g. issue-047 or task-123)
             issue_match = re.search(r"(issue|task)-?\d+", branch_slug, re.IGNORECASE)
             if issue_match:
@@ -356,7 +357,7 @@ def run(args: List[str]) -> None:
                         clean_desc = branch_slug.replace('-', ' ').title()
                         entry = f"{clean_desc} ({issue_id})"
                     
-                    cat = "feat" if branch_type == "feat" else "fix"
+                    cat = branch_type
                     categories[cat].append(entry)
                     print(f"[INFO] Automatically injected issue entry from branch name: {entry}")
                     
