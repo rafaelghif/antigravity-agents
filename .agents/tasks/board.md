@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Copy blueprints directory during install and bootstrap (feat/issue-059) <!-- id: issue-059 -->
 - [x] Synchronize bootstrap.ps1 versions and verify local file installer options (feat/issue-058) <!-- id: issue-058 -->
 - [x] Fix install.sh piping compatibility for unbound BASH_SOURCE variable (feat/issue-057) <!-- id: issue-057 -->
 - [x] Fix git_profiles.example comment to be valid JSON (feat/issue-056) <!-- id: issue-056 -->

@@ -178,9 +178,23 @@ def copy_core_files():
     # Initialize clean memory, tasks, and issues folders
     target_mem = os.path.join(target_root, ".agents/memory")
     os.makedirs(os.path.join(target_mem, "decisions"), exist_ok=True)
+    os.makedirs(os.path.join(target_mem, "blueprints"), exist_ok=True)
     os.makedirs(os.path.join(target_root, ".agents/tasks"), exist_ok=True)
     os.makedirs(os.path.join(target_root, ".agents/issues"), exist_ok=True)
     
+    # Copy blueprints
+    src_blueprints = os.path.join(src_root, ".agents/memory/blueprints")
+    if os.path.exists(src_blueprints):
+        target_blueprints = os.path.join(target_mem, "blueprints")
+        for file in os.listdir(src_blueprints):
+            src_file = os.path.join(src_blueprints, file)
+            dest_file = os.path.join(target_blueprints, file)
+            if os.path.isfile(src_file) and not os.path.exists(dest_file):
+                try:
+                    shutil.copy2(src_file, dest_file)
+                except Exception:
+                    pass
+
     # Copy template memory files
     src_templates = os.path.join(src_root, ".agents/memory/templates")
     if os.path.exists(src_templates):
@@ -287,7 +301,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.31.0"
+    AAC_VERSION = "2.32.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
