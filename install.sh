@@ -5,6 +5,42 @@ set -euo pipefail
 TARGET_DIR="${1:-.}"
 TARGET_ABS=$(realpath "$TARGET_DIR")
 
+# 0. Check for Git presence
+if ! command -v git &>/dev/null; then
+  echo "=========================================================="
+  echo "   [ERROR] Git is not installed!"
+  echo "=========================================================="
+  echo "Git is required to pull repository data, rotate profiles, and track version control."
+  echo "Please install Git (from https://git-scm.com or via your package manager)"
+  echo "and run the installer again."
+  echo "Installation aborted."
+  echo "=========================================================="
+  exit 1
+fi
+
+# 0. Check for Python 3 presence
+PYTHON_EXEC=""
+if command -v python3 &>/dev/null; then
+  PYTHON_EXEC="python3"
+elif command -v python &>/dev/null; then
+  if python --version 2>&1 | grep -q "Python 3"; then
+    PYTHON_EXEC="python"
+  fi
+fi
+
+if [ -z "$PYTHON_EXEC" ]; then
+  echo "=========================================================="
+  echo "   [ERROR] Python 3 is not installed!"
+  echo "=========================================================="
+  echo "Python 3 is required to run the Antigravity Agent Core CLI and validation hooks."
+  echo "If you do not install Python 3, the agent cannot function."
+  echo "Please install Python 3 (from https://www.python.org or via your package manager)"
+  echo "and run the installer again."
+  echo "Installation aborted."
+  echo "=========================================================="
+  exit 1
+fi
+
 echo "=========================================================="
 echo "   Installing Antigravity Agent Core V2..."
 echo "   Target Directory: $TARGET_ABS"
@@ -84,6 +120,20 @@ if [ -d "$SRC_DIR/.agents" ]; then
 else
   echo "Local source files not found. Downloading Antigravity Agent Core from GitHub..."
   
+  # Verifying network connection to GitHub
+  echo "Verifying network connection to GitHub..."
+  if ! curl -I -s --max-time 5 https://github.com &>/dev/null && ! wget -q --spider --timeout=5 https://github.com &>/dev/null; then
+    echo "=========================================================="
+    echo "   [ERROR] GitHub Connection Failed!"
+    echo "=========================================================="
+    echo "An active internet connection is required to download the Antigravity Agent Core"
+    echo "source files from GitHub."
+    echo "Please check your network connection and try again."
+    echo "Installation aborted."
+    echo "=========================================================="
+    exit 1
+  fi
+
   # Create a temporary directory
   TEMP_DIR=$(mktemp -d)
   ZIP_PATH="$TEMP_DIR/repo.zip"
