@@ -181,31 +181,38 @@ def audit_secrets_and_ignored_files() -> bool:
             with open(profiles_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             profiles = data.get("profiles", [])
-            active_profile = next((p for p in profiles if p.get("active")), None)
             
-            if active_profile:
-                profile_email = active_profile.get("email")
-                profile_name = active_profile.get("name")
-                
-                # Get current git config email
-                res_email = subprocess.run(
-                    ['git', 'config', 'user.email'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-                current_email = res_email.stdout.strip()
-                
-                if current_email != profile_email:
-                    print_err(
-                        f"Mismatched Git Email Identity!\n"
-                        f"  - Current Git Config Email: '{current_email}'\n"
-                        f"  - Active Profile Email    : '{profile_email}' (Profile: '{profile_name}')\n"
-                        f"  Please switch Git profile: './helper.sh profile switch <name>'"
-                    )
-                    failed = True
+            # Get current git config email
+            res_email = subprocess.run(
+                ['git', 'config', 'user.email'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            current_email = res_email.stdout.strip()
+            
+            # Find profile matching current git config email
+            matching_profile = next((p for p in profiles if p.get("email") == current_email), None)
+            
+            if matching_profile:
+                # If it matches a registered profile but is not active, auto-sync it!
+                if not matching_profile.get("active"):
+                    for p in profiles:
+                        p["active"] = (p.get("email") == current_email)
+                    with open(profiles_path, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2)
+                    print_ok(f"Auto-switched active profile in git_profiles.json to '{matching_profile.get('name')}' to match Git config.")
                 else:
-                    print_ok(f"Git Config Email matches active profile '{profile_name}' ({profile_email}).")
+                    print_ok(f"Git Config Email matches active profile '{matching_profile.get('name')}' ({current_email}).")
+            else:
+                # No registered profile matches current git email -> block!
+                active_profile = next((p for p in profiles if p.get("active")), None)
+                print_err(
+                    f"Mismatched Git Email Identity! The email '{current_email}' is not registered in git_profiles.json.\n"
+                    f"  Please register the profile first: './helper.sh profile add <name> {current_email}'\n"
+                    f"  Or switch to an active profile: './helper.sh profile switch <profile_name>'"
+                )
+                failed = True
         except Exception as e:
             print_warn(f"Failed to audit Git config profile email: {e}")
 
