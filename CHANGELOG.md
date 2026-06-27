@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.55.0] - 2026-06-27
+
+### 🚀 Features
+- Create Developer Experience DX Improvements Plan (ISSUE-076)
+
+
 ## [2.54.0] - 2026-06-27
 
 ### 🚀 Features
