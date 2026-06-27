@@ -160,5 +160,15 @@ class TestBootstrapCommand(unittest.TestCase):
         self.assertNotIn("locks.json", copied_files)
         self.assertNotIn("cached.pyc", copied_files)
 
+    def test_bootstrap_core_dirs_isolation(self, mock_input):
+        import inspect
+        source = inspect.getsource(bootstrap.copy_core_files)
+        # Check that memory, tasks, issues, plans, tests are NOT in the copied core_dirs list
+        self.assertNotIn("'.agents/memory'", source)
+        self.assertNotIn("'.agents/tasks'", source)
+        self.assertNotIn("'.agents/issues'", source)
+        self.assertNotIn("'.agents/plans'", source)
+        self.assertNotIn("'.agents/tests'", source)
+
 if __name__ == '__main__':
     unittest.main()

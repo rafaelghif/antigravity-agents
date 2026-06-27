@@ -46,6 +46,10 @@ if [ -d "$SRC_DIR/.agents" ]; then
       ! -name "*.pyc" \
       ! -name "*.pyo" \
       ! -path ".agents/memory/*" \
+      ! -path ".agents/tasks/*" \
+      ! -path ".agents/issues/*" \
+      ! -path ".agents/plans/*" \
+      ! -path ".agents/tests/*" \
       -exec sh -c '
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
@@ -125,6 +129,10 @@ else
       ! -name "*.pyc" \
       ! -name "*.pyo" \
       ! -path ".agents/memory/*" \
+      ! -path ".agents/tasks/*" \
+      ! -path ".agents/issues/*" \
+      ! -path ".agents/plans/*" \
+      ! -path ".agents/tests/*" \
       -exec sh -c '
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
