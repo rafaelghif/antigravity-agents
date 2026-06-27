@@ -37,29 +37,38 @@ A world-class code writer transforms ambiguous problems into clean, robust, and 
 
 ### C. Defensive Code Design
 - **Input Validation**: Check arguments at API boundaries for type safety, ranges, and nullability.
-- **Strong Typing**: Apply type annotations for all function signatures (e.g. Python type hints) to enable compile-time or static analysis checking.
 - **Safe Resource Lifecycle**: Always use context managers (`with` statements in Python) for open files, database connections, and sockets.
+
+### D. Strict Type Hints & Annotations
+- **Required Types**: Every function/method signature MUST declare parameter types and return types (e.g., `def calculate_sum(a: int, b: int) -> int:`).
+- **Avoid Generic Fallbacks**: Avoid using generic `Any` type annotations unless absolutely necessary. When generics are needed, use type variables (`TypeVar`) or Union/Optional types for precision.
+- **Static Type Checkers**: Run local checkers (e.g., `mypy` or `tsc`) to verify type compliance before commits.
 
 ---
 
-## 2. The Code Review Playbook (Zero-Regression Inspections)
+## 3. The Code Review Playbook (Zero-Regression Inspections)
 
 A world-class code reviewer ensures code quality, correctness, and team consistency prior to merges.
 
-### A. Core Inspection Gates
+### A. The Self-Review (First Line of Defense)
+Before proposing any code review, developers must self-review their changes:
+- **Diff Inspection**: Examine `git diff` line-by-line to ensure no debug/temporary code or logging statements are left.
+- **Code Documentation**: Verify all public APIs have clean docstrings explaining parameters, returns, and exceptions.
+
+### B. Core Inspection Gates
 - **Secrets Audit**: Programmatically and visually verify that no credentials, API keys, passwords, or `.env` configurations are checked in.
 - **Insulation Check**: Verify that layer boundaries are maintained. Helper utilities, DB models, and third-party frameworks must not bleed into core business logic.
 - **DRY & SOLID Verification**: Identify duplicate code patterns and recommend modular class structures following SOLID principles.
 - **Type Safety**: Ensure no variable types are declared as generic `Any` or left untyped at public interface boundaries.
 
-### B. Common Code Smells to Reject
+### C. Common Code Smells to Reject
 - **Dead Code**: Unused imports, variables, functions, or commented-out code blocks.
 - **Magic Strings/Numbers**: Replace inline literals with named constants or configuration variables.
 - **Swallowed Exceptions**: Reject try-except blocks that catch general exceptions without logging or raising them.
 
 ---
 
-## 3. Testing & Validation Gates
+## 4. Testing & Validation Gates
 
 Quality is not verified after implementation—it is built-in.
 
@@ -69,7 +78,7 @@ Quality is not verified after implementation—it is built-in.
 
 ---
 
-## 4. Architectural Integrity & Design Decisions (ADRs)
+## 5. Architectural Integrity & Design Decisions (ADRs)
 
 Maintain a long-term, self-documenting system architecture.
 
