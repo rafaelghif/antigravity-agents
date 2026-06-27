@@ -96,5 +96,46 @@ class TestChangelog(unittest.TestCase):
             draft=True
         )
 
+        mock_upd_changelog.assert_called_once()
+        mock_create_rel.assert_called_once_with(
+            tag_name="v1.1.0",
+            name="Release v1.1.0",
+            body="### 🚀 Features\n- add feature",
+            draft=True
+        )
+
+    @patch('commands.changelog.extract_issue_title')
+    def test_parse_conventional_commits_prioritization(self, mock_extract):
+        mock_extract.return_value = "Auto-Changelog Feature"
+        # Verify breaking change priority
+        commits = [
+            ("hash1", "fix: fix issue (issue-022)"),
+            ("hash2", "feat!: breaking change (issue-022)"),
+            ("hash3", "feat: normal feature (issue-022)")
+        ]
+        categories = changelog.parse_conventional_commits(commits)
+        self.assertEqual(categories["breaking"], ["Auto-Changelog Feature (ISSUE-022)"])
+        self.assertEqual(len(categories["feat"]), 0)
+        self.assertEqual(len(categories["fix"]), 0)
+
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('builtins.open', new_callable=mock_open, read_data="---\ntitle: \"Bug fix description\"\n---\n")
+    def test_classify_from_local_issue(self, mock_file, mock_listdir, mock_exists):
+        mock_exists.return_value = True
+        mock_listdir.return_value = ["issue_022.md"]
+        cat = changelog.classify_from_local_issue("issue-022")
+        self.assertEqual(cat, "fix")
+
+    @patch('subprocess.run')
+    def test_get_boundary_commit_tags(self, mock_run):
+        mock_res = MagicMock()
+        mock_res.returncode = 0
+        mock_res.stdout = "tag_commit_hash\n"
+        mock_run.return_value = mock_res
+        
+        commit = changelog.get_boundary_commit("2.28.0")
+        self.assertEqual(commit, "tag_commit_hash")
+
 if __name__ == '__main__':
     unittest.main()
