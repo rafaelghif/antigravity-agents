@@ -35,17 +35,22 @@ def print_help():
    Antigravity Agent Core (AAC) V2 CLI Command Helper     
 =========================================================={RESET}
 {BOLD}Usage:{RESET} ./helper.sh <command> [args...]
+       aac <command> [args...] (if global launcher is installed)
 
 {BOLD}Available Commands:{RESET}
-  🚀 {GREEN}{BOLD}bootstrap{RESET}   Scaffolds directory structures & stack detection.
-  ✅ {GREEN}{BOLD}validate{RESET}    Runs validation guard (audits secrets, board, linting, tests).
-  🔄 {GREEN}{BOLD}sync{RESET}        Synchronizes skills index in AGENTS.md & ADR registry.
-  🎫 {GREEN}{BOLD}issue{RESET}       Manages local task tracker issues (checkout, close, list).
-  🔒 {GREEN}{BOLD}lock{RESET}        Acquires module locks to prevent concurrent modifications.
-  👤 {GREEN}{BOLD}profile{RESET}     Configures/switches developer git commit identities.
-  📝 {GREEN}{BOLD}changelog{RESET}   Generates conventional commit release notes & bumps SemVer.
-  🧠 {GREEN}{BOLD}learn{RESET}       Records developer/agent lessons directly to lessons-learned.md.
-  💬 {GREEN}{BOLD}commit{RESET}      Fires safe git commit command gated by validation guard.
+  🚀 {GREEN}{BOLD}bootstrap{RESET}       Scaffolds directory structures & stack detection.
+  ✅ {GREEN}{BOLD}validate{RESET}        Runs validation guard (audits secrets, board, linting, tests).
+  🔄 {GREEN}{BOLD}sync{RESET}            Synchronizes skills index in AGENTS.md & ADR registry.
+  🎫 {GREEN}{BOLD}issue{RESET}           Manages local task tracker issues (checkout, close, list).
+  🔒 {GREEN}{BOLD}lock{RESET}            Acquires module locks to prevent concurrent modifications.
+  👤 {GREEN}{BOLD}profile{RESET}         Configures/switches developer git commit identities.
+  📝 {GREEN}{BOLD}changelog{RESET}       Generates conventional commit release notes & bumps SemVer.
+  🧠 {GREEN}{BOLD}learn{RESET}           Records developer/agent lessons directly to lessons-learned.md.
+  💬 {GREEN}{BOLD}commit{RESET}          Fires safe git commit command gated by validation guard.
+  🩺 {GREEN}{BOLD}doctor{RESET}          Runs workspace diagnostics health audits.
+  ⬆️ {GREEN}{BOLD}upgrade{RESET}         Upgrades Antigravity Agent Core core scripts & wrappers.
+  ⌨️ {GREEN}{BOLD}completion{RESET}      Generates terminal tab-completion scripts (Bash/Zsh).
+  🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -111,7 +116,27 @@ def print_command_help(cmd):
 💬 Gated Conventional Commit wrapper that runs validation first.
 
 {BOLD}Usage:{RESET} ./helper.sh commit -m "<subject>" [-m "<body>"]
-  - Blocks commit if local validation guard fails."""
+  - Blocks commit if local validation guard fails.""",
+
+        "doctor": f"""{CYAN}{BOLD}Command: doctor{RESET}
+🩺 Diagnoses local environment configuration, tool versioning, and profiles health.
+
+{BOLD}Usage:{RESET} ./helper.sh doctor""",
+
+        "upgrade": f"""{CYAN}{BOLD}Command: upgrade{RESET}
+⬆️ Self-upgrades Antigravity Agent Core templates and CLI command modules to the latest version.
+
+{BOLD}Usage:{RESET} ./helper.sh upgrade""",
+
+        "completion": f"""{CYAN}{BOLD}Command: completion{RESET}
+⌨️ Generates tab-completion configuration for the shell terminal.
+
+{BOLD}Usage:{RESET} ./helper.sh completion <bash|zsh>""",
+
+        "install-global": f"""{CYAN}{BOLD}Command: install-global{RESET}
+🌐 Installs the global 'aac' launcher command alias into user local path directory.
+
+{BOLD}Usage:{RESET} ./helper.sh install-global"""
     }
 
     if cmd in command_help:
@@ -125,7 +150,7 @@ def main():
     if len(sys.argv) < 2:
         print_help()
         sys.exit(0)
-        
+    
     cmd = sys.argv[1].lower()
     
     if cmd in help_args:
@@ -136,7 +161,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
@@ -152,8 +177,9 @@ def main():
     error_msg = None
     
     try:
-        # Resolve command file path dynamically
-        cmd_file = os.path.abspath(os.path.join(os.path.dirname(__file__), f"commands/{cmd}.py"))
+        # Resolve command file path dynamically (hyphens mapped to underscores)
+        module_name = cmd.replace('-', '_')
+        cmd_file = os.path.abspath(os.path.join(os.path.dirname(__file__), f"commands/{module_name}.py"))
         if not os.path.exists(cmd_file):
             print(f"{RED}Error: Command module file '{cmd_file}' not found.{RESET}")
             status = "failed"
@@ -166,7 +192,7 @@ def main():
             sys.path.insert(0, root_path)
             
         import importlib.util
-        spec = importlib.util.spec_from_file_location(f"cmd_{cmd}", cmd_file)
+        spec = importlib.util.spec_from_file_location(f"cmd_{module_name}", cmd_file)
         if spec is None or spec.loader is None:
             print(f"{RED}Error: Could not load command module spec for '{cmd}'.{RESET}")
             status = "failed"

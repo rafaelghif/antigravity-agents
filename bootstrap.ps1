@@ -46,7 +46,7 @@ if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
 
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md" -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.56.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.56.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.57.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.57.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
