@@ -7,8 +7,9 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
-- [/] Establish Testing and CI-CD playbooks and Refactor existing skills (feat/issue-050) <!-- id: issue-050 -->
-- [/] Fix changelog version bump calculation and branch-based issue injection (feat/issue-049) <!-- id: issue-049 -->
+- [x] Optimize token efficiency, remove E2E testing, and fix SemVer branch bump (feat/issue-051) <!-- id: issue-051 -->
+- [x] Establish Testing and CI-CD playbooks and Refactor existing skills (feat/issue-050) <!-- id: issue-050 -->
+- [x] Fix changelog version bump calculation and branch-based issue injection (feat/issue-049) <!-- id: issue-049 -->
 - [x] Enforce strict security, exploit prevention, and code safety validation rules (feat/issue-048) <!-- id: issue-048 -->
 - [x] Implement installer prerequisite audits for Git, Python 3, and network connectivity (feat/issue-047) <!-- id: issue-047 -->
 - [x] Fix changelog boundary commit resolution and clean up duplicated changelog entries (feat/issue-046) <!-- id: issue-046 -->
