@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.56.0] - 2026-06-27
+
+### 🚀 Features
+- Add documentation updates and warranty disclaimer to plan and README (ISSUE-077)
+
+
 ## [2.55.0] - 2026-06-27
 
 ### 🚀 Features
