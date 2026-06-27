@@ -51,6 +51,7 @@ def print_help():
   ⬆️ {GREEN}{BOLD}upgrade{RESET}         Upgrades Antigravity Agent Core core scripts & wrappers.
   ⌨️ {GREEN}{BOLD}completion{RESET}      Generates terminal tab-completion scripts (Bash/Zsh).
   🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
+  🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -136,7 +137,12 @@ def print_command_help(cmd):
         "install-global": f"""{CYAN}{BOLD}Command: install-global{RESET}
 🌐 Installs the global 'aac' launcher command alias into user local path directory.
 
-{BOLD}Usage:{RESET} ./helper.sh install-global"""
+{BOLD}Usage:{RESET} ./helper.sh install-global""",
+
+        "context": f"""{CYAN}{BOLD}Command: context{RESET}
+🎯 Optimizes the workspace active context and locks scope for the active task.
+
+{BOLD}Usage:{RESET} ./helper.sh context optimize"""
     }
 
     if cmd in command_help:
@@ -161,7 +167,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)

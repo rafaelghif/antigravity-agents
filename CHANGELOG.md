@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.58.0] - 2026-06-27
+
+### 🚀 Features
+- Implement Context Optimizer and Self-Learning Memory Rule Synthesizer (ISSUE-079)
+
+
 ## [2.57.0] - 2026-06-27
 
 ### 🚀 Features

@@ -57,5 +57,39 @@ class TestSync(unittest.TestCase):
         mock_file.assert_called_with(expected_path, 'w', encoding='utf-8')
         mock_file().write.assert_called()
 
+    @patch('os.path.exists', return_value=True)
+    def test_sync_lessons_to_rules(self, mock_exists):
+        import sync
+        
+        lessons_content = "## Lessons Learned\n- **[2026-06-27]** **Token Efficiency**: Always specify file read ranges\n"
+        rules_content = "# Project Rules\n"
+        
+        written_data = {}
+        
+        def mock_open_impl(filename, mode='r', **kwargs):
+            filename_str = str(filename)
+            mock_file_handle = MagicMock()
+            
+            if 'r' in mode:
+                if "lessons-learned.md" in filename_str:
+                    mock_file_handle.read.return_value = lessons_content
+                else:
+                    mock_file_handle.read.return_value = rules_content
+            elif 'w' in mode:
+                def write_impl(data):
+                    written_data[filename_str] = data
+                mock_file_handle.write.side_effect = write_impl
+                
+            mock_file_handle.__enter__.return_value = mock_file_handle
+            return mock_file_handle
+
+        with patch('builtins.open', mock_open_impl):
+            sync.sync_lessons_to_rules()
+            
+        rules_written_key = next((k for k in written_data if "rules.md" in k), None)
+        self.assertIsNotNone(rules_written_key)
+        self.assertIn("## 5. Synthesized Rules", written_data[rules_written_key])
+        self.assertIn("Token Efficiency", written_data[rules_written_key])
+
 if __name__ == '__main__':
     unittest.main()
