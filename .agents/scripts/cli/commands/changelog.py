@@ -1,6 +1,12 @@
 import os
 import sys
 import re
+
+# Inject parent directory containing git_api
+scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if scripts_dir not in sys.path:
+    sys.path.insert(0, scripts_dir)
+
 import subprocess
 from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
@@ -255,6 +261,7 @@ def update_changelog(new_version: str, categories: Dict[str, List[str]]) -> None
     with open(changelog_path, 'w', encoding='utf-8') as f:
         f.write(updated_content)
     print(f"[OK] Prepended release changes to CHANGELOG.md.")
+    return new_entry
 
 def run(args: List[str]) -> None:
     preview = "--preview" in args
@@ -306,7 +313,29 @@ def run(args: List[str]) -> None:
     # Perform actual file writes
     update_version_in_files(current_ver, new_ver)
     
+    entry_text = ""
     if not bump_only:
-        update_changelog(new_ver, categories)
+        entry_text = update_changelog(new_ver, categories)
+        
+    if entry_text:
+        # Strip header (e.g. ## [2.14.0] - date) to form body
+        body = entry_text.strip()
+        header_line_end = body.find('\n')
+        if header_line_end != -1:
+            body = body[header_line_end:].strip()
+            
+        print("Publishing automated GitHub Release Draft...")
+        try:
+            import git_api
+            release_url = git_api.create_github_release(
+                tag_name=f"v{new_ver}",
+                name=f"Release v{new_ver}",
+                body=body,
+                draft=True
+            )
+            if release_url:
+                print(f"[OK] GitHub Draft Release created successfully: {release_url}")
+        except Exception as e:
+            print(f"[WARN] Failed to publish draft release to GitHub: {e}")
         
     print(f"\nRelease updates completed. Active version is now {new_ver}!")

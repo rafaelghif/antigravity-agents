@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Automatically publish GitHub Release Draft during release bump (feat/issue-039) <!-- id: issue-039 -->
 - [x] Fix CI verify workflow cache dependency path error (feat/issue-038) <!-- id: issue-038 -->
 - [x] Validate GPG signing key validity during profile switch (feat/issue-037) <!-- id: issue-037 -->
 - [x] Fix git_api import path bug and implement CI commit status reporting (feat/issue-036) <!-- id: issue-036 -->
