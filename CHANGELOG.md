@@ -3,6 +3,275 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.7.0] - 2026-06-27
+
+### Features
+- enforce strict git branch flow and base branch edit prohibition
+- implement two-way profile status auto-sync and strict email blocking
+- implement two-way remote issue sync with local fallback in validator
+- implement safe automated installer upgrade with timestamped backup
+- copy memory templates to target directory in bootstrap.ps1 for Windows systems
+- isolate target project memory by initializing from clean templates
+- remove inline templates from bootstrap.ps1 for windows parity
+- implement developer profile validations and auto-release stale locks
+- implement auto-changelog and semantic versioning generator CLI
+- enforce strict Pre-Implementation Impact Analysis and DRY file templates
+- remove inline templates and enable remote download from github repo
+- copy standard agent files and skills to target project
+- modularize validation guard, improve CLI dispatcher and git API error warnings
+- enforce strict check against ignored files in .gitignore and .antigravityignore
+- enforce strict workspace-level specifications and artifacts rule
+- integrate full V2 AGENTS.md template and version sync
+- implement git profile manager CLI subcommand
+- establish ADR 0002 for strict validation gate architecture
+- enforce Git profiles setup rule in agents.md
+- implement remote GitHub Issue integration and conventional commit msg hook
+- implement strict Git staged files and private files validation gate
+- implement V2 CLI project bootstrap subcommand and empty workspace rules
+- implement isolated installer for external project bootstrapping
+- implement V2 CLI mock unit testing suite
+- establish Pre-Implementation Impact Analysis Protocol in working rules and playbooks
+- implement V2 expanded compliance validation suite
+- implement V2 modular Python CLI and wrappers
+- add unresolved subtasks validation guard and tasking design capture skill playbook
+- implement dynamic workspace synchronization script and compile-time validation check
+- enforce strict workspace-level configuration and remove global user config dependencies
+- implement strict Git branch and local Issue validation gates to eliminate agent inconsistency
+- implement offline validation guard, local git hook automation, and windows bootstrap script
+- create universal multi-language bootstrap scripts and documentation templates
+- implement auto-recon script, architectural blueprints, security auditing, and CI/CD workflow
+- add world-class-programmer skill playbook
+- initialize V2 layout files and update AGENTS.md
+- resolve issue #15: Fix bootstrap directory creation and path separators closes #15
+- resolve issue #14: Fix Git profile rotation sequence bug closes #14
+- resolve issue #13: Implement shell script safety improvements closes #13
+- resolve issue #12: Remove .kimchi directory closes #12
+- resolve issue #11: Implement Git & GitHub CLI Operational Guidelines compliance checks closes #11
+- resolve issue #10: Strict Rules Enforcement closes #10
+- fix(issue): discard memory.md changes before checkout in merge to prevent checkout block
+- fix(issue): bypass branch and locking validation checks during merge commits and pass env
+- resolve issue #10: Strict Rules Enforcement closes #10
+- test raw commit blocker
+- resolve issue #9: Implement interactive merge conflict resolution helper inside issue merge closes #9
+- resolve issue #8: Implement GitLab and Gitea issue synchronization with Git profile rotation closes #8
+- resolve issue #7: Fix PowerShell 5.1 compatibility and user guide documentation closes #7
+- resolve issue #6: Create comprehensive layman-friendly User Guide closes #6
+- resolve issue #5: Document Antigravity CLI Authentication and Onboarding Integration closes #5
+- resolve issue #4: Implement pure-Python workspace validation suite closes #4
+- resolve issue #3: Add Git profile and credential status display to interactive menu closes #3
+- resolve issue #2: Add support for Gitea and GitLab issue synchronization closes #2
+- resolve issue #1: Fix Windows shell script execution compatibility closes #1
+- add optional github issue sync to issue tracker
+- resolve issue #3: Ignore sample directory in git closes #3
+- resolve issue #2: Fix SURIOTA review report findings closes #2
+- implement automated issue checkout and git-flow merge lifecycle
+- implement local issue tracker with helper issue and commit closes integration
+- modernize onboarding tutorial guide, doctor and validation check outputs with TTY-aware ANSI colors
+- modernize interactive CLI dashboard with colors and progress indicators
+- add clean and interactive menu dashboard commands
+- add guide subcommand and compile python cli files into bootstrap.sh
+- add push subcommand wrapping validation and profile ssh rotation
+- add docs-sync specialized skill for docstring synchronization
+- add automatic token usage reset feature
+- implement interactive adr wizard skill and validation checks
+- implement git pr review scaffolder skill
+- implement strict framework alignment, isolation boundary auto-heals, and budget block gates
+- design and scaffold git PR review scaffolder skill workflow
+- implement 4 framework improvements (venv, autocomplete, CI/CD, and skill tests)
+- migrate helper CLI and all subcommands to modular Python
+- implement API profile rate-limit cooldowns and retry sleep fallback
+- add cross-platform Python API key rotation test suite and register test runner
+- add native PowerShell api-rotate-wrapper.ps1 and helper.ps1 loading
+- add api-rotator skill and per-profile quota budget tracking
+- add api-profile subcommand and wrapper script for API key auto-rotation
+- add validation check for Git profiles and manual rotate action
+- enforce strict profile rotation and add fallback alternates
+- support SSH key rotation for multi-account profiles
+- add git_profiles.example template for multi-account setup
+- implement auto-rotation round-robin Git profile commits
+- add profiles config support to git-profile command
+- add git-profile command to helper.sh to support switching Git configurations
+- add Laravel framework technology stack and scaffolding
+- implement modular ADR scaffolding and compliance verification
+- add PowerShell helper and GitHub Actions validation workflow
+- split monolithic rules into modular files
+- refine project rules for TypeScript Node.js stack
+- migrate project rules to rules directory
+- implement workspace rules registry and legacy migration
+- implement automated skill registry and agent self-creation
+- design skill registry execution plan and tasks
+- harden agents protocol constraints and verification gates
+- add version release auto-bump command for changelog
+- add token budget guard and log-usage helper command
+- ignore environment secrets and keys in antigravityignore
+- define autonomous operational script execution rules
+- add sync-api command and zero-dependency typescript client generator
+- add Docker and Docker Compose scaffolding to initialization wizard
+- add flexible custom multi-project scaffolding and architectural templates
+- add monorepo scaffolding and directory-aware validation hooks
+- add boilerplates and automated migration method
+- add --update flag to bootstrapper and document migration guide
+- add handover protocol and relayed context to memory and rules
+- fix infinite hooks loop, add powershell force flag, and make command parsing robust
+- add bootstrap.ps1 PowerShell script for Windows and update README
+- add auto Git initialization and bootstrapper self-cleanup to improve user setup experience
+- restrict agent git-ops to local commits only, preventing branch creation, push, pull, or rebase operations
+- synchronize helper commit command with linter support and update docs
+- enhance project initialization wizard and clean up stdout logging
+- implement automated reconnaissance, validation, and doctor checks
+- implement interactive onboarding discovery and impact-analysis skills
+
+### Bug Fixes
+- Fix bootstrap directory creation and path separators
+- Resolve SURIOTA review report path assertion and API rotator Windows execution bugs
+- Fix Windows script execution, linter stub, bootstrap.sh and docs-sync bugs
+- improve git profile parsing and push email matching
+- memory leaks
+- fix memory leaks
+- support local-only fallback profile and improve SSH key verification
+- resolve argument parsing with spaces/quotes in helper.ps1 wrapper
+- remove backslash escapes in single-quoted templates
+- improve validation fetch safety with a pure bash watchdog
+- exclude bootstrap.sh in root from validate.sh credentials check
+
+### Refactors
+- expand world-class-programmer skill to cover code writing, reviewing, testing, and architecture
+- isolate agent files and update gitignore guards
+
+### Documentation
+- rewrite README.md for AAC V2 CLI, profiles, locks, and upgrades
+- document mock leak lesson learned
+- document aligned design decisions from grill-me session
+- add github PAT configuration example and generation guide
+- document optional github issues synchronization features
+- document local issue tracker in README, cli guide, and changelog
+- update CHANGELOG.md with validate.sh precedence fix and python env scan
+- consolidate migration documentation and update CLI version references
+- standardize documentation folder layout and update references
+- migrate README into modular sub-documentation files
+- design strict framework alignment, isolation boundary, and budget block rules
+- design detailed implementation specs for git PR review scaffolder skill
+- enforce strict documentation rules for README and Changelog updates
+- add Python 3 prerequisite documentation and validation checks
+- update README and CHANGELOG, archive task checklists
+- define Python CLI migration workflow
+- define API profile cooldown workflow
+- refine migration script and guide for V1.7.4
+- update README, CHANGELOG, and create api_rotation documentation
+- simplify CLI help menus and add cheat sheet to README
+- synchronize README and CHANGELOG with CLI parameters and rotation option
+- add Windows-specific SSH instructions and path guides
+- document SSH key creation and extreme fallback features
+- update README and CHANGELOG with SSH key rotation instructions
+- document git-profile command in README and record v1.7.1 in CHANGELOG
+- document helper.ps1 and CI workflow, release v1.7.0
+- add release comparison links to changelog
+- document autonomous operational scripts execution rules
+- polish professional tone and strengthen disclaimer section
+- document handover protocol and relayed context workflow
+- update quickstart and workflow sections for Git hooks automation
+- add Disclaimer & No Warranty section to README.md
+- add license shields, forks/stars badges, and open-source terms to README.md
+- refine README.md to combine all existing sections with precise repo URL setup scenarios
+- update README stepy guide, author contact details, move bootstrap to root, and ignore generated files
+- add 30-second quick start guide to README and update bootstrap setup instructions
+
+### Chores
+- Issue Details (ISSUE-030)
+- Issue Details (ISSUE-029)
+- Issue Details (ISSUE-028)
+- bump version to 2.5.0, update CHANGELOG.md, and version references
+- add CLI commands reference to AGENTS.md for strict instruction compliance
+- bump version to 2.4.0, update CHANGELOG.md, and enforce changelog rules in AGENTS.md
+- bump version to 2.3.0 and update CHANGELOG.md
+- mark CLI unit testing completed and close issue
+- Design & Task Specification: V2 CLI Testing Suite (ISSUE-012)
+- mark V2 compliance validation completed and close issue
+- Design & Task Specification: V2 Compliance Validation Suite (ISSUE-011)
+- mark V2 CLI implementation completed and close issue
+- Design & Task Specification: V2 Python CLI (ISSUE-010)
+- mark V2 layout initialization completed
+- update handover notes in memory ledger
+- update branch info and handover notes in memory ledger after issue-12 merge (ISSUE-12)
+- update branch info and handover notes in memory ledger after merge
+- update handover notes in memory ledger
+- clean up memory ledger and workflows after merging issue 9
+- archive active checklists and update handover notes
+- remove local temporary workspace issue files
+- re-compile bootstrap scripts with updated issue CLI
+- reset memory ledger to clean template
+- Ignore sample directory and untrack existing review reports
+- Update memory.md handover notes with Windows compatibility fix details
+- update issue command description in helper.py help output
+- enforce strict branch isolation and git-flow merge rules for agents
+- implement local issues format validation and strict issue guidelines
+- fix find logical precedence bug and add python env scan in validate.sh
+- modernize bootstrap welcome banner and completion logs with colored output and dashboard launch instructions
+- clean workspace workflows and memory template for release
+- clean workspace workflows and memory template for release
+- add git_profiles to ignore patterns and recompile bootstrap.sh
+- clean workspace configurations and workflows for public release
+- update handover notes for CLI bug fixes
+- update handover notes and token usage budget log
+- reset memory and token budget to default templates for clean public release
+- exclude bootstrap.sh from staged TODO/FIXME check and synchronize bootstrapper validate.sh template
+- clean up memory, task workflows, and sprint archives for public release
+- update docs-sync task checklist to completed
+- update api budget autoreset task workflow after /grill-me alignment
+- refine bootstrapper memory template and automate git sync
+- archive active sprint checklists for merge
+- update handover notes for completed README documentation migration
+- update handover notes for completed adr-wizard
+- update handover notes for completed pr-scaffolder
+- clean up workspace locks, tasks, and memory for Git deployment
+- cleanup and fix commit argument type in sync_git command
+- archive completed migration checklists and clean memory matrix
+- improve project rules, register ADR-003, and update gitignore
+- archive active checklists for merge
+- compile updated memory handover notes to bootstrap templates
+- archive active checklists for merge
+- compile updated memory handover notes to bootstrap templates
+- compile updated memory handover notes to bootstrap templates
+- add task workflow plan for api-rotator skill
+- update memory active branch, commit hash, and handover notes
+- reset memory ledger to clean placeholder template
+- archive sprint history and clean workspace memory for push
+- revert workspace rules to generic project-agnostic state
+- update handover notes for rules registry completion
+- update handover notes for completed sprint
+- enforce conventional commits via commit-msg hook and add check 8
+- relocate CHANGELOG.md to project root and update README.md quickstart
+- implement check 7 gitignore compliance validation
+- integrate pre-commit and post-commit git hook automations
+- add .antigravityignore file and update documentation/changelog
+- add dynamic workflow archiving and document /grill-me decisions
+- refine bootstrapping checklist lifecycle and real-time schema updates
+- implement strict teamwork and git memory sync rules
+- implement strict cache loading sequence and hierarchical task trees
+- automate agent memory sync, locking, and archiving via helper scripts and git hooks
+- initialize antigravity agent core
+
+### Other Updates
+- merge(main): branch 'issue-15-fix-bootstrap-directory-creation-and-path-separators' into 'main'
+- merge(main): branch 'issue-14-fix-git-profile-rotation-sequence-bug' into 'main'
+- merge(main): branch 'issue-13-implement-shell-script-safety-improvements' into 'main'
+- merge(main): branch 'issue-12-remove-kimchi-directory' into 'main'
+- merge(main): branch 'issue-11-implement-git-github-cli-operational-guidelines-compliance-checks' into 'main'
+- merge(main): branch 'issue-10-strict-rules-enforcement' into 'main'
+- merge branch 'issue-9-implement-interactive-merge-conflict-resolution-helper-inside-issue-merge' into 'main'
+- merge branch 'issue-8-implement-gitlab-and-gitea-issue-synchronization-with-git-profile-rotation' into 'main'
+- merge branch 'issue-7-fix-powershell-5-1-compatibility-and-user-guide-documentation' into 'main'
+- merge branch 'issue-6-create-comprehensive-layman-friendly-user-guide' into 'main'
+- merge branch 'issue-5-document-antigravity-cli-authentication-and-onboarding-integration' into 'main'
+- merge branch 'issue-4-implement-pure-python-workspace-validation-suite' into 'main'
+- merge branch 'issue-3-add-git-profile-and-credential-status-display-to-interactive-menu' into 'main'
+- merge branch 'issue-2-add-support-for-gitea-and-gitlab-issue-synchronization' into 'main'
+- merge branch 'issue-1-fix-windows-shell-script-execution-compatibility' into 'main'
+- merge branch 'issue-3-ignore-sample-directory-in-git' into 'main'
+- merge branch 'issue-2-fix-suriota-review-report-findings' into 'main'
+- merge branch 'fix-windows-linter-stub'
+
+
 ## [2.6.0] - 2026-06-27
 
 ### Features
