@@ -67,5 +67,34 @@ class TestChangelog(unittest.TestCase):
         self.assertEqual(categories["fix"], ["fix minor issue"])
         self.assertEqual(categories["chore"], ["tidy up files"])
 
+    @patch('commands.changelog.get_current_version')
+    @patch('commands.changelog.get_latest_changelog_version')
+    @patch('commands.changelog.get_boundary_commit')
+    @patch('commands.changelog.get_commits_since')
+    @patch('commands.changelog.parse_conventional_commits')
+    @patch('commands.changelog.bump_semver')
+    @patch('commands.changelog.update_version_in_files')
+    @patch('commands.changelog.update_changelog')
+    @patch('git_api.create_github_release')
+    def test_changelog_run_creates_github_release(self, mock_create_rel, mock_upd_changelog, mock_upd_files, mock_bump, mock_parse, mock_commits, mock_boundary, mock_latest, mock_curr):
+        mock_curr.return_value = "1.0.0"
+        mock_latest.return_value = "1.0.0"
+        mock_boundary.return_value = "hash1"
+        mock_commits.return_value = [("hash2", "feat: add feature")]
+        mock_parse.return_value = {"feat": ["add feature"], "breaking": [], "fix": [], "refactor": [], "docs": [], "chore": [], "test": [], "other": []}
+        mock_bump.return_value = "1.1.0"
+        mock_upd_changelog.return_value = "## [1.1.0] - 2026-06-27\n### 🚀 Features\n- add feature\n"
+        mock_create_rel.return_value = "https://github.com/test/repo/releases/tag/v1.1.0"
+        
+        changelog.run([])
+        
+        mock_upd_changelog.assert_called_once()
+        mock_create_rel.assert_called_once_with(
+            tag_name="v1.1.0",
+            name="Release v1.1.0",
+            body="### 🚀 Features\n- add feature",
+            draft=True
+        )
+
 if __name__ == '__main__':
     unittest.main()

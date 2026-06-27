@@ -128,3 +128,33 @@ def post_commit_status(sha: str, state: str, target_url: str = "", description: 
     except Exception as e:
         print(f"[FAIL] Failed to post commit status: {e}", file=sys.stderr)
     return False
+
+def create_github_release(tag_name: str, name: str, body: str, draft: bool = True) -> Optional[str]:
+    """Create a draft or published release on GitHub."""
+    pat = get_pat()
+    repo = get_repo_info()
+    if not pat or not repo:
+        print("[WARN] Bypassing remote GitHub release creation due to missing configuration.", file=sys.stderr)
+        return None
+        
+    url = f"https://api.github.com/repos/{repo}/releases"
+    headers = {
+        "Authorization": f"Bearer {pat}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Antigravity-Agent-Core"
+    }
+    payload = {
+        "tag_name": tag_name,
+        "name": name,
+        "body": body,
+        "draft": draft
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as res:
+            res_data = json.loads(res.read().decode('utf-8'))
+            return res_data.get("html_url")
+    except Exception as e:
+        print(f"[FAIL] Failed to create GitHub release: {e}", file=sys.stderr)
+    return None

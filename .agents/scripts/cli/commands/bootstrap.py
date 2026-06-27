@@ -202,7 +202,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.14.0"
+    AAC_VERSION = "2.15.0"
     if not os.path.exists(agents_file):
         template = f"""# AGENTS.md — {name}
 
