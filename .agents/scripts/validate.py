@@ -464,6 +464,9 @@ def audit_unit_tests() -> bool:
         print_warn("Bypass flag 'BYPASS_TESTS=true' detected. Skipping unit test execution.")
         return True
         
+    failed = False
+    
+    # 1. Run agent system tests
     test_cmd = None
     if os.path.exists(".agents/tests"):
         if shutil.which("pytest"):
@@ -472,17 +475,60 @@ def audit_unit_tests() -> bool:
             test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", ".agents/tests"]
             
     if test_cmd:
-        print(f"Running test suite: {' '.join(test_cmd)}")
+        print(f"Running agent test suite: {' '.join(test_cmd)}")
         test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         if test_res.returncode != 0:
-            print_err(f"Unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
-            return False
+            print_err(f"Agent unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
+            failed = True
         else:
-            print_ok("All unit tests passed successfully.")
-            return True
-    else:
-        print_warn("No test suite directory ('.agents/tests/') or runner (pytest/unittest) found.")
-        return True
+            print_ok("Agent unit tests passed successfully.")
+            
+    # 2. Run sub-project tests listed in .agents/projects.json
+    projects_file = ".agents/projects.json"
+    if os.path.exists(projects_file):
+        try:
+            with open(projects_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            projects = data.get("projects", [])
+            for project in projects:
+                name = project.get("name")
+                path = project.get("path")
+                cmd_str = project.get("test_command")
+                if not name or not path or not cmd_str:
+                    continue
+                
+                resolved_path = os.path.abspath(path)
+                if not os.path.exists(resolved_path):
+                    print_err(f"Sub-project '{name}' path '{path}' does not exist!")
+                    failed = True
+                    continue
+                    
+                print(f"Running test suite for sub-project '{name}' in '{path}': {cmd_str}")
+                import shlex
+                cmd_args = shlex.split(cmd_str)
+                
+                use_shell = False
+                if not shutil.which(cmd_args[0]) and os.name != 'nt':
+                    use_shell = True
+                
+                test_res = subprocess.run(
+                    cmd_str if use_shell else cmd_args,
+                    cwd=resolved_path,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    shell=use_shell
+                )
+                if test_res.returncode != 0:
+                    print_err(f"Sub-project '{name}' tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
+                    failed = True
+                else:
+                    print_ok(f"Sub-project '{name}' tests passed successfully.")
+        except Exception as e:
+            print_warn(f"Failed to read or execute sub-project tests: {e}")
+            failed = True
+
+    return not failed
 
 # ==========================================================
 # 9. Module Lock Compliance Audit

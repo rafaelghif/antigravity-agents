@@ -34,3 +34,24 @@ Maintains session locks and branch states.
 - **branch**: Name of the active feature branch.
 - **task_id**: Current active task ID from the board.
 - **locks**: List of acquired module locks.
+
+## 4. Multi-Project Monorepo Schema (`projects.json`)
+Defines sub-projects inside a monorepo workspace.
+```json
+{
+  "projects": [
+    {
+      "name": "backend",
+      "path": "app/backend",
+      "stack": "python",
+      "test_command": "pytest"
+    },
+    {
+      "name": "frontend",
+      "path": "app/frontend",
+      "stack": "node",
+      "test_command": "npm run test"
+    }
+  ]
+}
+```
