@@ -38,9 +38,10 @@ created_at: [current-date]
 - [ ] Criterion 2 (e.g. Tests cover all endpoints)
 ```
 
-## 2. Synchronizing with the Task Board
+## 2. Synchronizing with the Task Board and Git Branch
 Once the issue file is written:
 1. Run `python3 .agents/scripts/sync.py` to synchronize any links.
 2. Open `.agents/tasks/board.md` and add the task referencing the issue:
    `- [ ] [Title] (feat/issue-[number]) <!-- id: issue-[number] -->`
 3. Transition the task to `Doing` before starting work.
+4. Create and checkout a new branch for the issue immediately (e.g., `./helper.sh issue checkout issue-[number]`). **NEVER** edit files or commit directly on the `main` or `master` branch.

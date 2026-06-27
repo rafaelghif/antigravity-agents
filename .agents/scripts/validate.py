@@ -273,13 +273,41 @@ def audit_git_branch_alignment() -> bool:
         return True
         
     if branch in ('main', 'master', 'HEAD'):
-        print_ok(f"On base branch '{branch}' (skipping issue verification).")
+        # Check if there are staged changes or modified files (excluding untracked git_profiles/locks configs)
+        try:
+            status_res = subprocess.run(
+                ['git', 'status', '--porcelain'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            )
+            dirty = False
+            for line in status_res.stdout.splitlines():
+                if not line.strip():
+                    continue
+                status = line[:2]
+                path = line[3:].strip()
+                # Ignore private untracked/ignored configs
+                if "git_profiles.json" in path or "locks.json" in path:
+                    continue
+                if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
+                    dirty = True
+                    break
+            if dirty:
+                print_err(f"Direct edits or commits on base branch '{branch}' are prohibited! "
+                          f"Please checkout a feature branch (e.g., './helper.sh issue checkout issue-028') before editing.")
+                return False
+        except Exception as e:
+            print_warn(f"Failed to check git status on base branch: {e}")
+            
+        print_ok(f"On base branch '{branch}' (clean, no active modifications).")
         return True
         
     match = re.search(r'(task-\d+|issue-\d+)', branch.lower())
     if not match:
-        print_warn(f"Branch name '{branch}' does not contain an issue ID pattern (e.g. 'issue-12' or 'task-001').")
-        return True
+        print_err(f"Branch name '{branch}' does not contain an issue ID pattern (e.g., 'feat/issue-012' or 'fix/task-001')!")
+        return False
         
     issue_id = match.group(1)
     task_board_path = ".agents/tasks/board.md"

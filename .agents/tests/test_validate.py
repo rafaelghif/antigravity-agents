@@ -66,5 +66,29 @@ class TestValidate(unittest.TestCase):
         mock_anti.return_value = True
         self.assertFalse(validate.audit_secrets_and_ignored_files())
 
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_audit_git_branch_alignment(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        # Scenario 1: On main branch and clean git status
+        mock_get_branch.return_value = "main"
+        mock_run.return_value = MagicMock(returncode=0, stdout="")
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+        # Scenario 2: On main branch and dirty git status
+        mock_run.return_value = MagicMock(returncode=0, stdout=" M src/main.py\n")
+        self.assertFalse(validate.audit_git_branch_alignment())
+
+        # Scenario 3: On feature branch with valid ID, issue files exist
+        mock_get_branch.return_value = "feat/issue-028"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "id: issue-028\ntasks:\n- [x] Done\n"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+        # Scenario 4: On feature branch with invalid ID pattern
+        mock_get_branch.return_value = "some-random-branch"
+        self.assertFalse(validate.audit_git_branch_alignment())
+
 if __name__ == '__main__':
     unittest.main()

@@ -25,6 +25,7 @@
 - **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications.
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
+- **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
 - **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
 - **ALWAYS** copy `.agents/git_profiles.example` to `.agents/git_profiles.json` during environment initialization to set up local identity rotation, and verify the `.json` file is never staged or committed.
@@ -62,17 +63,19 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 
 ## 5. Working protocol
 1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), and task board before writing any code.
-2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`.
+2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, and create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`).
 3. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `world-class-programmer` playbook) to evaluate long-term maintenance and UI/UX simplicity.
 4. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
 5. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
-6. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, changelog is updated by running `./helper.sh changelog`, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
+6. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.
 7. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
 
 ## 6. Git & review
 - Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.
+- All code edits must be done on the designated branch. Committing to base branches (`main` or `master`) directly is strictly prohibited.
 - One task = one PR where practical; link the task ID in the PR description.
 - No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.
+- When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.
 
 ## 7. Tool permissions
 Default to `request-review` in `agy config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.
