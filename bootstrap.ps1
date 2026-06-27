@@ -7,13 +7,7 @@ Write-Host "==========================================================" -Foregro
 $Dirs = @(
     ".agents/memory/decisions",
     ".agents/tasks",
-    ".agents/issues",
-    ".agents/skills/review",
-    ".agents/skills/adr-writer",
-    ".agents/skills/debugging",
-    ".agents/skills/world-class-programmer",
-    ".agents/workflows",
-    ".agents/scripts"
+    ".agents/issues"
 )
 
 foreach ($Dir in $Dirs) {
@@ -22,74 +16,54 @@ foreach ($Dir in $Dirs) {
     }
 }
 
-# 2. Write base files inline if they do not exist
-if (-not (Test-Path "AGENTS.md")) {
-    $AgentsContent = @"
-# AGENTS.md — <Project Name>
-
-> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand.
-
-## 1. What this project is
-- **Product:** <one-line description>
-- **Stack:** General Project
-- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
-
-## 2. Non-negotiable rules
-- **NEVER** commit secrets, `.env*` files, or credentials.
-- **ALWAYS** run the project's test command before marking a task `Completed`.
-- **ALWAYS** check `.agents/tasks/board.md` before starting work.
-- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first.
-
-## 3. Context map — what loads when
-| Path | Contents | When it loads |
-|---|---|---|
-| `AGENTS.md` (this file) | Identity, rules, map | Always |
-| `.agents/skills/*/SKILL.md` | Playbooks | On demand |
-| `.agents/tasks/board.md` | Task board | Read at start, written at change |
-| `.agents/memory/architecture.md` | System summary | On demand |
-
-## 4. Working protocol
-1. **Before coding:** Read `.agents/tasks/board.md`.
-2. **Before any architecture-affecting change:** check `.agents/memory/decisions/` for a relevant ADR.
-"@
-    Set-Content -Path "AGENTS.md" -Value $AgentsContent -Encoding UTF8
-    Write-Host "Created AGENTS.md template."
-}
-
-if (-not (Test-Path ".agents/rules.md")) {
-    $RulesContent = @"
-# Project Rules
-Use **General Project** for the main product stack.
-- test command is: `N/A`.
-"@
-    Set-Content -Path ".agents/rules.md" -Value $RulesContent -Encoding UTF8
-    Write-Host "Created .agents/rules.md template."
-}
-
-if (-not (Test-Path ".agents/tasks/board.md")) {
-    $BoardContent = @"
-# Task Board
-## Todo
-- [ ] Initialize project codebase
-## Doing
-## Done
-"@
-    Set-Content -Path ".agents/tasks/board.md" -Value $BoardContent -Encoding UTF8
-    Write-Host "Created .agents/tasks/board.md template."
+# 2. Synchronize Version if AGENTS.md exists
+if (Test-Path "AGENTS.md") {
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        python -c '
+import re, os
+with open("AGENTS.md", "r", encoding="utf-8") as f:
+    content = f.read()
+if "- **Version:**" in content:
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.2.0", content)
+else:
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.2.0", content)
+with open("AGENTS.md", "w", encoding="utf-8") as f:
+    f.write(content)
+' | Out-Null
+        Write-Host "Synchronized AGENTS.md version."
+    } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
+        python3 -c '
+import re, os
+with open("AGENTS.md", "r", encoding="utf-8") as f:
+    content = f.read()
+if "- **Version:**" in content:
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.2.0", content)
+else:
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.2.0", content)
+with open("AGENTS.md", "w", encoding="utf-8") as f:
+    f.write(content)
+' | Out-Null
+        Write-Host "Synchronized AGENTS.md version."
+    }
 }
 
 # 3. Trigger auto-reconnaissance
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    python .agents/scripts/recon.py
-} elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-    python3 .agents/scripts/recon.py
+if (Test-Path ".agents/scripts/recon.py") {
+    Write-Host "Running auto-reconnaissance scan..."
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        python .agents/scripts/recon.py
+    } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
+        python3 .agents/scripts/recon.py
+    } else {
+        Write-Host "Warning: Python not found. Please run .agents/scripts/recon.py manually after installing Python." -ForegroundColor Yellow
+    }
 } else {
-    Write-Host "Warning: Python not found. Please run .agents/scripts/recon.py manually after installing Python." -ForegroundColor Yellow
+    Write-Host "Warning: .agents/scripts/recon.py not found. Skipping auto-reconnaissance." -ForegroundColor Yellow
 }
 
 # 4. Set up local Git hooks
 if (Test-Path ".git") {
-    $HookContent = @"
+    $PreCommitContent = @"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
   python3 .agents/scripts/validate.py
@@ -99,8 +73,39 @@ else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
 "@
-    Set-Content -Path ".git/hooks/pre-commit" -Value $HookContent -Encoding UTF8
+    Set-Content -Path ".git/hooks/pre-commit" -Value $PreCommitContent -Encoding UTF8
     Write-Host "Installed local Git pre-commit hook."
+
+    $CommitMsgContent = @"
+#!/usr/bin/env bash
+COMMIT_MSG_FILE="`$1"
+COMMIT_MSG=`$(cat "`$COMMIT_MSG_FILE")
+CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
+
+if [[ ! "`$COMMIT_MSG" =~ `$CONVENTIONAL_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Non-compliant commit message format!"
+  echo "=========================================================="
+  echo "Commit messages must follow Conventional Commits standard:"
+  echo "  Format: <type>(<scope>): <subject>"
+  echo "  Example: feat(auth): add login endpoint"
+  echo "=========================================================="
+  exit 1
+fi
+
+ID_REGEX="(task-|issue-|chore-)[a-zA-Z0-9_-]+"
+if [[ ! "`$COMMIT_MSG" =~ `$ID_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Missing Task/Issue ID reference!"
+  echo "=========================================================="
+  echo "Commit messages must include an active task or issue ID reference."
+  echo "  Example body: Task ID: issue-123"
+  echo "=========================================================="
+  exit 1
+fi
+"@
+    Set-Content -Path ".git/hooks/commit-msg" -Value $CommitMsgContent -Encoding UTF8
+    Write-Host "Installed local Git commit-msg hook."
 }
 
 Write-Host "==========================================================" -ForegroundColor Green
