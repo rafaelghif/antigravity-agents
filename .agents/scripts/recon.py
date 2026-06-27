@@ -109,8 +109,17 @@ def scan_workspace():
     if not detected_stack:
         detected_stack.append("General Project")
         
+    main_stack = None
+    if has_py:
+        main_stack = "python"
+    elif has_js:
+        main_stack = "node"
+    elif has_php:
+        main_stack = "php"
+
     return {
         "stack": ", ".join(detected_stack),
+        "main_stack": main_stack,
         "build_tool": build_tool,
         "test_command": test_command,
         "lint_command": lint_command,
@@ -150,6 +159,163 @@ def update_rules_md(scan_results):
         f.write(content)
     print("Updated .agents/rules.md with build and test guidelines.")
 
+def generate_recommendations_report(scan_results):
+    os.makedirs(".agents/plans", exist_ok=True)
+    report_path = ".agents/plans/recon_recommendations.md"
+    
+    # 1. Check directories
+    missing_dirs = []
+    stack = scan_results.get("main_stack")
+    if stack == "python":
+        for d in ("src", "tests"):
+            if not os.path.isdir(d):
+                missing_dirs.append(d)
+    elif stack == "node":
+        for d in ("src", "tests"):
+            if not os.path.isdir(d):
+                missing_dirs.append(d)
+    elif stack == "php":
+        for d in ("src", "tests"):
+            if not os.path.isdir(d):
+                missing_dirs.append(d)
+
+    # 2. Check dependencies
+    missing_deps = []
+    suggested_cmds = []
+    
+    if stack == "python":
+        reqs_file = "requirements.txt"
+        has_test = False
+        has_lint = False
+        if os.path.exists(reqs_file):
+            try:
+                with open(reqs_file, 'r', encoding='utf-8') as f:
+                    content = f.read().lower()
+                if "pytest" in content or "unittest" in content:
+                    has_test = True
+                if "flake8" in content or "black" in content or "pylint" in content:
+                    has_lint = True
+            except Exception:
+                pass
+        if not has_test:
+            missing_deps.append("pytest")
+            suggested_cmds.append("pip install pytest")
+        if not has_lint:
+            missing_deps.append("flake8")
+            suggested_cmds.append("pip install flake8")
+            
+    elif stack == "node":
+        pkg_file = "package.json"
+        has_test = False
+        has_lint = False
+        if os.path.exists(pkg_file):
+            try:
+                import json
+                with open(pkg_file, 'r', encoding='utf-8') as f:
+                    p_data = json.load(f)
+                dev_deps = p_data.get("devDependencies", {})
+                deps = p_data.get("dependencies", {})
+                all_deps = {**dev_deps, **deps}
+                for k in all_deps:
+                    if k in ("jest", "mocha", "vitest", "jasmine"):
+                        has_test = True
+                    if k in ("eslint", "prettier"):
+                        has_lint = True
+            except Exception:
+                pass
+        if not has_test:
+            missing_deps.append("jest")
+            suggested_cmds.append("npm install --save-dev jest")
+        if not has_lint:
+            missing_deps.append("eslint")
+            suggested_cmds.append("npm install --save-dev eslint")
+            
+    elif stack == "php":
+        comp_file = "composer.json"
+        has_test = False
+        if os.path.exists(comp_file):
+            try:
+                import json
+                with open(comp_file, 'r', encoding='utf-8') as f:
+                    p_data = json.load(f)
+                dev_deps = p_data.get("require-dev", {})
+                deps = p_data.get("require", {})
+                all_deps = {**dev_deps, **deps}
+                if any("phpunit" in k or "pest" in k for k in all_deps):
+                    has_test = True
+            except Exception:
+                pass
+        if not has_test:
+            missing_deps.append("phpunit/phpunit")
+            suggested_cmds.append("composer require --dev phpunit/phpunit")
+
+    # 3. Check gitignore
+    missing_ignores = []
+    gitignore_file = ".gitignore"
+    ignores_to_check = []
+    if stack == "python":
+        ignores_to_check = ["venv/", "__pycache__/", ".pytest_cache/"]
+    elif stack == "node":
+        ignores_to_check = ["node_modules/", "dist/"]
+    elif stack == "php":
+        ignores_to_check = ["vendor/"]
+        
+    if os.path.exists(gitignore_file) and ignores_to_check:
+        try:
+            with open(gitignore_file, 'r', encoding='utf-8') as f:
+                git_content = f.read()
+            for pattern in ignores_to_check:
+                if pattern not in git_content:
+                    missing_ignores.append(pattern)
+        except Exception:
+            pass
+    elif not os.path.exists(gitignore_file) and ignores_to_check:
+        missing_ignores = ignores_to_check
+        suggested_cmds.append("touch .gitignore")
+
+    # Write report
+    report_content = f"""# Workspace Auto-Reconnaissance Recommendations
+
+This report is automatically generated by `recon.py`. It lists recommended structural changes and missing dependencies for the active project stack.
+
+## 1. Detected Stack
+- **Primary Stack**: {scan_results.get("stack", "General Project")}
+
+"""
+    if missing_dirs:
+        report_content += "## 2. Missing Standard Directories\n"
+        for d in missing_dirs:
+            report_content += f"- [ ] `{d}/` directory is missing.\n"
+        report_content += "\n"
+    else:
+        report_content += "## 2. Directory Structure\n- [x] All standard directories are present.\n\n"
+
+    if missing_deps:
+        report_content += "## 3. Missing Developer Dependencies\n"
+        for dep in missing_deps:
+            report_content += f"- [ ] `{dep}` is not installed or configured.\n"
+        report_content += "\n"
+    else:
+        report_content += "## 3. Developer Dependencies\n- [x] Recommended test and lint dependencies are configured.\n\n"
+
+    if missing_ignores:
+        report_content += "## 4. Missing Gitignore Patterns\n"
+        for pattern in missing_ignores:
+            report_content += f"- [ ] `{pattern}` pattern is missing from `.gitignore`.\n"
+        report_content += "\n"
+    else:
+        report_content += "## 4. Gitignore Configuration\n- [x] `.gitignore` contains all standard ignore patterns.\n\n"
+
+    if suggested_cmds:
+        report_content += "## 5. Suggested Recovery Commands\n"
+        for cmd in suggested_cmds:
+            report_content += f"```bash\n{cmd}\n```\n"
+        report_content += "\n"
+        
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write(report_content)
+    print(f"Generated structured recommendations report at '{report_path}'.")
+
 if __name__ == '__main__':
     print("Running enterprise auto-reconnaissance scan...")
     results = scan_workspace()
@@ -158,4 +324,5 @@ if __name__ == '__main__':
     
     update_agents_md(results)
     update_rules_md(results)
+    generate_recommendations_report(results)
     print("Auto-reconnaissance completed successfully!")
