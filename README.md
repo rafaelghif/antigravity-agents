@@ -15,8 +15,7 @@ AAC V2's auto-reconnaissance engine dynamically scans your repository and config
 - **Go**: Golang modules and tooling
 - **Rust**: Cargo suites
 - **Java & Kotlin**: Maven and Gradle configurations
-- **CSS / Styling**: Tailwind CSS, SCSS, Sass, Vanilla CSS
-- **Mobile & Desktop**: .NET (C#)
+- **CSS / Styling**: Tailwind CSS, SCSS, Vanilla CSS
 - **Containerization**: Docker, Docker Compose
 
 ---
@@ -26,11 +25,17 @@ AAC V2's auto-reconnaissance engine dynamically scans your repository and config
 To bootstrap your AI assistant in **any new or existing repository**:
 
 ### 1. Run the Installer
-Run the bootstrap script inside your project's root folder:
+Run the bootstrap installer script inside your project's root folder:
+
+**Linux / macOS (Bash):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
 ```
-*(Or copy the `bootstrap.sh` script to your local project root and run `bash bootstrap.sh`)*
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1" -OutFile "bootstrap.ps1"; .\bootstrap.ps1
+```
 
 ### 2. Auto-Detect Your Stack
 The installer automatically triggers the reconnaissance script (`.agents/scripts/recon.py`), which:
@@ -41,6 +46,62 @@ The installer automatically triggers the reconnaissance script (`.agents/scripts
 ### 3. Start Coding with the Agent
 When prompting your agent, refer to the master instruction guidelines:
 > "Read AGENTS.md and align with our workspace layout, rules, and memory ledger."
+
+---
+
+## 🛠️ AAC V2 CLI Commands Reference
+
+AAC V2 provides a unified command dispatcher wrapper `./helper.sh` (Linux/macOS) and `./helper.ps1` (Windows) to manage all developer workflows.
+
+| Command | Usage | Description |
+|---|---|---|
+| **`bootstrap`** | `./helper.sh bootstrap` | Scaffolds directories, detects stack, writes `AGENTS.md`, and guides Git profile setup. |
+| **`validate`** | `./helper.sh validate` | Runs local validation guard check (8 core audits: critical files, secrets/ignored files, links, task board, git alignment, syntax, unit tests). |
+| **`issue`** | `./helper.sh issue <subcommand>` | Local issue tracker. Supports `list`, `add <title>`, `view <id>`, and `close <id>`. |
+| **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative coding. Run with `--release <module>` to unlock. |
+| **`profile`** | `./helper.sh profile <subcommand>` | Credentials manager. Supports `add <name> <email>`, `switch <name>`, `list`, and `apply`. |
+| **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer version. |
+| **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries in `architecture.md`. |
+
+---
+
+## 🔒 Developer Profile & Identity Rotation
+
+To prevent committing code under mismatched Git author emails (e.g. leaking personal emails in corporate repositories), AAC V2 implements active profile matching:
+
+1. **Configuring Profiles**: Register developer profiles in `.agents/git_profiles.json` (created automatically from `.agents/git_profiles.example`):
+   ```bash
+   ./helper.sh profile add corp-work developer@company.com
+   ```
+2. **Switching Identities**: Switch between accounts dynamically:
+   ```bash
+   ./helper.sh profile switch corp-work
+   ```
+3. **Email Validation Gate**: The validation guard (`./helper.sh validate`) automatically compares `git config user.email` with the active profile. If they do not match, validation fails and blocks the pre-commit hook.
+
+---
+
+## 🔑 Collaborative Module Locking
+
+To prevent developers or autonomous agents from modifying the same files concurrently, AAC V2 uses a lightweight, local-only module locking workflow:
+
+- **Locking a Module**: Lock a script or subdirectory before editing:
+  ```bash
+  ./helper.sh lock validate
+  ```
+  This creates a lock entry in `.agents/locks.json` mapped to your active branch.
+- **Acquiring Conflicts**: If another developer tries to lock the same module, the CLI blocks the action and prints the active branch owner.
+- **Stale Lock Auto-Release**: The lock script and validation guard dynamically verify local git refs. If a lock's holder branch is merged or deleted locally, the lock is automatically pruned and released.
+
+---
+
+## 🔄 Safe Automated Upgrades
+
+Upgrading an older version of Antigravity Agent Core is fully automated and risk-free:
+- When the installer (`install.sh` or `bootstrap.ps1`) runs in a folder that already contains `.agents`, it automatically generates a timestamped archive:
+  - Moving `.agents/` to `.agents_backup_YYYYMMDD_HHMMSS/`
+  - Copying `AGENTS.md` to `AGENTS.md.backup_YYYYMMDD_HHMMSS`
+- A clean, template-initialized V2 folder is written, ensuring no obsolete or stale files remain, while keeping all previous configurations safely archived.
 
 ---
 
