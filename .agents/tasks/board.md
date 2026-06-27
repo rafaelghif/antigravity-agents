@@ -3,9 +3,9 @@
 This board tracks active development tasks for AAC V2.
 
 ## Todo
-- [ ] Add CLI unit testing suite (`test/cli-v2`) <!-- id: task-012 -->
 
 ## Doing
+- [/] Add CLI unit testing suite (`feat/issue-012-test-cli-v2`) <!-- id: issue-012 -->
 
 ## Done
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`) <!-- id: chore-init -->
