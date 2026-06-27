@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Fix Python syntax error in Windows bootstrap script (feat/issue-069) <!-- id: issue-069 -->
 - [x] Commit install.ps1 path alignment changes (feat/issue-068) <!-- id: issue-068 -->
 - [x] Align and synchronize installation and bootstrap scripts across OSs (feat/issue-067) <!-- id: issue-067 -->
 - [x] Track and commit install.ps1 Windows installer file (feat/issue-066) <!-- id: issue-066 -->

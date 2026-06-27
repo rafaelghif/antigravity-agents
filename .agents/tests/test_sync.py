@@ -53,7 +53,8 @@ class TestSync(unittest.TestCase):
         issue.sync_issues()
         
         # Verify it tries to create issue_99.md
-        mock_file.assert_called_with(".agents/issues/issue_99.md", 'w', encoding='utf-8')
+        expected_path = os.path.join(".agents/issues", "issue_99.md")
+        mock_file.assert_called_with(expected_path, 'w', encoding='utf-8')
         mock_file().write.assert_called()
 
 if __name__ == '__main__':

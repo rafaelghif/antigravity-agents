@@ -32,30 +32,10 @@ if (Test-Path $SrcTemplates) {
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md") {
     if (Get-Command python -ErrorAction SilentlyContinue) {
-        python -c '
-import re, os
-with open("AGENTS.md", "r", encoding="utf-8") as f:
-    content = f.read()
-if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.45.0", content)
-else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.45.0", content)
-with open("AGENTS.md", "w", encoding="utf-8") as f:
-    f.write(content)
-' | Out-Null
+        python -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.47.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.47.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
         Write-Host "Synchronized AGENTS.md version."
     } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-        python3 -c '
-import re, os
-with open("AGENTS.md", "r", encoding="utf-8") as f:
-    content = f.read()
-if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.45.0", content)
-else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.45.0", content)
-with open("AGENTS.md", "w", encoding="utf-8") as f:
-    f.write(content)
-' | Out-Null
+        python3 -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.47.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.47.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
         Write-Host "Synchronized AGENTS.md version."
     }
 }

@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.47.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-069)
+
+### 🐛 Bug Fixes
+- fix python syntax error on windows and unit test compatibility
+
+
+## [2.46.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-069)
+
+
 ## [2.45.0] - 2026-06-27
 
 ### 🚀 Features
