@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Automated Installer Upgrade Flow with Directory Backup (`feat/issue-024`) <!-- id: issue-024 -->
 - [x] Implement Developer Profile Compliance and Stale Lock Auto-Release (`feat/issue-023`) <!-- id: issue-023 -->
 - [x] Implement Auto-Changelog Generator CLI with Semantic Tagging (`feat/issue-022`) <!-- id: issue-022 -->
 - [x] Refactor CLI, validation guard, and git-api error handling (`feat/issue-021`) <!-- id: issue-021 -->

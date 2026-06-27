@@ -10,8 +10,20 @@ echo "   Installing Antigravity Agent Core V2..."
 echo "   Target Directory: $TARGET_ABS"
 echo "=========================================================="
 
-# 1. Verify target directory
+# 1. Verify target directory and backup existing installation for upgrade
 mkdir -p "$TARGET_ABS"
+
+TIMESTAMP=""
+if [ -d "$TARGET_ABS/.agents" ]; then
+  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+  echo "Existing installation found! Archiving to .agents_backup_$TIMESTAMP..."
+  mv "$TARGET_ABS/.agents" "$TARGET_ABS/.agents_backup_$TIMESTAMP"
+  
+  if [ -f "$TARGET_ABS/AGENTS.md" ]; then
+    echo "Backing up AGENTS.md to AGENTS.md.backup_$TIMESTAMP..."
+    cp "$TARGET_ABS/AGENTS.md" "$TARGET_ABS/AGENTS.md.backup_$TIMESTAMP"
+  fi
+fi
 
 # Get source path
 SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -134,6 +146,20 @@ fi
 # 4. Execute final synchronization in target directory
 cd "$TARGET_ABS"
 ./helper.sh sync
+
+if [ -n "${TIMESTAMP:-}" ]; then
+  echo ""
+  echo "=========================================================="
+  echo "   [WARNING] Upgrade Backup Triggered!                    "
+  echo "=========================================================="
+  echo "Your old .agents config has been archived to:"
+  echo "  .agents_backup_$TIMESTAMP"
+  echo "Your old AGENTS.md has been backed up to:"
+  echo "  AGENTS.md.backup_$TIMESTAMP"
+  echo "To restore custom tasks, issues, or profiles, copy them"
+  echo "from the backup folder to the active .agents directory."
+  echo "=========================================================="
+fi
 
 echo "=========================================================="
 echo "   AAC V2 Installation Completed Successfully!            "
