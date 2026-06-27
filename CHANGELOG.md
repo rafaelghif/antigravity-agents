@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.5.0] - 2026-06-27
+
+### Features
+- enforce strict git branch flow and base branch edit prohibition
+
+### Chores
+- add CLI commands reference to AGENTS.md for strict instruction compliance
+
+
 ## [2.4.0] - 2026-06-27
 
 ### Features
