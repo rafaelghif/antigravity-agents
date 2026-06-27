@@ -80,6 +80,7 @@ if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR/.agents" ]; then
       ! -path "*/__pycache__/*" \
       ! -path "*/.git/*" \
       ! -name "git_profiles.json" \
+      ! -name "projects.json" \
       ! -name "locks.json" \
       ! -name ".DS_Store" \
       ! -name "*.pyc" \
@@ -110,6 +111,11 @@ if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR/.agents" ]; then
       filename_t=$(basename "$t" .template)
       cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
     done
+  fi
+
+  # Copy projects.example to projects.json if it doesn't exist
+  if [ -f "$SRC_DIR/.agents/projects.example" ] && [ ! -f "$TARGET_ABS/.agents/projects.json" ]; then
+    cp "$SRC_DIR/.agents/projects.example" "$TARGET_ABS/.agents/projects.json" || true
   fi
 
   cp -n "$SRC_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
@@ -181,6 +187,7 @@ else
       ! -path "*/__pycache__/*" \
       ! -path "*/.git/*" \
       ! -name "git_profiles.json" \
+      ! -name "projects.json" \
       ! -name "locks.json" \
       ! -name ".DS_Store" \
       ! -name "*.pyc" \
@@ -211,6 +218,11 @@ else
       filename_t=$(basename "$t" .template)
       cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
     done
+  fi
+
+  # Copy projects.example to projects.json if it doesn't exist
+  if [ -f "$EXTRACTED_DIR/.agents/projects.example" ] && [ ! -f "$TARGET_ABS/.agents/projects.json" ]; then
+    cp "$EXTRACTED_DIR/.agents/projects.example" "$TARGET_ABS/.agents/projects.json" || true
   fi
 
   cp -n "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true

@@ -1,0 +1,37 @@
+{
+  "comment": "Antigravity Multi-Project Configuration Template. Copy this file to '.agents/projects.json' to define workspace components.",
+  "projects": [
+    {
+      "name": "backend-api",
+      "path": "app/backend",
+      "stack": "python",
+      "test_command": "pytest",
+      "description": "Python Django/FastAPI backend API service.",
+      "sync_contracts": [
+        {
+          "source": "openapi.yaml",
+          "target": "../frontend/src/api/client.ts",
+          "generator": "npx openapi-typescript"
+        }
+      ],
+      "_fields_documentation": {
+        "name": "[Required] Unique identifier of the project component.",
+        "path": "[Required] Relative path from workspace root to project directory.",
+        "stack": "[Required] Programming stack (e.g. python, node, php).",
+        "test_command": "[Required] Script/binary used to run the project's test suite locally.",
+        "description": "[Optional] Brief explanation of this project component.",
+        "sync_contracts": "[Optional] List of API schema contract sync definitions.",
+        "sync_contracts.source": "[Required if sync_contracts is set] Path to the API schema source relative to the project path.",
+        "sync_contracts.target": "[Required if sync_contracts is set] Path to the destination file relative to the project path.",
+        "sync_contracts.generator": "[Optional] Custom shell command prefix to build/generate code from the schema."
+      }
+    },
+    {
+      "name": "frontend-web",
+      "path": "app/frontend",
+      "stack": "node",
+      "test_command": "npm run test",
+      "description": "React/Vite user interface frontend app."
+    }
+  ]
+}
