@@ -19,3 +19,4 @@ __pycache__/
 # <<< ANTIGRAVITY AGENT END >>>
 .agents/cooldowns.json
 /sample
+.agents/logs/

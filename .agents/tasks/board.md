@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement AAC V2 Core Enhancements (Points 1-5) (feat/issue-072) <!-- id: issue-072 -->
 - [x] Sync and resolve bugs in Windows scripts (feat/issue-071) <!-- id: issue-071 -->
 - [x] Fix PowerShell hooks directory resolution path mismatch (feat/issue-070) <!-- id: issue-070 -->
 - [x] Fix Python syntax error in Windows bootstrap script (feat/issue-069) <!-- id: issue-069 -->

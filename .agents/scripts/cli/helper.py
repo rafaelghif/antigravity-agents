@@ -1,6 +1,27 @@
 import sys
 import os
 import importlib
+import time
+import json
+from datetime import datetime, timezone
+
+def log_cli_execution(cmd: str, args: list, status: str, duration_ms: float, error: str = None) -> None:
+    log_dir = ".agents/logs"
+    log_file = os.path.join(log_dir, "cli.log")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+        entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "command": cmd,
+            "args": args,
+            "status": status,
+            "duration_ms": round(duration_ms, 2),
+            "error": error
+        }
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception:
+        pass
 
 CYAN = "\033[96m"
 GREEN = "\033[92m"
@@ -115,7 +136,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
@@ -126,11 +147,17 @@ def main():
         print_help()
         sys.exit(1)
         
+    start_time = time.perf_counter()
+    status = "success"
+    error_msg = None
+    
     try:
         # Resolve command file path dynamically
         cmd_file = os.path.abspath(os.path.join(os.path.dirname(__file__), f"commands/{cmd}.py"))
         if not os.path.exists(cmd_file):
             print(f"{RED}Error: Command module file '{cmd_file}' not found.{RESET}")
+            status = "failed"
+            error_msg = f"Command module file '{cmd_file}' not found"
             sys.exit(1)
             
         # Inject project root path into sys.path to resolve imports correctly
@@ -142,16 +169,30 @@ def main():
         spec = importlib.util.spec_from_file_location(f"cmd_{cmd}", cmd_file)
         if spec is None or spec.loader is None:
             print(f"{RED}Error: Could not load command module spec for '{cmd}'.{RESET}")
+            status = "failed"
+            error_msg = f"Could not load command module spec for '{cmd}'"
             sys.exit(1)
         cmd_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cmd_module)
         if not hasattr(cmd_module, "run"):
             print(f"{RED}Error: Command module '{cmd}' does not implement required 'run(args)' method.{RESET}")
+            status = "failed"
+            error_msg = f"Command module '{cmd}' does not implement required 'run(args)' method"
             sys.exit(1)
         cmd_module.run(sys.argv[2:])
+    except SystemExit as se:
+        if se.code != 0:
+            status = "failed"
+            error_msg = f"SystemExit: {se.code}"
+        raise
     except Exception as e:
+        status = "failed"
+        error_msg = str(e)
         print(f"{RED}Error executing command '{cmd}': {e}{RESET}")
         sys.exit(1)
+    finally:
+        duration_ms = (time.perf_counter() - start_time) * 1000.0
+        log_cli_execution(cmd, sys.argv[2:], status, duration_ms, error_msg)
 
 if __name__ == '__main__':
     main()

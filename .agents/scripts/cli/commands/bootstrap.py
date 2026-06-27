@@ -301,6 +301,17 @@ def run(args):
             with open(".antigravityignore", 'w', encoding='utf-8') as f:
                 f.write(anti_ignore_content)
 
+    # 3.1 Create GitHub CI workflow
+    github_workflow_dir = ".github/workflows"
+    github_workflow_file = os.path.join(github_workflow_dir, "verify.yml")
+    if not os.path.exists(github_workflow_file):
+        os.makedirs(github_workflow_dir, exist_ok=True)
+        ci_content = read_template(src_root, "ci_github_workflow.yml.template", "")
+        if ci_content:
+            with open(github_workflow_file, 'w', encoding='utf-8') as f:
+                f.write(ci_content)
+            print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
+
     # 4. Generate .agents/schema.md
     schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n")
     schema_content = schema_content.replace("{{NAME}}", name).replace("{{STACK}}", stack.capitalize()).replace("{{ARCH}}", arch.upper())
@@ -310,7 +321,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.50.0"
+    AAC_VERSION = "2.51.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
