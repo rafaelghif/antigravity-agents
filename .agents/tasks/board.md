@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Two-Way GitHub Issues Synchronization with Local Fallback (`feat/issue-026`) <!-- id: issue-026 -->
 - [x] Update Public Facing README.md Documentation for V2 CLI and Compliance (`feat/issue-025`) <!-- id: issue-025 -->
 - [x] Implement Automated Installer Upgrade Flow with Directory Backup (`feat/issue-024`) <!-- id: issue-024 -->
 - [x] Implement Developer Profile Compliance and Stale Lock Auto-Release (`feat/issue-023`) <!-- id: issue-023 -->

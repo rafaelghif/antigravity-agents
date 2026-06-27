@@ -470,6 +470,14 @@ def run_validations() -> None:
     # Auto prune stale locks
     prune_stale_locks()
     
+    # Auto sync remote issues
+    try:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "cli")))
+        import commands.issue as issue_cmd
+        issue_cmd.sync_issues()
+    except Exception:
+        pass
+    
     # Run the 8 audits sequentially
     results = {}
     results["Critical Files"] = audit_critical_files()

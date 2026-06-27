@@ -6,10 +6,100 @@ from datetime import datetime
 
 ISSUE_DIR = ".agents/issues"
 
+def sync_issues():
+    """Fetch remote issues and synchronize status/existence with local markdown files."""
+    try:
+        import git_api
+        remote_issues = git_api.fetch_github_issues()
+        if not remote_issues:
+            return
+            
+        print("[INFO] Synchronizing local issues with GitHub remote...")
+        if not os.path.exists(ISSUE_DIR):
+            os.makedirs(ISSUE_DIR, exist_ok=True)
+            
+        # Parse all local issues to build a map of {github_number: file_path}
+        local_issues = {}
+        for f_name in os.listdir(ISSUE_DIR):
+            if not f_name.endswith(".md") or "example" in f_name:
+                continue
+            path = os.path.join(ISSUE_DIR, f_name)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                m_num = re.search(r'github_number:\s*(\d+)', content)
+                if m_num:
+                    local_issues[int(m_num.group(1))] = path
+            except Exception:
+                pass
+                
+        for issue in remote_issues:
+            # Skip pull requests
+            if "pull_request" in issue:
+                continue
+                
+            number = issue.get("number")
+            title = issue.get("title", "")
+            state = issue.get("state", "open")
+            html_url = issue.get("html_url", "")
+            body = issue.get("body", "") or ""
+            
+            if number in local_issues:
+                # Update status if mismatched
+                path = local_issues[number]
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    m_status = re.search(r'status:\s*(.*?)\n', content)
+                    if m_status:
+                        current_status = m_status.group(1).strip()
+                        if current_status != state:
+                            content = re.sub(r'status:\s*' + current_status, f'status: {state}', content)
+                            with open(path, 'w', encoding='utf-8') as f:
+                                f.write(content)
+                            print(f"[OK] Updated local issue #{number} status to '{state}'.")
+                except Exception:
+                    pass
+            else:
+                # Create a new local issue file
+                issue_id = f"issue-{number}"
+                file_path = os.path.join(ISSUE_DIR, f"issue_{number}.md")
+                current_date = datetime.now().strftime("%Y-%m-%d")
+                
+                template = f"""---
+id: {issue_id}
+title: "{title}"
+status: {state}
+assignee: agent-antigravity
+created_at: {current_date}
+github_url: "{html_url}"
+github_number: {number}
+---
+
+# Issue Details
+
+## Problem Statement
+{body}
+
+## Tasks
+- [ ] Implement remote synchronization fixes
+
+## Acceptance Criteria
+- [ ] Verification complete
+"""
+                try:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(template)
+                    print(f"[OK] Pulled new remote issue #{number} as local file '{file_path}'.")
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"[WARN] Issue synchronization failed: {e}", file=sys.stderr)
+
 def get_issue_path(issue_id):
     normalized = issue_id.lower().replace('-', '_')
     if not os.path.exists(ISSUE_DIR):
-        os.makedirs(ISSUE_DIR)
+        os.makedirs(ISSUE_DIR, exist_ok=True)
     for f in os.listdir(ISSUE_DIR):
         if normalized in f.lower().replace('-', '_') or issue_id.lower() in f.lower():
             return os.path.join(ISSUE_DIR, f)
@@ -19,7 +109,7 @@ def get_issue_path(issue_id):
 
 def run(args):
     if len(args) == 0:
-        print("Usage: helper.py issue <create|list|checkout|close> [args...]")
+        print("Usage: helper.py issue <create|list|checkout|close|sync> [args...]")
         sys.exit(1)
         
     action = args[0].lower()
@@ -166,6 +256,9 @@ created_at: {current_date}
             f.write(content)
         print(f"Successfully closed issue '{issue_id}' (updated file status).")
         
+    elif action == "sync":
+        sync_issues()
+        
     else:
-        print(f"Error: Unknown action '{action}'. Available: create, list, checkout, close")
+        print(f"Error: Unknown action '{action}'. Available: create, list, checkout, close, sync")
         sys.exit(1)

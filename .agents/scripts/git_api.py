@@ -79,3 +79,24 @@ def close_github_issue(issue_number: int) -> bool:
     except Exception as e:
         print(f"[FAIL] Failed to close GitHub issue #{issue_number}: {e}", file=sys.stderr)
     return False
+
+def fetch_github_issues() -> Optional[list]:
+    pat = get_pat()
+    repo = get_repo_info()
+    if not pat or not repo:
+        return None
+        
+    url = f"https://api.github.com/repos/{repo}/issues?state=all&per_page=100"
+    headers = {
+        "Authorization": f"Bearer {pat}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Antigravity-Agent-Core"
+    }
+    
+    req = urllib.request.Request(url, headers=headers, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=3.0) as res:
+            return json.loads(res.read().decode('utf-8'))
+    except Exception as e:
+        print(f"[WARN] Failed to fetch remote GitHub issues: {e}", file=sys.stderr)
+    return None
