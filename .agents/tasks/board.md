@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Improve auto-reconnaissance system to generate structured recommendations report (feat/issue-035) <!-- id: issue-035 -->
 - [x] Implement structured changelog categorization and repository-isolated SSH key rotation (feat/issue-034) <!-- id: issue-034 -->
 - [x] Implement comprehensive integration test suite for project bootstrap commands (feat/issue-033) <!-- id: issue-033 -->
 - [x] Enforce strict module lock verification gate in validation checks (feat/issue-032) <!-- id: issue-032 -->
