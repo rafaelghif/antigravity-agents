@@ -3,7 +3,7 @@
 These rules extend the core guidelines in `AGENTS.md` with project-specific language and tool specifications.
 
 ## 1. Programming Language & Tools
-- Use **Python 3.10+** for all CLI scripting.
+- Use **Python 3** for the main product stack.
 - Rely on the standard library where possible to minimize external dependencies.
 - Use **Bash** for lightweight POSIX-compatible wrapper scripts. Ensure path-separators and directory check logic are safe for multi-platform execution (e.g. using `python3` wrappers on Windows).
 
