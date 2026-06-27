@@ -3,22 +3,28 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.52.0] - 2026-06-27
+
+### 🚀 Features
+- Fix changelog titles and parsing logic (ISSUE-073)
+
+
 ## [2.51.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-072)
+- Implement AAC V2 Core Enhancements (Points 1-5) (ISSUE-072)
 
 
 ## [2.50.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-071)
+- Sync and resolve bugs in Windows scripts (ISSUE-071)
 
 
 ## [2.49.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-070)
+- Fix PowerShell hooks directory resolution path mismatch (ISSUE-070)
 
 ### 🐛 Bug Fixes
 - resolve hooks destination relative to PowerShell active directory context
@@ -28,7 +34,7 @@ All notable changes to this project will be documented in this file.
 ## [2.48.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-070)
+- Fix PowerShell hooks directory resolution path mismatch (ISSUE-070)
 
 ### 🐛 Bug Fixes
 - fix python syntax error on windows and unit test compatibility
@@ -37,7 +43,7 @@ All notable changes to this project will be documented in this file.
 ## [2.47.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-069)
+- Fix Python syntax error in Windows bootstrap script (ISSUE-069)
 
 ### 🐛 Bug Fixes
 - fix python syntax error on windows and unit test compatibility
@@ -46,73 +52,73 @@ All notable changes to this project will be documented in this file.
 ## [2.46.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-069)
+- Fix Python syntax error in Windows bootstrap script (ISSUE-069)
 
 
 ## [2.45.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-068)
+- Commit install.ps1 path alignment changes (ISSUE-068)
 
 
 ## [2.44.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-068)
+- Commit install.ps1 path alignment changes (ISSUE-068)
 
 
 ## [2.43.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-067)
+- Align and synchronize installation and bootstrap scripts across OSs (ISSUE-067)
 
 
 ## [2.42.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-067)
+- Align and synchronize installation and bootstrap scripts across OSs (ISSUE-067)
 
 
 ## [2.41.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-066)
+- Track and commit install.ps1 Windows installer file (ISSUE-066)
 
 
 ## [2.40.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-066)
+- Track and commit install.ps1 Windows installer file (ISSUE-066)
 
 
 ## [2.39.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-065)
+- Fix Windows installation and bootstrap completeness (ISSUE-065)
 
 
 ## [2.38.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-065)
+- Fix Windows installation and bootstrap completeness (ISSUE-065)
 
 
 ## [2.37.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-064)
+- Add issue.py to auto-staged files list and commit it (ISSUE-064)
 
 
 ## [2.36.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-063)
+- Commit README installation command updates (ISSUE-063)
 
 
 ## [2.35.0] - 2026-06-27
 
 ### 🚀 Features
-- Issue Details (ISSUE-062)
+- Fix Windows installation execution policy error (ISSUE-062)
 
 ### ⚙️ Chores
 - merge bootstrap.py update for projects.json copying
@@ -121,19 +127,19 @@ All notable changes to this project will be documented in this file.
 ## [2.34.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-061)
+- Enforce remote Git source download by default during installation (ISSUE-061)
 
 
 ## [2.33.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-060)
+- Improve CLI helper UI, add help commands, and projects.json sample (ISSUE-060)
 
 
 ## [2.32.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-059)
+- Copy blueprints directory during install and bootstrap (ISSUE-059)
 
 ### 🛠️ Refactors
 - auto-update version in bootstrap.ps1 on version bump
@@ -142,25 +148,25 @@ All notable changes to this project will be documented in this file.
 ## [2.31.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-058)
+- Synchronize bootstrap.ps1 versions and verify local file installer options (ISSUE-058)
 
 
 ## [2.30.3] - 2026-06-27
 
 ### 🐛 Bug Fixes
-- Design & Task Specification (ISSUE-057)
+- Fix install.sh piping compatibility for unbound BASH_SOURCE variable (ISSUE-057)
 
 
 ## [2.30.2] - 2026-06-27
 
 ### 🐛 Bug Fixes
-- Design & Task Specification (ISSUE-056)
+- Fix git_profiles.example comment to be valid JSON (ISSUE-056)
 
 
 ## [2.30.1] - 2026-06-27
 
 ### 🐛 Bug Fixes
-- Design & Task Specification (ISSUE-055)
+- Synchronize README.md with CLI commands, monorepo projects, and skills (ISSUE-055)
 
 ### 🛠️ Refactors
 - upgrade boundary resolution and SemVer prioritization
@@ -169,7 +175,7 @@ All notable changes to this project will be documented in this file.
 ## [2.30.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-054)
+- Refactor changelog generator to improve SemVer safety, boundary resolution, and issue classification (ISSUE-054)
 
 ### 📝 Documentation
 - add projects.json and contract-synchronization skill for monorepos
@@ -178,7 +184,7 @@ All notable changes to this project will be documented in this file.
 ## [2.29.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-053)
+- Implement monorepo multi-project support and API contract synchronization (ISSUE-053)
 
 ### 📝 Documentation
 - implement self-learning CLI command and stack-agnostic project auto-detection
@@ -187,7 +193,7 @@ All notable changes to this project will be documented in this file.
 ## [2.28.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-052)
+- Implement self-learning mechanism and plug-and-play stack adaptation (ISSUE-052)
 
 ### 📝 Documentation
 - remove e2e testing, add token efficiency guidelines, and fix SemVer branch bump mapping
@@ -196,7 +202,7 @@ All notable changes to this project will be documented in this file.
 ## [2.27.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-051)
+- Optimize token efficiency, remove E2E testing, and fix SemVer branch bump (ISSUE-051)
 
 ### 📝 Documentation
 - add and refactor testing, ci-cd, coding, and security playbooks
@@ -205,13 +211,13 @@ All notable changes to this project will be documented in this file.
 ## [2.26.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-050)
+- Establish Testing and CI-CD playbooks and Refactor existing skills (ISSUE-050)
 
 
 ## [2.25.0] - 2026-06-27
 
 ### 🚀 Features
-- Design & Task Specification (ISSUE-049)
+- Fix changelog version bump calculation and branch-based issue injection (ISSUE-049)
 
 
 ## [2.24.0] - 2026-06-27
