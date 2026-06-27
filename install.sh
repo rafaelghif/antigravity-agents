@@ -21,7 +21,25 @@ mkdir -p "$TARGET_ABS/.agents"
 
 if [ -d "$SRC_DIR/.agents" ]; then
   echo "Using local source files from: $SRC_DIR"
-  cp -R -n "$SRC_DIR/.agents/"* "$TARGET_ABS/.agents/"
+  
+  # Copy all files and folders under .agents except memory
+  for f in "$SRC_DIR/.agents/"*; do
+    basename_f=$(basename "$f")
+    if [ "$basename_f" != "memory" ]; then
+      cp -R -n "$f" "$TARGET_ABS/.agents/"
+    fi
+  done
+  
+  # Initialize clean memory folder in target
+  mkdir -p "$TARGET_ABS/.agents/memory/decisions"
+  if [ -d "$SRC_DIR/.agents/memory/templates" ]; then
+    for t in "$SRC_DIR/.agents/memory/templates/"*.template; do
+      [ -f "$t" ] || continue
+      filename_t=$(basename "$t" .template)
+      cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
+    done
+  fi
+
   cp -n "$SRC_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
   cp -n "$SRC_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
   
@@ -70,8 +88,24 @@ else
     exit 1
   fi
   
-  # Copy files
-  cp -R -n "$EXTRACTED_DIR/.agents/"* "$TARGET_ABS/.agents/"
+  # Copy all files and folders under .agents except memory
+  for f in "$EXTRACTED_DIR/.agents/"*; do
+    basename_f=$(basename "$f")
+    if [ "$basename_f" != "memory" ]; then
+      cp -R -n "$f" "$TARGET_ABS/.agents/"
+    fi
+  done
+  
+  # Initialize clean memory folder in target
+  mkdir -p "$TARGET_ABS/.agents/memory/decisions"
+  if [ -d "$EXTRACTED_DIR/.agents/memory/templates" ]; then
+    for t in "$EXTRACTED_DIR/.agents/memory/templates/"*.template; do
+      [ -f "$t" ] || continue
+      filename_t=$(basename "$t" .template)
+      cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
+    done
+  fi
+
   cp -n "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
   cp -n "$EXTRACTED_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
   

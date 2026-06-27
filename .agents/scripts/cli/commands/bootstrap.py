@@ -105,6 +105,23 @@ def copy_core_files():
             except Exception:
                 pass
 
+    # Initialize clean memory folder
+    target_mem = os.path.join(target_root, ".agents/memory")
+    os.makedirs(os.path.join(target_mem, "decisions"), exist_ok=True)
+    
+    # Copy template memory files
+    src_templates = os.path.join(src_root, ".agents/memory/templates")
+    if os.path.exists(src_templates):
+        for file in os.listdir(src_templates):
+            if file.endswith(".template"):
+                src_file = os.path.join(src_templates, file)
+                dest_file = os.path.join(target_mem, file[:-9])  # remove .template suffix
+                if not os.path.exists(dest_file):
+                    try:
+                        shutil.copy2(src_file, dest_file)
+                    except Exception:
+                        pass
+
 def run(args):
     print("==========================================================")
     print("   Antigravity V2 Project Bootstrapper                    ")

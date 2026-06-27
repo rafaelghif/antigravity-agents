@@ -1,0 +1,18 @@
+# Project Architecture Ledger
+
+This document summarizes the layout, design philosophy, and system topology of the project.
+
+## 1. System Topology
+
+Describe your system components, architecture (e.g. Clean, MVC, Layered), databases, and external service integrations here.
+
+## 2. Directory Map
+
+Provide a high-level map of key directories:
+- `/src`: Core application code.
+- `/.agents`: Agent guidelines, custom skills, and local tracking.
+
+## 3. Decisions & ADR Registry
+
+All major design decisions should be recorded as ADRs under `/.agents/memory/decisions/` and registered below:
+- (No ADRs registered yet)
