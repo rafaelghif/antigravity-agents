@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.30.0] - 2026-06-27
+
+### 🚀 Features
+- Design & Task Specification (ISSUE-054)
+
+### 📝 Documentation
+- add projects.json and contract-synchronization skill for monorepos
+
+
 ## [2.29.0] - 2026-06-27
 
 ### 🚀 Features

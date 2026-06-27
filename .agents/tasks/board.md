@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Refactor changelog generator to improve SemVer safety, boundary resolution, and issue classification (feat/issue-054) <!-- id: issue-054 -->
 - [x] Implement monorepo multi-project support and API contract synchronization (feat/issue-053) <!-- id: issue-053 -->
 - [x] Implement self-learning mechanism and plug-and-play stack adaptation (feat/issue-052) <!-- id: issue-052 -->
 - [x] Optimize token efficiency, remove E2E testing, and fix SemVer branch bump (feat/issue-051) <!-- id: issue-051 -->
