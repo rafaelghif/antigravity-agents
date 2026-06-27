@@ -125,5 +125,40 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertIn("FallbackProject", content)
             self.assertIn("Python (CLEAN)", content)
 
+    def test_read_template(self, mock_input):
+        src_root = os.path.abspath(os.path.join(os.path.dirname(bootstrap.__file__), "../../../../"))
+        
+        # Verify python_requirements.txt template reads correctly
+        req_template = bootstrap.read_template(src_root, "python_requirements.txt.template")
+        self.assertIn("pytest", req_template)
+        
+        # Verify fallback for missing file
+        missing_template = bootstrap.read_template(src_root, "non_existent.template", "fallback_content")
+        self.assertEqual(missing_template, "fallback_content")
+
+    @patch('shutil.copy2')
+    @patch('os.makedirs')
+    @patch('os.path.exists')
+    @patch('os.walk')
+    def test_copy_core_files_exclusions(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
+        # Setup mock for os.walk
+        mock_exists.side_effect = lambda path: False if "valid.py" in path or "git_profiles" in path or "locks.json" in path or "cached.pyc" in path else True
+        mock_walk.return_value = [
+            ('/src/root/.agents/scripts', ['__pycache__', 'valid_dir'], ['git_profiles.json', 'locks.json', 'valid.py', 'cached.pyc'])
+        ]
+        
+        bootstrap.copy_core_files()
+        
+        # Verify copy2 was called for valid.py but NOT for git_profiles.json, locks.json, or cached.pyc
+        # Filter mock calls
+        copied_files = []
+        for call_args in mock_copy2.call_args_list:
+            copied_files.append(os.path.basename(call_args[0][0]))
+            
+        self.assertIn("valid.py", copied_files)
+        self.assertNotIn("git_profiles.json", copied_files)
+        self.assertNotIn("locks.json", copied_files)
+        self.assertNotIn("cached.pyc", copied_files)
+
 if __name__ == '__main__':
     unittest.main()

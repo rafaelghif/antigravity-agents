@@ -7,7 +7,8 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
-- [/] Remediate technical debt in issue CLI, validation guard, and bootstrap scripts (feat/issue-040) <!-- id: issue-040 -->
+- [/] Retrieve bootstrapper templates from Git and exclude private/unimportant files during installation/injection (feat/issue-041) <!-- id: issue-041 -->
+- [x] Remediate technical debt in issue CLI, validation guard, and bootstrap scripts (feat/issue-040) <!-- id: issue-040 -->
 - [x] Automatically publish GitHub Release Draft during release bump (feat/issue-039) <!-- id: issue-039 -->
 - [x] Fix CI verify workflow cache dependency path error (feat/issue-038) <!-- id: issue-038 -->
 - [x] Validate GPG signing key validity during profile switch (feat/issue-037) <!-- id: issue-037 -->
