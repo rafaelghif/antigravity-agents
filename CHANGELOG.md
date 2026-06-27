@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.54.0] - 2026-06-27
+
+### 🚀 Features
+- Implement Automated SSH Key Generation for Developer Profiles (ISSUE-075)
+
+
 ## [2.53.0] - 2026-06-27
 
 ### 🚀 Features
