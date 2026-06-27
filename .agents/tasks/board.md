@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Commit README installation command updates (feat/issue-063) <!-- id: issue-063 -->
 - [x] Fix Windows installation execution policy error (feat/issue-062) <!-- id: issue-062 -->
 - [x] Enforce remote Git source download by default during installation (feat/issue-061) <!-- id: issue-061 -->
 - [x] Improve CLI helper UI, add help commands, and projects.json sample (feat/issue-060) <!-- id: issue-060 -->
