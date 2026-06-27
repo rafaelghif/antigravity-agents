@@ -4,12 +4,14 @@
       "name": "corporate-work",
       "email": "developer@company.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...",
+      "ssh_key_path": "~/.ssh/id_ed25519_corp",
       "active": true
     },
     {
       "name": "personal-github",
       "email": "dev.personal@gmail.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAJ...",
+      "ssh_key_path": "~/.ssh/id_ed25519_personal",
       "active": false
     }
   ]

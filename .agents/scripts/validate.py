@@ -208,8 +208,19 @@ def audit_secrets_and_ignored_files() -> bool:
                     with open(profiles_path, 'w', encoding='utf-8') as f:
                         json.dump(data, f, indent=2)
                     print_ok(f"Auto-switched active profile in git_profiles.json to '{matching_profile.get('name')}' to match Git config.")
+                    matching_profile = next((p for p in profiles if p.get("email") == current_email), None)
                 else:
                     print_ok(f"Git Config Email matches active profile '{matching_profile.get('name')}' ({current_email}).")
+                
+                # Verify SSH key path if present
+                ssh_key = matching_profile.get("ssh_key_path") if matching_profile else None
+                if ssh_key:
+                    ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
+                    if not os.path.exists(ssh_key_abs):
+                        print_err(f"SSH private key file not found for profile '{matching_profile.get('name')}': '{ssh_key_abs}'")
+                        failed = True
+                    else:
+                        print_ok(f"SSH private key path verified for profile '{matching_profile.get('name')}'.")
             else:
                 # Check if there are any user defined profiles (non-placeholder)
                 placeholders = {"developer@company.com", "dev.personal@gmail.com"}

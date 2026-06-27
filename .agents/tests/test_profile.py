@@ -72,10 +72,12 @@ class TestProfileCommand(unittest.TestCase):
         self.assertTrue(any("user.name" in cmd and "p2" in cmd for cmd in sub_calls))
         self.assertTrue(any("user.email" in cmd and "p2@test.com" in cmd for cmd in sub_calls))
 
+    @patch('os.path.exists')
     @patch('subprocess.run')
     @patch('profile.load_profiles')
     @patch('profile.save_profiles')
-    def test_handle_switch_with_ssh_key(self, mock_save, mock_load, mock_sub):
+    def test_handle_switch_with_ssh_key(self, mock_save, mock_load, mock_sub, mock_exists):
+        mock_exists.return_value = True
         mock_load.return_value = {
             "profiles": [
                 {"name": "p1", "email": "p1@test.com", "active": True},

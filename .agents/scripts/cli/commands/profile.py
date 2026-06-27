@@ -115,7 +115,8 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
             
         ssh_key = profile.get("ssh_key_path")
         if ssh_key:
-            subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i {ssh_key} -o IdentitiesOnly=yes'], check=True)
+            ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
+            subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i "{ssh_key_abs}" -o IdentitiesOnly=yes'], check=True)
         else:
             subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
             
@@ -152,6 +153,14 @@ def handle_switch(args: List[str]) -> None:
         print_err(f"Profile '{target_name}' not found.")
         sys.exit(1)
         
+    ssh_key = target_profile.get("ssh_key_path")
+    if ssh_key:
+        ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
+        if not os.path.exists(ssh_key_abs):
+            print_err(f"SSH private key file not found at '{ssh_key_abs}'.")
+            sys.exit(1)
+        print_ok(f"SSH private key verified at '{ssh_key_abs}'.")
+
     signing_key = target_profile.get("signing_key")
     if signing_key and not signing_key.endswith("...") and not force_no_gpg:
         print(f"Validating GPG signing key '{signing_key}'...")
@@ -197,21 +206,34 @@ def validate_email(email: str) -> bool:
 def handle_add(args: List[str]) -> None:
     """Add a new profile to JSON configuration."""
     if len(args) < 2:
-        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--switch|-s]")
+        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--switch|-s]")
         sys.exit(1)
         
     name = args[0]
     email = args[1]
     
     signing_key = None
+    ssh_key_path = None
     switch_after = False
     
-    remaining_args = args[2:]
-    for arg in remaining_args:
+    i = 2
+    while i < len(args):
+        arg = args[i]
         if arg in ('--switch', '-s'):
             switch_after = True
+            i += 1
+        elif arg == '--ssh-key':
+            if i + 1 < len(args):
+                ssh_key_path = args[i+1]
+                i += 2
+            else:
+                print_err("Error: --ssh-key requires a path argument.")
+                sys.exit(1)
         elif not arg.startswith('-'):
             signing_key = arg
+            i += 1
+        else:
+            i += 1
             
     if not validate_name(name):
         print_err(f"Invalid profile name '{name}'. Only alphanumeric, hyphens, and underscores allowed.")
@@ -236,6 +258,8 @@ def handle_add(args: List[str]) -> None:
     }
     if signing_key:
         new_profile["signing_key"] = signing_key
+    if ssh_key_path:
+        new_profile["ssh_key_path"] = ssh_key_path
         
     profiles.append(new_profile)
     data["profiles"] = profiles
