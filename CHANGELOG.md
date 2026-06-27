@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.57.0] - 2026-06-27
+
+### 🚀 Features
+- Implement DX Improvements (Doctor, Upgrade, Global Launcher, Completion, Docs) (ISSUE-078)
+
+
 ## [2.56.0] - 2026-06-27
 
 ### 🚀 Features

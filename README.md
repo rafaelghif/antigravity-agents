@@ -63,6 +63,71 @@ AAC V2 provides a unified command dispatcher wrapper `./helper.sh` (Linux/macOS)
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer version. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries in `architecture.md`. |
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons, post-mortems, and solutions directly to `lessons-learned.md`. |
+| **`doctor`** | `./helper.sh doctor` | Diagnostics doctor that verifies host environment health, identity setups, and network checks. |
+| **`upgrade`** | `./helper.sh upgrade` | Auto-upgrades agent core scripts and templates from the official repository. |
+| **`completion`** | `./helper.sh completion <bash/zsh>` | Generates terminal tab-completion configurations. |
+| **`install-global`**| `./helper.sh install-global` | Installs the global wrapper launcher command `aac` into the user PATH. |
+
+---
+
+## 🌐 Global Wrapper Installation (`aac`)
+
+To run Antigravity Agent Core commands globally from any subdirectory inside your project workspace (instead of writing `./helper.sh` or relative paths), install the global launcher alias:
+
+1. **Install launcher wrapper**:
+   ```bash
+   ./helper.sh install-global
+   ```
+2. **Path Setup**:
+   * **Linux/macOS**: If `~/.local/bin` is not in your environment PATH, add this line to your shell configuration (`~/.bashrc` or `~/.zshrc`):
+     ```bash
+     export PATH="$HOME/.local/bin:$PATH"
+     ```
+   * **Windows**: If not present, run this in PowerShell:
+     ```powershell
+     [Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$HOME\.local\bin', 'User')
+     ```
+3. **Usage**:
+   Once registered, run any command globally:
+   ```bash
+   aac validate
+   aac profile list
+   ```
+
+---
+
+## ⌨️ Shell Tab-Completion Integration
+
+Speed up command invocation with tab completion for Bash and Zsh:
+
+### For Bash:
+1. Append the completion script output to your `~/.bashrc`:
+   ```bash
+   aac completion bash >> ~/.bashrc
+   ```
+2. Source your shell configuration:
+   ```bash
+   source ~/.bashrc
+   ```
+
+### For Zsh:
+1. Create a completion directory in your user home:
+   ```zsh
+   mkdir -p ~/.zsh/completion
+   ```
+2. Redirect the completion script to a file prefixed with `_`:
+   ```zsh
+   aac completion zsh > ~/.zsh/completion/_aac
+   ```
+3. Add the completion path to your `~/.zshrc` before calling `compinit`:
+   ```zsh
+   fpath=(~/.zsh/completion $fpath)
+   autoload -U compinit || compinit
+   ```
+4. Restart your terminal or source your profile:
+   ```zsh
+   source ~/.zshrc
+   ```
 
 ---
 
