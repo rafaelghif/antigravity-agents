@@ -19,6 +19,14 @@ class TestUpgradeFlow(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def test_installer_upgrade_backup(self):
+        # Check if bash is available and working
+        try:
+            res = subprocess.run(['bash', '-c', 'exit 0'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if res.returncode != 0:
+                self.skipTest("bash shell is not working on this system")
+        except (FileNotFoundError, subprocess.SubprocessError):
+            self.skipTest("bash shell is not available on this system")
+
         # 1. Create a dummy old installation in target
         old_agents_dir = os.path.join(self.test_dir, ".agents")
         os.makedirs(old_agents_dir, exist_ok=True)
