@@ -112,5 +112,18 @@ class TestBootstrapCommand(unittest.TestCase):
         with self.assertRaises(SystemExit):
             bootstrap.run(["TestInvalid", "python", "monolith"])
 
+    @patch('os.path.exists')
+    def test_bootstrap_agents_md_fallback(self, mock_exists, mock_input):
+        # Mock exists to return False for source AGENTS.md but handle other checks
+        from genericpath import exists as real_exists
+        mock_exists.side_effect = lambda path: False if "AGENTS.md" in path and ("scripts" in path or ".." in path) else real_exists(path)
+        
+        bootstrap.run(["FallbackProject", "python", "clean"])
+        self.assertTrue(os.path.exists("AGENTS.md"))
+        with open("AGENTS.md", 'r') as f:
+            content = f.read()
+            self.assertIn("FallbackProject", content)
+            self.assertIn("Python (CLEAN)", content)
+
 if __name__ == '__main__':
     unittest.main()

@@ -141,5 +141,38 @@ class TestValidate(unittest.TestCase):
         m_post_status.assert_any_call("dummy-sha-12345", "pending", description="Running AAC V2 Validation Guard...")
         m_post_status.assert_any_call("dummy-sha-12345", "success", description="AAC V2 Validation Guard passed successfully!")
 
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('sys.argv', ['validate.py', '--skip-subtasks'])
+    def test_audit_git_branch_alignment_with_skip_subtasks_flag(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-040"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "---\nid: issue-040\n---\n## Tasks\n- [ ] Task 1\n"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch.dict('os.environ', {'SKIP_SUBTASK_AUDIT': 'true'})
+    def test_audit_git_branch_alignment_with_skip_subtasks_env(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-040"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "---\nid: issue-040\n---\n## Tasks\n- [ ] Task 1\n"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('sys.argv', ['validate.py'])
+    def test_audit_git_branch_alignment_fails_with_unresolved_subtasks(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-040"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "---\nid: issue-040\n---\n## Tasks\n- [ ] Task 1\n"
+        self.assertFalse(validate.audit_git_branch_alignment())
+
 if __name__ == '__main__':
     unittest.main()
