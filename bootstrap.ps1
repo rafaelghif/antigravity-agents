@@ -32,10 +32,10 @@ if (Test-Path $SrcTemplates) {
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md") {
     if (Get-Command python -ErrorAction SilentlyContinue) {
-        python -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.47.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.47.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+        python -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.49.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.49.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
         Write-Host "Synchronized AGENTS.md version."
     } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-        python3 -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.47.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.47.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+        python3 -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.49.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.49.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
         Write-Host "Synchronized AGENTS.md version."
     }
 }
@@ -66,7 +66,11 @@ else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
 "@
-    $PreCommitPath = [System.IO.Path]::GetFullPath(".git/hooks/pre-commit")
+    $HooksDir = Join-Path (Get-Location).Path ".git/hooks"
+    if (-not (Test-Path $HooksDir)) {
+        New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
+    }
+    $PreCommitPath = Join-Path $HooksDir "pre-commit"
     [System.IO.File]::WriteAllText($PreCommitPath, $PreCommitContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git pre-commit hook."
 
@@ -98,7 +102,7 @@ if [[ ! "`$COMMIT_MSG" =~ `$ID_REGEX ]]; then
   exit 1
 fi
 "@
-    $CommitMsgPath = [System.IO.Path]::GetFullPath(".git/hooks/commit-msg")
+    $CommitMsgPath = Join-Path $HooksDir "commit-msg"
     [System.IO.File]::WriteAllText($CommitMsgPath, $CommitMsgContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git commit-msg hook."
 }
