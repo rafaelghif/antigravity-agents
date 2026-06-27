@@ -7,7 +7,6 @@ This board tracks active development tasks for AAC V2.
 - [ ] Add CLI unit testing suite (`test/cli-v2`)
 
 ## Doing
-- [/] Implement V2 CLI and bootstrap logic (`feat/issue-010-cli-v2`) <!-- id: issue-010 -->
 
 ## Done
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`)
@@ -20,3 +19,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Enforce strict workspace-level configuration and remove global config dependency (`feat/workspace-only`) <!-- id: task-007 -->
 - [x] Implement dynamic workspace synchronization and validation check (`feat/sync-validate`) <!-- id: task-008 -->
 - [x] Implement subtask checkbox compliance check and tasking design capture skill playbook (`feat/tasking-spec`) <!-- id: task-009 -->
+- [x] Implement V2 CLI and bootstrap logic (`feat/issue-010-cli-v2`) <!-- id: issue-010 -->
