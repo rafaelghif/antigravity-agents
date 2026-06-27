@@ -7,6 +7,7 @@ Write-Host "==========================================================" -Foregro
 $Dirs = @(
     ".agents/memory/decisions",
     ".agents/tasks",
+    ".agents/issues",
     ".agents/skills/review",
     ".agents/skills/adr-writer",
     ".agents/skills/debugging",

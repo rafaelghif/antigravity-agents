@@ -8,6 +8,7 @@ echo "=========================================================="
 # 1. Create directories
 mkdir -p .agents/memory/decisions
 mkdir -p .agents/tasks
+mkdir -p .agents/issues
 mkdir -p .agents/skills/review
 mkdir -p .agents/skills/adr-writer
 mkdir -p .agents/skills/debugging

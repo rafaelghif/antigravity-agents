@@ -18,6 +18,9 @@
 - **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.
 - **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.
 - **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications.
+- **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
+- **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
+- **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
 
 ## 3. Context map — what loads when
 

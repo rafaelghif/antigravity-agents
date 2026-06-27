@@ -16,3 +16,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement enterprise-grade features (auto-recon script, architectural blueprints, security auditing, CI/CD) (`feat/enterprise-features`) <!-- id: task-003 -->
 - [x] Standardize multi-language bootstrap templates (PHP, Node, C#, CSS/Tailwind) (`feat/bootstrap-v2`) <!-- id: task-004 -->
 - [x] Add offline validation guard and local Git hook automation (`feat/validation-guard`) <!-- id: task-005 -->
+- [x] Implement strict Git branch and local Issue validation gates (`feat/issue-gates`) <!-- id: task-006 -->
