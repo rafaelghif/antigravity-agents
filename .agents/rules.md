@@ -16,3 +16,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Every new feature or command module MUST have corresponding unit tests under `tests/`.
 - Tests must use standard `unittest` or `pytest` frameworks.
 - Mock all filesystem or external command calls to ensure tests remain deterministic and fast.
+
+## 4. Plug-and-Play Adaptation & Self-Learning
+- **Stack Adaptiveness**: The agent layout is project-agnostic. Use `bootstrap.py` to auto-detect and support any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) without strict folder structure constraints.
+- **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work.

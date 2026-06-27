@@ -104,9 +104,9 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertIn("phpunit", content)
 
     def test_bootstrap_invalid_args(self, mock_input):
-        # Invalid stack
+        # Empty stack name
         with self.assertRaises(SystemExit):
-            bootstrap.run(["TestInvalid", "ruby", "clean"])
+            bootstrap.run(["TestInvalid", "", "clean"])
 
         # Invalid architecture
         with self.assertRaises(SystemExit):
