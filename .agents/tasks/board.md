@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Validate GPG signing key validity during profile switch (feat/issue-037) <!-- id: issue-037 -->
 - [x] Fix git_api import path bug and implement CI commit status reporting (feat/issue-036) <!-- id: issue-036 -->
 - [x] Improve auto-reconnaissance system to generate structured recommendations report (feat/issue-035) <!-- id: issue-035 -->
 - [x] Implement structured changelog categorization and repository-isolated SSH key rotation (feat/issue-034) <!-- id: issue-034 -->
