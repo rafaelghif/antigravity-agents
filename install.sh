@@ -34,13 +34,26 @@ mkdir -p "$TARGET_ABS/.agents"
 if [ -d "$SRC_DIR/.agents" ]; then
   echo "Using local source files from: $SRC_DIR"
   
-  # Copy all files and folders under .agents except memory
-  for f in "$SRC_DIR/.agents/"*; do
-    basename_f=$(basename "$f")
-    if [ "$basename_f" != "memory" ]; then
-      cp -R -n "$f" "$TARGET_ABS/.agents/"
-    fi
-  done
+  # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc
+  (
+    cd "$SRC_DIR"
+    find .agents -type f \
+      ! -path "*/__pycache__/*" \
+      ! -path "*/.git/*" \
+      ! -name "git_profiles.json" \
+      ! -name "locks.json" \
+      ! -name ".DS_Store" \
+      ! -name "*.pyc" \
+      ! -name "*.pyo" \
+      ! -path ".agents/memory/*" \
+      -exec sh -c '
+        for file; do
+          dest_file="'"$TARGET_ABS"'/$file"
+          mkdir -p "$(dirname "$dest_file")"
+          cp -n "$file" "$dest_file" 2>/dev/null || true
+        done
+      ' _ {} +
+  )
   
   # Initialize clean memory folder in target
   mkdir -p "$TARGET_ABS/.agents/memory/decisions"
@@ -100,13 +113,26 @@ else
     exit 1
   fi
   
-  # Copy all files and folders under .agents except memory
-  for f in "$EXTRACTED_DIR/.agents/"*; do
-    basename_f=$(basename "$f")
-    if [ "$basename_f" != "memory" ]; then
-      cp -R -n "$f" "$TARGET_ABS/.agents/"
-    fi
-  done
+  # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc
+  (
+    cd "$EXTRACTED_DIR"
+    find .agents -type f \
+      ! -path "*/__pycache__/*" \
+      ! -path "*/.git/*" \
+      ! -name "git_profiles.json" \
+      ! -name "locks.json" \
+      ! -name ".DS_Store" \
+      ! -name "*.pyc" \
+      ! -name "*.pyo" \
+      ! -path ".agents/memory/*" \
+      -exec sh -c '
+        for file; do
+          dest_file="'"$TARGET_ABS"'/$file"
+          mkdir -p "$(dirname "$dest_file")"
+          cp -n "$file" "$dest_file" 2>/dev/null || true
+        done
+      ' _ {} +
+  )
   
   # Initialize clean memory folder in target
   mkdir -p "$TARGET_ABS/.agents/memory/decisions"

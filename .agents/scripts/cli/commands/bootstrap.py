@@ -45,6 +45,19 @@ def create_mvc_architecture(root):
         with open(os.path.join(root, d, "__init__.py"), 'w') as f:
             f.write("")
 
+def read_template(src_root, filename, fallbacks=None):
+    """Read a configuration template from the source directory, falling back if missing."""
+    template_path = os.path.join(src_root, ".agents/templates", filename)
+    if os.path.exists(template_path):
+        try:
+            with open(template_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            pass
+    if fallbacks is not None:
+        return fallbacks
+    return ""
+
 def copy_core_files():
     """Copy all core agent files and skills from the running installation source
     to the target project workspace if they are missing."""
@@ -52,7 +65,7 @@ def copy_core_files():
     
     # Locate the running script's project root (where .agents directory is located)
     # Since this command runs from .agents/scripts/cli/commands/bootstrap.py
-    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     target_root = os.path.abspath(".")
     
     # If target is the same as source, nothing to copy
@@ -61,11 +74,27 @@ def copy_core_files():
         
     print("Copying core agent scripts, skills, and CLI helper tools...")
     
+    def is_ignored(full_path):
+        # Resolve path relative to src_root
+        rel = os.path.relpath(full_path, src_root)
+        parts = rel.replace('\\', '/').split('/')
+        exclude_parts = {'__pycache__', '.git', '.pytest_cache', '.next', '.nuxt', 'node_modules', 'vendor'}
+        if any(p in exclude_parts for p in parts):
+            return True
+        base = os.path.basename(rel)
+        exclude_files = {'git_profiles.json', 'locks.json', '.DS_Store', 'Thumbs.db'}
+        if base in exclude_files:
+            return True
+        if base.endswith(('.pyc', '.pyo')):
+            return True
+        return False
+
     # Directories to copy recursively
     core_dirs = [
         ".agents/scripts",
         ".agents/skills",
         ".agents/workflows",
+        ".agents/templates",
     ]
     
     for d in core_dirs:
@@ -74,12 +103,15 @@ def copy_core_files():
         if os.path.exists(src_dir):
             if os.path.exists(target_dir):
                 # Copy individual files that are missing
-                for root, _, files in os.walk(src_dir):
+                for root, dirs, files in os.walk(src_dir):
+                    dirs[:] = [d_name for d_name in dirs if not is_ignored(os.path.join(root, d_name))]
                     rel_path = os.path.relpath(root, src_dir)
                     dest_folder = os.path.join(target_dir, rel_path)
                     os.makedirs(dest_folder, exist_ok=True)
                     for file in files:
                         src_file = os.path.join(root, file)
+                        if is_ignored(src_file):
+                            continue
                         dest_file = os.path.join(dest_folder, file)
                         if not os.path.exists(dest_file):
                             try:
@@ -88,7 +120,13 @@ def copy_core_files():
                                 pass
             else:
                 try:
-                    shutil.copytree(src_dir, target_dir)
+                    def copytree_ignore(path, names):
+                        ignored = []
+                        for name in names:
+                            if is_ignored(os.path.join(path, name)):
+                                ignored.append(name)
+                        return ignored
+                    shutil.copytree(src_dir, target_dir, ignore=copytree_ignore)
                 except Exception:
                     pass
                 
@@ -166,44 +204,46 @@ def run(args):
     copy_core_files()
 
     # 2. Write Base Configuration Files
+    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
+    
     if stack == "python":
+        req_content = read_template(src_root, "python_requirements.txt.template", "# Project dependencies\npytest\nflake8\n")
         with open("requirements.txt", 'w', encoding='utf-8') as f:
-            f.write("# Project dependencies\npytest\nflake8\n")
+            f.write(req_content)
     elif stack == "node":
+        pkg_content = read_template(src_root, "node_package.json.template", '{\n  "name": "{{NAME}}",\n  "version": "1.0.0",\n  "scripts": {\n    "test": "jest",\n    "lint": "eslint ."\n  }\n}')
+        pkg_content = pkg_content.replace("{{NAME}}", name.lower())
         with open("package.json", 'w', encoding='utf-8') as f:
-            f.write(f'{{\n  "name": "{name.lower()}",\n  "version": "1.0.0",\n  "scripts": {{\n    "test": "jest",\n    "lint": "eslint ."\n  }}\n}}')
+            f.write(pkg_content)
     elif stack == "php":
+        comp_content = read_template(src_root, "php_composer.json.template", '{\n  "name": "dev/{{NAME}}",\n  "require": {},\n  "require-dev": {\n    "phpunit/phpunit": "^9.0"\n  }\n}')
+        comp_content = comp_content.replace("{{NAME}}", name.lower())
         with open("composer.json", 'w', encoding='utf-8') as f:
-            f.write(f'{{\n  "name": "dev/{name.lower()}",\n  "require": {{}},\n  "require-dev": {{\n    "phpunit/phpunit": "^9.0"\n  }}\n}}')
+            f.write(comp_content)
 
-    # 3. Create .gitignore
+    # 3. Create .gitignore and .antigravityignore
     if not os.path.exists(".gitignore"):
+        git_ignore_content = read_template(src_root, "gitignore.template", ".env\n__pycache__/\nnode_modules/\nvendor/\n.pytest_cache/\n.agents/locks.json\n")
         with open(".gitignore", 'w', encoding='utf-8') as f:
-            f.write(".env\n__pycache__/\nnode_modules/\nvendor/\n.pytest_cache/\n.agents/locks.json\n")
+            f.write(git_ignore_content)
+            
+    if not os.path.exists(".antigravityignore"):
+        anti_ignore_content = read_template(src_root, "antigravityignore.template", "")
+        if anti_ignore_content:
+            with open(".antigravityignore", 'w', encoding='utf-8') as f:
+                f.write(anti_ignore_content)
 
     # 4. Generate .agents/schema.md
-    schema_content = f"""# Project Architecture Blueprint: {name}
-
-## 1. Stack Details
-- **Language/Platform**: {stack.capitalize()}
-- **Pattern**: {arch.upper()} Architecture
-
-## 2. Directory Layout
-- `src/`: Core codebase.
-- `tests/`: Unit and integration testing suite.
-
-## 3. Structural Rules
-- Modules must communicate only through defined APIs.
-- Domain entities must have zero external dependencies.
-"""
+    schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n")
+    schema_content = schema_content.replace("{{NAME}}", name).replace("{{STACK}}", stack.capitalize()).replace("{{ARCH}}", arch.upper())
     with open(".agents/schema.md", 'w', encoding='utf-8') as f:
         f.write(schema_content)
     print("Generated '.agents/schema.md' architecture blueprint.")
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.17.0"
-    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+    AAC_VERSION = "2.18.0"
+    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     if not os.path.exists(agents_file):

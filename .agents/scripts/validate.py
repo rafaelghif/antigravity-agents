@@ -522,7 +522,7 @@ def audit_module_locks() -> bool:
 
     failed = False
     for path in staged_files:
-        if path.endswith(('.md', '.json', '.txt', '.sh', '.ps1', '.gitignore', '.antigravityignore', '.example')):
+        if path.endswith(('.md', '.json', '.txt', '.sh', '.ps1', '.gitignore', '.antigravityignore', '.example', '.template')):
             continue
         if "tests/" in path or "plans/" in path or "memory/" in path or "docs/" in path:
             continue

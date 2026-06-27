@@ -1,0 +1,7 @@
+.env
+__pycache__/
+node_modules/
+vendor/
+.pytest_cache/
+.agents/locks.json
+.agents/git_profiles.json
