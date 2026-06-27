@@ -100,6 +100,10 @@ if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR/.agents" ]; then
   
   # Initialize clean memory folder in target
   mkdir -p "$TARGET_ABS/.agents/memory/decisions"
+  mkdir -p "$TARGET_ABS/.agents/memory/blueprints"
+  if [ -d "$SRC_DIR/.agents/memory/blueprints" ]; then
+    cp -r "$SRC_DIR/.agents/memory/blueprints/"* "$TARGET_ABS/.agents/memory/blueprints/" 2>/dev/null || true
+  fi
   if [ -d "$SRC_DIR/.agents/memory/templates" ]; then
     for t in "$SRC_DIR/.agents/memory/templates/"*.template; do
       [ -f "$t" ] || continue
@@ -197,6 +201,10 @@ else
   
   # Initialize clean memory folder in target
   mkdir -p "$TARGET_ABS/.agents/memory/decisions"
+  mkdir -p "$TARGET_ABS/.agents/memory/blueprints"
+  if [ -d "$EXTRACTED_DIR/.agents/memory/blueprints" ]; then
+    cp -r "$EXTRACTED_DIR/.agents/memory/blueprints/"* "$TARGET_ABS/.agents/memory/blueprints/" 2>/dev/null || true
+  fi
   if [ -d "$EXTRACTED_DIR/.agents/memory/templates" ]; then
     for t in "$EXTRACTED_DIR/.agents/memory/templates/"*.template; do
       [ -f "$t" ] || continue
