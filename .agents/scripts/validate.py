@@ -267,11 +267,11 @@ def run_validations():
         import subprocess
         test_cmd = None
         # Default python/pytest testing
-        if os.path.exists("tests") or os.path.exists("test"):
+        if os.path.exists(".agents/tests"):
             if shutil.which("pytest"):
-                test_cmd = ["pytest"]
+                test_cmd = ["pytest", ".agents/tests"]
             else:
-                test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests"]
+                test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", ".agents/tests"]
                 
         if test_cmd:
             print(f"Running test suite: {' '.join(test_cmd)}")
@@ -282,7 +282,7 @@ def run_validations():
             else:
                 print_ok("All unit tests passed successfully.")
         else:
-            print_warn("No test suite directory ('tests/') or runner (pytest/unittest) found.")
+            print_warn("No test suite directory ('.agents/tests/') or runner (pytest/unittest) found.")
             
     print("\n==========================================================")
     if failed:

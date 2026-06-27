@@ -23,12 +23,12 @@ This issue covers implementing unit tests for our V2 CLI command modules under `
 - Mock-based isolation using `unittest.mock` to ensure offline execution under 50ms per test.
 
 ## 2. Implementation Subtasks
-- [ ] Create `.agents/tests/` folder and `__init__.py`.
-- [ ] Implement `.agents/tests/test_lock.py` using mock filesystem.
-- [ ] Implement `.agents/tests/test_issue.py` using mock files.
-- [ ] Implement `.agents/tests/test_commit.py` with mock git shell calls.
-- [ ] Update `validate.py` test suite runner to execute tests from `.agents/tests/`.
+- [x] Create `.agents/tests/` folder and `__init__.py`.
+- [x] Implement `.agents/tests/test_lock.py` using mock filesystem.
+- [x] Implement `.agents/tests/test_issue.py` using mock files.
+- [x] Implement `.agents/tests/test_commit.py` with mock git shell calls.
+- [x] Update `validate.py` test suite runner to execute tests from `.agents/tests/`.
 
 ## 3. Acceptance Criteria
-- [ ] Running `./helper.sh validate` successfully discovers and runs the unit tests.
-- [ ] All unit tests pass cleanly with zero failures.
+- [x] Running `./helper.sh validate` successfully discovers and runs the unit tests.
+- [x] All unit tests pass cleanly with zero failures.
