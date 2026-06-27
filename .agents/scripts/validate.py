@@ -260,10 +260,17 @@ def audit_link_integrity() -> bool:
                     from urllib.parse import unquote
                     base_path = unquote(base_path)
                     
-                    if not clean_path.startswith('/'):
-                        resolved_path = os.path.join(os.path.dirname(f), base_path)
-                    else:
+                    # On Windows, absolute file links might look like /C:/path
+                    # We strip the leading slash if followed by a drive letter (e.g., /C:)
+                    if len(clean_path) >= 3 and clean_path[0] == '/' and clean_path[2] == ':' and clean_path[1].isalpha():
+                        clean_path = clean_path[1:]
+                        base_path = base_path[1:]
+                    
+                    is_absolute = clean_path.startswith('/') or (len(clean_path) >= 2 and clean_path[1] == ':' and clean_path[0].isalpha())
+                    if is_absolute:
                         resolved_path = base_path
+                    else:
+                        resolved_path = os.path.join(os.path.dirname(f), base_path)
                     
                     if resolved_path and not os.path.exists(resolved_path):
                         print_err(f"Broken link in '{f}': linked file '{resolved_path}' does not exist.")

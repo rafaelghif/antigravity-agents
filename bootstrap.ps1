@@ -29,26 +29,34 @@ if (Test-Path $SrcTemplates) {
     }
 }
 
-# 2. Synchronize Version if AGENTS.md exists
-if (Test-Path "AGENTS.md") {
-    if (Get-Command python -ErrorAction SilentlyContinue) {
-        python -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.49.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.49.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
-        Write-Host "Synchronized AGENTS.md version."
-    } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-        python3 -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.49.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.49.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
-        Write-Host "Synchronized AGENTS.md version."
+# 1.2 Detect Python 3 executable
+$PythonExec = ""
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    $Version = & python --version 2>&1
+    if ($Version -match "Python 3") {
+        $PythonExec = "python"
     }
+}
+if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+    $Version = & python3 --version 2>&1
+    if ($Version -match "Python 3") {
+        $PythonExec = "python3"
+    }
+}
+
+# 2. Synchronize Version if AGENTS.md exists
+if (Test-Path "AGENTS.md" -and $PythonExec) {
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.50.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.50.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    Write-Host "Synchronized AGENTS.md version."
 }
 
 # 3. Trigger auto-reconnaissance
 if (Test-Path ".agents/scripts/recon.py") {
     Write-Host "Running auto-reconnaissance scan..."
-    if (Get-Command python -ErrorAction SilentlyContinue) {
-        python .agents/scripts/recon.py
-    } elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-        python3 .agents/scripts/recon.py
+    if ($PythonExec) {
+        & $PythonExec .agents/scripts/recon.py
     } else {
-        Write-Host "Warning: Python not found. Please run .agents/scripts/recon.py manually after installing Python." -ForegroundColor Yellow
+        Write-Host "Warning: Python 3 not found. Please run .agents/scripts/recon.py manually after installing Python 3." -ForegroundColor Yellow
     }
 } else {
     Write-Host "Warning: .agents/scripts/recon.py not found. Skipping auto-reconnaissance." -ForegroundColor Yellow
