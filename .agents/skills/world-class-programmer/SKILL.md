@@ -9,7 +9,19 @@ This playbook establishes the elite engineering standards required for writing, 
 
 ---
 
-## 1. The Code Writer Playbook (Writing High-Quality Code)
+## 1. Pre-Implementation Impact Analysis Protocol
+
+Before writing any code or proposing design decisions, the agent MUST perform a comprehensive Impact Analysis. This critical thinking phase must be documented in the issue specification or shared directly with the user.
+
+### Analysis Structure
+1. **Explore Options**: Propose at least two different implementation approaches (e.g. Option A vs Option B).
+2. **Trade-offs Matrix**: Compare options on complexity, maintainability, dependency footprints, performance, and UI/UX ease-of-use.
+3. **Downstream Impacts**: Evaluate how each option affects other parts of the workspace, future compatibility, prompt cache size, and developer cognitive load.
+4. **Recommendation**: Clearly state the recommended approach and justify why it offers the best balance of robustness and UX/DX simplicity.
+
+---
+
+## 2. The Code Writer Playbook (Writing High-Quality Code)
 
 A world-class code writer transforms ambiguous problems into clean, robust, and self-documenting code.
 

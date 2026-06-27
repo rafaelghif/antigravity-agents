@@ -45,10 +45,11 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 
 ## 4. Working protocol
 1. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`.
-2. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
-3. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
-4. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
-5. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
+2. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `world-class-programmer` playbook) to evaluate long-term maintenance and UI/UX simplicity.
+3. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
+4. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
+5. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
+6. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
 
 ## 5. Git & review
 - Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.
