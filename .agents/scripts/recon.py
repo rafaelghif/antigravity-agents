@@ -126,7 +126,6 @@ def update_agents_md(scan_results):
     with open(agents_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Replace Stack placeholder
     stack_pattern = r'(-\s+\*\*Stack:\*\*)\s+.*'
     replacement = f'\\1 {scan_results["stack"]}'
     new_content = re.sub(stack_pattern, replacement, content)
@@ -144,7 +143,6 @@ def update_rules_md(scan_results):
     with open(rules_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Replace commands in rules
     content = re.sub(r'Use \*\*.*?\*\* (?:for the main product stack|for all CLI scripting)\.?', f'Use **{scan_results["stack"]}** for the main product stack.', content)
     content = re.sub(r'test command is: `.*?`\.|test command before.*', f'test command is: `{scan_results["test_command"]}`.', content)
     

@@ -25,15 +25,15 @@ This issue specifies the modular implementation of the Python CLI suite and boot
 - `helper.sh` (POSIX) and `helper.ps1` (Windows) in root acting as outer wrappers calling `python3 .agents/scripts/cli/helper.py`.
 
 ## 2. Implementation Subtasks
-- [ ] Create `.agents/scripts/cli/helper.py` entry parser.
-- [ ] Implement `.agents/scripts/cli/commands/lock.py` for locking modules.
-- [ ] Implement `.agents/scripts/cli/commands/validate.py` (importing from our validation script).
-- [ ] Implement `.agents/scripts/cli/commands/sync.py` (importing from our sync script).
-- [ ] Implement `.agents/scripts/cli/commands/issue.py` (issue lifecycle: create, list, checkout, close).
-- [ ] Implement `.agents/scripts/cli/commands/commit.py` (git profiles round-robin config switching).
-- [ ] Create wrapper scripts `helper.sh` and `helper.ps1` at workspace root.
+- [x] Create `.agents/scripts/cli/helper.py` entry parser.
+- [x] Implement `.agents/scripts/cli/commands/lock.py` for locking modules.
+- [x] Implement `.agents/scripts/cli/commands/validate.py` (importing from our validation script).
+- [x] Implement `.agents/scripts/cli/commands/sync.py` (importing from our sync script).
+- [x] Implement `.agents/scripts/cli/commands/issue.py` (issue lifecycle: create, list, checkout, close).
+- [x] Implement `.agents/scripts/cli/commands/commit.py` (git profiles round-robin config switching).
+- [x] Create wrapper scripts `helper.sh` and `helper.ps1` at workspace root.
 
 ## 3. Acceptance Criteria
-- [ ] Running `./helper.sh validate` passes validation tests.
-- [ ] Running `./helper.sh issue list` displays all active issues.
-- [ ] Commits made via `./helper.sh commit` automatically swap git profile configurations.
+- [x] Running `./helper.sh validate` passes validation tests.
+- [x] Running `./helper.sh issue list` displays all active issues.
+- [x] Commits made via `./helper.sh commit` automatically swap git profile configurations.
