@@ -15,6 +15,11 @@ All notable changes to this project will be documented in this file.
 
 ## [2.22.0] - 2026-06-27
 
+- No notable changes.
+
+
+## [2.22.0] - 2026-06-27
+
 ### 🚀 Features
 - Enforce prompt-level loop guard in `AGENTS.md` and `debugging/SKILL.md` to prevent agent infinite loops.
 

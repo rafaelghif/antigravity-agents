@@ -31,6 +31,9 @@
 - **ALWAYS** copy `.agents/git_profiles.example` to `.agents/git_profiles.json` during environment initialization to set up local identity rotation, and verify the `.json` file is never staged or committed.
 - **ALWAYS** run the changelog generator command (`./helper.sh changelog`) before closing issues or completing tasks to ensure the release history in `CHANGELOG.md` is strictly updated.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck in a loop, immediately halt and prompt the USER for manual intervention.
+- **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.
+- **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.
+- **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.
 
 ## 3. CLI Helper Commands Reference
 All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):

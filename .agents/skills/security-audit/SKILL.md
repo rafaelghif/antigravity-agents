@@ -23,3 +23,11 @@ This playbook outlines steps for auditing code changes against security guidelin
 ## 3. Deployment Security
 - **Least Privilege**: Ensure network egress rules and API scopes are restricted to the bare minimum required for operations.
 - **Secure Storage**: Sensitive configuration details must be fetched at runtime from secure environment stores (e.g. AWS Secrets Manager, GitHub Secrets) rather than baked into deployment images.
+
+## 4. Exploit Prevention & Code Transparency
+
+To guarantee that the agent installation is secure and does not compromise target repositories:
+- **No Backdoors**: Never write code that bypasses authentication, provides unauthorized backdoors, or modifies files outside the designated project boundaries.
+- **Supply Chain Security**: Only install packages or libraries that are sourced from official registries (e.g. PyPI, npm) and are pinned to secure, known version hashes.
+- **Code Transparency**: Deployed code must be clean, well-commented, human-readable, and completely free of obfuscation, dynamic execution (`eval()`), or unverified binary blobs.
+- **Restricted System Access**: All installer scripts and validation hooks must perform operations strictly inside the workspace directory, preventing any interaction with user global home settings or non-workspace files.

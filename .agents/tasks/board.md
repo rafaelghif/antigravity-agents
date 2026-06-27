@@ -7,7 +7,8 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
-- [/] Implement installer prerequisite audits for Git, Python 3, and network connectivity (feat/issue-047) <!-- id: issue-047 -->
+- [/] Enforce strict security, exploit prevention, and code safety validation rules (feat/issue-048) <!-- id: issue-048 -->
+- [x] Implement installer prerequisite audits for Git, Python 3, and network connectivity (feat/issue-047) <!-- id: issue-047 -->
 - [x] Fix changelog boundary commit resolution and clean up duplicated changelog entries (feat/issue-046) <!-- id: issue-046 -->
 - [x] Enforce prompt-level loop guard to prevent agent infinite loops (feat/issue-045) <!-- id: issue-045 -->
 - [x] Implement enterprise-grade Observability & Logging skill playbook (feat/issue-044) <!-- id: issue-044 -->
