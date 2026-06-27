@@ -100,3 +100,31 @@ def fetch_github_issues() -> Optional[list]:
     except Exception as e:
         print(f"[WARN] Failed to fetch remote GitHub issues: {e}", file=sys.stderr)
     return None
+
+def post_commit_status(sha: str, state: str, target_url: str = "", description: str = "", context: str = "AAC Validation Guard") -> bool:
+    """Post a validation status back to GitHub commit."""
+    pat = get_pat()
+    repo = get_repo_info()
+    if not pat or not repo or not sha:
+        return False
+        
+    url = f"https://api.github.com/repos/{repo}/statuses/{sha}"
+    headers = {
+        "Authorization": f"Bearer {pat}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "Antigravity-Agent-Core"
+    }
+    payload = {
+        "state": state, # pending, success, error, failure
+        "target_url": target_url,
+        "description": description,
+        "context": context
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as res:
+            return res.status == 201
+    except Exception as e:
+        print(f"[FAIL] Failed to post commit status: {e}", file=sys.stderr)
+    return False

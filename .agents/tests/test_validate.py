@@ -118,5 +118,28 @@ class TestValidate(unittest.TestCase):
         mock_file_open.return_value.read.return_value = '{"validate": "feat/issue-032"}'
         self.assertTrue(validate.audit_module_locks())
 
+    @patch('os.getenv')
+    @patch('validate.get_commit_sha')
+    @patch('git_api.post_commit_status')
+    @patch('sys.exit')
+    @patch('validate.audit_critical_files', return_value=True)
+    @patch('validate.audit_secrets_and_ignored_files', return_value=True)
+    @patch('validate.audit_link_integrity', return_value=True)
+    @patch('validate.audit_git_branch_alignment', return_value=True)
+    @patch('validate.audit_workspace_sync', return_value=True)
+    @patch('validate.audit_task_board_schema', return_value=True)
+    @patch('validate.audit_static_linting', return_value=True)
+    @patch('validate.audit_unit_tests', return_value=True)
+    @patch('validate.audit_module_locks', return_value=True)
+    def test_run_validations_in_ci(self, m_lock, m_test, m_lint, m_schema, m_sync, m_branch, m_link, m_secrets, m_crit, m_exit, m_post_status, m_sha, m_getenv):
+        m_getenv.side_effect = lambda k: "true" if k in ("CI", "GITHUB_ACTIONS") else None
+        m_sha.return_value = "dummy-sha-12345"
+        
+        validate.run_validations()
+        
+        # Verify post_commit_status was called with success
+        m_post_status.assert_any_call("dummy-sha-12345", "pending", description="Running AAC V2 Validation Guard...")
+        m_post_status.assert_any_call("dummy-sha-12345", "success", description="AAC V2 Validation Guard passed successfully!")
+
 if __name__ == '__main__':
     unittest.main()

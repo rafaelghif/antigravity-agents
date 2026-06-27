@@ -1,6 +1,11 @@
 import sys
 import os
 import re
+
+# Inject parent directory containing git_api
+scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if scripts_dir not in sys.path:
+    sys.path.insert(0, scripts_dir)
 import subprocess
 from datetime import datetime
 
