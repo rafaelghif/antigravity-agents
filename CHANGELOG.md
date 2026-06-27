@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.49.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-070)
+
+### 🐛 Bug Fixes
+- resolve hooks destination relative to PowerShell active directory context
+- fix python syntax error on windows and unit test compatibility
+
+
+## [2.48.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-070)
+
+### 🐛 Bug Fixes
+- fix python syntax error on windows and unit test compatibility
+
+
 ## [2.47.0] - 2026-06-27
 
 ### 🚀 Features
