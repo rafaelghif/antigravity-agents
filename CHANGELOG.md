@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.53.0] - 2026-06-27
+
+### 🚀 Features
+- Implement Git HTTPS Credentials Rotation Integration (ISSUE-074)
+
+
 ## [2.52.0] - 2026-06-27
 
 ### 🚀 Features

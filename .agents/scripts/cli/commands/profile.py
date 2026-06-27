@@ -120,6 +120,14 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
         else:
             subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
             
+        git_token = profile.get("git_token")
+        if git_token and not git_token.startswith("ghp_corporateToken") and not git_token.startswith("ghp_personalToken"):
+            helper_py = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
+            python_exe = sys.executable
+            subprocess.run(['git', 'config', '--local', 'credential.helper', f'!"{python_exe}" "{helper_py}" profile credential-helper'], check=True)
+        else:
+            subprocess.run(['git', 'config', '--local', '--unset', 'credential.helper'], stderr=subprocess.DEVNULL)
+            
         print_ok(f"Applied Git Profile to local config: '{name}' <{email}>")
     except subprocess.CalledProcessError as e:
         print_err(f"Failed to apply local Git configuration: {e}")
@@ -206,7 +214,7 @@ def validate_email(email: str) -> bool:
 def handle_add(args: List[str]) -> None:
     """Add a new profile to JSON configuration."""
     if len(args) < 2:
-        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--switch|-s]")
+        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--switch|-s]")
         sys.exit(1)
         
     name = args[0]
@@ -214,6 +222,7 @@ def handle_add(args: List[str]) -> None:
     
     signing_key = None
     ssh_key_path = None
+    git_token = None
     switch_after = False
     
     i = 2
@@ -228,6 +237,13 @@ def handle_add(args: List[str]) -> None:
                 i += 2
             else:
                 print_err("Error: --ssh-key requires a path argument.")
+                sys.exit(1)
+        elif arg == '--git-token':
+            if i + 1 < len(args):
+                git_token = args[i+1]
+                i += 2
+            else:
+                print_err("Error: --git-token requires a token argument.")
                 sys.exit(1)
         elif not arg.startswith('-'):
             signing_key = arg
@@ -260,6 +276,8 @@ def handle_add(args: List[str]) -> None:
         new_profile["signing_key"] = signing_key
     if ssh_key_path:
         new_profile["ssh_key_path"] = ssh_key_path
+    if git_token:
+        new_profile["git_token"] = git_token
         
     profiles.append(new_profile)
     data["profiles"] = profiles
@@ -268,6 +286,45 @@ def handle_add(args: List[str]) -> None:
     
     if switch_after:
         handle_switch([name])
+
+def handle_credential_helper(args: List[str]) -> None:
+    """Implement Git Credential Helper protocol to dynamically rotate HTTPS tokens."""
+    if not args:
+        sys.exit(0)
+        
+    action = args[0].lower()
+    if action == "get":
+        query = {}
+        for line in sys.stdin:
+            line = line.strip()
+            if not line:
+                break
+            if "=" in line:
+                k, v = line.split("=", 1)
+                query[k] = v
+                
+        data = load_profiles()
+        profiles = data.get("profiles", [])
+        active_profile = next((p for p in profiles if p.get("active")), None)
+        
+        if active_profile:
+            token = active_profile.get("git_token")
+            if not token:
+                token = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
+                
+            if token and not token.startswith("ghp_corporateToken") and not token.startswith("ghp_personalToken"):
+                username = active_profile.get("email") or active_profile.get("name") or "git"
+                print(f"username={username}")
+                print(f"password={token}")
+                print()
+                sys.exit(0)
+                
+    elif action in ("store", "erase"):
+        for _ in sys.stdin:
+            pass
+        sys.exit(0)
+        
+    sys.exit(0)
 
 def run(args: List[str]) -> None:
     """Main CLI dispatch entry point for profile command."""
@@ -282,6 +339,8 @@ def run(args: List[str]) -> None:
         handle_switch(args[1:])
     elif subcmd == "add":
         handle_add(args[1:])
+    elif subcmd == "credential-helper":
+        handle_credential_helper(args[1:])
     else:
         print_err(f"Unknown subcommand '{subcmd}'. Available: list, switch, add")
         sys.exit(1)
