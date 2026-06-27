@@ -3,19 +3,22 @@
 All notable changes to this project will be documented in this file.
 
 
-## [2.22.0] - 2026-06-27
+## [2.25.0] - 2026-06-27
 
-- No notable changes.
-
-
-## [2.22.0] - 2026-06-27
-
-- No notable changes.
+### 🚀 Features
+- Design & Task Specification (ISSUE-049)
 
 
-## [2.22.0] - 2026-06-27
+## [2.24.0] - 2026-06-27
 
-- No notable changes.
+### 🚀 Features
+- Enforce strict security, exploit prevention, and code safety validation rules in `AGENTS.md` and `security-audit/SKILL.md`.
+
+
+## [2.23.0] - 2026-06-27
+
+### 🚀 Features
+- Implement installer prerequisite audits for Git, Python 3, and network connectivity in `install.sh`.
 
 
 ## [2.22.0] - 2026-06-27
