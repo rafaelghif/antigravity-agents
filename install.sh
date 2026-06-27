@@ -70,7 +70,7 @@ fi
 # 2. Safely acquire and copy agent directory structure
 mkdir -p "$TARGET_ABS/.agents"
 
-if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR/.agents" ]; then
+if [ "${ANTIGRAVITY_LOCAL_DEV:-0}" = "1" ] && [ -d "$SRC_DIR/.agents" ]; then
   echo "Using local source files from: $SRC_DIR"
   
   # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc
