@@ -34,7 +34,7 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 
 **Windows (PowerShell):**
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1" -OutFile "bootstrap.ps1"; .\bootstrap.ps1
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/bootstrap.ps1" -OutFile "bootstrap.ps1"; .\bootstrap.ps1
 ```
 
 ### 2. Auto-Detect Your Stack
