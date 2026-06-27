@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Git Profile Manager command in V2 CLI (`feat/issue-020`) <!-- id: issue-020 -->
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`) <!-- id: chore-init -->
 - [x] Initialize V2 layout (rules, schemas, ADRs, skills) (`feat/init-v2`) <!-- id: task-001 -->
 - [x] Create world-class-programmer skill playbook (`feat/world-class-programmer-skill`) <!-- id: task-002 -->

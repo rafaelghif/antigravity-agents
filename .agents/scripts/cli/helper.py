@@ -9,10 +9,10 @@ def main():
         sys.exit(1)
         
     cmd = sys.argv[1].lower()
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile'}
     
     if cmd not in allowed_commands:
-        print(f"Error: Unknown command '{cmd}'. Available: {', '.join(allowed_commands)}")
+        print(f"Error: Unknown command '{cmd}'. Available: {', '.join(sorted(allowed_commands))}")
         sys.exit(1)
         
     try:
