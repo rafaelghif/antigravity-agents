@@ -15,6 +15,9 @@
 - **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
 - **ALWAYS** run the project's test command before marking a task `Completed`.
 - **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.
+- **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `world-class-programmer` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.
+- **NEVER** write or maintain duplicate code or inline file templates (such as `cat << 'EOF'` strings of repository files) inside bootstrap, install, or helper scripts. Always rely on a single source of truth (copying locally or fetching from the repository).
+- **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.
 - **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don't duplicate it.
 - **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with the task ID in the body.
 - **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.
