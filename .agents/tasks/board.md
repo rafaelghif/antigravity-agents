@@ -26,3 +26,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement strict Git staged files and private files validation gate (`feat/staged-secrets`) <!-- id: task-016 -->
 - [x] Implement remote GitHub Issue integration and strict Conventional Commit message hook (`feat/git-api-enforcer`) <!-- id: task-017 -->
 - [x] Enforce Git profiles setup rule in AGENTS.md to protect credentials (`feat/git-profile-rules`) <!-- id: task-018 -->
+- [x] Document and establish ADR 0002 for strict validation gate architecture (`feat/adr-validation`) <!-- id: task-019 -->
