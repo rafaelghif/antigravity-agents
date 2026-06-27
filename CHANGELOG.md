@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.31.0] - 2026-06-27
+
+### 🚀 Features
+- Design & Task Specification (ISSUE-058)
+
+
 ## [2.30.3] - 2026-06-27
 
 ### 🐛 Bug Fixes
