@@ -1,7 +1,7 @@
 ---
 id: issue-028
 title: "Enforce strict git branch flow, merge procedures, and profile identity validation"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-06-27
 ---

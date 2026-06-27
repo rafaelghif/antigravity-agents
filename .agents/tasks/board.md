@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Enforce strict git branch flow, merge procedures, and profile identity validation (feat/issue-028) <!-- id: issue-028 -->
 
 ## Done
+- [x] Enforce strict git branch flow, merge procedures, and profile identity validation (feat/issue-028) <!-- id: issue-028 -->
 - [x] Implement Two-Way Git Profile Auto-Sync and Strict Validation (`feat/issue-027`) <!-- id: issue-027 -->
 - [x] Implement Two-Way GitHub Issues Synchronization with Local Fallback (`feat/issue-026`) <!-- id: issue-026 -->
 - [x] Update Public Facing README.md Documentation for V2 CLI and Compliance (`feat/issue-025`) <!-- id: issue-025 -->
