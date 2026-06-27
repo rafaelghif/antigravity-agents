@@ -1,6 +1,11 @@
 import os
 import re
 import sys
+
+# Inject current directory containing git_api into sys.path
+scripts_dir = os.path.dirname(os.path.abspath(__file__))
+if scripts_dir not in sys.path:
+    sys.path.insert(0, scripts_dir)
 import subprocess
 import shutil
 from typing import List, Dict, Any
@@ -564,6 +569,15 @@ def prune_stale_locks() -> None:
 # ==========================================================
 # Main Execution Entry Point
 # ==========================================================
+def get_commit_sha() -> str:
+    try:
+        res = subprocess.run(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0:
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return ""
+
 def run_validations() -> None:
     failed = False
     
@@ -571,6 +585,16 @@ def run_validations() -> None:
     print("   Running AAC V2 Local Validation Guard...              ")
     print("==========================================================")
     
+    is_ci = os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true"
+    sha = get_commit_sha() if is_ci else ""
+    
+    if is_ci and sha:
+        try:
+            import git_api
+            git_api.post_commit_status(sha, "pending", description="Running AAC V2 Validation Guard...")
+        except Exception:
+            pass
+
     # Auto prune stale locks
     prune_stale_locks()
     
@@ -582,7 +606,7 @@ def run_validations() -> None:
     except Exception:
         pass
     
-    # Run the 8 audits sequentially
+    # Run the 9 audits sequentially
     results = {}
     results["Critical Files"] = audit_critical_files()
     results["Secrets & Ignored Files"] = audit_secrets_and_ignored_files()
@@ -610,10 +634,22 @@ def run_validations() -> None:
     if failed:
         print(f"{RED}   Validation FAILED! Please fix the errors above. {RESET}")
         print("==========================================================")
+        if is_ci and sha:
+            try:
+                import git_api
+                git_api.post_commit_status(sha, "failure", description="AAC V2 Validation Guard failed.")
+            except Exception:
+                pass
         sys.exit(1)
     else:
         print(f"{GREEN}   Validation PASSED! Workspace is compliant.      {RESET}")
         print("==========================================================")
+        if is_ci and sha:
+            try:
+                import git_api
+                git_api.post_commit_status(sha, "success", description="AAC V2 Validation Guard passed successfully!")
+            except Exception:
+                pass
         sys.exit(0)
 
 if __name__ == '__main__':
