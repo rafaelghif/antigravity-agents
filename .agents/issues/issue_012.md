@@ -1,7 +1,7 @@
 ---
 id: issue-012
 title: "Add CLI unit testing suite"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-06-27
 ---
