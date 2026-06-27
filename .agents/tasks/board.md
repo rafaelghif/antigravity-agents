@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement comprehensive integration test suite for project bootstrap commands (feat/issue-033) <!-- id: issue-033 -->
 - [x] Enforce strict module lock verification gate in validation checks (feat/issue-032) <!-- id: issue-032 -->
 - [x] Force non-fast-forward merges for strict branch tracking in Git history (feat/issue-031) <!-- id: issue-031 -->
 - [x] Fallback to git local account when git_profiles.json is not configured (feat/issue-030) <!-- id: issue-030 -->

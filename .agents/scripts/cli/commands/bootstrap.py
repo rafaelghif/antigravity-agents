@@ -93,21 +93,25 @@ def copy_core_files():
                     pass
                 
     # Root helper wrappers
-    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example"]
+    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example", ".agents/rules.md"]
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)
         if os.path.exists(src_file) and not os.path.exists(dest_file):
             try:
+                # Ensure parent dir exists
+                os.makedirs(os.path.dirname(dest_file), exist_ok=True)
                 shutil.copy2(src_file, dest_file)
                 if h.endswith(".sh"):
                     os.chmod(dest_file, 0o755)
             except Exception:
                 pass
 
-    # Initialize clean memory folder
+    # Initialize clean memory, tasks, and issues folders
     target_mem = os.path.join(target_root, ".agents/memory")
     os.makedirs(os.path.join(target_mem, "decisions"), exist_ok=True)
+    os.makedirs(os.path.join(target_root, ".agents/tasks"), exist_ok=True)
+    os.makedirs(os.path.join(target_root, ".agents/issues"), exist_ok=True)
     
     # Copy template memory files
     src_templates = os.path.join(src_root, ".agents/memory/templates")
@@ -154,6 +158,11 @@ def run(args):
     elif arch == "mvc":
         create_mvc_architecture(".")
 
+    # Ensure .agents and subdirectories exist
+    os.makedirs(".agents", exist_ok=True)
+    os.makedirs(".agents/tasks", exist_ok=True)
+    os.makedirs(".agents/issues", exist_ok=True)
+
     copy_core_files()
 
     # 2. Write Base Configuration Files
@@ -193,7 +202,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.8.0"
+    AAC_VERSION = "2.9.0"
     if not os.path.exists(agents_file):
         template = f"""# AGENTS.md — {name}
 
