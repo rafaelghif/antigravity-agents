@@ -37,9 +37,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.37.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.39.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.37.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.39.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 ' | Out-Null
@@ -50,9 +50,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.37.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.39.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.37.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.39.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 ' | Out-Null
@@ -86,7 +86,8 @@ else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
 "@
-    Set-Content -Path ".git/hooks/pre-commit" -Value $PreCommitContent -Encoding UTF8
+    $PreCommitPath = [System.IO.Path]::GetFullPath(".git/hooks/pre-commit")
+    [System.IO.File]::WriteAllText($PreCommitPath, $PreCommitContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git pre-commit hook."
 
     $CommitMsgContent = @"
@@ -117,7 +118,8 @@ if [[ ! "`$COMMIT_MSG" =~ `$ID_REGEX ]]; then
   exit 1
 fi
 "@
-    Set-Content -Path ".git/hooks/commit-msg" -Value $CommitMsgContent -Encoding UTF8
+    $CommitMsgPath = [System.IO.Path]::GetFullPath(".git/hooks/commit-msg")
+    [System.IO.File]::WriteAllText($CommitMsgPath, $CommitMsgContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git commit-msg hook."
 }
 

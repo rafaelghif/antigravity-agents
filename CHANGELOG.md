@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.39.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-065)
+
+
+## [2.38.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-065)
+
+
 ## [2.37.0] - 2026-06-27
 
 ### 🚀 Features
