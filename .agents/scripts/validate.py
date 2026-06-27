@@ -159,6 +159,29 @@ def run_validations():
                     failed = True
                 else:
                     print_ok(f"Branch '{branch}' successfully aligned with registered issue '{issue_id}'.")
+                    
+                    # Audit active issue checkboxes/subtasks
+                    if file_exists:
+                        matched_path = None
+                        normalized_id = issue_id.replace('-', '_')
+                        for f_name in os.listdir(issue_dir):
+                            if normalized_id in f_name.lower().replace('-', '_') or issue_id in f_name.lower():
+                                matched_path = os.path.join(issue_dir, f_name)
+                                break
+                        if matched_path:
+                            try:
+                                with open(matched_path, 'r', encoding='utf-8') as f:
+                                    issue_content = f.read()
+                                    unchecked = re.findall(r'([-*]\s*\[\s+\]\s+.*)', issue_content)
+                                    if unchecked:
+                                        print_err(f"Active issue '{issue_id}' has {len(unchecked)} unresolved subtasks:")
+                                        for task in unchecked:
+                                            print_err(f"  {task.strip()}")
+                                        failed = True
+                                    else:
+                                        print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
+                            except Exception as e:
+                                print_warn(f"Failed to parse subtasks in '{matched_path}': {e}")
     else:
         print_warn("Not inside a git repository or git command failed.")
         

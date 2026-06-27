@@ -19,3 +19,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement strict Git branch and local Issue validation gates (`feat/issue-gates`) <!-- id: task-006 -->
 - [x] Enforce strict workspace-level configuration and remove global config dependency (`feat/workspace-only`) <!-- id: task-007 -->
 - [x] Implement dynamic workspace synchronization and validation check (`feat/sync-validate`) <!-- id: task-008 -->
+- [x] Implement subtask checkbox compliance check and tasking design capture skill playbook (`feat/tasking-spec`) <!-- id: task-009 -->
