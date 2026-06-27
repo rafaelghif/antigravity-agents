@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Refactor CLI, validation guard, and git-api error handling (`feat/issue-021`) <!-- id: issue-021 -->
 
 ## Done
 - [x] Implement Git Profile Manager command in V2 CLI (`feat/issue-020`) <!-- id: issue-020 -->

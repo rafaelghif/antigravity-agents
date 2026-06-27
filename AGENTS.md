@@ -22,7 +22,7 @@
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
-- **NEVER** write to or rely on global configurations outside the project directory (e.g., in user home directory). Everything must be stored strictly within the workspace level under `.agents/` and tracked in git to ensure multi-developer environment consistency.
+- **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
 - **ALWAYS** copy `.agents/git_profiles.example` to `.agents/git_profiles.json` during environment initialization to set up local identity rotation, and verify the `.json` file is never staged or committed.
 
 ## 3. Context map — what loads when

@@ -1,5 +1,4 @@
-# Example Git Profiles Rotation Configuration
-# Save this file as 'git_profiles.json' in your ~/.gemini/config/ or .agents/ folder to configure local credentials rotation.
+# Save this file as 'git_profiles.json' in your .agents/ folder to configure local credentials rotation.
 
 {
   "profiles": [
