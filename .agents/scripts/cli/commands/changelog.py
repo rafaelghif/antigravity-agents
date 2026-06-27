@@ -34,11 +34,21 @@ def get_latest_changelog_version() -> Optional[str]:
     return None
 
 def get_boundary_commit(version: str) -> Optional[str]:
-    """Find the commit hash that matches the release of the given version."""
+    """Find the commit hash that matches the release of the given version or the last release."""
     try:
         # Search git log for chore(release): version or version string
         res = subprocess.run(
             ['git', 'log', f'--grep={version}', '--format=%H', '-n', '1'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+            
+        # Fallback to the latest release commit in history
+        res = subprocess.run(
+            ['git', 'log', '--grep=chore(release):', '--format=%H', '-n', '1'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
@@ -106,6 +116,14 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
     resolved_issues = set()
     
     for h, s in commits:
+        # Ignore Git infrastructure commits (merges and automated releases)
+        s_lower = s.lower()
+        if (s_lower.startswith("chore(git): merge") or 
+            s_lower.startswith("merge branch") or 
+            s_lower.startswith("merge ") or 
+            s_lower.startswith("chore(release):")):
+            continue
+            
         match = conv_regex.match(s)
         if match:
             ctype, is_breaking, desc = match.groups()
