@@ -7,7 +7,8 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
-- [/] Exclude memory, tasks, issues, plans, and tests during installation to guarantee a fresh workspace (feat/issue-042) <!-- id: issue-042 -->
+- [/] Rename skills to professional, non-exaggerated enterprise-grade names (feat/issue-043) <!-- id: issue-043 -->
+- [x] Exclude memory, tasks, issues, plans, and tests during installation to guarantee a fresh workspace (feat/issue-042) <!-- id: issue-042 -->
 - [x] Retrieve bootstrapper templates from Git and exclude private/unimportant files during installation/injection (feat/issue-041) <!-- id: issue-041 -->
 - [x] Remediate technical debt in issue CLI, validation guard, and bootstrap scripts (feat/issue-040) <!-- id: issue-040 -->
 - [x] Automatically publish GitHub Release Draft during release bump (feat/issue-039) <!-- id: issue-039 -->

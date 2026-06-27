@@ -1,9 +1,9 @@
 ---
-name: tasking
+name: task-management
 description: Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards.
 ---
 
-# Tasking & Design Capture Skill Playbook
+# Task Management & Design Capture Skill Playbook
 
 Use this playbook immediately after a `/grill-me` design alignment session to capture decisions and scaffold tasks.
 

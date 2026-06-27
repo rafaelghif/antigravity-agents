@@ -1,11 +1,11 @@
 ---
-name: world-class-programmer
+name: coding-standards
 description: Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity.
 ---
 
-# World-Class Programmer Skill Playbook
+# Coding Standards & Practices Playbook
 
-This playbook establishes the elite engineering standards required for writing, reviewing, testing, and designing software at a world-class level.
+This playbook establishes the professional engineering standards required for writing, reviewing, testing, and designing software at an enterprise level.
 
 ---
 

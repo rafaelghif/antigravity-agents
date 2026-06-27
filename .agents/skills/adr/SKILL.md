@@ -1,9 +1,9 @@
 ---
-name: adr-writer
+name: adr
 description: Standardized playbook and template for generating new Architectural Decision Records.
 ---
 
-# ADR Writer Skill
+# Architectural Decision Records (ADR) Skill Playbook
 
 This playbook provides templates and step-by-step instructions for adding architectural design logs.
 
