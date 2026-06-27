@@ -90,6 +90,62 @@ def sync_adrs_to_architecture_md():
         af.write(new_content)
     print("Successfully synchronized ADR registry in architecture.md.")
 
+def sync_lessons_to_rules():
+    lessons_file = ".agents/memory/lessons-learned.md"
+    rules_file = ".agents/rules.md"
+    
+    if not os.path.exists(lessons_file) or not os.path.exists(rules_file):
+        print("Warning: lessons-learned.md or rules.md missing.")
+        return
+        
+    try:
+        with open(lessons_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        lessons = []
+        in_lessons_section = False
+        for line in content.split('\n'):
+            line_strip = line.strip()
+            if line_strip.startswith('## Lessons Learned'):
+                in_lessons_section = True
+                continue
+            elif line_strip.startswith('##') and in_lessons_section:
+                break
+                
+            if in_lessons_section and line_strip.startswith('- '):
+                bullet = re.sub(r'^-\s+(\*\*\[\d{4}-\d{2}-\d{2}\]\*\*\s*)?', '', line_strip)
+                
+                match = re.match(r'^\*\*([^*]+)\*\*:\s*(.*)', bullet)
+                if match:
+                    title = match.group(1).strip()
+                    desc = match.group(2).strip()
+                    lessons.append(f"- **[Learning: {title}]** {desc}")
+                else:
+                    lessons.append(f"- {bullet}")
+                    
+        if not lessons:
+            print("No lessons found in lessons-learned.md to synthesize.")
+            return
+            
+        with open(rules_file, 'r', encoding='utf-8') as f:
+            rules_content = f.read()
+            
+        synthesized_block = "\n## 5. Synthesized Rules (Self-Learning Memory)\n" + "\n".join(lessons) + "\n"
+        
+        if "## 5. Synthesized Rules" in rules_content:
+            pattern = r'## 5\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$'
+            new_rules_content = re.sub(pattern, synthesized_block.strip() + "\n", rules_content)
+        else:
+            new_rules_content = rules_content.rstrip() + "\n" + synthesized_block
+            
+        with open(rules_file, 'w', encoding='utf-8') as f:
+            f.write(new_rules_content)
+            
+        print("Successfully synchronized synthesized rules in rules.md.")
+    except Exception as e:
+        print(f"Error synchronizing lessons to rules: {e}")
+
 if __name__ == '__main__':
     sync_skills_to_agents_md()
     sync_adrs_to_architecture_md()
+    sync_lessons_to_rules()
