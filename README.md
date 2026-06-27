@@ -117,5 +117,5 @@ After running the bootstrap, your project will have the following layout:
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
   - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
-- `.agents/skills/`: Executable playbooks (e.g. `review/`, `debugging/`, `world-class-programmer/`).
+- `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `debugging/`, `coding-standards/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
