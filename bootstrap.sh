@@ -243,6 +243,7 @@ fi
 
 # 5. Set up local Git hooks
 if [ -d ".git" ]; then
+  # Pre-commit Hook
   cat << 'EOF' > .git/hooks/pre-commit
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
@@ -253,6 +254,38 @@ fi
 EOF
   chmod +x .git/hooks/pre-commit
   echo "Installed local Git pre-commit hook."
+
+  # Commit-msg Hook
+  cat << 'EOF' > .git/hooks/commit-msg
+#!/usr/bin/env bash
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
+
+if [[ ! "$COMMIT_MSG" =~ $CONVENTIONAL_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Non-compliant commit message format!"
+  echo "=========================================================="
+  echo "Commit messages must follow Conventional Commits standard:"
+  echo "  Format: <type>(<scope>): <subject>"
+  echo "  Example: feat(auth): add login endpoint"
+  echo "=========================================================="
+  exit 1
+fi
+
+ID_REGEX="(task-|issue-|chore-)[a-zA-Z0-9_-]+"
+if [[ ! "$COMMIT_MSG" =~ $ID_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Missing Task/Issue ID reference!"
+  echo "=========================================================="
+  echo "Commit messages must include an active task or issue ID reference."
+  echo "  Example body: Task ID: issue-123"
+  echo "=========================================================="
+  exit 1
+fi
+EOF
+  chmod +x .git/hooks/commit-msg
+  echo "Installed local Git commit-msg hook."
 fi
 
 echo "=========================================================="

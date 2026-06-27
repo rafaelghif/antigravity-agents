@@ -38,14 +38,30 @@ def run(args):
             print(f"Error: Issue file '{file_path}' already exists.")
             sys.exit(1)
             
+        # Attempt to create remote GitHub issue
+        github_url = ""
+        github_number = ""
+        try:
+            import git_api
+            res = git_api.create_github_issue(title, f"Local tracking ID: {issue_id}")
+            if res:
+                github_url, github_number = res
+                print(f"Successfully created remote GitHub issue #{github_number}: {github_url}")
+        except Exception as e:
+            print(f"Warning: Could not create remote GitHub issue: {e}")
+
         current_date = datetime.now().strftime("%Y-%m-%d")
+        github_fields = ""
+        if github_url:
+            github_fields = f"github_url: \"{github_url}\"\ngithub_number: {github_number}\n"
+
         template = f"""---
 id: {issue_id}
 title: "{title}"
 status: open
 assignee: agent-antigravity
 created_at: {current_date}
----
+{github_fields}---
 
 # Issue Details
 
@@ -130,6 +146,17 @@ created_at: {current_date}
             
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
+
+        # Parse github_number to close remote issue
+        m_num = re.search(r'github_number:\s*(\d+)', content)
+        if m_num:
+            github_number = int(m_num.group(1))
+            try:
+                import git_api
+                print(f"Closing remote GitHub issue #{github_number}...")
+                git_api.close_github_issue(github_number)
+            except Exception as e:
+                print(f"Warning: Could not close remote GitHub issue: {e}")
             
         content = re.sub(r'status:\s*open', 'status: closed', content)
         
