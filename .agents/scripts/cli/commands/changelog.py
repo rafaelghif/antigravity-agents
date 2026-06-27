@@ -281,6 +281,21 @@ def update_changelog(new_version: str, categories: Dict[str, List[str]]) -> None
     print(f"[OK] Prepended release changes to CHANGELOG.md.")
     return new_entry
 
+def get_current_branch() -> Optional[str]:
+    """Get the active Git branch name."""
+    try:
+        res = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode == 0:
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return None
+
 def run(args: List[str]) -> None:
     preview = "--preview" in args
     bump_only = "--bump-only" in args
@@ -307,11 +322,50 @@ def run(args: List[str]) -> None:
     commits = get_commits_since(boundary_commit)
     print(f"Found {len(commits)} commits since boundary.")
     
-    if not commits:
-        print("No new commits found. Nothing to update.")
+    categories = parse_conventional_commits(commits)
+    
+    # Inject current branch issue if not already present
+    current_branch = get_current_branch()
+    if current_branch and (current_branch.startswith("feat/") or current_branch.startswith("fix/")):
+        parts = current_branch.split('/')
+        if len(parts) == 2:
+            branch_type = parts[0]
+            branch_slug = parts[1]
+            
+            # Normalize slug to issue ID (e.g. issue-047 or task-123)
+            issue_match = re.search(r"(issue|task)-?\d+", branch_slug, re.IGNORECASE)
+            if issue_match:
+                match_val = issue_match.group(0)
+                if '-' not in match_val:
+                    match_val = re.sub(r"(\d+)", r"-\1", match_val)
+                issue_id = match_val.upper()
+                
+                # Check if already resolved
+                has_issue = False
+                for cat, items in categories.items():
+                    for item in items:
+                        if issue_id in item:
+                            has_issue = True
+                            break
+                            
+                if not has_issue:
+                    title = extract_issue_title(issue_id)
+                    if title:
+                        entry = f"{title} ({issue_id})"
+                    else:
+                        clean_desc = branch_slug.replace('-', ' ').title()
+                        entry = f"{clean_desc} ({issue_id})"
+                    
+                    cat = "feat" if branch_type == "feat" else "fix"
+                    categories[cat].append(entry)
+                    print(f"[INFO] Automatically injected issue entry from branch name: {entry}")
+                    
+    # Check if there are any changes in categories
+    has_changes = any(categories[c] for c in categories)
+    if not has_changes:
+        print("No new commits or issue branch changes found. Nothing to update.")
         return
         
-    categories = parse_conventional_commits(commits)
     new_ver = bump_semver(current_ver, categories)
     print(f"Calculated next version: {new_ver}")
     
