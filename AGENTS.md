@@ -21,6 +21,7 @@
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
+- **NEVER** write to or rely on global configurations outside the project directory (e.g., in user home directory). Everything must be stored strictly within the workspace level under `.agents/` and tracked in git to ensure multi-developer environment consistency.
 
 ## 3. Context map — what loads when
 
@@ -34,7 +35,6 @@
 | `.agents/memory/glossary.md` | Domain terms | On demand when unfamiliar terms appear |
 | `.agents/memory/tech-debt.md`, `lessons-learned.md` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
 | `.agents/tasks/board.md` | Task board | Read at the start of every task, written at every status change |
-| `~/.gemini/antigravity-cli/skills/` | Your personal global skills | Same progressive loading, scoped to you — not the team |
 
 If you're about to paste a paragraph of explanation into this file, it almost certainly belongs in a skill or memory file instead, pulled in with `@path` only when needed. That's what keeps the per-prompt token cost flat as the project grows.
 
