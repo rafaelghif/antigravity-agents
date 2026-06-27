@@ -62,12 +62,15 @@ if [ -d "$TARGET_ABS/.agents" ]; then
 fi
 
 # Get source path
-SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+SRC_DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+fi
 
 # 2. Safely acquire and copy agent directory structure
 mkdir -p "$TARGET_ABS/.agents"
 
-if [ -d "$SRC_DIR/.agents" ]; then
+if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR/.agents" ]; then
   echo "Using local source files from: $SRC_DIR"
   
   # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc

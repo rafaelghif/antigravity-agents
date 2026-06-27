@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Fix install.sh piping compatibility for unbound BASH_SOURCE variable (feat/issue-057) <!-- id: issue-057 -->
 - [x] Fix git_profiles.example comment to be valid JSON (feat/issue-056) <!-- id: issue-056 -->
 - [x] Synchronize README.md with CLI commands, monorepo projects, and skills (feat/issue-055) <!-- id: issue-055 -->
 - [x] Refactor changelog generator to improve SemVer safety, boundary resolution, and issue classification (feat/issue-054) <!-- id: issue-054 -->
