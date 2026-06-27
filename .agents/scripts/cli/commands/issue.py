@@ -80,9 +80,10 @@ def update_board_completed(issue_id):
                 new_lines.append(line)
                 
         if target_line:
-            # Change unchecked to checked
+            # Change unchecked or doing to checked
             target_line = re.sub(r'\[\s*\]', '[x]', target_line)
             target_line = re.sub(r'\[\s*[xX]\s*\]', '[x]', target_line)
+            target_line = re.sub(r'\[\s*/\s*\]', '[x]', target_line)
             
             # Find ## Done line
             done_idx = -1

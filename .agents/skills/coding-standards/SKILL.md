@@ -84,3 +84,14 @@ Maintain a long-term, self-documenting system architecture.
 
 - **Use ADRs**: For every major design choice (e.g. library addition, folder reorganization, protocol switch), write an Architectural Decision Record in `.agents/memory/decisions/`.
 - **Decoupled Architecture**: Structure modules into clear domains with well-defined APIs. Keep system utilities separate from business logic.
+
+---
+
+## 6. Token & Context Efficiency Playbook
+
+To optimize agent runtime cost, token consumption, and cognitive footprint, agents must strictly follow these rules:
+
+- **Targeted File Reads**: Avoid viewing whole files. Always specify `StartLine` and `EndLine` parameters when calling `view_file` to target only the code relevant to the task.
+- **Decoupled Subagents**: Only invoke subagents for separate, heavy, or multi-step research operations. Perform straightforward code editing and validation within the parent agent context.
+- **Zero Redundant Commands**: Do not run repetitive commands or searches. If a search query or validation command fails 3 times, immediately halt and prompt the user.
+- **No E2E testing overhead**: Do not request, setup, or run browser-based End-to-End or UI tests unless explicitly demanded by the user. Focus strictly on fast, mock-driven unit and integration testing.

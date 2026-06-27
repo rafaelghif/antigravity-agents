@@ -1,17 +1,17 @@
 ---
 name: testing
-description: Playbook for executing unit, integration, and E2E tests, mocking external services, and structuring test suites.
+description: Playbook for executing unit and integration tests, mocking external services, and structuring test suites.
 ---
 
 # Testing & Test Automation Playbook
 
-This playbook establishes the guidelines, strategies, and patterns for implementing testing and test automation at an enterprise scale, ensuring code safety, reliability, and zero-regression deployments.
+This playbook establishes the guidelines, strategies, and patterns for implementing testing and test automation at an enterprise scale, ensuring code safety, reliability, and zero-regression deployments without unnecessary overhead.
 
 ---
 
 ## 1. Test Categorization & Isolation
 
-To maintain a fast and reliable CI/CD pipeline, tests are divided into three tiers:
+To maintain a fast and reliable CI/CD pipeline, tests are divided into two tiers (E2E testing is omitted to optimize token usage and avoid redundant runtime overhead):
 
 ### A. Unit Tests (Fast & Deterministic)
 - **Scope**: Validate single functions, utility modules, or isolated classes.
@@ -25,12 +25,6 @@ To maintain a fast and reliable CI/CD pipeline, tests are divided into three tie
 - **Rules**:
   - Network and database components may be active, but should preferably use local mocks or isolated databases (e.g., SQLite in-memory).
   - Maintain absolute cleanup (rollback database transactions or reset state) after each test run.
-
-### C. End-to-End (E2E) & UI Tests (User Flow Verification)
-- **Scope**: Validate the application's entire path from user interface to downstream services.
-- **Rules**:
-  - Run inside simulated browser instances (e.g. Playwright, Puppeteer).
-  - Focus on critical paths (e.g., user signup, checkout, core CRUD operations).
 
 ---
 
