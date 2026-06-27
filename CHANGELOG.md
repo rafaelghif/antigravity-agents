@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.4.0] - 2026-06-27
+
+### Features
+- implement two-way profile status auto-sync and strict email blocking
+- implement two-way remote issue sync with local fallback in validator
+
+
 ## [2.3.0] - 2026-06-27
 
 ### Features

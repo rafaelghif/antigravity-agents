@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.3.0
+- **Version:** 2.4.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -28,6 +28,7 @@
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
 - **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
 - **ALWAYS** copy `.agents/git_profiles.example` to `.agents/git_profiles.json` during environment initialization to set up local identity rotation, and verify the `.json` file is never staged or committed.
+- **ALWAYS** run the changelog generator command (`./helper.sh changelog`) before closing issues or completing tasks to ensure the release history in `CHANGELOG.md` is strictly updated.
 
 ## 3. Context map — what loads when
 
@@ -55,7 +56,7 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 3. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `world-class-programmer` playbook) to evaluate long-term maintenance and UI/UX simplicity.
 4. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
 5. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
-6. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
+6. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, changelog is updated by running `./helper.sh changelog`, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
 7. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
 
 ## 5. Git & review
