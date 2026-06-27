@@ -1,3 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=========================================================="
+echo "   Bootstrapping Antigravity Agent Core (AAC) V2...   "
+echo "=========================================================="
+
+# 1. Create directories
+mkdir -p .agents/memory/decisions
+mkdir -p .agents/tasks
+mkdir -p .agents/skills/review
+mkdir -p .agents/skills/adr-writer
+mkdir -p .agents/skills/debugging
+mkdir -p .agents/skills/world-class-programmer
+mkdir -p .agents/workflows
+mkdir -p .agents/scripts
+
+# 2. Write base files inline if they do not exist
+if [ ! -f "AGENTS.md" ]; then
+  cat << 'EOF' > AGENTS.md
+# AGENTS.md — <Project Name>
+
+> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand.
+
+## 1. What this project is
+- **Product:** <one-line description>
+- **Stack:** General Project
+- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
+
+## 2. Non-negotiable rules
+- **NEVER** commit secrets, `.env*` files, or credentials.
+- **ALWAYS** run the project's test command before marking a task `Completed`.
+- **ALWAYS** check `.agents/tasks/board.md` before starting work.
+- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first.
+
+## 3. Context map — what loads when
+| Path | Contents | When it loads |
+|---|---|---|
+| `AGENTS.md` (this file) | Identity, rules, map | Always |
+| `.agents/skills/*/SKILL.md` | Playbooks | On demand |
+| `.agents/tasks/board.md` | Task board | Read at start, written at change |
+| `.agents/memory/architecture.md` | System summary | On demand |
+
+## 4. Working protocol
+1. **Before coding:** Read `.agents/tasks/board.md`.
+2. **Before any architecture-affecting change:** check `.agents/memory/decisions/` for a relevant ADR.
+EOF
+  echo "Created AGENTS.md template."
+fi
+
+if [ ! -f ".agents/rules.md" ]; then
+  cat << 'EOF' > .agents/rules.md
+# Project Rules
+Use **General Project** for the main product stack.
+- test command is: `N/A`.
+EOF
+  echo "Created .agents/rules.md template."
+fi
+
+if [ ! -f ".agents/tasks/board.md" ]; then
+  cat << 'EOF' > .agents/tasks/board.md
+# Task Board
+## Todo
+- [ ] Initialize project codebase
+## Doing
+## Done
+EOF
+  echo "Created .agents/tasks/board.md template."
+fi
+
+# 3. Create recon.py if missing (or overwrite with latest version)
+cat << 'EOF' > .agents/scripts/recon.py
 import os
 import re
 import sys
@@ -126,7 +198,6 @@ def update_agents_md(scan_results):
     with open(agents_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Replace Stack placeholder
     stack_pattern = r'(-\s+\*\*Stack:\*\*)\s+.*'
     replacement = f'\\1 {scan_results["stack"]}'
     new_content = re.sub(stack_pattern, replacement, content)
@@ -144,7 +215,6 @@ def update_rules_md(scan_results):
     with open(rules_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Replace commands in rules
     content = re.sub(r'Use \*\*.*?\*\* (?:for the main product stack|for all CLI scripting)\.?', f'Use **{scan_results["stack"]}** for the main product stack.', content)
     content = re.sub(r'test command is: `.*?`\.|test command before.*', f'test command is: `{scan_results["test_command"]}`.', content)
     
@@ -161,3 +231,15 @@ if __name__ == '__main__':
     update_agents_md(results)
     update_rules_md(results)
     print("Auto-reconnaissance completed successfully!")
+EOF
+
+# 4. Trigger auto-reconnaissance
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/recon.py
+else
+  echo "Warning: python3 not found. Please run .agents/scripts/recon.py manually after installing python3."
+fi
+
+echo "=========================================================="
+echo "   AAC V2 Bootstrap Completed Successfully!             "
+echo "=========================================================="
