@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.35.0] - 2026-06-27
+
+### 🚀 Features
+- Issue Details (ISSUE-062)
+
+### ⚙️ Chores
+- merge bootstrap.py update for projects.json copying
+
+
 ## [2.34.0] - 2026-06-27
 
 ### 🚀 Features
