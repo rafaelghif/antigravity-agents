@@ -17,6 +17,14 @@ def load_profiles():
             print(f"Warning: Failed to load git profiles from '{target}': {e}")
     return {}
 
+def has_user_defined_profiles(profiles):
+    placeholders = {"developer@company.com", "dev.personal@gmail.com"}
+    for p in profiles:
+        email = p.get("email")
+        if email and email not in placeholders:
+            return True
+    return False
+
 def run(args):
     data = load_profiles()
     profiles = data.get("profiles", [])
@@ -26,10 +34,26 @@ def run(args):
             active_profile = p
             break
             
-    if active_profile:
+    local_email = ""
+    try:
+        res = subprocess.run(['git', 'config', 'user.email'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0:
+            local_email = res.stdout.strip()
+    except Exception:
+        pass
+
+    apply_profile = False
+    if not local_email:
+        apply_profile = True
+    else:
+        if has_user_defined_profiles(profiles) and active_profile:
+            placeholder_emails = {"developer@company.com", "dev.personal@gmail.com"}
+            if active_profile.get("email") not in placeholder_emails:
+                apply_profile = True
+
+    if apply_profile and active_profile:
         print(f"Applying Git Profile: '{active_profile['name']}'")
         email = active_profile.get("email")
-        # Extract default username from name field or email
         name = active_profile.get("name", "Developer")
         if email:
             subprocess.run(['git', 'config', '--local', 'user.email', email])
@@ -40,7 +64,6 @@ def run(args):
             subprocess.run(['git', 'config', '--local', 'user.signingkey', signing_key])
             subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'true'])
         else:
-            # Disable gpg signing if using placeholder/no key to prevent commit blocks
             subprocess.run(['git', 'config', '--local', '--unset', 'commit.gpgsign'], stderr=subprocess.DEVNULL)
             subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'], stderr=subprocess.DEVNULL)
             

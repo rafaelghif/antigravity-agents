@@ -205,14 +205,21 @@ def audit_secrets_and_ignored_files() -> bool:
                 else:
                     print_ok(f"Git Config Email matches active profile '{matching_profile.get('name')}' ({current_email}).")
             else:
-                # No registered profile matches current git email -> block!
-                active_profile = next((p for p in profiles if p.get("active")), None)
-                print_err(
-                    f"Mismatched Git Email Identity! The email '{current_email}' is not registered in git_profiles.json.\n"
-                    f"  Please register the profile first: './helper.sh profile add <name> {current_email}'\n"
-                    f"  Or switch to an active profile: './helper.sh profile switch <profile_name>'"
-                )
-                failed = True
+                # Check if there are any user defined profiles (non-placeholder)
+                placeholders = {"developer@company.com", "dev.personal@gmail.com"}
+                user_defined = any(p.get("email") not in placeholders for p in profiles if p.get("email"))
+                
+                if not user_defined:
+                    print_ok(f"Using local Git Config Email '{current_email}' (profiles are unconfigured).")
+                else:
+                    # No registered profile matches current git email -> block!
+                    active_profile = next((p for p in profiles if p.get("active")), None)
+                    print_err(
+                        f"Mismatched Git Email Identity! The email '{current_email}' is not registered in git_profiles.json.\n"
+                        f"  Please register the profile first: './helper.sh profile add <name> {current_email}'\n"
+                        f"  Or switch to an active profile: './helper.sh profile switch <profile_name>'"
+                    )
+                    failed = True
         except Exception as e:
             print_warn(f"Failed to audit Git config profile email: {e}")
 
