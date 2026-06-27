@@ -3,6 +3,7 @@ import os
 import json
 import re
 import subprocess
+import shutil
 from typing import List, Dict, Any
 
 PROFILES_FILE = ".agents/git_profiles.json"
@@ -22,6 +23,68 @@ def print_warn(msg: str) -> None:
 
 def print_ok(msg: str) -> None:
     print(f"{GREEN}[OK] {msg}{RESET}")
+
+def find_ssh_keygen() -> str:
+    """Attempt to locate ssh-keygen on Windows if not in PATH."""
+    binary = shutil.which("ssh-keygen")
+    if binary:
+        return binary
+        
+    if os.name == 'nt':
+        common_paths = [
+            r"C:\Program Files\Git\usr\bin\ssh-keygen.exe",
+            r"C:\Program Files (x86)\Git\usr\bin\ssh-keygen.exe",
+            os.path.expandvars(r"%USERPROFILE%\AppData\Local\Programs\Git\usr\bin\ssh-keygen.exe")
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                return path
+    return "ssh-keygen"
+
+def generate_ssh_key(name: str, email: str) -> str:
+    """Generate a secure Ed25519 SSH key pair for the profile."""
+    ssh_dir = os.path.abspath(os.path.expanduser("~/.ssh"))
+    try:
+        os.makedirs(ssh_dir, mode=0o700, exist_ok=True)
+    except Exception as e:
+        print_warn(f"Failed to create SSH directory '{ssh_dir}': {e}. Trying current workspace directory.")
+        ssh_dir = os.path.abspath(".agents")
+        
+    key_path = os.path.join(ssh_dir, f"id_ed25519_{name}")
+    
+    if os.path.exists(key_path):
+        print_warn(f"SSH private key file already exists at '{key_path}'. Registering the existing key.")
+        return key_path
+        
+    keygen_bin = find_ssh_keygen()
+    print(f"Generating secure Ed25519 SSH key pair at '{key_path}'...")
+    try:
+        res = subprocess.run(
+            [keygen_bin, '-t', 'ed25519', '-C', email, '-f', key_path, '-N', ''],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode != 0:
+            print_err(f"Failed to generate SSH key: {res.stderr.strip()}")
+            sys.exit(1)
+            
+        print_ok("SSH key pair generated successfully.")
+        
+        pub_path = f"{key_path}.pub"
+        if os.path.exists(pub_path):
+            with open(pub_path, 'r', encoding='utf-8') as f:
+                pub_key = f.read().strip()
+            print("\n" + "="*60)
+            print(f"{GREEN}ACTION REQUIRED:{RESET} Add this SSH public key to your GitHub account:")
+            print("-"*60)
+            print(pub_key)
+            print("="*60 + "\n")
+            
+        return key_path
+    except Exception as e:
+        print_err(f"Error executing ssh-keygen: {e}")
+        sys.exit(1)
 
 def ensure_profiles_file() -> None:
     """Ensure that the git profiles json file exists in the workspace."""
@@ -214,7 +277,7 @@ def validate_email(email: str) -> bool:
 def handle_add(args: List[str]) -> None:
     """Add a new profile to JSON configuration."""
     if len(args) < 2:
-        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--switch|-s]")
+        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--generate-ssh] [--switch|-s]")
         sys.exit(1)
         
     name = args[0]
@@ -223,6 +286,7 @@ def handle_add(args: List[str]) -> None:
     signing_key = None
     ssh_key_path = None
     git_token = None
+    generate_ssh = False
     switch_after = False
     
     i = 2
@@ -245,6 +309,9 @@ def handle_add(args: List[str]) -> None:
             else:
                 print_err("Error: --git-token requires a token argument.")
                 sys.exit(1)
+        elif arg == '--generate-ssh':
+            generate_ssh = True
+            i += 1
         elif not arg.startswith('-'):
             signing_key = arg
             i += 1
@@ -259,6 +326,10 @@ def handle_add(args: List[str]) -> None:
         print_err(f"Invalid email format: '{email}'.")
         sys.exit(1)
         
+    if ssh_key_path and generate_ssh:
+        print_err("Error: --ssh-key and --generate-ssh options are mutually exclusive.")
+        sys.exit(1)
+        
     data = load_profiles()
     profiles = data.get("profiles", [])
     
@@ -266,6 +337,9 @@ def handle_add(args: List[str]) -> None:
         if p.get("name") == name:
             print_err(f"Profile '{name}' already exists.")
             sys.exit(1)
+            
+    if generate_ssh:
+        ssh_key_path = generate_ssh_key(name, email)
             
     new_profile = {
         "name": name,

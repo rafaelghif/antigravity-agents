@@ -235,5 +235,28 @@ class TestProfileCommand(unittest.TestCase):
             self.assertTrue(any("username=p1@test.com" in p for p in printed))
             self.assertTrue(any("password=ghp_realSecretToken123" in p for p in printed))
 
+    @patch('subprocess.run')
+    @patch('os.makedirs')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...")
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_add_generate_ssh_success(self, mock_save, mock_load, mock_open, mock_exists, mock_makedirs, mock_sub):
+        mock_load.return_value = {"profiles": []}
+        
+        def exists_side_effect(path):
+            if path.endswith(".pub"):
+                return True
+            return False
+        mock_exists.side_effect = exists_side_effect
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        profile.handle_add(["new-prof", "new@prof.com", "--generate-ssh"])
+        
+        saved_data = mock_save.call_args[0][0]
+        self.assertEqual(len(saved_data["profiles"]), 1)
+        self.assertEqual(saved_data["profiles"][0]["name"], "new-prof")
+        self.assertTrue(saved_data["profiles"][0]["ssh_key_path"].endswith("id_ed25519_new-prof"))
+
 if __name__ == '__main__':
     unittest.main()
