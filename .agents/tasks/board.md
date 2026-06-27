@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Synchronize README.md with CLI commands, monorepo projects, and skills (feat/issue-055) <!-- id: issue-055 -->
 - [x] Refactor changelog generator to improve SemVer safety, boundary resolution, and issue classification (feat/issue-054) <!-- id: issue-054 -->
 - [x] Implement monorepo multi-project support and API contract synchronization (feat/issue-053) <!-- id: issue-053 -->
 - [x] Implement self-learning mechanism and plug-and-play stack adaptation (feat/issue-052) <!-- id: issue-052 -->

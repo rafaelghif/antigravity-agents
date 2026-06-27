@@ -62,6 +62,7 @@ AAC V2 provides a unified command dispatcher wrapper `./helper.sh` (Linux/macOS)
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials manager. Supports `add <name> <email>`, `switch <name>`, `list`, and `apply`. |
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer version. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries in `architecture.md`. |
+| **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons, post-mortems, and solutions directly to `lessons-learned.md`. |
 
 ---
 
@@ -105,17 +106,46 @@ Upgrading an older version of Antigravity Agent Core is fully automated and risk
 
 ---
 
+## 🔀 Monorepo & Multi-Project Synchronization
+
+For projects with separate backend and frontend services (e.g., `app/backend` and `app/frontend`), AAC V2 provides seamless multi-project orchestration:
+
+1. **Configuring Sub-Projects**: Add your sub-projects mapping inside `.agents/projects.json`:
+   ```json
+   {
+     "projects": [
+       {
+         "name": "backend",
+         "path": "app/backend",
+         "stack": "python",
+         "test_command": "pytest"
+       },
+       {
+         "name": "frontend",
+         "path": "app/frontend",
+         "stack": "node",
+         "test_command": "npm run test"
+       }
+     ]
+   }
+   ```
+2. **Automated Cross-Testing**: The local validation command `./helper.sh validate` scans the registered sub-projects and executes their respective test suites automatically.
+3. **API Contract Alignment**: The `contract-synchronization` skill playbooks ensure TypeScript types, frontend API routes, and client bindings are auto-generated from the backend specification (e.g. OpenAPI/Swagger YAML) and never modified manually, preventing interface mismatches.
+
+---
+
 ## 📂 The V2 Directory Blueprint
 
 After running the bootstrap, your project will have the following layout:
 - `AGENTS.md` (root): Master rules and directory maps loaded by the agent on every prompt.
 - `.agents/rules.md`: Automatically generated build, test, and style configurations.
 - `.agents/schema.md`: Holds definitions for config schemas and data formats.
+- `.agents/projects.json`: Defines paths and test commands for sub-projects in a monorepo setup.
 - `.agents/tasks/board.md`: Active markdown task board for tracking progress.
 - `.agents/memory/`:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
   - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
-- `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `debugging/`, `coding-standards/`, `observability/`).
+- `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `debugging/`, `coding-standards/`, `contract-synchronization/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
