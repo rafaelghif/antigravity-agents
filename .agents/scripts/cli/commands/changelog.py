@@ -101,11 +101,22 @@ def extract_issue_title(issue_id: str) -> Optional[str]:
                 path = os.path.join(issue_dir, f_name)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            # Match first header like '# Issue 022: Title' or '# Title'
-                            match = re.match(r"^#\s+(?:Issue\s+\d+:\s*)?(.+)", line)
-                            if match:
-                                return match.group(1).strip()
+                        content = f.read()
+                    
+                    # 1. Try parsing frontmatter title
+                    m_title = re.search(r'^title:\s*["\']?(.*?)["\']?\s*$', content, re.MULTILINE | re.IGNORECASE)
+                    if m_title:
+                        title_val = m_title.group(1).strip().strip('\'"')
+                        if title_val:
+                            return title_val
+                            
+                    # 2. Fallback to markdown header but skip generic headers
+                    for line in content.splitlines():
+                        match = re.match(r"^#\s+(?:Issue\s+\d+:\s*)?(.+)", line)
+                        if match:
+                            hdr = match.group(1).strip()
+                            if hdr.lower() not in ("issue details", "problem statement", "design & task specification"):
+                                return hdr
                 except Exception:
                     pass
     return None
@@ -127,7 +138,7 @@ def classify_from_local_issue(issue_id: str) -> Optional[str]:
                     for line in content.splitlines():
                         match = re.match(r"^title:\s*(.+)", line)
                         if match:
-                            title = match.group(1).strip().lower()
+                            title = match.group(1).strip().strip('\'"').lower()
                             break
                     if not title:
                         # Fallback: check first heading
