@@ -87,20 +87,20 @@ if ($LocalDev -and (Test-Path $SrcAgents)) {
     $Files = Get-ChildItem -Path $SrcAgents -Recurse -File
     foreach ($File in $Files) {
         $RelativePath = $File.FullName.Substring($SrcDir.Length + 1)
-        # Exclude specific files and directories
-        if ($RelativePath -like "*\__pycache__\*" -or
-            $RelativePath -like "*\.git\*" -or
+        # Exclude specific files and directories (handling both slash directions)
+        if ($RelativePath -like "*\__pycache__\*" -or $RelativePath -like "*/__pycache__/*" -or
+            $RelativePath -like "*\.git\*" -or $RelativePath -like "*/.git/*" -or
             $File.Name -eq "git_profiles.json" -or
             $File.Name -eq "projects.json" -or
             $File.Name -eq "locks.json" -or
             $File.Name -eq ".DS_Store" -or
             $File.Extension -eq ".pyc" -or
             $File.Extension -eq ".pyo" -or
-            $RelativePath -like ".agents\memory\*" -or
-            $RelativePath -like ".agents\tasks\*" -or
-            $RelativePath -like ".agents\issues\*" -or
-            $RelativePath -like ".agents\plans\*" -or
-            $RelativePath -like ".agents\tests\*") {
+            $RelativePath -like ".agents\memory\*" -or $RelativePath -like ".agents/memory/*" -or
+            $RelativePath -like ".agents\tasks\*" -or $RelativePath -like ".agents/tasks/*" -or
+            $RelativePath -like ".agents\issues\*" -or $RelativePath -like ".agents/issues/*" -or
+            $RelativePath -like ".agents\plans\*" -or $RelativePath -like ".agents/plans/*" -or
+            $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*") {
             continue
         }
         
@@ -244,20 +244,20 @@ if ($LocalDev -and (Test-Path $SrcAgents)) {
     $Files = Get-ChildItem -Path $SrcAgents -Recurse -File
     foreach ($File in $Files) {
         $RelativePath = $File.FullName.Substring($ExtractedDir.Length + 1)
-        # Exclude specific files and directories
-        if ($RelativePath -like "*\__pycache__\*" -or
-            $RelativePath -like "*\.git\*" -or
+        # Exclude specific files and directories (handling both slash directions)
+        if ($RelativePath -like "*\__pycache__\*" -or $RelativePath -like "*/__pycache__/*" -or
+            $RelativePath -like "*\.git\*" -or $RelativePath -like "*/.git/*" -or
             $File.Name -eq "git_profiles.json" -or
             $File.Name -eq "projects.json" -or
             $File.Name -eq "locks.json" -or
             $File.Name -eq ".DS_Store" -or
             $File.Extension -eq ".pyc" -or
             $File.Extension -eq ".pyo" -or
-            $RelativePath -like ".agents\memory\*" -or
-            $RelativePath -like ".agents\tasks\*" -or
-            $RelativePath -like ".agents\issues\*" -or
-            $RelativePath -like ".agents\plans\*" -or
-            $RelativePath -like ".agents\tests\*") {
+            $RelativePath -like ".agents\memory\*" -or $RelativePath -like ".agents/memory/*" -or
+            $RelativePath -like ".agents\tasks\*" -or $RelativePath -like ".agents/tasks/*" -or
+            $RelativePath -like ".agents\issues\*" -or $RelativePath -like ".agents/issues/*" -or
+            $RelativePath -like ".agents\plans\*" -or $RelativePath -like ".agents/plans/*" -or
+            $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*") {
             continue
         }
         
