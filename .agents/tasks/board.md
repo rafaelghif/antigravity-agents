@@ -3,11 +3,11 @@
 This board tracks active development tasks for AAC V2.
 
 ## Todo
-- [ ] Implement V2 CLI and bootstrap logic (`feat/cli-v2`)
 - [ ] Set up automated compliance validation suite (`feat/validate-v2`)
 - [ ] Add CLI unit testing suite (`test/cli-v2`)
 
 ## Doing
+- [/] Implement V2 CLI and bootstrap logic (`feat/issue-010-cli-v2`) <!-- id: issue-010 -->
 
 ## Done
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`)
