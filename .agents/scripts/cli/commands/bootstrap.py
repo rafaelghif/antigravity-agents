@@ -208,6 +208,15 @@ def copy_core_files():
                     except Exception:
                         pass
 
+    # Copy projects.example to projects.json if it doesn't exist
+    src_projects_ex = os.path.join(src_root, ".agents/projects.example")
+    dest_projects_json = os.path.join(target_root, ".agents/projects.json")
+    if os.path.exists(src_projects_ex) and not os.path.exists(dest_projects_json):
+        try:
+            shutil.copy2(src_projects_ex, dest_projects_json)
+        except Exception:
+            pass
+
 def run(args):
     print("==========================================================")
     print("   Antigravity V2 Project Bootstrapper                    ")
@@ -301,7 +310,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.32.0"
+    AAC_VERSION = "2.33.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
