@@ -15,3 +15,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Create world-class-programmer skill playbook (`feat/world-class-programmer-skill`) <!-- id: task-002 -->
 - [x] Implement enterprise-grade features (auto-recon script, architectural blueprints, security auditing, CI/CD) (`feat/enterprise-features`) <!-- id: task-003 -->
 - [x] Standardize multi-language bootstrap templates (PHP, Node, C#, CSS/Tailwind) (`feat/bootstrap-v2`) <!-- id: task-004 -->
+- [x] Add offline validation guard and local Git hook automation (`feat/validation-guard`) <!-- id: task-005 -->

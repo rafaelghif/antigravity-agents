@@ -1,0 +1,19 @@
+# Example Git Profiles Rotation Configuration
+# Save this file as 'git_profiles.json' in your ~/.gemini/config/ or .agents/ folder to configure local credentials rotation.
+
+{
+  "profiles": [
+    {
+      "name": "corporate-work",
+      "email": "developer@company.com",
+      "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...",
+      "active": true
+    },
+    {
+      "name": "personal-github",
+      "email": "dev.personal@gmail.com",
+      "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAJ...",
+      "active": false
+    }
+  ]
+}

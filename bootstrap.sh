@@ -240,6 +240,20 @@ else
   echo "Warning: python3 not found. Please run .agents/scripts/recon.py manually after installing python3."
 fi
 
+# 5. Set up local Git hooks
+if [ -d ".git" ]; then
+  cat << 'EOF' > .git/hooks/pre-commit
+#!/usr/bin/env bash
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/validate.py
+else
+  echo "Warning: python3 not found. Skipping commit validation check."
+fi
+EOF
+  chmod +x .git/hooks/pre-commit
+  echo "Installed local Git pre-commit hook."
+fi
+
 echo "=========================================================="
 echo "   AAC V2 Bootstrap Completed Successfully!             "
 echo "=========================================================="

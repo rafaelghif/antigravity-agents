@@ -1,0 +1,131 @@
+import os
+import re
+import sys
+
+# Terminal Colors
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+
+def print_err(msg):
+    print(f"{RED}[FAIL] {msg}{RESET}", file=sys.stderr)
+
+def print_warn(msg):
+    print(f"{YELLOW}[WARN] {msg}{RESET}")
+
+def print_ok(msg):
+    print(f"{GREEN}[OK] {msg}{RESET}")
+
+def run_validations():
+    failed = False
+    
+    print("==========================================================")
+    print("   Running AAC V2 Local Validation Guard...              ")
+    print("==========================================================")
+    
+    # 1. Critical Files Audit
+    critical_files = [
+        "AGENTS.md",
+        ".agents/rules.md",
+        ".agents/tasks/board.md",
+        ".agents/memory/architecture.md"
+    ]
+    
+    print("\n[1/3] Auditing Critical Files...")
+    for f in critical_files:
+        if not os.path.exists(f):
+            print_err(f"Critical file '{f}' is missing from workspace!")
+            failed = True
+        else:
+            print_ok(f"Found '{f}'")
+            
+    # 2. Secret Exposure Audit
+    print("\n[2/3] Auditing for Staged Secrets & Credentials...")
+    # Scan files in current directory, excluding .git, node_modules, vendor, etc.
+    secret_patterns = [
+        r"(?i)api_key\s*=\s*['\"][a-zA-Z0-9_\-]{16,}['\"]",
+        r"(?i)password\s*=\s*['\"][a-zA-Z0-9_\-]{8,}['\"]",
+        r"(?i)private_key\s*=\s*['\"].*['\"]",
+        r"-----BEGIN [A-Z ]+ PRIVATE KEY-----"
+    ]
+    
+    exclude_dirs = {'.git', 'node_modules', 'venv', 'env', '__pycache__', 'vendor'}
+    found_secrets = False
+    
+    for root, dirs, files in os.walk('.'):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        for file in files:
+            # Skip binary files or common non-code files
+            if file.endswith(('.png', '.jpg', '.ico', '.pdf', '.zip', '.tar.gz')):
+                continue
+            path = os.path.join(root, file)
+            # Avoid self-scanning validation script or Git logs
+            if "validate.py" in path:
+                continue
+                
+            try:
+                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    for idx, line in enumerate(content.splitlines(), 1):
+                        for pattern in secret_patterns:
+                            if re.search(pattern, line):
+                                print_err(f"Potential secret exposed in '{path}' at line {idx}: {line.strip()}")
+                                found_secrets = True
+                                failed = True
+            except Exception:
+                pass
+                
+    if not found_secrets:
+        print_ok("No credentials or secrets detected.")
+        
+    # 3. Link Integrity Audit
+    print("\n[3/3] Auditing File Links inside Memory Registers...")
+    link_files = [".agents/memory/architecture.md", ".agents/schema.md"]
+    found_broken_links = False
+    
+    for f in link_files:
+        if not os.path.exists(f):
+            continue
+        try:
+            with open(f, 'r', encoding='utf-8') as file:
+                content = file.read()
+                # Find markdown file scheme links like file:///absolute/path/to/file or file://./relative/path
+                links = re.findall(r'file://([^\s\)]+)', content)
+                for link in links:
+                    # Parse absolute vs relative file paths
+                    if link.startswith('///'):
+                        clean_path = '/' + link[3:]
+                    elif link.startswith('//.'):
+                        clean_path = link[2:]
+                    else:
+                        clean_path = link
+                    
+                    # Split anchors (#L120-L130)
+                    base_path = clean_path.split('#')[0]
+                    # Unquote URL encoding (%20 etc)
+                    from urllib.parse import unquote
+                    base_path = unquote(base_path)
+                    
+                    if base_path and not os.path.exists(base_path):
+                        print_err(f"Broken link in '{f}': linked file '{base_path}' does not exist.")
+                        found_broken_links = True
+                        failed = True
+        except Exception as e:
+            print_warn(f"Failed to scan links in '{f}': {e}")
+            
+    if not found_broken_links:
+        print_ok("All file-link path integrity checks passed.")
+        
+    print("\n==========================================================")
+    if failed:
+        print(f"{RED}   Validation FAILED! Please fix the errors above. {RESET}")
+        print("==========================================================")
+        sys.exit(1)
+    else:
+        print(f"{GREEN}   Validation PASSED! Workspace is compliant.      {RESET}")
+        print("==========================================================")
+        sys.exit(0)
+
+if __name__ == '__main__':
+    run_validations()
