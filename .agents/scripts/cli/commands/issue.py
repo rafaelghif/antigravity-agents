@@ -401,7 +401,9 @@ created_at: {current_date}
                 "AGENTS.md",
                 "bootstrap.sh",
                 "bootstrap.ps1",
-                ".agents/scripts/cli/commands/bootstrap.py"
+                ".agents/scripts/cli/commands/bootstrap.py",
+                "README.md",
+                ".agents/scripts/cli/commands/issue.py"
             ]
             for f_to_stage in files_to_stage:
                 if os.path.exists(f_to_stage):
