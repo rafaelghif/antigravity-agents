@@ -199,5 +199,41 @@ class TestProfileCommand(unittest.TestCase):
             profile.handle_add(["existing", "new@test.com"])
         mock_exit.assert_called_with(1)
 
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_with_git_token(self, mock_save, mock_load, mock_sub):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "git_token": "ghp_realSecretToken123"}
+            ]
+        }
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        profile.handle_switch(["p2"])
+        
+        sub_calls = [call[0][0] for call in mock_sub.call_args_list]
+        self.assertTrue(any("credential.helper" in " ".join(cmd) and "profile credential-helper" in " ".join(cmd) for cmd in sub_calls))
+
+    @patch('sys.exit', side_effect=SystemExit)
+    @patch('sys.stdin')
+    @patch('profile.load_profiles')
+    def test_handle_credential_helper_get(self, mock_load, mock_stdin, mock_exit):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True, "git_token": "ghp_realSecretToken123"}
+            ]
+        }
+        mock_stdin.__iter__.return_value = ["protocol=https\n", "host=github.com\n", "\n"]
+        
+        with patch('builtins.print') as mock_print:
+            with self.assertRaises(SystemExit):
+                profile.handle_credential_helper(["get"])
+                
+            printed = [call[0][0] for call in mock_print.call_args_list if call[0]]
+            self.assertTrue(any("username=p1@test.com" in p for p in printed))
+            self.assertTrue(any("password=ghp_realSecretToken123" in p for p in printed))
+
 if __name__ == '__main__':
     unittest.main()
