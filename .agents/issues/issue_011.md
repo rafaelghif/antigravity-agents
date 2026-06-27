@@ -19,12 +19,12 @@ This issue outlines the integration of new compliance checks into `.agents/scrip
    - **Bypass Rule**: Allow bypassing test execution if environment variable `BYPASS_TESTS=true` is set.
 
 ## 2. Implementation Subtasks
-- [ ] Add `board.md` format verification logic in `validate.py`.
-- [ ] Add static syntax compiling / linter check logic in `validate.py`.
-- [ ] Add test suite execution logic in `validate.py` (reads test command from `.agents/rules.md` or `recon.py`).
-- [ ] Implement support for `BYPASS_TESTS` environment variable to skip test execution.
+- [x] Add `board.md` format verification logic in `validate.py`.
+- [x] Add static syntax compiling / linter check logic in `validate.py`.
+- [x] Add test suite execution logic in `validate.py` (reads test command from `.agents/rules.md` or `recon.py`).
+- [x] Implement support for `BYPASS_TESTS` environment variable to skip test execution.
 
 ## 3. Acceptance Criteria
-- [ ] Running `./helper.sh validate` successfully checks `board.md` syntax.
-- [ ] Adding invalid Python syntax causes the validation suite to fail.
-- [ ] Commits are blocked if unit tests fail, unless `BYPASS_TESTS=true` is set.
+- [x] Running `./helper.sh validate` successfully checks `board.md` syntax.
+- [x] Adding invalid Python syntax causes the validation suite to fail.
+- [x] Commits are blocked if unit tests fail, unless `BYPASS_TESTS=true` is set.

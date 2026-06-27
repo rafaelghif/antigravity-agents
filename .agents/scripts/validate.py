@@ -32,7 +32,7 @@ def run_validations():
         ".agents/memory/architecture.md"
     ]
     
-    print("\n[1/3] Auditing Critical Files...")
+    print("\n[1/8] Auditing Critical Files...")
     for f in critical_files:
         if not os.path.exists(f):
             print_err(f"Critical file '{f}' is missing from workspace!")
@@ -41,7 +41,7 @@ def run_validations():
             print_ok(f"Found '{f}'")
             
     # 2. Secret Exposure Audit
-    print("\n[2/3] Auditing for Staged Secrets & Credentials...")
+    print("\n[2/8] Auditing for Staged Secrets & Credentials...")
     # Scan files in current directory, excluding .git, node_modules, vendor, etc.
     secret_patterns = [
         r"(?i)api_key\s*=\s*['\"][a-zA-Z0-9_\-]{16,}['\"]",
@@ -80,7 +80,7 @@ def run_validations():
         print_ok("No credentials or secrets detected.")
         
     # 3. Link Integrity Audit
-    print("\n[3/3] Auditing File Links inside Memory Registers...")
+    print("\n[3/8] Auditing File Links inside Memory Registers...")
     link_files = [".agents/memory/architecture.md", ".agents/schema.md"]
     found_broken_links = False
     
@@ -124,7 +124,7 @@ def run_validations():
         print_ok("All file-link path integrity checks passed.")
         
     # 4. Git Branch & Issue Alignment Audit
-    print("\n[4/4] Auditing Git Branch to Local Issue Alignment...")
+    print("\n[4/8] Auditing Git Branch to Local Issue Alignment...")
     branch = get_current_branch()
     if branch:
         if branch in ('main', 'master', 'HEAD'):
@@ -186,7 +186,7 @@ def run_validations():
         print_warn("Not inside a git repository or git command failed.")
         
     # 5. Synchronization Check
-    print("\n[5/5] Auditing Workspace Sync Alignment...")
+    print("\n[5/8] Auditing Workspace Sync Alignment...")
     skills_dir = ".agents/skills"
     agents_file = "AGENTS.md"
     sync_failed = False
@@ -204,6 +204,86 @@ def run_validations():
     if not sync_failed:
         print_ok("Workspace AGENTS.md is in perfect sync with local skills.")
         
+    # 6. Task Board Schema Compliance Check
+    print("\n[6/8] Auditing Task Board Schema Compliance...")
+    task_board = ".agents/tasks/board.md"
+    board_failed = False
+    if os.path.exists(task_board):
+        try:
+            with open(task_board, 'r', encoding='utf-8') as f:
+                content = f.read()
+            required_sections = ["## Todo", "## Doing", "## Done"]
+            for sec in required_sections:
+                if sec not in content:
+                    print_err(f"Task board '{task_board}' is missing section '{sec}'!")
+                    board_failed = True
+                    failed = True
+            # Verify markdown task checkboxes have dynamic tracking IDs
+            task_lines = re.findall(r'([-*]\s*\[[xX /]\].*)', content)
+            for line in task_lines:
+                if "<!-- id:" not in line:
+                    print_warn(f"Task line missing ID tracking comment: '{line.strip()}'")
+        except Exception as e:
+            print_warn(f"Failed to scan task board schema: {e}")
+    if not board_failed:
+        print_ok("Task board schema is compliant.")
+        
+    # 7. Static Code Linting / Compile Check
+    print("\n[7/8] Auditing Static Syntax Compilation...")
+    lint_failed = False
+    scripts_dir = ".agents/scripts"
+    if os.path.exists(scripts_dir):
+        for root, _, files in os.walk(scripts_dir):
+            for file in files:
+                if file.endswith(".py"):
+                    file_path = os.path.join(root, file)
+                    import py_compile
+                    try:
+                        py_compile.compile(file_path, doraise=True)
+                    except py_compile.PyCompileError as e:
+                        print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
+                        lint_failed = True
+                        failed = True
+                        continue
+                        
+                    # Optional style check via flake8
+                    import shutil
+                    if shutil.which("flake8"):
+                        import subprocess
+                        res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
+                        if res.returncode != 0:
+                            print_err(f"flake8 style violations found in '{file_path}':\n{res.stdout}")
+                            lint_failed = True
+                            failed = True
+    if not lint_failed:
+        print_ok("Static syntax compilation and style audits passed.")
+        
+    # 8. Executing Local Unit Tests
+    print("\n[8/8] Executing Local Unit Tests...")
+    if os.getenv("BYPASS_TESTS") == "true":
+        print_warn("Bypass flag 'BYPASS_TESTS=true' detected. Skipping unit test execution.")
+    else:
+        import shutil
+        import subprocess
+        test_cmd = None
+        # Default python/pytest testing
+        if os.path.exists("tests") or os.path.exists("test"):
+            if shutil.which("pytest"):
+                test_cmd = ["pytest"]
+            else:
+                test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests"]
+                
+        if test_cmd:
+            print(f"Running test suite: {' '.join(test_cmd)}")
+            test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if test_res.returncode != 0:
+                print_err(f"Unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
+                failed = True
+            else:
+                print_ok("All unit tests passed successfully.")
+        else:
+            print_warn("No test suite directory ('tests/') or runner (pytest/unittest) found.")
+            
     print("\n==========================================================")
     if failed:
         print(f"{RED}   Validation FAILED! Please fix the errors above. {RESET}")
