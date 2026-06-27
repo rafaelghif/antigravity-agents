@@ -172,7 +172,13 @@ if ($LocalDev -and (Test-Path $SrcAgents)) {
     }
 
     # Run local bootstrap.ps1
-    & (Join-Path $SrcDir "bootstrap.ps1")
+    $OriginalLocation = Get-Location
+    Set-Location -Path $TargetAbs
+    try {
+        & (Join-Path $SrcDir "bootstrap.ps1")
+    } finally {
+        Set-Location -Path $OriginalLocation
+    }
 } else {
     Write-Host "Local source files not found. Downloading Antigravity Agent Core from GitHub..."
     Write-Host "Verifying network connection to GitHub..."

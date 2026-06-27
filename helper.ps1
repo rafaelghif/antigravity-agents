@@ -1,9 +1,30 @@
 # Windows PowerShell wrapper for Antigravity Agent Core CLI
 
+$ScriptDir = $PSScriptRoot
+if (-not $ScriptDir) {
+    $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+if (-not $ScriptDir) {
+    $ScriptDir = Get-Location
+}
+
+$PythonExec = ""
 if (Get-Command python -ErrorAction SilentlyContinue) {
-    python .agents/scripts/cli/helper.py $args
-} elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-    python3 .agents/scripts/cli/helper.py $args
+    $Version = & python --version 2>&1
+    if ($Version -match "Python 3") {
+        $PythonExec = "python"
+    }
+}
+if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+    $Version = & python3 --version 2>&1
+    if ($Version -match "Python 3") {
+        $PythonExec = "python3"
+    }
+}
+
+if ($PythonExec) {
+    $HelperScript = Join-Path $ScriptDir ".agents/scripts/cli/helper.py"
+    & $PythonExec $HelperScript @args
 } else {
     Write-Error "Error: Python 3 runtime is required to execute Antigravity CLI commands."
     Exit 1

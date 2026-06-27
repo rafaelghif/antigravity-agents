@@ -129,7 +129,7 @@ if [ "${ANTIGRAVITY_LOCAL_DEV:-0}" = "1" ] && [ -d "$SRC_DIR/.agents" ]; then
   fi
   
   # Run local bootstrap.sh
-  bash "$SRC_DIR/bootstrap.sh"
+  (cd "$TARGET_ABS" && bash "$SRC_DIR/bootstrap.sh")
 else
   echo "Local source files not found. Downloading Antigravity Agent Core from GitHub..."
   
