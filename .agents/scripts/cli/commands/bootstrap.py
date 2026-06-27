@@ -44,6 +44,66 @@ def create_mvc_architecture(root):
         with open(os.path.join(root, d, "__init__.py"), 'w') as f:
             f.write("")
 
+def copy_core_files():
+    """Copy all core agent files and skills from the running installation source
+    to the target project workspace if they are missing."""
+    import shutil
+    
+    # Locate the running script's project root (where .agents directory is located)
+    # Since this command runs from .agents/scripts/cli/commands/bootstrap.py
+    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+    target_root = os.path.abspath(".")
+    
+    # If target is the same as source, nothing to copy
+    if src_root == target_root:
+        return
+        
+    print("Copying core agent scripts, skills, and CLI helper tools...")
+    
+    # Directories to copy recursively
+    core_dirs = [
+        ".agents/scripts",
+        ".agents/skills",
+        ".agents/workflows",
+    ]
+    
+    for d in core_dirs:
+        src_dir = os.path.join(src_root, d)
+        target_dir = os.path.join(target_root, d)
+        if os.path.exists(src_dir):
+            if os.path.exists(target_dir):
+                # Copy individual files that are missing
+                for root, _, files in os.walk(src_dir):
+                    rel_path = os.path.relpath(root, src_dir)
+                    dest_folder = os.path.join(target_dir, rel_path)
+                    os.makedirs(dest_folder, exist_ok=True)
+                    for file in files:
+                        src_file = os.path.join(root, file)
+                        dest_file = os.path.join(dest_folder, file)
+                        if not os.path.exists(dest_file):
+                            try:
+                                shutil.copy2(src_file, dest_file)
+                            except Exception:
+                                pass
+            else:
+                try:
+                    shutil.copytree(src_dir, target_dir)
+                except Exception:
+                    pass
+                
+    # Root helper wrappers
+    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example"]
+    for h in helpers:
+        src_file = os.path.join(src_root, h)
+        dest_file = os.path.join(target_root, h)
+        if os.path.exists(src_file) and not os.path.exists(dest_file):
+            try:
+                shutil.copy2(src_file, dest_file)
+                if h.endswith(".sh"):
+                    os.chmod(dest_file, 0o755)
+            except Exception:
+                pass
+
 def run(args):
     print("==========================================================")
     print("   Antigravity V2 Project Bootstrapper                    ")
@@ -75,6 +135,8 @@ def run(args):
         create_layered_architecture(".")
     elif arch == "mvc":
         create_mvc_architecture(".")
+
+    copy_core_files()
 
     # 2. Write Base Configuration Files
     if stack == "python":
