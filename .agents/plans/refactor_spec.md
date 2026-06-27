@@ -6,6 +6,7 @@ We have aligned on a comprehensive refactoring and bugfix plan for the core comp
 We will refactor this script to improve modularity, execution speed, and usability:
 - **Modularity**: Extract each of the 8 validation checks into distinct Python functions (e.g. `audit_critical_files()`, `audit_secrets()`, `audit_link_integrity()`, etc.).
 - **Performance Optimization**: Exclude heavy/build directories like `dist`, `build`, `out`, and `.next` from the secret scanner's fallback walker to ensure fast execution on larger projects.
+- **Ignore File Compliance**: Check staged files against patterns in `.gitignore` (using `git check-ignore`) and `.antigravityignore` (using a regex conversion helper) to ensure ignored files are not staged or committed.
 - **Audit Summary Table**: Build a clean visual status grid at the end of the script displaying the final pass/fail status of each audit step (resembling a checklist).
 
 ## 2. CLI Dispatcher (`helper.py` & commands)
@@ -23,7 +24,7 @@ We will resolve bugs and warning visibility issues:
 
 ## 4. Implementation Subtasks
 
-1. **Refactor validate.py**: Restructure the script into 8 modular functions, add the summary box printer, and update exclude directories.
+1. **Refactor validate.py**: Restructure the script into 8 modular functions, add the summary box printer, update exclude directories, and implement strict `.gitignore` and `.antigravityignore` staged file validation checks.
 2. **Refactor git_api.py**: Apply API headers, improve remote URL parsing, and add missing configurations warning logs.
 3. **Refactor helper.py**: Streamline CLI path resolving and command dispatching.
 4. **Refactor issue.py**: Check `git_api` returns and print warning logs to the user if GitHub issue creation was bypassed due to missing tokens or remote setup.

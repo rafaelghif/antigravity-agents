@@ -32,6 +32,7 @@ Option B is selected. We will keep CLI command modules self-contained while refa
 ## 3. Implementation Subtasks
 - [ ] **validate.py**: Refactor audits into distinct functions and add a visual audit summary table/box.
 - [ ] **validate.py**: Exclude `dist`, `build`, `out`, and `.next` from the secret scanner's directory walker.
+- [ ] **validate.py**: Implement strict validation check preventing any files/folders ignored by `.gitignore` or `.antigravityignore` from being staged or committed.
 - [ ] **git_api.py**: Use `Bearer` token header, robust git remote parse regex, and add warning logs for missing token/remote URL.
 - [ ] **helper.py**: Simplify command path loading and error handling.
 - [ ] **issue.py**: Clean up arguments parsing and print warning messages if git_api returns `None` for GitHub issue creation.
@@ -40,6 +41,7 @@ Option B is selected. We will keep CLI command modules self-contained while refa
 
 ## 4. Acceptance Criteria
 - [ ] `validate.py` prints a clean colored Summary Table at the end of the execution.
+- [ ] `validate.py` fails if any file ignored by `.gitignore` or `.antigravityignore` is staged.
 - [ ] Subcommand runner handles missing or invalid commands gracefully.
 - [ ] `helper.py issue create` logs a helpful warning to the user if GITHUB_TOKEN or remote configuration is missing.
 - [ ] All unit tests pass.
