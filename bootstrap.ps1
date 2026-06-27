@@ -16,6 +16,19 @@ foreach ($Dir in $Dirs) {
     }
 }
 
+# 1.1 Copy template memory files
+$SrcTemplates = ".agents/memory/templates"
+if (Test-Path $SrcTemplates) {
+    $Templates = Get-ChildItem -Path $SrcTemplates -Filter "*.template"
+    foreach ($T in $Templates) {
+        $DestName = $T.BaseName
+        $DestPath = ".agents/memory/$DestName"
+        if (-not (Test-Path $DestPath)) {
+            Copy-Item -Path $T.FullName -Destination $DestPath -Force | Out-Null
+        }
+    }
+}
+
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md") {
     if (Get-Command python -ErrorAction SilentlyContinue) {
