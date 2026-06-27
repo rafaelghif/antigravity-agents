@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.28.0] - 2026-06-27
+
+### 🚀 Features
+- Design & Task Specification (ISSUE-052)
+
+### 📝 Documentation
+- remove e2e testing, add token efficiency guidelines, and fix SemVer branch bump mapping
+
+
 ## [2.27.0] - 2026-06-27
 
 ### 🚀 Features
