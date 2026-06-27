@@ -30,7 +30,17 @@
 - **ALWAYS** copy `.agents/git_profiles.example` to `.agents/git_profiles.json` during environment initialization to set up local identity rotation, and verify the `.json` file is never staged or committed.
 - **ALWAYS** run the changelog generator command (`./helper.sh changelog`) before closing issues or completing tasks to ensure the release history in `CHANGELOG.md` is strictly updated.
 
-## 3. Context map — what loads when
+## 3. CLI Helper Commands Reference
+All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):
+- `./helper.sh bootstrap`: Scaffolds dirs, stack detect, AGENTS.md, profile wizard.
+- `./helper.sh validate`: Runs 8 audits (files, secrets, links, branch, sync, task schema, lint, tests).
+- `./helper.sh issue <create|list|checkout|close|sync>`: Subtask and issue lifecycle tracking.
+- `./helper.sh lock <module-name>`: Acquires local locks. Unlock with `--release <module-name>`.
+- `./helper.sh profile <add|switch|list|apply>`: Credentials rotation and auto-sync config.
+- `./helper.sh changelog`: Conventional commits parser and SemVer version bump.
+- `./helper.sh sync`: Updates skills and ADR registries.
+
+## 4. Context map — what loads when
 
 | Path | Contents | When it loads |
 |---|---|---|
@@ -50,7 +60,7 @@
 
 If you're about to paste a paragraph of explanation into this file, it almost certainly belongs in a skill or memory file instead, pulled in with `@path` only when needed. That's what keeps the per-prompt token cost flat as the project grows.
 
-## 4. Working protocol
+## 5. Working protocol
 1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), and task board before writing any code.
 2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`.
 3. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `world-class-programmer` playbook) to evaluate long-term maintenance and UI/UX simplicity.
@@ -59,13 +69,13 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 6. **Before marking a task `Completed`:** tests pass, board updated with implementation notes, changelog is updated by running `./helper.sh changelog`, and — if the change was architecturally significant — a new or superseding ADR exists (`adr-writer` skill).
 7. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
 
-## 5. Git & review
+## 6. Git & review
 - Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.
 - One task = one PR where practical; link the task ID in the PR description.
 - No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.
 
-## 6. Tool permissions
+## 7. Tool permissions
 Default to `request-review` in `agy config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.
 
-## 7. Maintaining this file
+## 8. Maintaining this file
 Reviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.
