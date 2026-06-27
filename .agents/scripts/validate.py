@@ -78,7 +78,7 @@ def is_git_ignored(path: str) -> bool:
 # 1. Critical Files Audit
 # ==========================================================
 def audit_critical_files() -> bool:
-    print("\n[1/8] Auditing Critical Files...")
+    print("\n[1/9] Auditing Critical Files...")
     critical_files = [
         "AGENTS.md",
         ".agents/rules.md",
@@ -98,7 +98,7 @@ def audit_critical_files() -> bool:
 # 2. Secret, Staged, and Ignored File Audit
 # ==========================================================
 def audit_secrets_and_ignored_files() -> bool:
-    print("\n[2/8] Auditing for Staged Secrets, Private, and Ignored Files...")
+    print("\n[2/9] Auditing for Staged Secrets, Private, and Ignored Files...")
     failed = False
     
     staged_files = []
@@ -231,7 +231,7 @@ def audit_secrets_and_ignored_files() -> bool:
 # 3. Link Integrity Audit
 # ==========================================================
 def audit_link_integrity() -> bool:
-    print("\n[3/8] Auditing File Links inside Memory Registers...")
+    print("\n[3/9] Auditing File Links inside Memory Registers...")
     link_files = [".agents/memory/architecture.md", ".agents/schema.md"]
     failed = False
     
@@ -273,7 +273,7 @@ def audit_link_integrity() -> bool:
 # 4. Git Branch & Issue Alignment Audit
 # ==========================================================
 def audit_git_branch_alignment() -> bool:
-    print("\n[4/8] Auditing Git Branch to Local Issue Alignment...")
+    print("\n[4/9] Auditing Git Branch to Local Issue Alignment...")
     branch = get_current_branch()
     if not branch:
         print_warn("Not inside a git repository or git command failed.")
@@ -362,7 +362,7 @@ def audit_git_branch_alignment() -> bool:
 # 5. Synchronization Check
 # ==========================================================
 def audit_workspace_sync() -> bool:
-    print("\n[5/8] Auditing Workspace Sync Alignment...")
+    print("\n[5/9] Auditing Workspace Sync Alignment...")
     skills_dir = ".agents/skills"
     agents_file = "AGENTS.md"
     failed = False
@@ -384,7 +384,7 @@ def audit_workspace_sync() -> bool:
 # 6. Task Board Schema Compliance Check
 # ==========================================================
 def audit_task_board_schema() -> bool:
-    print("\n[6/8] Auditing Task Board Schema Compliance...")
+    print("\n[6/9] Auditing Task Board Schema Compliance...")
     task_board = ".agents/tasks/board.md"
     failed = False
     if os.path.exists(task_board):
@@ -412,7 +412,7 @@ def audit_task_board_schema() -> bool:
 # 7. Static Code Linting / Compile Check
 # ==========================================================
 def audit_static_linting() -> bool:
-    print("\n[7/8] Auditing Static Syntax Compilation...")
+    print("\n[7/9] Auditing Static Syntax Compilation...")
     failed = False
     scripts_dir = ".agents/scripts"
     antigravity_patterns = parse_antigravity_ignore()
@@ -448,7 +448,7 @@ def audit_static_linting() -> bool:
 # 8. Local Unit Tests Execution
 # ==========================================================
 def audit_unit_tests() -> bool:
-    print("\n[8/8] Executing Local Unit Tests...")
+    print("\n[8/9] Executing Local Unit Tests...")
     if os.getenv("BYPASS_TESTS") == "true":
         print_warn("Bypass flag 'BYPASS_TESTS=true' detected. Skipping unit test execution.")
         return True
@@ -472,6 +472,68 @@ def audit_unit_tests() -> bool:
     else:
         print_warn("No test suite directory ('.agents/tests/') or runner (pytest/unittest) found.")
         return True
+
+# ==========================================================
+# 9. Module Lock Compliance Audit
+# ==========================================================
+def audit_module_locks() -> bool:
+    print("\n[9/9] Auditing Module Lock Compliance...")
+    branch = get_current_branch()
+    if not branch:
+        print_warn("Not inside a git repository or git command failed.")
+        return True
+        
+    if branch in ('main', 'master', 'HEAD'):
+        print_ok(f"On base branch '{branch}' (skipping lock compliance check).")
+        return True
+
+    staged_files = []
+    try:
+        res = subprocess.run(
+            ['git', 'diff', '--cached', '--name-only'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        staged_files = [line.strip() for line in res.stdout.splitlines() if line.strip()]
+    except Exception:
+        pass
+
+    locks_file = ".agents/locks.json"
+    locks = {}
+    if os.path.exists(locks_file):
+        try:
+            import json
+            with open(locks_file, 'r', encoding='utf-8') as f:
+                locks = json.load(f)
+        except Exception:
+            pass
+
+    failed = False
+    for path in staged_files:
+        if path.endswith(('.md', '.json', '.txt', '.sh', '.ps1', '.gitignore', '.antigravityignore', '.example')):
+            continue
+        if "tests/" in path or "plans/" in path or "memory/" in path or "docs/" in path:
+            continue
+            
+        base = os.path.basename(path)
+        mod_name = os.path.splitext(base)[0]
+        
+        if mod_name in locks:
+            if locks[mod_name] != branch:
+                print_err(f"Module '{mod_name}' (file '{path}') is locked by branch '{locks[mod_name]}', but you are committing from '{branch}'!")
+                failed = True
+            else:
+                print_ok(f"Module '{mod_name}' (file '{path}') is correctly locked by this branch.")
+        else:
+            print_err(f"Module '{mod_name}' (file '{path}') is staged for commit, but no lock is acquired! "
+                      f"Please run './helper.sh lock {mod_name}' first.")
+            failed = True
+
+    if not failed:
+        print_ok("Lock compliance check passed.")
+    return not failed
 
 def prune_stale_locks() -> None:
     locks_file = ".agents/locks.json"
@@ -530,6 +592,7 @@ def run_validations() -> None:
     results["Task Board Schema"] = audit_task_board_schema()
     results["Static Code Linting"] = audit_static_linting()
     results["Local Unit Tests"] = audit_unit_tests()
+    results["Module Lock Compliance"] = audit_module_locks()
     
     # Print the Colored Audit Summary Table
     print("\n==========================================================")
