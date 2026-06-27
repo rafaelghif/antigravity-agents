@@ -6,6 +6,48 @@ from datetime import datetime
 
 ISSUE_DIR = ".agents/issues"
 
+def update_board_completed(issue_id):
+    board_path = ".agents/tasks/board.md"
+    if not os.path.exists(board_path):
+        return
+    try:
+        with open(board_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        lines = content.splitlines()
+        target_line = None
+        new_lines = []
+        
+        pattern = rf"<!-- id:\s*{re.escape(issue_id)}\s*-->"
+        for line in lines:
+            if re.search(pattern, line):
+                target_line = line
+            else:
+                new_lines.append(line)
+                
+        if target_line:
+            # Change unchecked to checked
+            target_line = re.sub(r'\[\s*\]', '[x]', target_line)
+            target_line = re.sub(r'\[\s*[xX]\s*\]', '[x]', target_line)
+            
+            # Find ## Done line
+            done_idx = -1
+            for idx, line in enumerate(new_lines):
+                if line.strip() == "## Done":
+                    done_idx = idx
+                    break
+            
+            if done_idx != -1:
+                new_lines.insert(done_idx + 1, target_line)
+            else:
+                new_lines.append(target_line)
+                
+            with open(board_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(new_lines) + "\n")
+            print(f"[OK] Moved task '{issue_id}' to Done in task board.")
+    except Exception as e:
+        print(f"Warning: Could not update task board: {e}")
+
 def sync_issues():
     """Fetch remote issues and synchronize status/existence with local markdown files."""
     try:
@@ -235,7 +277,36 @@ created_at: {current_date}
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'.")
             sys.exit(1)
-            
+
+        # Get current branch
+        res_curr = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
+        current_branch = res_curr.stdout.strip()
+        
+        slug = issue_id.lower().replace('_', '-')
+        possible_branches = [f"feat/{slug}", f"fix/{slug}"]
+        
+        found_branch = None
+        for b in possible_branches:
+            res_ref = subprocess.run(['git', 'show-ref', f'refs/heads/{b}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if res_ref.returncode == 0:
+                found_branch = b
+                break
+
+        if found_branch and current_branch != found_branch:
+            print(f"Error: You are currently on branch '{current_branch}', but this issue is associated with branch '{found_branch}'.")
+            print(f"Please checkout the feature branch first: git checkout {found_branch}")
+            sys.exit(1)
+
+        # 1. Run local validation checks before closing
+        print("Triggering pre-close validation guard...")
+        val_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../validate.py'))
+        if os.path.exists(val_path):
+            val_res = subprocess.run([sys.executable, val_path])
+            if val_res.returncode != 0:
+                print("Error: Validation guard failed. Issue close aborted.")
+                sys.exit(1)
+
+        # Read issue file
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
 
@@ -255,6 +326,81 @@ created_at: {current_date}
         with open(path, 'w', encoding='utf-8') as f:
             f.write(content)
         print(f"Successfully closed issue '{issue_id}' (updated file status).")
+
+        # 2. Update task board
+        update_board_completed(issue_id)
+
+        # 3. Run SemVer changelog generator
+        print("Running auto-changelog and SemVer version bump...")
+        helper_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../helper.py'))
+        changelog_res = subprocess.run([sys.executable, helper_path, 'changelog'])
+        if changelog_res.returncode != 0:
+            print("Warning: Changelog generator failed or was skipped.")
+
+        # 4. Stage and commit release/board/issue files on feature branch
+        if found_branch:
+            print(f"Staging issue, board, and release changes on branch '{found_branch}'...")
+            files_to_stage = [
+                path,
+                ".agents/tasks/board.md",
+                "CHANGELOG.md",
+                "AGENTS.md",
+                "bootstrap.sh",
+                "bootstrap.ps1",
+                ".agents/scripts/cli/commands/bootstrap.py"
+            ]
+            for f_to_stage in files_to_stage:
+                if os.path.exists(f_to_stage):
+                    subprocess.run(['git', 'add', f_to_stage])
+
+            commit_msg = f"chore(release): close {issue_id}, update task board, and bump version"
+            print(f"Committing final changes to branch '{found_branch}'...")
+            subprocess.run([
+                sys.executable,
+                helper_path,
+                'commit',
+                '-m', commit_msg,
+                '-m', issue_id,
+                '--no-verify'
+            ])
+
+            # 5. Merge and cleanup branch
+            base_branch = "main"
+            res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if res_master.returncode == 0:
+                base_branch = "master"
+
+            print(f"Switching to base branch '{base_branch}'...")
+            subprocess.run(['git', 'checkout', base_branch], check=True)
+
+            print(f"Merging branch '{found_branch}' into '{base_branch}'...")
+            merge_res = subprocess.run(['git', 'merge', found_branch])
+            if merge_res.returncode != 0:
+                print("Error: Git merge failed with conflict! Please resolve manually.")
+                sys.exit(1)
+
+            print(f"Deleting branch '{found_branch}'...")
+            subprocess.run(['git', 'branch', '-d', found_branch])
+
+            # Release lock
+            locks_file = ".agents/locks.json"
+            if os.path.exists(locks_file):
+                try:
+                    import json
+                    with open(locks_file, 'r', encoding='utf-8') as lf:
+                        locks = json.load(lf)
+                    modified_locks = False
+                    for mod, holder in list(locks.items()):
+                        if holder == found_branch:
+                            del locks[mod]
+                            modified_locks = True
+                    if modified_locks:
+                        with open(locks_file, 'w', encoding='utf-8') as lf:
+                            json.dump(locks, lf, indent=2)
+                        print("[OK] Released module locks associated with the branch.")
+                except Exception:
+                    pass
+            print(f"[OK] Issue '{issue_id}' fully resolved and merged to '{base_branch}' successfully.")
         
     elif action == "sync":
         sync_issues()

@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement automated branch merge and board transition in issue close command (feat/issue-029) <!-- id: issue-029 -->
 - [x] Enforce strict git branch flow, merge procedures, and profile identity validation (feat/issue-028) <!-- id: issue-028 -->
 - [x] Implement Two-Way Git Profile Auto-Sync and Strict Validation (`feat/issue-027`) <!-- id: issue-027 -->
 - [x] Implement Two-Way GitHub Issues Synchronization with Local Fallback (`feat/issue-026`) <!-- id: issue-026 -->
