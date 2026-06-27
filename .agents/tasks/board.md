@@ -7,7 +7,8 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
-- [/] Fix changelog boundary commit resolution and clean up duplicated changelog entries (feat/issue-046) <!-- id: issue-046 -->
+- [/] Implement installer prerequisite audits for Git, Python 3, and network connectivity (feat/issue-047) <!-- id: issue-047 -->
+- [x] Fix changelog boundary commit resolution and clean up duplicated changelog entries (feat/issue-046) <!-- id: issue-046 -->
 - [x] Enforce prompt-level loop guard to prevent agent infinite loops (feat/issue-045) <!-- id: issue-045 -->
 - [x] Implement enterprise-grade Observability & Logging skill playbook (feat/issue-044) <!-- id: issue-044 -->
 - [x] Rename skills to professional, non-exaggerated enterprise-grade names (feat/issue-043) <!-- id: issue-043 -->
