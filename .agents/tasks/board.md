@@ -25,3 +25,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement V2 CLI project bootstrap subcommand and rules for fresh projects (`feat/project-bootstrap`) <!-- id: task-015 -->
 - [x] Implement strict Git staged files and private files validation gate (`feat/staged-secrets`) <!-- id: task-016 -->
 - [x] Implement remote GitHub Issue integration and strict Conventional Commit message hook (`feat/git-api-enforcer`) <!-- id: task-017 -->
+- [x] Enforce Git profiles setup rule in AGENTS.md to protect credentials (`feat/git-profile-rules`) <!-- id: task-018 -->
