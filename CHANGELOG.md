@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.29.0] - 2026-06-27
+
+### 🚀 Features
+- Design & Task Specification (ISSUE-053)
+
+### 📝 Documentation
+- implement self-learning CLI command and stack-agnostic project auto-detection
+
+
 ## [2.28.0] - 2026-06-27
 
 ### 🚀 Features

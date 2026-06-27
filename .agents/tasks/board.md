@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement monorepo multi-project support and API contract synchronization (feat/issue-053) <!-- id: issue-053 -->
 - [x] Implement self-learning mechanism and plug-and-play stack adaptation (feat/issue-052) <!-- id: issue-052 -->
 - [x] Optimize token efficiency, remove E2E testing, and fix SemVer branch bump (feat/issue-051) <!-- id: issue-051 -->
 - [x] Establish Testing and CI-CD playbooks and Refactor existing skills (feat/issue-050) <!-- id: issue-050 -->
