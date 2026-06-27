@@ -28,4 +28,5 @@ graph TD
 
 ## 3. Decisions & ADR Registry
 All major architectural changes must be registered as ADRs:
-- [ADR 0001: Initialization of V2 layout](file:///home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/memory/decisions/0001-v2-initialization.md)
+- [ADR 0001: Initialization of V2 Layout](file://./decisions/0001-v2-initialization.md)
+

@@ -107,8 +107,14 @@ def run_validations():
                     from urllib.parse import unquote
                     base_path = unquote(base_path)
                     
-                    if base_path and not os.path.exists(base_path):
-                        print_err(f"Broken link in '{f}': linked file '{base_path}' does not exist.")
+                    # Resolve relative path from the scanned file's directory
+                    if not clean_path.startswith('/'):
+                        resolved_path = os.path.join(os.path.dirname(f), base_path)
+                    else:
+                        resolved_path = base_path
+                    
+                    if resolved_path and not os.path.exists(resolved_path):
+                        print_err(f"Broken link in '{f}': linked file '{resolved_path}' does not exist.")
                         found_broken_links = True
                         failed = True
         except Exception as e:
@@ -155,6 +161,25 @@ def run_validations():
                     print_ok(f"Branch '{branch}' successfully aligned with registered issue '{issue_id}'.")
     else:
         print_warn("Not inside a git repository or git command failed.")
+        
+    # 5. Synchronization Check
+    print("\n[5/5] Auditing Workspace Sync Alignment...")
+    skills_dir = ".agents/skills"
+    agents_file = "AGENTS.md"
+    sync_failed = False
+    if os.path.exists(skills_dir) and os.path.exists(agents_file):
+        with open(agents_file, 'r', encoding='utf-8') as af:
+            af_content = af.read()
+        for skill_name in os.listdir(skills_dir):
+            skill_path = os.path.join(skills_dir, skill_name, "SKILL.md")
+            if os.path.exists(skill_path):
+                if f".agents/skills/{skill_name}/SKILL.md" not in af_content:
+                    print_err(f"Skill '{skill_name}' is not registered in '{agents_file}' context map!")
+                    sync_failed = True
+                    failed = True
+                    
+    if not sync_failed:
+        print_ok("Workspace AGENTS.md is in perfect sync with local skills.")
         
     print("\n==========================================================")
     if failed:

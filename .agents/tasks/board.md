@@ -18,3 +18,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Add offline validation guard and local Git hook automation (`feat/validation-guard`) <!-- id: task-005 -->
 - [x] Implement strict Git branch and local Issue validation gates (`feat/issue-gates`) <!-- id: task-006 -->
 - [x] Enforce strict workspace-level configuration and remove global config dependency (`feat/workspace-only`) <!-- id: task-007 -->
+- [x] Implement dynamic workspace synchronization and validation check (`feat/sync-validate`) <!-- id: task-008 -->
