@@ -35,6 +35,21 @@ def get_latest_changelog_version() -> Optional[str]:
 
 def get_boundary_commit(version: str) -> Optional[str]:
     """Find the commit hash that matches the release of the given version or the last release."""
+    # 1. Try resolving via git tags (vX.Y.Z or X.Y.Z)
+    for tag_fmt in (f"v{version}", version):
+        try:
+            res = subprocess.run(
+                ['git', 'rev-parse', f'{tag_fmt}^{{commit}}'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if res.returncode == 0 and res.stdout.strip():
+                return res.stdout.strip()
+        except Exception:
+            pass
+
+    # 2. Fallback to grepping commits log
     try:
         # Search git log for chore(release): version or version string
         res = subprocess.run(
@@ -95,8 +110,54 @@ def extract_issue_title(issue_id: str) -> Optional[str]:
                     pass
     return None
 
+def classify_from_local_issue(issue_id: str) -> Optional[str]:
+    """Parse local issue metadata to classify the category of the issue (breaking, feat, fix, etc.)."""
+    normalized_id = issue_id.lower().replace('-', '_')
+    issue_dir = ".agents/issues"
+    if os.path.exists(issue_dir):
+        for f_name in os.listdir(issue_dir):
+            if normalized_id in f_name.lower().replace('-', '_') or issue_id.lower() in f_name.lower():
+                path = os.path.join(issue_dir, f_name)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # 1. Parse title or problem statement to classify
+                    title = ""
+                    for line in content.splitlines():
+                        match = re.match(r"^title:\s*(.+)", line)
+                        if match:
+                            title = match.group(1).strip().lower()
+                            break
+                    if not title:
+                        # Fallback: check first heading
+                        for line in content.splitlines():
+                            match = re.match(r"^#\s+(.+)", line)
+                            if match:
+                                title = match.group(1).strip().lower()
+                                break
+                    
+                    if title:
+                        if "breaking" in title or "major" in title or "!" in title:
+                            return "breaking"
+                        if any(w in title for w in ("feat", "feature", "implement", "add", "support")):
+                            return "feat"
+                        if any(w in title for w in ("fix", "bug", "remediate", "error", "prevent", "leak", "resolve")):
+                            return "fix"
+                        if "docs" in title or "document" in title:
+                            return "docs"
+                        if "refactor" in title:
+                            return "refactor"
+                        if "test" in title:
+                            return "test"
+                        if "chore" in title:
+                            return "chore"
+                except Exception:
+                    pass
+    return None
+
 def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List[str]]:
-    """Parse commit messages and group them into categories."""
+    """Parse commit messages, resolve local issue metadata, and prioritize classifications to ensure correct SemVer."""
     categories = {
         "breaking": [],
         "feat": [],
@@ -113,7 +174,21 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
     # Regex to find task/issue reference
     issue_regex = re.compile(r"((?:issue|task)-\d+)", re.IGNORECASE)
     
-    resolved_issues = set()
+    # Priority for sorting/prioritizing issue commit categories
+    # breaking (4) > feat (3) > fix (2) > chore/refactor/docs/test (1) > other (0)
+    type_priority = {
+        "breaking": 4,
+        "feat": 3,
+        "fix": 2,
+        "refactor": 1,
+        "docs": 1,
+        "chore": 1,
+        "test": 1,
+        "other": 0
+    }
+    
+    parsed_issues = {}  # Map of {ISSUE_ID: [(priority_value, category_key, entry_text)]}
+    standalone_commits = []  # List of (category_key, entry_text) for commits without issue IDs
     
     for h, s in commits:
         # Ignore Git infrastructure commits (merges and automated releases)
@@ -125,48 +200,66 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
             continue
             
         match = conv_regex.match(s)
+        issue_match = issue_regex.search(s)
+        
+        issue_id = issue_match.group(1).upper() if issue_match else None
+        
         if match:
             ctype, is_breaking, desc = match.groups()
             ctype = ctype.lower()
-            
-            # Map style/perf to chore
             if ctype in ("style", "perf"):
                 ctype = "chore"
                 
-            # Extract issue ID if present
-            issue_match = issue_regex.search(s)
+            cat = "breaking" if is_breaking else ctype
+            priority = type_priority.get(cat, 1)
+            
             entry = desc
-            issue_id = None
-            if issue_match:
-                issue_id = issue_match.group(1).upper()
-                # Deduplicate: only include each issue once in the release notes
-                if issue_id in resolved_issues:
-                    continue
-                resolved_issues.add(issue_id)
-                # Try to resolve title from local issue specification
+            if issue_id:
                 clean_title = extract_issue_title(issue_id)
                 if clean_title:
                     entry = f"{clean_title} ({issue_id})"
                 else:
                     entry = f"{desc} ({issue_id})"
-            
-            if is_breaking:
-                categories["breaking"].append(entry)
+                    
+                if issue_id not in parsed_issues:
+                    parsed_issues[issue_id] = []
+                parsed_issues[issue_id].append((priority, cat, entry))
             else:
-                categories[ctype].append(entry)
+                standalone_commits.append((cat, entry))
         else:
             # Fallback to general parsing
-            issue_match = issue_regex.search(s)
-            if issue_match:
-                issue_id = issue_match.group(1).upper()
-                if issue_id not in resolved_issues:
-                    resolved_issues.add(issue_id)
-                    clean_title = extract_issue_title(issue_id)
-                    if clean_title:
-                        categories["other"].append(f"{clean_title} ({issue_id})")
-                        continue
-            categories["other"].append(s)
-            
+            entry = s
+            cat = "other"
+            priority = 0
+            if issue_id:
+                clean_title = extract_issue_title(issue_id)
+                if clean_title:
+                    entry = f"{clean_title} ({issue_id})"
+                else:
+                    entry = f"{s} ({issue_id})"
+                
+                # Check if local issue spec metadata can classify the category
+                issue_cat = classify_from_local_issue(issue_id)
+                if issue_cat:
+                    cat = issue_cat
+                    priority = type_priority.get(cat, 1)
+                    
+                if issue_id not in parsed_issues:
+                    parsed_issues[issue_id] = []
+                parsed_issues[issue_id].append((priority, cat, entry))
+            else:
+                standalone_commits.append((cat, entry))
+                
+    # Deduplicate issues by selecting the commit with the highest SemVer priority
+    for issue_id, items in parsed_issues.items():
+        items.sort(key=lambda x: x[0], reverse=True)
+        best_priority, best_cat, best_entry = items[0]
+        categories[best_cat].append(best_entry)
+        
+    # Append standalone commits
+    for cat, entry in standalone_commits:
+        categories[cat].append(entry)
+        
     return categories
 
 def bump_semver(current: str, categories: Dict[str, List[str]]) -> str:
