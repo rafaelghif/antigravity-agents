@@ -11,6 +11,55 @@ from datetime import datetime
 
 ISSUE_DIR = ".agents/issues"
 
+def parse_issue_frontmatter(content):
+    """Parse YAML-like frontmatter between --- boundaries."""
+    lines = content.splitlines()
+    fm = {}
+    if len(lines) > 0 and lines[0].strip() == '---':
+        fm_lines = []
+        for line in lines[1:]:
+            if line.strip() == '---':
+                break
+            fm_lines.append(line)
+        for line in fm_lines:
+            if ':' in line:
+                k, v = line.split(':', 1)
+                k = k.strip()
+                v = v.strip()
+                # Strip surrounding quotes
+                if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                    v = v[1:-1]
+                fm[k] = v
+    return fm
+
+def get_issue_tasks(content):
+    """
+    Extract checklist tasks under specific sections (Tasks, Subtasks, Criteria).
+    Returns (all_tasks, unchecked_tasks) as lists of task lines.
+    """
+    lines = content.splitlines()
+    all_tasks = []
+    unchecked = []
+    in_relevant_section = False
+    
+    for line in lines:
+        striped = line.strip()
+        if striped.startswith('##'):
+            # Check if this is a tasks or acceptance criteria section
+            lower_header = striped.lower()
+            if 'task' in lower_header or 'subtask' in lower_header or 'criteria' in lower_header:
+                in_relevant_section = True
+            else:
+                in_relevant_section = False
+        elif in_relevant_section:
+            if striped.startswith(('-', '*')) and '[' in striped and ']' in striped:
+                match = re.match(r'^[-*]\s*\[\s*([xX\s/])\s*\]\s+(.*)', striped)
+                if match:
+                    all_tasks.append(striped)
+                    if match.group(1).strip() == '':
+                        unchecked.append(striped)
+    return all_tasks, unchecked
+
 def update_board_completed(issue_id):
     board_path = ".agents/tasks/board.md"
     if not os.path.exists(board_path):
@@ -74,9 +123,9 @@ def sync_issues():
             try:
                 with open(path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                m_num = re.search(r'github_number:\s*(\d+)', content)
-                if m_num:
-                    local_issues[int(m_num.group(1))] = path
+                fm = parse_issue_frontmatter(content)
+                if "github_number" in fm:
+                    local_issues[int(fm["github_number"])] = path
             except Exception:
                 pass
                 
@@ -97,14 +146,13 @@ def sync_issues():
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                    m_status = re.search(r'status:\s*(.*?)\n', content)
-                    if m_status:
-                        current_status = m_status.group(1).strip()
-                        if current_status != state:
-                            content = re.sub(r'status:\s*' + current_status, f'status: {state}', content)
-                            with open(path, 'w', encoding='utf-8') as f:
-                                f.write(content)
-                            print(f"[OK] Updated local issue #{number} status to '{state}'.")
+                    fm = parse_issue_frontmatter(content)
+                    current_status = fm.get("status")
+                    if current_status and current_status != state:
+                        content = re.sub(r'status:\s*' + re.escape(current_status), f'status: {state}', content)
+                        with open(path, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                        print(f"[OK] Updated local issue #{number} status to '{state}'.")
                 except Exception:
                     pass
             else:
@@ -235,22 +283,18 @@ created_at: {current_date}
             try:
                 with open(path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    m_id = re.search(r'id:\s*(.*?)\n', content)
-                    m_title = re.search(r'title:\s*"(.*?)"', content)
-                    m_status = re.search(r'status:\s*(.*?)\n', content)
-                    
-                    i_id = m_id.group(1).strip() if m_id else f_name
-                    i_title = m_title.group(1).strip() if m_title else "No Title"
-                    i_status = m_status.group(1).strip() if m_status else "unknown"
-                    
-                    # Count tasks
-                    all_tasks = re.findall(r'([-*]\s*\[\s*[xX ]\s*\]\s+.*)', content)
-                    unchecked = re.findall(r'([-*]\s*\[\s+\]\s+.*)', content)
-                    res_str = f"({len(all_tasks) - len(unchecked)}/{len(all_tasks)} tasks)" if all_tasks else ""
-                    
-                    status_color = "\033[92m" if i_status == "open" else "\033[90m"
-                    reset = "\033[0m"
-                    print(f"  - {i_id}: {i_title} [{status_color}{i_status}{reset}] {res_str}")
+                fm = parse_issue_frontmatter(content)
+                i_id = fm.get("id", f_name)
+                i_title = fm.get("title", "No Title")
+                i_status = fm.get("status", "unknown")
+                
+                # Count tasks
+                all_tasks, unchecked = get_issue_tasks(content)
+                res_str = f"({len(all_tasks) - len(unchecked)}/{len(all_tasks)} tasks)" if all_tasks else ""
+                
+                status_color = "\033[92m" if i_status == "open" else "\033[90m"
+                reset = "\033[0m"
+                print(f"  - {i_id}: {i_title} [{status_color}{i_status}{reset}] {res_str}")
             except Exception as e:
                 print(f"  - Error reading {f_name}: {e}")
                 
@@ -267,11 +311,14 @@ created_at: {current_date}
         # Determine branch name
         slug = issue_id.lower().replace('_', '-')
         branch_name = f"feat/{slug}"
-        print(f"Creating/checking out Git branch '{branch_name}'...")
+        print(f"Checking out Git branch '{branch_name}'...")
         
-        # Run git checkout
-        subprocess.run(['git', 'checkout', '-b', branch_name], stderr=subprocess.PIPE)
-        subprocess.run(['git', 'checkout', branch_name])
+        # Check if branch exists
+        res_ref = subprocess.run(['git', 'show-ref', f'refs/heads/{branch_name}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if res_ref.returncode == 0:
+            subprocess.run(['git', 'checkout', branch_name])
+        else:
+            subprocess.run(['git', '-c', 'advice.detachedHead=false', 'checkout', '-b', branch_name])
         
     elif action == "close":
         if len(args) < 2:
@@ -315,18 +362,19 @@ created_at: {current_date}
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # Parse github_number to close remote issue
-        m_num = re.search(r'github_number:\s*(\d+)', content)
-        if m_num:
-            github_number = int(m_num.group(1))
+        fm = parse_issue_frontmatter(content)
+        github_number = fm.get("github_number")
+        if github_number:
             try:
+                github_number = int(github_number)
                 import git_api
                 print(f"Closing remote GitHub issue #{github_number}...")
                 git_api.close_github_issue(github_number)
             except Exception as e:
                 print(f"Warning: Could not close remote GitHub issue: {e}")
             
-        content = re.sub(r'status:\s*open', 'status: closed', content)
+        current_status = fm.get("status", "open")
+        content = re.sub(r'status:\s*' + re.escape(current_status), 'status: closed', content)
         
         with open(path, 'w', encoding='utf-8') as f:
             f.write(content)
@@ -383,6 +431,7 @@ created_at: {current_date}
             merge_res = subprocess.run(['git', 'merge', found_branch, '--no-ff', '-m', merge_msg, '-m', issue_id])
             if merge_res.returncode != 0:
                 print("Error: Git merge failed with conflict! Please resolve manually.")
+                print(f"To abort the merge: git merge --abort && git checkout {found_branch}")
                 sys.exit(1)
 
             print(f"Deleting branch '{found_branch}'...")

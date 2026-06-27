@@ -8,7 +8,9 @@ if scripts_dir not in sys.path:
     sys.path.insert(0, scripts_dir)
 import subprocess
 import shutil
-from typing import List, Dict, Any
+import json
+import py_compile
+from typing import List, Dict, Any, Optional
 
 # Terminal Colors
 RED = "\033[91m"
@@ -182,7 +184,6 @@ def audit_secrets_and_ignored_files() -> bool:
     profiles_path = ".agents/git_profiles.json"
     if os.path.exists(profiles_path):
         try:
-            import json
             with open(profiles_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             profiles = data.get("profiles", [])
@@ -350,14 +351,21 @@ def audit_git_branch_alignment() -> bool:
         try:
             with open(matched_path, 'r', encoding='utf-8') as f:
                 issue_content = f.read()
-                unchecked = re.findall(r'([-*]\s*\[\s+\]\s+.*)', issue_content)
-                if unchecked:
+            # Dynamically import issue command to use its helper
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "cli")))
+            import commands.issue as issue_cmd
+            all_tasks, unchecked = issue_cmd.get_issue_tasks(issue_content)
+            
+            if unchecked:
+                if "--skip-subtasks" in sys.argv or os.getenv("SKIP_SUBTASK_AUDIT") == "true":
+                    print_warn(f"Active issue '{issue_id}' has {len(unchecked)} unresolved subtasks (bypassed).")
+                else:
                     print_err(f"Active issue '{issue_id}' has {len(unchecked)} unresolved subtasks:")
                     for task in unchecked:
                         print_err(f"  {task.strip()}")
                     return False
-                else:
-                    print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
+            else:
+                print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
         except Exception as e:
             print_warn(f"Failed to parse subtasks in '{matched_path}': {e}")
             
@@ -430,7 +438,6 @@ def audit_static_linting() -> bool:
                     file_path = os.path.join(root, file)
                     if is_ignored_by_antigravity(file_path, antigravity_patterns):
                         continue
-                    import py_compile
                     try:
                         py_compile.compile(file_path, doraise=True)
                     except py_compile.PyCompileError as e:
@@ -438,7 +445,6 @@ def audit_static_linting() -> bool:
                         failed = True
                         continue
                         
-                    import shutil
                     if shutil.which("flake8"):
                         res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
                         if res.returncode != 0:
@@ -509,7 +515,6 @@ def audit_module_locks() -> bool:
     locks = {}
     if os.path.exists(locks_file):
         try:
-            import json
             with open(locks_file, 'r', encoding='utf-8') as f:
                 locks = json.load(f)
         except Exception:
@@ -544,7 +549,6 @@ def prune_stale_locks() -> None:
     locks_file = ".agents/locks.json"
     if os.path.exists(locks_file):
         try:
-            import json
             with open(locks_file, 'r', encoding='utf-8') as f:
                 locks = json.load(f)
             
