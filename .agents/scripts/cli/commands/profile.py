@@ -126,25 +126,57 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
 def handle_switch(args: List[str]) -> None:
     """Switch active profile by name and apply settings to Git config."""
     if not args:
-        print_err("Usage: helper.py profile switch <name>")
+        print_err("Usage: helper.py profile switch <name> [--force-no-gpg]")
+        sys.exit(1)
+        
+    force_no_gpg = False
+    if "--force-no-gpg" in args:
+        force_no_gpg = True
+        args.remove("--force-no-gpg")
+        
+    if not args:
+        print_err("Usage: helper.py profile switch <name> [--force-no-gpg]")
         sys.exit(1)
         
     target_name = args[0]
     data = load_profiles()
     profiles = data.get("profiles", [])
     
-    found = False
+    target_profile = None
     for p in profiles:
         if p.get("name") == target_name:
-            p["active"] = True
-            found = True
-        else:
-            p["active"] = False
+            target_profile = p
+            break
             
-    if not found:
+    if not target_profile:
         print_err(f"Profile '{target_name}' not found.")
         sys.exit(1)
         
+    signing_key = target_profile.get("signing_key")
+    if signing_key and not signing_key.endswith("...") and not force_no_gpg:
+        print(f"Validating GPG signing key '{signing_key}'...")
+        try:
+            gpg_check = subprocess.run(
+                ['gpg', '--list-secret-keys', '--keyid-format', 'LONG', signing_key],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if gpg_check.returncode != 0:
+                print_err(f"GPG signing key '{signing_key}' is not found or is invalid on this machine.")
+                print_err("Please import the key first, or use '--force-no-gpg' to override.")
+                sys.exit(1)
+            print_ok("GPG signing key is valid.")
+        except FileNotFoundError:
+            print_warn("GnuPG ('gpg') tool is not installed on this machine. Cannot verify GPG signing key validity.")
+            print_warn("Proceeding with profile switch anyway.")
+            
+    for p in profiles:
+        if p.get("name") == target_name:
+            p["active"] = True
+        else:
+            p["active"] = False
+            
     save_profiles(data)
     print_ok(f"Switched active profile to '{target_name}'.")
     

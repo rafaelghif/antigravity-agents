@@ -89,6 +89,69 @@ class TestProfileCommand(unittest.TestCase):
         sub_calls = [call[0][0] for call in mock_sub.call_args_list]
         self.assertTrue(any("core.sshCommand" in " ".join(cmd) and "id_rsa_p2" in " ".join(cmd) for cmd in sub_calls))
 
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_gpg_success(self, mock_save, mock_load, mock_sub):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "signing_key": "4A1D5B"}
+            ]
+        }
+        def side_effect(cmd, *args, **kwargs):
+            if cmd[0] == "gpg":
+                return MagicMock(returncode=0)
+            return MagicMock(returncode=0)
+        mock_sub.side_effect = side_effect
+        
+        profile.handle_switch(["p2"])
+        
+        saved_data = mock_save.call_args[0][0]
+        self.assertTrue(saved_data["profiles"][1]["active"])
+
+    @patch('sys.exit', side_effect=SystemExit)
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_gpg_failure(self, mock_save, mock_load, mock_sub, mock_exit):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "signing_key": "4A1D5B"}
+            ]
+        }
+        def side_effect(cmd, *args, **kwargs):
+            if cmd[0] == "gpg":
+                return MagicMock(returncode=1)
+            return MagicMock(returncode=0)
+        mock_sub.side_effect = side_effect
+        
+        with self.assertRaises(SystemExit):
+            profile.handle_switch(["p2"])
+        mock_exit.assert_called_once_with(1)
+
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_gpg_override(self, mock_save, mock_load, mock_sub):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "signing_key": "4A1D5B"}
+            ]
+        }
+        def side_effect(cmd, *args, **kwargs):
+            if cmd[0] == "gpg":
+                return MagicMock(returncode=1) # should not run gpg
+            return MagicMock(returncode=0)
+        mock_sub.side_effect = side_effect
+        
+        profile.handle_switch(["p2", "--force-no-gpg"])
+        
+        saved_data = mock_save.call_args[0][0]
+        self.assertTrue(saved_data["profiles"][1]["active"])
+
     @patch('sys.exit', side_effect=SystemExit)
     @patch('profile.load_profiles')
     def test_handle_switch_not_found(self, mock_load, mock_exit):
