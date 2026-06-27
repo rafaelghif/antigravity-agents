@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.30.3] - 2026-06-27
+
+### 🐛 Bug Fixes
+- Design & Task Specification (ISSUE-057)
+
+
 ## [2.30.2] - 2026-06-27
 
 ### 🐛 Bug Fixes
