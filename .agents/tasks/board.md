@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Enforce remote Git source download by default during installation (feat/issue-061) <!-- id: issue-061 -->
 - [x] Improve CLI helper UI, add help commands, and projects.json sample (feat/issue-060) <!-- id: issue-060 -->
 - [x] Copy blueprints directory during install and bootstrap (feat/issue-059) <!-- id: issue-059 -->
 - [x] Synchronize bootstrap.ps1 versions and verify local file installer options (feat/issue-058) <!-- id: issue-058 -->
