@@ -219,14 +219,14 @@ def update_changelog(new_version: str, categories: Dict[str, List[str]]) -> None
     new_entry = f"\n## [{new_version}] - {date_str}\n"
     
     sections = [
-        ("breaking", "Breaking Changes"),
-        ("feat", "Features"),
-        ("fix", "Bug Fixes"),
-        ("refactor", "Refactors"),
-        ("docs", "Documentation"),
-        ("chore", "Chores"),
-        ("test", "Tests"),
-        ("other", "Other Updates")
+        ("breaking", "💥 Breaking Changes"),
+        ("feat", "🚀 Features"),
+        ("fix", "🐛 Bug Fixes"),
+        ("refactor", "🛠️ Refactors"),
+        ("docs", "📝 Documentation"),
+        ("chore", "⚙️ Chores"),
+        ("test", "🧪 Tests"),
+        ("other", "📋 Other Updates")
     ]
     
     has_content = False
