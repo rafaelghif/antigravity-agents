@@ -3,6 +3,36 @@ import os
 import re
 import json
 
+def detect_project_stack(root=".") -> str:
+    """Detect the programming stack from the files present in the root directory."""
+    if os.path.exists(os.path.join(root, "go.mod")):
+        return "go"
+    if os.path.exists(os.path.join(root, "Cargo.toml")):
+        return "rust"
+    if os.path.exists(os.path.join(root, "package.json")):
+        return "node"
+    if os.path.exists(os.path.join(root, "composer.json")):
+        return "php"
+    if (os.path.exists(os.path.join(root, "requirements.txt")) or 
+            os.path.exists(os.path.join(root, "Pipfile")) or 
+            os.path.exists(os.path.join(root, "pyproject.toml"))):
+        return "python"
+    
+    # Check for Java
+    if os.path.exists(os.path.join(root, "pom.xml")) or os.path.exists(os.path.join(root, "build.gradle")):
+        return "java"
+    
+    # Check for C#
+    if os.path.exists(root) and os.path.isdir(root):
+        try:
+            for f in os.listdir(root):
+                if f.endswith(".csproj") or f.endswith(".sln"):
+                    return "csharp"
+        except Exception:
+            pass
+            
+    return ""
+
 def create_clean_architecture(root):
     dirs = [
         "src/core/entities",
@@ -169,21 +199,36 @@ def run(args):
     print("   Antigravity V2 Project Bootstrapper                    ")
     print("==========================================================")
     
+    # Auto-detect stack
+    detected_stack = detect_project_stack(".")
+    
     # Prompt for project details
     # To keep it friendly for automation, we support command-line arguments:
     # helper.py bootstrap <name> <stack> <architecture> [options]
     if len(args) < 3:
-        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack: python|node|php> <arch: clean|layered|mvc>)")
-        name = input("Project Name: ").strip()
-        stack = input("Programming Stack (python/node/php): ").strip().lower()
+        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc>)")
+        default_name = os.path.basename(os.path.abspath(".")).strip()
+        name = input(f"Project Name (default: {default_name}): ").strip()
+        if not name:
+            name = default_name
+            
+        stack_prompt = "Programming Stack"
+        if detected_stack:
+            stack_prompt += f" (Auto-detected: '{detected_stack}', press enter to accept): "
+        else:
+            stack_prompt += " (python/node/php/go/rust/etc.): "
+        stack = input(stack_prompt).strip().lower()
+        if not stack and detected_stack:
+            stack = detected_stack
+            
         arch = input("Architecture Pattern (clean/layered/mvc): ").strip().lower()
     else:
         name = args[0]
         stack = args[1].lower()
         arch = args[2].lower()
 
-    if not name or stack not in ("python", "node", "php") or arch not in ("clean", "layered", "mvc"):
-        print("Error: Invalid inputs. Stack must be 'python', 'node', or 'php'. Architecture must be 'clean', 'layered', or 'mvc'.")
+    if not name or not stack or arch not in ("clean", "layered", "mvc"):
+        print("Error: Invalid inputs. Stack cannot be empty. Architecture must be 'clean', 'layered', or 'mvc'.")
         sys.exit(1)
 
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture...")
@@ -242,7 +287,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.27.0"
+    AAC_VERSION = "2.28.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
@@ -284,11 +329,20 @@ def run(args):
     # 6. Update .agents/rules.md
     rules_file = ".agents/rules.md"
     if os.path.exists(rules_file):
-        test_cmds = {"python": "pytest", "node": "npm run test", "php": "./vendor/bin/phpunit"}
+        test_cmds = {
+            "python": "pytest", 
+            "node": "npm run test", 
+            "php": "./vendor/bin/phpunit",
+            "go": "go test ./...",
+            "rust": "cargo test",
+            "csharp": "dotnet test",
+            "java": "gradle test"
+        }
+        test_cmd = test_cmds.get(stack, f"run {stack} tests")
         with open(rules_file, 'r', encoding='utf-8') as f:
             rules_content = f.read()
         rules_content = re.sub(r'Use \*\*.*?\*\* for the main product stack\.', f'Use **{stack.capitalize()}** for the main product stack.', rules_content)
-        rules_content = re.sub(r'test command is: `.*?`\.', f'test command is: `{test_cmds[stack]}`.', rules_content)
+        rules_content = re.sub(r'test command is: `.*?`\.', f'test command is: `{test_cmd}`.', rules_content)
         with open(rules_file, 'w', encoding='utf-8') as f:
             f.write(rules_content)
         print("Updated '.agents/rules.md' style and test command configuration.")
