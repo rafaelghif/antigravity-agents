@@ -14,10 +14,12 @@ class TestLockCommand(unittest.TestCase):
         locks = lock.load_locks()
         self.assertEqual(locks, {})
 
+    @patch('lock.branch_exists')
     @patch('os.path.exists')
     @patch('builtins.open', new_callable=mock_open, read_data='{"module-x": "feat/issue-1"}')
-    def test_load_locks_existing(self, mock_file, mock_exists):
+    def test_load_locks_existing(self, mock_file, mock_exists, mock_branch):
         mock_exists.return_value = True
+        mock_branch.return_value = True
         locks = lock.load_locks()
         self.assertEqual(locks.get("module-x"), "feat/issue-1")
 

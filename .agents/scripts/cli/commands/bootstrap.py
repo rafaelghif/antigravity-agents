@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import json
 
 def create_clean_architecture(root):
     dirs = [
@@ -289,3 +290,57 @@ This board tracks active development tasks.
 """)
     print("Initialized task board at '.agents/tasks/board.md'.")
     print("\nProject bootstrapping completed successfully! Run './helper.sh validate' to verify.")
+
+    # 8. Git Profile Onboarding Wizard
+    profiles_file = ".agents/git_profiles.json"
+    if not os.path.exists(profiles_file):
+        example_file = ".agents/git_profiles.example"
+        if os.path.exists(example_file):
+            import shutil
+            try:
+                shutil.copy2(example_file, profiles_file)
+            except Exception:
+                pass
+            
+    has_profiles = False
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                p_data = json.load(f)
+            if p_data.get("profiles"):
+                has_profiles = True
+        except Exception:
+            pass
+            
+    if not has_profiles:
+        print("\n==========================================================")
+        print("   Onboarding: Git Developer Profile Configuration       ")
+        print("==========================================================")
+        print("No Git profiles configured in '.agents/git_profiles.json'.")
+        is_interactive = sys.stdin.isatty()
+        if is_interactive:
+            try:
+                setup_now = input("Would you like to configure your local developer profile now? (y/n): ").strip().lower()
+                if setup_now == 'y':
+                    prof_name = input("Profile Name (e.g. corp, personal): ").strip()
+                    prof_email = input("Git config Email: ").strip()
+                    if prof_name and prof_email:
+                        new_profile = {
+                            "name": prof_name,
+                            "email": prof_email,
+                            "active": True
+                        }
+                        with open(profiles_file, 'w', encoding='utf-8') as f:
+                            json.dump({"profiles": [new_profile]}, f, indent=2)
+                        
+                        import subprocess
+                        subprocess.run(['git', 'config', 'user.name', prof_name])
+                        subprocess.run(['git', 'config', 'user.email', prof_email])
+                        print(f"[OK] Created active profile '{prof_name}' and updated local Git config.")
+            except Exception as e:
+                print(f"Skipping profile wizard: {e}")
+        else:
+            print("Note: To set up your credentials rotation, configure '.agents/git_profiles.json'")
+            print("or run: ./helper.sh profile add <name> <email>")
+        print("==========================================================")
+

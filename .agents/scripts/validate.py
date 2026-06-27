@@ -173,8 +173,44 @@ def audit_secrets_and_ignored_files() -> bool:
         except Exception:
             pass
             
+    # D. Check if Git config email matches active profile in git_profiles.json
+    profiles_path = ".agents/git_profiles.json"
+    if os.path.exists(profiles_path):
+        try:
+            import json
+            with open(profiles_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            profiles = data.get("profiles", [])
+            active_profile = next((p for p in profiles if p.get("active")), None)
+            
+            if active_profile:
+                profile_email = active_profile.get("email")
+                profile_name = active_profile.get("name")
+                
+                # Get current git config email
+                res_email = subprocess.run(
+                    ['git', 'config', 'user.email'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                current_email = res_email.stdout.strip()
+                
+                if current_email != profile_email:
+                    print_err(
+                        f"Mismatched Git Email Identity!\n"
+                        f"  - Current Git Config Email: '{current_email}'\n"
+                        f"  - Active Profile Email    : '{profile_email}' (Profile: '{profile_name}')\n"
+                        f"  Please switch Git profile: './helper.sh profile switch <name>'"
+                    )
+                    failed = True
+                else:
+                    print_ok(f"Git Config Email matches active profile '{profile_name}' ({profile_email}).")
+        except Exception as e:
+            print_warn(f"Failed to audit Git config profile email: {e}")
+
     if not failed:
-        print_ok("No credentials, staged private files, or secrets detected.")
+        print_ok("No credentials, staged private files, mismatched profiles, or secrets detected.")
     return not failed
 
 # ==========================================================
@@ -395,6 +431,32 @@ def audit_unit_tests() -> bool:
         print_warn("No test suite directory ('.agents/tests/') or runner (pytest/unittest) found.")
         return True
 
+def prune_stale_locks() -> None:
+    locks_file = ".agents/locks.json"
+    if os.path.exists(locks_file):
+        try:
+            import json
+            with open(locks_file, 'r', encoding='utf-8') as f:
+                locks = json.load(f)
+            
+            modified = False
+            for mod, holder in list(locks.items()):
+                if holder != "unknown":
+                    res = subprocess.run(
+                        ['git', 'show-ref', f'refs/heads/{holder}'],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE
+                    )
+                    if res.returncode != 0:
+                        del locks[mod]
+                        modified = True
+            if modified:
+                with open(locks_file, 'w', encoding='utf-8') as f:
+                    json.dump(locks, f, indent=2)
+                print_ok("Auto-pruned stale module locks in 'locks.json'.")
+        except Exception:
+            pass
+
 # ==========================================================
 # Main Execution Entry Point
 # ==========================================================
@@ -404,6 +466,9 @@ def run_validations() -> None:
     print("==========================================================")
     print("   Running AAC V2 Local Validation Guard...              ")
     print("==========================================================")
+    
+    # Auto prune stale locks
+    prune_stale_locks()
     
     # Run the 8 audits sequentially
     results = {}

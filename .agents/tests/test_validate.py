@@ -40,10 +40,14 @@ class TestValidate(unittest.TestCase):
         mock_exists.side_effect = lambda path: "rules.md" not in path
         self.assertFalse(validate.audit_critical_files())
 
+    @patch('os.path.exists')
     @patch('subprocess.run')
     @patch('validate.is_git_ignored')
     @patch('validate.is_ignored_by_antigravity')
-    def test_audit_secrets_and_ignored_files_rejections(self, mock_anti, mock_git, mock_run):
+    def test_audit_secrets_and_ignored_files_rejections(self, mock_anti, mock_git, mock_run, mock_exists):
+        # Mock exists to return False for git_profiles.json
+        mock_exists.side_effect = lambda path: False if 'git_profiles.json' in path else True
+        
         # Mock git diff returning staged files
         mock_run.return_value = MagicMock(returncode=0, stdout="src/main.py\n")
         

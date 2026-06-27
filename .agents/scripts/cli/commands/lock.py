@@ -1,26 +1,60 @@
 import sys
 import os
 import json
+import subprocess
 
 LOCK_FILE = ".agents/locks.json"
 
-def load_locks():
+def branch_exists(branch_name: str) -> bool:
+    """Verify if a local Git branch exists."""
+    if branch_name == "unknown":
+        return True
+    try:
+        res = subprocess.run(
+            ['git', 'show-ref', f'refs/heads/{branch_name}'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        return res.returncode == 0
+    except Exception:
+        return True  # Fallback to assume it exists if git command fails
+
+def prune_stale_locks(locks: dict) -> dict:
+    """Filter out locks whose holder branches no longer exist locally."""
+    stale_mods = []
+    for mod, holder in list(locks.items()):
+        if not branch_exists(holder):
+            stale_mods.append(mod)
+            del locks[mod]
+    if stale_mods:
+        print(f"[INFO] Auto-released stale locks for module(s): {', '.join(stale_mods)} (associated branch no longer exists).")
+    return locks
+
+def load_locks() -> dict:
+    locks = {}
     if os.path.exists(LOCK_FILE):
         try:
             with open(LOCK_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                locks = json.load(f)
         except Exception:
-            return {}
-    return {}
+            locks = {}
+            
+    if locks:
+        orig_len = len(locks)
+        locks = prune_stale_locks(locks)
+        if len(locks) != orig_len:
+            save_locks(locks)
+            
+    return locks
 
-def save_locks(locks):
+def save_locks(locks: dict) -> None:
     try:
         with open(LOCK_FILE, 'w', encoding='utf-8') as f:
             json.dump(locks, f, indent=2)
     except Exception as e:
         print(f"Error saving locks: {e}")
 
-def run(args):
+def run(args: list) -> None:
     if len(args) == 0:
         locks = load_locks()
         if not locks:
@@ -47,7 +81,6 @@ def run(args):
 
     mod_name = args[0]
     # Determine holder branch
-    import subprocess
     branch = "unknown"
     try:
         res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
