@@ -21,3 +21,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Set up automated compliance validation suite (`feat/issue-011-validate-v2`) <!-- id: issue-011 -->
 - [x] Establish Pre-Implementation Impact Analysis Protocol in skills and working rules (`feat/impact-analysis`) <!-- id: task-013 -->
 - [x] Add CLI unit testing suite (`feat/issue-012-test-cli-v2`) <!-- id: issue-012 -->
+- [x] Create isolated installer for fresh or existing project bootstrap (`feat/isolated-installer`) <!-- id: task-014 -->
