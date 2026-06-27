@@ -72,6 +72,23 @@ class TestProfileCommand(unittest.TestCase):
         self.assertTrue(any("user.name" in cmd and "p2" in cmd for cmd in sub_calls))
         self.assertTrue(any("user.email" in cmd and "p2@test.com" in cmd for cmd in sub_calls))
 
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_with_ssh_key(self, mock_save, mock_load, mock_sub):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "ssh_key_path": "~/.ssh/id_rsa_p2"}
+            ]
+        }
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        profile.handle_switch(["p2"])
+        
+        sub_calls = [call[0][0] for call in mock_sub.call_args_list]
+        self.assertTrue(any("core.sshCommand" in " ".join(cmd) and "id_rsa_p2" in " ".join(cmd) for cmd in sub_calls))
+
     @patch('sys.exit', side_effect=SystemExit)
     @patch('profile.load_profiles')
     def test_handle_switch_not_found(self, mock_load, mock_exit):

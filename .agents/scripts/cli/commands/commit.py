@@ -67,6 +67,12 @@ def run(args):
             subprocess.run(['git', 'config', '--local', '--unset', 'commit.gpgsign'], stderr=subprocess.DEVNULL)
             subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'], stderr=subprocess.DEVNULL)
             
+        ssh_key = active_profile.get("ssh_key_path")
+        if ssh_key:
+            subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i {ssh_key} -o IdentitiesOnly=yes'])
+        else:
+            subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
+            
     # Trigger local validation checks
     if '--no-verify' not in args:
         print("Triggering pre-commit validation guard...")

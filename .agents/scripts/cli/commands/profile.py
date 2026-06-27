@@ -113,6 +113,12 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
             subprocess.run(['git', 'config', '--local', '--unset', 'commit.gpgsign'], stderr=subprocess.DEVNULL)
             subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'], stderr=subprocess.DEVNULL)
             
+        ssh_key = profile.get("ssh_key_path")
+        if ssh_key:
+            subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i {ssh_key} -o IdentitiesOnly=yes'], check=True)
+        else:
+            subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
+            
         print_ok(f"Applied Git Profile to local config: '{name}' <{email}>")
     except subprocess.CalledProcessError as e:
         print_err(f"Failed to apply local Git configuration: {e}")
