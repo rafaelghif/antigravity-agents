@@ -5,11 +5,11 @@ import importlib
 def main():
     if len(sys.argv) < 2:
         print("Usage: helper.py <command> [args...]")
-        print("Available commands: lock, validate, sync, issue, commit")
+        print("Available commands: lock, validate, sync, issue, commit, bootstrap")
         sys.exit(1)
         
     cmd = sys.argv[1].lower()
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap'}
     
     if cmd not in allowed_commands:
         print(f"Error: Unknown command '{cmd}'. Available: {', '.join(allowed_commands)}")
