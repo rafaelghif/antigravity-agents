@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Align and synchronize installation and bootstrap scripts across OSs (feat/issue-067) <!-- id: issue-067 -->
 - [x] Track and commit install.ps1 Windows installer file (feat/issue-066) <!-- id: issue-066 -->
 - [x] Fix Windows installation and bootstrap completeness (feat/issue-065) <!-- id: issue-065 -->
 - [x] Add issue.py to auto-staged files list and commit it (feat/issue-064) <!-- id: issue-064 -->

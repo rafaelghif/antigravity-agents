@@ -11,6 +11,15 @@ mkdir -p .agents/memory/decisions
 mkdir -p .agents/tasks
 mkdir -p .agents/issues
 
+# 1.1 Copy template memory files
+if [ -d ".agents/memory/templates" ]; then
+  for t in ".agents/memory/templates/"*.template; do
+    [ -f "$t" ] || continue
+    filename_t=$(basename "$t" .template)
+    cp -n "$t" ".agents/memory/$filename_t" 2>/dev/null || true
+  done
+fi
+
 # 2. Synchronize Version if AGENTS.md exists
 if [ -f "AGENTS.md" ]; then
   if command -v python3 &>/dev/null; then
@@ -19,9 +28,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.41.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.43.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.41.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.43.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
@@ -48,8 +57,10 @@ if [ -d ".git" ]; then
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
   python3 .agents/scripts/validate.py
+elif command -v python &>/dev/null; then
+  python .agents/scripts/validate.py
 else
-  echo "Warning: python3 not found. Skipping commit validation check."
+  echo "Warning: Python not found. Skipping commit validation check."
 fi
 EOF
   chmod +x .git/hooks/pre-commit
