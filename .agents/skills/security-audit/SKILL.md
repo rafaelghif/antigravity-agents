@@ -15,6 +15,7 @@ This playbook outlines steps for auditing code changes against security guidelin
 ## 2. Vulnerability Assessment Checklist
 - **SQL Injections**: Check all database operations. Ensure queries use parameterized inputs or ORM safe-execution methods. Never concatenate raw strings inside database queries.
 - **XSS (Cross-Site Scripting)**: Verify that user inputs are sanitized and escaped before rendering them in HTML or sending them to client applications.
+- **Static Analysis (SAST)**: Use automated static code security scanners (e.g., `bandit` for Python, `eslint-plugin-security` for JavaScript/TypeScript, or CodeQL) to scan the codebase for structural vulnerabilities.
 - **Insecure Dependencies**: Run dependency vulnerability scans:
   - For Node.js: `npm audit` or `pnpm audit`
   - For Python: `pip-audit` or `safety check`
@@ -28,6 +29,6 @@ This playbook outlines steps for auditing code changes against security guidelin
 
 To guarantee that the agent installation is secure and does not compromise target repositories:
 - **No Backdoors**: Never write code that bypasses authentication, provides unauthorized backdoors, or modifies files outside the designated project boundaries.
-- **Supply Chain Security**: Only install packages or libraries that are sourced from official registries (e.g. PyPI, npm) and are pinned to secure, known version hashes.
+- **Supply Chain Security & Dependency Pinning**: Only install packages or libraries that are sourced from official registries (e.g. PyPI, npm). All packages must be pinned to exact versions (e.g., `requests==2.31.0` in `requirements.txt` or specific package lockfile hashes like `package-lock.json` or `poetry.lock`). Avoid dynamic range specifiers (like `*` or `>=`) to prevent dependency confusion attacks.
 - **Code Transparency**: Deployed code must be clean, well-commented, human-readable, and completely free of obfuscation, dynamic execution (`eval()`), or unverified binary blobs.
 - **Restricted System Access**: All installer scripts and validation hooks must perform operations strictly inside the workspace directory, preventing any interaction with user global home settings or non-workspace files.
