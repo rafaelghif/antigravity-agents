@@ -40,9 +40,45 @@ def run_validations():
         else:
             print_ok(f"Found '{f}'")
             
-    # 2. Secret Exposure Audit
+    # 2. Secret & Staged File Audit
     print("\n[2/8] Auditing for Staged Secrets & Credentials...")
-    # Scan files in current directory, excluding .git, node_modules, vendor, etc.
+    
+    forbidden_patterns = [
+        r"git_profiles\.json$",
+        r"locks\.json$",
+        r"\.env.*$"
+    ]
+    
+    import subprocess
+    staged_files = []
+    try:
+        res = subprocess.run(
+            ['git', 'diff', '--cached', '--name-only'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        staged_files = [line.strip() for line in res.stdout.splitlines() if line.strip()]
+    except Exception:
+        # Fallback to walk scanning if not inside a git repo or command fails
+        exclude_dirs = {'.git', 'node_modules', 'venv', 'env', '__pycache__', 'vendor'}
+        for root, dirs, files in os.walk('.'):
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+            for file in files:
+                staged_files.append(os.path.join(root, file))
+
+    found_secrets = False
+    
+    # Audit for forbidden private filenames
+    for path in staged_files:
+        for pattern in forbidden_patterns:
+            if re.search(pattern, path):
+                print_err(f"Forbidden private file staged for commit: '{path}'!")
+                found_secrets = True
+                failed = True
+
+    # Audit file contents for secrets
     secret_patterns = [
         r"(?i)api_key\s*=\s*['\"][a-zA-Z0-9_\-]{16,}['\"]",
         r"(?i)password\s*=\s*['\"][a-zA-Z0-9_\-]{8,}['\"]",
@@ -50,34 +86,28 @@ def run_validations():
         r"-----BEGIN [A-Z ]+ PRIVATE KEY-----"
     ]
     
-    exclude_dirs = {'.git', 'node_modules', 'venv', 'env', '__pycache__', 'vendor'}
-    found_secrets = False
-    
-    for root, dirs, files in os.walk('.'):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
-        for file in files:
-            # Skip binary files or common non-code files
-            if file.endswith(('.png', '.jpg', '.ico', '.pdf', '.zip', '.tar.gz')):
-                continue
-            path = os.path.join(root, file)
-            # Avoid self-scanning validation script or Git logs
-            if "validate.py" in path:
-                continue
-                
-            try:
-                with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                    for idx, line in enumerate(content.splitlines(), 1):
-                        for pattern in secret_patterns:
-                            if re.search(pattern, line):
-                                print_err(f"Potential secret exposed in '{path}' at line {idx}: {line.strip()}")
-                                found_secrets = True
-                                failed = True
-            except Exception:
-                pass
+    for path in staged_files:
+        if not os.path.exists(path) or os.path.isdir(path):
+            continue
+        if "validate.py" in path:
+            continue
+        if path.endswith(('.png', '.jpg', '.ico', '.pdf', '.zip', '.tar.gz')):
+            continue
+            
+        try:
+            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                for idx, line in enumerate(content.splitlines(), 1):
+                    for pattern in secret_patterns:
+                        if re.search(pattern, line):
+                            print_err(f"Potential secret exposed in staged file '{path}' at line {idx}: {line.strip()}")
+                            found_secrets = True
+                            failed = True
+        except Exception:
+            pass
                 
     if not found_secrets:
-        print_ok("No credentials or secrets detected.")
+        print_ok("No credentials, staged private files, or secrets detected.")
         
     # 3. Link Integrity Audit
     print("\n[3/8] Auditing File Links inside Memory Registers...")

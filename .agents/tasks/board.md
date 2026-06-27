@@ -23,3 +23,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Add CLI unit testing suite (`feat/issue-012-test-cli-v2`) <!-- id: issue-012 -->
 - [x] Create isolated installer for fresh or existing project bootstrap (`feat/isolated-installer`) <!-- id: task-014 -->
 - [x] Implement V2 CLI project bootstrap subcommand and rules for fresh projects (`feat/project-bootstrap`) <!-- id: task-015 -->
+- [x] Implement strict Git staged files and private files validation gate (`feat/staged-secrets`) <!-- id: task-016 -->
