@@ -324,6 +324,16 @@ def update_version_in_files(old_version: str, new_version: str) -> None:
             f.write(content)
         print(f"[OK] Updated bootstrap.sh version to {new_version}.")
 
+    # 4. Update bootstrap.ps1
+    bootstrap_ps1 = "bootstrap.ps1"
+    if os.path.exists(bootstrap_ps1):
+        with open(bootstrap_ps1, 'r', encoding='utf-8') as f:
+            content = f.read()
+        content = content.replace(f"- **Version:** {old_version}", f"- **Version:** {new_version}")
+        with open(bootstrap_ps1, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print(f"[OK] Updated bootstrap.ps1 version to {new_version}.")
+
 def update_changelog(new_version: str, categories: Dict[str, List[str]]) -> None:
     """Prepend new version changes to CHANGELOG.md."""
     changelog_path = "CHANGELOG.md"
