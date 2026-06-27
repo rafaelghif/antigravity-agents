@@ -35,6 +35,17 @@ Introduce shell tab-completion scripts to speed up command line invocation.
   - Implement `completion bash` and `completion zsh` commands.
   - Dynamically output completion definitions matching helper commands (`lock`, `validate`, `profile`, `skill`, `issue`, `changelog`) and subcommands.
 
+### Milestone 5: Documentation & Interactive Help Updates
+- **Interactive Helper CLI Help**:
+  - Update `helper.py` main help instructions and command reference to describe the new commands (`doctor`, `upgrade`, `completion`, and `skill` manager command) with clear examples.
+- **Detailed README.md Documentation**:
+  - Update `README.md` to provide professional, step-by-step instructions on:
+    1. Installing and configuring the global CLI wrapper (`aac` alias).
+    2. Installing terminal tab-autocompletions for Bash, Zsh, and PowerShell (explaining how to source and append completion scripts in shell profiles).
+    3. Using diagnostics audits (`doctor`) and upgrades (`upgrade`).
+- **No-Warranty / Disclaimer Clause**:
+  - Add a prominent, professional disclaimer to `README.md` stating that this developer agent tool is provided as-is without any warranties of any kind.
+
 ---
 
 ## 2. File Modifiers Plan

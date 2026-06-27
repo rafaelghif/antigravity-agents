@@ -149,3 +149,12 @@ After running the bootstrap, your project will have the following layout:
   - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
 - `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `debugging/`, `coding-standards/`, `contract-synchronization/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
+
+---
+
+## ⚠️ Disclaimer (No Warranty)
+
+> [!WARNING]
+> **No Warranty**: Antigravity Agent Core (AAC) is provided **"as-is"** without any warranty of any kind, express or implied. The developers and contributors make no representations or warranties regarding the security, accuracy, reliability, or correctness of code modifications, credential management, or task executions performed by the agent.
+> 
+> Using this agent involves executing code, managing local keys, and modifying repository content. You assume all risks associated with its use, including but not limited to potential data loss, local environment misconfigurations, or API rate-limiting issues.
