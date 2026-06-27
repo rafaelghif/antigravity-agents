@@ -3,13 +3,12 @@
 This board tracks active development tasks for AAC V2.
 
 ## Todo
-- [ ] Add CLI unit testing suite (`test/cli-v2`)
+- [ ] Add CLI unit testing suite (`test/cli-v2`) <!-- id: task-012 -->
 
 ## Doing
-- [/] Set up automated compliance validation suite (`feat/issue-011-validate-v2`) <!-- id: issue-011 -->
 
 ## Done
-- [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`)
+- [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`) <!-- id: chore-init -->
 - [x] Initialize V2 layout (rules, schemas, ADRs, skills) (`feat/init-v2`) <!-- id: task-001 -->
 - [x] Create world-class-programmer skill playbook (`feat/world-class-programmer-skill`) <!-- id: task-002 -->
 - [x] Implement enterprise-grade features (auto-recon script, architectural blueprints, security auditing, CI/CD) (`feat/enterprise-features`) <!-- id: task-003 -->
@@ -20,3 +19,4 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement dynamic workspace synchronization and validation check (`feat/sync-validate`) <!-- id: task-008 -->
 - [x] Implement subtask checkbox compliance check and tasking design capture skill playbook (`feat/tasking-spec`) <!-- id: task-009 -->
 - [x] Implement V2 CLI and bootstrap logic (`feat/issue-010-cli-v2`) <!-- id: issue-010 -->
+- [x] Set up automated compliance validation suite (`feat/issue-011-validate-v2`) <!-- id: issue-011 -->
