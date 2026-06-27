@@ -47,6 +47,8 @@ def run(args):
             if res:
                 github_url, github_number = res
                 print(f"Successfully created remote GitHub issue #{github_number}: {github_url}")
+            else:
+                print("Warning: Remote GitHub issue creation was bypassed (either token or git remote is missing).")
         except Exception as e:
             print(f"Warning: Could not create remote GitHub issue: {e}")
 

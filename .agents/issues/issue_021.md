@@ -1,7 +1,7 @@
 ---
 id: issue-021
 title: "Refactor CLI command dispatching, validation guard, and git-api error handling"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-06-27
 ---
@@ -30,19 +30,19 @@ created_at: 2026-06-27
 Option B is selected. We will keep CLI command modules self-contained while refactoring their internal structure to be cleaner, faster, and more robust.
 
 ## 3. Implementation Subtasks
-- [ ] **validate.py**: Refactor audits into distinct functions and add a visual audit summary table/box.
-- [ ] **validate.py**: Exclude `dist`, `build`, `out`, and `.next` from the secret scanner's directory walker.
-- [ ] **validate.py**: Implement strict validation check preventing any files/folders ignored by `.gitignore` or `.antigravityignore` from being staged or committed.
-- [ ] **git_api.py**: Use `Bearer` token header, robust git remote parse regex, and add warning logs for missing token/remote URL.
-- [ ] **helper.py**: Simplify command path loading and error handling.
-- [ ] **issue.py**: Clean up arguments parsing and print warning messages if git_api returns `None` for GitHub issue creation.
-- [ ] **Tests**: Run unit tests and add new assertions if necessary.
-- [ ] **Validation**: Verify `validate.py` runs successfully.
+- [x] **validate.py**: Refactor audits into distinct functions and add a visual audit summary table/box.
+- [x] **validate.py**: Exclude `dist`, `build`, `out`, and `.next` from the secret scanner's directory walker.
+- [x] **validate.py**: Implement strict validation check preventing any files/folders ignored by `.gitignore` or `.antigravityignore` from being staged or committed.
+- [x] **git_api.py**: Use `Bearer` token header, robust git remote parse regex, and add warning logs for missing token/remote URL.
+- [x] **helper.py**: Simplify command path loading and error handling.
+- [x] **issue.py**: Clean up arguments parsing and print warning messages if git_api returns `None` for GitHub issue creation.
+- [x] **Tests**: Run unit tests and add new assertions if necessary.
+- [x] **Validation**: Verify `validate.py` runs successfully.
 
 ## 4. Acceptance Criteria
-- [ ] `validate.py` prints a clean colored Summary Table at the end of the execution.
-- [ ] `validate.py` fails if any file ignored by `.gitignore` or `.antigravityignore` is staged.
-- [ ] Subcommand runner handles missing or invalid commands gracefully.
-- [ ] `helper.py issue create` logs a helpful warning to the user if GITHUB_TOKEN or remote configuration is missing.
-- [ ] All unit tests pass.
-- [ ] Validation guard runs and passes successfully.
+- [x] `validate.py` prints a clean colored Summary Table at the end of the execution.
+- [x] `validate.py` fails if any file ignored by `.gitignore` or `.antigravityignore` is staged.
+- [x] Subcommand runner handles missing or invalid commands gracefully.
+- [x] `helper.py issue create` logs a helpful warning to the user if GITHUB_TOKEN or remote configuration is missing.
+- [x] All unit tests pass.
+- [x] Validation guard runs and passes successfully.

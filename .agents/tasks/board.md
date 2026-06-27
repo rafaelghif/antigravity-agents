@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Refactor CLI, validation guard, and git-api error handling (`feat/issue-021`) <!-- id: issue-021 -->
 
 ## Done
+- [x] Refactor CLI, validation guard, and git-api error handling (`feat/issue-021`) <!-- id: issue-021 -->
 - [x] Implement Git Profile Manager command in V2 CLI (`feat/issue-020`) <!-- id: issue-020 -->
 - [x] Establish V2 directory structure and baseline protocol (`chore/init-layout`) <!-- id: chore-init -->
 - [x] Initialize V2 layout (rules, schemas, ADRs, skills) (`feat/init-v2`) <!-- id: task-001 -->

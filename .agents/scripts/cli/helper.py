@@ -29,13 +29,17 @@ def main():
             
         import importlib.util
         spec = importlib.util.spec_from_file_location(f"cmd_{cmd}", cmd_file)
+        if spec is None or spec.loader is None:
+            print(f"Error: Could not load command module spec for '{cmd}'.")
+            sys.exit(1)
         cmd_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cmd_module)
+        if not hasattr(cmd_module, "run"):
+            print(f"Error: Command module '{cmd}' does not implement required 'run(args)' method.")
+            sys.exit(1)
         cmd_module.run(sys.argv[2:])
     except Exception as e:
         print(f"Error executing command '{cmd}': {e}")
-        import traceback
-        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == '__main__':

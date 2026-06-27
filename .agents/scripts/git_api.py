@@ -2,36 +2,45 @@ import os
 import urllib.request
 import json
 import urllib.error
+import subprocess
+import sys
+import re
+from typing import Optional, Tuple
 
 # Detect GITHUB_TOKEN or GIT_PAT from environment
-def get_pat():
-    return os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
+def get_pat() -> Optional[str]:
+    pat = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
+    if not pat:
+        print("[WARN] GitHub token (GITHUB_TOKEN or GIT_PAT) is not set in the environment.", file=sys.stderr)
+    return pat
 
-def get_repo_info():
+def get_repo_info() -> Optional[str]:
     # Attempt to parse repository owner and name from git remote URL
-    import subprocess
     try:
-        res = subprocess.run(['git', 'remote', 'get-url', 'origin'], stdout=subprocess.PIPE, text=True)
+        res = subprocess.run(['git', 'remote', 'get-url', 'origin'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode != 0:
+            print("[WARN] Git remote 'origin' is not configured.", file=sys.stderr)
+            return None
         url = res.stdout.strip()
         # Parse git@github.com:owner/repo.git or https://github.com/owner/repo.git
-        if "github.com" in url:
-            part = url.split("github.com")[-1].strip(":/")
-            if part.endswith(".git"):
-                part = part[:-4]
-            return part # e.g. "owner/repo"
-    except Exception:
-        pass
+        match = re.search(r'github\.com[:/]([^/]+/[^/\.]+)(\.git)?', url)
+        if match:
+            return match.group(1)
+        print(f"[WARN] Could not parse repository info from URL: '{url}'", file=sys.stderr)
+    except Exception as e:
+        print(f"[WARN] Failed to get Git remote details: {e}", file=sys.stderr)
     return None
 
-def create_github_issue(title, body=""):
+def create_github_issue(title: str, body: str = "") -> Optional[Tuple[str, int]]:
     pat = get_pat()
     repo = get_repo_info()
     if not pat or not repo:
+        print("[WARN] Bypassing remote GitHub issue creation due to missing configuration.", file=sys.stderr)
         return None
         
     url = f"https://api.github.com/repos/{repo}/issues"
     headers = {
-        "Authorization": f"token {pat}",
+        "Authorization": f"Bearer {pat}",
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "Antigravity-Agent-Core"
     }
@@ -43,20 +52,21 @@ def create_github_issue(title, body=""):
             res_data = json.loads(res.read().decode('utf-8'))
             return res_data.get("html_url"), res_data.get("number")
     except urllib.error.HTTPError as e:
-        print(f"GitHub API Error: {e.code} - {e.read().decode('utf-8')}")
+        print(f"[FAIL] GitHub API HTTP Error: {e.code} - {e.read().decode('utf-8')}", file=sys.stderr)
     except Exception as e:
-        print(f"Failed to create GitHub issue: {e}")
+        print(f"[FAIL] Failed to create GitHub issue: {e}", file=sys.stderr)
     return None
 
-def close_github_issue(issue_number):
+def close_github_issue(issue_number: int) -> bool:
     pat = get_pat()
     repo = get_repo_info()
     if not pat or not repo or not issue_number:
+        print("[WARN] Bypassing remote GitHub issue closure due to missing configuration.", file=sys.stderr)
         return False
         
     url = f"https://api.github.com/repos/{repo}/issues/{issue_number}"
     headers = {
-        "Authorization": f"token {pat}",
+        "Authorization": f"Bearer {pat}",
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "Antigravity-Agent-Core"
     }
@@ -67,5 +77,5 @@ def close_github_issue(issue_number):
         with urllib.request.urlopen(req) as res:
             return res.status == 200
     except Exception as e:
-        print(f"Failed to close GitHub issue #{issue_number}: {e}")
+        print(f"[FAIL] Failed to close GitHub issue #{issue_number}: {e}", file=sys.stderr)
     return False
