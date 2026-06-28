@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.65.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit GPG signing auto config fix and tests
+
+
 ## [2.65.0] - 2026-06-28
 
 ### 🚀 Features
