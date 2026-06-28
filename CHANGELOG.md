@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.73.0] - 2026-06-28
+
+### 🚀 Features
+- Implement visual web dashboard, VS Code extension structure, and conversational workflows (ISSUE-094)
+
+### 🐛 Bug Fixes
+- implement incremental validation logic for static analysis and unit testing
+
+
 ## [2.72.0] - 2026-06-28
 
 ### 🚀 Features
