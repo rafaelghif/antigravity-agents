@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.75.0] - 2026-06-28
+
+### 🚀 Features
+- Fix parameter parsing error in bootstrap.ps1 on Windows (ISSUE-096)
+
+### 🐛 Bug Fixes
+- parameter parsing error in bootstrap.ps1 on Windows
+
+
 ## [2.74.0] - 2026-06-28
 
 ### 🚀 Features
