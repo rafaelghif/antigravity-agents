@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.66.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Git identity and signing auto-repair fallbacks in validation guard (ISSUE-087)
+
+
 ## [2.65.1] - 2026-06-28
 
 ### ⚙️ Chores
