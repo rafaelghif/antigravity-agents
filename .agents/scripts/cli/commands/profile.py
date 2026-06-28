@@ -279,49 +279,167 @@ def validate_email(email: str) -> bool:
     """Validate basic email format."""
     return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
 
+def run_interactive_wizard() -> Dict[str, Any]:
+    """Guide the developer through registering a new profile step-by-step."""
+    print("\n" + "="*60)
+    print(f"{GREEN}   Antigravity Profile Registration Wizard   {RESET}")
+    print("="*60)
+    print("Configure a new Git profile step-by-step.\n")
+    
+    try:
+        # 1. Profile Name
+        while True:
+            name = input("1. Enter Profile Name (alphanumeric, hyphens, underscores): ").strip()
+            if not name:
+                print("   Profile name cannot be empty.")
+                continue
+            if not validate_name(name):
+                print("   Invalid name format. Only alphanumeric, hyphens, and underscores are allowed.")
+                continue
+            # Check uniqueness
+            data = load_profiles()
+            profiles = data.get("profiles", [])
+            if any(p.get("name") == name for p in profiles):
+                print(f"   Profile '{name}' already exists. Please choose a different name.")
+                continue
+            break
+            
+        # 2. Email
+        while True:
+            email = input("2. Enter Git Email: ").strip()
+            if not email:
+                print("   Email cannot be empty.")
+                continue
+            if not validate_email(email):
+                print("   Invalid email format. Please try again.")
+                continue
+            break
+            
+        # 3. Signing Type
+        signing_key = None
+        ssh_key_path = None
+        
+        print("\n3. Choose Commit Signing Option:")
+        print("   [1] None (default)")
+        print("   [2] SSH Key (Automatic generation or existing file)")
+        print("   [3] GPG Key (Existing keyring Key ID)")
+        choice = input("Enter choice (1-3) [1]: ").strip() or "1"
+        
+        if choice == "2":
+            gen_choice = input("   Would you like us to generate a new secure SSH key pair? (Y/n) [y]: ").strip().lower() or "y"
+            if gen_choice == "y":
+                ssh_key_path = generate_ssh_key(name, email)
+                # Read the public key to use as the signing key
+                pub_key_path = f"{ssh_key_path}.pub"
+                if os.path.exists(pub_key_path):
+                    try:
+                        with open(pub_key_path, 'r', encoding='utf-8') as f:
+                            signing_key = f.read().strip()
+                    except Exception:
+                        pass
+            else:
+                while True:
+                    path_input = input("   Enter path to your private SSH key: ").strip()
+                    if not path_input:
+                        print("   SSH key path cannot be empty.")
+                        continue
+                    ssh_key_path = os.path.expanduser(path_input)
+                    if not os.path.exists(ssh_key_path):
+                        print(f"   Warning: file '{ssh_key_path}' does not exist yet. We will register it anyway.")
+                    # Check if public key exists to set signing_key
+                    pub_key_path = f"{ssh_key_path}.pub"
+                    if os.path.exists(pub_key_path):
+                        try:
+                            with open(pub_key_path, 'r', encoding='utf-8') as f:
+                                signing_key = f.read().strip()
+                        except Exception:
+                            pass
+                    break
+        elif choice == "3":
+            while True:
+                gpg_input = input("   Enter GPG Key ID (e.g. 4A1D5B or 16-char hex): ").strip()
+                if not gpg_input:
+                    print("   GPG Key ID cannot be empty.")
+                    continue
+                signing_key = gpg_input
+                break
+                
+        # 4. GitHub PAT
+        print("\n4. Authentication Token:")
+        git_token = input("   Enter GitHub Personal Access Token (PAT) [press Enter to skip]: ").strip()
+        if not git_token:
+            git_token = None
+            
+        # 5. Switch Immediately
+        switch_choice = input("\n5. Switch to this new profile immediately? (Y/n) [y]: ").strip().lower() or "y"
+        switch_after = (switch_choice == "y")
+        
+        return {
+            "name": name,
+            "email": email,
+            "signing_key": signing_key,
+            "ssh_key_path": ssh_key_path,
+            "git_token": git_token,
+            "switch_after": switch_after
+        }
+        
+    except KeyboardInterrupt:
+        print(f"\n\n{YELLOW}[WARN] Profile registration wizard aborted.{RESET}")
+        sys.exit(0)
+
 def handle_add(args: List[str]) -> None:
     """Add a new profile to JSON configuration."""
-    if len(args) < 2:
-        print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--generate-ssh] [--switch|-s]")
-        sys.exit(1)
+    if len(args) == 0:
+        wizard_data = run_interactive_wizard()
+        name = wizard_data["name"]
+        email = wizard_data["email"]
+        signing_key = wizard_data["signing_key"]
+        ssh_key_path = wizard_data["ssh_key_path"]
+        git_token = wizard_data["git_token"]
+        switch_after = wizard_data["switch_after"]
+        generate_ssh = False
+    else:
+        if len(args) < 2:
+            print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--generate-ssh] [--switch|-s]")
+            sys.exit(1)
+            
+        name = args[0]
+        email = args[1]
         
-    name = args[0]
-    email = args[1]
-    
-    signing_key = None
-    ssh_key_path = None
-    git_token = None
-    generate_ssh = False
-    switch_after = False
-    
-    i = 2
-    while i < len(args):
-        arg = args[i]
-        if arg in ('--switch', '-s'):
-            switch_after = True
-            i += 1
-        elif arg == '--ssh-key':
-            if i + 1 < len(args):
-                ssh_key_path = args[i+1]
-                i += 2
+        signing_key = None
+        ssh_key_path = None
+        git_token = None
+        generate_ssh = False
+        switch_after = False
+        
+        i = 2
+        while i < len(args):
+            arg = args[i]
+            if arg in ('--switch', '-s'):
+                switch_after = True
+                i += 1
+            elif arg == '--ssh-key':
+                if i + 1 < len(args):
+                    ssh_key_path = args[i+1]
+                    i += 2
+                else:
+                    print_err("Error: --ssh-key requires a path argument.")
+                    sys.exit(1)
+            elif arg == '--git-token':
+                if i + 1 < len(args):
+                    git_token = args[i+1]
+                    i += 2
+                else:
+                    print_err("Error: --git-token requires a token argument.")
+                    sys.exit(1)
+            elif arg == '--generate-ssh':
+                generate_ssh = True
+                i += 1
+            elif not arg.startswith('-'):
+                signing_key = arg
+                i += 1
             else:
-                print_err("Error: --ssh-key requires a path argument.")
-                sys.exit(1)
-        elif arg == '--git-token':
-            if i + 1 < len(args):
-                git_token = args[i+1]
-                i += 2
-            else:
-                print_err("Error: --git-token requires a token argument.")
-                sys.exit(1)
-        elif arg == '--generate-ssh':
-            generate_ssh = True
-            i += 1
-        elif not arg.startswith('-'):
-            signing_key = arg
-            i += 1
-        else:
-            i += 1
+                i += 1
             
     if not validate_name(name):
         print_err(f"Invalid profile name '{name}'. Only alphanumeric, hyphens, and underscores allowed.")

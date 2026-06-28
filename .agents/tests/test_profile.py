@@ -291,5 +291,30 @@ class TestProfileCommand(unittest.TestCase):
         sub_calls = [" ".join(call[0][0]) for call in mock_sub.call_args_list]
         self.assertTrue(any("gpg.format openpgp" in cmd for cmd in sub_calls))
 
+    @patch('builtins.input')
+    @patch('profile.generate_ssh_key')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    @patch('subprocess.run')
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="ssh-ed25519 AAA-mock-pub-key")
+    def test_handle_add_interactive_wizard(self, mock_file, mock_exists, mock_sub, mock_save, mock_load, mock_gen_ssh, mock_input):
+        mock_load.return_value = {"profiles": []}
+        mock_gen_ssh.return_value = "/fake/path"
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        mock_input.side_effect = ["wizard-prof", "wizard@test.com", "2", "y", "ghp_token123", "y"]
+        
+        profile.handle_add([])
+        
+        saved_data = mock_save.call_args[0][0]
+        self.assertEqual(len(saved_data["profiles"]), 1)
+        prof = saved_data["profiles"][0]
+        self.assertEqual(prof["name"], "wizard-prof")
+        self.assertEqual(prof["email"], "wizard@test.com")
+        self.assertEqual(prof["signing_key"], "ssh-ed25519 AAA-mock-pub-key")
+        self.assertEqual(prof["ssh_key_path"], "/fake/path")
+        self.assertEqual(prof["git_token"], "ghp_token123")
+
 if __name__ == '__main__':
     unittest.main()
