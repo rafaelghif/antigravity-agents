@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.67.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit interactive profile registration wizard
+
+
 ## [2.67.0] - 2026-06-28
 
 ### 🚀 Features
