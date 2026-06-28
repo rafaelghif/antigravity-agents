@@ -8,9 +8,9 @@ import re
 from typing import Optional, Tuple
 
 # Detect GITHUB_TOKEN or GIT_PAT from environment
-def get_pat() -> Optional[str]:
+def get_pat(silent: bool = False) -> Optional[str]:
     pat = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
-    if not pat:
+    if not pat and not silent:
         print("[WARN] GitHub token (GITHUB_TOKEN or GIT_PAT) is not set in the environment.", file=sys.stderr)
     return pat
 
@@ -81,7 +81,7 @@ def close_github_issue(issue_number: int) -> bool:
     return False
 
 def fetch_github_issues() -> Optional[list]:
-    pat = get_pat()
+    pat = get_pat(silent=True)
     repo = get_repo_info()
     if not pat or not repo:
         return None
@@ -103,7 +103,7 @@ def fetch_github_issues() -> Optional[list]:
 
 def post_commit_status(sha: str, state: str, target_url: str = "", description: str = "", context: str = "AAC Validation Guard") -> bool:
     """Post a validation status back to GitHub commit."""
-    pat = get_pat()
+    pat = get_pat(silent=True)
     repo = get_repo_info()
     if not pat or not repo or not sha:
         return False
