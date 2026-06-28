@@ -22,15 +22,23 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 
 # 0. Check for Python 3 presence
 $PythonExec = ""
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    $Version = & python --version 2>&1
-    if ($Version -match "Python 3") {
-        $PythonExec = "python"
+$OldPreference = $ErrorActionPreference
+$ErrorActionPreference = "SilentlyContinue"
+try {
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        $Version = [string](& python --version 2>&1)
+        if ($Version -match "Python 3") {
+            $PythonExec = "python"
+        }
     }
-}
-if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
-    $PythonExec = "python3"
-}
+    if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+        $Version = [string](& python3 --version 2>&1)
+        if ($Version -match "Python 3") {
+            $PythonExec = "python3"
+        }
+    }
+} catch {}
+$ErrorActionPreference = $OldPreference
 
 if (-not $PythonExec) {
     Write-Host "==========================================================" -ForegroundColor Red
@@ -67,7 +75,7 @@ if (Test-Path $AgentsDir) {
     
     if (Test-Path $Agentsmd) {
         Write-Host "Backing up AGENTS.md to AGENTS.md.backup_$Timestamp..."
-        Copy-Item -Path $Agentsmd -Destination "$Agentsmd.backup_$Timestamp" -Force | Out-Null
+        Copy-Item -Path $Agentsmd -Destination "$($Agentsmd).backup_$Timestamp" -Force | Out-Null
     }
 }
 
@@ -231,7 +239,7 @@ if ($LocalDev -and (Test-Path $SrcAgents)) {
         Exit 1
     }
     
-    $ExtractedDirs = Get-ChildItem -Path $TempDir -Directory -Filter "antigravity-agents-*"
+    $ExtractedDirs = @(Get-ChildItem -Path $TempDir -Directory -Filter "antigravity-agents-*")
     if ($ExtractedDirs.Count -eq 0) {
         Write-Host "Error: Extracted repository folder not found." -ForegroundColor Red
         Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
