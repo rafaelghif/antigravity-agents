@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.71.0] - 2026-06-28
+
+### 🚀 Features
+- Align README.md with PowerShell tab completion and CLI updates (ISSUE-092)
+
+### 🐛 Bug Fixes
+- implement unified credentials fallback, GPG diagnostics, and PowerShell completion
+
+
 ## [2.70.0] - 2026-06-28
 
 ### 🚀 Features
