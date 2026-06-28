@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.59.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Auto-Lessons Extractor when closing issues (ISSUE-080)
+
+
 ## [2.58.0] - 2026-06-27
 
 ### 🚀 Features
