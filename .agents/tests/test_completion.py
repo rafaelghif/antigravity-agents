@@ -32,6 +32,16 @@ class TestCompletionCommand(unittest.TestCase):
         self.assertIn("#compdef aac helper.sh", printed)
 
     @patch('sys.exit', side_effect=raise_system_exit)
+    @patch('builtins.print')
+    def test_completion_powershell(self, mock_print, mock_exit):
+        with self.assertRaises(SystemExit) as cm:
+            completion.run(["powershell"])
+        self.assertEqual(cm.exception.code, 0)
+        printed = mock_print.call_args[0][0]
+        self.assertIn("Register-ArgumentCompleter", printed)
+        self.assertIn("CompletionResult", printed)
+
+    @patch('sys.exit', side_effect=raise_system_exit)
     def test_completion_invalid(self, mock_exit):
         with self.assertRaises(SystemExit) as cm:
             completion.run(["fish"])

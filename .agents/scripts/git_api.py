@@ -10,6 +10,18 @@ from typing import Optional, Tuple
 # Detect GITHUB_TOKEN or GIT_PAT from environment
 def get_pat(silent: bool = False) -> Optional[str]:
     pat = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
+    if not pat:
+        profiles_file = ".agents/git_profiles.json"
+        if os.path.exists(profiles_file):
+            try:
+                with open(profiles_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                profiles = data.get("profiles", [])
+                active = next((p for p in profiles if p.get("active")), None)
+                if active:
+                    pat = active.get("git_token")
+            except Exception:
+                pass
     if not pat and not silent:
         print("[WARN] GitHub token (GITHUB_TOKEN or GIT_PAT) is not set in the environment.", file=sys.stderr)
     return pat
