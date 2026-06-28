@@ -359,6 +359,24 @@ created_at: {current_date}
                 print("Error: Validation guard failed. Issue close aborted.")
                 sys.exit(1)
 
+        # Trigger Auto-Lessons Extractor
+        print("Triggering Auto-Lessons Extractor...")
+        try:
+            commands_dir = os.path.dirname(__file__)
+            if commands_dir not in sys.path:
+                sys.path.insert(0, commands_dir)
+            import learn
+            
+            # Detect base branch dynamically
+            base_branch = "main"
+            res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if res_master.returncode == 0:
+                base_branch = "master"
+                
+            learn.suggest_and_record_lessons(base_branch)
+        except Exception as e:
+            print(f"Warning: Auto-Lessons Extractor failed: {e}")
+
         # Read issue file
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -391,6 +409,12 @@ created_at: {current_date}
         if changelog_res.returncode != 0:
             print("Warning: Changelog generator failed or was skipped.")
 
+        # Run workspace sync to compile new lessons into rules
+        print("Running workspace sync to compile new lessons into rules...")
+        sync_res = subprocess.run([sys.executable, helper_path, 'sync'])
+        if sync_res.returncode != 0:
+            print("Warning: Workspace synchronization failed.")
+
         # 4. Stage and commit release/board/issue files on feature branch
         if found_branch:
             print(f"Staging issue, board, and release changes on branch '{found_branch}'...")
@@ -403,7 +427,9 @@ created_at: {current_date}
                 "bootstrap.ps1",
                 ".agents/scripts/cli/commands/bootstrap.py",
                 "README.md",
-                ".agents/scripts/cli/commands/issue.py"
+                ".agents/scripts/cli/commands/issue.py",
+                ".agents/memory/lessons-learned.md",
+                ".agents/rules.md"
             ]
             for f_to_stage in files_to_stage:
                 if os.path.exists(f_to_stage):
