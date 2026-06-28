@@ -487,6 +487,25 @@ created_at: {current_date}
         if sync_res.returncode != 0:
             print("Warning: Workspace synchronization failed.")
 
+        # Release locks held by this branch before staging final commit
+        locks_file = ".agents/locks.json"
+        if os.path.exists(locks_file):
+            try:
+                import json
+                with open(locks_file, 'r', encoding='utf-8') as lf:
+                    locks = json.load(lf)
+                modified_locks = False
+                for mod, holder in list(locks.items()):
+                    if holder == found_branch:
+                        del locks[mod]
+                        modified_locks = True
+                if modified_locks:
+                    with open(locks_file, 'w', encoding='utf-8') as lf:
+                        json.dump(locks, lf, indent=2)
+                    print("[OK] Released module locks associated with the branch.")
+            except Exception:
+                pass
+
         # 4. Stage and commit release/board/issue files on feature branch
         if found_branch:
             print(f"Staging issue, board, and release changes on branch '{found_branch}'...")
@@ -501,7 +520,8 @@ created_at: {current_date}
                 "README.md",
                 ".agents/scripts/cli/commands/issue.py",
                 ".agents/memory/lessons-learned.md",
-                ".agents/rules.md"
+                ".agents/rules.md",
+                ".agents/locks.json"
             ]
             for f_to_stage in files_to_stage:
                 if os.path.exists(f_to_stage):
@@ -538,24 +558,7 @@ created_at: {current_date}
             print(f"Deleting branch '{found_branch}'...")
             subprocess.run(['git', 'branch', '-d', found_branch])
 
-            # Release lock
-            locks_file = ".agents/locks.json"
-            if os.path.exists(locks_file):
-                try:
-                    import json
-                    with open(locks_file, 'r', encoding='utf-8') as lf:
-                        locks = json.load(lf)
-                    modified_locks = False
-                    for mod, holder in list(locks.items()):
-                        if holder == found_branch:
-                            del locks[mod]
-                            modified_locks = True
-                    if modified_locks:
-                        with open(locks_file, 'w', encoding='utf-8') as lf:
-                            json.dump(locks, lf, indent=2)
-                        print("[OK] Released module locks associated with the branch.")
-                except Exception:
-                    pass
+            # Locks were released and committed on the feature branch prior to base merge.
             print(f"[OK] Issue '{issue_id}' fully resolved and merged to '{base_branch}' successfully.")
         
     elif action == "sync":

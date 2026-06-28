@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.70.0] - 2026-06-28
+
+### 🚀 Features
+- Implement unified API credentials, GPG diagnostics, PowerShell completion, and lock auto-pruning (ISSUE-091)
+
+### 🐛 Bug Fixes
+- exclude git_profiles.json from tracking and silence validation warnings
+
+
 ## [2.69.0] - 2026-06-28
 
 ### 🚀 Features
