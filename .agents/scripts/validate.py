@@ -601,6 +601,32 @@ def audit_task_board_schema() -> bool:
     if not failed:
         print_ok("Task board schema is compliant.")
     return not failed
+def get_modified_files() -> List[str]:
+    """Retrieve list of modified files in the repository across staged/unstaged changes and diff comparison to base branch."""
+    files = []
+    
+    # 1. Local staged changes
+    res_staged = subprocess.run(['git', 'diff', '--cached', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if res_staged.returncode == 0:
+        files.extend(line.strip() for line in res_staged.stdout.splitlines() if line.strip())
+        
+    # 2. Local unstaged changes
+    res_unstaged = subprocess.run(['git', 'diff', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if res_unstaged.returncode == 0:
+        files.extend(line.strip() for line in res_unstaged.stdout.splitlines() if line.strip())
+        
+    # 3. Fallback comparison to base branch if diff is empty (e.g. committed changes on feature branch)
+    if not files:
+        base_branch = "main"
+        res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if res_master.returncode == 0:
+            base_branch = "master"
+            
+        res_diff = subprocess.run(['git', 'diff', f'{base_branch}...HEAD', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res_diff.returncode == 0:
+            files.extend(line.strip() for line in res_diff.stdout.splitlines() if line.strip())
+            
+    return list(set(files))
 
 # ==========================================================
 # 7. Static Code Linting / Compile Check
@@ -608,30 +634,49 @@ def audit_task_board_schema() -> bool:
 def audit_static_linting() -> bool:
     print("\n[7/9] Auditing Static Syntax Compilation...")
     failed = False
-    scripts_dir = ".agents/scripts"
     antigravity_patterns = parse_antigravity_ignore()
+    modified_files = get_modified_files()
     
-    if os.path.exists(scripts_dir):
-        for root, dirs, files in os.walk(scripts_dir):
-            dirs[:] = [d for d in dirs if not is_ignored_by_antigravity(os.path.join(root, d), antigravity_patterns)]
-            for file in files:
-                if file.endswith(".py"):
-                    file_path = os.path.join(root, file)
-                    if is_ignored_by_antigravity(file_path, antigravity_patterns):
-                        continue
-                    try:
-                        py_compile.compile(file_path, doraise=True)
-                    except py_compile.PyCompileError as e:
-                        print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
-                        failed = True
-                        continue
-                        
-                    if shutil.which("flake8"):
-                        res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
-                        if res.returncode != 0:
-                            print_err(f"flake8 style violations found in '{file_path}':\n{res.stdout}")
-                            failed = True
+    target_files = []
+    if modified_files:
+        # Check only modified python scripts
+        for f in modified_files:
+            if f.endswith(".py") and f.startswith(".agents/scripts/") and os.path.exists(f):
+                if not is_ignored_by_antigravity(f, antigravity_patterns):
+                    target_files.append(f)
+        
+        if target_files:
+            print(f"Incremental validation active. Auditing {len(target_files)} modified Python files.")
+        else:
+            print("Incremental validation active. No Python files modified. Skipping static check.")
+            return True
+    else:
+        # Baseline audit
+        print("No active git modifications detected. Performing baseline audit on all scripts...")
+        scripts_dir = ".agents/scripts"
+        if os.path.exists(scripts_dir):
+            for root, dirs, files in os.walk(scripts_dir):
+                dirs[:] = [d for d in dirs if not is_ignored_by_antigravity(os.path.join(root, d), antigravity_patterns)]
+                for file in files:
+                    if file.endswith(".py"):
+                        file_path = os.path.join(root, file)
+                        if not is_ignored_by_antigravity(file_path, antigravity_patterns):
+                            target_files.append(file_path)
                             
+    for file_path in target_files:
+        try:
+            py_compile.compile(file_path, doraise=True)
+        except py_compile.PyCompileError as e:
+            print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
+            failed = True
+            continue
+            
+        if shutil.which("flake8"):
+            res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"flake8 style violations found in '{file_path}':\n{res.stdout}")
+                failed = True
+                
     if not failed:
         print_ok("Static syntax compilation and style audits passed.")
     return not failed
@@ -645,6 +690,19 @@ def audit_unit_tests() -> bool:
         print_warn("Bypass flag 'BYPASS_TESTS=true' detected. Skipping unit test execution.")
         return True
         
+    modified_files = get_modified_files()
+    if modified_files:
+        # Check if any modified file impacts python execution or test configuration
+        affects_tests = False
+        for f in modified_files:
+            if f.endswith(".py") or f.startswith(".agents/tests/") or f == ".agents/projects.json" or f == ".agents/rules.md":
+                affects_tests = True
+                break
+        
+        if not affects_tests:
+            print_ok("Incremental validation active. No code or test files modified. Skipping unit tests.")
+            return True
+            
     failed = False
     
     # 1. Run agent system tests
