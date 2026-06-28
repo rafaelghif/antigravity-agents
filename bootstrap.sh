@@ -28,9 +28,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.63.1", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.64.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.63.1", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.64.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
@@ -97,6 +97,21 @@ fi
 EOF
   chmod +x .git/hooks/commit-msg
   echo "Installed local Git commit-msg hook."
+
+  # Prepare-commit-msg Hook
+  cat << 'EOF' > .git/hooks/prepare-commit-msg
+#!/usr/bin/env bash
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+elif command -v python &>/dev/null; then
+  python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+fi
+EOF
+  chmod +x .git/hooks/prepare-commit-msg
+  echo "Installed local Git prepare-commit-msg hook."
 fi
 
 echo "=========================================================="
