@@ -46,7 +46,7 @@ if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
 
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md" -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.63.1', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.63.1', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.64.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.64.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -113,6 +113,21 @@ fi
     $CommitMsgPath = Join-Path $HooksDir "commit-msg"
     [System.IO.File]::WriteAllText($CommitMsgPath, $CommitMsgContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git commit-msg hook."
+
+    $PrepareCommitMsgContent = @"
+#!/usr/bin/env bash
+COMMIT_MSG_FILE="`$1"
+COMMIT_SOURCE="`${2:-}"
+
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+elif command -v python &>/dev/null; then
+  python .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+fi
+"@
+    $PrepareCommitMsgPath = Join-Path $HooksDir "prepare-commit-msg"
+    [System.IO.File]::WriteAllText($PrepareCommitMsgPath, $PrepareCommitMsgContent.Replace("`r`n", "`n"))
+    Write-Host "Installed local Git prepare-commit-msg hook."
 }
 
 Write-Host "==========================================================" -ForegroundColor Green

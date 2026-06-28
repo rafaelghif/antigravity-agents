@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.64.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Auto-Task ID Injection via prepare-commit-msg Git hook (ISSUE-085)
+
+
 ## [2.63.1] - 2026-06-28
 
 ### ⚙️ Chores
