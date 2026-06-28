@@ -2,7 +2,9 @@
 
 These rules extend the core guidelines in `AGENTS.md` with project-specific language and tool specifications.
 
-## 1. Programming Language & Tools
+> **Scope note:** Section 1–3 below govern **AAC's own source code** (the CLI tool itself, which is built in Python). They do **not** apply to whatever stack a *managed/target* project uses — that's handled by the stack-agnostic detection described in Section 4.
+
+## 1. Programming Language & Tools (AAC's own codebase)
 - Use **Python 3** for the main product stack.
 - Rely on the standard library where possible to minimize external dependencies.
 - Use **Bash** for lightweight POSIX-compatible wrapper scripts. Ensure path-separators and directory check logic are safe for multi-platform execution (e.g. using `python3` wrappers on Windows).
@@ -18,5 +20,10 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Mock all filesystem or external command calls to ensure tests remain deterministic and fast.
 
 ## 4. Plug-and-Play Adaptation & Self-Learning
-- **Stack Adaptiveness**: The agent layout is project-agnostic. Use `bootstrap.py` to auto-detect and support any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) without strict folder structure constraints.
-- **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work.
+- **Stack Adaptiveness**: The agent layout is project-agnostic. `./helper.sh bootstrap` (a thin wrapper around `bootstrap.py` — all detection logic lives in the Python script, not duplicated in the shell wrapper, per the no-duplicate-templates rule in `AGENTS.md`) auto-detects and supports any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) for the *target* project, without strict folder structure constraints.
+- **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
+
+## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Token Efficiency]** Always specify file read ranges to save context tokens
+- **[Learning: V2 Restructuring]** Moving to a flat and modular directory structure simplifies agent context parsing and increases model prompt cache efficiency.
+- **[Learning: Python Mock Leaks]** When mocking `sys.exit` in Python unit tests, configure it to raise `SystemExit` (using `side_effect=SystemExit`) and wrap the calls in `assertRaises(SystemExit)`. Uncontrolled mock exits allow the test execution to proceed past the exit point, potentially causing side-effects such as truncating or corrupting real local configuration files during test discover suites.
