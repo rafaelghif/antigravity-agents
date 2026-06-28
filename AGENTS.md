@@ -4,13 +4,14 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.59.1
+- **Version:** 2.60.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
 ## 2. Non-negotiable rules
 *(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*
 
+- **ALWAYS** perform an explicit **Rule & Schema Compliance Audit** in your thought block or response before executing any file modifications. List: (a) target files to edit, (b) active module locks, (c) applicable non-negotiable rules from `AGENTS.md` and `.agents/rules.md`, and (d) verification of conformity with `.agents/schema.md`.
 - **NEVER** commit secrets, `.env*` files, or credentials. Use the secrets approach documented in `.agents/memory/architecture.md`.
 - **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
 - **ALWAYS** run the project's test command before marking a task `Completed`.
@@ -72,7 +73,8 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 ## 5. Working protocol
 1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), and task board before writing any code.
 2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, and create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`).
-3. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.
+3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching) before proposing or writing code.
+4. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.
 4. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
 5. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
 6. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.

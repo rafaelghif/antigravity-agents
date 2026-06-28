@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.60.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Chain-of-Thought Compliance Gate in AGENTS.md (ISSUE-081)
+
+
 ## [2.59.1] - 2026-06-28
 
 ### ⚙️ Chores
