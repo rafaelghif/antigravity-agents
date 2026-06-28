@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.68.0] - 2026-06-28
+
+### 🚀 Features
+- Synchronize and fix Linux and Windows installation and bootstrap scripts (ISSUE-089)
+
+
 ## [2.67.2] - 2026-06-28
 
 ### ⚙️ Chores

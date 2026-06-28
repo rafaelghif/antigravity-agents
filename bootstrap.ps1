@@ -31,22 +31,27 @@ if (Test-Path $SrcTemplates) {
 
 # 1.2 Detect Python 3 executable
 $PythonExec = ""
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    $Version = & python --version 2>&1
-    if ($Version -match "Python 3") {
-        $PythonExec = "python"
+$OldPreference = $ErrorActionPreference
+$ErrorActionPreference = "SilentlyContinue"
+try {
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        $Version = [string](& python --version 2>&1)
+        if ($Version -match "Python 3") {
+            $PythonExec = "python"
+        }
     }
-}
-if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
-    $Version = & python3 --version 2>&1
-    if ($Version -match "Python 3") {
-        $PythonExec = "python3"
+    if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+        $Version = [string](& python3 --version 2>&1)
+        if ($Version -match "Python 3") {
+            $PythonExec = "python3"
+        }
     }
-}
+} catch {}
+$ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if (Test-Path "AGENTS.md" -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.67.2', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.67.2', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.68.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.68.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -63,21 +68,35 @@ if (Test-Path ".agents/scripts/recon.py") {
 }
 
 # 4. Set up local Git hooks
-if (Test-Path ".git") {
+$IsGit = $false
+try {
+    $GitCheck = git rev-parse --is-inside-work-tree 2>&1
+    if ($LastExitCode -eq 0 -and $GitCheck -eq "true") {
+        $IsGit = $true
+    }
+} catch {}
+
+if ($IsGit) {
+    $HooksDir = (git rev-parse --git-path hooks)
+    if (-not [System.IO.Path]::IsPathRooted($HooksDir)) {
+        $HooksDir = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $HooksDir))
+    }
+    if (-not (Test-Path $HooksDir)) {
+        New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
+    }
+    
+    $Prefix = (git rev-parse --show-prefix)
+
     $PreCommitContent = @"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/validate.py
+  python3 "${Prefix}.agents/scripts/validate.py"
 elif command -v python &>/dev/null; then
-  python .agents/scripts/validate.py
+  python "${Prefix}.agents/scripts/validate.py"
 else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
 "@
-    $HooksDir = Join-Path (Get-Location).Path ".git/hooks"
-    if (-not (Test-Path $HooksDir)) {
-        New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
-    }
     $PreCommitPath = Join-Path $HooksDir "pre-commit"
     [System.IO.File]::WriteAllText($PreCommitPath, $PreCommitContent.Replace("`r`n", "`n"))
     Write-Host "Installed local Git pre-commit hook."
@@ -120,9 +139,9 @@ COMMIT_MSG_FILE="`$1"
 COMMIT_SOURCE="`${2:-}"
 
 if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python3 "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 elif command -v python &>/dev/null; then
-  python .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 fi
 "@
     $PrepareCommitMsgPath = Join-Path $HooksDir "prepare-commit-msg"
