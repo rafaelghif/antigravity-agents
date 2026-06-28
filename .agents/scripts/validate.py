@@ -99,6 +99,89 @@ def audit_critical_files() -> bool:
             failed = True
         else:
             print_ok(f"Found '{f}'")
+            
+    # Verify and self-heal local Git hooks
+    hooks_dir = ".git/hooks"
+    if os.path.exists(hooks_dir):
+        hooks = {
+            "pre-commit": r"""#!/usr/bin/env bash
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/validate.py
+elif command -v python &>/dev/null; then
+  python .agents/scripts/validate.py
+else
+  echo "Warning: Python not found. Skipping commit validation check."
+fi
+""",
+            "commit-msg": r"""#!/usr/bin/env bash
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
+
+if [[ ! "$COMMIT_MSG" =~ $CONVENTIONAL_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Non-compliant commit message format!"
+  echo "=========================================================="
+  echo "Commit messages must follow Conventional Commits standard:"
+  echo "  Format: <type>(<scope>): <subject>"
+  echo "  Example: feat(auth): add login endpoint"
+  echo "=========================================================="
+  exit 1
+fi
+
+ID_REGEX="(task-|issue-|chore-)[a-zA-Z0-9_-]+"
+if [[ ! "$COMMIT_MSG" =~ $ID_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Missing Task/Issue ID reference!"
+  echo "=========================================================="
+  echo "Commit messages must include an active task or issue ID reference."
+  echo "  Example body: Task ID: issue-123"
+  echo "=========================================================="
+  exit 1
+fi
+""",
+            "prepare-commit-msg": r"""#!/usr/bin/env bash
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+if command -v python3 &>/dev/null; then
+  python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+elif command -v python &>/dev/null; then
+  python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+fi
+"""
+        }
+        
+        for name, content in hooks.items():
+            path = os.path.join(hooks_dir, name)
+            needs_write = False
+            if not os.path.exists(path):
+                print_warn(f"Git hook '{name}' is missing.")
+                needs_write = True
+            else:
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        curr = f.read()
+                    if curr.strip().replace("\r\n", "\n") != content.strip().replace("\r\n", "\n"):
+                        print_warn(f"Git hook '{name}' content is modified or outdated.")
+                        needs_write = True
+                except Exception:
+                    needs_write = True
+            
+            if needs_write:
+                print(f"Auto-repairing Git hook '{name}'...")
+                try:
+                    with open(path, 'w', encoding='utf-8') as f:
+                        f.write(content.replace("\r\n", "\n"))
+                    if os.name != 'nt':
+                        os.chmod(path, 0o755)
+                    print_ok(f"Git hook '{name}' repaired successfully.")
+                except Exception as e:
+                    print_err(f"Failed to auto-repair Git hook '{name}': {e}")
+                    failed = True
+            else:
+                print_ok(f"Git hook '{name}' is active and compliant.")
+                
     return not failed
 
 # ==========================================================

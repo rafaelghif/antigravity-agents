@@ -316,5 +316,24 @@ class TestProfileCommand(unittest.TestCase):
         self.assertEqual(prof["ssh_key_path"], "/fake/path")
         self.assertEqual(prof["git_token"], "ghp_token123")
 
+    @patch('builtins.input', return_value="2")
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_interactive_menu(self, mock_save, mock_load, mock_sub, mock_input):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False}
+            ]
+        }
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        profile.handle_switch([])
+        
+        saved_data = mock_save.call_args[0][0]
+        self.assertFalse(saved_data["profiles"][0]["active"])
+        self.assertTrue(saved_data["profiles"][1]["active"])
+
 if __name__ == '__main__':
     unittest.main()

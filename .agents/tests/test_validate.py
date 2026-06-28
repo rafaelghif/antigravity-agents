@@ -202,5 +202,20 @@ class TestValidate(unittest.TestCase):
         self.assertTrue(any("user.name p1" in cmd for cmd in sub_calls))
         self.assertTrue(any("commit.gpgsign false" in cmd for cmd in sub_calls))
 
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data="outdated content")
+    @patch('os.chmod')
+    def test_audit_critical_files_hooks_repair(self, mock_chmod, mock_file, mock_exists):
+        def exists_side_effect(path):
+            if ".git/hooks" in path:
+                return True
+            return True
+            
+        mock_exists.side_effect = exists_side_effect
+        
+        res = validate.audit_critical_files()
+        self.assertTrue(res)
+        mock_file().write.assert_called()
+
 if __name__ == '__main__':
     unittest.main()

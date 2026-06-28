@@ -202,23 +202,40 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
 
 def handle_switch(args: List[str]) -> None:
     """Switch active profile by name and apply settings to Git config."""
-    if not args:
-        print_err("Usage: helper.py profile switch <name> [--force-no-gpg]")
-        sys.exit(1)
-        
     force_no_gpg = False
     if "--force-no-gpg" in args:
         force_no_gpg = True
         args.remove("--force-no-gpg")
         
-    if not args:
-        print_err("Usage: helper.py profile switch <name> [--force-no-gpg]")
-        sys.exit(1)
-        
-    target_name = args[0]
     data = load_profiles()
     profiles = data.get("profiles", [])
     
+    if not args:
+        if not profiles:
+            print_err("No profiles found to switch. Please add a profile first: './helper.sh profile add'")
+            sys.exit(1)
+            
+        print("\nChoose a profile to switch to:")
+        for idx, p in enumerate(profiles, start=1):
+            active_marker = f" {GREEN}* [active]{RESET}" if p.get("active") else ""
+            print(f"  [{idx}] {p.get('name')} ({p.get('email')}){active_marker}")
+            
+        try:
+            choice = input(f"Select profile (1-{len(profiles)}) [1]: ").strip() or "1"
+            choice_idx = int(choice) - 1
+            if choice_idx < 0 or choice_idx >= len(profiles):
+                print_err("Invalid choice.")
+                sys.exit(1)
+            target_name = profiles[choice_idx].get("name")
+        except KeyboardInterrupt:
+            print(f"\n{YELLOW}[WARN] Switch aborted.{RESET}")
+            sys.exit(0)
+        except ValueError:
+            print_err("Invalid input.")
+            sys.exit(1)
+    else:
+        target_name = args[0]
+        
     target_profile = None
     for p in profiles:
         if p.get("name") == target_name:
