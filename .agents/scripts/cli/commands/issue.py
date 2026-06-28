@@ -257,11 +257,36 @@ def run(args):
     action = args[0].lower()
     
     if action == "create":
-        if len(args) < 3:
-            print("Usage: helper.py issue create <id> \"<title>\"")
-            sys.exit(1)
-        issue_id = args[1]
-        title = args[2]
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from interactive import prompt_input
+        
+        issue_id = None
+        title = None
+        
+        if len(args) >= 2:
+            issue_id = args[1]
+        else:
+            files = [f for f in os.listdir(ISSUE_DIR) if f.endswith(".md") and "example" not in f]
+            max_num = 0
+            for f in files:
+                m = re.search(r'issue_(\d+)\.md', f)
+                if m:
+                    max_num = max(max_num, int(m.group(1)))
+            default_id = f"issue-{max_num + 1:03d}"
+            issue_id = prompt_input("Enter issue ID", default=default_id)
+            if not issue_id:
+                print("\033[91mError: Issue ID is required.\033[0m")
+                sys.exit(1)
+                
+        if len(args) >= 3:
+            title = args[2]
+        else:
+            title = prompt_input("Enter issue title/description")
+            if not title:
+                print("\033[91mError: Issue title is required.\033[0m")
+                sys.exit(1)
         if not os.path.exists(ISSUE_DIR):
             os.makedirs(ISSUE_DIR)
             
@@ -373,9 +398,39 @@ created_at: {current_date}
                 
     elif action == "checkout":
         if len(args) < 2:
-            print("Usage: helper.py issue checkout <id>")
-            sys.exit(1)
-        issue_id = args[1]
+            files = [f for f in os.listdir(ISSUE_DIR) if f.endswith(".md") and "example" not in f]
+            open_issues = []
+            for f_name in sorted(files):
+                path = os.path.join(ISSUE_DIR, f_name)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    fm = parse_issue_frontmatter(content)
+                    i_status = fm.get("status", "unknown")
+                    if i_status == "open":
+                        open_issues.append({
+                            "name": fm.get("id"),
+                            "desc": fm.get("title", "No Title")
+                        })
+                except Exception:
+                    pass
+            if not open_issues:
+                print("Error: No open issues found. Please create one first: './helper.sh issue create <id> \"<title>\"'")
+                sys.exit(1)
+            
+            cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if cli_dir not in sys.path:
+                sys.path.insert(0, cli_dir)
+            from interactive import interactive_select
+            
+            selection = interactive_select(open_issues, title="Select an issue to check out:")
+            if not selection:
+                print("\033[93m[WARN] Checkout aborted.\033[0m")
+                sys.exit(0)
+            issue_id = selection.get("name")
+        else:
+            issue_id = args[1]
+            
         path = get_issue_path(issue_id)
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'. Please run 'create' first.")
@@ -395,9 +450,69 @@ created_at: {current_date}
         
     elif action == "close":
         if len(args) < 2:
-            print("Usage: helper.py issue close <id>")
-            sys.exit(1)
-        issue_id = args[1]
+            res_curr = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
+            current_branch = res_curr.stdout.strip()
+            detected_id = None
+            if current_branch.startswith("feat/") or current_branch.startswith("fix/"):
+                detected_id = current_branch.split("/", 1)[1].replace('_', '-')
+                
+            files = [f for f in os.listdir(ISSUE_DIR) if f.endswith(".md") and "example" not in f]
+            open_issues = []
+            detected_issue_info = None
+            for f_name in sorted(files):
+                path = os.path.join(ISSUE_DIR, f_name)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    fm = parse_issue_frontmatter(content)
+                    i_id = fm.get("id")
+                    i_title = fm.get("title", "No Title")
+                    i_status = fm.get("status", "unknown")
+                    if i_status == "open":
+                        issue_info = {"name": i_id, "desc": i_title}
+                        open_issues.append(issue_info)
+                        if detected_id and i_id.lower().replace('_', '-') == detected_id.lower():
+                            detected_issue_info = issue_info
+                except Exception:
+                    pass
+                    
+            if not open_issues:
+                print("Error: No open issues found to close.")
+                sys.exit(0)
+                
+            cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if cli_dir not in sys.path:
+                sys.path.insert(0, cli_dir)
+            from interactive import interactive_select
+            
+            if detected_issue_info:
+                title = f"Close active issue '{detected_issue_info['name']}'?"
+                confirm_opts = [
+                    {"name": "Yes, close it", "value": detected_issue_info["name"]},
+                    {"name": "Select another open issue...", "value": "select_other"},
+                    {"name": "Cancel", "value": "cancel"}
+                ]
+                sel = interactive_select(confirm_opts, title=title)
+                if not sel or sel["value"] == "cancel":
+                    print("\033[93m[WARN] Close aborted.\033[0m")
+                    sys.exit(0)
+                elif sel["value"] == "select_other":
+                    sel_other = interactive_select(open_issues, title="Select an issue to close:")
+                    if not sel_other:
+                        print("\033[93m[WARN] Close aborted.\033[0m")
+                        sys.exit(0)
+                    issue_id = sel_other["name"]
+                else:
+                    issue_id = sel["value"]
+            else:
+                sel = interactive_select(open_issues, title="Select an open issue to close:")
+                if not sel:
+                    print("\033[93m[WARN] Close aborted.\033[0m")
+                    sys.exit(0)
+                issue_id = sel["name"]
+        else:
+            issue_id = args[1]
+            
         path = get_issue_path(issue_id)
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'.")

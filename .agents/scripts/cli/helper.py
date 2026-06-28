@@ -52,7 +52,6 @@ def print_help():
   ⌨️ {GREEN}{BOLD}completion{RESET}      Generates terminal tab-completion scripts (Bash/Zsh).
   🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
   🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
-  💻 {GREEN}{BOLD}ui{RESET}              Launches local web GUI dashboard.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -143,12 +142,7 @@ def print_command_help(cmd):
         "context": f"""{CYAN}{BOLD}Command: context{RESET}
 🎯 Optimizes the workspace active context and locks scope for the active task.
 
-{BOLD}Usage:{RESET} ./helper.sh context optimize""",
-
-        "ui": f"""{CYAN}{BOLD}Command: ui{RESET}
-💻 Launches a local Web UI Dashboard to manage the task board, developer profiles, and diagnostics visually.
-
-{BOLD}Usage:{RESET} ./helper.sh ui"""
+{BOLD}Usage:{RESET} ./helper.sh context optimize"""
     }
 
     if cmd in command_help:
@@ -173,7 +167,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'ui'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)

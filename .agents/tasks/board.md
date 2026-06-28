@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Enhance CLI interactive UX and remove Web Dashboard (feat/issue-095) <!-- id: issue-095 -->
 - [x] Implement visual web dashboard, VS Code extension structure, and conversational workflows (feat/issue-094) <!-- id: issue-094 -->
 - [x] Implement incremental static analysis and unit testing in validation guard (feat/issue-093) <!-- id: issue-093 -->
 - [x] Align README.md with PowerShell tab completion and CLI updates (feat/issue-092) <!-- id: issue-092 -->

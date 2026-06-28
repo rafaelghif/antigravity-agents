@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.74.0] - 2026-06-28
+
+### 🚀 Features
+- Enhance CLI interactive UX and remove Web Dashboard (ISSUE-095)
+
+### 🐛 Bug Fixes
+- implement frontend real-time auto-refresh polling loop
+- correct task actions buttons and redesign local dashboard to premium dark style
+- register ui subcommand in allowed_commands list
+- add visual UI, VS Code integration, and conversational playbooks
+
+
 ## [2.73.0] - 2026-06-28
 
 ### 🚀 Features
