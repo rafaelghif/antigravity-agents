@@ -9,7 +9,7 @@ __pycache__/
 .agents/locks/
 
 # Ignore local agent git profiles configuration
-.agents/git_profiles
+.agents/git_profiles.json
 
 # Ignore local agent API key configuration and active state files
 .agents/api_keys

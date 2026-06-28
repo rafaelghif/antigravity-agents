@@ -87,7 +87,7 @@ id_ed25519
 .npmrc
 .pypirc
 .git-credentials
-.agents/git_profiles
+.agents/git_profiles.json
 .agents/api_keys
 .agents/active_api_keys
 .agents/active_api_keys.ps1
