@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.63.0] - 2026-06-28
+
+### 🚀 Features
+- Fix upgrade command repository URL and update paths (ISSUE-084)
+
+
 ## [2.62.1] - 2026-06-28
 
 ### ⚙️ Chores
