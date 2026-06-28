@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Interactive Profile Registration Wizard for CLI profile add (feat/issue-088) <!-- id: issue-088 -->
 - [x] Implement Git identity and signing auto-repair fallbacks in validation guard (feat/issue-087) <!-- id: issue-087 -->
 - [x] Implement Auto-Configuration GPG Signing when Switching Profiles (feat/issue-086) <!-- id: issue-086 -->
 - [x] Implement Auto-Task ID Injection via prepare-commit-msg Git hook (feat/issue-085) <!-- id: issue-085 -->

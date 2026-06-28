@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.67.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Interactive Profile Registration Wizard for CLI profile add (ISSUE-088)
+
+
 ## [2.66.1] - 2026-06-28
 
 ### ⚙️ Chores
