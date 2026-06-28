@@ -173,7 +173,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'ui'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
