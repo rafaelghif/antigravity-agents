@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.59.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit auto-lessons extractor code and tests
+
+
 ## [2.59.0] - 2026-06-28
 
 ### 🚀 Features
