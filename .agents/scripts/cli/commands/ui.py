@@ -1122,8 +1122,21 @@ HTML_UI = """<!DOCTYPE html>
             });
         }
 
-        // Initial Load
+        // Initial Load & Realtime Polling Sync Loop
         fetchBoard();
+        setInterval(() => {
+            const activeTabBtn = document.querySelector('.tab-btn.active');
+            if (activeTabBtn) {
+                const activeTab = activeTabBtn.innerText.toLowerCase();
+                if (activeTab.includes('tasks')) {
+                    fetchBoard();
+                } else if (activeTab.includes('credentials')) {
+                    fetchProfiles();
+                } else {
+                    fetchSystemStatus();
+                }
+            }
+        }, 3000);
     </script>
 </body>
 </html>
