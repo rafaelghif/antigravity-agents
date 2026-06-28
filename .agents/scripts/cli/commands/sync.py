@@ -15,6 +15,7 @@ def run(args):
         spec.loader.exec_module(sync_module)
         sync_module.sync_skills_to_agents_md()
         sync_module.sync_adrs_to_architecture_md()
+        sync_module.sync_lessons_to_rules()
     except Exception as e:
         print(f"Error executing sync: {e}")
         sys.exit(1)

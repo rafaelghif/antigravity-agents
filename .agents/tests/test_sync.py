@@ -91,5 +91,23 @@ class TestSync(unittest.TestCase):
         self.assertIn("## 5. Synthesized Rules", written_data[rules_written_key])
         self.assertIn("Token Efficiency", written_data[rules_written_key])
 
+    @patch('importlib.util.spec_from_file_location')
+    @patch('importlib.util.module_from_spec')
+    @patch('os.path.exists', return_value=True)
+    def test_sync_command_run(self, mock_exists, mock_module_from_spec, mock_spec_from_file):
+        import commands.sync as sync_cmd
+        
+        mock_spec = MagicMock()
+        mock_spec_from_file.return_value = mock_spec
+        
+        mock_sync_module = MagicMock()
+        mock_module_from_spec.return_value = mock_sync_module
+        
+        sync_cmd.run([])
+        
+        mock_sync_module.sync_skills_to_agents_md.assert_called_once()
+        mock_sync_module.sync_adrs_to_architecture_md.assert_called_once()
+        mock_sync_module.sync_lessons_to_rules.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main()
