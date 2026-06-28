@@ -312,6 +312,32 @@ created_at: {current_date}
             f.write(template)
         print(f"Successfully created issue file '{file_path}'.")
         
+        # Auto-append to task board board.md
+        board_path = ".agents/tasks/board.md"
+        if os.path.exists(board_path):
+            try:
+                with open(board_path, 'r', encoding='utf-8') as f:
+                    board_content = f.read()
+                
+                slug = issue_id.lower().replace('_', '-')
+                branch_name = f"feat/{slug}"
+                new_task_line = f"- [ ] {title} ({branch_name}) <!-- id: {issue_id} -->"
+                
+                lines = board_content.splitlines()
+                updated_lines = []
+                inserted = False
+                for line in lines:
+                    updated_lines.append(line)
+                    if line.strip() == "## Todo" and not inserted:
+                        updated_lines.append(new_task_line)
+                        inserted = True
+                
+                with open(board_path, 'w', encoding='utf-8') as f:
+                    f.write("\n".join(updated_lines) + "\n")
+                print(f"[OK] Automatically added task '{issue_id}' to Todo in task board.")
+            except Exception as e:
+                print(f"Warning: Could not auto-append issue to task board: {e}")
+        
     elif action == "list":
         if not os.path.exists(ISSUE_DIR):
             print("No issues directory found.")

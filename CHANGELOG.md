@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.69.0] - 2026-06-28
+
+### 🚀 Features
+- Implement workspace security hardening and DX improvements (ISSUE-090)
+
+### 🐛 Bug Fixes
+- commit windows installer strict-mode compatibility changes
+
+
 ## [2.68.0] - 2026-06-28
 
 ### 🚀 Features
