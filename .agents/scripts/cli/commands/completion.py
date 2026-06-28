@@ -107,9 +107,50 @@ _aac_completion() {
 }
 """
 
+def get_powershell_completion() -> str:
+    return """# PowerShell completion for Antigravity Agent Core (aac/helper.ps1)
+$AacCompleter = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+    
+    $opts = @("lock", "validate", "sync", "issue", "commit", "bootstrap", "profile", "changelog", "learn", "skill", "doctor", "upgrade", "completion", "install-global")
+    $profile_subcmds = @("list", "switch", "add", "credential-helper")
+    $issue_subcmds = @("create", "list", "checkout", "close", "sync")
+    $skill_subcmds = @("list", "install", "uninstall")
+    $completion_subcmds = @("bash", "zsh", "powershell")
+    
+    $tokens = $commandAst.CommandElements
+    if ($tokens.Count -le 1) {
+        return
+    }
+    
+    $cmdWord = $tokens[1].Value
+    if ($tokens.Count -eq 2 -or ($tokens.Count -eq 3 -and $wordToComplete)) {
+        # Completing the main command
+        $opts | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    } elseif ($tokens.Count -eq 3 -or ($tokens.Count -eq 4 -and $wordToComplete)) {
+        # Completing a subcommand
+        $subcmds = @()
+        if ($cmdWord -eq "profile") { $subcmds = $profile_subcmds }
+        elseif ($cmdWord -eq "issue") { $subcmds = $issue_subcmds }
+        elseif ($cmdWord -eq "skill") { $subcmds = $skill_subcmds }
+        elseif ($cmdWord -eq "completion") { $subcmds = $completion_subcmds }
+        
+        $subcmds | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
+            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+        }
+    }
+}
+
+Register-ArgumentCompleter -CommandName aac -ScriptBlock $AacCompleter
+Register-ArgumentCompleter -CommandName helper.ps1 -ScriptBlock $AacCompleter
+Register-ArgumentCompleter -CommandName .\\helper.ps1 -ScriptBlock $AacCompleter
+"""
+
 def run(args: List[str]) -> None:
     if not args:
-        print("Usage: helper.py completion <bash|zsh>")
+        print("Usage: helper.py completion <bash|zsh|powershell>")
         sys.exit(1)
         
     shell = args[0].lower()
@@ -117,8 +158,10 @@ def run(args: List[str]) -> None:
         print(get_bash_completion())
     elif shell == "zsh":
         print(get_zsh_completion())
+    elif shell == "powershell":
+        print(get_powershell_completion())
     else:
-        print_err(f"Unsupported shell '{shell}'. Supported: bash, zsh")
+        print_err(f"Unsupported shell '{shell}'. Supported: bash, zsh, powershell")
         sys.exit(1)
         
     sys.exit(0)

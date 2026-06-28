@@ -12,15 +12,30 @@ import commands.issue as issue
 
 class TestSync(unittest.TestCase):
 
+    @patch('os.path.exists')
     @patch('os.getenv')
-    def test_get_pat(self, mock_getenv):
+    def test_get_pat(self, mock_getenv, mock_exists):
         # Env token present
         mock_getenv.return_value = "dummy-token"
+        mock_exists.return_value = False
         self.assertEqual(git_api.get_pat(), "dummy-token")
 
-        # Env token missing
+        # Env token missing, and no profiles file
         mock_getenv.return_value = None
+        mock_exists.return_value = False
         self.assertIsNone(git_api.get_pat())
+
+        # Env token missing, but active profile has token in profiles file
+        mock_getenv.return_value = None
+        mock_exists.side_effect = lambda p: p == ".agents/git_profiles.json"
+        
+        mock_json_content = json.dumps({
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True, "git_token": "profile-token"}
+            ]
+        })
+        with patch('builtins.open', mock_open(read_data=mock_json_content)):
+            self.assertEqual(git_api.get_pat(), "profile-token")
 
     @patch('git_api.get_pat')
     @patch('git_api.get_repo_info')

@@ -100,6 +100,8 @@ def check_profiles() -> bool:
         active = next((p for p in profiles if p.get("active")), None)
         if active:
             print_ok(f"Active profile: '{active.get('name')}' <{active.get('email')}>")
+            
+            # 1. Check SSH Key
             ssh_key = active.get("ssh_key_path")
             if ssh_key:
                 ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
@@ -107,6 +109,29 @@ def check_profiles() -> bool:
                     print_ok(f"SSH private key file verified: '{ssh_key_abs}'")
                 else:
                     print_err(f"SSH private key file not found: '{ssh_key_abs}'")
+                    return False
+                    
+            # 2. Check GPG Key
+            signing_key = active.get("signing_key")
+            if signing_key and not signing_key.startswith("ssh-"):
+                import shutil
+                print(f"Verifying GPG signing key '{signing_key}' in local keyring...")
+                if shutil.which("gpg"):
+                    try:
+                        gpg_check = subprocess.run(
+                            ['gpg', '--list-secret-keys', '--keyid-format', 'LONG', signing_key],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE
+                        )
+                        if gpg_check.returncode == 0:
+                            print_ok("GPG signing key verified in local keyring.")
+                        else:
+                            print_err(f"GPG key '{signing_key}' not found in local keyring! Commit signing will fail.")
+                            return False
+                    except Exception as e:
+                        print_warn(f"Failed to execute gpg check: {e}")
+                else:
+                    print_err("GnuPG ('gpg') tool is not installed, but GPG commit signing key is configured.")
                     return False
         else:
             print_warn("No active profile set in git_profiles.json.")
