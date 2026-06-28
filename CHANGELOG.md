@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.62.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit two-way issue sync tests and plan
+
+
 ## [2.62.0] - 2026-06-28
 
 ### 🚀 Features
