@@ -1,7 +1,7 @@
 ---
 id: issue-097
 title: "Enhance safety and type-casting of PowerShell helpers"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-06-28
 ---

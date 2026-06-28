@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.76.0] - 2026-06-28
+
+### 🚀 Features
+- Enhance safety and type-casting of PowerShell helpers (ISSUE-097)
+
+### 🐛 Bug Fixes
+- enforce safe powershell parameter parsing and type casting
+
+
 ## [2.75.0] - 2026-06-28
 
 ### 🚀 Features
