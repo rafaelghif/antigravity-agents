@@ -258,5 +258,38 @@ class TestProfileCommand(unittest.TestCase):
         self.assertEqual(saved_data["profiles"][0]["name"], "new-prof")
         self.assertTrue(saved_data["profiles"][0]["ssh_key_path"].endswith("id_ed25519_new-prof"))
 
+    @patch('subprocess.run')
+    @patch('profile.load_profiles')
+    @patch('profile.save_profiles')
+    def test_handle_switch_gpg_ssh_format(self, mock_save, mock_load, mock_sub):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI"}
+            ]
+        }
+        mock_sub.return_value = MagicMock(returncode=0)
+        profile.handle_switch(["p2"])
+        sub_calls = [" ".join(call[0][0]) for call in mock_sub.call_args_list]
+        self.assertTrue(any("gpg.format ssh" in cmd for cmd in sub_calls))
+        
+        mock_sub.reset_mock()
+        
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@test.com", "active": True},
+                {"name": "p2", "email": "p2@test.com", "active": False, "signing_key": "4A1D5B"}
+            ]
+        }
+        def side_effect(cmd, *args, **kwargs):
+            if cmd[0] == "gpg":
+                return MagicMock(returncode=0)
+            return MagicMock(returncode=0)
+        mock_sub.side_effect = side_effect
+        
+        profile.handle_switch(["p2"])
+        sub_calls = [" ".join(call[0][0]) for call in mock_sub.call_args_list]
+        self.assertTrue(any("gpg.format openpgp" in cmd for cmd in sub_calls))
+
 if __name__ == '__main__':
     unittest.main()
