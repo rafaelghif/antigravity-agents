@@ -24,6 +24,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: installer]** Ensured robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and fixed strict-mode property access crashes in PowerShell.
 - **[Learning: Token Efficiency]** Always specify file read ranges to save context tokens
 - **[Learning: V2 Restructuring]** Moving to a flat and modular directory structure simplifies agent context parsing and increases model prompt cache efficiency.
 - **[Learning: Python Mock Leaks]** When mocking `sys.exit` in Python unit tests, configure it to raise `SystemExit` (using `side_effect=SystemExit`) and wrap the calls in `assertRaises(SystemExit)`. Uncontrolled mock exits allow the test execution to proceed past the exit point, potentially causing side-effects such as truncating or corrupting real local configuration files during test discover suites.

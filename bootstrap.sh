@@ -20,54 +20,66 @@ if [ -d ".agents/memory/templates" ]; then
   done
 fi
 
+# 1.2 Detect Python 3 executable
+PYTHON_EXEC=""
+if command -v python3 &>/dev/null; then
+  PYTHON_EXEC="python3"
+elif command -v python &>/dev/null; then
+  if python --version 2>&1 | grep -q "Python 3"; then
+    PYTHON_EXEC="python"
+  fi
+fi
+
 # 2. Synchronize Version if AGENTS.md exists
-if [ -f "AGENTS.md" ]; then
-  if command -v python3 &>/dev/null; then
-    python3 -c '
+if [ -f "AGENTS.md" ] && [ -n "$PYTHON_EXEC" ]; then
+  "$PYTHON_EXEC" -c '
 import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.67.2", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.68.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.67.2", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.68.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
-    echo "Synchronized AGENTS.md version."
-  fi
+  echo "Synchronized AGENTS.md version."
 fi
 
 # 3. Trigger auto-reconnaissance if recon.py exists
 if [ -f ".agents/scripts/recon.py" ]; then
   echo "Running enterprise auto-reconnaissance scan..."
-  if command -v python3 &>/dev/null; then
-    python3 .agents/scripts/recon.py
+  if [ -n "$PYTHON_EXEC" ]; then
+    "$PYTHON_EXEC" .agents/scripts/recon.py
   else
-    echo "Warning: python3 not found. Please run .agents/scripts/recon.py manually after installing python3."
+    echo "Warning: Python 3 not found. Please run .agents/scripts/recon.py manually after installing Python 3."
   fi
 else
   echo "Warning: .agents/scripts/recon.py not found. Skipping auto-reconnaissance."
 fi
 
 # 4. Set up local Git hooks
-if [ -d ".git" ]; then
+if git rev-parse --is-inside-work-tree &>/dev/null; then
+  HOOKS_DIR=$(git rev-parse --git-path hooks)
+  PREFIX=$(git rev-parse --show-prefix)
+  mkdir -p "$HOOKS_DIR"
+
   # Pre-commit Hook
-  cat << 'EOF' > .git/hooks/pre-commit
+  cat << EOF > "$HOOKS_DIR/pre-commit"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/validate.py
+  python3 "${PREFIX}.agents/scripts/validate.py"
 elif command -v python &>/dev/null; then
-  python .agents/scripts/validate.py
+  python "${PREFIX}.agents/scripts/validate.py"
 else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
 EOF
-  chmod +x .git/hooks/pre-commit
+  chmod +x "$HOOKS_DIR/pre-commit"
   echo "Installed local Git pre-commit hook."
 
   # Commit-msg Hook
-  cat << 'EOF' > .git/hooks/commit-msg
+  cat << 'EOF' > "$HOOKS_DIR/commit-msg"
 #!/usr/bin/env bash
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
@@ -95,22 +107,22 @@ if [[ ! "$COMMIT_MSG" =~ $ID_REGEX ]]; then
   exit 1
 fi
 EOF
-  chmod +x .git/hooks/commit-msg
+  chmod +x "$HOOKS_DIR/commit-msg"
   echo "Installed local Git commit-msg hook."
 
   # Prepare-commit-msg Hook
-  cat << 'EOF' > .git/hooks/prepare-commit-msg
+  cat << EOF > "$HOOKS_DIR/prepare-commit-msg"
 #!/usr/bin/env bash
-COMMIT_MSG_FILE="$1"
-COMMIT_SOURCE="${2:-}"
+COMMIT_MSG_FILE="\$1"
+COMMIT_SOURCE="\${2:-}"
 
 if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+  python3 "${PREFIX}.agents/scripts/prepare_commit_msg.py" "\$COMMIT_MSG_FILE" "\$COMMIT_SOURCE"
 elif command -v python &>/dev/null; then
-  python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
+  python "${PREFIX}.agents/scripts/prepare_commit_msg.py" "\$COMMIT_MSG_FILE" "\$COMMIT_SOURCE"
 fi
 EOF
-  chmod +x .git/hooks/prepare-commit-msg
+  chmod +x "$HOOKS_DIR/prepare-commit-msg"
   echo "Installed local Git prepare-commit-msg hook."
 fi
 
