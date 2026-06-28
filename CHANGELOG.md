@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.65.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Auto-Configuration GPG Signing when Switching Profiles (ISSUE-086)
+
+
 ## [2.64.1] - 2026-06-28
 
 ### ⚙️ Chores
