@@ -172,9 +172,14 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
         if signing_key and not signing_key.endswith("..."):
             subprocess.run(['git', 'config', '--local', 'user.signingkey', signing_key], check=True)
             subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'true'], check=True)
+            if signing_key.startswith("ssh-") or "ssh" in signing_key:
+                subprocess.run(['git', 'config', '--local', 'gpg.format', 'ssh'], check=True)
+            else:
+                subprocess.run(['git', 'config', '--local', 'gpg.format', 'openpgp'], check=True)
         else:
             subprocess.run(['git', 'config', '--local', '--unset', 'commit.gpgsign'], stderr=subprocess.DEVNULL)
             subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'], stderr=subprocess.DEVNULL)
+            subprocess.run(['git', 'config', '--local', '--unset', 'gpg.format'], stderr=subprocess.DEVNULL)
             
         ssh_key = profile.get("ssh_key_path")
         if ssh_key:
@@ -233,7 +238,7 @@ def handle_switch(args: List[str]) -> None:
         print_ok(f"SSH private key verified at '{ssh_key_abs}'.")
 
     signing_key = target_profile.get("signing_key")
-    if signing_key and not signing_key.endswith("...") and not force_no_gpg:
+    if signing_key and not signing_key.endswith("...") and not force_no_gpg and not (signing_key.startswith("ssh-") or "ssh" in signing_key):
         print(f"Validating GPG signing key '{signing_key}'...")
         try:
             gpg_check = subprocess.run(
