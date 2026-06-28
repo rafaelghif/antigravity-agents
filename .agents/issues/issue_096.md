@@ -1,7 +1,7 @@
 ---
 id: issue-096
 title: "Fix parameter parsing error in bootstrap.ps1 on Windows"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-06-28
 ---

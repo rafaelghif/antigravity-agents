@@ -24,6 +24,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: powershell]** Avoid using the -and operator directly after Test-Path in PowerShell without enclosing Test-Path in parentheses, otherwise PowerShell parses -and as a parameter to Test-Path.
 - **[Learning: feature]** Implemented local visual web dashboard server, structured VS Code extension integration logic, and registered conversational skill playbooks to unify agent operations.
 - **[Learning: performance]** Implemented Git-diff driven incremental validation in validation guard to skip syntax and unit tests checks when code is untouched.
 - **[Learning: docs]** Synchronized README.md instructions and CLI references with PowerShell autocomplete and shell completion capabilities.
