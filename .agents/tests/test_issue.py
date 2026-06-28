@@ -75,5 +75,19 @@ class TestIssueCommand(unittest.TestCase):
                 written_data = "".join(call[0][0] for call in handle.write.call_args_list)
                 self.assertIn("status: closed", written_data)
 
+    @patch('git_api.get_pat', return_value="dummy-pat")
+    @patch('git_api.get_repo_info', return_value="owner/repo")
+    @patch('git_api.create_github_issue', return_value=("https://github.com/owner/repo/issues/123", 123))
+    @patch('os.path.exists', return_value=True)
+    @patch('os.listdir', return_value=["issue_100.md"])
+    @patch('builtins.open', new_callable=mock_open, read_data="---\nid: issue-100\ntitle: \"Offline issue\"\n---\n")
+    def test_push_offline_issues_success(self, mock_file, mock_listdir, mock_exists, mock_create, mock_repo, mock_pat):
+        issue.push_offline_issues()
+        mock_create.assert_called_once_with("Offline issue", "Local tracking ID: issue-100")
+        handle = mock_file()
+        written_data = "".join(call[0][0] for call in handle.write.call_args_list)
+        self.assertIn("github_url: \"https://github.com/owner/repo/issues/123\"", written_data)
+        self.assertIn("github_number: 123", written_data)
+
 if __name__ == '__main__':
     unittest.main()
