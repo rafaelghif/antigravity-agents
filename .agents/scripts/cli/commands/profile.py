@@ -215,24 +215,25 @@ def handle_switch(args: List[str]) -> None:
             print_err("No profiles found to switch. Please add a profile first: './helper.sh profile add'")
             sys.exit(1)
             
-        print("\nChoose a profile to switch to:")
-        for idx, p in enumerate(profiles, start=1):
-            active_marker = f" {GREEN}* [active]{RESET}" if p.get("active") else ""
-            print(f"  [{idx}] {p.get('name')} ({p.get('email')}){active_marker}")
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from interactive import interactive_select
+        
+        options = []
+        default_idx = 0
+        for idx, p in enumerate(profiles):
+            desc = p.get("email")
+            if p.get("active"):
+                desc += " (active)"
+                default_idx = idx
+            options.append({"name": p.get("name"), "desc": desc})
             
-        try:
-            choice = input(f"Select profile (1-{len(profiles)}) [1]: ").strip() or "1"
-            choice_idx = int(choice) - 1
-            if choice_idx < 0 or choice_idx >= len(profiles):
-                print_err("Invalid choice.")
-                sys.exit(1)
-            target_name = profiles[choice_idx].get("name")
-        except KeyboardInterrupt:
-            print(f"\n{YELLOW}[WARN] Switch aborted.{RESET}")
+        selection = interactive_select(options, title="Select a profile to switch to:", default_idx=default_idx)
+        if not selection:
+            print(f"{YELLOW}[WARN] Switch aborted.{RESET}")
             sys.exit(0)
-        except ValueError:
-            print_err("Invalid input.")
-            sys.exit(1)
+        target_name = selection.get("name")
     else:
         target_name = args[0]
         
