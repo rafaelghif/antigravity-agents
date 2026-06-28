@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.61.0] - 2026-06-28
+
+### 🚀 Features
+- Fix CLI sync command to compile lessons to rules (ISSUE-082)
+
+
 ## [2.60.1] - 2026-06-28
 
 ### ⚙️ Chores
