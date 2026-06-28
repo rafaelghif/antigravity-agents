@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.66.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit Git identity auto repair fix and tests
+
+
 ## [2.66.0] - 2026-06-28
 
 ### 🚀 Features
