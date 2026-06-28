@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.72.0] - 2026-06-28
+
+### 🚀 Features
+- Implement incremental static analysis and unit testing in validation guard (ISSUE-093)
+
+
 ## [2.71.0] - 2026-06-28
 
 ### 🚀 Features
