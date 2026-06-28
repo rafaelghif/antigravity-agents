@@ -6,6 +6,7 @@ import os
 # Inject CLI commands folder to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli/commands')))
 import issue
+import learn
 
 class TestIssueCommand(unittest.TestCase):
     @patch('os.listdir')
@@ -35,10 +36,11 @@ class TestIssueCommand(unittest.TestCase):
             self.assertIn("## Done\n- [x] Task title (feat/issue-123) <!-- id: issue-123 -->", written_data)
             self.assertNotIn("## Doing\n- [ ] Task title (feat/issue-123)", written_data)
 
+    @patch('learn.suggest_and_record_lessons')
     @patch('subprocess.run')
     @patch('os.path.exists')
     @patch('builtins.open', new_callable=mock_open, read_data="---\nid: issue-029\nstatus: open\ngithub_number: 12\n---\n")
-    def test_issue_close_flow(self, mock_file, mock_exists, mock_sub):
+    def test_issue_close_flow(self, mock_file, mock_exists, mock_sub, mock_suggest):
         # Setup mocks
         mock_exists.side_effect = lambda p: True
         
@@ -66,6 +68,7 @@ class TestIssueCommand(unittest.TestCase):
                 # Verify board was updated and remote github issue was closed
                 mock_board.assert_called_once_with("issue-029")
                 mock_git_api.assert_called_once_with(12)
+                mock_suggest.assert_called_once()
                 
                 # Check that correct file writes occurred
                 handle = mock_file()
