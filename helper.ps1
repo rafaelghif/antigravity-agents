@@ -10,13 +10,13 @@ if (-not $ScriptDir) {
 
 $PythonExec = ""
 if (Get-Command python -ErrorAction SilentlyContinue) {
-    $Version = & python --version 2>&1
+    $Version = [string](& python --version 2>&1)
     if ($Version -match "Python 3") {
         $PythonExec = "python"
     }
 }
-if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
-    $Version = & python3 --version 2>&1
+if ((-not $PythonExec) -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+    $Version = [string](& python3 --version 2>&1)
     if ($Version -match "Python 3") {
         $PythonExec = "python3"
     }

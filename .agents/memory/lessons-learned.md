@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-06-28]** **powershell**: Explicitly cast command and function outputs to [string] when matching or testing results in PowerShell to prevent type casting bugs on non-standard PowerShell environments.
 - **[2026-06-28]** **powershell**: Avoid using the -and operator directly after Test-Path in PowerShell without enclosing Test-Path in parentheses, otherwise PowerShell parses -and as a parameter to Test-Path.
 - **[2026-06-28]** **feature**: Implemented local visual web dashboard server, structured VS Code extension integration logic, and registered conversational skill playbooks to unify agent operations.
 - **[2026-06-28]** **performance**: Implemented Git-diff driven incremental validation in validation guard to skip syntax and unit tests checks when code is untouched.
