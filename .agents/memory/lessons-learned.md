@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-06-28]** **docs**: Synchronized README.md instructions and CLI references with PowerShell autocomplete and shell completion capabilities.
 - **[2026-06-28]** **feature**: Unified API credentials fallback to profile configs, integrated GPG keyring auditing into doctor diagnostics, implemented PowerShell autocomplete support, and automated lock releases inside the staging phase of issue closures.
 - **[2026-06-28]** **security**: Hardened git credentials tracking by explicitly ignoring git_profiles.json in configuration rules, and silenced validation warnings by adding silent flags to git_api helpers.
 - **[2026-06-28]** **installer**: Ensured robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and fixed strict-mode property access crashes in PowerShell.

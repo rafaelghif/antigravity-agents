@@ -65,7 +65,7 @@ AAC V2 provides a unified command dispatcher wrapper `./helper.sh` (Linux/macOS)
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons, post-mortems, and solutions directly to `lessons-learned.md`. |
 | **`doctor`** | `./helper.sh doctor` | Diagnostics doctor that verifies host environment health, identity setups, and network checks. |
 | **`upgrade`** | `./helper.sh upgrade` | Auto-upgrades agent core scripts and templates from the official repository. |
-| **`completion`** | `./helper.sh completion <bash/zsh>` | Generates terminal tab-completion configurations. |
+| **`completion`** | `./helper.sh completion <bash/zsh/powershell>` | Generates terminal tab-completion configurations. |
 | **`install-global`**| `./helper.sh install-global` | Installs the global wrapper launcher command `aac` into the user PATH. |
 
 ---
@@ -127,6 +127,20 @@ Speed up command invocation with tab completion for Bash and Zsh:
 4. Restart your terminal or source your profile:
    ```zsh
    source ~/.zshrc
+   ```
+
+### For PowerShell:
+1. Open your PowerShell profile script in a text editor:
+   ```powershell
+   notepad $PROFILE
+   ```
+2. Append the dynamic autocomplete registration expression:
+   ```powershell
+   aac completion powershell | Out-String | Invoke-Expression
+   ```
+3. Save the profile and reload the session:
+   ```powershell
+   . $PROFILE
    ```
 
 ---

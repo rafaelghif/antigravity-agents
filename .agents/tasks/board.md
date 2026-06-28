@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Align README.md with PowerShell tab completion and CLI updates (feat/issue-092) <!-- id: issue-092 -->
 - [x] Implement unified API credentials, GPG diagnostics, PowerShell completion, and lock auto-pruning (feat/issue-091) <!-- id: issue-091 -->
 - [x] Implement workspace security hardening and DX improvements (feat/issue-090) <!-- id: issue-090 -->
 - [x] Synchronize and fix Linux and Windows installation and bootstrap scripts (feat/issue-089) <!-- id: issue-089 -->

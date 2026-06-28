@@ -24,6 +24,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: docs]** Synchronized README.md instructions and CLI references with PowerShell autocomplete and shell completion capabilities.
 - **[Learning: feature]** Unified API credentials fallback to profile configs, integrated GPG keyring auditing into doctor diagnostics, implemented PowerShell autocomplete support, and automated lock releases inside the staging phase of issue closures.
 - **[Learning: security]** Hardened git credentials tracking by explicitly ignoring git_profiles.json in configuration rules, and silenced validation warnings by adding silent flags to git_api helpers.
 - **[Learning: installer]** Ensured robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and fixed strict-mode property access crashes in PowerShell.
