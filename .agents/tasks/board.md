@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement workspace security hardening and DX improvements (feat/issue-090) <!-- id: issue-090 -->
 - [x] Synchronize and fix Linux and Windows installation and bootstrap scripts (feat/issue-089) <!-- id: issue-089 -->
 - [x] Implement Interactive Profile Registration Wizard for CLI profile add (feat/issue-088) <!-- id: issue-088 -->
 - [x] Implement Git identity and signing auto-repair fallbacks in validation guard (feat/issue-087) <!-- id: issue-087 -->

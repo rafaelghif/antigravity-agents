@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-06-28]** **security**: Hardened git credentials tracking by explicitly ignoring git_profiles.json in configuration rules, and silenced validation warnings by adding silent flags to git_api helpers.
 - **[2026-06-28]** **installer**: Ensured robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and fixed strict-mode property access crashes in PowerShell.
 - **[2026-06-27]** **Token Efficiency**: Always specify file read ranges to save context tokens
 - **V2 Restructuring**: Moving to a flat and modular directory structure simplifies agent context parsing and increases model prompt cache efficiency.
