@@ -188,14 +188,41 @@ def audit_secrets_and_ignored_files() -> bool:
                 data = json.load(f)
             profiles = data.get("profiles", [])
             
-            # Get current git config email
+            # Get current git config email and name
             res_email = subprocess.run(
                 ['git', 'config', 'user.email'],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
             )
+            res_name = subprocess.run(
+                ['git', 'config', 'user.name'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
             current_email = res_email.stdout.strip()
+            current_name = res_name.stdout.strip()
+
+            # Auto-repair empty Git identity locally
+            if not current_email or not current_name:
+                print_warn("Git identity (name/email) is not configured locally or globally.")
+                active_profile = next((p for p in profiles if p.get("active")), None)
+                if not active_profile and profiles:
+                    active_profile = profiles[0]
+                
+                if active_profile:
+                    fallback_email = active_profile.get("email", "developer@antigravity.local")
+                    fallback_name = active_profile.get("name", "AAC Developer")
+                else:
+                    fallback_email = "developer@antigravity.local"
+                    fallback_name = "AAC Developer"
+                    
+                print(f"Auto-repairing Git identity locally using fallback: '{fallback_name}' <{fallback_email}>...")
+                subprocess.run(['git', 'config', '--local', 'user.email', fallback_email])
+                subprocess.run(['git', 'config', '--local', 'user.name', fallback_name])
+                current_email = fallback_email
+                current_name = fallback_name
             
             # Find profile matching current git config email
             matching_profile = next((p for p in profiles if p.get("email") == current_email), None)
@@ -221,6 +248,59 @@ def audit_secrets_and_ignored_files() -> bool:
                         failed = True
                     else:
                         print_ok(f"SSH private key path verified for profile '{matching_profile.get('name')}'.")
+                
+                # Audit and auto-repair GPG/SSH signing configuration
+                res_gpgsign = subprocess.run(
+                    ['git', 'config', '--local', 'commit.gpgsign'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                res_signingkey = subprocess.run(
+                    ['git', 'config', '--local', 'user.signingkey'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                
+                gpgsign_enabled = res_gpgsign.stdout.strip().lower() == "true"
+                local_signingkey = res_signingkey.stdout.strip()
+                
+                if gpgsign_enabled and local_signingkey:
+                    # SSH Key
+                    if local_signingkey.startswith("ssh-") or "ssh" in local_signingkey:
+                        ssh_key_path = matching_profile.get("ssh_key_path")
+                        if ssh_key_path:
+                            ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key_path))
+                            if not os.path.exists(ssh_key_abs):
+                                print_warn(f"Commit signing is enabled with SSH key, but SSH key file is missing at: '{ssh_key_abs}'.")
+                                print("Auto-repairing: Disabling local Git commit signing to prevent commit failures...")
+                                subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'false'])
+                                subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'])
+                                subprocess.run(['git', 'config', '--local', '--unset', 'gpg.format'])
+                    # GPG Key
+                    else:
+                        try:
+                            gpg_check = subprocess.run(
+                                ['gpg', '--list-secret-keys', '--keyid-format', 'LONG', local_signingkey],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True
+                            )
+                            if gpg_check.returncode != 0:
+                                print_warn(f"Commit signing is enabled with GPG key '{local_signingkey}', but key is missing from local keyring.")
+                                print("Auto-repairing: Disabling local Git commit signing to prevent commit failures...")
+                                subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'false'])
+                                subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'])
+                                subprocess.run(['git', 'config', '--local', '--unset', 'gpg.format'])
+                            else:
+                                print_ok("GPG signing key verified in local keyring.")
+                        except FileNotFoundError:
+                            print_warn("GnuPG ('gpg') tool is not installed, but GPG signing is enabled.")
+                            print("Auto-repairing: Disabling local Git commit signing to prevent commit failures...")
+                            subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'false'])
+                            subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'])
+                            subprocess.run(['git', 'config', '--local', '--unset', 'gpg.format'])
             else:
                 # Check if there are any user defined profiles (non-placeholder)
                 placeholders = {"developer@company.com", "dev.personal@gmail.com"}
