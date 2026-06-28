@@ -14,7 +14,7 @@ _aac_completion() {
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="lock validate sync issue commit bootstrap profile changelog learn skill doctor upgrade completion install-global"
+    opts="lock validate sync issue commit bootstrap profile changelog learn skill doctor upgrade completion install-global ui"
 
     case "${prev}" in
         profile)
@@ -71,7 +71,8 @@ _aac_completion() {
                 'doctor[Run diagnostics audits]' \
                 'upgrade[Upgrade core scripts]' \
                 'completion[Generate tab-completion scripts]' \
-                'install-global[Install global launcher alias]'
+                'install-global[Install global launcher alias]' \
+                'ui[Launch local Web UI Dashboard]'
             ;;
         args)
             case "$words[1]" in
@@ -112,7 +113,7 @@ def get_powershell_completion() -> str:
 $AacCompleter = {
     param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
     
-    $opts = @("lock", "validate", "sync", "issue", "commit", "bootstrap", "profile", "changelog", "learn", "skill", "doctor", "upgrade", "completion", "install-global")
+    $opts = @("lock", "validate", "sync", "issue", "commit", "bootstrap", "profile", "changelog", "learn", "skill", "doctor", "upgrade", "completion", "install-global", "ui")
     $profile_subcmds = @("list", "switch", "add", "credential-helper")
     $issue_subcmds = @("create", "list", "checkout", "close", "sync")
     $skill_subcmds = @("list", "install", "uninstall")

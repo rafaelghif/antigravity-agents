@@ -1,0 +1,42 @@
+{
+  "name": "aac-vscode-extension",
+  "displayName": "Antigravity Agent Core IDE Integration",
+  "description": "Visual settings, profile switching, and module locking integration for Cursor & VS Code",
+  "version": "1.0.0",
+  "publisher": "antigravity",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aac.switchProfile",
+        "title": "AAC: Switch Active Profile"
+      },
+      {
+        "command": "aac.lockModule",
+        "title": "AAC: Lock Module"
+      },
+      {
+        "command": "aac.validateWorkspace",
+        "title": "AAC: Run Validation Guard"
+      }
+    ],
+    "statusbar": [
+      {
+        "id": "aac.profileStatus",
+        "command": "aac.switchProfile",
+        "text": "$(person) AAC Profile",
+        "alignment": "left",
+        "priority": 100
+      }
+    ]
+  }
+}
