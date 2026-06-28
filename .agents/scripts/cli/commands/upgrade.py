@@ -8,7 +8,7 @@ GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
-SOURCE_REPO = "https://github.com/rafaelghifari/antigravity-agents.git"
+SOURCE_REPO = "https://github.com/rafaelghif/antigravity-agents.git"
 
 def print_err(msg: str) -> None:
     print(f"{RED}[FAIL] {msg}{RESET}")
@@ -60,6 +60,9 @@ def run(args: List[str]) -> None:
         paths_to_update = [
             ".agents/scripts/",
             ".agents/templates/",
+            ".agents/skills/",
+            ".agents/rules.md",
+            "AGENTS.md",
             "helper.sh",
             "helper.ps1"
         ]
