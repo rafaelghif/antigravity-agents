@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.62.0] - 2026-06-28
+
+### 🚀 Features
+- Implement Two-Way Offline-to-Online Issue Synchronization (ISSUE-083)
+
+
 ## [2.61.1] - 2026-06-28
 
 ### ⚙️ Chores

@@ -192,6 +192,52 @@ github_number: {number}
     except Exception as e:
         print(f"[WARN] Issue synchronization failed: {e}", file=sys.stderr)
 
+def push_offline_issues():
+    """Find local issues without a github_number and push them to GitHub remote."""
+    if not os.path.exists(ISSUE_DIR):
+        return
+        
+    import git_api
+    pat = git_api.get_pat()
+    repo = git_api.get_repo_info()
+    if not pat or not repo:
+        return
+        
+    print("[INFO] Auditing local issues for offline creations...")
+    for f_name in os.listdir(ISSUE_DIR):
+        if not f_name.endswith(".md") or "example" in f_name:
+            continue
+        path = os.path.join(ISSUE_DIR, f_name)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            fm = parse_issue_frontmatter(content)
+            github_number = fm.get("github_number")
+            github_url = fm.get("github_url")
+            issue_id = fm.get("id")
+            title = fm.get("title")
+            
+            # If it doesn't have a remote number and has a valid ID/title
+            if not github_number and issue_id and title:
+                print(f"[INFO] Pushing local issue '{issue_id}' to GitHub remote...")
+                res = git_api.create_github_issue(title, f"Local tracking ID: {issue_id}")
+                if res:
+                    url, number = res
+                    # Update local issue file frontmatter by inserting right before the second ---
+                    lines = content.splitlines()
+                    boundary_indices = [idx for idx, line in enumerate(lines) if line.strip() == '---']
+                    if len(boundary_indices) >= 2:
+                        insert_idx = boundary_indices[1]
+                        lines.insert(insert_idx, f"github_url: \"{url}\"")
+                        lines.insert(insert_idx + 1, f"github_number: {number}")
+                        new_content = "\n".join(lines) + "\n"
+                        with open(path, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        print(f"[OK] Successfully linked local issue '{issue_id}' to remote GitHub issue #{number}.")
+        except Exception as e:
+            print(f"[WARN] Failed to push local issue '{f_name}': {e}", file=sys.stderr)
+
 def get_issue_path(issue_id):
     normalized = issue_id.lower().replace('-', '_')
     if not os.path.exists(ISSUE_DIR):
@@ -487,6 +533,7 @@ created_at: {current_date}
             print(f"[OK] Issue '{issue_id}' fully resolved and merged to '{base_branch}' successfully.")
         
     elif action == "sync":
+        push_offline_issues()
         sync_issues()
         
     else:
