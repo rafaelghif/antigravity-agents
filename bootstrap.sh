@@ -28,9 +28,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.63.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.63.1", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.63.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.63.1", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
