@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Chain-of-Thought Compliance Gate in AGENTS.md (feat/issue-081) <!-- id: issue-081 -->
 - [x] Implement Auto-Lessons Extractor when closing issues (feat/issue-080) <!-- id: issue-080 -->
 - [x] Implement AAC V2 Core Enhancements (Points 1-5) (feat/issue-072) <!-- id: issue-072 -->
 - [x] Sync and resolve bugs in Windows scripts (feat/issue-071) <!-- id: issue-071 -->
