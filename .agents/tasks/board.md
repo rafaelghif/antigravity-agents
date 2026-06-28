@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement Two-Way Offline-to-Online Issue Synchronization (feat/issue-083) <!-- id: issue-083 -->
 - [x] Fix CLI sync command to compile lessons to rules (feat/issue-082) <!-- id: issue-082 -->
 - [x] Implement Chain-of-Thought Compliance Gate in AGENTS.md (feat/issue-081) <!-- id: issue-081 -->
 - [x] Implement Auto-Lessons Extractor when closing issues (feat/issue-080) <!-- id: issue-080 -->
