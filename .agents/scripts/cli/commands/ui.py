@@ -124,7 +124,6 @@ def update_board_task_status(task_id: str, new_status: str) -> bool:
 
 class AACWebHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        # Silence server logs to stdout
         pass
 
     def do_GET(self):
@@ -133,6 +132,36 @@ class AACWebHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(HTML_UI.encode('utf-8'))
+        elif self.path == "/api/status":
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            
+            # Get current git branch
+            branch = "main"
+            res_branch = subprocess.run(['git', 'branch', '--show-current'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res_branch.returncode == 0:
+                branch = res_branch.stdout.strip()
+                
+            # Get active profile
+            active_profile = "None"
+            profiles_file = ".agents/git_profiles.json"
+            if os.path.exists(profiles_file):
+                try:
+                    with open(profiles_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        active = next((p for p in data.get("profiles", []) if p.get("active")), None)
+                        if active:
+                            active_profile = active.get("name")
+                except Exception:
+                    pass
+                    
+            status_data = {
+                "branch": branch,
+                "profile": active_profile,
+                "version": "2.73.0"
+            }
+            self.wfile.write(json.dumps(status_data).encode('utf-8'))
         elif self.path == "/api/board":
             self.send_response(200)
             self.send_header("Content-type", "application/json")
@@ -154,7 +183,6 @@ class AACWebHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             
-            # Simple run diagnostics and return list
             results = []
             results.append({"name": "Python Environment", "status": "PASS" if doctor_cmd.check_python() else "FAIL"})
             results.append({"name": "Git CLI Installation", "status": "PASS" if doctor_cmd.check_git() else "FAIL"})
@@ -275,19 +303,19 @@ HTML_UI = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Antigravity Agent Core Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f131a;
-            --card-bg: rgba(22, 28, 38, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent: #2563eb;
-            --accent-glow: rgba(37, 99, 235, 0.15);
+            --bg-color: #0b0f17;
+            --card-bg: rgba(22, 28, 45, 0.45);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.25);
             --success: #10b981;
-            --success-glow: rgba(16, 185, 129, 0.15);
-            --error: #ef4444;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --error: #f43f5e;
             --warning: #f59e0b;
         }
 
@@ -298,8 +326,11 @@ HTML_UI = """<!DOCTYPE html>
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
             background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -308,13 +339,13 @@ HTML_UI = """<!DOCTYPE html>
         }
 
         header {
-            background: linear-gradient(180deg, rgba(15, 19, 26, 0.9) 0%, rgba(15, 19, 26, 0.5) 100%);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem;
+            background: rgba(11, 15, 23, 0.7);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1.25rem 2.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -327,55 +358,87 @@ HTML_UI = """<!DOCTYPE html>
         }
 
         .logo-icon {
-            font-size: 1.75rem;
-            animation: float 3s ease-in-out infinite;
+            font-size: 1.85rem;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: float 4s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(5deg); }
         }
 
         .logo-text {
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #f8fafc, #cbd5e1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .tabs {
             display: flex;
-            gap: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 0.35rem;
+            border-radius: 30px;
+            gap: 0.25rem;
         }
 
         .tab-btn {
             background: none;
             border: none;
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
             cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            border-radius: 20px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .tab-btn.active {
             color: var(--text-primary);
-            background-color: rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            background-color: var(--accent);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .tab-btn:hover:not(.active) {
             color: var(--text-primary);
-            background-color: rgba(255, 255, 255, 0.02);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Status Widget */
+        .status-widget {
+            display: flex;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
         }
 
         main {
             flex: 1;
-            padding: 2rem;
+            padding: 2.5rem;
             max-width: 1400px;
             width: 100%;
             margin: 0 auto;
@@ -383,87 +446,85 @@ HTML_UI = """<!DOCTYPE html>
 
         .content-tab {
             display: none;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .content-tab.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Task Board Styles */
+        /* Task Board Column Design */
         .board-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            min-height: 500px;
+            gap: 2rem;
+            min-height: 600px;
         }
 
         .board-col {
             background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.25rem;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
+            backdrop-filter: blur(16px);
         }
 
         .col-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .col-title {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
 
         .col-count {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(255, 255, 255, 0.06);
             font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
             color: var(--text-secondary);
+            border: 1px solid var(--card-border);
         }
 
         .task-list {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
             overflow-y: auto;
         }
 
+        /* Task Cards */
         .task-card {
-            background-color: rgba(15, 19, 26, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            transition: all 0.2s ease;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.7) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .task-card:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .task-title {
-            font-size: 0.95rem;
-            font-weight: 500;
-            line-height: 1.4;
+            border-color: rgba(59, 130, 246, 0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
         .task-meta {
@@ -471,174 +532,227 @@ HTML_UI = """<!DOCTYPE html>
             justify-content: space-between;
             align-items: center;
             font-size: 0.8rem;
-            color: var(--text-secondary);
         }
 
         .task-branch {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
+            background-color: rgba(59, 130, 246, 0.12);
+            color: #93c5fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
             font-family: monospace;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
         .task-actions {
             display: flex;
             gap: 0.5rem;
             margin-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.75rem;
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0.35rem 0.6rem;
-            font-size: 0.75rem;
-            border-radius: 4px;
+            border: none;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
             flex: 1;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
         }
 
-        .action-btn:hover {
+        .primary-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+        }
+
+        .primary-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 15px rgba(29, 78, 216, 0.5);
+        }
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .secondary-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.3);
+        }
+
+        .success-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 15px rgba(4, 120, 87, 0.5);
+        }
+
+        .warning-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+
+        .warning-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.5);
         }
 
         /* Profile Styles */
         .profiles-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         .profile-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
         }
 
         .profile-card {
             background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(16px);
         }
 
         .profile-card.active {
             border-color: var(--success);
-            box-shadow: 0 0 15px var(--success-glow);
+            box-shadow: 0 0 25px var(--success-glow);
+            background: linear-gradient(135deg, rgba(22, 28, 45, 0.6) 0%, rgba(16, 185, 129, 0.04) 100%);
         }
 
         .profile-info {
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0.5rem;
         }
 
         .profile-name {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
 
         .profile-email {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-secondary);
         }
 
         .profile-keys {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
             font-size: 0.75rem;
         }
 
         .key-badge {
             background: rgba(255, 255, 255, 0.05);
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
             color: var(--text-secondary);
+            border: 1px solid var(--card-border);
         }
 
         .switch-btn {
             background-color: var(--accent);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 500;
+            padding: 0.6rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .switch-btn:hover {
-            box-shadow: 0 0 10px var(--accent-glow);
+            box-shadow: 0 0 15px var(--accent-glow);
             filter: brightness(1.1);
         }
 
         .switch-btn.active-btn {
             background-color: transparent;
-            border: 1px solid var(--success);
+            border: 1.5px solid var(--success);
             color: var(--success);
             cursor: default;
         }
 
         .add-profile-form {
             background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.25rem;
+            backdrop-filter: blur(16px);
         }
 
         .form-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            margin-bottom: 0.25rem;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
+            gap: 0.5rem;
         }
 
         .form-group label {
             font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-secondary);
         }
 
-        .form-group input, .form-group select {
+        .form-group input {
             background-color: rgba(15, 19, 26, 0.6);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--card-border);
             color: var(--text-primary);
-            padding: 0.6rem;
-            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
             font-family: inherit;
             outline: none;
+            transition: all 0.2s ease;
         }
 
         .form-group input:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
         }
 
         .submit-btn {
-            background-color: var(--success);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
-            padding: 0.6rem;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             margin-top: 0.5rem;
+            box-shadow: 0 4px 10px var(--success-glow);
         }
 
         .submit-btn:hover {
@@ -648,82 +762,117 @@ HTML_UI = """<!DOCTYPE html>
         /* Doctor Styles */
         .doctor-container {
             background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
+            backdrop-filter: blur(16px);
         }
 
         .doctor-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1.25rem;
+        }
+
+        .doctor-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
         }
 
         .run-doctor-btn {
-            background-color: var(--accent);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .run-doctor-btn:hover {
+            filter: brightness(1.1);
         }
 
         .diagnostic-list {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .diagnostic-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 1rem;
-            background: rgba(15, 19, 26, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            background: rgba(15, 19, 26, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .diagnostic-row:hover {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(15, 19, 26, 0.7);
+        }
+
+        .diagnostic-name {
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .status-badge {
             font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.2rem 0.6rem;
-            border-radius: 10px;
+            font-weight: 700;
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
         }
 
         .status-badge.PASS {
             background-color: var(--success-glow);
-            color: var(--success);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .status-badge.FAIL {
-            background-color: rgba(239, 68, 68, 0.15);
-            color: var(--error);
+            background-color: rgba(244, 63, 94, 0.12);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.2);
         }
 
         .status-badge.WARN {
-            background-color: rgba(245, 158, 11, 0.15);
-            color: var(--warning);
+            background-color: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
     </style>
 </head>
 <body>
     <header>
         <div class="logo-container">
-            <span class="logo-icon">🚀</span>
-            <span class="logo-text">AAC V2 Web UI</span>
+            <span class="logo-icon">▲</span>
+            <span class="logo-text">AAC WORKSPACE</span>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('board')">Task Board</button>
-            <button class="tab-btn" onclick="switchTab('profiles')">Profiles</button>
+            <button class="tab-btn active" onclick="switchTab('board')">Tasks Board</button>
+            <button class="tab-btn" onclick="switchTab('profiles')">Credentials</button>
             <button class="tab-btn" onclick="switchTab('doctor')">Diagnostics</button>
+        </div>
+        <div class="status-widget">
+            <div class="status-item">
+                <span class="status-dot"></span>
+                <span>Branch: <strong id="header-branch" style="color: #60a5fa; font-family: monospace;">main</strong></span>
+            </div>
+            <div class="status-item" style="border-left: 1px solid rgba(255,255,255,0.08); padding-left: 1rem;">
+                <span>Profile: <strong id="header-profile" style="color: #34d399;">None</strong></span>
+            </div>
         </div>
     </header>
 
@@ -760,7 +909,8 @@ HTML_UI = """<!DOCTYPE html>
             <div class="profiles-container">
                 <div class="profile-list" id="profile-cards-container"></div>
                 <div class="add-profile-form">
-                    <h3 class="form-title">Add Developer Profile</h3>
+                    <h3 class="form-title">Create Developer Profile</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Register local GPG/SSH profiles to prevent Git email mismatches.</p>
                     <div class="form-group">
                         <label for="prof-name">Profile Name</label>
                         <input type="text" id="prof-name" placeholder="e.g. personal-work">
@@ -812,6 +962,18 @@ HTML_UI = """<!DOCTYPE html>
             if (tabName === 'profiles') fetchProfiles();
         }
 
+        // Fetch System Status (Header bar info)
+        async function fetchSystemStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('header-branch').innerText = data.branch;
+                document.getElementById('header-profile').innerText = data.profile;
+            } catch (e) {
+                console.error("Failed to load status info", e);
+            }
+        }
+
         // Board Fetching & Movement
         async function fetchBoard() {
             const res = await fetch('/api/board');
@@ -821,12 +983,13 @@ HTML_UI = """<!DOCTYPE html>
             document.getElementById('count-doing').innerText = data.doing.length;
             document.getElementById('count-done').innerText = data.done.length;
             
-            renderColumn('todo', data.todo, ['doing']);
-            renderColumn('doing', data.doing, ['todo', 'done']);
-            renderColumn('done', data.done, ['doing']);
+            renderColumn('todo', data.todo);
+            renderColumn('doing', data.doing);
+            renderColumn('done', data.done);
+            fetchSystemStatus();
         }
 
-        function renderColumn(colId, tasks, allowedTargets) {
+        function renderColumn(colId, tasks) {
             const container = document.getElementById('list-' + colId);
             container.innerHTML = '';
             
@@ -834,18 +997,24 @@ HTML_UI = """<!DOCTYPE html>
                 const card = document.createElement('div');
                 card.className = 'task-card';
                 
-                let branchHtml = t.branch ? `<span class="task-branch">${t.branch}</span>` : '';
+                let branchHtml = t.branch ? `<span class="task-branch">⌥ ${t.branch}</span>` : '';
                 
                 let actionsHtml = '';
-                allowedTargets.forEach(target => {
-                    let label = target === 'doing' ? 'Start Task' : (target === 'done' ? 'Complete' : 'To Todo');
-                    actionsHtml += `<button class="action-btn" onclick="moveTask('${t.id}', '${target}')">${label}</button>`;
-                });
+                if (colId === 'todo') {
+                    actionsHtml = `<button class="action-btn primary-btn" onclick="moveTask('${t.id}', 'doing')">🚀 Start Task</button>`;
+                } else if (colId === 'doing') {
+                    actionsHtml = `
+                        <button class="action-btn secondary-btn" onclick="moveTask('${t.id}', 'todo')">↩ Move back</button>
+                        <button class="action-btn success-btn" onclick="moveTask('${t.id}', 'done')">✓ Complete</button>
+                    `;
+                } else if (colId === 'done') {
+                    actionsHtml = `<button class="action-btn warning-btn" onclick="moveTask('${t.id}', 'doing')">↺ Reopen Task</button>`;
+                }
                 
                 card.innerHTML = `
-                    <span class="task-title">${t.title}</span>
+                    <div style="font-weight: 600; font-size: 0.95rem; line-height: 1.4; color: #f8fafc;">${t.title}</div>
                     <div class="task-meta">
-                        <span>ID: ${t.id}</span>
+                        <span style="font-size: 0.75rem; color: #94a3b8;">ID: ${t.id}</span>
                         ${branchHtml}
                     </div>
                     <div class="task-actions">${actionsHtml}</div>
@@ -875,13 +1044,13 @@ HTML_UI = """<!DOCTYPE html>
                 card.className = 'profile-card' + (p.active ? ' active' : '');
                 
                 let keysHtml = '';
-                if (p.signing_key) keysHtml += `<span class="key-badge">GPG: ${p.signing_key}</span>`;
-                if (p.ssh_key_path) keysHtml += `<span class="key-badge">SSH: ${p.ssh_key_path.split('/').pop()}</span>`;
-                if (p.git_token) keysHtml += `<span class="key-badge">PAT Configured</span>`;
+                if (p.signing_key) keysHtml += `<span class="key-badge">🔑 GPG: ${p.signing_key}</span>`;
+                if (p.ssh_key_path) keysHtml += `<span class="key-badge">⚙ SSH: ${p.ssh_key_path.split('/').pop()}</span>`;
+                if (p.git_token) keysHtml += `<span class="key-badge">PAT Verified</span>`;
                 
                 let btnHtml = p.active 
                     ? `<button class="switch-btn active-btn">Active</button>` 
-                    : `<button class="switch-btn" onclick="switchProfile('${p.name}')">Switch</button>`;
+                    : `<button class="switch-btn" onclick="switchProfile('${p.name}')">Switch Profile</button>`;
                 
                 card.innerHTML = `
                     <div class="profile-info">
@@ -893,6 +1062,7 @@ HTML_UI = """<!DOCTYPE html>
                 `;
                 container.appendChild(card);
             });
+            fetchSystemStatus();
         }
 
         async function switchProfile(name) {
@@ -935,7 +1105,7 @@ HTML_UI = """<!DOCTYPE html>
         // Diagnostics Doctor
         async function runDiagnostics() {
             const container = document.getElementById('diagnostic-results');
-            container.innerHTML = '<p style="color: var(--text-secondary);">Auditing local configurations...</p>';
+            container.innerHTML = '<p style="color: var(--text-secondary);">Auditing workspace security and locks...</p>';
             
             const res = await fetch('/api/diagnostics');
             const data = await res.json();
@@ -945,7 +1115,7 @@ HTML_UI = """<!DOCTYPE html>
                 const row = document.createElement('div');
                 row.className = 'diagnostic-row';
                 row.innerHTML = `
-                    <span>${d.name}</span>
+                    <span class="diagnostic-name">${d.name}</span>
                     <span class="status-badge ${d.status}">${d.status}</span>
                 `;
                 container.appendChild(row);
