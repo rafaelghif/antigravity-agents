@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.64.1] - 2026-06-28
+
+### ⚙️ Chores
+- commit auto task ID injection hook and tests
+
+
 ## [2.64.0] - 2026-06-28
 
 ### 🚀 Features
