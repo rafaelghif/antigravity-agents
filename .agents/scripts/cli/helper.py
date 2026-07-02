@@ -5,6 +5,19 @@ import time
 import json
 from datetime import datetime, timezone
 
+# Reconfigure stdout/stderr to support UTF-8 on Windows cp932/etc. terminals
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+if hasattr(sys.stderr, 'reconfigure'):
+    try:
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+
 def log_cli_execution(cmd: str, args: list, status: str, duration_ms: float, error: str = None) -> None:
     log_dir = ".agents/logs"
     log_file = os.path.join(log_dir, "cli.log")

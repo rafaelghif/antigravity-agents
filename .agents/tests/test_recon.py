@@ -21,9 +21,9 @@ class TestReconCommand(unittest.TestCase):
 
     def test_scan_workspace_python(self):
         # Create dummy Python project setup
-        with open("requirements.txt", 'w') as f:
+        with open("requirements.txt", 'w', encoding='utf-8') as f:
             f.write("pytest\nflake8\n")
-        with open("main.py", 'w') as f:
+        with open("main.py", 'w', encoding='utf-8') as f:
             f.write("print('hello')\n")
             
         results = recon.scan_workspace()
@@ -32,7 +32,7 @@ class TestReconCommand(unittest.TestCase):
 
     def test_scan_workspace_node(self):
         # Create dummy Node project setup
-        with open("package.json", 'w') as f:
+        with open("package.json", 'w', encoding='utf-8') as f:
             f.write('{"name": "test"}')
             
         results = recon.scan_workspace()

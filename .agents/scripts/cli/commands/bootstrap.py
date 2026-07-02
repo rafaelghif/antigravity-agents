@@ -106,7 +106,12 @@ def copy_core_files():
     
     def is_ignored(full_path):
         # Resolve path relative to src_root
-        rel = os.path.relpath(full_path, src_root)
+        try:
+            rel = os.path.relpath(full_path, src_root)
+        except ValueError:
+            p1 = os.path.splitdrive(os.path.abspath(full_path))[1]
+            p2 = os.path.splitdrive(os.path.abspath(src_root))[1]
+            rel = os.path.relpath(p1, p2)
         parts = rel.replace('\\', '/').split('/')
         exclude_parts = {'__pycache__', '.git', '.pytest_cache', '.next', '.nuxt', 'node_modules', 'vendor'}
         if any(p in exclude_parts for p in parts):
@@ -135,7 +140,12 @@ def copy_core_files():
                 # Copy individual files that are missing
                 for root, dirs, files in os.walk(src_dir):
                     dirs[:] = [d_name for d_name in dirs if not is_ignored(os.path.join(root, d_name))]
-                    rel_path = os.path.relpath(root, src_dir)
+                    try:
+                        rel_path = os.path.relpath(root, src_dir)
+                    except ValueError:
+                        p1 = os.path.splitdrive(os.path.abspath(root))[1]
+                        p2 = os.path.splitdrive(os.path.abspath(src_dir))[1]
+                        rel_path = os.path.relpath(p1, p2)
                     dest_folder = os.path.join(target_dir, rel_path)
                     os.makedirs(dest_folder, exist_ok=True)
                     for file in files:

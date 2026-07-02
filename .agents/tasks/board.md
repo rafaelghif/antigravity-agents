@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Fix Windows compatibility, CLI encoding, and test suite execution bugs (feat/issue-098) <!-- id: issue-098 -->
 
 ## Done
 - [x] Enhance safety and type-casting of PowerShell helpers (feat/issue-097) <!-- id: issue-097 -->
