@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.101.0] - 2026-07-02
+
+### 🚀 Features
+- Fix Git profile fallback to local user account priority (ISSUE-121)
+
+### 🐛 Bug Fixes
+- prevent using placeholder profile in validate auto-repair
+- prevent applying placeholder profile in commit command
+
+### 🧪 Tests
+- update unit tests for profile fallback and auto-repair behaviors
+
+
 ## [2.100.0] - 2026-07-02
 
 ### 🚀 Features
