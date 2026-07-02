@@ -249,11 +249,212 @@ window.loadData = async function(force = false) {
 // Auto run on load
 document.addEventListener('DOMContentLoaded', () => {
   window.loadData(false);
+  window.loadProfiles();
 });
 
 // Poll dashboard data every 5 seconds if document is visible
 setInterval(() => {
   if (document.visibilityState === 'visible') {
     window.loadData(false);
+    window.loadProfiles();
   }
 }, 5000);
+
+// Global function to copy public key to clipboard
+window.copyPublicKey = function() {
+  const box = document.getElementById('pubkey-content');
+  if (!box) return;
+  navigator.clipboard.writeText(box.textContent).then(() => {
+    const btn = document.getElementById('copy-pubkey-btn');
+    if (btn) {
+      const origText = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.background = 'var(--accent-success)';
+      setTimeout(() => {
+        btn.textContent = origText;
+        btn.style.background = '';
+      }, 2000);
+    }
+  });
+};
+
+// Global function to switch git profiles
+window.handleSwitchProfile = async function(name) {
+  try {
+    const res = await fetch('/api/profiles/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name })
+    });
+    const result = await res.json();
+    if (result.success) {
+      window.loadProfiles();
+      window.loadData(true); // Force run validation status on profile switch
+    } else {
+      alert('Error switching profile: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to switch profile:', err);
+  }
+};
+
+// Global function to handle new profile creation
+window.handleCreateProfile = async function(event) {
+  event.preventDefault();
+  const name = document.getElementById('prof-name').value.trim();
+  const email = document.getElementById('prof-email').value.trim();
+  const signingKey = document.getElementById('prof-gpg').value.trim() || null;
+  const sshKeyPath = document.getElementById('prof-ssh-path').value.trim() || null;
+  const gitToken = document.getElementById('prof-token').value.trim() || null;
+  const generateSsh = document.getElementById('prof-gen-ssh').checked;
+  const switchAfter = document.getElementById('prof-switch-after').checked;
+
+  const btn = event.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Registering...';
+
+  try {
+    const res = await fetch('/api/profiles/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        signing_key: signingKey,
+        ssh_key_path: sshKeyPath,
+        git_token: gitToken,
+        generate_ssh: generateSsh,
+        switch_after: switchAfter
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('create-profile-form').reset();
+      window.loadProfiles();
+      window.loadData(true);
+      alert('Profile registered successfully!');
+    } else {
+      alert('Error registering profile: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to create profile:', err);
+    alert('Failed to connect to the server.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Profile';
+  }
+};
+
+// Load Git profiles list and active details
+window.loadProfiles = async function() {
+  try {
+    const res = await fetch('/api/profiles');
+    if (!res.ok) return;
+    const data = await res.json();
+    const profiles = data.profiles || [];
+    
+    // Find active profile
+    const active = profiles.find(p => p.active);
+    
+    // 1. Render Active Profile Details Card
+    const detailsContainer = document.getElementById('active-profile-details');
+    if (detailsContainer) {
+      if (active) {
+        let keyRowHtml = '';
+        if (active.ssh_key_path) {
+          keyRowHtml = `
+            <div class="label">SSH Key Path:</div>
+            <div class="val">${active.ssh_key_path}</div>
+          `;
+        } else if (active.signing_key) {
+          keyRowHtml = `
+            <div class="label">Signing Key:</div>
+            <div class="val">${active.signing_key}</div>
+          `;
+        }
+        
+        detailsContainer.innerHTML = `
+          <div class="profile-details-table">
+            <div class="label">Name:</div>
+            <div class="val">${active.name}</div>
+            <div class="label">Email:</div>
+            <div class="val">${active.email}</div>
+            ${keyRowHtml}
+            <div class="label">GitHub PAT:</div>
+            <div class="val">${active.git_token ? '•••••••••••• (Configured)' : 'None'}</div>
+          </div>
+          <div id="ssh-pubkey-display" style="display:none;"></div>
+        `;
+        
+        // If profile has SSH key path, fetch and display public key
+        if (active.ssh_key_path) {
+          try {
+            const pubRes = await fetch(`/api/ssh/public-key?profile=${encodeURIComponent(active.name)}`);
+            if (pubRes.ok) {
+              const pubData = await pubRes.json();
+              if (pubData.public_key) {
+                const pubDisplay = document.getElementById('ssh-pubkey-display');
+                if (pubDisplay) {
+                  pubDisplay.style.display = 'block';
+                  pubDisplay.innerHTML = `
+                    <div class="pubkey-container">
+                      <div class="pubkey-header">
+                        <h3>🔑 Ed25519 Public Key</h3>
+                        <button class="btn-secondary" id="copy-pubkey-btn" onclick="window.copyPublicKey()">Copy Key</button>
+                      </div>
+                      <div class="pubkey-box" id="pubkey-content">${pubData.public_key}</div>
+                    </div>
+                  `;
+                }
+              }
+            }
+          } catch (pubErr) {
+            console.error('Failed to load public key:', pubErr);
+          }
+        }
+      } else {
+        detailsContainer.innerHTML = `
+          <p class="text-muted" style="font-size:0.85rem; margin:0;">
+            No active Git profile set up. Use the form to register one.
+          </p>
+        `;
+      }
+    }
+    
+    // 2. Render Registered Profiles List
+    const listContainer = document.getElementById('profiles-list-container');
+    if (listContainer) {
+      listContainer.innerHTML = '';
+      if (profiles.length > 0) {
+        profiles.forEach(p => {
+          const isCurrent = p.active;
+          const card = document.createElement('div');
+          card.className = 'profile-card' + (isCurrent ? ' active' : '');
+          
+          let actionHtml = '';
+          if (isCurrent) {
+            actionHtml = `<span class="status-badge pass" style="font-size:0.7rem; font-weight:600;">ACTIVE</span>`;
+          } else {
+            actionHtml = `<button class="btn-secondary" onclick="window.handleSwitchProfile('${p.name}')">Switch</button>`;
+          }
+          
+          card.innerHTML = `
+            <div class="profile-info">
+              <span class="name">${p.name}</span>
+              <span class="email">${p.email}</span>
+            </div>
+            <div class="profile-action">
+              ${actionHtml}
+            </div>
+          `;
+          listContainer.appendChild(card);
+        });
+      } else {
+        listContainer.innerHTML = '<p class="text-muted" style="font-size: 0.85rem; margin:0;">No registered profiles found.</p>';
+      }
+    }
+    
+  } catch (err) {
+    console.error('Failed to load profiles:', err);
+  }
+};

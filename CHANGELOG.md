@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.117.0] - 2026-07-02
+
+### 🚀 Features
+- add Git profiles and SSH public key management tab and API
+
+### ⚙️ Chores
+- Implement Git profile and credentials management in local dashboard (ISSUE-139)
+
+
 ## [2.116.1] - 2026-07-02
 
 ### ⚙️ Chores
