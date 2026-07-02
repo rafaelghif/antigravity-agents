@@ -1,7 +1,7 @@
 ---
 id: issue-125
 title: "Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
