@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement Automatic Non-Interactive Mode Detection and Commit Message Validation (feat/issue-106) <!-- id: issue-106 -->
 
 ## Done
 - [x] Implement Strict Task Splitting and Context Insulation Protocols in Working Guidelines (feat/issue-105) <!-- id: issue-105 -->

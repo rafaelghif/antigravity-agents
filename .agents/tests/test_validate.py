@@ -131,7 +131,8 @@ class TestValidate(unittest.TestCase):
     @patch('validate.audit_static_linting', return_value=True)
     @patch('validate.audit_unit_tests', return_value=True)
     @patch('validate.audit_module_locks', return_value=True)
-    def test_run_validations_in_ci(self, m_lock, m_test, m_lint, m_schema, m_sync, m_branch, m_link, m_secrets, m_crit, m_exit, m_post_status, m_sha, m_getenv):
+    @patch('validate.audit_commit_messages', return_value=True)
+    def test_run_validations_in_ci(self, m_commit, m_lock, m_test, m_lint, m_schema, m_sync, m_branch, m_link, m_secrets, m_crit, m_exit, m_post_status, m_sha, m_getenv):
         m_getenv.side_effect = lambda k: "true" if k in ("CI", "GITHUB_ACTIONS") else None
         m_sha.return_value = "dummy-sha-12345"
         
@@ -256,6 +257,36 @@ class TestValidate(unittest.TestCase):
         validate.auto_format_file("test.js")
         mock_run.assert_called_once()
         self.assertIn("prettier", mock_run.call_args[0][0][0])
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    def test_audit_commit_messages_success(self, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-106"
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="feat: correct subject line\n\nRefs: issue-106\x00")
+        ]
+        self.assertTrue(validate.audit_commit_messages())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    def test_audit_commit_messages_missing_refs(self, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-106"
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="feat: missing refs trailer\x00")
+        ]
+        self.assertFalse(validate.audit_commit_messages())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    def test_audit_commit_messages_invalid_conventional(self, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-106"
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="bad subject: message\n\nRefs: issue-106\x00")
+        ]
+        self.assertFalse(validate.audit_commit_messages())
 
 if __name__ == '__main__':
     unittest.main()

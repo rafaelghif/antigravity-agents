@@ -434,7 +434,7 @@ This board tracks active development tasks.
         print("   Onboarding: Git Developer Profile Configuration       ")
         print("==========================================================")
         print("No Git profiles configured in '.agents/git_profiles.json'.")
-        is_interactive = sys.stdin.isatty()
+        is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
         if is_interactive:
             try:
                 setup_now = input("Would you like to configure your local developer profile now? (y/n): ").strip().lower()

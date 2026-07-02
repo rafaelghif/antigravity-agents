@@ -1029,6 +1029,82 @@ def prune_stale_locks() -> None:
             pass
 
 # ==========================================================
+# 10. Commit Message Compliance Audit
+# ==========================================================
+def audit_commit_messages() -> bool:
+    print("\n[10/10] Auditing Commit Message Compliance...")
+    branch = get_current_branch()
+    if not branch or branch in ('main', 'master', 'HEAD'):
+        print_ok(f"On base branch '{branch}' (skipping commit message compliance check).")
+        return True
+
+    # Detect base branch
+    base_branch = 'main'
+    try:
+        res = subprocess.run(
+            ['git', 'show-ref', '--verify', 'refs/heads/master'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        if res.returncode == 0:
+            base_branch = 'master'
+    except Exception:
+        pass
+
+    try:
+        res = subprocess.run(
+            ['git', 'log', f'{base_branch}..HEAD', '--format=%B%x00'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+    except Exception as e:
+        print_warn(f"Failed to fetch git log: {e}")
+        return True
+
+    commits = [c.strip() for c in res.stdout.split('\x00') if c.strip()]
+    if not commits:
+        print_ok("No new commits on this branch yet.")
+        return True
+
+    import re
+    # Conventional commit regex pattern (subject line)
+    conv_pattern = re.compile(r'^(feat|fix|chore|refactor|docs|test|style|ci|perf|build|revert)(\(.*\))?!?: .+$', re.IGNORECASE)
+    # Refs pattern (anywhere in commit message)
+    refs_pattern = re.compile(r'Refs:\s*(issue|task)-\d+', re.IGNORECASE)
+
+    failed = False
+    for commit in commits:
+        lines = commit.splitlines()
+        if not lines:
+            continue
+        subject = lines[0].strip()
+        
+        # Skip merge commits
+        if subject.startswith("Merge branch") or subject.startswith("Merge pull request") or subject.startswith("Merge "):
+            continue
+
+        # Check conventional commit prefix
+        if not conv_pattern.match(subject):
+            print_err(f"Commit subject does not follow Conventional Commits: '{subject}'")
+            print_err("  Expected format: 'feat: description', 'fix: description', etc.")
+            failed = True
+            continue
+
+        # Check Refs trailer line
+        if not refs_pattern.search(commit):
+            print_err(f"Commit message is missing 'Refs: <issue-id>' trailer: '{subject}'")
+            print_err("  Example: 'Refs: issue-106'")
+            failed = True
+
+    if failed:
+        return False
+        
+    print_ok("All commit messages are compliant with Conventional Commits and reference task IDs.")
+    return True
+
+# ==========================================================
 # Main Execution Entry Point
 # ==========================================================
 def get_commit_sha() -> str:
@@ -1068,7 +1144,7 @@ def run_validations() -> None:
     except Exception:
         pass
     
-    # Run the 9 audits sequentially
+    # Run the 10 audits sequentially
     results = {}
     results["Critical Files"] = audit_critical_files()
     results["Secrets & Ignored Files"] = audit_secrets_and_ignored_files()
@@ -1079,6 +1155,7 @@ def run_validations() -> None:
     results["Static Code Linting"] = audit_static_linting()
     results["Local Unit Tests"] = audit_unit_tests()
     results["Module Lock Compliance"] = audit_module_locks()
+    results["Commit Message Compliance"] = audit_commit_messages()
     
     # Print the Colored Audit Summary Table
     print("\n==========================================================")
