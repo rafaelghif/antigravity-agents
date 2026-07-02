@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.98.0] - 2026-07-02
+
+### 🚀 Features
+- Position Antigravity CLI as primary highlight in README (ISSUE-118)
+
+
 ## [2.97.0] - 2026-07-02
 
 ### 🚀 Features

@@ -1,12 +1,13 @@
 # Antigravity Agent Core (AAC) V2 🚀
-### *Zero-Trust Guardrails for AI Coding Assistants (Aider, Cursor, Cline, Claude)*
+### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
+*(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.95.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-2.97.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
 
-**AAC V2** is an open-source, local-first guardrail framework designed to enforce security boundaries, directory structures, and code patterns when working with autonomous AI agents or IDE assistants.
+**AAC V2** is an open-source, local-first guardrail and workspace customization framework built specifically for the **Antigravity CLI (agy)**. It leverages Antigravity's native custom Skills and Rules engines to enforce strict boundaries, directory structures, and code patterns on any autonomous agent working in your repository.
 
 By placing a strict insulation layer around your workspace, AAC V2 prevents AI tools from:
 - 🔓 Leaking local credentials, API keys, or private `.env` files.
