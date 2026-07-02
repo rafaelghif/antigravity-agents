@@ -95,3 +95,4 @@ id_ed25519
 .agents/active_context.md
 .agents/cooldowns.json
 .agents/sync_cache.json
+.agents/logs/

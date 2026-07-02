@@ -1092,23 +1092,41 @@ def prune_stale_locks() -> None:
             with open(locks_file, 'r', encoding='utf-8') as f:
                 locks = json.load(f)
             
+            holders = {holder for holder in locks.values() if holder != "unknown"}
+            if not holders:
+                return
+                
+            res = subprocess.run(
+                ['git', 'show-ref', '--heads'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            existing_branches = set()
+            if res.returncode == 0:
+                for line in res.stdout.splitlines():
+                    parts = line.strip().split()
+                    if len(parts) == 2:
+                        ref = parts[1]
+                        if ref.startswith('refs/heads/'):
+                            existing_branches.add(ref[11:])
+            else:
+                # If git show-ref --heads fails (e.g. empty repo or error), skip pruning to prevent data loss
+                return
+                
             modified = False
             for mod, holder in list(locks.items()):
-                if holder != "unknown":
-                    res = subprocess.run(
-                        ['git', 'show-ref', f'refs/heads/{holder}'],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE
-                    )
-                    if res.returncode != 0:
-                        del locks[mod]
-                        modified = True
+                if holder != "unknown" and holder not in existing_branches:
+                    del locks[mod]
+                    modified = True
             if modified:
                 with open(locks_file, 'w', encoding='utf-8') as f:
                     json.dump(locks, f, indent=2)
                 print_ok("Auto-pruned stale module locks in 'locks.json'.")
         except Exception:
             pass
+
 
 # ==========================================================
 # 10. Commit Message Compliance Audit
@@ -1218,14 +1236,7 @@ def run_validations() -> None:
     # Auto prune stale locks
     prune_stale_locks()
     
-    # Auto sync remote issues
-    try:
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "cli")))
-        import commands.issue as issue_cmd
-        issue_cmd.sync_issues()
-    except Exception:
-        pass
-    
+
     # Run the 10 audits sequentially
     results = {}
     results["Critical Files"] = audit_critical_files()

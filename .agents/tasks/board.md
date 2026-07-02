@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Optimize validation guard performance and decouple remote sync (feat/issue-109) <!-- id: issue-109 -->
 - [x] Fully benchmark agent core and generate report (feat/issue-108) <!-- id: issue-108 -->
 - [x] Implement Proactive Private File Scan and Git Branch Type Enforcer (feat/issue-107) <!-- id: issue-107 -->
 - [x] Implement Automatic Non-Interactive Mode Detection and Commit Message Validation (feat/issue-106) <!-- id: issue-106 -->
