@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.107.0] - 2026-07-02
+
+### 🚀 Features
+- declare HTML_TEMPLATE as raw string to suppress Javascript regex compiler warnings
+- implement human validation bypass, local visual status dashboard, and automatic task board synchronization
+- Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync (ISSUE-127)
+
+
 ## [2.106.0] - 2026-07-02
 
 ### 🚀 Features

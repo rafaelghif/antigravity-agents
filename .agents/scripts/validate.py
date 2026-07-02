@@ -1365,6 +1365,15 @@ def get_commit_sha() -> str:
     return ""
 
 def run_validations() -> None:
+    # Check for bypass flags (human fast-track mode)
+    if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true"):
+        print("==========================================================")
+        print("   Running AAC V2 Local Validation Guard...              ")
+        print("==========================================================")
+        print(f"{YELLOW}[BYPASS] Human Fast-Track/Bypass enabled. Bypassing validations...{RESET}")
+        print("==========================================================")
+        sys.exit(0)
+
     failed = False
     
     print("==========================================================")
@@ -1413,6 +1422,8 @@ def run_validations() -> None:
             
     if failed:
         print(f"{RED}   Validation FAILED! Please fix the errors above. {RESET}")
+        print(f"{YELLOW}   [TIP] If you are a human developer and need to bypass this check, run: {RESET}")
+        print(f"{YELLOW}         AAC_BYPASS_COMPLIANCE=1 git commit ... or use --no-verify {RESET}")
         print("==========================================================")
         if is_ci and sha:
             try:
