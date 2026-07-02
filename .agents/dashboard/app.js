@@ -39,10 +39,12 @@ window.toggleTask = async function(taskIndex, completed) {
 // Global function to load dashboard data
 window.loadData = async function(force = false) {
   const refreshBtns = document.querySelectorAll('.btn-action');
-  refreshBtns.forEach(btn => {
-    btn.disabled = true;
-    btn.textContent = force ? 'Auditing...' : 'Loading...';
-  });
+  if (force) {
+    refreshBtns.forEach(btn => {
+      btn.disabled = true;
+      btn.textContent = 'Auditing...';
+    });
+  }
 
   try {
     const url = force ? '/api/status?force=true' : '/api/status';
@@ -51,6 +53,19 @@ window.loadData = async function(force = false) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
     const data = await res.json();
+    
+    // Manage button states based on server auditing flag
+    if (data.auditing) {
+      refreshBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.textContent = 'Auditing...';
+      });
+    } else {
+      refreshBtns.forEach(btn => {
+        btn.disabled = false;
+        btn.textContent = 'Refresh Audit';
+      });
+    }
     
     // 1. Version Info
     const versionBadge = document.getElementById('version-badge');
@@ -224,7 +239,6 @@ window.loadData = async function(force = false) {
 
   } catch (err) {
     console.error('Failed to load status:', err);
-  } finally {
     refreshBtns.forEach(btn => {
       btn.disabled = false;
       btn.textContent = 'Refresh Audit';
@@ -236,3 +250,10 @@ window.loadData = async function(force = false) {
 document.addEventListener('DOMContentLoaded', () => {
   window.loadData(false);
 });
+
+// Poll dashboard data every 5 seconds if document is visible
+setInterval(() => {
+  if (document.visibilityState === 'visible') {
+    window.loadData(false);
+  }
+}, 5000);
