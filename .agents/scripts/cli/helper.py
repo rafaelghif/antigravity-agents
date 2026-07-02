@@ -244,6 +244,17 @@ def main():
     finally:
         duration_ms = (time.perf_counter() - start_time) * 1000.0
         log_cli_execution(cmd, sys.argv[2:], status, duration_ms, error_msg)
+        try:
+            if cmd not in ('upgrade', 'dashboard'):
+                cmd_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "commands"))
+                if cmd_dir not in sys.path:
+                    sys.path.insert(0, cmd_dir)
+                import upgrade
+                import threading
+                t = threading.Thread(target=upgrade.check_and_run_auto_upgrade, daemon=False)
+                t.start()
+        except Exception:
+            pass
 
 if __name__ == '__main__':
     main()
