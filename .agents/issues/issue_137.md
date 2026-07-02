@@ -1,7 +1,7 @@
 ---
 id: issue-137
 title: "Enable asynchronous non-blocking validation audits and auto-updating dashboard"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

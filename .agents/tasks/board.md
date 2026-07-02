@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Enable asynchronous non-blocking validation audits and auto-updating dashboard (feat/issue-137) <!-- id: issue-137 -->
 - [x] Stage archived issue 134 and 135 specs (feat/issue-136) <!-- id: issue-136 -->
 - [x] Add lock compliance bypass switch for human developers (feat/issue-135) <!-- id: issue-135 -->
 - [x] Ignore local upgrade state cache file and stage archived issue 132 (feat/issue-134) <!-- id: issue-134 -->

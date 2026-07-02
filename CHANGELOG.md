@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.116.0] - 2026-07-02
+
+### 🚀 Features
+- add active tab visibility-aware auto-polling and update button control
+- run compliance audit checks asynchronously in a background thread
+
+### ⚙️ Chores
+- Enable asynchronous non-blocking validation audits and auto-updating dashboard (ISSUE-137)
+
+### 🧪 Tests
+- assert non-blocking background validation audit behavior
+
+
 ## [2.115.1] - 2026-07-02
 
 ### ⚙️ Chores
