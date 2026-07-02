@@ -41,6 +41,8 @@ flowchart TD
 * **👤 Zero-Trust Git Profiles**: Rotate commits metadata and GPG/SSH keys dynamically, preventing corporate credential leaks.
 * **🔒 Collaborative Module Locks**: Restrict parallel edits on directories to prevent agents from clashing.
 * **📦 Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, keeping agent index files tiny and saving up to **80% in LLM token budgets**.
+* **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
+* **⏩ Human Validation Bypass**: Skip strict validation audits during quick human hotfixes via `--bypass` flags or `AAC_BYPASS_COMPLIANCE=1` env variables.
 * **🚀 GitHub Action CI/CD Integration**: Block PR merges automatically in your organization if an agent attempts to push non-compliant code.
 
 ---
@@ -94,6 +96,7 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatcher comman
 |---|---|---|
 | **`bootstrap`** | `./helper.sh bootstrap` | Scaffolds directories, detects stack, and guides Git profile setup. |
 | **`validate`** | `./helper.sh validate` | Runs 10 compliance audits (files, secrets, links, branch, sync, tests, locks). |
+| **`dashboard`** | `./helper.sh dashboard` | Launches local web-based interactive visual status dashboard. |
 | **`issue`** | `./helper.sh issue <subcommand>` | Local issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
 | **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative koding. Run with `--release` to unlock. |
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
