@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Ignore local upgrade state cache file and stage archived issue 132 (feat/issue-134) <!-- id: issue-134 -->
 - [x] Implement automatic upgrade check for CLI commands (feat/issue-133) <!-- id: issue-133 -->
 - [x] Enhance dashboard security, scalability, and dynamic MIME type resolution for static files (feat/issue-132) <!-- id: issue-132 -->
 - [x] Track dashboard static assets and stage archived issues deletion (feat/issue-131) <!-- id: issue-131 -->
