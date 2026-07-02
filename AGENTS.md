@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.105.0
+- **Version:** 2.106.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -52,21 +52,21 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 |---|---|---|
 | `AGENTS.md` (this file) | Identity, non-negotiables, map | Always — every prompt |
 | `.agents/rules.md` | Project-specific stack, style, and testing rules (language, lint, frameworks) | Always — loaded alongside `AGENTS.md` every prompt, since the §2 Compliance Audit must check it on every edit |
-| `.agents/skills/adr/SKILL.md` | Standardized playbook and template for generating new Architectural Decision Records. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/ci-cd/SKILL.md` | Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/code-review/SKILL.md` | Guidelines and checklists for performing high-quality, zero-regression code reviews. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/coding-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/contract-synchronization/SKILL.md` | Playbook for managing API contract schemas, generating client code, and verifying backend/frontend synchronization. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/conversational-agent/SKILL.md` | Playbook for translating natural language requests about tasks, profiles, locking, and validation into CLI helper executions. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
-| `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
+| `.agents/skills/adr/SKILL.md` | Standardized playbook and template for generating new Architectural Decision Records. | On match |
+| `.agents/skills/ci-cd/SKILL.md` | Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. | On match |
+| `.agents/skills/code-review/SKILL.md` | Guidelines and checklists for performing high-quality, zero-regression code reviews. | On match |
+| `.agents/skills/coding-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. | On match |
+| `.agents/skills/contract-synchronization/SKILL.md` | Playbook for managing API contract schemas, generating client code, and verifying backend/frontend synchronization. | On match |
+| `.agents/skills/conversational-agent/SKILL.md` | Playbook for translating natural language requests about tasks, profiles, locking, and validation into CLI helper executions. | On match |
+| `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | On match |
+| `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | On match |
+| `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | On match |
+| `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | On match |
+| `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
+| `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | On match |
+| `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
+| `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | On match |
+| `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | On match |
 | `.agents/workflows/*.md` | Slash-command macros (e.g. `/sync-memory`) | Only when the command is run |
 | `.agents/memory/architecture.md` | Compressed system summary | Pulled on demand (`@.agents/memory/architecture.md`) before architecture-affecting work |
 | `.agents/memory/decisions/` | ADRs — full reasoning | On demand, referenced from architecture.md and the `adr` skill — never auto-loaded |
@@ -78,8 +78,8 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 
 ## 5. Working protocol
 1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), task board, and the local git-identity profile (copies `.agents/git_profiles.example` → `.agents/git_profiles.json`, which must never be staged or committed) before writing any code.
-2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, and create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`).
-3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching) before proposing or writing code.
+2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`), run `./helper.sh context optimize`, and read `.agents/active_context.md` to align on active scope, checklist, and rules.
+3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching using `.agents/active_context.md` as the primary source) before proposing or writing code.
 4. **Task Splitting:** The agent MUST split any assigned task into small, atomic subtasks (no more than 3-5 lines of code edits per step where practical) and list them under `Implementation Subtasks` in the local issue specification file (e.g. `.agents/issues/issue_xxx.md`).
 5. **Context Insulation (Single subtask focus):** The agent MUST focus on exactly ONE atomic subtask at a time. After completing a subtask, the agent MUST run validation and make a git commit with a clear Conventional Commit message referencing the task ID. This keeps the prompt cache warm and prevents context pollution.
 6. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.

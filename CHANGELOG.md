@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.106.0] - 2026-07-02
+
+### 🚀 Features
+- reduce prompt token footprint, prevent duplicate rules, and mandate active context manifest reads
+- Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (ISSUE-126)
+
+
 ## [2.105.0] - 2026-07-02
 
 ### 🚀 Features

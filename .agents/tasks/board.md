@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (feat/issue-126) <!-- id: issue-126 -->
 - [x] Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects (feat/issue-125) <!-- id: issue-125 -->
 - [x] Improve release commit messages by injecting local issue titles and formatting Refs trailer (feat/issue-124) <!-- id: issue-124 -->
 - [x] Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch (feat/issue-123) <!-- id: issue-123 -->

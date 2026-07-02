@@ -131,6 +131,11 @@ def record_lesson(lesson: str, category: str = None):
     with open(lessons_path, 'r', encoding='utf-8') as f:
         content = f.read()
         
+    # Prevent duplicate lessons from accumulating
+    if lesson in content:
+        print(f"[INFO] Lesson already exists in '{lessons_path}'. Skipping recording.")
+        return
+        
     # Append the lesson to the list under ## Lessons Learned
     date_str = datetime.now().strftime("%Y-%m-%d")
     prefix = f"**{category}**: " if category else ""
