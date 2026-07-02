@@ -6,6 +6,29 @@ import webbrowser
 import subprocess
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
+import threading
+import io
+import contextlib
+from urllib.parse import urlparse, parse_qs
+from socketserver import ThreadingMixIn
+
+# Thread-safe compliance status cache
+LATEST_DATA = {}
+data_lock = threading.Lock()
+initial_data_loaded = threading.Event()
+
+DEFAULT_COMPLIANCE = {
+    "Critical Files": True,
+    "Secrets & Ignored Files": True,
+    "Link Integrity": True,
+    "Git Branch Alignment": True,
+    "Workspace Sync": True,
+    "Task Board Schema": True,
+    "Static Code Linting": True,
+    "Local Unit Tests": True,
+    "Module Lock Compliance": True,
+    "Commit Message Compliance": True
+}
 
 # Resolve parent scripts directory
 scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -36,7 +59,63 @@ def get_issue_frontmatter(path):
         pass
     return fm
 
-def get_dashboard_data():
+def run_silent_validation():
+    compliance = {}
+    f_dummy = io.StringIO()
+    with contextlib.redirect_stdout(f_dummy), contextlib.redirect_stderr(f_dummy):
+        try:
+            compliance["Critical Files"] = validate.audit_critical_files()
+        except Exception:
+            compliance["Critical Files"] = False
+            
+        try:
+            compliance["Secrets & Ignored Files"] = validate.audit_secrets_and_ignored_files()
+        except Exception:
+            compliance["Secrets & Ignored Files"] = False
+            
+        try:
+            compliance["Link Integrity"] = validate.audit_link_integrity()
+        except Exception:
+            compliance["Link Integrity"] = False
+            
+        try:
+            compliance["Git Branch Alignment"] = validate.audit_git_branch_alignment()
+        except Exception:
+            compliance["Git Branch Alignment"] = False
+            
+        try:
+            compliance["Workspace Sync"] = validate.audit_workspace_sync()
+        except Exception:
+            compliance["Workspace Sync"] = False
+            
+        try:
+            compliance["Task Board Schema"] = validate.audit_task_board_schema()
+        except Exception:
+            compliance["Task Board Schema"] = False
+            
+        try:
+            compliance["Static Code Linting"] = validate.audit_static_linting()
+        except Exception:
+            compliance["Static Code Linting"] = False
+            
+        try:
+            compliance["Local Unit Tests"] = validate.audit_unit_tests()
+        except Exception:
+            compliance["Local Unit Tests"] = False
+            
+        try:
+            compliance["Module Lock Compliance"] = validate.audit_module_locks()
+        except Exception:
+            compliance["Module Lock Compliance"] = False
+            
+        try:
+            compliance["Commit Message Compliance"] = validate.audit_commit_messages()
+        except Exception:
+            compliance["Commit Message Compliance"] = False
+            
+    return compliance
+
+def get_dashboard_data(force=False):
     # 1. Version Info
     version = "2.106.0"
     agents_path = "AGENTS.md"
@@ -165,18 +244,14 @@ def get_dashboard_data():
             pass
 
     # 8. Real-time Live Compliance Check
-    compliance = {
-        "Critical Files": validate.audit_critical_files(),
-        "Secrets & Ignored Files": validate.audit_secrets_and_ignored_files(),
-        "Link Integrity": validate.audit_link_integrity(),
-        "Git Branch Alignment": validate.audit_git_branch_alignment(),
-        "Workspace Sync": validate.audit_workspace_sync(),
-        "Task Board Schema": validate.audit_task_board_schema(),
-        "Static Code Linting": validate.audit_static_linting(),
-        "Local Unit Tests": validate.audit_unit_tests(),
-        "Module Lock Compliance": validate.audit_module_locks(),
-        "Commit Message Compliance": validate.audit_commit_messages()
-    }
+    compliance = {}
+    if force:
+        compliance = run_silent_validation()
+        with data_lock:
+            LATEST_DATA["compliance"] = compliance
+    else:
+        with data_lock:
+            compliance = LATEST_DATA.get("compliance", DEFAULT_COMPLIANCE)
 
     return {
         "version": version,
@@ -189,6 +264,7 @@ def get_dashboard_data():
         "compliance": compliance,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
+
 
 HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
@@ -553,10 +629,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
   <div class="dashboard-container">
     <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchTab('overview')">Overview & Active Issue</button>
-      <button class="tab-btn" onclick="switchTab('locks')">Module Locks</button>
-      <button class="tab-btn" onclick="switchTab('memory')">Self-Learning Memory</button>
-      <button class="tab-btn" onclick="switchTab('changelog')">SemVer & Releases</button>
+      <button class="tab-btn active" onclick="switchTab(this, 'overview')">Overview & Active Issue</button>
+      <button class="tab-btn" onclick="switchTab(this, 'locks')">Module Locks</button>
+      <button class="tab-btn" onclick="switchTab(this, 'memory')">Self-Learning Memory</button>
+      <button class="tab-btn" onclick="switchTab(this, 'changelog')">SemVer & Releases</button>
     </div>
 
     <!-- TAB 1: OVERVIEW -->
@@ -600,9 +676,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             <div id="compliance-list">
               <!-- dynamically loaded -->
             </div>
-            <div style="margin-top: 1.25rem;" class="text-center">
-              <button class="btn-action" onclick="loadData()">Refresh Audit Status</button>
-            </div>
+              <button class="btn-action" onclick="loadData(true)">Refresh Audit Status</button>
           </div>
         </div>
       </div>
@@ -657,17 +731,23 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   </div>
 
   <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    function switchTab(btn, tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-      event.target.classList.add('active');
+      btn.classList.add('active');
       document.getElementById(tabId + '-tab').classList.add('active');
     }
 
-    async function loadData() {
+    async function loadData(force = false) {
+      const refreshBtn = document.querySelector('.btn-action');
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = 'Auditing...';
+      }
       try {
-        const res = await fetch('/api/status');
+        const url = force ? '/api/status?force=true' : '/api/status';
+        const res = await fetch(url);
         const data = await res.json();
         
         // Update version badge
@@ -797,29 +877,41 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
       } catch (err) {
         console.error('Failed to load status:', err);
+      } finally {
+        const refreshBtn = document.querySelector('.btn-action');
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = 'Refresh Audit Status';
+        }
       }
     }
 
     // Initial load
-    loadData();
+    loadData(false);
   </script>
 </body>
 </html>
 """
 
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
 class DashboardHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/api/status':
+        parsed_url = urlparse(self.path)
+        if parsed_url.path == '/api/status':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             try:
-                data = get_dashboard_data()
+                query = parse_qs(parsed_url.query)
+                force = query.get('force', ['false'])[0].lower() == 'true'
+                data = get_dashboard_data(force=force)
                 self.wfile.write(json.dumps(data).encode('utf-8'))
             except Exception as e:
                 err_response = {"error": str(e)}
                 self.wfile.write(json.dumps(err_response).encode('utf-8'))
-        elif self.path == '/' or self.path == '/index.html':
+        elif parsed_url.path == '/' or parsed_url.path == '/index.html':
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
             self.end_headers()
@@ -833,13 +925,24 @@ class DashboardHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+def initial_audit_worker():
+    global LATEST_DATA
+    compliance = run_silent_validation()
+    with data_lock:
+        LATEST_DATA["compliance"] = compliance
+    initial_data_loaded.set()
+
 def run(args):
+    # Spawn background thread to populate initial compliance cache asynchronously
+    t = threading.Thread(target=initial_audit_worker, daemon=True)
+    t.start()
+
     port = 8000
     server = None
     # Auto port binding to avoid port conflicts
     while port < 8020:
         try:
-            server = HTTPServer(('127.0.0.1', port), DashboardHandler)
+            server = ThreadingHTTPServer(('127.0.0.1', port), DashboardHandler)
             break
         except OSError:
             port += 1
