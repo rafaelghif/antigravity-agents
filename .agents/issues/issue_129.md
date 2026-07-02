@@ -1,7 +1,7 @@
 ---
 id: issue-129
 title: "Fix visual status dashboard UI/UX loading bug, threading HTTP server bottleneck, and terminal stdout clutter"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

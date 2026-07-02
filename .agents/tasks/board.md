@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Fix visual status dashboard UI/UX loading bug, threading HTTP server bottleneck, and terminal stdout clutter (feat/issue-129) <!-- id: issue-129 -->
 
 ## Done
+- [x] Fix visual status dashboard UI/UX loading bug, threading HTTP server bottleneck, and terminal stdout clutter (feat/issue-129) <!-- id: issue-129 -->
 - [x] Update user documentation and custom skills to cover visual dashboard, validation bypass, and automated board sync (feat/issue-128) <!-- id: issue-128 -->
 - [x] Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync (feat/issue-127) <!-- id: issue-127 -->
 - [x] Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (feat/issue-126) <!-- id: issue-126 -->
