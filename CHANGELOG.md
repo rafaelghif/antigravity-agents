@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.108.0] - 2026-07-02
+
+### 🚀 Features
+- update README and custom skill playbooks for visual dashboard, human validation bypass, and automated board synchronization
+- Update user documentation and custom skills to cover visual dashboard, validation bypass, and automated board sync (ISSUE-128)
+
+
 ## [2.107.0] - 2026-07-02
 
 ### 🚀 Features

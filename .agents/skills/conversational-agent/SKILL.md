@@ -33,3 +33,16 @@ When the user asks to switch profiles, manage tasks, lock modules, or audit code
 - Action:
   * For general diagnostics: `./helper.sh doctor`
   * For validation audits: `./helper.sh validate`
+
+## 5. Local Visual Dashboard
+- User says: *"Show dashboard"*, *"Open web UI"*, or *"Run local status dashboard"*
+- Action:
+  * Run: `./helper.sh dashboard`
+  * This will start a local HTTP server and open the interactive dashboard in a browser.
+
+## 6. Human Validation Bypass
+- User says: *"Bypass validation"* or *"Skip audit checks"*
+- Action:
+  * Run the command with `--bypass` or with the environment variable `AAC_BYPASS_COMPLIANCE=1` prefix.
+  * Example: `AAC_BYPASS_COMPLIANCE=1 git commit -m "feat(scope): descriptive message"`
+  * Or: `./helper.sh validate --bypass`

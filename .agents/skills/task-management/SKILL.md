@@ -41,7 +41,9 @@ created_at: [current-date]
 ## 2. Synchronizing with the Task Board and Git Branch
 Once the issue file is written:
 1. Run `python3 .agents/scripts/sync.py` to synchronize any links.
-2. Open `.agents/tasks/board.md` and add the task referencing the issue:
+2. The task board (`board.md`) is automatically synchronized with local issues when running `./helper.sh issue sync`. You can also manually add/move the task if needed:
    `- [ ] [Title] (feat/issue-[number]) <!-- id: issue-[number] -->`
 3. Transition the task to `Doing` before starting work.
 4. Create and checkout a new branch for the issue immediately (e.g., `./helper.sh issue checkout issue-[number]`). **NEVER** edit files or commit directly on the `main` or `master` branch.
+
+Note: Task statuses and checkbox states in `board.md` are automatically kept in sync with issue file statuses whenever issues are synchronized, checkout, or closed.
