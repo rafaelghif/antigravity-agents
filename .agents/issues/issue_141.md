@@ -35,17 +35,17 @@ created_at: 2026-07-02
   - *Trade-off*: Leaves the dashboard as a read-only viewer rather than a fully interactive developer assistant.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Add `/api/locks/acquire`, `/api/locks/release`, `/api/learn`, and `/api/sync` endpoints to `dashboard.py`.
-- [ ] Subtask 2: Add interactive lock creation form, release button, and record lesson form to `index.html`. Add "Sync Workspace" button.
-- [ ] Subtask 3: Implement client-side dynamic polling speed control (500ms fast / 5s default) and interactive button events in `app.js`.
-- [ ] Subtask 4: Add CSS styling for new forms and control buttons in `style.css`.
-- [ ] Subtask 5: Write unit tests in `test_dashboard.py` verifying locks, learn, and sync API routes.
-- [ ] Subtask 6: Run validation guard checks and ensure all pass.
+- [x] Subtask 1: Add `/api/locks/acquire`, `/api/locks/release`, `/api/learn`, and `/api/sync` endpoints to `dashboard.py`.
+- [x] Subtask 2: Add interactive lock creation form, release button, and record lesson form to `index.html`. Add "Sync Workspace" button.
+- [x] Subtask 3: Implement client-side dynamic polling speed control (500ms fast / 5s default) and interactive button events in `app.js`.
+- [x] Subtask 4: Add CSS styling for new forms and control buttons in `style.css`.
+- [x] Subtask 5: Write unit tests in `test_dashboard.py` verifying locks, learn, and sync API routes.
+- [x] Subtask 6: Run validation guard checks and ensure all pass.
 
 ## 3. Acceptance Criteria
-- [ ] Clicking "Sync Workspace" triggers a sync run on the backend and updates the UI.
-- [ ] Clicking "Release" next to a lock successfully unlocks the module in `locks.json`.
-- [ ] Filling the lock form and clicking "Lock Module" locks the module.
-- [ ] Recording a lesson adds it to `lessons-learned.md` and displays it in the ledger.
-- [ ] When auditing is triggered, polling switches to every 500ms, and changes back to 5s as soon as validation completes.
-- [ ] All unit tests and validation checks pass cleanly.
+- [x] Clicking "Sync Workspace" triggers a sync run on the backend and updates the UI.
+- [x] Clicking "Release" next to a lock successfully unlocks the module in `locks.json`.
+- [x] Filling the lock form and clicking "Lock Module" locks the module.
+- [x] Recording a lesson adds it to `lessons-learned.md` and displays it in the ledger.
+- [x] When auditing is triggered, polling switches to every 500ms, and changes back to 5s as soon as validation completes.
+- [x] All unit tests and validation checks pass cleanly.
