@@ -28,7 +28,8 @@ class TestContextCommand(unittest.TestCase):
             context.run(["optimize"])
             
         self.assertEqual(cm.exception.code, 0)
-        mock_file.assert_called_once_with(".agents/active_context.md", 'w', encoding='utf-8')
+        mock_file.assert_any_call(".agents/rules.md", 'r', encoding='utf-8')
+        mock_file.assert_any_call(".agents/active_context.md", 'w', encoding='utf-8')
 
     @patch('sys.exit', side_effect=raise_system_exit)
     def test_context_run_invalid_args(self, mock_exit):

@@ -570,6 +570,16 @@ def audit_git_branch_alignment() -> bool:
 # ==========================================================
 def audit_workspace_sync() -> bool:
     print("\n[5/9] Auditing Workspace Sync Alignment...")
+    
+    try:
+        import sync
+        print("Automatically synchronizing skills, ADRs, and rules...")
+        sync.sync_skills_to_agents_md()
+        sync.sync_adrs_to_architecture_md()
+        sync.sync_lessons_to_rules()
+    except Exception as e:
+        print_warn(f"Auto-synchronization failed: {e}")
+
     skills_dir = ".agents/skills"
     agents_file = "AGENTS.md"
     failed = False

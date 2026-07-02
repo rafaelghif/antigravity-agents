@@ -66,10 +66,15 @@ class TestLearnCommand(unittest.TestCase):
         mock_record.assert_not_called()
 
     @patch('sys.stdin.isatty', return_value=False)
-    @patch('learn.analyze_diff')
-    def test_suggest_and_record_lessons_non_interactive(self, mock_analyze, mock_isatty):
+    @patch('learn.analyze_diff', return_value=[("Testing / Mocking", "Ensure mock side effects are isolated.")])
+    @patch('learn.extract_lessons_from_commits', return_value=[("Git Commit", "Commit lesson")])
+    @patch('learn.record_lesson')
+    def test_suggest_and_record_lessons_non_interactive(self, mock_record, mock_extract, mock_analyze, mock_isatty):
         learn.suggest_and_record_lessons("main")
-        mock_analyze.assert_not_called()
+        mock_analyze.assert_called_once_with("main")
+        mock_extract.assert_called_once_with("main")
+        mock_record.assert_any_call("Ensure mock side effects are isolated.", "Testing / Mocking")
+        mock_record.assert_any_call("Commit lesson", "Git Commit")
 
     @patch('learn.suggest_and_record_lessons')
     @patch('subprocess.run')

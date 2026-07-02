@@ -155,9 +155,81 @@ def record_lesson(lesson: str, category: str = None):
         
     print(f"[OK] Successfully recorded lesson: \"{lesson}\" in '{lessons_path}'.")
 
+def extract_lessons_from_commits(base_branch="main"):
+    """
+    Extracts lessons from commits on the current feature branch since base_branch.
+    Looks for commit messages or descriptions that contain explicit lessons.
+    Format:
+    - Commits with prefix "lesson:" or containing "Learning:" or similar.
+    """
+    try:
+        # Get commit hashes and subjects/bodies on feature branch relative to base_branch
+        res = subprocess.run(
+            ['git', 'log', f'{base_branch}..HEAD', '--format=%s%n%b'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode != 0:
+            return []
+            
+        commit_text = res.stdout
+        lessons = []
+        # Find lines like:
+        # - lesson: description
+        # - Learning: description
+        # - [Learning: Category] description
+        pattern = r'(?m)^\s*[-*]?\s*(?:lesson|learning|learn):\s*(.*)$'
+        for match in re.finditer(pattern, commit_text, re.IGNORECASE):
+            lesson_text = match.group(1).strip()
+            if lesson_text:
+                lessons.append(("Git Commit", lesson_text))
+                
+        # Also check for lines starting with "Learning:" or "[Learning:"
+        pattern_bracket = r'(?m)^\s*[-*]?\s*\[?Learning:\s*([^\]\n]+)\]?:?\s*(.*)$'
+        for match in re.finditer(pattern_bracket, commit_text, re.IGNORECASE):
+            cat = match.group(1).strip()
+            desc = match.group(2).strip()
+            if desc:
+                lessons.append((cat, desc))
+            elif cat:
+                lessons.append(("Git Commit", cat))
+                
+        return lessons
+    except Exception as e:
+        print(f"Warning: Commit analysis encountered an error: {e}")
+        return []
+
 def suggest_and_record_lessons(base_branch="main"):
     if not sys.stdin.isatty():
-        print("[INFO] Non-interactive environment detected. Skipping auto-lessons extraction.")
+        print("🧠 [LEARN] Auto-Lessons Extractor: Non-interactive mode detected. Auto-extracting lessons...")
+        # 1. Analyze git diff for matches
+        suggestions = analyze_diff(base_branch)
+        
+        # 2. Extract lessons from commits
+        commit_lessons = extract_lessons_from_commits(base_branch)
+        
+        recorded_count = 0
+        recorded_lessons = set() # Avoid duplicates
+        
+        # Record matched diff suggestions
+        for cat, lesson in suggestions:
+            if lesson not in recorded_lessons:
+                record_lesson(lesson, cat)
+                recorded_lessons.add(lesson)
+                recorded_count += 1
+                
+        # Record commit lessons
+        for cat, lesson in commit_lessons:
+            if lesson not in recorded_lessons:
+                record_lesson(lesson, cat)
+                recorded_lessons.add(lesson)
+                recorded_count += 1
+                
+        if recorded_count == 0:
+            print("[INFO] No auto-extractable lessons matched or found in commits.")
+        else:
+            print(f"[OK] Successfully auto-recorded {recorded_count} lessons learned.")
         return
         
     print("\n🧠 [LEARN] Auto-Lessons Extractor: Analyzing git diff for lessons learned...")

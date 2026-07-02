@@ -24,6 +24,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: compatibility]** Always reconfigure sys.stdout and sys.stderr to utf-8, handle ValueError on os.path.relpath cross-drive matches, propagate exit codes using exit $LASTEXITCODE in PowerShell wrapper scripts, and specify encoding='utf-8' on subprocess.run calls to ensure complete Windows compatibility.
 - **[Learning: powershell]** Explicitly cast command and function outputs to [string] when matching or testing results in PowerShell to prevent type casting bugs on non-standard PowerShell environments.
 - **[Learning: powershell]** Avoid using the -and operator directly after Test-Path in PowerShell without enclosing Test-Path in parentheses, otherwise PowerShell parses -and as a parameter to Test-Path.
 - **[Learning: feature]** Implemented local visual web dashboard server, structured VS Code extension integration logic, and registered conversational skill playbooks to unify agent operations.
