@@ -22,6 +22,7 @@
       </div>
       <div class="navbar-actions">
         <span class="version-badge" id="version-badge">v2.109.0</span>
+        <button class="btn-secondary" id="sync-btn" onclick="syncWorkspace()" style="margin-right: 0.5rem;">Sync Workspace</button>
         <button class="btn-action" onclick="loadData(true)">Refresh Audit</button>
       </div>
     </div>
@@ -104,13 +105,52 @@
 
       <!-- TAB 2: LOCKS -->
       <div id="locks-tab" class="tab-content">
-        <div class="card">
-          <div class="card-header">
-            <h2>🔒 Collaborative Module Locks</h2>
+        <div class="locks-page-grid">
+          <!-- Active Locks List -->
+          <div class="card">
+            <div class="card-header">
+              <h2>🔒 Active Module Locks</h2>
+            </div>
+            <div class="card-body">
+              <div id="locks-list" class="locks-vertical-list">
+                <!-- dynamic locks -->
+              </div>
+            </div>
           </div>
-          <div class="card-body">
-            <div id="locks-list" class="locks-grid">
-              <!-- dynamic locks -->
+
+          <!-- Acquire Lock Form -->
+          <div class="card">
+            <div class="card-header">
+              <h2>🔑 Acquire Module Lock</h2>
+            </div>
+            <div class="card-body">
+              <form id="acquire-lock-form" onsubmit="handleAcquireLock(event)" class="profile-form">
+                <div class="form-group">
+                  <label for="lock-module-input">Select or Type Module to Lock</label>
+                  <input type="text" id="lock-module-input" placeholder="e.g. bootstrap, validate, app/models/user" required list="common-modules-list">
+                  <datalist id="common-modules-list">
+                    <option value="bootstrap"></option>
+                    <option value="changelog"></option>
+                    <option value="commit"></option>
+                    <option value="completion"></option>
+                    <option value="context"></option>
+                    <option value="doctor"></option>
+                    <option value="helper"></option>
+                    <option value="install_global"></option>
+                    <option value="issue"></option>
+                    <option value="learn"></option>
+                    <option value="lock"></option>
+                    <option value="profile"></option>
+                    <option value="skill"></option>
+                    <option value="sync"></option>
+                    <option value="upgrade"></option>
+                    <option value="validate"></option>
+                    <option value="git_api"></option>
+                    <option value="recon"></option>
+                  </datalist>
+                </div>
+                <button type="submit" class="btn-primary">Acquire Lock</button>
+              </form>
             </div>
           </div>
         </div>
@@ -119,17 +159,48 @@
       <!-- TAB 3: SELF-LEARNING -->
       <div id="memory-tab" class="tab-content">
         <div class="memory-grid">
-          <div class="card">
-            <div class="card-header">
-              <h2>🧠 Lessons Learned Ledger</h2>
+          <!-- Left Column Stacked -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card">
+              <div class="card-header">
+                <h2>🧠 Lessons Learned Ledger</h2>
+              </div>
+              <div class="card-body">
+                <div id="lessons-list" class="lessons-container" style="max-height: 300px; overflow-y: auto;">
+                  <!-- dynamic lessons -->
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <div id="lessons-list" class="lessons-container">
-                <!-- dynamic lessons -->
+
+            <div class="card">
+              <div class="card-header">
+                <h2>✍️ Record Lesson Learned</h2>
+              </div>
+              <div class="card-body">
+                <form id="record-lesson-form" onsubmit="handleRecordLesson(event)" class="profile-form">
+                  <div class="form-group">
+                    <label for="lesson-category">Category / Topic</label>
+                    <input type="text" id="lesson-category" placeholder="e.g. testing, git, database" required list="common-categories-list">
+                    <datalist id="common-categories-list">
+                      <option value="Testing / Mocking"></option>
+                      <option value="Database Schema"></option>
+                      <option value="Path Handling / OS Compatibility"></option>
+                      <option value="Shell Scripting"></option>
+                      <option value="Context / Token Optimization"></option>
+                      <option value="Git Profile & Credentials"></option>
+                    </datalist>
+                  </div>
+                  <div class="form-group">
+                    <label for="lesson-content">What did you learn?</label>
+                    <input type="text" id="lesson-content" placeholder="e.g. Wrap mocked system exits in assertRaises(SystemExit)" required>
+                  </div>
+                  <button type="submit" class="btn-primary">Record Lesson</button>
+                </form>
               </div>
             </div>
           </div>
 
+          <!-- Right Column -->
           <div class="card">
             <div class="card-header">
               <h2>📜 Synthesized Project Rules</h2>

@@ -48,6 +48,16 @@ spec = importlib.util.spec_from_file_location("profile_cmd", os.path.join(cmd_di
 profile_cmd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(profile_cmd)
 
+# Dynamically import custom lock command module
+spec_lock = importlib.util.spec_from_file_location("lock_cmd", os.path.join(cmd_dir, "lock.py"))
+lock_cmd = importlib.util.module_from_spec(spec_lock)
+spec_lock.loader.exec_module(lock_cmd)
+
+# Dynamically import custom learn command module
+spec_learn = importlib.util.spec_from_file_location("learn_cmd", os.path.join(cmd_dir, "learn.py"))
+learn_cmd = importlib.util.module_from_spec(spec_learn)
+spec_learn.loader.exec_module(learn_cmd)
+
 def get_issue_frontmatter(path):
     fm = {}
     if not os.path.exists(path):
@@ -458,6 +468,66 @@ def get_ssh_public_key(profile_name=None):
     except Exception as e:
         return None, str(e)
 
+def acquire_module_lock(module):
+    try:
+        branch = "unknown"
+        try:
+            res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
+            branch = res.stdout.strip()
+        except Exception:
+            pass
+
+        locks = lock_cmd.load_locks()
+        if module in locks:
+            if locks[module] == branch:
+                return True, f"Module '{module}' is already locked by you (branch '{branch}')."
+            else:
+                return False, f"Error: Module '{module}' is already locked by branch '{locks[module]}'!"
+        else:
+            locks[module] = branch
+            lock_cmd.save_locks(locks)
+            return True, f"Successfully acquired lock on module '{module}' for branch '{branch}'."
+    except Exception as e:
+        return False, str(e)
+
+def release_module_lock(module):
+    try:
+        locks = lock_cmd.load_locks()
+        if module in locks:
+            del locks[module]
+            lock_cmd.save_locks(locks)
+            return True, f"Successfully released lock on module '{module}'."
+        else:
+            return False, f"Module '{module}' is not currently locked."
+    except Exception as e:
+        return False, str(e)
+
+def record_learned_lesson(lesson, category):
+    try:
+        if not lesson:
+            return False, "Lesson description cannot be empty."
+        learn_cmd.record_lesson(lesson, category)
+        # Auto-sync workspace to rebuild rules.md!
+        run_sync_workspace()
+        return True, "Lesson recorded and rules synchronized successfully."
+    except Exception as e:
+        return False, str(e)
+
+def run_sync_workspace():
+    try:
+        script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../sync.py'))
+        if not os.path.exists(script_path):
+            return False, f"Sync script not found at '{script_path}'"
+        spec = importlib.util.spec_from_file_location("sync_module", script_path)
+        sync_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sync_module)
+        sync_module.sync_skills_to_agents_md()
+        sync_module.sync_adrs_to_architecture_md()
+        sync_module.sync_lessons_to_rules()
+        return True, "Workspace synchronized successfully."
+    except Exception as e:
+        return False, str(e)
+
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -544,6 +614,67 @@ class DashboardHandler(BaseHTTPRequestHandler):
             try:
                 req = json.loads(post_data.decode('utf-8'))
                 success, msg = add_new_profile(req)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/locks/acquire':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                module_name = req.get('module')
+                success, msg = acquire_module_lock(module_name)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/locks/release':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                module_name = req.get('module')
+                success, msg = release_module_lock(module_name)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/learn':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                lesson = req.get('lesson')
+                category = req.get('category')
+                success, msg = record_learned_lesson(lesson, category)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/sync':
+            try:
+                success, msg = run_sync_workspace()
                 self.send_response(200 if success else 400)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()

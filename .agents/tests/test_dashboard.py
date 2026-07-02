@@ -199,5 +199,44 @@ class TestDashboardCommand(unittest.TestCase):
         self.assertIsNone(err)
         self.assertEqual(pub_key, "ssh-ed25519 AAAAB3NzaC1yc2EA...")
 
+    @patch('dashboard.lock_cmd.load_locks')
+    @patch('dashboard.lock_cmd.save_locks')
+    @patch('subprocess.run')
+    def test_acquire_module_lock(self, mock_sub, mock_save, mock_load):
+        mock_sub.return_value = MagicMock(returncode=0, stdout="feat/issue-141")
+        mock_load.return_value = {}
+        success, msg = dashboard.acquire_module_lock("bootstrap")
+        self.assertTrue(success)
+        mock_save.assert_called_once_with({"bootstrap": "feat/issue-141"})
+
+    @patch('dashboard.lock_cmd.load_locks')
+    @patch('dashboard.lock_cmd.save_locks')
+    def test_release_module_lock(self, mock_save, mock_load):
+        mock_load.return_value = {"bootstrap": "feat/issue-141"}
+        success, msg = dashboard.release_module_lock("bootstrap")
+        self.assertTrue(success)
+        mock_save.assert_called_once_with({})
+
+    @patch('dashboard.learn_cmd.record_lesson')
+    @patch('dashboard.run_sync_workspace')
+    def test_record_learned_lesson(self, mock_sync, mock_record):
+        success, msg = dashboard.record_learned_lesson("My lesson", "Testing")
+        self.assertTrue(success)
+        mock_record.assert_called_once_with("My lesson", "Testing")
+        mock_sync.assert_called_once()
+
+    @patch('importlib.util.spec_from_file_location')
+    @patch('os.path.exists', return_value=True)
+    def test_run_sync_workspace(self, mock_exists, mock_spec):
+        mock_sync_module = MagicMock()
+        mock_spec.return_value.loader.exec_module = lambda m: None
+        mock_spec.return_value = MagicMock()
+        with patch('importlib.util.module_from_spec', return_value=mock_sync_module):
+            success, msg = dashboard.run_sync_workspace()
+            self.assertTrue(success)
+            mock_sync_module.sync_skills_to_agents_md.assert_called_once()
+            mock_sync_module.sync_adrs_to_architecture_md.assert_called_once()
+            mock_sync_module.sync_lessons_to_rules.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main()
