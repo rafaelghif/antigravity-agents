@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.84.0] - 2026-07-02
+
+### 🚀 Features
+- Align release version history, resolve double-bumping bug, and format CHANGELOG.md (ISSUE-104)
+
+### 📝 Documentation
+- add workspace optimization plan to plans directory
+
+### ⚙️ Chores
+- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
+- align release versions and clean up duplicate changelog entries
+
+
 ## [2.83.0] - 2026-07-02
 
 ### 🚀 Features

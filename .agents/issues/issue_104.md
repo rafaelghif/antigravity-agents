@@ -1,7 +1,7 @@
 ---
 id: issue-104
 title: "Align release version history, resolve double-bumping bug, and format CHANGELOG.md"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
