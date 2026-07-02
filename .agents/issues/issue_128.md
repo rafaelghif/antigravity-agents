@@ -1,7 +1,7 @@
 ---
 id: issue-128
 title: "Update user documentation and custom skills to cover visual dashboard, validation bypass, and automated board sync"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

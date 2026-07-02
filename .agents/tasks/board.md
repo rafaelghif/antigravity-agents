@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Update user documentation and custom skills to cover visual dashboard, validation bypass, and automated board sync (feat/issue-128) <!-- id: issue-128 -->
 
 ## Done
+- [x] Update user documentation and custom skills to cover visual dashboard, validation bypass, and automated board sync (feat/issue-128) <!-- id: issue-128 -->
 - [x] Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync (feat/issue-127) <!-- id: issue-127 -->
 - [x] Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (feat/issue-126) <!-- id: issue-126 -->
 - [x] Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects (feat/issue-125) <!-- id: issue-125 -->
