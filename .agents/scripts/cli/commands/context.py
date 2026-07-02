@@ -73,7 +73,79 @@ def get_git_changes() -> List[str]:
         return [line.strip() for line in res.stdout.strip().split('\n')]
     return []
 
+def archive_completed_tasks_and_plans() -> None:
+    """Scan the task board, find issues in the Done column, and move their
+    corresponding markdown files from .agents/issues/ and .agents/plans/ to .agents/archive/."""
+    board_file = ".agents/tasks/board.md"
+    if not os.path.exists(board_file):
+        return
+        
+    done_issues = set()
+    try:
+        with open(board_file, 'r', encoding='utf-8') as f:
+            board_content = f.read()
+        # Extract Done section
+        done_match = re.search(r'## Done\n([\s\S]*?)(?:##|$)', board_content)
+        if done_match:
+            # Find all issue ids: <!-- id: issue-xxx -->
+            for match in re.finditer(r'<!-- id:\s*(issue-[a-zA-Z0-9_-]+)\s*-->', done_match.group(1)):
+                done_issues.add(match.group(1).lower())
+    except Exception as e:
+        print_err(f"Failed to read task board for archiving: {e}")
+        return
+
+    if not done_issues:
+        return
+
+    # Create archive directories
+    archive_issues_dir = ".agents/archive/issues"
+    archive_plans_dir = ".agents/archive/plans"
+    os.makedirs(archive_issues_dir, exist_ok=True)
+    os.makedirs(archive_plans_dir, exist_ok=True)
+
+    archived_count = 0
+    # Process issues
+    issues_dir = ".agents/issues"
+    if os.path.exists(issues_dir):
+        for f_name in os.listdir(issues_dir):
+            if not f_name.endswith(".md"):
+                continue
+            normalized_name = f_name.lower().replace('_', '-')
+            for issue_id in done_issues:
+                file_id = issue_id.replace('-', '-')
+                if file_id in normalized_name:
+                    src_path = os.path.join(issues_dir, f_name)
+                    dest_path = os.path.join(archive_issues_dir, f_name)
+                    try:
+                        os.rename(src_path, dest_path)
+                        archived_count += 1
+                    except Exception as e:
+                        print_err(f"Failed to archive issue file '{f_name}': {e}")
+
+    # Process plans
+    plans_dir = ".agents/plans"
+    if os.path.exists(plans_dir):
+        for f_name in os.listdir(plans_dir):
+            if not f_name.endswith(".md"):
+                continue
+            normalized_name = f_name.lower().replace('_', '-')
+            for issue_id in done_issues:
+                if issue_id in normalized_name:
+                    src_path = os.path.join(plans_dir, f_name)
+                    dest_path = os.path.join(archive_plans_dir, f_name)
+                    try:
+                        os.rename(src_path, dest_path)
+                        archived_count += 1
+                    except Exception as e:
+                        print_err(f"Failed to archive plan file '{f_name}': {e}")
+                        
+    if archived_count > 0:
+        print_ok(f"Successfully archived {archived_count} completed task/plan files to '.agents/archive/'.")
+
 def optimize_context() -> None:
+    # First, archive completed tasks and plans to keep LLM context clean
+    archive_completed_tasks_and_plans()
+
     branch = get_current_branch()
     if not branch or branch in ('main', 'master'):
         print_err("Cannot optimize context on base branch main/master. Checkout a feature branch first.")

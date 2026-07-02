@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.96.0] - 2026-07-02
+
+### 🚀 Features
+- Implement enterprise guardrails: GitHub Action template, active token context archiver, and README marketing pitch rewrite (ISSUE-116)
+
+
 ## [2.95.0] - 2026-07-02
 
 ### 🚀 Features
