@@ -25,6 +25,7 @@ if ((-not $PythonExec) -and (Get-Command python3 -ErrorAction SilentlyContinue))
 if ($PythonExec) {
     $HelperScript = Join-Path $ScriptDir ".agents/scripts/cli/helper.py"
     & $PythonExec $HelperScript @args
+    exit $LASTEXITCODE
 } else {
     Write-Error "Error: Python 3 runtime is required to execute Antigravity CLI commands."
     Exit 1

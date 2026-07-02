@@ -45,14 +45,14 @@ class TestBootstrapCommand(unittest.TestCase):
 
         # Verify stack config files
         self.assertTrue(os.path.exists("requirements.txt"))
-        with open("requirements.txt", 'r') as f:
+        with open("requirements.txt", 'r', encoding='utf-8') as f:
             content = f.read()
             self.assertIn("pytest", content)
             self.assertIn("flake8", content)
 
         # Verify schema.md
         self.assertTrue(os.path.exists(".agents/schema.md"))
-        with open(".agents/schema.md", 'r') as f:
+        with open(".agents/schema.md", 'r', encoding='utf-8') as f:
             schema = f.read()
             self.assertIn("TestPythonClean", schema)
             self.assertIn("Python", schema)
@@ -60,7 +60,7 @@ class TestBootstrapCommand(unittest.TestCase):
 
         # Verify AGENTS.md
         self.assertTrue(os.path.exists("AGENTS.md"))
-        with open("AGENTS.md", 'r') as f:
+        with open("AGENTS.md", 'r', encoding='utf-8') as f:
             agents = f.read()
             self.assertIn("TestPythonClean", agents)
 
@@ -80,7 +80,7 @@ class TestBootstrapCommand(unittest.TestCase):
 
         # Verify package.json
         self.assertTrue(os.path.exists("package.json"))
-        with open("package.json", 'r') as f:
+        with open("package.json", 'r', encoding='utf-8') as f:
             content = f.read()
             self.assertIn("testnodelayered", content.replace("_", "").replace("-", ""))
 
@@ -99,7 +99,7 @@ class TestBootstrapCommand(unittest.TestCase):
 
         # Verify composer.json
         self.assertTrue(os.path.exists("composer.json"))
-        with open("composer.json", 'r') as f:
+        with open("composer.json", 'r', encoding='utf-8') as f:
             content = f.read()
             self.assertIn("phpunit", content)
 
@@ -120,7 +120,7 @@ class TestBootstrapCommand(unittest.TestCase):
         
         bootstrap.run(["FallbackProject", "python", "clean"])
         self.assertTrue(os.path.exists("AGENTS.md"))
-        with open("AGENTS.md", 'r') as f:
+        with open("AGENTS.md", 'r', encoding='utf-8') as f:
             content = f.read()
             self.assertIn("FallbackProject", content)
             self.assertIn("Python (CLEAN)", content)

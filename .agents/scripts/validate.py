@@ -2,6 +2,19 @@ import os
 import re
 import sys
 
+# Reconfigure stdout/stderr to support UTF-8 on Windows cp932/etc. terminals
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+if hasattr(sys.stderr, 'reconfigure'):
+    try:
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+
 # Inject current directory containing git_api into sys.path
 scripts_dir = os.path.dirname(os.path.abspath(__file__))
 if scripts_dir not in sys.path:
@@ -105,9 +118,9 @@ def audit_critical_files() -> bool:
     if os.path.exists(hooks_dir):
         hooks = {
             "pre-commit": r"""#!/usr/bin/env bash
-if command -v python3 &>/dev/null; then
+if command -v python3 &>/dev/null && python3 --version &>/dev/null; then
   python3 .agents/scripts/validate.py
-elif command -v python &>/dev/null; then
+elif command -v python &>/dev/null && python --version &>/dev/null; then
   python .agents/scripts/validate.py
 else
   echo "Warning: Python not found. Skipping commit validation check."
@@ -144,9 +157,9 @@ fi
 COMMIT_MSG_FILE="$1"
 COMMIT_SOURCE="${2:-}"
 
-if command -v python3 &>/dev/null; then
+if command -v python3 &>/dev/null && python3 --version &>/dev/null; then
   python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
-elif command -v python &>/dev/null; then
+elif command -v python &>/dev/null && python --version &>/dev/null; then
   python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
 fi
 """
