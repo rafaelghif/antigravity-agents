@@ -430,8 +430,7 @@ def audit_secrets_and_ignored_files() -> bool:
                 if ssh_key:
                     ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
                     if not os.path.exists(ssh_key_abs):
-                        print_err(f"SSH private key file not found for profile '{matching_profile.get('name')}': '{ssh_key_abs}'")
-                        failed = True
+                        print_warn(f"SSH private key file not found for profile '{matching_profile.get('name')}': '{ssh_key_abs}'. Commit verification might fail if this key is required.")
                     else:
                         print_ok(f"SSH private key path verified for profile '{matching_profile.get('name')}'.")
                 
@@ -614,15 +613,18 @@ def audit_git_branch_alignment() -> bool:
             if issue_id in tb.read():
                 in_board = True
                 
-    issue_dir = ".agents/issues"
+    search_dirs = [".agents/issues", ".agents/archive/issues"]
     file_exists = False
     matched_path = None
-    if os.path.exists(issue_dir):
-        normalized_id = issue_id.replace('-', '_')
-        for f_name in os.listdir(issue_dir):
-            if normalized_id in f_name.lower().replace('-', '_') or issue_id in f_name.lower():
-                file_exists = True
-                matched_path = os.path.join(issue_dir, f_name)
+    normalized_id = issue_id.replace('-', '_')
+    for issue_dir in search_dirs:
+        if os.path.exists(issue_dir):
+            for f_name in os.listdir(issue_dir):
+                if normalized_id in f_name.lower().replace('-', '_') or issue_id in f_name.lower():
+                    file_exists = True
+                    matched_path = os.path.join(issue_dir, f_name)
+                    break
+            if file_exists:
                 break
                 
     if not (file_exists or in_board):

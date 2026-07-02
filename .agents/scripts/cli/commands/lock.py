@@ -5,27 +5,46 @@ import subprocess
 
 LOCK_FILE = ".agents/locks.json"
 
-def branch_exists(branch_name: str) -> bool:
-    """Verify if a local Git branch exists."""
-    if branch_name == "unknown":
-        return True
+def get_existing_branches() -> set:
+    """Retrieve all local Git branch names in a single Git call."""
     try:
         res = subprocess.run(
-            ['git', 'show-ref', f'refs/heads/{branch_name}'],
+            ['git', 'show-ref', '--heads'],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            text=True
         )
-        return res.returncode == 0
+        if res.returncode != 0:
+            return set()
+        branches = set()
+        for line in res.stdout.splitlines():
+            parts = line.strip().split()
+            if len(parts) == 2:
+                ref = parts[1]
+                if ref.startswith("refs/heads/"):
+                    branches.add(ref[11:])
+        return branches
     except Exception:
-        return True  # Fallback to assume it exists if git command fails
+        return set()
 
 def prune_stale_locks(locks: dict) -> dict:
     """Filter out locks whose holder branches no longer exist locally."""
+    if not locks:
+        return locks
+        
+    existing_branches = get_existing_branches()
+    # Fallback to keep locks if Git query fails or returns empty branch list
+    if not existing_branches:
+        return locks
+        
     stale_mods = []
     for mod, holder in list(locks.items()):
-        if not branch_exists(holder):
+        if holder == "unknown":
+            continue
+        if holder not in existing_branches:
             stale_mods.append(mod)
             del locks[mod]
+            
     if stale_mods:
         print(f"[INFO] Auto-released stale locks for module(s): {', '.join(stale_mods)} (associated branch no longer exists).")
     return locks

@@ -112,11 +112,11 @@ class TestProfileCommand(unittest.TestCase):
         saved_data = mock_save.call_args[0][0]
         self.assertTrue(saved_data["profiles"][1]["active"])
 
-    @patch('sys.exit', side_effect=SystemExit)
+    @patch('sys.exit')
     @patch('subprocess.run')
     @patch('profile.load_profiles')
     @patch('profile.save_profiles')
-    def test_handle_switch_gpg_failure(self, mock_save, mock_load, mock_sub, mock_exit):
+    def test_handle_switch_gpg_warning(self, mock_save, mock_load, mock_sub, mock_exit):
         mock_load.return_value = {
             "profiles": [
                 {"name": "p1", "email": "p1@test.com", "active": True},
@@ -129,9 +129,10 @@ class TestProfileCommand(unittest.TestCase):
             return MagicMock(returncode=0)
         mock_sub.side_effect = side_effect
         
-        with self.assertRaises(SystemExit):
-            profile.handle_switch(["p2"])
-        mock_exit.assert_called_once_with(1)
+        profile.handle_switch(["p2"])
+        mock_exit.assert_not_called()
+        saved_data = mock_save.call_args[0][0]
+        self.assertTrue(saved_data["profiles"][1]["active"])
 
     @patch('subprocess.run')
     @patch('profile.load_profiles')

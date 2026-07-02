@@ -243,10 +243,17 @@ def get_issue_path(issue_id):
     normalized = issue_id.lower().replace('-', '_')
     if not os.path.exists(ISSUE_DIR):
         os.makedirs(ISSUE_DIR, exist_ok=True)
+    # 1. Search in active issues dir first
     for f in os.listdir(ISSUE_DIR):
         if normalized in f.lower().replace('-', '_') or issue_id.lower() in f.lower():
             return os.path.join(ISSUE_DIR, f)
-    # Extract only digits/chars for standard suffix
+    # 2. Search in archive issues dir as fallback
+    archive_dir = ".agents/archive/issues"
+    if os.path.exists(archive_dir):
+        for f in os.listdir(archive_dir):
+            if normalized in f.lower().replace('-', '_') or issue_id.lower() in f.lower():
+                return os.path.join(archive_dir, f)
+    # 3. Fallback path if not found anywhere
     suffix = normalized.split('_')[-1]
     return os.path.join(ISSUE_DIR, f"issue_{suffix}.md")
 

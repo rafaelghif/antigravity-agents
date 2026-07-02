@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
 - [x] Refactor helper doctor key check validation to warnings instead of hard failures (feat/issue-119) <!-- id: issue-119 -->
 - [x] Position Antigravity CLI as primary highlight in README (feat/issue-118) <!-- id: issue-118 -->
 - [x] Ignore active context archive directory in gitignore (feat/issue-117) <!-- id: issue-117 -->
