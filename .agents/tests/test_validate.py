@@ -261,6 +261,27 @@ class TestValidate(unittest.TestCase):
         self.assertTrue(any("user.name p1" in cmd for cmd in sub_calls))
         self.assertTrue(any("commit.gpgsign false" in cmd for cmd in sub_calls))
 
+    @patch('os.path.exists', return_value=True)
+    @patch('subprocess.run')
+    @patch('builtins.open', new_callable=mock_open, read_data='{"profiles": [{"name": "corporate-work", "email": "developer@company.com", "active": true}]}')
+    def test_audit_secrets_identity_repair_placeholder(self, mock_file, mock_sub, mock_exists):
+        def side_effect(cmd, *args, **kwargs):
+            cmd_str = " ".join(cmd)
+            if "user.email" in cmd_str:
+                return MagicMock(returncode=1, stdout="")
+            elif "user.name" in cmd_str:
+                return MagicMock(returncode=1, stdout="")
+            return MagicMock(returncode=0)
+            
+        mock_sub.side_effect = side_effect
+        
+        res = validate.audit_secrets_and_ignored_files()
+        self.assertTrue(res)
+        
+        sub_calls = [" ".join(call[0][0]) for call in mock_sub.call_args_list]
+        self.assertTrue(any("user.email developer@antigravity.local" in cmd for cmd in sub_calls))
+        self.assertTrue(any("user.name AAC Developer" in cmd for cmd in sub_calls))
+
     @patch('os.path.exists')
     @patch('builtins.open', new_callable=mock_open, read_data="outdated content")
     @patch('os.chmod')

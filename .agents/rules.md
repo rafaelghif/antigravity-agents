@@ -28,6 +28,8 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 ## 5. Synthesized Rules (Self-Learning Memory)
 - **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
 - **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
+- **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
+- **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[Learning: compatibility]** Always reconfigure sys.stdout and sys.stderr to utf-8, handle ValueError on os.path.relpath cross-drive matches, propagate exit codes using exit $LASTEXITCODE in PowerShell wrapper scripts, and specify encoding='utf-8' on subprocess.run calls to ensure complete Windows compatibility.
 - **[Learning: powershell]** Explicitly cast command and function outputs to [string] when matching or testing results in PowerShell to prevent type casting bugs on non-standard PowerShell environments.

@@ -43,12 +43,12 @@ def run(args):
         pass
 
     apply_profile = False
-    if not local_email:
-        apply_profile = True
-    else:
-        if has_user_defined_profiles(profiles) and active_profile:
-            placeholder_emails = {"developer@company.com", "dev.personal@gmail.com"}
-            if active_profile.get("email") not in placeholder_emails:
+    if active_profile:
+        placeholder_emails = {"developer@company.com", "dev.personal@gmail.com"}
+        if active_profile.get("email") not in placeholder_emails:
+            if not local_email:
+                apply_profile = True
+            elif has_user_defined_profiles(profiles):
                 apply_profile = True
 
     if apply_profile and active_profile:

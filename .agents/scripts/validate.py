@@ -397,7 +397,8 @@ def audit_secrets_and_ignored_files() -> bool:
                 if not active_profile and profiles:
                     active_profile = profiles[0]
                 
-                if active_profile:
+                placeholders = {"developer@company.com", "dev.personal@gmail.com"}
+                if active_profile and active_profile.get("email") not in placeholders:
                     fallback_email = active_profile.get("email", "developer@antigravity.local")
                     fallback_name = active_profile.get("name", "AAC Developer")
                 else:
