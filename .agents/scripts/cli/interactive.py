@@ -80,12 +80,12 @@ def interactive_select(options, title="Select an option:", default_idx=0):
         return None
 
     is_testing = "unittest" in sys.modules or "pytest" in sys.modules or os.environ.get("AAC_TEST_MODE") == "1"
-    is_non_interactive = (os.getenv("ANTIGRAVITY_AGENT") == "1" or os.getenv("ANTIGRAVITY_NONINTERACTIVE") == "1") and not is_testing
+    is_non_interactive = (os.getenv("ANTIGRAVITY_AGENT") == "1" or os.getenv("ANTIGRAVITY_NONINTERACTIVE") == "1" or not sys.stdin.isatty()) and not is_testing
     if is_non_interactive:
         return options[default_idx] if 0 <= default_idx < len(options) else (options[0] if options else None)
 
-    if not sys.stdin.isatty() or is_testing:
-        # Fallback to standard numbered input
+    if is_testing:
+        # Fallback to standard numbered input under test mode
         print(f"\n{title}")
         for idx, opt in enumerate(options):
             label = opt if isinstance(opt, str) else opt.get("name", "")
@@ -165,6 +165,14 @@ def prompt_input(prompt_text, default=""):
     Returns:
         str: The user input, or the default value.
     """
+    is_testing = "unittest" in sys.modules or "pytest" in sys.modules or os.environ.get("AAC_TEST_MODE") == "1"
+    is_non_interactive = (os.getenv("ANTIGRAVITY_AGENT") == "1" or os.getenv("ANTIGRAVITY_NONINTERACTIVE") == "1" or not sys.stdin.isatty()) and not is_testing
+    
+    if is_non_interactive:
+        if default:
+            return default
+        raise RuntimeError(f"Terminal is non-interactive (stdin is not a TTY). Cannot prompt for input: '{prompt_text}'")
+
     default_suffix = f" [{default}]" if default else ""
     try:
         val = input(f"\033[1;33m{prompt_text}{default_suffix}:\033[0m ").strip()

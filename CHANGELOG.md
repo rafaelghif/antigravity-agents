@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.94.0] - 2026-07-02
+
+### 🚀 Features
+- Implement core robustness improvements: headless checks, parallel tests, utf-8 fixes, lockfile tracking, and json schema validation (ISSUE-114)
+
+
 ## [2.93.0] - 2026-07-02
 
 ### 🚀 Features
