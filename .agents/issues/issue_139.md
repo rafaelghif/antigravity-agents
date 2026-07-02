@@ -1,7 +1,7 @@
 ---
 id: issue-139
 title: "Implement Git profile and credentials management in local dashboard"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
