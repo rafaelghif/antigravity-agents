@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement enterprise-grade self-healing database performance and release skills (feat/issue-110) <!-- id: issue-110 -->
 - [x] Optimize validation guard performance and decouple remote sync (feat/issue-109) <!-- id: issue-109 -->
 - [x] Fully benchmark agent core and generate report (feat/issue-108) <!-- id: issue-108 -->
 - [x] Implement Proactive Private File Scan and Git Branch Type Enforcer (feat/issue-107) <!-- id: issue-107 -->

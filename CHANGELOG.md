@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.90.0] - 2026-07-02
+
+### 🚀 Features
+- Implement enterprise-grade self-healing database performance and release skills (ISSUE-110)
+
+
 ## [2.89.0] - 2026-07-02
 
 ### 🚀 Features
