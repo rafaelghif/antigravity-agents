@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.116.1] - 2026-07-02
+
+### ⚙️ Chores
+- Stage archived issue 136 and 137 specs (ISSUE-138)
+
+
 ## [2.116.0] - 2026-07-02
 
 ### 🚀 Features

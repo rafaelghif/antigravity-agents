@@ -1,6 +1,6 @@
 ---
-id: issue-136
-title: "Stage archived issue 134 and 135 specs"
+id: issue-138
+title: "Stage archived issue 136 and 137 specs"
 status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
@@ -12,13 +12,13 @@ created_at: 2026-07-02
 - **Stack**: Git commands.
 - **Architecture**: Keep workspace git status clean from archived task registers.
 - **Key Modules**:
-  - [.agents/issues/issue_136.md](file:///home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/issues/issue_136.md)
+  - [.agents/issues/issue_138.md](file:///home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/issues/issue_138.md)
 
 ### Pre-Implementation Impact Analysis
-- **Option A (Recommended)**: Stage the deletion of all completed issues that were archived.
-  - *Trade-off*: Leaves workspace working tree completely clean and passes validation baseline.
+- **Option A (Recommended)**: Stage the deletion of completed and archived issues.
+  - *Trade-off*: Fully clean git status and baseline compliance.
 - **Option B**: Skip staging.
-  - *Trade-off*: Blocks final branch close validation checks due to dirty workspace.
+  - *Trade-off*: Leaves workspace dirty.
 
 ## 2. Implementation Subtasks
 - [x] Subtask 1: Stage the deletion of archived issue specification files.
