@@ -43,6 +43,9 @@
         <button class="nav-btn" onclick="switchTab(this, 'changelog')">
           <span class="nav-icon">📦</span> Releases
         </button>
+        <button class="nav-btn" onclick="switchTab(this, 'profiles')">
+          <span class="nav-icon">👤</span> Git Profiles
+        </button>
       </nav>
       <div class="sidebar-footer">
         <p>Operational Control Panel</p>
@@ -149,6 +152,75 @@
           <div class="card-body">
             <div id="changelog-list" class="changelog-container">
               <!-- dynamic changelog -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: GIT PROFILES -->
+      <div id="profiles-tab" class="tab-content">
+        <div class="profiles-grid">
+          <!-- Active Profile Card -->
+          <div class="card card-glow">
+            <div class="card-header">
+              <h2>👤 Active Developer Profile</h2>
+            </div>
+            <div class="card-body">
+              <div id="active-profile-details">
+                <!-- dynamic active profile -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Register Profile Form Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>➕ Register Git Profile</h2>
+            </div>
+            <div class="card-body">
+              <form id="create-profile-form" onsubmit="handleCreateProfile(event)" class="profile-form">
+                <div class="form-group">
+                  <label for="prof-name">Profile Name</label>
+                  <input type="text" id="prof-name" placeholder="e.g. johndoe" required>
+                </div>
+                <div class="form-group">
+                  <label for="prof-email">Git Email</label>
+                  <input type="email" id="prof-email" placeholder="e.g. john.doe@work.com" required>
+                </div>
+                <div class="form-group">
+                  <label for="prof-gpg">GPG Key ID (Optional)</label>
+                  <input type="text" id="prof-gpg" placeholder="e.g. 4A1D5B">
+                </div>
+                <div class="form-group">
+                  <label for="prof-ssh-path">SSH Key Path (Optional)</label>
+                  <input type="text" id="prof-ssh-path" placeholder="e.g. ~/.ssh/id_ed25519_john">
+                </div>
+                <div class="form-group">
+                  <label for="prof-token">GitHub Access Token / PAT (Optional)</label>
+                  <input type="password" id="prof-token" placeholder="ghp_...">
+                </div>
+                <div class="form-group row-check">
+                  <input type="checkbox" id="prof-gen-ssh">
+                  <label for="prof-gen-ssh">Generate secure Ed25519 SSH keyautomatically</label>
+                </div>
+                <div class="form-group row-check">
+                  <input type="checkbox" id="prof-switch-after" checked>
+                  <label for="prof-switch-after">Switch to this profile immediately</label>
+                </div>
+                <button type="submit" class="btn-primary">Create Profile</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registered Profiles List -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h2>👥 Registered Git Profiles</h2>
+          </div>
+          <div class="card-body">
+            <div id="profiles-list-container" class="profiles-list">
+              <!-- dynamic list -->
             </div>
           </div>
         </div>

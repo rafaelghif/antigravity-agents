@@ -13,6 +13,7 @@ import mimetypes
 mimetypes.init()
 from urllib.parse import urlparse, parse_qs
 from socketserver import ThreadingMixIn
+import importlib.util
 
 # Thread-safe compliance status cache
 LATEST_DATA = {}
@@ -40,6 +41,12 @@ if scripts_dir not in sys.path:
     sys.path.insert(0, scripts_dir)
 
 import validate
+
+# Dynamically import custom profile command module avoiding name collision with standard lib profile
+cmd_dir = os.path.dirname(__file__)
+spec = importlib.util.spec_from_file_location("profile_cmd", os.path.join(cmd_dir, "profile.py"))
+profile_cmd = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(profile_cmd)
 
 def get_issue_frontmatter(path):
     fm = {}
@@ -342,6 +349,115 @@ def toggle_issue_task(task_index, completed):
         pass
     return False
 
+def switch_active_profile(name):
+    try:
+        data = profile_cmd.load_profiles()
+        profiles = data.get("profiles", [])
+        target = None
+        for p in profiles:
+            if p.get("name") == name:
+                p["active"] = True
+                target = p
+            else:
+                p["active"] = False
+        if not target:
+            return False, f"Profile '{name}' not found"
+        profile_cmd.save_profiles(data)
+        
+        # Auto-generate key if requested key file is not present
+        ssh_key = target.get("ssh_key_path")
+        if ssh_key:
+            ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
+            if not os.path.exists(ssh_key_abs):
+                try:
+                    profile_cmd.generate_ssh_key(name, target.get("email"))
+                except Exception:
+                    pass
+                    
+        profile_cmd.apply_git_config(target)
+        return True, "Success"
+    except Exception as e:
+        return False, str(e)
+
+def add_new_profile(profile_data):
+    try:
+        name = profile_data.get("name")
+        email = profile_data.get("email")
+        if not name or not profile_cmd.validate_name(name):
+            return False, "Invalid profile name. Only alphanumeric, hyphens, and underscores allowed."
+        if not email or not profile_cmd.validate_email(email):
+            return False, "Invalid email format."
+            
+        data = profile_cmd.load_profiles()
+        profiles = data.get("profiles", [])
+        if any(p.get("name") == name for p in profiles):
+            return False, f"Profile '{name}' already exists"
+            
+        ssh_key_path = profile_data.get("ssh_key_path")
+        generate_ssh = profile_data.get("generate_ssh", False)
+        signing_key = profile_data.get("signing_key")
+        
+        if generate_ssh:
+            try:
+                ssh_key_path = profile_cmd.generate_ssh_key(name, email)
+                pub_key_path = f"{ssh_key_path}.pub"
+                if os.path.exists(pub_key_path):
+                    with open(pub_key_path, 'r', encoding='utf-8') as f:
+                        signing_key = f.read().strip()
+            except Exception as e:
+                return False, f"Failed to generate SSH key: {e}"
+                
+        new_profile = {
+            "name": name,
+            "email": email,
+            "active": False
+        }
+        if signing_key:
+            new_profile["signing_key"] = signing_key
+        if ssh_key_path:
+            new_profile["ssh_key_path"] = ssh_key_path
+        if profile_data.get("git_token"):
+            new_profile["git_token"] = profile_data["git_token"]
+            
+        profiles.append(new_profile)
+        data["profiles"] = profiles
+        profile_cmd.save_profiles(data)
+        
+        if profile_data.get("switch_after", False):
+            switch_active_profile(name)
+            
+        return True, "Profile added successfully"
+    except Exception as e:
+        return False, str(e)
+
+def get_ssh_public_key(profile_name=None):
+    try:
+        data = profile_cmd.load_profiles()
+        profiles = data.get("profiles", [])
+        
+        target = None
+        if profile_name:
+            target = next((p for p in profiles if p.get("name") == profile_name), None)
+        else:
+            target = next((p for p in profiles if p.get("active")), None)
+            
+        if not target:
+            return None, "Profile not found"
+            
+        ssh_key = target.get("ssh_key_path")
+        if not ssh_key:
+            return None, "No SSH key path registered for this profile"
+            
+        pub_key_path = f"{os.path.abspath(os.path.expanduser(ssh_key))}.pub"
+        if not os.path.exists(pub_key_path):
+            return None, f"Public key file not found at '{pub_key_path}'"
+            
+        with open(pub_key_path, 'r', encoding='utf-8') as f:
+            pub_content = f.read().strip()
+        return pub_content, None
+    except Exception as e:
+        return None, str(e)
+
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -360,6 +476,29 @@ class DashboardHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 err_response = {"error": str(e)}
                 self.wfile.write(json.dumps(err_response).encode('utf-8'))
+        elif parsed_url.path == '/api/profiles':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            try:
+                data = profile_cmd.load_profiles()
+                self.wfile.write(json.dumps(data).encode('utf-8'))
+            except Exception as e:
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/ssh/public-key':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            try:
+                query = parse_qs(parsed_url.query)
+                profile_name = query.get('profile', [None])[0]
+                pub_key, err = get_ssh_public_key(profile_name)
+                if err:
+                    self.wfile.write(json.dumps({"error": err}).encode('utf-8'))
+                else:
+                    self.wfile.write(json.dumps({"public_key": pub_key}).encode('utf-8'))
+            except Exception as e:
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
         else:
             self.serve_static_file(parsed_url.path)
 
@@ -378,6 +517,37 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": success}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/profiles/switch':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                profile_name = req.get('name')
+                success, msg = switch_active_profile(profile_name)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        elif parsed_url.path == '/api/profiles/add':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                success, msg = add_new_profile(req)
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success, "message": msg}).encode('utf-8'))
             except Exception as e:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')

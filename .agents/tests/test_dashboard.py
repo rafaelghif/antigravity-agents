@@ -148,5 +148,56 @@ class TestDashboardCommand(unittest.TestCase):
         data_after = dashboard.get_dashboard_data(force=False)
         self.assertFalse(data_after["auditing"])
 
+    @patch('dashboard.profile_cmd.load_profiles')
+    @patch('dashboard.profile_cmd.save_profiles')
+    @patch('dashboard.profile_cmd.apply_git_config')
+    def test_switch_active_profile(self, mock_apply, mock_save, mock_load):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@mail.com", "active": True},
+                {"name": "p2", "email": "p2@mail.com", "active": False}
+            ]
+        }
+        success, msg = dashboard.switch_active_profile("p2")
+        self.assertTrue(success)
+        mock_save.assert_called_once()
+        saved_data = mock_save.call_args[0][0]
+        self.assertFalse(saved_data["profiles"][0]["active"])
+        self.assertTrue(saved_data["profiles"][1]["active"])
+        mock_apply.assert_called_once_with(saved_data["profiles"][1])
+
+    @patch('dashboard.profile_cmd.load_profiles')
+    @patch('dashboard.profile_cmd.save_profiles')
+    def test_add_new_profile(self, mock_save, mock_load):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@mail.com", "active": True}
+            ]
+        }
+        success, msg = dashboard.add_new_profile({
+            "name": "p2",
+            "email": "p2@mail.com",
+            "signing_key": "4A1D5B"
+        })
+        self.assertTrue(success)
+        mock_save.assert_called_once()
+        saved_data = mock_save.call_args[0][0]
+        self.assertEqual(len(saved_data["profiles"]), 2)
+        self.assertEqual(saved_data["profiles"][1]["name"], "p2")
+        self.assertEqual(saved_data["profiles"][1]["signing_key"], "4A1D5B")
+
+    @patch('dashboard.profile_cmd.load_profiles')
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="ssh-ed25519 AAAAB3NzaC1yc2EA...")
+    def test_get_ssh_public_key(self, mock_file, mock_exists, mock_load):
+        mock_load.return_value = {
+            "profiles": [
+                {"name": "p1", "email": "p1@mail.com", "active": True, "ssh_key_path": "~/.ssh/id_ed25519_p1"}
+            ]
+        }
+        pub_key, err = dashboard.get_ssh_public_key("p1")
+        self.assertIsNone(err)
+        self.assertEqual(pub_key, "ssh-ed25519 AAAAB3NzaC1yc2EA...")
+
 if __name__ == '__main__':
     unittest.main()
