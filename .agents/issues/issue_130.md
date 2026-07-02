@@ -23,12 +23,12 @@ created_at: 2026-07-02
 
 ## 2. Implementation Subtasks
 - [x] Subtask 1: Create `.agents/dashboard/app.js` containing AJAX loading, tab switching, and toggle task interactivity.
-- [ ] Subtask 2: Refactor `dashboard.py` to serve static files (`index.html`, `style.css`, `app.js`) from `.agents/dashboard/` instead of inline template.
-- [ ] Subtask 3: Add `POST /api/task/toggle` endpoint in `dashboard.py` to update the active issue's subtask checkbox state in its markdown file.
-- [ ] Subtask 4: Verify the local validation guard passes and run unit tests.
+- [x] Subtask 2: Refactor `dashboard.py` to serve static files (`index.html`, `style.css`, `app.js`) from `.agents/dashboard/` instead of inline template.
+- [x] Subtask 3: Add `POST /api/task/toggle` endpoint in `dashboard.py` to update the active issue's subtask checkbox state in its markdown file.
+- [x] Subtask 4: Verify the local validation guard passes and run unit tests.
 
 ## 3. Acceptance Criteria
-- [ ] The dashboard successfully loads and serves static files from `.agents/dashboard/`.
-- [ ] The UI looks modern, premium, responds to tab switching, and has a smaller navbar and better scroll.
-- [ ] Toggling subtask checkboxes on the dashboard UI updates the active issue file (e.g. `.agents/issues/issue_130.md`) dynamically.
-- [ ] Validation suite and unit tests pass without error.
+- [x] The dashboard successfully loads and serves static files from `.agents/dashboard/`.
+- [x] The UI looks modern, premium, responds to tab switching, and has a smaller navbar and better scroll.
+- [x] Toggling subtask checkboxes on the dashboard UI updates the active issue file (e.g. `.agents/issues/issue_130.md`) dynamically.
+- [x] Validation suite and unit tests pass without error.
