@@ -1,7 +1,7 @@
 ---
 id: issue-107
 title: "Implement Proactive Private File Scan and Git Branch Type Enforcer"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

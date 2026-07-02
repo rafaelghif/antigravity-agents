@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.87.0] - 2026-07-02
+
+### 🚀 Features
+- add proactive private file scanner and git branch type enforcer
+- Implement Proactive Private File Scan and Git Branch Type Enforcer (ISSUE-107)
+
+
 ## [2.86.0] - 2026-07-02
 
 ### 🚀 Features
