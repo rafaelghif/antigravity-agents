@@ -3,10 +3,11 @@
 This board tracks active development tasks for AAC V2.
 
 ## Todo
-
+- [ ] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 ## Doing
 
 ## Done
+- [x] Add lock compliance bypass switch for human developers (feat/issue-135) <!-- id: issue-135 -->
 - [x] Ignore local upgrade state cache file and stage archived issue 132 (feat/issue-134) <!-- id: issue-134 -->
 - [x] Implement automatic upgrade check for CLI commands (feat/issue-133) <!-- id: issue-133 -->
 - [x] Enhance dashboard security, scalability, and dynamic MIME type resolution for static files (feat/issue-132) <!-- id: issue-132 -->
@@ -135,3 +136,10 @@ This board tracks active development tasks for AAC V2.
 - [x] Implement remote GitHub Issue integration and strict Conventional Commit message hook (`feat/git-api-enforcer`) <!-- id: task-017 -->
 - [x] Enforce Git profiles setup rule in AGENTS.md to protect credentials (`feat/git-profile-rules`) <!-- id: task-018 -->
 - [x] Document and establish ADR 0002 for strict validation gate architecture (`feat/adr-validation`) <!-- id: task-019 -->
+- [x] Fix changelog titles and parsing logic (feat/issue-073) <!-- id: issue-073 -->
+- [x] Create Developer Experience DX Improvements Plan (feat/issue-076) <!-- id: issue-076 -->
+- [x] Add documentation updates and warranty disclaimer to plan and README (feat/issue-077) <!-- id: issue-077 -->
+- [x] Implement Git HTTPS Credentials Rotation Integration (feat/issue-074) <!-- id: issue-074 -->
+- [x] Implement DX Improvements (Doctor, Upgrade, Global Launcher, Completion, Docs) (feat/issue-078) <!-- id: issue-078 -->
+- [x] Implement Automated SSH Key Generation for Developer Profiles (feat/issue-075) <!-- id: issue-075 -->
+- [x] Implement Context Optimizer and Self-Learning Memory Rule Synthesizer (feat/issue-079) <!-- id: issue-079 -->
