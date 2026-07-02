@@ -91,80 +91,83 @@ def get_commits_since(commit_hash: Optional[str]) -> List[Tuple[str, str]]:
         print(f"Error reading git commits: {e}", file=sys.stderr)
     return commits
 
+def find_issue_file(issue_id: str) -> Optional[str]:
+    """Search for the issue file in the active folder first, then fall back to the archive folder."""
+    normalized_id = issue_id.lower().replace('-', '_')
+    search_dirs = [".agents/issues", ".agents/archive/issues"]
+    for issue_dir in search_dirs:
+        if os.path.exists(issue_dir):
+            for f_name in os.listdir(issue_dir):
+                if normalized_id in f_name.lower().replace('-', '_') or issue_id.lower() in f_name.lower():
+                    return os.path.join(issue_dir, f_name)
+    return None
+
 def extract_issue_title(issue_id: str) -> Optional[str]:
     """Extract clean title from local issue markdown file."""
-    normalized_id = issue_id.lower().replace('-', '_')
-    issue_dir = ".agents/issues"
-    if os.path.exists(issue_dir):
-        for f_name in os.listdir(issue_dir):
-            if normalized_id in f_name.lower().replace('-', '_') or issue_id.lower() in f_name.lower():
-                path = os.path.join(issue_dir, f_name)
-                try:
-                    with open(path, 'r', encoding='utf-8') as f:
-                        content = f.read()
+    path = find_issue_file(issue_id)
+    if path:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 1. Try parsing frontmatter title
+            m_title = re.search(r'^title:\s*["\']?(.*?)["\']?\s*$', content, re.MULTILINE | re.IGNORECASE)
+            if m_title:
+                title_val = m_title.group(1).strip().strip('\'"')
+                if title_val:
+                    return title_val
                     
-                    # 1. Try parsing frontmatter title
-                    m_title = re.search(r'^title:\s*["\']?(.*?)["\']?\s*$', content, re.MULTILINE | re.IGNORECASE)
-                    if m_title:
-                        title_val = m_title.group(1).strip().strip('\'"')
-                        if title_val:
-                            return title_val
-                            
-                    # 2. Fallback to markdown header but skip generic headers
-                    for line in content.splitlines():
-                        match = re.match(r"^#\s+(?:Issue\s+\d+:\s*)?(.+)", line)
-                        if match:
-                            hdr = match.group(1).strip()
-                            if hdr.lower() not in ("issue details", "problem statement", "design & task specification"):
-                                return hdr
-                except Exception:
-                    pass
+            # 2. Fallback to markdown header but skip generic headers
+            for line in content.splitlines():
+                match = re.match(r"^#\s+(?:Issue\s+\d+:\s*)?(.+)", line)
+                if match:
+                    hdr = match.group(1).strip()
+                    if hdr.lower() not in ("issue details", "problem statement", "design & task specification"):
+                        return hdr
+        except Exception:
+            pass
     return None
 
 def classify_from_local_issue(issue_id: str) -> Optional[str]:
     """Parse local issue metadata to classify the category of the issue (breaking, feat, fix, etc.)."""
-    normalized_id = issue_id.lower().replace('-', '_')
-    issue_dir = ".agents/issues"
-    if os.path.exists(issue_dir):
-        for f_name in os.listdir(issue_dir):
-            if normalized_id in f_name.lower().replace('-', '_') or issue_id.lower() in f_name.lower():
-                path = os.path.join(issue_dir, f_name)
-                try:
-                    with open(path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                    
-                    # 1. Parse title or problem statement to classify
-                    title = ""
-                    for line in content.splitlines():
-                        match = re.match(r"^title:\s*(.+)", line)
-                        if match:
-                            title = match.group(1).strip().strip('\'"').lower()
-                            break
-                    if not title:
-                        # Fallback: check first heading
-                        for line in content.splitlines():
-                            match = re.match(r"^#\s+(.+)", line)
-                            if match:
-                                title = match.group(1).strip().lower()
-                                break
-                    
-                    if title:
-                        if "breaking" in title or "major" in title or "!" in title:
-                            return "breaking"
-                        if any(w in title for w in ("feat", "feature", "implement", "add", "support")):
-                            return "feat"
-                        if any(w in title for w in ("fix", "bug", "remediate", "error", "prevent", "leak", "resolve")):
-                            return "fix"
-                        if "docs" in title or "document" in title:
-                            return "docs"
-                        if "refactor" in title:
-                            return "refactor"
-                        if "test" in title:
-                            return "test"
-                        if "chore" in title:
-                            return "chore"
-                except Exception:
-                    pass
+    path = find_issue_file(issue_id)
+    if path:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 1. Parse title or problem statement to classify
+            title = ""
+            for line in content.splitlines():
+                match = re.match(r"^title:\s*(.+)", line)
+                if match:
+                    title = match.group(1).strip().strip('\'"').lower()
+                    break
+            if not title:
+                # Fallback: check first heading
+                for line in content.splitlines():
+                    match = re.match(r"^#\s+(.+)", line)
+                    if match:
+                        title = match.group(1).strip().lower()
+                        break
+            
+            if title:
+                if "breaking" in title or "major" in title or "!" in title:
+                    return "breaking"
+                if any(w in title for w in ("feat", "feature", "implement", "add", "support")):
+                    return "feat"
+                if any(w in title for w in ("fix", "bug", "remediate", "error", "prevent", "leak", "resolve")):
+                    return "fix"
+                if "docs" in title or "document" in title:
+                    return "docs"
+                if "refactor" in title:
+                    return "refactor"
+                if "test" in title:
+                    return "test"
+                if "chore" in title:
+                    return "chore"
+        except Exception:
+            pass
     return None
 
 def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List[str]]:

@@ -36,7 +36,12 @@ def parse_yaml_frontmatter(content: str) -> Dict[str, str]:
 
 def get_issue_details(issue_id: str) -> Dict[str, Any]:
     file_id = issue_id.replace('-', '_')
+    # 1. Search in active issues first
     issue_file = f".agents/issues/{file_id}.md"
+    if not os.path.exists(issue_file):
+        # 2. Fallback to archive issues
+        issue_file = f".agents/archive/issues/{file_id}.md"
+
     details = {
         "title": "Unknown Title",
         "tasks": [],

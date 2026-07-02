@@ -251,9 +251,9 @@ def handle_switch(args: List[str]) -> None:
     if ssh_key:
         ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
         if not os.path.exists(ssh_key_abs):
-            print_err(f"SSH private key file not found at '{ssh_key_abs}'.")
-            sys.exit(1)
-        print_ok(f"SSH private key verified at '{ssh_key_abs}'.")
+            print_warn(f"SSH private key file not found at '{ssh_key_abs}'. Commitment verification might fail if this key is required.")
+        else:
+            print_ok(f"SSH private key verified at '{ssh_key_abs}'.")
 
     signing_key = target_profile.get("signing_key")
     if signing_key and not signing_key.endswith("...") and not force_no_gpg and not (signing_key.startswith("ssh-") or "ssh" in signing_key):
@@ -266,10 +266,10 @@ def handle_switch(args: List[str]) -> None:
                 text=True
             )
             if gpg_check.returncode != 0:
-                print_err(f"GPG signing key '{signing_key}' is not found or is invalid on this machine.")
-                print_err("Please import the key first, or use '--force-no-gpg' to override.")
-                sys.exit(1)
-            print_ok("GPG signing key is valid.")
+                print_warn(f"GPG signing key '{signing_key}' is not found or is invalid on this machine.")
+                print_warn("Commit signing might fail if this key is required.")
+            else:
+                print_ok("GPG signing key is valid.")
         except FileNotFoundError:
             print_warn("GnuPG ('gpg') tool is not installed on this machine. Cannot verify GPG signing key validity.")
             print_warn("Proceeding with profile switch anyway.")

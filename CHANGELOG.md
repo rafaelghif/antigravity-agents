@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.100.0] - 2026-07-02
+
+### 🚀 Features
+- Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (ISSUE-120)
+
+
 ## [2.99.0] - 2026-07-02
 
 ### 🚀 Features

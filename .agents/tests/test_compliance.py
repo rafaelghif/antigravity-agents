@@ -13,19 +13,22 @@ import commands.lock as lock
 class TestCompliance(unittest.TestCase):
 
     @patch('subprocess.run')
-    def test_branch_exists(self, mock_run):
-        # Branch exists (returns 0)
-        mock_run.return_value = MagicMock(returncode=0)
-        self.assertTrue(lock.branch_exists("feat/issue-023"))
+    def test_get_existing_branches(self, mock_run):
+        # Multiple branches returned
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="sha1 refs/heads/feat/issue-023\nsha2 refs/heads/main\n"
+        )
+        self.assertEqual(lock.get_existing_branches(), {"feat/issue-023", "main"})
 
-        # Branch does not exist (returns 1)
+        # Git fails (non-zero code)
         mock_run.return_value = MagicMock(returncode=1)
-        self.assertFalse(lock.branch_exists("feat/non-existent"))
+        self.assertEqual(lock.get_existing_branches(), set())
 
-    @patch('commands.lock.branch_exists')
-    def test_prune_stale_locks(self, mock_exists):
+    @patch('commands.lock.get_existing_branches')
+    def test_prune_stale_locks(self, mock_get_branches):
         # Setup: lock module 'm1' by b1 (exists) and 'm2' by b2 (stale)
-        mock_exists.side_effect = lambda b: b == "b1"
+        mock_get_branches.return_value = {"b1"}
         locks = {"m1": "b1", "m2": "b2"}
         pruned = lock.prune_stale_locks(locks)
         self.assertIn("m1", pruned)
