@@ -1,7 +1,7 @@
 ---
 id: issue-124
 title: "Improve release commit messages by injecting local issue titles and formatting Refs trailer"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

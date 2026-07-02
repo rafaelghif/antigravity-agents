@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Improve release commit messages by injecting local issue titles and formatting Refs trailer (feat/issue-124) <!-- id: issue-124 -->
 
 ## Done
+- [x] Improve release commit messages by injecting local issue titles and formatting Refs trailer (feat/issue-124) <!-- id: issue-124 -->
 - [x] Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch (feat/issue-123) <!-- id: issue-123 -->
 - [x] Fix security vulnerabilities and performance bottlenecks identified in critical audit (feat/issue-122) <!-- id: issue-122 -->
 - [x] Fix Git profile fallback to local user account priority (feat/issue-121) <!-- id: issue-121 -->

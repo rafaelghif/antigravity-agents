@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.104.0] - 2026-07-02
+
+### 🚀 Features
+- append local issue titles and format Refs trailer in release commits
+- Improve release commit messages by injecting local issue titles and formatting Refs trailer (ISSUE-124)
+
+
 ## [2.103.0] - 2026-07-02
 
 ### 🚀 Features
