@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync (feat/issue-127) <!-- id: issue-127 -->
 
 ## Done
 - [x] Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (feat/issue-126) <!-- id: issue-126 -->

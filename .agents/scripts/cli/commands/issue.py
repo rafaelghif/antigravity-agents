@@ -103,6 +103,189 @@ def update_board_completed(issue_id):
     except Exception as e:
         print(f"Warning: Could not update task board: {e}")
 
+def sync_board_with_issues():
+    board_path = ".agents/tasks/board.md"
+    if not os.path.exists(board_path):
+        return
+    try:
+        # Load all local issues (both in ISSUE_DIR and archive/issues/)
+        issues = []
+        # 1. Active issues
+        if os.path.exists(ISSUE_DIR):
+            for f_name in os.listdir(ISSUE_DIR):
+                if f_name.endswith(".md") and not "example" in f_name:
+                    issues.append(os.path.join(ISSUE_DIR, f_name))
+        # 2. Archived issues
+        archive_dir = ".agents/archive/issues"
+        if os.path.exists(archive_dir):
+            for f_name in os.listdir(archive_dir):
+                if f_name.endswith(".md"):
+                    issues.append(os.path.join(archive_dir, f_name))
+
+        # Parse issue status and titles
+        issue_data = {}
+        for path in issues:
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                fm = parse_issue_frontmatter(content)
+                i_id = fm.get("id")
+                title = fm.get("title")
+                status = fm.get("status", "open")
+                if i_id and title:
+                    issue_data[i_id.lower()] = {
+                        "id": i_id,
+                        "title": title,
+                        "status": status.lower()
+                    }
+            except Exception:
+                pass
+
+        # Load board.md content
+        with open(board_path, 'r', encoding='utf-8') as f:
+            board_content = f.read()
+
+        # Parse existing task board lines
+        lines = board_content.splitlines()
+        
+        # We want to separate sections: Todo, Doing, Done
+        todo_lines = []
+        doing_lines = []
+        done_lines = []
+        
+        # Keep any other static headers or footers
+        header_lines = []
+        footer_lines = []
+        
+        current_section = "header"
+        for line in lines:
+            stripped = line.strip()
+            if stripped == "## Todo":
+                current_section = "todo"
+                header_lines.append(line)
+                continue
+            elif stripped == "## Doing":
+                current_section = "doing"
+                header_lines.append(line)
+                continue
+            elif stripped == "## Done":
+                current_section = "done"
+                header_lines.append(line)
+                continue
+            elif stripped.startswith("## ") and current_section in ("todo", "doing", "done"):
+                current_section = "footer"
+                footer_lines.append(line)
+                continue
+                
+            if current_section == "header":
+                header_lines.append(line)
+            elif current_section == "footer":
+                footer_lines.append(line)
+            elif current_section == "todo":
+                if stripped.startswith("- ["):
+                    todo_lines.append(line)
+                elif stripped:
+                    todo_lines.append(line)
+            elif current_section == "doing":
+                if stripped.startswith("- ["):
+                    doing_lines.append(line)
+                elif stripped:
+                    doing_lines.append(line)
+            elif current_section == "done":
+                if stripped.startswith("- ["):
+                    done_lines.append(line)
+                elif stripped:
+                    done_lines.append(line)
+
+        # Map existing issue IDs on the board to prevent duplication
+        board_ids = {}
+        def extract_id(line):
+            match = re.search(r'<!-- id:\s*([a-zA-Z0-9_-]+)\s*-->', line)
+            return match.group(1).lower() if match else None
+
+        # Build maps of existing lines
+        all_board_lines = todo_lines + doing_lines + done_lines
+        for line in all_board_lines:
+            i_id = extract_id(line)
+            if i_id:
+                board_ids[i_id] = line
+
+        # Re-categorize or add issues
+        updated_todo = []
+        updated_doing = []
+        updated_done = []
+        
+        # Track which issues are already processed
+        processed_ids = set()
+
+        # Update existing board lines based on new status
+        for line in all_board_lines:
+            i_id = extract_id(line)
+            if not i_id or i_id not in issue_data:
+                if line in todo_lines:
+                    updated_todo.append(line)
+                elif line in doing_lines:
+                    updated_doing.append(line)
+                elif line in done_lines:
+                    updated_done.append(line)
+                continue
+                
+            processed_ids.add(i_id)
+            info = issue_data[i_id]
+            status = info["status"]
+            
+            # Reformat checked state based on status
+            if status in ("closed", "done"):
+                new_line = re.sub(r'\[\s*.*?\]', '[x]', line)
+                updated_done.append(new_line)
+            else:
+                if line in doing_lines:
+                    updated_doing.append(line)
+                else:
+                    new_line = re.sub(r'\[\s*xX\s*\]', '[ ]', line)
+                    updated_todo.append(new_line)
+
+        # Add any new issues not currently on the board
+        for i_id, info in issue_data.items():
+            if i_id not in processed_ids:
+                status = info["status"]
+                title = info["title"]
+                slug = info["id"].lower().replace('_', '-')
+                branch_name = f"feat/{slug}"
+                
+                if status in ("closed", "done"):
+                    new_line = f"- [x] {title} ({branch_name}) <!-- id: {info['id']} -->"
+                    updated_done.append(new_line)
+                else:
+                    new_line = f"- [ ] {title} ({branch_name}) <!-- id: {info['id']} -->"
+                    updated_todo.append(new_line)
+
+        # Reconstruct the board.md content
+        output = []
+        
+        for line in header_lines:
+            output.append(line)
+            if line.strip() == "## Todo":
+                output.extend(updated_todo)
+                if not updated_todo:
+                    output.append("")
+            elif line.strip() == "## Doing":
+                output.extend(updated_doing)
+                if not updated_doing:
+                    output.append("")
+            elif line.strip() == "## Done":
+                output.extend(updated_done)
+                if not updated_done:
+                    output.append("")
+
+        output.extend(footer_lines)
+
+        with open(board_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(output) + "\n")
+        print("[OK] Task board (board.md) successfully synchronized with issue states.")
+    except Exception as e:
+        print(f"Warning: Could not sync task board: {e}")
+
 def sync_issues():
     """Fetch remote issues and synchronize status/existence with local markdown files."""
     try:
@@ -192,6 +375,8 @@ github_number: {number}
                     pass
     except Exception as e:
         print(f"[WARN] Issue synchronization failed: {e}", file=sys.stderr)
+    finally:
+        sync_board_with_issues()
 
 def push_offline_issues():
     """Find local issues without a github_number and push them to GitHub remote."""

@@ -89,6 +89,28 @@ class TestIssueCommand(unittest.TestCase):
         self.assertIn("github_url: \"https://github.com/owner/repo/issues/123\"", written_data)
         self.assertIn("github_number: 123", written_data)
 
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_sync_board_with_issues(self, mock_file, mock_listdir, mock_exists):
+        # Setup mocks
+        mock_exists.side_effect = lambda p: True
+        mock_listdir.side_effect = lambda d: ["issue_126.md"] if ("issues" in d and "archive" not in d) else []
+        
+        # Mock file contents: issue frontmatter and board.md
+        issue_content = "---\nid: issue-126\ntitle: \"My Test Issue\"\nstatus: closed\n---\n"
+        board_content = "# Board\n## Todo\n- [ ] My Test Issue (feat/issue-126) <!-- id: issue-126 -->\n## Doing\n## Done\n"
+        
+        # Configure file reading mock
+        mock_file.return_value.read.side_effect = [issue_content, board_content]
+        
+        issue.sync_board_with_issues()
+        
+        # Verify that it updated the file and moved issue-126 to Done [x]
+        handle = mock_file()
+        written_data = "".join(call[0][0] for call in handle.write.call_args_list)
+        self.assertIn("- [x] My Test Issue", written_data)
+
 import git_api
 
 class TestGitApiCaching(unittest.TestCase):
@@ -119,6 +141,8 @@ class TestGitApiCaching(unittest.TestCase):
         self.assertEqual(res, [{"id": 2, "title": "Fresh"}])
         mock_urlopen.assert_called_once()
         mock_file().write.assert_called()
+
+
 
 if __name__ == '__main__':
     unittest.main()
