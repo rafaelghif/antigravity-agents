@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.92.0] - 2026-07-02
+
+### 🚀 Features
+- Fix validation audit count and working protocol mismatches in AGENTS.md (ISSUE-112)
+
+
 ## [2.91.0] - 2026-07-02
 
 ### 🚀 Features

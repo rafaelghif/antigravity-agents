@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.91.0
+- **Version:** 2.92.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -29,7 +29,7 @@
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
 - **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
-- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §6 — don't run it ad hoc outside that step.
+- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.
 - **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.
 - **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.
@@ -38,7 +38,7 @@
 ## 3. CLI Helper Commands Reference
 All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):
 - `./helper.sh bootstrap`: Scaffolds dirs, stack detect, AGENTS.md, profile wizard.
-- `./helper.sh validate`: Runs 8 audits (files, secrets, links, branch, sync, task schema, lint, tests).
+- `./helper.sh validate`: Runs 10 audits (critical files, secrets, links, branch, sync, task board, lint, tests, locks, commits).
 - `./helper.sh issue <create|list|checkout|close|sync>`: Subtask and issue lifecycle tracking.
 - `./helper.sh lock <module-name>`: Acquires local locks. Unlock with `--release <module-name>`.
 - `./helper.sh profile <add|switch|list|apply>`: Credentials rotation and auto-sync config.
