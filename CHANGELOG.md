@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.97.0] - 2026-07-02
+
+### 🚀 Features
+- Ignore active context archive directory in gitignore (ISSUE-117)
+
+
 ## [2.96.0] - 2026-07-02
 
 ### 🚀 Features

@@ -22,3 +22,4 @@ __pycache__/
 .agents/sync_cache.json
 /sample
 .agents/logs/
+.agents/archive/
