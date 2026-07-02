@@ -6,6 +6,8 @@ import os
 # Inject CLI commands folder to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli/commands')))
 import dashboard
+import mimetypes
+mimetypes.init()
 
 class TestDashboardCommand(unittest.TestCase):
     @patch('os.path.exists', return_value=True)
@@ -73,6 +75,47 @@ class TestDashboardCommand(unittest.TestCase):
         self.assertIn("- [x] Subtask 2", write_args)
         self.assertIn("- [ ] Subtask 1", write_args)
         mock_sync.assert_called_once()
+
+    @patch('os.path.exists')
+    @patch('os.path.isfile')
+    @patch('builtins.open', new_callable=mock_open, read_data=b"my html content")
+    def test_serve_static_file_success(self, mock_file_open, mock_isfile, mock_exists):
+        import io
+        mock_exists.return_value = True
+        mock_isfile.return_value = True
+        
+        handler = MagicMock()
+        handler.wfile = io.BytesIO()
+        
+        dashboard.DashboardHandler.serve_static_file(handler, "/index.html")
+        
+        handler.send_response.assert_called_with(200)
+        handler.send_header.assert_any_call('Content-Type', 'text/html; charset=utf-8')
+        handler.wfile.seek(0)
+        self.assertEqual(handler.wfile.read(), b"my html content")
+
+    def test_serve_static_file_traversal_blocked(self):
+        import io
+        handler = MagicMock()
+        handler.wfile = io.BytesIO()
+        
+        dashboard.DashboardHandler.serve_static_file(handler, "/../../../../etc/passwd")
+        
+        handler.send_response.assert_called_with(403)
+        handler.wfile.seek(0)
+        self.assertIn(b"Forbidden: Directory Traversal Blocked", handler.wfile.read())
+
+    @patch('os.path.exists', return_value=False)
+    def test_serve_static_file_not_found(self, mock_exists):
+        import io
+        handler = MagicMock()
+        handler.wfile = io.BytesIO()
+        
+        dashboard.DashboardHandler.serve_static_file(handler, "/nonexistent.html")
+        
+        handler.send_response.assert_called_with(404)
+        handler.wfile.seek(0)
+        self.assertIn(b"Not Found", handler.wfile.read())
 
 if __name__ == '__main__':
     unittest.main()

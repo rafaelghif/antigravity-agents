@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.112.0] - 2026-07-02
+
+### 🚀 Features
+- serve files dynamically with security guards and mime-type discovery
+
+### ⚙️ Chores
+- Enhance dashboard security, scalability, and dynamic MIME type resolution for static files (ISSUE-132)
+
+### 🧪 Tests
+- cover dynamic file serving, path traversal guard, and 404 responses
+
+
 ## [2.111.0] - 2026-07-02
 
 ### 🚀 Features
