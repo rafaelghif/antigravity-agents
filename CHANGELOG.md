@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.102.0] - 2026-07-02
+
+### 🚀 Features
+- cap ThreadPoolExecutor workers in validate.py to prevent CPU thrashing
+- Fix security vulnerabilities and performance bottlenecks identified in critical audit (ISSUE-122)
+
+### 🐛 Bug Fixes
+- add --no-install flag to npx calls to secure formatting fallbacks
+- remove implicit shell=True parameter and use explicit argument array
+- add HTTP timeout parameter to all urlopen requests
+
+
 ## [2.101.0] - 2026-07-02
 
 ### 🚀 Features

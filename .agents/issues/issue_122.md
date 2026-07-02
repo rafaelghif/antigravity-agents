@@ -1,7 +1,7 @@
 ---
 id: issue-122
 title: "Fix security vulnerabilities and performance bottlenecks identified in critical audit"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
