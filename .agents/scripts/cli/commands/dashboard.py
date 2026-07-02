@@ -10,6 +10,7 @@ import threading
 import io
 import contextlib
 import mimetypes
+mimetypes.init()
 from urllib.parse import urlparse, parse_qs
 from socketserver import ThreadingMixIn
 
