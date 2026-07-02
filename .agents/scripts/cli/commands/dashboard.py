@@ -190,7 +190,7 @@ def get_dashboard_data():
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
 
-HTML_TEMPLATE = """<!DOCTYPE html>
+HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
