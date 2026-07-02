@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Fix Git profile fallback to local user account priority (feat/issue-121) <!-- id: issue-121 -->
 
 ## Done
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
