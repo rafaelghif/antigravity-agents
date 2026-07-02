@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Track and commit full system audit report in plans (feat/issue-113) <!-- id: issue-113 -->
 - [x] Fix validation audit count and working protocol mismatches in AGENTS.md (feat/issue-112) <!-- id: issue-112 -->
 - [x] Elevate public README.md documentation to world-class enterprise standard (feat/issue-111) <!-- id: issue-111 -->
 - [x] Implement enterprise-grade self-healing database performance and release skills (feat/issue-110) <!-- id: issue-110 -->
