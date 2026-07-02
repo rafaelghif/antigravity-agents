@@ -13,6 +13,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Follow **PEP 8** style guidelines for all Python code.
 - Always include clear docstrings for public classes, modules, and functions.
 - Keep functions short, focused, and under 50 lines where practical.
+- Commit message subjects must be descriptive and explain the technical change made; generic messages such as `fix: issue-122` or `chore: task-100` are strictly forbidden. Always explain what was changed (e.g. `fix(perf): cap thread pool size`).
 
 ## 3. Testing Requirements
 - Every new feature or command module MUST have corresponding unit tests under `tests/`.
@@ -26,6 +27,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Strict Task Splitting & Context Insulation**: Before starting any task, the agent MUST split the work into small, atomic subtasks in the issue specification. The agent MUST work on only one subtask at a time, running validation and committing after each atomic step, and running `./helper.sh context optimize` to prune stale history and avoid hallucination.
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
 - **[Learning: Git Profile & Credentials]** Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
 - **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.

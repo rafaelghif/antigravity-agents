@@ -364,5 +364,14 @@ class TestValidate(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=0, stdout="bad subject: message\n\nRefs: issue-106\x00")
         self.assertFalse(validate.audit_commit_messages())
 
+    @patch('validate.get_current_branch')
+    @patch('validate.get_base_branch')
+    @patch('subprocess.run')
+    def test_audit_commit_messages_generic_subject(self, mock_run, mock_base_branch, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-106"
+        mock_base_branch.return_value = "main"
+        mock_run.return_value = MagicMock(returncode=0, stdout="fix: issue-106\n\nRefs: issue-106\x00")
+        self.assertFalse(validate.audit_commit_messages())
+
 if __name__ == '__main__':
     unittest.main()

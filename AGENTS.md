@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.104.0
+- **Version:** 2.105.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -20,7 +20,7 @@
 - **NEVER** write or maintain duplicate code or inline file templates (such as `cat << 'EOF'` strings of repository files) inside bootstrap, install, or helper scripts. Always rely on a single source of truth (copying locally or fetching from the repository).
 - **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.
 - **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don't duplicate it.
-- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body — this exact, fixed format is what `./helper.sh changelog`'s parser depends on; freeform mentions of the task ID will not parse reliably.
+- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body. The subject line MUST be descriptive of the technical changes made; **NEVER** use generic placeholder subjects (e.g. `fix: issue-122` or `chore: task-100`) without explanation. This exact format is what `./helper.sh changelog`'s parser depends on.
 - **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.
 - **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.
 - **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications. If a module is already locked by someone/something else, wait or escalate to the USER — never force-override or bypass an existing lock.

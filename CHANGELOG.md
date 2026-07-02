@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.105.0] - 2026-07-02
+
+### 🚀 Features
+- enforce descriptive commit subjects in AGENTS.md, rules.md, and validator checks
+- Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects (ISSUE-125)
+
+
 ## [2.104.0] - 2026-07-02
 
 ### 🚀 Features
