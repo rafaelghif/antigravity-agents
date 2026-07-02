@@ -266,632 +266,61 @@ def get_dashboard_data(force=False):
     }
 
 
-HTML_TEMPLATE = r"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antigravity AAC V2 Local Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-color: #0b0f19;
-      --card-bg: #151d30;
-      --card-border: #24324f;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --accent-primary: #6366f1; /* Indigo */
-      --accent-success: #10b981; /* Emerald */
-      --accent-warning: #f59e0b; /* Amber */
-      --accent-error: #ef4444; /* Rose */
-      --gradient-brand: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 0;
-      padding: 0;
-      line-height: 1.5;
-    }
-
-    /* Header styling with brand gradient */
-    header {
-      background: var(--gradient-brand);
-      padding: 2rem 2rem 2.5rem 2rem;
-      border-bottom: 1px solid var(--card-border);
-      position: relative;
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo-area h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
-      font-weight: 800;
-      margin: 0;
-      letter-spacing: -0.025em;
-      text-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .logo-area p {
-      margin: 0.25rem 0 0 0;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.95rem;
-    }
-
-    .badge {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(4px);
-      padding: 0.35rem 0.8rem;
-      border-radius: 20px;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    /* Container */
-    .dashboard-container {
-      max-width: 1200px;
-      margin: -1.5rem auto 3rem auto;
-      padding: 0 1.5rem;
-    }
-
-    /* Navigation Tabs */
-    .tabs-bar {
-      display: flex;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 0.35rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    }
-
-    .tab-btn {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 0.85rem 1rem;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: 'Outfit', sans-serif;
-      text-align: center;
-    }
-
-    .tab-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .tab-btn.active {
-      color: #ffffff;
-      background: var(--accent-primary);
-      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-    }
-
-    /* Layout structure */
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Grid Layouts */
-    .overview-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (max-width: 900px) {
-      .overview-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Card Styling */
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .card:hover {
-      border-color: #3b507a;
-      transform: translateY(-2px);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 0.75rem;
-    }
-
-    .card-header h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.3rem;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .card-header .header-meta {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    /* Compliance check items */
-    .compliance-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      background: rgba(255, 255, 255, 0.02);
-      margin-bottom: 0.6rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .compliance-item .name {
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    .status-badge {
-      padding: 0.25rem 0.65rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-badge.pass {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-success);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .status-badge.fail {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--accent-error);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* Task Checklist */
-    .task-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.65rem 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .task-item:last-child {
-      border-bottom: none;
-    }
-
-    .task-checkbox {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent-primary);
-    }
-
-    .task-label {
-      font-size: 0.95rem;
-    }
-
-    .task-label.checked {
-      color: var(--text-muted);
-      text-decoration: line-through;
-    }
-
-    /* Lock List */
-    .lock-item {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 0.75rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .lock-details {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .lock-module {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #cbd5e1;
-    }
-
-    .lock-branch {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .lock-time {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    /* Git status */
-    .git-file {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.85rem;
-      padding: 0.4rem 0.6rem;
-      background: rgba(255,255,255,0.03);
-      border-radius: 6px;
-      margin-bottom: 0.4rem;
-      border-left: 3px solid var(--accent-warning);
-    }
-
-    .git-file.staged {
-      border-left-color: var(--accent-success);
-    }
-
-    /* Memory lessons & rules */
-    .rule-item {
-      padding: 0.75rem 1rem;
-      background: rgba(255,255,255,0.02);
-      border-radius: 8px;
-      border-left: 3px solid var(--accent-primary);
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
-
-    /* Utility classes */
-    .btn-action {
-      background: var(--accent-primary);
-      color: #ffffff;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .btn-action:hover {
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    .text-muted {
-      color: var(--text-muted);
-    }
-
-    .flex-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .badge-info {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="header-content">
-      <div class="logo-area">
-        <h1>AAC V2 Dashboard</h1>
-        <p>Operational Workspace Control & Compliance</p>
-      </div>
-      <div>
-        <span class="badge" id="version-badge">v2.106.0</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="dashboard-container">
-    <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchTab(this, 'overview')">Overview & Active Issue</button>
-      <button class="tab-btn" onclick="switchTab(this, 'locks')">Module Locks</button>
-      <button class="tab-btn" onclick="switchTab(this, 'memory')">Self-Learning Memory</button>
-      <button class="tab-btn" onclick="switchTab(this, 'changelog')">SemVer & Releases</button>
-    </div>
-
-    <!-- TAB 1: OVERVIEW -->
-    <div id="overview-tab" class="tab-content active">
-      <div class="overview-grid">
-        <!-- Active Issue Card -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <h2>🎫 Active Issue</h2>
-              <span class="badge-info" id="active-issue-branch">Loading...</span>
-            </div>
-            <div id="active-issue-content">
-              <h3 id="active-issue-title" style="margin-top: 0;">Loading...</h3>
-              <p class="text-muted" style="font-size: 0.9rem;">Status: <span id="active-issue-status" class="status-badge pass">open</span></p>
-              
-              <h4 style="margin-bottom: 0.5rem;">Issue Checklist:</h4>
-              <div id="active-issue-checklist">
-                <!-- dynamically loaded -->
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2>📂 Git status changes</h2>
-            </div>
-            <div id="git-status-content">
-              <!-- dynamically loaded -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Compliance Checklist Card -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <h2>✅ Compliance Audits</h2>
-              <span class="header-meta" id="compliance-timestamp">Just now</span>
-            </div>
-            <div id="compliance-list">
-              <!-- dynamically loaded -->
-            </div>
-              <button class="btn-action" onclick="loadData(true)">Refresh Audit Status</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2: LOCKS -->
-    <div id="locks-tab" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <h2>🔒 Active Module Locks</h2>
-        </div>
-        <p class="text-muted" style="margin-top: 0; margin-bottom: 1.5rem;">Locks prevent parallel AI agents from making conflicting edits to files.</p>
-        <div id="locks-list">
-          <!-- dynamically loaded -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: SELF-LEARNING -->
-    <div id="memory-tab" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <h2>🧠 Synthesized Rules (Self-Learning Memory)</h2>
-        </div>
-        <p class="text-muted" style="margin-top: 0; margin-bottom: 1.5rem;">These rules are automatically generated when bugs are fixed locally to prevent agent regression.</p>
-        <div id="rules-list">
-          <!-- dynamically loaded -->
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <h2>📝 Lessons Learned Feed</h2>
-        </div>
-        <div id="lessons-list">
-          <!-- dynamically loaded -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: SEMVER & RELEASES -->
-    <div id="changelog-tab" class="tab-content">
-      <div class="card">
-        <div class="card-header">
-          <h2>📝 SemVer Release History</h2>
-        </div>
-        <p class="text-muted" style="margin-top: 0; margin-bottom: 1.5rem;">Recent SemVer bumps and automated release tags.</p>
-        <div id="changelog-list">
-          <!-- dynamically loaded -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function switchTab(btn, tabId) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-      btn.classList.add('active');
-      document.getElementById(tabId + '-tab').classList.add('active');
-    }
-
-    async function loadData(force = false) {
-      const refreshBtn = document.querySelector('.btn-action');
-      if (refreshBtn) {
-        refreshBtn.disabled = true;
-        refreshBtn.textContent = 'Auditing...';
-      }
-      try {
-        const url = force ? '/api/status?force=true' : '/api/status';
-        const res = await fetch(url);
-        const data = await res.json();
-        
-        // Update version badge
-        document.getElementById('version-badge').textContent = 'v' + data.version;
-
-        // Render Compliance Checks
-        const complianceList = document.getElementById('compliance-list');
-        complianceList.innerHTML = '';
-        for (const [name, passed] of Object.entries(data.compliance)) {
-          const item = document.createElement('div');
-          item.className = 'compliance-item';
-          item.innerHTML = `
-            <span class="name">${name}</span>
-            <span class="status-badge ${passed ? 'pass' : 'fail'}">${passed ? 'PASS' : 'FAIL'}</span>
-          `;
-          complianceList.appendChild(item);
-        }
-        document.getElementById('compliance-timestamp').textContent = 'Updated: ' + data.timestamp;
-
-        // Render Active Issue
-        const issue = data.active_issue;
-        document.getElementById('active-issue-title').textContent = issue.id !== 'None' ? issue.id + ': ' + issue.title : issue.title;
-        document.getElementById('active-issue-branch').textContent = issue.branch;
-        
-        const statusBadge = document.getElementById('active-issue-status');
-        statusBadge.textContent = issue.status;
-        statusBadge.className = 'status-badge ' + (issue.status === 'open' ? 'pass' : 'fail');
-
-        const checklist = document.getElementById('active-issue-checklist');
-        checklist.innerHTML = '';
-        if (issue.tasks && issue.tasks.length > 0) {
-          issue.tasks.forEach(task => {
-            const checked = task.toLowerCase().includes('[x]');
-            const cleanLabel = task.replace(/^-\s+\[\s*[xX\s]\s*\]\s*/, '');
-            const item = document.createElement('div');
-            item.className = 'task-item';
-            item.innerHTML = `
-              <input type="checkbox" class="task-checkbox" ${checked ? 'checked' : ''} disabled>
-              <span class="task-label ${checked ? 'checked' : ''}">${cleanLabel}</span>
-            `;
-            checklist.appendChild(item);
-          });
-        } else {
-          checklist.innerHTML = '<p class="text-muted">No checklist tasks defined in the active issue file.</p>';
-        }
-
-        // Render Git Status
-        const gitContent = document.getElementById('git-status-content');
-        gitContent.innerHTML = '';
-        if (data.git_status && data.git_status.length > 0) {
-          data.git_status.forEach(file => {
-            const isStaged = file.startsWith('M') || file.startsWith('A') || file.startsWith('D');
-            const item = document.createElement('div');
-            item.className = 'git-file ' + (isStaged ? 'staged' : '');
-            item.textContent = file;
-            gitContent.appendChild(item);
-          });
-        } else {
-          gitContent.innerHTML = '<p class="text-muted">Workspace is clean. No uncommitted modifications.</p>';
-        }
-
-        // Render Module Locks
-        const locksList = document.getElementById('locks-list');
-        locksList.innerHTML = '';
-        if (data.locks && data.locks.length > 0) {
-          data.locks.forEach(lock => {
-            const item = document.createElement('div');
-            item.className = 'lock-item';
-            item.innerHTML = `
-              <div class="lock-details">
-                <span class="lock-module">${lock.module}</span>
-                <span class="lock-branch">Branch: <b>${lock.branch}</b></span>
-              </div>
-              <div class="text-muted lock-time">Locked: ${lock.timestamp}</div>
-            `;
-            locksList.appendChild(item);
-          });
-        } else {
-          locksList.innerHTML = '<p class="text-muted">No active module locks found. Run <code>./helper.sh lock &lt;module&gt;</code> to lock.</p>';
-        }
-
-        // Render Synthesized Rules
-        const rulesList = document.getElementById('rules-list');
-        rulesList.innerHTML = '';
-        if (data.rules && data.rules.length > 0) {
-          data.rules.forEach(rule => {
-            const item = document.createElement('div');
-            item.className = 'rule-item';
-            item.textContent = rule;
-            rulesList.appendChild(item);
-          });
-        } else {
-          rulesList.innerHTML = '<p class="text-muted">No synthesized rules recorded yet.</p>';
-        }
-
-        // Render Lessons Learned
-        const lessonsList = document.getElementById('lessons-list');
-        lessonsList.innerHTML = '';
-        if (data.lessons && data.lessons.length > 0) {
-          data.lessons.forEach(lesson => {
-            const item = document.createElement('div');
-            item.className = 'rule-item';
-            item.style.borderLeftColor = 'var(--accent-warning)';
-            item.textContent = lesson;
-            lessonsList.appendChild(item);
-          });
-        } else {
-          lessonsList.innerHTML = '<p class="text-muted">No lessons learned recorded yet.</p>';
-        }
-
-        // Render Changelog
-        const changelogList = document.getElementById('changelog-list');
-        changelogList.innerHTML = '';
-        if (data.changelog && data.changelog.length > 0) {
-          data.changelog.forEach(release => {
-            const item = document.createElement('div');
-            item.className = 'lock-item';
-            item.innerHTML = `
-              <span class="lock-module">Release v${release.version}</span>
-              <span class="lock-time">${release.date}</span>
-            `;
-            changelogList.appendChild(item);
-          });
-        } else {
-          changelogList.innerHTML = '<p class="text-muted">No changelog entries found.</p>';
-        }
-
-      } catch (err) {
-        console.error('Failed to load status:', err);
-      } finally {
-        const refreshBtn = document.querySelector('.btn-action');
-        if (refreshBtn) {
-          refreshBtn.disabled = false;
-          refreshBtn.textContent = 'Refresh Audit Status';
-        }
-      }
-    }
-
-    // Initial load
-    loadData(false);
-  </script>
-</body>
-</html>
-"""
+def toggle_issue_task(task_index, completed):
+    active_branch = ""
+    try:
+        res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0:
+            active_branch = res.stdout.strip()
+    except Exception:
+        pass
+
+    issue_match = re.search(r'(issue|task|chore)-[0-9]+', active_branch, re.IGNORECASE)
+    if not issue_match:
+        return False
+
+    issue_id = issue_match.group(0).lower()
+    file_id = issue_id.replace('-', '_')
+    issue_path = f".agents/issues/{file_id}.md"
+    if not os.path.exists(issue_path):
+        issue_path = f".agents/archive/issues/{file_id}.md"
+
+    if not os.path.exists(issue_path):
+        return False
+
+    try:
+        with open(issue_path, 'r', encoding='utf-8') as f:
+            lines = f.read().splitlines()
+
+        task_counter = 0
+        updated = False
+        for i, line in enumerate(lines):
+            if line.strip().startswith('- ['):
+                if task_counter == task_index:
+                    checked_str = '[x]' if completed else '[ ]'
+                    new_line = re.sub(r'-\s+\[\s*[xX\s]?\s*\]', f'- {checked_str}', line)
+                    lines[i] = new_line
+                    updated = True
+                    break
+                task_counter += 1
+
+        if updated:
+            with open(issue_path, 'w', encoding='utf-8') as f:
+                f.write("\n".join(lines) + "\n")
+            
+            # Sync the task board
+            try:
+                cmd_dir = os.path.dirname(__file__)
+                if cmd_dir not in sys.path:
+                    sys.path.insert(0, cmd_dir)
+                import issue as issue_cmd
+                issue_cmd.sync_board_with_issues()
+            except Exception:
+                pass
+            return True
+    except Exception:
+        pass
+    return False
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
@@ -911,15 +340,58 @@ class DashboardHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 err_response = {"error": str(e)}
                 self.wfile.write(json.dumps(err_response).encode('utf-8'))
-        elif parsed_url.path == '/' or parsed_url.path == '/index.html':
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(HTML_TEMPLATE.encode('utf-8'))
+        elif parsed_url.path in ('/', '/index.html'):
+            self.serve_static_file('index.html', 'text/html')
+        elif parsed_url.path == '/style.css':
+            self.serve_static_file('style.css', 'text/css')
+        elif parsed_url.path == '/app.js':
+            self.serve_static_file('app.js', 'application/javascript')
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b"Not Found")
+
+    def do_POST(self):
+        parsed_url = urlparse(self.path)
+        if parsed_url.path == '/api/task/toggle':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                req = json.loads(post_data.decode('utf-8'))
+                task_index = int(req.get('taskIndex'))
+                completed = bool(req.get('completed'))
+                success = toggle_issue_task(task_index, completed)
+                
+                self.send_response(200 if success else 400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": success}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"Not Found")
+
+    def serve_static_file(self, filename, content_type):
+        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
+        filepath = os.path.join(workspace_root, ".agents", "dashboard", filename)
+        if os.path.exists(filepath):
+            self.send_response(200)
+            self.send_header('Content-Type', f'{content_type}; charset=utf-8')
+            self.end_headers()
+            try:
+                with open(filepath, 'rb') as f:
+                    self.wfile.write(f.read())
+            except Exception as e:
+                self.wfile.write(f"Error reading file: {e}".encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"File Not Found")
 
     # Override log_message to prevent terminal cluttering
     def log_message(self, format, *args):
