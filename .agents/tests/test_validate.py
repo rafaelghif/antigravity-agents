@@ -374,5 +374,13 @@ class TestValidate(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=0, stdout="fix: issue-106\n\nRefs: issue-106\x00")
         self.assertFalse(validate.audit_commit_messages())
 
+    @patch('os.environ.get')
+    def test_audit_module_locks_bypassed_env(self, mock_env_get):
+        mock_env_get.side_effect = lambda name, default=None: "true" if name == "SKIP_LOCK_AUDIT" else default
+        self.assertTrue(validate.audit_module_locks())
+        
+        mock_env_get.side_effect = lambda name, default=None: "1" if name == "AAC_BYPASS_LOCKS" else default
+        self.assertTrue(validate.audit_module_locks())
+
 if __name__ == '__main__':
     unittest.main()
