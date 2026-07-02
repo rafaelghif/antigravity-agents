@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.78.0] - 2026-07-02
+
+### 🚀 Features
+- Fix Windows compatibility, CLI encoding, and test suite execution bugs (ISSUE-098)
+
+
 ## [2.77.0] - 2026-07-02
 
 ### 🚀 Features
