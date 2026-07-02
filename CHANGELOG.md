@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.95.0] - 2026-07-02
+
+### 🚀 Features
+- Optimize documentation and CLI completion prints for onboarding configs (ISSUE-115)
+
+
 ## [2.94.0] - 2026-07-02
 
 ### 🚀 Features
