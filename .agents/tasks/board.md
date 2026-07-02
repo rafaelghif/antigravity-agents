@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (feat/issue-101) <!-- id: issue-101 -->
 
 ## Done
 - [x] Ignore active_context.md in Git and Antigravity ignore configurations (feat/issue-100) <!-- id: issue-100 -->

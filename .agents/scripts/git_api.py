@@ -64,7 +64,16 @@ def create_github_issue(title: str, body: str = "") -> Optional[Tuple[str, int]]
             res_data = json.loads(res.read().decode('utf-8'))
             return res_data.get("html_url"), res_data.get("number")
     except urllib.error.HTTPError as e:
-        print(f"[FAIL] GitHub API HTTP Error: {e.code} - {e.read().decode('utf-8')}", file=sys.stderr)
+        if e.code in (401, 403):
+            print("[WARN] GitHub API unauthorized (401/403). Could not create remote issue.", file=sys.stderr)
+        else:
+            try:
+                err_detail = e.read().decode('utf-8')
+                print(f"[FAIL] GitHub API HTTP Error: {e.code} - {err_detail}", file=sys.stderr)
+            except Exception:
+                print(f"[FAIL] GitHub API HTTP Error: {e.code}", file=sys.stderr)
+    except urllib.error.URLError:
+        print("[WARN] Network offline. Could not create remote GitHub issue.", file=sys.stderr)
     except Exception as e:
         print(f"[FAIL] Failed to create GitHub issue: {e}", file=sys.stderr)
     return None
@@ -88,6 +97,13 @@ def close_github_issue(issue_number: int) -> bool:
     try:
         with urllib.request.urlopen(req) as res:
             return res.status == 200
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            print(f"[WARN] GitHub API unauthorized (401/403). Could not close remote issue #{issue_number}.", file=sys.stderr)
+        else:
+            print(f"[FAIL] GitHub API HTTP Error: {e.code} on closing issue #{issue_number}", file=sys.stderr)
+    except urllib.error.URLError:
+        print(f"[WARN] Network offline. Could not close remote GitHub issue #{issue_number}.", file=sys.stderr)
     except Exception as e:
         print(f"[FAIL] Failed to close GitHub issue #{issue_number}: {e}", file=sys.stderr)
     return False
@@ -109,6 +125,13 @@ def fetch_github_issues() -> Optional[list]:
     try:
         with urllib.request.urlopen(req, timeout=3.0) as res:
             return json.loads(res.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            print("[WARN] GitHub API unauthorized (401/403). Operating in offline mode.", file=sys.stderr)
+        else:
+            print(f"[WARN] Failed to fetch remote GitHub issues: HTTP Error {e.code}", file=sys.stderr)
+    except urllib.error.URLError:
+        print("[WARN] Network offline. Operating in offline mode.", file=sys.stderr)
     except Exception as e:
         print(f"[WARN] Failed to fetch remote GitHub issues: {e}", file=sys.stderr)
     return None

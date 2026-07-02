@@ -217,5 +217,31 @@ class TestValidate(unittest.TestCase):
         self.assertTrue(res)
         mock_file().write.assert_called()
 
+    @patch('shutil.which', return_value="/usr/bin/php")
+    @patch('subprocess.run')
+    def test_auto_lint_file_php(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.php")
+        self.assertTrue(res)
+        mock_run.assert_called_once()
+        self.assertIn("php", mock_run.call_args[0][0])
+        
+    @patch('shutil.which', return_value="/usr/bin/eslint")
+    @patch('subprocess.run')
+    def test_auto_lint_file_js(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.js")
+        self.assertTrue(res)
+        mock_run.assert_called_once()
+        self.assertIn("/usr/bin/eslint", mock_run.call_args[0][0])
+
+    @patch('shutil.which', return_value="/usr/bin/shlint")
+    @patch('subprocess.run')
+    def test_run_project_lint_command(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.run_project_lint_command("proj", "proj_path", "shlint file.js")
+        self.assertTrue(res)
+        mock_run.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main()

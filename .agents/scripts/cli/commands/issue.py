@@ -109,6 +109,7 @@ def sync_issues():
         import git_api
         remote_issues = git_api.fetch_github_issues()
         if not remote_issues:
+            print("[INFO] Operating in local offline mode using local issue cache.")
             return
             
         print("[INFO] Synchronizing local issues with GitHub remote...")
