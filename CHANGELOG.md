@@ -3,100 +3,70 @@
 All notable changes to this project will be documented in this file.
 
 
-## [2.88.0] - 2026-07-02
-
-### 🚀 Features
-- implement lock checks for unstaged changes, auto-formatters, and sync caching
-- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
-
-
-## [2.87.0] - 2026-07-02
-
-### 🚀 Features
-- implement lock checks for unstaged changes, auto-formatters, and sync caching
-- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
-
-
-## [2.86.0] - 2026-07-02
-
-### 🚀 Features
-- Prune non-actionable features from rules and lessons learned for token efficiency (ISSUE-102)
-
-### ⚙️ Chores
-- prune non-actionable features from lessons-learned and rules.md
-
-
-## [2.85.0] - 2026-07-02
-
-### 🚀 Features
-- Prune non-actionable features from rules and lessons learned for token efficiency (ISSUE-102)
-
-### ⚙️ Chores
-- prune non-actionable features from lessons-learned and rules.md
-
-
 ## [2.84.0] - 2026-07-02
 
 ### 🚀 Features
-- implement multi-language linting and graceful API fallback warnings
-- Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (ISSUE-101)
+- Align release version history, resolve double-bumping bug, and format CHANGELOG.md (ISSUE-104)
+
+### 📝 Documentation
+- add workspace optimization plan to plans directory
+
+### ⚙️ Chores
+- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
+- align release versions and clean up duplicate changelog entries
 
 
 ## [2.83.0] - 2026-07-02
 
 ### 🚀 Features
-- implement multi-language linting and graceful API fallback warnings
-- Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (ISSUE-101)
-
+- Align release version history, resolve double-bumping bug, and format CHANGELOG.md (ISSUE-104)
+- Align all versions in core files to 2.83.0 to resolve release duplicates
 
 ## [2.82.0] - 2026-07-02
 
 ### 🚀 Features
-- Ignore active_context.md in Git and Antigravity ignore configurations (ISSUE-100)
-
-### ⚙️ Chores
-- ignore active_context.md in Git and Antigravity ignore files
-
+- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
+- Add lock checks for unstaged changes (working tree changes) to Module Lock Compliance validation
+- Integrate auto-formatters (black, prettier, php-cs-fixer) into syntax linting validation
+- Implement local sync caching (.agents/sync_cache.json) to throttle GitHub remote requests and speed up pre-commit validation
 
 ## [2.81.0] - 2026-07-02
 
 ### 🚀 Features
-- Ignore active_context.md in Git and Antigravity ignore configurations (ISSUE-100)
+- Prune non-actionable features from rules and lessons learned for token efficiency (ISSUE-102)
 
 ### ⚙️ Chores
-- ignore active_context.md in Git and Antigravity ignore files
-
+- Prune changelog-like feature items from lessons-learned and rules.md to optimize agent context tokens
 
 ## [2.80.0] - 2026-07-02
 
 ### 🚀 Features
-- implement robust self-learning and auto-sync guard integration
-- Implement Robust Self-Learning and Auto-Sync Guard Integration (ISSUE-099)
-
-### 📝 Documentation
-- record lessons learned for Windows compatibility
-
+- Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (ISSUE-101)
+- Add multi-language syntax and lint checks (Python, JS/TS, PHP) and custom lint_command integration
+- Catch 401/403 HTTP errors and URLErrors in git_api to prevent raw stack traces on unauthorized/offline states
+- Add local offline mode fallback for issue synchronization when unauthorized or offline
 
 ## [2.79.0] - 2026-07-02
 
 ### 🚀 Features
-- implement robust self-learning and auto-sync guard integration
-- Implement Robust Self-Learning and Auto-Sync Guard Integration (ISSUE-099)
+- Ignore active_context.md in Git and Antigravity ignore configurations (ISSUE-100)
 
-### 📝 Documentation
-- record lessons learned for Windows compatibility
-
+### ⚙️ Chores
+- Add .agents/active_context.md to .gitignore and .antigravityignore to prevent developer merge conflicts
 
 ## [2.78.0] - 2026-07-02
 
 ### 🚀 Features
-- Fix Windows compatibility, CLI encoding, and test suite execution bugs (ISSUE-098)
+- Implement Robust Self-Learning and Auto-Sync Guard Integration (ISSUE-099)
 
+### 📝 Documentation
+- Record lessons learned for Windows compatibility and GPG keyring auditing diagnostics
 
 ## [2.77.0] - 2026-07-02
 
 ### 🚀 Features
 - Fix Windows compatibility, CLI encoding, and test suite execution bugs (ISSUE-098)
+
 
 ### 🐛 Bug Fixes
 - resolve Windows compatibility and Unicode console printing bugs
