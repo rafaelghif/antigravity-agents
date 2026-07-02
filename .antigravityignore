@@ -97,3 +97,4 @@ id_ed25519
 .agents/sync_cache.json
 .agents/logs/
 .agents/archive/
+.agents/upgrade_state.json

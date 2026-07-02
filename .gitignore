@@ -23,3 +23,4 @@ __pycache__/
 /sample
 .agents/logs/
 .agents/archive/
+.agents/upgrade_state.json
