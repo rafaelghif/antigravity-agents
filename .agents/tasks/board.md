@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Align release version history, resolve double-bumping bug, and format CHANGELOG.md (feat/issue-104) <!-- id: issue-104 -->
 
 ## Done
 - [x] Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (feat/issue-103) <!-- id: issue-103 -->
