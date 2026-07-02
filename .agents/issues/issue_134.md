@@ -1,7 +1,7 @@
 ---
 id: issue-134
 title: "Ignore local upgrade state cache file and stage archived issue 132"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

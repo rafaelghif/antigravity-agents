@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.114.0] - 2026-07-02
+
+### 🚀 Features
+- ignore transient agent upgrade check state file
+
+### ⚙️ Chores
+- Ignore local upgrade state cache file and stage archived issue 132 (ISSUE-134)
+
+
 ## [2.113.0] - 2026-07-02
 
 ### 🚀 Features
