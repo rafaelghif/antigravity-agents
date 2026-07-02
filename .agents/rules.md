@@ -27,12 +27,9 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **[Learning: compatibility]** Always reconfigure sys.stdout and sys.stderr to utf-8, handle ValueError on os.path.relpath cross-drive matches, propagate exit codes using exit $LASTEXITCODE in PowerShell wrapper scripts, and specify encoding='utf-8' on subprocess.run calls to ensure complete Windows compatibility.
 - **[Learning: powershell]** Explicitly cast command and function outputs to [string] when matching or testing results in PowerShell to prevent type casting bugs on non-standard PowerShell environments.
 - **[Learning: powershell]** Avoid using the -and operator directly after Test-Path in PowerShell without enclosing Test-Path in parentheses, otherwise PowerShell parses -and as a parameter to Test-Path.
-- **[Learning: feature]** Implemented local visual web dashboard server, structured VS Code extension integration logic, and registered conversational skill playbooks to unify agent operations.
-- **[Learning: performance]** Implemented Git-diff driven incremental validation in validation guard to skip syntax and unit tests checks when code is untouched.
-- **[Learning: docs]** Synchronized README.md instructions and CLI references with PowerShell autocomplete and shell completion capabilities.
-- **[Learning: feature]** Unified API credentials fallback to profile configs, integrated GPG keyring auditing into doctor diagnostics, implemented PowerShell autocomplete support, and automated lock releases inside the staging phase of issue closures.
-- **[Learning: security]** Hardened git credentials tracking by explicitly ignoring git_profiles.json in configuration rules, and silenced validation warnings by adding silent flags to git_api helpers.
-- **[Learning: installer]** Ensured robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and fixed strict-mode property access crashes in PowerShell.
-- **[Learning: Token Efficiency]** Always specify file read ranges to save context tokens
-- **[Learning: V2 Restructuring]** Moving to a flat and modular directory structure simplifies agent context parsing and increases model prompt cache efficiency.
+- **[Learning: performance]** Leverage git-diff driven incremental validation in validation guard to skip syntax and unit tests checks when code is untouched, optimizing validation run speed.
+- **[Learning: security]** Harden git credentials tracking by explicitly ignoring git_profiles.json in configuration rules, and silence validation warnings by adding silent flags to git_api helpers.
+- **[Learning: installer]** Ensure robust Git hooks path resolution in subdirectories and monorepos by using git rev-parse --git-path hooks and --show-prefix, and avoid strict-mode property access crashes in PowerShell.
+- **[Learning: Token Efficiency]** Always specify file read ranges to save context tokens.
+- **[Learning: V2 Restructuring]** Maintain a flat and modular directory structure to simplify agent context parsing and increase model prompt cache efficiency.
 - **[Learning: Python Mock Leaks]** When mocking `sys.exit` in Python unit tests, configure it to raise `SystemExit` (using `side_effect=SystemExit`) and wrap the calls in `assertRaises(SystemExit)`. Uncontrolled mock exits allow the test execution to proceed past the exit point, potentially causing side-effects such as truncating or corrupting real local configuration files during test discover suites.
