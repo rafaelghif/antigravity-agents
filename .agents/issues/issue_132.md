@@ -1,7 +1,7 @@
 ---
 id: issue-132
 title: "Enhance dashboard security, scalability, and dynamic MIME type resolution for static files"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
