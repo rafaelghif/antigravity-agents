@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.88.0] - 2026-07-02
+
+### 🚀 Features
+- Fully benchmark agent core and generate report (ISSUE-108)
+
+
 ## [2.87.0] - 2026-07-02
 
 ### 🚀 Features
