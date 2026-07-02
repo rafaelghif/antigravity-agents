@@ -22,7 +22,7 @@ created_at: 2026-07-02
   - *Trade-off*: Zero runtime I/O, but any change to CSS/JS requires stopping and starting the server, degrading Developer Experience (DX).
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Create `.agents/dashboard/app.js` containing AJAX loading, tab switching, and toggle task interactivity.
+- [x] Subtask 1: Create `.agents/dashboard/app.js` containing AJAX loading, tab switching, and toggle task interactivity.
 - [ ] Subtask 2: Refactor `dashboard.py` to serve static files (`index.html`, `style.css`, `app.js`) from `.agents/dashboard/` instead of inline template.
 - [ ] Subtask 3: Add `POST /api/task/toggle` endpoint in `dashboard.py` to update the active issue's subtask checkbox state in its markdown file.
 - [ ] Subtask 4: Verify the local validation guard passes and run unit tests.
