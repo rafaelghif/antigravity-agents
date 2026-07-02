@@ -650,14 +650,29 @@ created_at: {current_date}
                 if os.path.exists(f_to_stage):
                     subprocess.run(['git', 'add', f_to_stage])
 
-            commit_msg = f"chore(release): close {issue_id}, update task board, and bump version"
+            # Extract issue title for clear commit logging
+            issue_title = ""
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        issue_content = f.read()
+                    fm = parse_issue_frontmatter(issue_content)
+                    issue_title = fm.get("title", "")
+                except Exception:
+                    pass
+
+            if issue_title:
+                commit_msg = f"chore(release): close {issue_id} ({issue_title}), update task board, and bump version"
+            else:
+                commit_msg = f"chore(release): close {issue_id}, update task board, and bump version"
+
             print(f"Committing final changes to branch '{found_branch}'...")
             subprocess.run([
                 sys.executable,
                 helper_path,
                 'commit',
                 '-m', commit_msg,
-                '-m', issue_id,
+                '-m', f"Refs: {issue_id}",
                 '--no-verify'
             ])
 
