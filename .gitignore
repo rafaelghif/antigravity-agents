@@ -16,6 +16,7 @@ __pycache__/
 .agents/active_api_keys
 .agents/active_api_keys.ps1
 .agents/active_api_profile_name
+.agents/active_context.md
 # <<< ANTIGRAVITY AGENT END >>>
 .agents/cooldowns.json
 /sample

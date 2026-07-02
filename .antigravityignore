@@ -92,6 +92,6 @@ id_ed25519
 .agents/active_api_keys
 .agents/active_api_keys.ps1
 .agents/active_api_profile_name
-
+.agents/active_context.md
 
 .agents/cooldowns.json

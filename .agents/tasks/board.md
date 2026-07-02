@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Ignore active_context.md in Git and Antigravity ignore configurations (feat/issue-100) <!-- id: issue-100 -->
 
 ## Done
 - [x] Implement Robust Self-Learning and Auto-Sync Guard Integration (feat/issue-099) <!-- id: issue-099 -->
