@@ -18,6 +18,8 @@ from socketserver import ThreadingMixIn
 LATEST_DATA = {}
 data_lock = threading.Lock()
 initial_data_loaded = threading.Event()
+audit_in_progress = False
+audit_thread_lock = threading.Lock()
 
 DEFAULT_COMPLIANCE = {
     "Critical Files": True,
@@ -246,14 +248,29 @@ def get_dashboard_data(force=False):
             pass
 
     # 8. Real-time Live Compliance Check
-    compliance = {}
+    global audit_in_progress
     if force:
-        compliance = run_silent_validation()
-        with data_lock:
-            LATEST_DATA["compliance"] = compliance
-    else:
-        with data_lock:
-            compliance = LATEST_DATA.get("compliance", DEFAULT_COMPLIANCE)
+        with audit_thread_lock:
+            if not audit_in_progress:
+                audit_in_progress = True
+                def run_async_audit():
+                    global audit_in_progress
+                    try:
+                        new_compliance = run_silent_validation()
+                        with data_lock:
+                            LATEST_DATA["compliance"] = new_compliance
+                    finally:
+                        with audit_thread_lock:
+                            audit_in_progress = False
+                
+                t = threading.Thread(target=run_async_audit, daemon=True)
+                t.start()
+
+    with data_lock:
+        compliance = LATEST_DATA.get("compliance", DEFAULT_COMPLIANCE)
+
+    with audit_thread_lock:
+        is_auditing = audit_in_progress
 
     return {
         "version": version,
@@ -264,7 +281,8 @@ def get_dashboard_data(force=False):
         "rules": rules,
         "changelog": changelog_releases[:5], # top 5 releases
         "compliance": compliance,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "auditing": is_auditing
     }
 
 
@@ -415,10 +433,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
         pass
 
 def initial_audit_worker():
-    global LATEST_DATA
-    compliance = run_silent_validation()
-    with data_lock:
-        LATEST_DATA["compliance"] = compliance
+    global LATEST_DATA, audit_in_progress
+    with audit_thread_lock:
+        audit_in_progress = True
+    try:
+        compliance = run_silent_validation()
+        with data_lock:
+            LATEST_DATA["compliance"] = compliance
+    finally:
+        with audit_thread_lock:
+            audit_in_progress = False
     initial_data_loaded.set()
 
 def run(args):
