@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Implement Robust Self-Learning and Auto-Sync Guard Integration (feat/issue-099) <!-- id: issue-099 -->
 
 ## Done
+- [x] Implement Robust Self-Learning and Auto-Sync Guard Integration (feat/issue-099) <!-- id: issue-099 -->
 - [x] Fix Windows compatibility, CLI encoding, and test suite execution bugs (feat/issue-098) <!-- id: issue-098 -->
 - [x] Enhance safety and type-casting of PowerShell helpers (feat/issue-097) <!-- id: issue-097 -->
 - [x] Fix parameter parsing error in bootstrap.ps1 on Windows (feat/issue-096) <!-- id: issue-096 -->

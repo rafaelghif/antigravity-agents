@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.80.0] - 2026-07-02
+
+### 🚀 Features
+- implement robust self-learning and auto-sync guard integration
+- Implement Robust Self-Learning and Auto-Sync Guard Integration (ISSUE-099)
+
+### 📝 Documentation
+- record lessons learned for Windows compatibility
+
+
+## [2.79.0] - 2026-07-02
+
+### 🚀 Features
+- implement robust self-learning and auto-sync guard integration
+- Implement Robust Self-Learning and Auto-Sync Guard Integration (ISSUE-099)
+
+### 📝 Documentation
+- record lessons learned for Windows compatibility
+
+
 ## [2.78.0] - 2026-07-02
 
 ### 🚀 Features
