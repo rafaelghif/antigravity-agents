@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects (feat/issue-125) <!-- id: issue-125 -->
 
 ## Done
 - [x] Improve release commit messages by injecting local issue titles and formatting Refs trailer (feat/issue-124) <!-- id: issue-124 -->
