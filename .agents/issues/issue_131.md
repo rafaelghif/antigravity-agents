@@ -22,11 +22,11 @@ created_at: 2026-07-02
   - *Trade-off*: Leaves repository dirty and visual dashboard broken/non-reproducible for fresh clones.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Track and stage `.agents/dashboard/index.html` and `.agents/dashboard/style.css`.
-- [ ] Subtask 2: Stage the deletion of archived issue specification files.
-- [ ] Subtask 3: Run the local validation guard and ensure all checks pass.
+- [x] Subtask 1: Track and stage `.agents/dashboard/index.html` and `.agents/dashboard/style.css`.
+- [x] Subtask 2: Stage the deletion of archived issue specification files.
+- [x] Subtask 3: Run the local validation guard and ensure all checks pass.
 
 ## 3. Acceptance Criteria
-- [ ] Dashboard static templates (`index.html` and `style.css`) are committed and tracked.
-- [ ] Deleted issue files are staged and committed, leaving the workspace completely clean.
-- [ ] Local validation guard passes cleanly without errors.
+- [x] Dashboard static templates (`index.html` and `style.css`) are committed and tracked.
+- [x] Deleted issue files are staged and committed, leaving the workspace completely clean.
+- [x] Local validation guard passes cleanly without errors.
