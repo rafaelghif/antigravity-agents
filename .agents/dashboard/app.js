@@ -60,11 +60,17 @@ window.loadData = async function(force = false) {
         btn.disabled = true;
         btn.textContent = 'Auditing...';
       });
+      if (currentPollSpeed !== 500) {
+        window.startPolling(500); // Poll fast while auditing
+      }
     } else {
       refreshBtns.forEach(btn => {
         btn.disabled = false;
         btn.textContent = 'Refresh Audit';
       });
+      if (currentPollSpeed !== 5000) {
+        window.startPolling(5000); // Restore slow polling
+      }
     }
     
     // 1. Version Info
@@ -161,16 +167,18 @@ window.loadData = async function(force = false) {
       if (data.locks && data.locks.length > 0) {
         data.locks.forEach(lock => {
           const item = document.createElement('div');
-          item.className = 'lock-card';
+          item.className = 'lock-card-row';
           item.innerHTML = `
-            <span class="lock-title">${lock.module}</span>
-            <div class="lock-meta">Locked: ${lock.timestamp}</div>
-            <span class="lock-branch-badge">${lock.branch}</span>
+            <div class="lock-info-box">
+              <span class="module-name">${lock.module}</span>
+              <span class="holder-branch">Branch: <code>${lock.branch}</code> • ${lock.timestamp}</span>
+            </div>
+            <button class="btn-secondary" onclick="window.handleReleaseLock('${lock.module}')">Release</button>
           `;
           locksList.appendChild(item);
         });
       } else {
-        locksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No active module locks found. Run <code>./helper.sh lock &lt;module&gt;</code> to lock.</p>';
+        locksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No active module locks found.</p>';
       }
     }
 
@@ -246,19 +254,145 @@ window.loadData = async function(force = false) {
   }
 };
 
+let pollIntervalId = null;
+let currentPollSpeed = 5000;
+
+window.startPolling = function(speed) {
+  if (pollIntervalId) {
+    clearInterval(pollIntervalId);
+  }
+  currentPollSpeed = speed;
+  pollIntervalId = setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      window.loadData(false);
+      window.loadProfiles();
+    }
+  }, speed);
+};
+
 // Auto run on load
 document.addEventListener('DOMContentLoaded', () => {
   window.loadData(false);
   window.loadProfiles();
+  window.startPolling(5000);
 });
 
-// Poll dashboard data every 5 seconds if document is visible
-setInterval(() => {
-  if (document.visibilityState === 'visible') {
-    window.loadData(false);
-    window.loadProfiles();
+// Global function to sync project metadata and ADRs
+window.syncWorkspace = async function() {
+  const btn = document.getElementById('sync-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Syncing...';
   }
-}, 5000);
+  try {
+    const res = await fetch('/api/sync', { method: 'POST' });
+    const result = await res.json();
+    if (result.success) {
+      window.loadData(true); // Re-run validation status to fetch new rules
+      alert('Workspace synchronized successfully!');
+    } else {
+      alert('Sync failed: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to sync workspace:', err);
+    alert('Failed to sync workspace.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Sync Workspace';
+    }
+  }
+};
+
+// Global function to handle lock acquisition
+window.handleAcquireLock = async function(event) {
+  event.preventDefault();
+  const input = document.getElementById('lock-module-input');
+  const module = input.value.trim();
+  if (!module) return;
+
+  const btn = event.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Locking...';
+
+  try {
+    const res = await fetch('/api/locks/acquire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ module: module })
+    });
+    const result = await res.json();
+    if (result.success) {
+      input.value = '';
+      window.loadData(true);
+      alert(result.message || 'Lock acquired successfully!');
+    } else {
+      alert('Failed to acquire lock: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to acquire lock:', err);
+    alert('Failed to connect to server.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Acquire Lock';
+  }
+};
+
+// Global function to handle lock release
+window.handleReleaseLock = async function(module) {
+  if (!confirm(`Are you sure you want to release the lock on module "${module}"?`)) {
+    return;
+  }
+  try {
+    const res = await fetch('/api/locks/release', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ module: module })
+    });
+    const result = await res.json();
+    if (result.success) {
+      window.loadData(true);
+    } else {
+      alert('Failed to release lock: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to release lock:', err);
+  }
+};
+
+// Global function to handle lesson learned submission
+window.handleRecordLesson = async function(event) {
+  event.preventDefault();
+  const category = document.getElementById('lesson-category').value.trim();
+  const lesson = document.getElementById('lesson-content').value.trim();
+  if (!lesson) return;
+
+  const btn = event.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Recording...';
+
+  try {
+    const res = await fetch('/api/learn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lesson: lesson, category: category })
+    });
+    const result = await res.json();
+    if (result.success) {
+      document.getElementById('record-lesson-form').reset();
+      window.loadData(true);
+      alert('Lesson recorded and rules synchronized!');
+    } else {
+      alert('Failed to record lesson: ' + (result.message || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Failed to record lesson:', err);
+    alert('Failed to connect to server.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Record Lesson';
+  }
+};
 
 // Global function to copy public key to clipboard
 window.copyPublicKey = function() {

@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement lock, learn, sync, and fast-polling in local dashboard (feat/issue-141) <!-- id: issue-141 -->
 - [x] Stage archived issue 138 and 139 specs (feat/issue-140) <!-- id: issue-140 -->
 - [x] Implement Git profile and credentials management in local dashboard (feat/issue-139) <!-- id: issue-139 -->
 - [x] Stage archived issue 136 and 137 specs (feat/issue-138) <!-- id: issue-138 -->

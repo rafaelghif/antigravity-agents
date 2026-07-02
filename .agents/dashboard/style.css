@@ -674,3 +674,56 @@ body {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Module Locks Grid & Cards styling */
+.locks-page-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .locks-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.locks-vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.lock-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.lock-card-row:hover {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.01);
+}
+
+.lock-info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.lock-info-box .module-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.lock-info-box .holder-branch {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+

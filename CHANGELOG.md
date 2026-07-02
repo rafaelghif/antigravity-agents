@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.118.0] - 2026-07-02
+
+### 🚀 Features
+- add lock, learn, sync operations and adaptive fast polling
+
+### ⚙️ Chores
+- Implement lock, learn, sync, and fast-polling in local dashboard (ISSUE-141)
+
+
 ## [2.117.1] - 2026-07-02
 
 ### ⚙️ Chores
