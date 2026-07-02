@@ -1,7 +1,7 @@
 ---
 id: issue-105
 title: "Implement Strict Task Splitting and Context Insulation Protocols in Working Guidelines"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

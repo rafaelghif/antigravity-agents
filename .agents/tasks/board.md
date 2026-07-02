@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Implement Strict Task Splitting and Context Insulation Protocols in Working Guidelines (feat/issue-105) <!-- id: issue-105 -->
 
 ## Done
+- [x] Implement Strict Task Splitting and Context Insulation Protocols in Working Guidelines (feat/issue-105) <!-- id: issue-105 -->
 - [x] Align release version history, resolve double-bumping bug, and format CHANGELOG.md (feat/issue-104) <!-- id: issue-104 -->
 - [x] Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (feat/issue-103) <!-- id: issue-103 -->
 - [x] Prune non-actionable features from rules and lessons learned for token efficiency (feat/issue-102) <!-- id: issue-102 -->
