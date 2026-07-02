@@ -1,7 +1,7 @@
 ---
 id: issue-142
 title: "Stage archived issue 140 and 141 specs"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
