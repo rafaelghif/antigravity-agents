@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Ignore active context archive directory in gitignore (feat/issue-117) <!-- id: issue-117 -->
 - [x] Implement enterprise guardrails: GitHub Action template, active token context archiver, and README marketing pitch rewrite (feat/issue-116) <!-- id: issue-116 -->
 - [x] Optimize documentation and CLI completion prints for onboarding configs (feat/issue-115) <!-- id: issue-115 -->
 - [x] Implement core robustness improvements: headless checks, parallel tests, utf-8 fixes, lockfile tracking, and json schema validation (feat/issue-114) <!-- id: issue-114 -->
