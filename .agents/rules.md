@@ -26,6 +26,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Strict Task Splitting & Context Insulation**: Before starting any task, the agent MUST split the work into small, atomic subtasks in the issue specification. The agent MUST work on only one subtask at a time, running validation and committing after each atomic step, and running `./helper.sh context optimize` to prune stale history and avoid hallucination.
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[Learning: compatibility]** Always reconfigure sys.stdout and sys.stderr to utf-8, handle ValueError on os.path.relpath cross-drive matches, propagate exit codes using exit $LASTEXITCODE in PowerShell wrapper scripts, and specify encoding='utf-8' on subprocess.run calls to ensure complete Windows compatibility.
 - **[Learning: powershell]** Explicitly cast command and function outputs to [string] when matching or testing results in PowerShell to prevent type casting bugs on non-standard PowerShell environments.
 - **[Learning: powershell]** Avoid using the -and operator directly after Test-Path in PowerShell without enclosing Test-Path in parentheses, otherwise PowerShell parses -and as a parameter to Test-Path.

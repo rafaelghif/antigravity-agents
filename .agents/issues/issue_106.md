@@ -1,7 +1,7 @@
 ---
 id: issue-106
 title: "Implement Automatic Non-Interactive Mode Detection and Commit Message Validation"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
