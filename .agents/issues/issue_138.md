@@ -21,9 +21,9 @@ created_at: 2026-07-02
   - *Trade-off*: Leaves workspace dirty.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Stage the deletion of archived issue specification files.
-- [ ] Subtask 2: Run validation guard checks.
+- [x] Subtask 1: Stage the deletion of archived issue specification files.
+- [x] Subtask 2: Run validation guard checks.
 
 ## 3. Acceptance Criteria
-- [ ] Working tree is clean.
-- [ ] Local validation guard passes cleanly.
+- [x] Working tree is clean.
+- [x] Local validation guard passes cleanly.
