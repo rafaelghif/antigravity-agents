@@ -32,17 +32,17 @@ created_at: 2026-07-02
   - *Trade-off*: High friction since the user still has to drop down to the CLI to rotate credentials or add new keys.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Add `/api/profiles` (GET, POST switch, POST add) and `/api/ssh/public-key` endpoints to `dashboard.py`.
-- [ ] Subtask 2: Add the "Profiles" tab layout and modal forms to `index.html`.
-- [ ] Subtask 3: Implement client-side API requests, form validations, and profile view rendering in `app.js`.
-- [ ] Subtask 4: Add styling for the profiles card lists, badge details, and forms in `style.css`.
-- [ ] Subtask 5: Write unit tests in `test_dashboard.py` verifying profiles API routes.
-- [ ] Subtask 6: Run validation guard checks and ensure all pass.
+- [x] Subtask 1: Add `/api/profiles` (GET, POST switch, POST add) and `/api/ssh/public-key` endpoints to `dashboard.py`.
+- [x] Subtask 2: Add the "Profiles" tab layout and modal forms to `index.html`.
+- [x] Subtask 3: Implement client-side API requests, form validations, and profile view rendering in `app.js`.
+- [x] Subtask 4: Add styling for the profiles card lists, badge details, and forms in `style.css`.
+- [x] Subtask 5: Write unit tests in `test_dashboard.py` verifying profiles API routes.
+- [x] Subtask 6: Run validation guard checks and ensure all pass.
 
 ## 3. Acceptance Criteria
-- [ ] Clicking "Profiles" in the sidebar opens the profiles management tab.
-- [ ] Displays all registered profiles from `.agents/git_profiles.json` with their status (active/inactive).
-- [ ] Clicking "Switch" on a profile switches the active profile in the JSON config and updates the local Git config dynamically.
-- [ ] Submitting the "Create Profile" form validates fields (alphanumeric name, email format) and registers the new profile successfully.
-- [ ] Selecting "Generate SSH Key" during creation correctly triggers `generate_ssh_key()` and displays the public key in the UI for copy-pasting.
-- [ ] Validation checklist passes without errors.
+- [x] Clicking "Profiles" in the sidebar opens the profiles management tab.
+- [x] Displays all registered profiles from `.agents/git_profiles.json` with their status (active/inactive).
+- [x] Clicking "Switch" on a profile switches the active profile in the JSON config and updates the local Git config dynamically.
+- [x] Submitting the "Create Profile" form validates fields (alphanumeric name, email format) and registers the new profile successfully.
+- [x] Selecting "Generate SSH Key" during creation correctly triggers `generate_ssh_key()` and displays the public key in the UI for copy-pasting.
+- [x] Validation checklist passes without errors.
