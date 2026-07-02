@@ -1,7 +1,7 @@
 ---
 id: issue-141
 title: "Implement lock, learn, sync, and fast-polling in local dashboard"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
