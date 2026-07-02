@@ -1,7 +1,7 @@
 ---
 id: issue-136
 title: "Stage archived issue 134 and 135 specs"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
