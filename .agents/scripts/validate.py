@@ -94,6 +94,75 @@ def is_git_ignored(path: str) -> bool:
     except Exception:
         return False
 
+def validate_json_schema(file_path: str, schema_type: str) -> bool:
+    """Validate JSON configuration files against lightweight local schemas."""
+    if not os.path.exists(file_path):
+        return True # File doesn't exist yet, which is fine for optional configs
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except json.JSONDecodeError as jde:
+        print_err(f"JSON Syntax Error in '{file_path}': {jde}")
+        return False
+    except Exception as e:
+        print_err(f"Failed to read '{file_path}': {e}")
+        return False
+
+    if schema_type == "projects":
+        if not isinstance(data, dict) or "projects" not in data:
+            print_err(f"Schema violation in '{file_path}': root must be a dict containing a 'projects' list.")
+            return False
+        projects = data["projects"]
+        if not isinstance(projects, list):
+            print_err(f"Schema violation in '{file_path}': 'projects' key must be a list.")
+            return False
+        for idx, project in enumerate(projects):
+            if not isinstance(project, dict):
+                print_err(f"Schema violation in '{file_path}': project at index {idx} must be a dictionary.")
+                return False
+            for req_key in ("name", "path"):
+                if req_key not in project or not isinstance(project[req_key], str) or not project[req_key].strip():
+                    print_err(f"Schema violation in '{file_path}' (project index {idx}): key '{req_key}' is required and must be a non-empty string.")
+                    return False
+            for opt_key in ("stack", "test_command", "lint_command"):
+                if opt_key in project and not isinstance(project[opt_key], str):
+                    print_err(f"Schema violation in '{file_path}' (project index {idx}): key '{opt_key}' must be a string if defined.")
+                    return False
+
+    elif schema_type == "locks":
+        if not isinstance(data, dict):
+            print_err(f"Schema violation in '{file_path}': locks registry must be a JSON dictionary of module names to branch names.")
+            return False
+        for mod, branch in data.items():
+            if not isinstance(mod, str) or not isinstance(branch, str):
+                print_err(f"Schema violation in '{file_path}': lock entry '{mod}' and holder '{branch}' must be strings.")
+                return False
+
+    elif schema_type == "git_profiles":
+        if not isinstance(data, dict) or "profiles" not in data:
+            print_err(f"Schema violation in '{file_path}': root must contain a 'profiles' list.")
+            return False
+        profiles = data["profiles"]
+        if not isinstance(profiles, list):
+            print_err(f"Schema violation in '{file_path}': 'profiles' must be a list.")
+            return False
+        for idx, profile in enumerate(profiles):
+            if not isinstance(profile, dict):
+                print_err(f"Schema violation in '{file_path}': profile at index {idx} must be a dictionary.")
+                return False
+            for req_key in ("name", "email"):
+                if req_key not in profile or not isinstance(profile[req_key], str) or not profile[req_key].strip():
+                    print_err(f"Schema violation in '{file_path}' (profile index {idx}): key '{req_key}' is required and must be a non-empty string.")
+                    return False
+            if "signing_key" in profile and not isinstance(profile["signing_key"], str):
+                print_err(f"Schema violation in '{file_path}' (profile index {idx}): key 'signing_key' must be a string.")
+                return False
+            if "active" in profile and not isinstance(profile["active"], bool):
+                print_err(f"Schema violation in '{file_path}' (profile index {idx}): key 'active' must be a boolean.")
+                return False
+
+    return True
+
 # ==========================================================
 # 1. Critical Files Audit
 # ==========================================================
@@ -112,6 +181,14 @@ def audit_critical_files() -> bool:
             failed = True
         else:
             print_ok(f"Found '{f}'")
+            
+    # Run JSON schema audits on optional config files
+    if not validate_json_schema(".agents/projects.json", "projects"):
+        failed = True
+    if not validate_json_schema(".agents/locks.json", "locks"):
+        failed = True
+    if not validate_json_schema(".agents/git_profiles.json", "git_profiles"):
+        failed = True
             
     # Verify and self-heal local Git hooks
     hooks_dir = ".git/hooks"
@@ -864,7 +941,16 @@ def audit_static_linting() -> bool:
     target_files = []
     custom_lint_projects = {}
     
-    if modified_files:
+    lockfiles = {
+        "requirements.txt", "pipfile", "poetry.lock", "pyproject.toml",
+        "package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb",
+        "composer.json", "composer.lock",
+        "go.mod", "go.sum",
+        "cargo.toml", "cargo.lock"
+    }
+    is_lockfile_modified = any(os.path.basename(f).lower() in lockfiles for f in modified_files) if modified_files else False
+    
+    if modified_files and not is_lockfile_modified:
         for f in modified_files:
             if is_ignored_by_antigravity(f, antigravity_patterns) or not os.path.exists(f):
                 continue
@@ -934,10 +1020,18 @@ def audit_unit_tests() -> bool:
         
     modified_files = get_modified_files()
     if modified_files:
-        # Check if any modified file impacts python execution or test configuration
+        lockfiles = {
+            "requirements.txt", "pipfile", "poetry.lock", "pyproject.toml",
+            "package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb",
+            "composer.json", "composer.lock",
+            "go.mod", "go.sum",
+            "cargo.toml", "cargo.lock"
+        }
+        # Check if any modified file impacts python execution, test configuration, or dependencies
         affects_tests = False
         for f in modified_files:
-            if f.endswith(".py") or f.startswith(".agents/tests/") or f == ".agents/projects.json" or f == ".agents/rules.md":
+            filename = os.path.basename(f).lower()
+            if f.endswith(".py") or f.startswith(".agents/tests/") or f == ".agents/projects.json" or f == ".agents/rules.md" or filename in lockfiles:
                 affects_tests = True
                 break
         
@@ -971,6 +1065,7 @@ def audit_unit_tests() -> bool:
             with open(projects_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             projects = data.get("projects", [])
+            tasks = []
             for project in projects:
                 name = project.get("name")
                 path = project.get("path")
@@ -983,28 +1078,41 @@ def audit_unit_tests() -> bool:
                     print_err(f"Sub-project '{name}' path '{path}' does not exist!")
                     failed = True
                     continue
-                    
-                print(f"Running test suite for sub-project '{name}' in '{path}': {cmd_str}")
-                import shlex
-                cmd_args = shlex.split(cmd_str)
+                tasks.append((name, resolved_path, cmd_str))
+
+            if tasks:
+                print(f"Executing test suites for {len(tasks)} sub-projects in parallel...")
+                from concurrent.futures import ThreadPoolExecutor
                 
-                use_shell = False
-                if not shutil.which(cmd_args[0]) and os.name != 'nt':
-                    use_shell = True
-                
-                test_res = subprocess.run(
-                    cmd_str if use_shell else cmd_args,
-                    cwd=resolved_path,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    shell=use_shell
-                )
-                if test_res.returncode != 0:
-                    print_err(f"Sub-project '{name}' tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
-                    failed = True
-                else:
-                    print_ok(f"Sub-project '{name}' tests passed successfully.")
+                def run_single_project_test(task):
+                    name, resolved_path, cmd_str = task
+                    import shlex
+                    cmd_args = shlex.split(cmd_str)
+                    use_shell = False
+                    if not shutil.which(cmd_args[0]) and os.name != 'nt':
+                        use_shell = True
+                    try:
+                        res = subprocess.run(
+                            cmd_str if use_shell else cmd_args,
+                            cwd=resolved_path,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            shell=use_shell
+                        )
+                        return (name, res.returncode, res.stdout, res.stderr)
+                    except Exception as e:
+                        return (name, -1, "", f"Failed to start test execution: {e}")
+
+                with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+                    results = list(executor.map(run_single_project_test, tasks))
+
+                for name, returncode, stdout, stderr in results:
+                    if returncode != 0:
+                        print_err(f"Sub-project '{name}' tests failed!\nStdout:\n{stdout}\nStderr:\n{stderr}")
+                        failed = True
+                    else:
+                        print_ok(f"Sub-project '{name}' tests passed successfully.")
         except Exception as e:
             print_warn(f"Failed to read or execute sub-project tests: {e}")
             failed = True

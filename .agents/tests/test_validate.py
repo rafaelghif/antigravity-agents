@@ -264,8 +264,8 @@ class TestValidate(unittest.TestCase):
     @patch('os.chmod')
     def test_audit_critical_files_hooks_repair(self, mock_chmod, mock_file, mock_exists):
         def exists_side_effect(path):
-            if ".git/hooks" in path:
-                return True
+            if "json" in path:
+                return False
             return True
             
         mock_exists.side_effect = exists_side_effect
