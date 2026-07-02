@@ -22,11 +22,11 @@ created_at: 2026-07-02
   - *Trade-off*: Promotes unsafe commits since developers must disable all tests and security audits to skip locking.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Add environment variable check at the top of `audit_module_locks()` in `validate.py`.
-- [ ] Subtask 2: Add unit tests in `test_validate.py` covering the lock audit bypass behavior.
-- [ ] Subtask 3: Verify all workspace tests and validation guards pass successfully.
+- [x] Subtask 1: Add environment variable check at the top of `audit_module_locks()` in `validate.py`.
+- [x] Subtask 2: Add unit tests in `test_validate.py` covering the lock audit bypass behavior.
+- [x] Subtask 3: Verify all workspace tests and validation guards pass successfully.
 
 ## 3. Acceptance Criteria
-- [ ] Setting `SKIP_LOCK_AUDIT=true` or `AAC_BYPASS_LOCKS=1` allows committing without locking files first.
-- [ ] Unit tests for lock validation bypass return success.
-- [ ] Validation suite passes without errors.
+- [x] Setting `SKIP_LOCK_AUDIT=true` or `AAC_BYPASS_LOCKS=1` allows committing without locking files first.
+- [x] Unit tests for lock validation bypass return success.
+- [x] Validation suite passes without errors.
