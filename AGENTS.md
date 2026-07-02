@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed specifically for agentic coding, prompt caching, and context insulation.
-- **Version:** 2.89.0
+- **Version:** 2.90.0
 - **Stack:** Python 3
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -58,9 +58,13 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/skills/coding-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/contract-synchronization/SKILL.md` | Playbook for managing API contract schemas, generating client code, and verifying backend/frontend synchronization. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/conversational-agent/SKILL.md` | Playbook for translating natural language requests about tasks, profiles, locking, and validation into CLI helper executions. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
+| `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
+| `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
+| `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
+| `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |
 | `.agents/workflows/*.md` | Slash-command macros (e.g. `/sync-memory`) | Only when the command is run |
