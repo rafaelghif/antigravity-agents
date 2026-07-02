@@ -19,7 +19,12 @@ def get_pat(silent: bool = False) -> Optional[str]:
                 profiles = data.get("profiles", [])
                 active = next((p for p in profiles if p.get("active")), None)
                 if active:
-                    pat = active.get("git_token")
+                    token = active.get("git_token")
+                    if token:
+                        if token.startswith("env:"):
+                            pat = os.getenv(token[4:])
+                        else:
+                            pat = token
             except Exception:
                 pass
     if not pat and not silent:

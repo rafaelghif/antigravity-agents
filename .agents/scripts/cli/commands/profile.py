@@ -146,7 +146,7 @@ def handle_list(args: List[str]) -> None:
         else:
             print(f"    {name} ({email})")
 
-def apply_git_config(profile: Dict[str, Any]) -> None:
+def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> None:
     """Immediately configure the local Git repository settings."""
     # Check if we are inside a Git repository
     git_check = subprocess.run(
@@ -161,7 +161,7 @@ def apply_git_config(profile: Dict[str, Any]) -> None:
         
     email = profile.get("email")
     name = profile.get("name")
-    signing_key = profile.get("signing_key")
+    signing_key = None if force_no_gpg else profile.get("signing_key")
     
     try:
         if email:
@@ -251,7 +251,16 @@ def handle_switch(args: List[str]) -> None:
     if ssh_key:
         ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
         if not os.path.exists(ssh_key_abs):
-            print_warn(f"SSH private key file not found at '{ssh_key_abs}'. Commitment verification might fail if this key is required.")
+            print_warn(f"SSH private key file not found at '{ssh_key_abs}'.")
+            is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
+            if is_interactive:
+                gen_choice = input("Would you like us to generate a new secure SSH key pair for this profile? (Y/n) [y]: ").strip().lower() or "y"
+                if gen_choice == "y":
+                    generated_path = generate_ssh_key(target_name, target_profile.get("email"))
+                    target_profile["ssh_key_path"] = generated_path
+                    save_profiles(data)
+            else:
+                print_warn("Commitment verification might fail if this key is required.")
         else:
             print_ok(f"SSH private key verified at '{ssh_key_abs}'.")
 
@@ -267,7 +276,13 @@ def handle_switch(args: List[str]) -> None:
             )
             if gpg_check.returncode != 0:
                 print_warn(f"GPG signing key '{signing_key}' is not found or is invalid on this machine.")
-                print_warn("Commit signing might fail if this key is required.")
+                is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
+                if is_interactive:
+                    disable_choice = input("Disable local Git commit signing for this session to prevent commit failures? (Y/n) [y]: ").strip().lower() or "y"
+                    if disable_choice == "y":
+                        force_no_gpg = True
+                else:
+                    print_warn("Commit signing might fail if this key is required.")
             else:
                 print_ok("GPG signing key is valid.")
         except FileNotFoundError:
@@ -286,7 +301,7 @@ def handle_switch(args: List[str]) -> None:
     # Locate the active profile and apply it
     for p in profiles:
         if p.get("active"):
-            apply_git_config(p)
+            apply_git_config(p, force_no_gpg)
             break
 
 def validate_name(name: str) -> bool:
@@ -524,6 +539,9 @@ def handle_credential_helper(args: List[str]) -> None:
         
         if active_profile:
             token = active_profile.get("git_token")
+            if token and token.startswith("env:"):
+                token = os.getenv(token[4:])
+                
             if not token:
                 token = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT")
                 

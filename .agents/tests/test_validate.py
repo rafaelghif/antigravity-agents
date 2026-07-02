@@ -338,33 +338,30 @@ class TestValidate(unittest.TestCase):
         self.assertIn("prettier", mock_run.call_args[0][0][0])
 
     @patch('validate.get_current_branch')
+    @patch('validate.get_base_branch')
     @patch('subprocess.run')
-    def test_audit_commit_messages_success(self, mock_run, mock_get_branch):
+    def test_audit_commit_messages_success(self, mock_run, mock_base_branch, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-106"
-        mock_run.side_effect = [
-            MagicMock(returncode=1),
-            MagicMock(returncode=0, stdout="feat: correct subject line\n\nRefs: issue-106\x00")
-        ]
+        mock_base_branch.return_value = "main"
+        mock_run.return_value = MagicMock(returncode=0, stdout="feat: correct subject line\n\nRefs: issue-106\x00")
         self.assertTrue(validate.audit_commit_messages())
 
     @patch('validate.get_current_branch')
+    @patch('validate.get_base_branch')
     @patch('subprocess.run')
-    def test_audit_commit_messages_missing_refs(self, mock_run, mock_get_branch):
+    def test_audit_commit_messages_missing_refs(self, mock_run, mock_base_branch, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-106"
-        mock_run.side_effect = [
-            MagicMock(returncode=1),
-            MagicMock(returncode=0, stdout="feat: missing refs trailer\x00")
-        ]
+        mock_base_branch.return_value = "main"
+        mock_run.return_value = MagicMock(returncode=0, stdout="feat: missing refs trailer\x00")
         self.assertFalse(validate.audit_commit_messages())
 
     @patch('validate.get_current_branch')
+    @patch('validate.get_base_branch')
     @patch('subprocess.run')
-    def test_audit_commit_messages_invalid_conventional(self, mock_run, mock_get_branch):
+    def test_audit_commit_messages_invalid_conventional(self, mock_run, mock_base_branch, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-106"
-        mock_run.side_effect = [
-            MagicMock(returncode=1),
-            MagicMock(returncode=0, stdout="bad subject: message\n\nRefs: issue-106\x00")
-        ]
+        mock_base_branch.return_value = "main"
+        mock_run.return_value = MagicMock(returncode=0, stdout="bad subject: message\n\nRefs: issue-106\x00")
         self.assertFalse(validate.audit_commit_messages())
 
 if __name__ == '__main__':

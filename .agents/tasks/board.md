@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch (feat/issue-123) <!-- id: issue-123 -->
 
 ## Done
 - [x] Fix security vulnerabilities and performance bottlenecks identified in critical audit (feat/issue-122) <!-- id: issue-122 -->

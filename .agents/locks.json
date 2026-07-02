@@ -1,1 +1,7 @@
-{}
+{
+  "validate": "feat/issue-123",
+  "git_api": "feat/issue-123",
+  "profile": "feat/issue-123",
+  "board": "feat/issue-123",
+  "issue": "feat/issue-123"
+}
