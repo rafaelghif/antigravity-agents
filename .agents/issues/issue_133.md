@@ -22,13 +22,13 @@ created_at: 2026-07-02
   - *Trade-off*: Simple but highly frustrating due to slow network latency on every CLI run.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Implement `check_and_run_auto_upgrade` inside `upgrade.py`.
-- [ ] Subtask 2: Integrate the async thread runner in `helper.py`'s exit lifecycle hook.
-- [ ] Subtask 3: Add unit tests in `test_upgrade.py` to cover check conditions, mock clean/dirty status, and rate-limiting cache.
-- [ ] Subtask 4: Verify the local validation guard passes.
+- [x] Subtask 1: Implement `check_and_run_auto_upgrade` inside `upgrade.py`.
+- [x] Subtask 2: Integrate the async thread runner in `helper.py`'s exit lifecycle hook.
+- [x] Subtask 3: Add unit tests in `test_upgrade.py` to cover check conditions, mock clean/dirty status, and rate-limiting cache.
+- [x] Subtask 4: Verify the local validation guard passes.
 
 ## 3. Acceptance Criteria
-- [ ] Auto-upgrade check triggers only once every 30 minutes (cache rate limit).
-- [ ] If local files are dirty, auto-upgrade exits immediately without altering workspace files.
-- [ ] Running a normal command automatically fetches and notifies the user if an upgrade was applied successfully.
-- [ ] Unit tests for the auto-upgrade check succeed.
+- [x] Auto-upgrade check triggers only once every 30 minutes (cache rate limit).
+- [x] If local files are dirty, auto-upgrade exits immediately without altering workspace files.
+- [x] Running a normal command automatically fetches and notifies the user if an upgrade was applied successfully.
+- [x] Unit tests for the auto-upgrade check succeed.
