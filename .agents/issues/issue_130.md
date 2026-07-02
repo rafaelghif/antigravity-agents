@@ -1,7 +1,7 @@
 ---
 id: issue-130
 title: "Modernize local visual dashboard with modular template serving and interactive subtasks checklist auto-update"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
