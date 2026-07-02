@@ -1,7 +1,7 @@
 ---
 id: issue-123
 title: "Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

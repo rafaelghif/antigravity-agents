@@ -3,6 +3,9 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-02]** **Git Profile & Credentials**: Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
+- **[2026-07-02]** **Path Handling / OS Compatibility**: Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
+- **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[2026-07-02]** **git**: Prevent applying placeholder Git profiles to local Git config when user-defined profiles are unconfigured, avoiding pollution of local Git author config
 - **[2026-07-02]** **Path Handling / OS Compatibility**: Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
 - **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
