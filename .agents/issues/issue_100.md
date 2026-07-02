@@ -1,7 +1,7 @@
 ---
 id: issue-100
 title: "Ignore active_context.md in Git and Antigravity ignore configurations"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

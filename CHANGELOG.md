@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.82.0] - 2026-07-02
+
+### 🚀 Features
+- Ignore active_context.md in Git and Antigravity ignore configurations (ISSUE-100)
+
+### ⚙️ Chores
+- ignore active_context.md in Git and Antigravity ignore files
+
+
+## [2.81.0] - 2026-07-02
+
+### 🚀 Features
+- Ignore active_context.md in Git and Antigravity ignore configurations (ISSUE-100)
+
+### ⚙️ Chores
+- ignore active_context.md in Git and Antigravity ignore files
+
+
 ## [2.80.0] - 2026-07-02
 
 ### 🚀 Features
