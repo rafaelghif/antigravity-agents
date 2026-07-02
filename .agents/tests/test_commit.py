@@ -47,24 +47,40 @@ class TestCommitCommand(unittest.TestCase):
             call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
             self.assertFalse(any("developer@company.com" in cmd for cmd in call_args_strs))
 
-        # Scenario 2: Local email is empty. It SHOULD apply corporate-work profile.
+        # Scenario 2: Local email is empty, but profiles are placeholders. It should NOT apply placeholder profile.
         mock_run.reset_mock()
         mock_run.side_effect = [
             MagicMock(returncode=1, stdout=""), # git config user.email is empty/failed
-            MagicMock(returncode=1, stdout=""), # git config user.name is empty/failed
-            MagicMock(returncode=0),            # git config user.email local write
-            MagicMock(returncode=0),            # git config user.name local write
-            MagicMock(returncode=0),            # git config gpg unsets
-            MagicMock(returncode=0),
             MagicMock(returncode=0)             # git commit execution
         ]
         
         with patch('sys.exit') as mock_exit:
             commit.run(["--no-verify"])
             
-            # Verify that git config WAS called with developer@company.com
+            # Verify that git config was NOT called with developer@company.com
             call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
-            self.assertTrue(any("developer@company.com" in cmd for cmd in call_args_strs))
+            self.assertFalse(any("developer@company.com" in cmd for cmd in call_args_strs))
+
+        # Scenario 3: Local email is empty, and profiles are user-defined. It SHOULD apply it.
+        mock_load_profiles.return_value = {
+            "profiles": [
+                {"name": "custom-work", "email": "dev@custom.com", "active": True},
+            ]
+        }
+        mock_run.reset_mock()
+        mock_run.side_effect = [
+            MagicMock(returncode=1, stdout=""), # git config user.email
+            MagicMock(returncode=0),            # git config user.email local write
+            MagicMock(returncode=0),            # git config user.name local write
+            MagicMock(returncode=0),            # git config --unset commit.gpgsign
+            MagicMock(returncode=0),            # git config --unset user.signingkey
+            MagicMock(returncode=0),            # git config --unset core.sshCommand
+            MagicMock(returncode=0)             # git commit execution
+        ]
+        with patch('sys.exit') as mock_exit:
+            commit.run(["--no-verify"])
+            call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
+            self.assertTrue(any("dev@custom.com" in cmd for cmd in call_args_strs))
 
 if __name__ == '__main__':
     unittest.main()
