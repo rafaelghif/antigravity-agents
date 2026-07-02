@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Prune non-actionable features from rules and lessons learned for token efficiency (feat/issue-102) <!-- id: issue-102 -->
 
 ## Done
+- [x] Prune non-actionable features from rules and lessons learned for token efficiency (feat/issue-102) <!-- id: issue-102 -->
 - [x] Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (feat/issue-101) <!-- id: issue-101 -->
 - [x] Ignore active_context.md in Git and Antigravity ignore configurations (feat/issue-100) <!-- id: issue-100 -->
 - [x] Implement Robust Self-Learning and Auto-Sync Guard Integration (feat/issue-099) <!-- id: issue-099 -->

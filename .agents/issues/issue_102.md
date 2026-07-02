@@ -1,7 +1,7 @@
 ---
 id: issue-102
 title: "Prune non-actionable features from rules and lessons learned for token efficiency"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---

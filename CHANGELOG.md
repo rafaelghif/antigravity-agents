@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.86.0] - 2026-07-02
+
+### 🚀 Features
+- Prune non-actionable features from rules and lessons learned for token efficiency (ISSUE-102)
+
+### ⚙️ Chores
+- prune non-actionable features from lessons-learned and rules.md
+
+
+## [2.85.0] - 2026-07-02
+
+### 🚀 Features
+- Prune non-actionable features from rules and lessons learned for token efficiency (ISSUE-102)
+
+### ⚙️ Chores
+- prune non-actionable features from lessons-learned and rules.md
+
+
 ## [2.84.0] - 2026-07-02
 
 ### 🚀 Features
