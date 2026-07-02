@@ -870,7 +870,7 @@ def auto_format_file(file_path: str) -> None:
         if prettier_bin:
             subprocess.run([prettier_bin, '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif shutil.which("npx"):
-            subprocess.run(['npx', 'prettier', '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['npx', '--no-install', 'prettier', '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def auto_lint_file(file_path: str) -> bool:
     """Run default syntax and lint checks based on file extension."""
@@ -917,7 +917,7 @@ def auto_lint_file(file_path: str) -> bool:
                 print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
                 return False
         elif shutil.which("npx"):
-            res = subprocess.run(['npx', 'eslint', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            res = subprocess.run(['npx', '--no-install', 'eslint', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if res.returncode != 0 and "eslint" in (res.stderr or res.stdout).lower():
                 print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
                 return False
@@ -1095,19 +1095,25 @@ def audit_unit_tests() -> bool:
                     if not shutil.which(cmd_args[0]) and os.name != 'nt':
                         use_shell = True
                     try:
+                        # Avoid implicit shell execution to prevent command injection.
+                        # Explicitly delegate to /bin/sh if shell context is required.
+                        if use_shell:
+                            run_args = ['/bin/sh', '-c', cmd_str]
+                        else:
+                            run_args = cmd_args
                         res = subprocess.run(
-                            cmd_str if use_shell else cmd_args,
+                            run_args,
                             cwd=resolved_path,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
-                            text=True,
-                            shell=use_shell
+                            text=True
                         )
                         return (name, res.returncode, res.stdout, res.stderr)
                     except Exception as e:
                         return (name, -1, "", f"Failed to start test execution: {e}")
 
-                with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+                max_workers = min(len(tasks), os.cpu_count() or 4)
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
                     results = list(executor.map(run_single_project_test, tasks))
 
                 for name, returncode, stdout, stderr in results:

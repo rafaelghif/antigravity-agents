@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Fix security vulnerabilities and performance bottlenecks identified in critical audit (feat/issue-122) <!-- id: issue-122 -->
 - [x] Fix Git profile fallback to local user account priority (feat/issue-121) <!-- id: issue-121 -->
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
 - [x] Refactor helper doctor key check validation to warnings instead of hard failures (feat/issue-119) <!-- id: issue-119 -->
