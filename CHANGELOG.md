@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.89.0] - 2026-07-02
+
+### 🚀 Features
+- Optimize validation guard performance and decouple remote sync (ISSUE-109)
+
+
 ## [2.88.0] - 2026-07-02
 
 ### 🚀 Features
