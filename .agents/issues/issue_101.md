@@ -1,7 +1,7 @@
 ---
 id: issue-101
 title: "Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
