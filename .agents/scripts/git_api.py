@@ -60,7 +60,7 @@ def create_github_issue(title: str, body: str = "") -> Optional[Tuple[str, int]]
     
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=10.0) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return res_data.get("html_url"), res_data.get("number")
     except urllib.error.HTTPError as e:
@@ -95,7 +95,7 @@ def close_github_issue(issue_number: int) -> bool:
     
     req = urllib.request.Request(url, data=data, headers=headers, method="PATCH")
     try:
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=10.0) as res:
             return res.status == 200
     except urllib.error.HTTPError as e:
         if e.code in (401, 403):
@@ -178,7 +178,7 @@ def post_commit_status(sha: str, state: str, target_url: str = "", description: 
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=10.0) as res:
             return res.status == 201
     except Exception as e:
         print(f"[FAIL] Failed to post commit status: {e}", file=sys.stderr)
@@ -207,7 +207,7 @@ def create_github_release(tag_name: str, name: str, body: str, draft: bool = Tru
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req) as res:
+        with urllib.request.urlopen(req, timeout=10.0) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return res_data.get("html_url")
     except Exception as e:

@@ -12,7 +12,7 @@ created_at: 2026-07-02
 Fix security vulnerabilities and performance bottlenecks identified in critical audit
 
 ## Tasks
-- [ ] Task 1: Add timeout to urllib urlopen requests in git_api.py
+- [x] Task 1: Add timeout to urllib urlopen requests in git_api.py
 - [ ] Task 2: Eliminate shell=True implicit shell injection in validate.py test execution
 - [ ] Task 3: Secure npx formatting and linting fallbacks using --no-install in validate.py
 - [ ] Task 4: Cap ThreadPoolExecutor workers in validate.py to avoid CPU thrashing
