@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement Proactive Private File Scan and Git Branch Type Enforcer (feat/issue-107) <!-- id: issue-107 -->
 
 ## Done
 - [x] Implement Automatic Non-Interactive Mode Detection and Commit Message Validation (feat/issue-106) <!-- id: issue-106 -->

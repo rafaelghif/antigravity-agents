@@ -44,7 +44,8 @@ class TestValidate(unittest.TestCase):
     @patch('subprocess.run')
     @patch('validate.is_git_ignored')
     @patch('validate.is_ignored_by_antigravity')
-    def test_audit_secrets_and_ignored_files_rejections(self, mock_anti, mock_git, mock_run, mock_exists):
+    @patch('os.walk', return_value=[])
+    def test_audit_secrets_and_ignored_files_rejections(self, mock_walk, mock_anti, mock_git, mock_run, mock_exists):
         # Mock exists to return False for git_profiles.json
         mock_exists.side_effect = lambda path: False if 'git_profiles.json' in path else True
         
@@ -66,6 +67,22 @@ class TestValidate(unittest.TestCase):
         mock_anti.return_value = True
         self.assertFalse(validate.audit_secrets_and_ignored_files())
 
+    @patch('os.path.exists')
+    @patch('subprocess.run')
+    @patch('validate.is_git_ignored')
+    @patch('validate.is_ignored_by_antigravity')
+    @patch('os.walk')
+    def test_audit_secrets_unignored_private_file(self, mock_walk, mock_anti, mock_git, mock_run, mock_exists):
+        mock_exists.return_value = True
+        mock_run.return_value = MagicMock(returncode=0, stdout="")
+        # Simulate finding an unignored .env file
+        mock_walk.return_value = [
+            ('.', [], ['.env'])
+        ]
+        mock_git.return_value = False
+        mock_anti.return_value = False
+        self.assertFalse(validate.audit_secrets_and_ignored_files())
+
     @patch('validate.get_current_branch')
     @patch('subprocess.run')
     @patch('os.path.exists')
@@ -84,10 +101,49 @@ class TestValidate(unittest.TestCase):
         mock_get_branch.return_value = "feat/issue-028"
         mock_exists.return_value = True
         mock_file_open.return_value.read.return_value = "id: issue-028\ntasks:\n- [x] Done\n"
+        mock_run.return_value = MagicMock(returncode=0, stdout="")
         self.assertTrue(validate.audit_git_branch_alignment())
 
         # Scenario 4: On feature branch with invalid ID pattern
         mock_get_branch.return_value = "some-random-branch"
+        self.assertFalse(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_branch_type_enforcer_feat_mismatch(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-028"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "id: issue-028\ntasks:\n- [x] Done\n"
+        
+        # Mock git calls:
+        # 1. show-ref (master verification): returncode=1
+        # 2. git log: returncode=0, stdout="chore: some chore\n"
+        # 3. git status --porcelain: returncode=0, stdout="" (is clean)
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="chore: some chore\n"),
+            MagicMock(returncode=0, stdout="")
+        ]
+        self.assertFalse(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_branch_type_enforcer_fix_mismatch(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "fix/issue-028"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "id: issue-028\ntasks:\n- [x] Done\n"
+        
+        # Mock git calls:
+        # 1. show-ref
+        # 2. git log: returncode=0, stdout="feat: new feature\n"
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="feat: new feature\n")
+        ]
         self.assertFalse(validate.audit_git_branch_alignment())
 
     @patch('validate.get_current_branch')

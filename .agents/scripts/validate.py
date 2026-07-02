@@ -276,6 +276,19 @@ def audit_secrets_and_ignored_files() -> bool:
         except Exception:
             pass
             
+    # C2. Scan filesystem for untracked/unignored private or sensitive files
+    for root, dirs, files in os.walk('.'):
+        exclude_dirs = {'.git', 'node_modules', 'venv', 'env', '__pycache__', 'vendor', 'dist', 'build', 'out', '.next'}
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        for file in files:
+            if file.startswith('.env') or file == 'git_profiles.json':
+                path = os.path.normpath(os.path.join(root, file))
+                # Skip if it is correctly ignored by git or antigravity
+                if not (is_git_ignored(path) or is_ignored_by_antigravity(path, antigravity_patterns)):
+                    print_err(f"Private file '{path}' exists but is NOT ignored in .gitignore or .antigravityignore!")
+                    print_err("  Please add it to .gitignore or .antigravityignore immediately to prevent accidental exposure.")
+                    failed = True
+            
     # D. Check if Git config email matches active profile in git_profiles.json
     profiles_path = ".agents/git_profiles.json"
     if os.path.exists(profiles_path):
@@ -562,7 +575,76 @@ def audit_git_branch_alignment() -> bool:
                 print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
         except Exception as e:
             print_warn(f"Failed to parse subtasks in '{matched_path}': {e}")
+    # Branch Type Enforcer: verify branch prefix alignment with commit types
+    base_branch = 'main'
+    try:
+        res = subprocess.run(
+            ['git', 'show-ref', '--verify', 'refs/heads/master'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        if res.returncode == 0:
+            base_branch = 'master'
+    except Exception:
+        pass
+
+    try:
+        res = subprocess.run(
+            ['git', 'log', f'{base_branch}..HEAD', '--format=%s'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        commits = [c.strip() for c in res.stdout.splitlines() if c.strip()]
+    except Exception:
+        commits = []
+
+    if commits:
+        branch_lower = branch.lower()
+        if branch_lower.startswith('feat/'):
+            # Only enforce at least one feat commit if the working tree is clean (final validation)
+            is_clean = True
+            try:
+                res_status = subprocess.run(
+                    ['git', 'status', '--porcelain'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=True
+                )
+                for line in res_status.stdout.splitlines():
+                    if line.strip() and not ("git_profiles.json" in line or "locks.json" in line):
+                        is_clean = False
+                        break
+            except Exception:
+                pass
             
+            if is_clean:
+                has_feat = any(c.lower().startswith('feat:') or c.lower().startswith('feat(') or 'feat!:' in c.lower() for c in commits)
+                if not has_feat:
+                    print_err(f"Branch prefix is 'feat/', but no 'feat:' commits were found in this branch's history!")
+                    print_err("  Feature branches must introduce new features before they can be closed/merged.")
+                    return False
+        elif branch_lower.startswith('fix/'):
+            # Fix branch must never contain a feature commit
+            has_feat = any(c.lower().startswith('feat:') or c.lower().startswith('feat(') or 'feat!:' in c.lower() for c in commits)
+            if has_feat:
+                print_err(f"Branch prefix is 'fix/', but a 'feat:' commit was found in history: '{commits[0]}'")
+                print_err("  Fix branches must not introduce new features. Please rename the branch to 'feat/' or change the commit type.")
+                return False
+        elif branch_lower.startswith('chore/'):
+            # Chore branch must never contain a feature or fix commit
+            has_feat_or_fix = any(
+                c.lower().startswith('feat:') or c.lower().startswith('feat(') or 'feat!:' in c.lower() or
+                c.lower().startswith('fix:') or c.lower().startswith('fix(') or 'fix!:' in c.lower()
+                for c in commits
+            )
+            if has_feat_or_fix:
+                print_err(f"Branch prefix is 'chore/', but a 'feat:' or 'fix:' commit was found in history: '{commits[0]}'")
+                print_err("  Chore branches must only contain chores. Please rename the branch or use appropriate commit types.")
+                return False
+
     return True
 
 # ==========================================================
