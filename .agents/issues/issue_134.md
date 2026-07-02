@@ -22,11 +22,11 @@ created_at: 2026-07-02
   - *Trade-off*: Leaves repository status dirty and vulnerable to accidental tracking.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Add `.agents/upgrade_state.json` to `.gitignore` and `.antigravityignore`.
-- [ ] Subtask 2: Stage the deletion of archived issue specification files.
-- [ ] Subtask 3: Run the local validation guard and ensure all checks pass.
+- [x] Subtask 1: Add `.agents/upgrade_state.json` to `.gitignore` and `.antigravityignore`.
+- [x] Subtask 2: Stage the deletion of archived issue specification files.
+- [x] Subtask 3: Run the local validation guard and ensure all checks pass.
 
 ## 3. Acceptance Criteria
-- [ ] `.agents/upgrade_state.json` is ignored by Git and context scans.
-- [ ] Deleted issue files are staged, leaving the working tree completely clean.
-- [ ] Local validation guard passes successfully.
+- [x] `.agents/upgrade_state.json` is ignored by Git and context scans.
+- [x] Deleted issue files are staged, leaving the working tree completely clean.
+- [x] Local validation guard passes successfully.
