@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (feat/issue-103) <!-- id: issue-103 -->
 
 ## Done
 - [x] Prune non-actionable features from rules and lessons learned for token efficiency (feat/issue-102) <!-- id: issue-102 -->

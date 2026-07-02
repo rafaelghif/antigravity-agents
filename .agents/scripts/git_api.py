@@ -108,11 +108,24 @@ def close_github_issue(issue_number: int) -> bool:
         print(f"[FAIL] Failed to close GitHub issue #{issue_number}: {e}", file=sys.stderr)
     return False
 
-def fetch_github_issues() -> Optional[list]:
+def fetch_github_issues(force: bool = False) -> Optional[list]:
     pat = get_pat(silent=True)
     repo = get_repo_info()
     if not pat or not repo:
         return None
+        
+    cache_file = ".agents/sync_cache.json"
+    import time
+    
+    if not force and os.path.exists(cache_file):
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            last_sync = cache_data.get("last_sync_time", 0.0)
+            if time.time() - last_sync < 300.0:
+                return cache_data.get("cached_issues")
+        except Exception:
+            pass
         
     url = f"https://api.github.com/repos/{repo}/issues?state=all&per_page=100"
     headers = {
@@ -124,7 +137,14 @@ def fetch_github_issues() -> Optional[list]:
     req = urllib.request.Request(url, headers=headers, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=3.0) as res:
-            return json.loads(res.read().decode('utf-8'))
+            data = json.loads(res.read().decode('utf-8'))
+            try:
+                os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+                with open(cache_file, 'w', encoding='utf-8') as f:
+                    json.dump({"last_sync_time": time.time(), "cached_issues": data}, f)
+            except Exception:
+                pass
+            return data
     except urllib.error.HTTPError as e:
         if e.code in (401, 403):
             print("[WARN] GitHub API unauthorized (401/403). Operating in offline mode.", file=sys.stderr)

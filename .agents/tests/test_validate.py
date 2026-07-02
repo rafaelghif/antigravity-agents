@@ -217,31 +217,45 @@ class TestValidate(unittest.TestCase):
         self.assertTrue(res)
         mock_file().write.assert_called()
 
-    @patch('shutil.which', return_value="/usr/bin/php")
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/php" if name == "php" else None)
     @patch('subprocess.run')
     def test_auto_lint_file_php(self, mock_run, mock_which):
         mock_run.return_value = MagicMock(returncode=0)
         res = validate.auto_lint_file("test.php")
         self.assertTrue(res)
         mock_run.assert_called_once()
-        self.assertIn("php", mock_run.call_args[0][0])
+        self.assertIn("php", mock_run.call_args[0][0][0])
         
-    @patch('shutil.which', return_value="/usr/bin/eslint")
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/eslint" if name == "eslint" else None)
     @patch('subprocess.run')
     def test_auto_lint_file_js(self, mock_run, mock_which):
         mock_run.return_value = MagicMock(returncode=0)
         res = validate.auto_lint_file("test.js")
         self.assertTrue(res)
         mock_run.assert_called_once()
-        self.assertIn("/usr/bin/eslint", mock_run.call_args[0][0])
+        self.assertIn("/usr/bin/eslint", mock_run.call_args[0][0][0])
 
-    @patch('shutil.which', return_value="/usr/bin/shlint")
+    @patch('shutil.which', side_effect=lambda bin_name: "/usr/bin/shlint" if bin_name == "shlint" else None)
     @patch('subprocess.run')
     def test_run_project_lint_command(self, mock_run, mock_which):
         mock_run.return_value = MagicMock(returncode=0)
         res = validate.run_project_lint_command("proj", "proj_path", "shlint file.js")
         self.assertTrue(res)
         mock_run.assert_called_once()
+
+    @patch('shutil.which', side_effect=lambda bin_name: "/usr/bin/black" if bin_name == "black" else None)
+    @patch('subprocess.run')
+    def test_auto_format_file_python_black(self, mock_run, mock_which):
+        validate.auto_format_file("test.py")
+        mock_run.assert_called_once()
+        self.assertIn("black", mock_run.call_args[0][0][0])
+        
+    @patch('shutil.which', side_effect=lambda bin_name: "/usr/bin/prettier" if bin_name == "prettier" else None)
+    @patch('subprocess.run')
+    def test_auto_format_file_js_prettier(self, mock_run, mock_which):
+        validate.auto_format_file("test.js")
+        mock_run.assert_called_once()
+        self.assertIn("prettier", mock_run.call_args[0][0][0])
 
 if __name__ == '__main__':
     unittest.main()
