@@ -1,7 +1,7 @@
 ---
 id: issue-126
 title: "Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
