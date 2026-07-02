@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.113.0] - 2026-07-02
+
+### 🚀 Features
+- implement non-blocking background auto-upgrade check at CLI exit
+
+### 🛠️ Refactors
+- pre-initialize mimetypes at import time
+
+### ⚙️ Chores
+- Implement automatic upgrade check for CLI commands (ISSUE-133)
+- Enhance dashboard security, scalability, and dynamic MIME type resolution for static files (ISSUE-132)
+
+### 🧪 Tests
+- cover automatic upgrade check rate limits and branch validation
+
+
 ## [2.112.0] - 2026-07-02
 
 ### 🚀 Features
