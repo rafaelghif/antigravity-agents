@@ -32,7 +32,7 @@ def sync_skills_to_agents_md():
     # Build the new skills table block
     skills_lines = []
     for s_name, s_desc in skills:
-        skills_lines.append(f"| `.agents/skills/{s_name}/SKILL.md` | {s_desc} | Name + description always indexed; full body loads only when the task matches. Don't re-paste skill content here. |")
+        skills_lines.append(f"| `.agents/skills/{s_name}/SKILL.md` | {s_desc} | On match |")
         
     skills_table_str = "\n".join(skills_lines)
     
@@ -126,6 +126,13 @@ def sync_lessons_to_rules():
         if not lessons:
             print("No lessons found in lessons-learned.md to synthesize.")
             return
+
+        # Deduplicate lessons while preserving order
+        unique_lessons = []
+        for l in lessons:
+            if l not in unique_lessons:
+                unique_lessons.append(l)
+        lessons = unique_lessons
             
         with open(rules_file, 'r', encoding='utf-8') as f:
             rules_content = f.read()
