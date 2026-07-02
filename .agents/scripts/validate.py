@@ -1112,7 +1112,8 @@ def audit_unit_tests() -> bool:
                     except Exception as e:
                         return (name, -1, "", f"Failed to start test execution: {e}")
 
-                with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+                max_workers = min(len(tasks), os.cpu_count() or 4)
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
                     results = list(executor.map(run_single_project_test, tasks))
 
                 for name, returncode, stdout, stderr in results:
