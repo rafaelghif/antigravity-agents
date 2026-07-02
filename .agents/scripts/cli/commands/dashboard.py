@@ -9,6 +9,7 @@ from datetime import datetime
 import threading
 import io
 import contextlib
+import mimetypes
 from urllib.parse import urlparse, parse_qs
 from socketserver import ThreadingMixIn
 
@@ -340,16 +341,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 err_response = {"error": str(e)}
                 self.wfile.write(json.dumps(err_response).encode('utf-8'))
-        elif parsed_url.path in ('/', '/index.html'):
-            self.serve_static_file('index.html', 'text/html')
-        elif parsed_url.path == '/style.css':
-            self.serve_static_file('style.css', 'text/css')
-        elif parsed_url.path == '/app.js':
-            self.serve_static_file('app.js', 'application/javascript')
         else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b"Not Found")
+            self.serve_static_file(parsed_url.path)
 
     def do_POST(self):
         parsed_url = urlparse(self.path)
@@ -376,12 +369,34 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Not Found")
 
-    def serve_static_file(self, filename, content_type):
+    def serve_static_file(self, path):
         workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
-        filepath = os.path.join(workspace_root, ".agents", "dashboard", filename)
-        if os.path.exists(filepath):
+        dashboard_dir = os.path.join(workspace_root, ".agents", "dashboard")
+        
+        clean_path = path.lstrip('/')
+        if not clean_path or clean_path == 'index.html':
+            clean_path = 'index.html'
+            
+        filepath = os.path.abspath(os.path.join(dashboard_dir, clean_path))
+        
+        # Path Traversal Guard: verify the resolved path starts with dashboard_dir
+        if not filepath.startswith(os.path.abspath(dashboard_dir)):
+            self.send_response(403)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(b"Forbidden: Directory Traversal Blocked")
+            return
+            
+        if os.path.exists(filepath) and os.path.isfile(filepath):
+            content_type, _ = mimetypes.guess_type(filepath)
+            if not content_type:
+                content_type = 'application/octet-stream'
+                
             self.send_response(200)
-            self.send_header('Content-Type', f'{content_type}; charset=utf-8')
+            if content_type.startswith('text/') or content_type in ('application/javascript', 'application/json'):
+                self.send_header('Content-Type', f'{content_type}; charset=utf-8')
+            else:
+                self.send_header('Content-Type', content_type)
             self.end_headers()
             try:
                 with open(filepath, 'rb') as f:
@@ -390,8 +405,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.wfile.write(f"Error reading file: {e}".encode('utf-8'))
         else:
             self.send_response(404)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
             self.end_headers()
-            self.wfile.write(b"File Not Found")
+            self.wfile.write(b"Not Found")
 
     # Override log_message to prevent terminal cluttering
     def log_message(self, format, *args):
