@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Prune non-actionable features from rules and lessons learned for token efficiency (feat/issue-102) <!-- id: issue-102 -->
 
 ## Done
 - [x] Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (feat/issue-101) <!-- id: issue-101 -->
