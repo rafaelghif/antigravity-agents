@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AAC V2 Operational Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Sleek Sticky Header -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <div class="logo-area">
+        <span class="logo-glow"></span>
+        <span class="logo-icon">🚀</span>
+        <div>
+          <h1>AAC V2</h1>
+          <p>Workspace Compliance Control</p>
+        </div>
+      </div>
+      <div class="navbar-actions">
+        <span class="version-badge" id="version-badge">v2.109.0</span>
+        <button class="btn-action" onclick="loadData(true)">Refresh Audit</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+    <!-- Sleek Sidebar Navigation -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" onclick="switchTab(this, 'overview')">
+          <span class="nav-icon">📊</span> Overview
+        </button>
+        <button class="nav-btn" onclick="switchTab(this, 'locks')">
+          <span class="nav-icon">🔒</span> Module Locks
+        </button>
+        <button class="nav-btn" onclick="switchTab(this, 'memory')">
+          <span class="nav-icon">🧠</span> Self-Learning
+        </button>
+        <button class="nav-btn" onclick="switchTab(this, 'changelog')">
+          <span class="nav-icon">📦</span> Releases
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <p>Operational Control Panel</p>
+        <span id="compliance-timestamp">Updating...</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- TAB 1: OVERVIEW -->
+      <div id="overview-tab" class="tab-content active">
+        <div class="overview-grid">
+          <!-- Active Issue Card -->
+          <div class="card card-glow">
+            <div class="card-header">
+              <h2>🎫 Active Issue Task list</h2>
+            </div>
+            <div class="card-body">
+              <h3 id="active-issue-title" class="active-title">No Active Issue Checked Out</h3>
+              <p class="branch-info">Branch: <span id="active-issue-branch" class="code-font">unknown</span></p>
+              
+              <div class="tasks-container">
+                <h4>Interactive Subtasks</h4>
+                <div id="active-tasks-list" class="tasks-list">
+                  <!-- dynamic tasks -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compliance Checklist Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>✅ Compliance Audits</h2>
+            </div>
+            <div class="card-body">
+              <div id="compliance-list" class="compliance-grid">
+                <!-- dynamic compliance -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Git Status Card -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h2>📂 Workspace Changes (Git Status)</h2>
+          </div>
+          <div class="card-body">
+            <div id="git-status-list" class="git-status-container">
+              <!-- dynamic status -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: LOCKS -->
+      <div id="locks-tab" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2>🔒 Collaborative Module Locks</h2>
+          </div>
+          <div class="card-body">
+            <div id="locks-list" class="locks-grid">
+              <!-- dynamic locks -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SELF-LEARNING -->
+      <div id="memory-tab" class="tab-content">
+        <div class="memory-grid">
+          <div class="card">
+            <div class="card-header">
+              <h2>🧠 Lessons Learned Ledger</h2>
+            </div>
+            <div class="card-body">
+              <div id="lessons-list" class="lessons-container">
+                <!-- dynamic lessons -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>📜 Synthesized Project Rules</h2>
+            </div>
+            <div class="card-body">
+              <div id="rules-list" class="rules-container">
+                <!-- dynamic rules -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: RELEASES -->
+      <div id="changelog-tab" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <h2>📦 SemVer Release History</h2>
+          </div>
+          <div class="card-body">
+            <div id="changelog-list" class="changelog-container">
+              <!-- dynamic changelog -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

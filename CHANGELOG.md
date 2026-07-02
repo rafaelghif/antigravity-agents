@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.111.0] - 2026-07-02
+
+### 🚀 Features
+- track and commit visual dashboard index.html and style.css static assets
+
+### ⚙️ Chores
+- Track dashboard static assets and stage archived issues deletion (ISSUE-131)
+
+
 ## [2.110.0] - 2026-07-02
 
 ### 🚀 Features
