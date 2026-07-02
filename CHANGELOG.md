@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.103.0] - 2026-07-02
+
+### 🚀 Features
+- implement path-resolved locks, env token lookup, cached branch checks, and GPG/SSH auto-repair switch
+- Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch (ISSUE-123)
+
+
 ## [2.102.0] - 2026-07-02
 
 ### 🚀 Features

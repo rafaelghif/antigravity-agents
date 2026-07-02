@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement core design improvements: path-resolved module locks, environment token lookup, and interactive GPG/SSH auto-repair switch (feat/issue-123) <!-- id: issue-123 -->
 - [x] Fix security vulnerabilities and performance bottlenecks identified in critical audit (feat/issue-122) <!-- id: issue-122 -->
 - [x] Fix Git profile fallback to local user account priority (feat/issue-121) <!-- id: issue-121 -->
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->

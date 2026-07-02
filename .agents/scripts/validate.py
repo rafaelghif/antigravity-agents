@@ -53,6 +53,25 @@ def get_current_branch() -> Optional[str]:
     except Exception:
         return None
 
+_base_branch_cache = None
+
+def get_base_branch() -> str:
+    """Retrieve the base branch name, caching the result to avoid redundant Git calls."""
+    global _base_branch_cache
+    if _base_branch_cache is None:
+        _base_branch_cache = 'main'
+        try:
+            res = subprocess.run(
+                ['git', 'show-ref', 'refs/heads/master'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            if res.returncode == 0:
+                _base_branch_cache = 'master'
+        except Exception:
+            pass
+    return _base_branch_cache
+
 def parse_antigravity_ignore() -> List[re.Pattern]:
     """Parse .antigravityignore and compile glob patterns to regex patterns."""
     patterns = []
@@ -802,10 +821,7 @@ def get_modified_files() -> List[str]:
         
     # 3. Fallback comparison to base branch if diff is empty (e.g. committed changes on feature branch)
     if not files:
-        base_branch = "main"
-        res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if res_master.returncode == 0:
-            base_branch = "master"
+        base_branch = get_base_branch()
             
         res_diff = subprocess.run(['git', 'diff', f'{base_branch}...HEAD', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         if res_diff.returncode == 0:
@@ -1184,18 +1200,22 @@ def audit_module_locks() -> bool:
         if "tests/" in path or "plans/" in path or "memory/" in path or "docs/" in path:
             continue
             
-        base = os.path.basename(path)
-        mod_name = os.path.splitext(base)[0]
+        rel_path = os.path.splitext(path)[0]
+        lock_key = rel_path
         
-        if mod_name in locks:
-            if locks[mod_name] != branch:
-                print_err(f"Module '{mod_name}' (file '{path}') is locked by branch '{locks[mod_name]}', but you are editing from '{branch}'!")
+        # Support backward compatibility for common modules locked by short basename
+        if lock_key not in locks and os.path.basename(rel_path) in locks:
+            lock_key = os.path.basename(rel_path)
+            
+        if lock_key in locks:
+            if locks[lock_key] != branch:
+                print_err(f"Module '{lock_key}' (file '{path}') is locked by branch '{locks[lock_key]}', but you are editing from '{branch}'!")
                 failed = True
             else:
-                print_ok(f"Module '{mod_name}' (file '{path}') is correctly locked by this branch.")
+                print_ok(f"Module '{lock_key}' (file '{path}') is correctly locked by this branch.")
         else:
-            print_err(f"Module '{mod_name}' (file '{path}') is modified, but no lock is acquired! "
-                      f"Please run './helper.sh lock {mod_name}' first.")
+            print_err(f"Module '{lock_key}' (file '{path}') is modified, but no lock is acquired! "
+                      f"Please run './helper.sh lock {lock_key}' first.")
             failed = True
 
     if not failed:
@@ -1256,17 +1276,7 @@ def audit_commit_messages() -> bool:
         return True
 
     # Detect base branch
-    base_branch = 'main'
-    try:
-        res = subprocess.run(
-            ['git', 'show-ref', '--verify', 'refs/heads/master'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        if res.returncode == 0:
-            base_branch = 'master'
-    except Exception:
-        pass
+    base_branch = get_base_branch()
 
     try:
         res = subprocess.run(
