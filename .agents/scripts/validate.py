@@ -1095,13 +1095,18 @@ def audit_unit_tests() -> bool:
                     if not shutil.which(cmd_args[0]) and os.name != 'nt':
                         use_shell = True
                     try:
+                        # Avoid implicit shell execution to prevent command injection.
+                        # Explicitly delegate to /bin/sh if shell context is required.
+                        if use_shell:
+                            run_args = ['/bin/sh', '-c', cmd_str]
+                        else:
+                            run_args = cmd_args
                         res = subprocess.run(
-                            cmd_str if use_shell else cmd_args,
+                            run_args,
                             cwd=resolved_path,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
-                            text=True,
-                            shell=use_shell
+                            text=True
                         )
                         return (name, res.returncode, res.stdout, res.stderr)
                     except Exception as e:
