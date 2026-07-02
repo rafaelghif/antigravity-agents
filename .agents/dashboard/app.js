@@ -1,0 +1,238 @@
+// AAC V2 Dashboard Client Logic
+
+// Global function to switch tabs
+window.switchTab = function(btn, tabId) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+  btn.classList.add('active');
+  const targetTab = document.getElementById(tabId + '-tab');
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+};
+
+// Global function to toggle subtask status
+window.toggleTask = async function(taskIndex, completed) {
+  try {
+    const res = await fetch('/api/task/toggle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        taskIndex: taskIndex,
+        completed: completed
+      })
+    });
+    if (res.ok) {
+      // Reload dashboard data instantly
+      window.loadData(false);
+    } else {
+      console.error('Failed to toggle task status.');
+    }
+  } catch (err) {
+    console.error('Error toggling task:', err);
+  }
+};
+
+// Global function to load dashboard data
+window.loadData = async function(force = false) {
+  const refreshBtns = document.querySelectorAll('.btn-action');
+  refreshBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.textContent = force ? 'Auditing...' : 'Loading...';
+  });
+
+  try {
+    const url = force ? '/api/status?force=true' : '/api/status';
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const data = await res.json();
+    
+    // 1. Version Info
+    const versionBadge = document.getElementById('version-badge');
+    if (versionBadge) {
+      versionBadge.textContent = 'v' + (data.version || '2.109.0');
+    }
+
+    // 2. Compliance Audits
+    const complianceList = document.getElementById('compliance-list');
+    if (complianceList) {
+      complianceList.innerHTML = '';
+      if (data.compliance) {
+        for (const [name, passed] of Object.entries(data.compliance)) {
+          const item = document.createElement('div');
+          item.className = 'compliance-item';
+          item.innerHTML = `
+            <span class="name">${name}</span>
+            <span class="status-badge ${passed ? 'pass' : 'fail'}">${passed ? 'PASS' : 'FAIL'}</span>
+          `;
+          complianceList.appendChild(item);
+        }
+      }
+    }
+    
+    const timestamp = document.getElementById('compliance-timestamp');
+    if (timestamp) {
+      timestamp.textContent = 'Updated: ' + (data.timestamp || 'Just now');
+    }
+
+    // 3. Active Issue Details
+    const issue = data.active_issue || { id: "None", title: "No Active Issue Checked Out", status: "closed", tasks: [], branch: "unknown" };
+    const issueTitleEl = document.getElementById('active-issue-title');
+    if (issueTitleEl) {
+      issueTitleEl.textContent = issue.id !== 'None' ? `${issue.id}: ${issue.title}` : issue.title;
+    }
+    const issueBranchEl = document.getElementById('active-issue-branch');
+    if (issueBranchEl) {
+      issueBranchEl.textContent = issue.branch || 'unknown';
+    }
+
+    // 4. Interactive Tasks
+    const activeTasksList = document.getElementById('active-tasks-list');
+    if (activeTasksList) {
+      activeTasksList.innerHTML = '';
+      if (issue.tasks && issue.tasks.length > 0) {
+        issue.tasks.forEach((task, idx) => {
+          const checked = task.toLowerCase().includes('[x]');
+          const cleanLabel = task.replace(/^-\s+\[\s*[xX\s]\s*\]\s*/, '');
+          const item = document.createElement('div');
+          item.className = 'task-item' + (checked ? ' done' : '');
+          item.innerHTML = `
+            <div class="task-checkbox"></div>
+            <span class="task-label">${cleanLabel}</span>
+          `;
+          item.addEventListener('click', () => {
+            window.toggleTask(idx, !checked);
+          });
+          activeTasksList.appendChild(item);
+        });
+      } else {
+        activeTasksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No tasks defined in the active issue file.</p>';
+      }
+    }
+
+    // 5. Git Status
+    const gitStatusList = document.getElementById('git-status-list');
+    if (gitStatusList) {
+      gitStatusList.innerHTML = '';
+      if (data.git_status && data.git_status.length > 0) {
+        data.git_status.forEach(file => {
+          const isStaged = file.startsWith('M') || file.startsWith('A') || file.startsWith('D') || file.startsWith('R');
+          const item = document.createElement('div');
+          item.className = 'git-file' + (isStaged ? ' staged' : '');
+          item.style.fontFamily = "'Fira Code', monospace";
+          item.style.fontSize = "0.8rem";
+          item.style.padding = "0.3rem 0.5rem";
+          item.style.marginBottom = "0.3rem";
+          item.style.borderRadius = "6px";
+          item.style.background = "rgba(255, 255, 255, 0.02)";
+          item.style.borderLeft = `3px solid ${isStaged ? 'var(--accent-success)' : 'var(--accent-warning)'}`;
+          item.textContent = file;
+          gitStatusList.appendChild(item);
+        });
+      } else {
+        gitStatusList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">Workspace is clean. No uncommitted modifications.</p>';
+      }
+    }
+
+    // 6. Collaborative Module Locks
+    const locksList = document.getElementById('locks-list');
+    if (locksList) {
+      locksList.innerHTML = '';
+      if (data.locks && data.locks.length > 0) {
+        data.locks.forEach(lock => {
+          const item = document.createElement('div');
+          item.className = 'lock-card';
+          item.innerHTML = `
+            <span class="lock-title">${lock.module}</span>
+            <div class="lock-meta">Locked: ${lock.timestamp}</div>
+            <span class="lock-branch-badge">${lock.branch}</span>
+          `;
+          locksList.appendChild(item);
+        });
+      } else {
+        locksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No active module locks found. Run <code>./helper.sh lock &lt;module&gt;</code> to lock.</p>';
+      }
+    }
+
+    // 7. Lessons Learned
+    const lessonsList = document.getElementById('lessons-list');
+    if (lessonsList) {
+      lessonsList.innerHTML = '';
+      if (data.lessons && data.lessons.length > 0) {
+        data.lessons.forEach(lesson => {
+          const item = document.createElement('div');
+          item.className = 'rule-item';
+          item.style.padding = "0.6rem 0.8rem";
+          item.style.background = "rgba(255, 255, 255, 0.02)";
+          item.style.borderRadius = "8px";
+          item.style.borderLeft = "3px solid var(--accent-warning)";
+          item.style.marginBottom = "0.5rem";
+          item.style.fontSize = "0.85rem";
+          item.textContent = lesson;
+          lessonsList.appendChild(item);
+        });
+      } else {
+        lessonsList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No lessons learned recorded yet.</p>';
+      }
+    }
+
+    // 8. Synthesized Rules
+    const rulesList = document.getElementById('rules-list');
+    if (rulesList) {
+      rulesList.innerHTML = '';
+      if (data.rules && data.rules.length > 0) {
+        data.rules.forEach(rule => {
+          const item = document.createElement('div');
+          item.className = 'rule-item';
+          item.style.padding = "0.6rem 0.8rem";
+          item.style.background = "rgba(255, 255, 255, 0.02)";
+          item.style.borderRadius = "8px";
+          item.style.borderLeft = "3px solid var(--accent-primary)";
+          item.style.marginBottom = "0.5rem";
+          item.style.fontSize = "0.85rem";
+          item.textContent = rule;
+          rulesList.appendChild(item);
+        });
+      } else {
+        rulesList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No synthesized rules recorded yet.</p>';
+      }
+    }
+
+    // 9. SemVer Releases
+    const changelogList = document.getElementById('changelog-list');
+    if (changelogList) {
+      changelogList.innerHTML = '';
+      if (data.changelog && data.changelog.length > 0) {
+        data.changelog.forEach(release => {
+          const item = document.createElement('div');
+          item.className = 'changelog-row';
+          item.innerHTML = `
+            <span class="changelog-v">v${release.version}</span>
+            <span class="text-muted" style="font-size: 0.8rem;">${release.date}</span>
+          `;
+          changelogList.appendChild(item);
+        });
+      } else {
+        changelogList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No release history found.</p>';
+      }
+    }
+
+  } catch (err) {
+    console.error('Failed to load status:', err);
+  } finally {
+    refreshBtns.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = 'Refresh Audit';
+    });
+  }
+};
+
+// Auto run on load
+document.addEventListener('DOMContentLoaded', () => {
+  window.loadData(false);
+});

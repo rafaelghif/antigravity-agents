@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.110.0] - 2026-07-02
+
+### 🚀 Features
+- create app.js for AJAX loading, tab switching, and task toggling interactivity
+
+### ⚙️ Chores
+- Modernize local visual dashboard with modular template serving and interactive subtasks checklist auto-update (ISSUE-130)
+
+### 🧪 Tests
+- add unit tests for interactive issue task toggling functionality
+- clear env variables to isolate branch alignment subtask unit tests
+
+
 ## [2.109.0] - 2026-07-02
 
 ### 🚀 Features
