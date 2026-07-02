@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Implement automatic upgrade check for CLI commands (feat/issue-133) <!-- id: issue-133 -->
 - [x] Enhance dashboard security, scalability, and dynamic MIME type resolution for static files (feat/issue-132) <!-- id: issue-132 -->
 - [x] Track dashboard static assets and stage archived issues deletion (feat/issue-131) <!-- id: issue-131 -->
 - [x] Modernize local visual dashboard with modular template serving and interactive subtasks checklist auto-update (feat/issue-130) <!-- id: issue-130 -->
