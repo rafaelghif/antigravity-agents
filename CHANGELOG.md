@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.91.0] - 2026-07-02
+
+### 🚀 Features
+- Elevate public README.md documentation to world-class enterprise standard (ISSUE-111)
+
+
 ## [2.90.0] - 2026-07-02
 
 ### 🚀 Features
