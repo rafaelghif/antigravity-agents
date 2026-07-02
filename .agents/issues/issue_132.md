@@ -22,12 +22,12 @@ created_at: 2026-07-02
   - *Trade-off*: Very safe but completely non-scalable. Adding files (like images, fonts, sub-scripts) requires code edits.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Implement path-traversal guard, mimetypes initialization, and dynamic file serving in `dashboard.py`.
-- [ ] Subtask 2: Add unit tests in `test_dashboard.py` to cover traversal blocking (403/404 responses), dynamic MIME type serving, and default index.html resolution.
-- [ ] Subtask 3: Run validator checks and ensure all tests pass.
+- [x] Subtask 1: Implement path-traversal guard, mimetypes initialization, and dynamic file serving in `dashboard.py`.
+- [x] Subtask 2: Add unit tests in `test_dashboard.py` to cover traversal blocking (403/404 responses), dynamic MIME type serving, and default index.html resolution.
+- [x] Subtask 3: Run validator checks and ensure all tests pass.
 
 ## 3. Acceptance Criteria
-- [ ] Accessing `/`, `/index.html`, `/style.css`, and `/app.js` works successfully.
-- [ ] Traversing out of the dashboard directory (e.g. `../../etc/passwd`) returns a `403 Forbidden` or `404 Not Found` response.
-- [ ] Static files are served with the correct `Content-Type` header (e.g. `text/html`, `text/css`, `application/javascript`).
-- [ ] Local validation guard and unittest suite pass without errors.
+- [x] Accessing `/`, `/index.html`, `/style.css`, and `/app.js` works successfully.
+- [x] Traversing out of the dashboard directory (e.g. `../../etc/passwd`) returns a `403 Forbidden` or `404 Not Found` response.
+- [x] Static files are served with the correct `Content-Type` header (e.g. `text/html`, `text/css`, `application/javascript`).
+- [x] Local validation guard and unittest suite pass without errors.
