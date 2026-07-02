@@ -80,6 +80,10 @@ def interactive_select(options, title="Select an option:", default_idx=0):
         return None
 
     is_testing = "unittest" in sys.modules or "pytest" in sys.modules or os.environ.get("AAC_TEST_MODE") == "1"
+    is_non_interactive = (os.getenv("ANTIGRAVITY_AGENT") == "1" or os.getenv("ANTIGRAVITY_NONINTERACTIVE") == "1") and not is_testing
+    if is_non_interactive:
+        return options[default_idx] if 0 <= default_idx < len(options) else (options[0] if options else None)
+
     if not sys.stdin.isatty() or is_testing:
         # Fallback to standard numbered input
         print(f"\n{title}")

@@ -201,7 +201,9 @@ def extract_lessons_from_commits(base_branch="main"):
         return []
 
 def suggest_and_record_lessons(base_branch="main"):
-    if not sys.stdin.isatty():
+    is_testing = "unittest" in sys.modules or "pytest" in sys.modules or os.environ.get("AAC_TEST_MODE") == "1"
+    is_non_interactive = not sys.stdin.isatty() or ((os.getenv("ANTIGRAVITY_AGENT") == "1" or os.getenv("ANTIGRAVITY_NONINTERACTIVE") == "1") and not is_testing)
+    if is_non_interactive:
         print("🧠 [LEARN] Auto-Lessons Extractor: Non-interactive mode detected. Auto-extracting lessons...")
         # 1. Analyze git diff for matches
         suggestions = analyze_diff(base_branch)

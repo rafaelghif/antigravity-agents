@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.86.0] - 2026-07-02
+
+### 🚀 Features
+- implement automatic non-interactive mode and commit message format validator
+- Implement Automatic Non-Interactive Mode Detection and Commit Message Validation (ISSUE-106)
+
+
 ## [2.85.0] - 2026-07-02
 
 ### 🚀 Features
