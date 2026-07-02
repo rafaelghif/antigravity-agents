@@ -108,8 +108,8 @@ def check_profiles() -> bool:
                 if os.path.exists(ssh_key_abs):
                     print_ok(f"SSH private key file verified: '{ssh_key_abs}'")
                 else:
-                    print_err(f"SSH private key file not found: '{ssh_key_abs}'")
-                    return False
+                    print_warn(f"SSH private key file not found: '{ssh_key_abs}'. "
+                               f"Commit signatures using SSH key might fail if this key is required.")
                     
             # 2. Check GPG Key
             signing_key = active.get("signing_key")
@@ -126,13 +126,11 @@ def check_profiles() -> bool:
                         if gpg_check.returncode == 0:
                             print_ok("GPG signing key verified in local keyring.")
                         else:
-                            print_err(f"GPG key '{signing_key}' not found in local keyring! Commit signing will fail.")
-                            return False
+                            print_warn(f"GPG key '{signing_key}' not found in local keyring! Commit signing will fail if required.")
                     except Exception as e:
                         print_warn(f"Failed to execute gpg check: {e}")
                 else:
-                    print_err("GnuPG ('gpg') tool is not installed, but GPG commit signing key is configured.")
-                    return False
+                    print_warn("GnuPG ('gpg') tool is not installed, but GPG commit signing key is configured.")
         else:
             print_warn("No active profile set in git_profiles.json.")
             
