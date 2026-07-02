@@ -19,5 +19,6 @@ __pycache__/
 .agents/active_context.md
 # <<< ANTIGRAVITY AGENT END >>>
 .agents/cooldowns.json
+.agents/sync_cache.json
 /sample
 .agents/logs/

@@ -89,5 +89,36 @@ class TestIssueCommand(unittest.TestCase):
         self.assertIn("github_url: \"https://github.com/owner/repo/issues/123\"", written_data)
         self.assertIn("github_number: 123", written_data)
 
+import git_api
+
+class TestGitApiCaching(unittest.TestCase):
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='{"last_sync_time": 1000.0, "cached_issues": [{"id": 1, "title": "Cached"}]}')
+    @patch('time.time', return_value=1050.0)
+    @patch('git_api.get_pat', return_value="dummy-pat")
+    @patch('git_api.get_repo_info', return_value="owner/repo")
+    @patch('urllib.request.urlopen')
+    def test_fetch_github_issues_cached(self, mock_urlopen, mock_repo, mock_pat, mock_time, mock_file, mock_exists):
+        mock_exists.return_value = True
+        res = git_api.fetch_github_issues()
+        self.assertEqual(res, [{"id": 1, "title": "Cached"}])
+        mock_urlopen.assert_not_called()
+
+    @patch('os.path.exists', return_value=False)
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('time.time', return_value=1000.0)
+    @patch('git_api.get_pat', return_value="dummy-pat")
+    @patch('git_api.get_repo_info', return_value="owner/repo")
+    @patch('urllib.request.urlopen')
+    def test_fetch_github_issues_uncached(self, mock_urlopen, mock_repo, mock_pat, mock_time, mock_file, mock_exists):
+        mock_res = MagicMock()
+        mock_res.read.return_value = b'[{"id": 2, "title": "Fresh"}]'
+        mock_urlopen.return_value.__enter__.return_value = mock_res
+        
+        res = git_api.fetch_github_issues()
+        self.assertEqual(res, [{"id": 2, "title": "Fresh"}])
+        mock_urlopen.assert_called_once()
+        mock_file().write.assert_called()
+
 if __name__ == '__main__':
     unittest.main()

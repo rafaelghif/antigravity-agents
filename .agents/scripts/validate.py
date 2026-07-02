@@ -677,8 +677,42 @@ def run_project_lint_command(project_name: str, project_path: str, lint_command:
     print_ok(f"Custom lint check for '{project_name}' passed.")
     return True
 
+def auto_format_file(file_path: str) -> None:
+    """Run auto-formatters (black, prettier, php-cs-fixer) on the file if available."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".py":
+        if shutil.which("black"):
+            subprocess.run(['black', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif shutil.which("yapf"):
+            subprocess.run(['yapf', '-i', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+    elif ext == ".php":
+        if shutil.which("php-cs-fixer"):
+            subprocess.run(['php-cs-fixer', 'fix', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif shutil.which("phpcbf"):
+            subprocess.run(['phpcbf', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+    elif ext in (".js", ".jsx", ".ts", ".tsx"):
+        prettier_bin = None
+        curr_dir = os.path.dirname(os.path.abspath(file_path))
+        while curr_dir and curr_dir != os.path.dirname(curr_dir):
+            bin_path = os.path.join(curr_dir, "node_modules", ".bin", "prettier")
+            if os.path.exists(bin_path):
+                prettier_bin = bin_path
+                break
+            curr_dir = os.path.dirname(curr_dir)
+            
+        if not prettier_bin:
+            prettier_bin = shutil.which("prettier")
+            
+        if prettier_bin:
+            subprocess.run([prettier_bin, '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif shutil.which("npx"):
+            subprocess.run(['npx', 'prettier', '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
 def auto_lint_file(file_path: str) -> bool:
     """Run default syntax and lint checks based on file extension."""
+    auto_format_file(file_path)
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".py":
         try:
@@ -909,7 +943,7 @@ def audit_module_locks() -> bool:
         print_ok(f"On base branch '{branch}' (skipping lock compliance check).")
         return True
 
-    staged_files = []
+    modified_files = set()
     try:
         res = subprocess.run(
             ['git', 'diff', '--cached', '--name-only'],
@@ -918,7 +952,20 @@ def audit_module_locks() -> bool:
             text=True,
             check=True
         )
-        staged_files = [line.strip() for line in res.stdout.splitlines() if line.strip()]
+        for line in res.stdout.splitlines():
+            if line.strip():
+                modified_files.add(line.strip())
+                
+        res_unstaged = subprocess.run(
+            ['git', 'diff', '--name-only'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True
+        )
+        for line in res_unstaged.stdout.splitlines():
+            if line.strip():
+                modified_files.add(line.strip())
     except Exception:
         pass
 
@@ -932,7 +979,7 @@ def audit_module_locks() -> bool:
             pass
 
     failed = False
-    for path in staged_files:
+    for path in sorted(modified_files):
         if path.endswith(('.md', '.json', '.txt', '.sh', '.ps1', '.gitignore', '.antigravityignore', '.example', '.template')):
             continue
         if "tests/" in path or "plans/" in path or "memory/" in path or "docs/" in path:
@@ -943,12 +990,12 @@ def audit_module_locks() -> bool:
         
         if mod_name in locks:
             if locks[mod_name] != branch:
-                print_err(f"Module '{mod_name}' (file '{path}') is locked by branch '{locks[mod_name]}', but you are committing from '{branch}'!")
+                print_err(f"Module '{mod_name}' (file '{path}') is locked by branch '{locks[mod_name]}', but you are editing from '{branch}'!")
                 failed = True
             else:
                 print_ok(f"Module '{mod_name}' (file '{path}') is correctly locked by this branch.")
         else:
-            print_err(f"Module '{mod_name}' (file '{path}') is staged for commit, but no lock is acquired! "
+            print_err(f"Module '{mod_name}' (file '{path}') is modified, but no lock is acquired! "
                       f"Please run './helper.sh lock {mod_name}' first.")
             failed = True
 

@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.88.0] - 2026-07-02
+
+### 🚀 Features
+- implement lock checks for unstaged changes, auto-formatters, and sync caching
+- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
+
+
+## [2.87.0] - 2026-07-02
+
+### 🚀 Features
+- implement lock checks for unstaged changes, auto-formatters, and sync caching
+- Implement 10/10 Workspace Optimizations for Strictness, Quality, Performance, and Token Efficiency (ISSUE-103)
+
+
 ## [2.86.0] - 2026-07-02
 
 ### 🚀 Features
