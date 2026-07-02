@@ -117,5 +117,36 @@ class TestDashboardCommand(unittest.TestCase):
         handler.wfile.seek(0)
         self.assertIn(b"Not Found", handler.wfile.read())
 
+    @patch('dashboard.run_silent_validation')
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('subprocess.run')
+    def test_get_dashboard_data_async_force(self, mock_sub, mock_file, mock_exists, mock_silent_val):
+        mock_sub.return_value = MagicMock(returncode=0, stdout="feat/issue-126")
+        mock_file.return_value.read.return_value = "- **Version:** 2.106.0"
+        mock_silent_val.return_value = {"Critical Files": True}
+        
+        # Reset global state to clean state
+        dashboard.audit_in_progress = False
+        
+        # Force audit check - should spawn a thread and return immediately
+        import time
+        data = dashboard.get_dashboard_data(force=True)
+        
+        # Immediate auditing state should be True
+        self.assertTrue(data["auditing"])
+        
+        # Wait up to 1 second for the background thread to finish
+        retries = 10
+        while dashboard.audit_in_progress and retries > 0:
+            time.sleep(0.1)
+            retries -= 1
+            
+        self.assertFalse(dashboard.audit_in_progress)
+        
+        # Calling get_dashboard_data now should return auditing: False
+        data_after = dashboard.get_dashboard_data(force=False)
+        self.assertFalse(data_after["auditing"])
+
 if __name__ == '__main__':
     unittest.main()
