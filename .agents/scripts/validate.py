@@ -1319,6 +1319,27 @@ def audit_commit_messages() -> bool:
             failed = True
             continue
 
+        # Forbid generic/placeholder subjects that only mention issue IDs or generic words
+        parts = subject.split(':', 1)
+        description = parts[1].strip() if len(parts) > 1 else ""
+        generic_patterns = [
+            r'^(?:fix|chore|feat|refactor|test|docs)?\s*(?:issue|task)-?\d+$',
+            r'^close\s*(?:issue|task)-?\d+$',
+            r'^fix\s+bugs?$',
+            r'^updates?$',
+            r'^fixes?$'
+        ]
+        is_generic = False
+        for gp in generic_patterns:
+            if re.match(gp, description, re.IGNORECASE):
+                is_generic = True
+                break
+        if is_generic:
+            print_err(f"Commit subject is too generic: '{subject}'")
+            print_err("  Please provide a descriptive subject summarizing what was changed (e.g. 'fix(security): resolve command injection').")
+            failed = True
+            continue
+
         # Check Refs trailer line
         if not refs_pattern.search(commit):
             print_err(f"Commit message is missing 'Refs: <issue-id>' trailer: '{subject}'")
