@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.85.0] - 2026-07-02
+
+### 🚀 Features
+- implement strict task splitting and context insulation rules
+- Implement Strict Task Splitting and Context Insulation Protocols in Working Guidelines (ISSUE-105)
+
+
 ## [2.84.0] - 2026-07-02
 
 ### 🚀 Features
