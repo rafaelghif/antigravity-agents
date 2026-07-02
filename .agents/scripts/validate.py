@@ -1149,6 +1149,10 @@ def audit_unit_tests() -> bool:
 # ==========================================================
 def audit_module_locks() -> bool:
     print("\n[9/9] Auditing Module Lock Compliance...")
+    if os.environ.get("SKIP_LOCK_AUDIT") == "true" or os.environ.get("AAC_BYPASS_LOCKS") == "1":
+        print_warn("Module Lock Compliance check bypassed by user request.")
+        return True
+
     branch = get_current_branch()
     if not branch:
         print_warn("Not inside a git repository or git command failed.")

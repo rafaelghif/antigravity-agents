@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.115.0] - 2026-07-02
+
+### 🚀 Features
+- allow bypassing lock compliance check via environment variables
+
+### ⚙️ Chores
+- Add lock compliance bypass switch for human developers (ISSUE-135)
+
+
 ## [2.114.0] - 2026-07-02
 
 ### 🚀 Features
