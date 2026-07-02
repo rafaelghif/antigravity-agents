@@ -331,7 +331,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.94.0"
+    AAC_VERSION = "2.95.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
@@ -460,4 +460,20 @@ This board tracks active development tasks.
             print("Note: To set up your credentials rotation, configure '.agents/git_profiles.json'")
             print("or run: ./helper.sh profile add <name> <email>")
         print("==========================================================")
+
+    # 9. Next Steps Configuration Guide
+    print("\n==========================================================")
+    print("   Next Steps: Workspace Configuration Guide             ")
+    print("==========================================================")
+    print("1. Git Identity Rotation (Avoid commits with wrong emails):")
+    print("   Verify '.agents/git_profiles.json' exists. To add new profiles:")
+    print("     ./helper.sh profile add <name> <email>")
+    print("2. Monorepos & Multi-Project Validation:")
+    print("   To run tests across multiple projects inside this repository,")
+    print("   copy '.agents/projects.example' to '.agents/projects.json'")
+    print("   and configure your project paths.")
+    print("3. Claim a Task and Start Coding:")
+    print("   Open '.agents/tasks/board.md' to see available issues.")
+    print("   Checkout a task using: ./helper.sh issue checkout <task-id>")
+    print("==========================================================")
 

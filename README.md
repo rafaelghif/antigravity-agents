@@ -98,7 +98,12 @@ The installer automatically triggers the reconnaissance script (`.agents/scripts
 - Replaces the placeholders in `AGENTS.md` with your detected languages and tools.
 - Automatically writes test/build rules in `.agents/rules.md`.
 
-### 3. Start Coding with the Agent
+### 3. Configure Profiles & Sub-projects (Optional)
+To set up local developer author signatures or configure monorepo sub-project validation:
+- **Developer Identities**: Edit `.agents/git_profiles.json` (created automatically from `git_profiles.example`) to rotate author names, emails, and SSH/GPG keys, or use `./helper.sh profile add`.
+- **Monorepos & Sub-projects**: Copy `.agents/projects.example` to `.agents/projects.json` and configure relative paths, stacks, and individual testing/linting commands for each subdirectory component.
+
+### 4. Start Coding with the Agent
 When prompting your agent, refer to the master instruction guidelines:
 > "Read AGENTS.md and align with our workspace layout, rules, and memory ledger."
 
