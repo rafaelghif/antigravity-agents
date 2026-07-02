@@ -55,5 +55,24 @@ class TestDashboardCommand(unittest.TestCase):
         self.assertIn("My Synthesized Rule", data["rules"])
         self.assertTrue(data["compliance"]["Critical Files"])
 
+    @patch('subprocess.run')
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('issue.sync_board_with_issues')
+    def test_toggle_issue_task(self, mock_sync, mock_file_open, mock_exists, mock_sub):
+        mock_sub.return_value = MagicMock(returncode=0, stdout="feat/issue-130\n")
+        
+        file_content = "---\nid: issue-130\ntitle: \"Modernize Dashboard\"\nstatus: open\n---\n- [ ] Subtask 1\n- [ ] Subtask 2"
+        mock_file_open.return_value.read.return_value = file_content
+        
+        success = dashboard.toggle_issue_task(1, True)
+        self.assertTrue(success)
+        
+        # Verify it wrote back the content with [x] for Subtask 2
+        write_args = "".join(call.args[0] for call in mock_file_open.return_value.write.call_args_list)
+        self.assertIn("- [x] Subtask 2", write_args)
+        self.assertIn("- [ ] Subtask 1", write_args)
+        mock_sync.assert_called_once()
+
 if __name__ == '__main__':
     unittest.main()
