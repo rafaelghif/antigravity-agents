@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.84.0] - 2026-07-02
+
+### 🚀 Features
+- implement multi-language linting and graceful API fallback warnings
+- Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (ISSUE-101)
+
+
+## [2.83.0] - 2026-07-02
+
+### 🚀 Features
+- implement multi-language linting and graceful API fallback warnings
+- Implement Multi-Language Linting, Graceful Sync Fallbacks, and API Rotation Enhancements (ISSUE-101)
+
+
 ## [2.82.0] - 2026-07-02
 
 ### 🚀 Features

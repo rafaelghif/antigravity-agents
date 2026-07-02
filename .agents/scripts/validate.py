@@ -654,28 +654,132 @@ def get_modified_files() -> List[str]:
 # ==========================================================
 # 7. Static Code Linting / Compile Check
 # ==========================================================
+def run_project_lint_command(project_name: str, project_path: str, lint_command: str) -> bool:
+    """Run a custom lint command for a sub-project."""
+    print(f"Running custom lint command for sub-project '{project_name}'...")
+    import shlex
+    cmd_args = shlex.split(lint_command)
+    use_shell = False
+    if not shutil.which(cmd_args[0]) and os.name != 'nt':
+        use_shell = True
+        
+    resolved_path = os.path.abspath(project_path)
+    res = subprocess.run(
+        lint_command if use_shell else cmd_args,
+        cwd=resolved_path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    if res.returncode != 0:
+        print_err(f"Custom lint command for '{project_name}' failed!\nStdout:\n{res.stdout}\nStderr:\n{res.stderr}")
+        return False
+    print_ok(f"Custom lint check for '{project_name}' passed.")
+    return True
+
+def auto_lint_file(file_path: str) -> bool:
+    """Run default syntax and lint checks based on file extension."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".py":
+        try:
+            py_compile.compile(file_path, doraise=True)
+            if shutil.which("flake8"):
+                res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
+                if res.returncode != 0:
+                    print_err(f"flake8 violations in '{file_path}':\n{res.stdout}")
+                    return False
+            return True
+        except py_compile.PyCompileError as e:
+            print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
+            return False
+            
+    elif ext == ".php":
+        if shutil.which("php"):
+            res = subprocess.run(['php', '-l', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"PHP syntax check failed for '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+            return True
+        return True
+        
+    elif ext in (".js", ".jsx", ".ts", ".tsx"):
+        eslint_bin = None
+        curr_dir = os.path.dirname(os.path.abspath(file_path))
+        while curr_dir and curr_dir != os.path.dirname(curr_dir):
+            bin_path = os.path.join(curr_dir, "node_modules", ".bin", "eslint")
+            if os.path.exists(bin_path):
+                eslint_bin = bin_path
+                break
+            curr_dir = os.path.dirname(curr_dir)
+            
+        if not eslint_bin:
+            eslint_bin = shutil.which("eslint")
+            
+        if eslint_bin:
+            res = subprocess.run([eslint_bin, file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
+                return False
+        elif shutil.which("npx"):
+            res = subprocess.run(['npx', 'eslint', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0 and "eslint" in (res.stderr or res.stdout).lower():
+                print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
+                return False
+        return True
+        
+    return True
+
 def audit_static_linting() -> bool:
     print("\n[7/9] Auditing Static Syntax Compilation...")
     failed = False
     antigravity_patterns = parse_antigravity_ignore()
     modified_files = get_modified_files()
     
+    projects = []
+    projects_file = ".agents/projects.json"
+    if os.path.exists(projects_file):
+        try:
+            with open(projects_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            projects = data.get("projects", [])
+        except Exception:
+            pass
+
     target_files = []
+    custom_lint_projects = {}
+    
     if modified_files:
-        # Check only modified python scripts
         for f in modified_files:
-            if f.endswith(".py") and f.startswith(".agents/scripts/") and os.path.exists(f):
-                if not is_ignored_by_antigravity(f, antigravity_patterns):
+            if is_ignored_by_antigravity(f, antigravity_patterns) or not os.path.exists(f):
+                continue
+                
+            matched_project = None
+            abs_f = os.path.abspath(f)
+            for p in projects:
+                p_path = p.get("path")
+                if p_path:
+                    abs_p_path = os.path.abspath(p_path)
+                    if abs_f.startswith(abs_p_path + os.sep) or abs_f == abs_p_path:
+                        matched_project = p
+                        break
+                        
+            if matched_project:
+                lint_cmd = matched_project.get("lint_command")
+                if lint_cmd:
+                    custom_lint_projects[matched_project["name"]] = (matched_project["path"], lint_cmd)
+                else:
                     target_files.append(f)
-        
-        if target_files:
-            print(f"Incremental validation active. Auditing {len(target_files)} modified Python files.")
+            else:
+                if f.endswith(".py") and f.startswith(".agents/scripts/"):
+                    target_files.append(f)
+                    
+        if target_files or custom_lint_projects:
+            print(f"Incremental validation active. Auditing {len(target_files)} file(s) and {len(custom_lint_projects)} project(s).")
         else:
-            print("Incremental validation active. No Python files modified. Skipping static check.")
+            print("Incremental validation active. No files requiring lint checks modified. Skipping static check.")
             return True
     else:
-        # Baseline audit
-        print("No active git modifications detected. Performing baseline audit on all scripts...")
+        print("No active git modifications detected. Performing baseline audit...")
         scripts_dir = ".agents/scripts"
         if os.path.exists(scripts_dir):
             for root, dirs, files in os.walk(scripts_dir):
@@ -686,20 +790,19 @@ def audit_static_linting() -> bool:
                         if not is_ignored_by_antigravity(file_path, antigravity_patterns):
                             target_files.append(file_path)
                             
-    for file_path in target_files:
-        try:
-            py_compile.compile(file_path, doraise=True)
-        except py_compile.PyCompileError as e:
-            print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
+        for p in projects:
+            lint_cmd = p.get("lint_command")
+            if lint_cmd:
+                custom_lint_projects[p["name"]] = (p["path"], lint_cmd)
+
+    for name, (path, cmd) in custom_lint_projects.items():
+        if not run_project_lint_command(name, path, cmd):
             failed = True
-            continue
             
-        if shutil.which("flake8"):
-            res = subprocess.run(['flake8', file_path], stdout=subprocess.PIPE, text=True)
-            if res.returncode != 0:
-                print_err(f"flake8 style violations found in '{file_path}':\n{res.stdout}")
-                failed = True
-                
+    for file_path in target_files:
+        if not auto_lint_file(file_path):
+            failed = True
+            
     if not failed:
         print_ok("Static syntax compilation and style audits passed.")
     return not failed
