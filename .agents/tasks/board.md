@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Fix security vulnerabilities and performance bottlenecks identified in critical audit (feat/issue-122) <!-- id: issue-122 -->
 
 ## Done
 - [x] Fix Git profile fallback to local user account priority (feat/issue-121) <!-- id: issue-121 -->

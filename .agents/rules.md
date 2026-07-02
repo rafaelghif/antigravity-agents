@@ -26,6 +26,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Strict Task Splitting & Context Insulation**: Before starting any task, the agent MUST split the work into small, atomic subtasks in the issue specification. The agent MUST work on only one subtask at a time, running validation and committing after each atomic step, and running `./helper.sh context optimize` to prune stale history and avoid hallucination.
 
 ## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: git]** Prevent applying placeholder Git profiles to local Git config when user-defined profiles are unconfigured, avoiding pollution of local Git author config
 - **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
 - **[Learning: Testing / Mocking]** Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[Learning: Path Handling / OS Compatibility]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
