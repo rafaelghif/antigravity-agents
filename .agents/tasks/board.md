@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Optimize prompt token footprint, prevent duplicate self-learning rules, and prune redundant CLI context (feat/issue-126) <!-- id: issue-126 -->
 
 ## Done
 - [x] Improve commit message rules in AGENTS.md and rules.md to enforce descriptive subjects (feat/issue-125) <!-- id: issue-125 -->
