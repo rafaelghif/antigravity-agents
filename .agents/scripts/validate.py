@@ -870,7 +870,7 @@ def auto_format_file(file_path: str) -> None:
         if prettier_bin:
             subprocess.run([prettier_bin, '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif shutil.which("npx"):
-            subprocess.run(['npx', 'prettier', '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['npx', '--no-install', 'prettier', '--write', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def auto_lint_file(file_path: str) -> bool:
     """Run default syntax and lint checks based on file extension."""
@@ -917,7 +917,7 @@ def auto_lint_file(file_path: str) -> bool:
                 print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
                 return False
         elif shutil.which("npx"):
-            res = subprocess.run(['npx', 'eslint', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            res = subprocess.run(['npx', '--no-install', 'eslint', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if res.returncode != 0 and "eslint" in (res.stderr or res.stdout).lower():
                 print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
                 return False
