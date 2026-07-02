@@ -1,7 +1,7 @@
 ---
 id: issue-127
 title: "Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 ---
