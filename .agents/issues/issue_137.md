@@ -23,14 +23,14 @@ created_at: 2026-07-02
   - *Trade-off*: Still risks long-running requests timing out or returning partial/error data on slow test runs. Doesn't solve the auto-update requirement.
 
 ## 2. Implementation Subtasks
-- [ ] Subtask 1: Define lock variables and refactor `get_dashboard_data` to trigger `run_silent_validation` in a separate thread on `force=true`.
-- [ ] Subtask 2: Update `app.js` to handle `auditing` status in the response and introduce focus-aware periodic polling.
-- [ ] Subtask 3: Write unit tests in `test_dashboard.py` asserting non-blocking behavior.
-- [ ] Subtask 4: Verify the entire validation guard passes cleanly.
+- [x] Subtask 1: Define lock variables and refactor `get_dashboard_data` to trigger `run_silent_validation` in a separate thread on `force=true`.
+- [x] Subtask 2: Update `app.js` to handle `auditing` status in the response and introduce focus-aware periodic polling.
+- [x] Subtask 3: Write unit tests in `test_dashboard.py` asserting non-blocking behavior.
+- [x] Subtask 4: Verify the entire validation guard passes cleanly.
 
 ## 3. Acceptance Criteria
-- [ ] Forced audit requests return immediately (within milliseconds) instead of hanging.
-- [ ] Clicking "Refresh Audit" disables the button and updates the label to "Auditing...".
-- [ ] Once background validation completes, the dashboard automatically updates and re-enables the button on the next poll.
-- [ ] Tab auto-updates every 5 seconds when active, reflecting external git/task modifications.
-- [ ] Dashboard test suites pass successfully.
+- [x] Forced audit requests return immediately (within milliseconds) instead of hanging.
+- [x] Clicking "Refresh Audit" disables the button and updates the label to "Auditing...".
+- [x] Once background validation completes, the dashboard automatically updates and re-enables the button on the next poll.
+- [x] Tab auto-updates every 5 seconds when active, reflecting external git/task modifications.
+- [x] Dashboard test suites pass successfully.
