@@ -92,8 +92,8 @@ def run(args: List[str]) -> None:
         sys.exit(1)
 
 def check_and_run_auto_upgrade() -> None:
-    # 1. Check if disabled via environment variable
-    if os.environ.get("AAC_DISABLE_AUTO_UPDATE") == "true":
+    # 1. Check if disabled via environment variable or during audit test validation
+    if os.environ.get("AAC_DISABLE_AUTO_UPDATE") == "true" or os.environ.get("IN_AUDIT_TEST") == "true":
         return
 
     # 2. Check rate limiting (once every 30 minutes / 1800 seconds)
