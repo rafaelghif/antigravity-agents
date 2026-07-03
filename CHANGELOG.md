@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.120.0] - 2026-07-04
+
+### 🚀 Features
+- implement hybrid rule clustering and threshold archiving
+- Consolidate and optimize rules to reduce token footprint (ISSUE-143)
+
+
 ## [2.119.0] - 2026-07-04
 
 ### 🚀 Features

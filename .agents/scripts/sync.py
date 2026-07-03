@@ -90,6 +90,20 @@ def sync_adrs_to_architecture_md():
         af.write(new_content)
     print("Successfully synchronized ADR registry in architecture.md.")
 
+def get_canonical_category(title: str) -> str:
+    t = title.lower()
+    if any(k in t for k in ["test", "mock", "leak"]):
+        return "Testing / Mocking"
+    if any(k in t for k in ["path", "os ", "compat", "powershell", "installer"]):
+        return "OS Compatibility / PowerShell"
+    if any(k in t for k in ["git", "security", "credential", "gpg", "ssh"]):
+        return "Git & Security"
+    if "performance" in t:
+        return "Performance"
+    if any(k in t for k in ["token", "context", "restruct", "structure"]):
+        return "Workspace Optimization"
+    return title.strip()
+
 def sync_lessons_to_rules():
     lessons_file = ".agents/memory/lessons-learned.md"
     rules_file = ".agents/rules.md"
@@ -102,7 +116,7 @@ def sync_lessons_to_rules():
         with open(lessons_file, 'r', encoding='utf-8') as f:
             content = f.read()
             
-        lessons = []
+        parsed_lessons = []
         in_lessons_section = False
         for line in content.split('\n'):
             line_strip = line.strip()
@@ -113,31 +127,71 @@ def sync_lessons_to_rules():
                 break
                 
             if in_lessons_section and line_strip.startswith('- '):
-                bullet = re.sub(r'^-\s+(\*\*\[\d{4}-\d{2}-\d{2}\]\*\*\s*)?', '', line_strip)
+                # Extract date if present, e.g. **[2026-07-02]**
+                date_match = re.search(r'^\s*-\s+\*\*\[(\d{4}-\d{2}-\d{2})\]\*\*', line)
+                date_str = date_match.group(1) if date_match else "1970-01-01"
                 
-                match = re.match(r'^\*\*([^*]+)\*\*:\s*(.*)', bullet)
+                # Strip prefix bullet and date to get the rest
+                rest = re.sub(r'^-\s+(\*\*\[\d{4}-\d{2}-\d{2}\]\*\*\s*)?', '', line_strip)
+                
+                # Match title/category and description, e.g. **Category**: Description
+                match = re.match(r'^\*\*([^*]+)\*\*:\s*(.*)', rest)
                 if match:
-                    title = match.group(1).strip()
+                    cat = match.group(1).strip()
                     desc = match.group(2).strip()
-                    lessons.append(f"- **[Learning: {title}]** {desc}")
+                    parsed_lessons.append({
+                        "date": date_str,
+                        "category": cat,
+                        "description": desc
+                    })
                 else:
-                    lessons.append(f"- {bullet}")
+                    # Fallback if the format is not standard
+                    parsed_lessons.append({
+                        "date": date_str,
+                        "category": "General",
+                        "description": rest
+                    })
                     
-        if not lessons:
+        if not parsed_lessons:
             print("No lessons found in lessons-learned.md to synthesize.")
             return
 
-        # Deduplicate lessons while preserving order
-        unique_lessons = []
-        for l in lessons:
-            if l not in unique_lessons:
-                unique_lessons.append(l)
-        lessons = unique_lessons
+        # Cluster lessons
+        clustered = {} # canonical_category -> {"max_date": str, "descriptions": []}
+        for item in parsed_lessons:
+            canon_cat = get_canonical_category(item["category"])
+            if canon_cat not in clustered:
+                clustered[canon_cat] = {
+                    "max_date": item["date"],
+                    "descriptions": []
+                }
+            else:
+                if item["date"] > clustered[canon_cat]["max_date"]:
+                    clustered[canon_cat]["max_date"] = item["date"]
+            
+            desc = item["description"]
+            if desc not in clustered[canon_cat]["descriptions"]:
+                clustered[canon_cat]["descriptions"].append(desc)
+
+        # Sort canonical categories by max_date descending
+        sorted_categories = sorted(clustered.keys(), key=lambda c: clustered[c]["max_date"], reverse=True)
+
+        active_rules = []
+        archived_rules = []
+        
+        for idx, cat in enumerate(sorted_categories):
+            descs = clustered[cat]["descriptions"]
+            combined_desc = "; ".join(descs)
+            rule_str = f"- **[Learning: {cat}]** {combined_desc}"
+            if idx < 5:
+                active_rules.append(rule_str)
+            else:
+                archived_rules.append(rule_str)
             
         with open(rules_file, 'r', encoding='utf-8') as f:
             rules_content = f.read()
             
-        synthesized_block = "\n## 5. Synthesized Rules (Self-Learning Memory)\n" + "\n".join(lessons) + "\n"
+        synthesized_block = "\n## 5. Synthesized Rules (Self-Learning Memory)\n" + "\n".join(active_rules) + "\n"
         
         if "## 5. Synthesized Rules" in rules_content:
             pattern = r'## 5\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$'
@@ -149,6 +203,43 @@ def sync_lessons_to_rules():
             f.write(new_rules_content)
             
         print("Successfully synchronized synthesized rules in rules.md.")
+
+        # Archive pruned rules to historical file
+        if archived_rules:
+            archive_file = ".agents/memory/lessons-archive.md"
+            existing_archive_rules = []
+            if os.path.exists(archive_file):
+                try:
+                    with open(archive_file, 'r', encoding='utf-8') as af:
+                        archive_content = af.read()
+                    for line in archive_content.split('\n'):
+                        line_strip = line.strip()
+                        if line_strip.startswith('- **[Learning:'):
+                            existing_archive_rules.append(line_strip)
+                except Exception:
+                    pass
+            
+            # Merge and deduplicate
+            all_archived = list(existing_archive_rules)
+            for r in archived_rules:
+                if r not in all_archived:
+                    all_archived.append(r)
+            
+            archive_header = """# AAC V2 Lessons Learned Archive
+
+This file stores archived historical lessons learned that have been pruned from the active prompt context to optimize token overhead.
+
+## Archived Lessons
+"""
+            archive_body = "\n".join(all_archived) + "\n"
+            try:
+                os.makedirs(os.path.dirname(archive_file), exist_ok=True)
+                with open(archive_file, 'w', encoding='utf-8') as af:
+                    af.write(archive_header + archive_body)
+                print(f"Successfully archived {len(archived_rules)} rules to {archive_file}.")
+            except Exception as e:
+                print(f"Warning: Failed to write rules archive: {e}")
+
     except Exception as e:
         print(f"Error synchronizing lessons to rules: {e}")
 

@@ -120,7 +120,15 @@ Problem status: open
     def test_sync_lessons_to_rules(self, mock_exists):
         import sync
         
-        lessons_content = "## Lessons Learned\n- **[2026-06-27]** **Token Efficiency**: Always specify file read ranges\n"
+        lessons_content = """## Lessons Learned
+- **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated
+- **[2026-06-27]** **Python Mock Leaks**: When mocking sys.exit in Python
+- **[2026-07-01]** **OS Compatibility / PowerShell**: Use cross-platform path helpers
+- **[2026-06-30]** **Git & Security**: Validate GPG keys
+- **[2026-06-29]** **Performance**: Optimize validators
+- **[2026-06-28]** **Workspace Optimization**: Specify read ranges
+- **[2026-06-25]** **Dummy Category**: This is a test dummy rule
+"""
         rules_content = "# Project Rules\n"
         
         written_data = {}
@@ -132,6 +140,8 @@ Problem status: open
             if 'r' in mode:
                 if "lessons-learned.md" in filename_str:
                     mock_file_handle.read.return_value = lessons_content
+                elif "lessons-archive.md" in filename_str:
+                    mock_file_handle.read.return_value = ""
                 else:
                     mock_file_handle.read.return_value = rules_content
             elif 'w' in mode:
@@ -146,9 +156,24 @@ Problem status: open
             sync.sync_lessons_to_rules()
             
         rules_written_key = next((k for k in written_data if "rules.md" in k), None)
+        archive_written_key = next((k for k in written_data if "lessons-archive.md" in k), None)
+        
         self.assertIsNotNone(rules_written_key)
         self.assertIn("## 5. Synthesized Rules", written_data[rules_written_key])
-        self.assertIn("Token Efficiency", written_data[rules_written_key])
+        
+        # Testing / Mocking and Python Mock Leaks should be clustered together
+        self.assertIn("Testing / Mocking", written_data[rules_written_key])
+        self.assertIn("Ensure mock side effects are isolated; When mocking sys.exit in Python", written_data[rules_written_key])
+        
+        # Git & Security, Performance, and Workspace Optimization should be included in rules.md
+        self.assertIn("Git & Security", written_data[rules_written_key])
+        self.assertIn("Performance", written_data[rules_written_key])
+        self.assertIn("Workspace Optimization", written_data[rules_written_key])
+        
+        # Dummy Category should be archived since we cap at 5 canonical rules
+        self.assertIsNotNone(archive_written_key)
+        self.assertIn("Dummy Category", written_data[archive_written_key])
+        self.assertNotIn("Dummy Category", written_data[rules_written_key])
 
     @patch('importlib.util.spec_from_file_location')
     @patch('importlib.util.module_from_spec')
