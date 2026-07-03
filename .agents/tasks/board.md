@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [ ] Fix infinite recursion hang in dashboard audit (feat/issue-146) <!-- id: issue-146 -->
 
 ## Done
+- [x] Fix infinite recursion hang in dashboard audit (feat/issue-146) <!-- id: issue-146 -->
 - [x] Fully benchmark agent core and generate report (feat/issue-145) <!-- id: issue-145 -->
 - [x] Stage deleted issue_42 spec (feat/issue-144) <!-- id: issue-144 -->
 - [x] Consolidate and optimize rules to reduce token footprint (feat/issue-143) <!-- id: issue-143 -->
