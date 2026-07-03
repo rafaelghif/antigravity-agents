@@ -1072,12 +1072,16 @@ def audit_unit_tests() -> bool:
         print(f"Running agent test suite: {' '.join(test_cmd)}")
         env = dict(os.environ)
         env["IN_AUDIT_TEST"] = "true"
-        test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
-        if test_res.returncode != 0:
-            print_err(f"Agent unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
+        try:
+            test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env, timeout=15)
+            if test_res.returncode != 0:
+                print_err(f"Agent unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
+                failed = True
+            else:
+                print_ok("Agent unit tests passed successfully.")
+        except subprocess.TimeoutExpired:
+            print_err("Agent unit tests execution timed out after 15 seconds! Halted to prevent process hang.")
             failed = True
-        else:
-            print_ok("Agent unit tests passed successfully.")
             
     # 2. Run sub-project tests listed in .agents/projects.json
     projects_file = ".agents/projects.json"

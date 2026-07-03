@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Fix integration test auto-upgrade hang on main branch (feat/issue-148) <!-- id: issue-148 -->
 - [x] Inject Cache-Control headers in dashboard (feat/issue-147) <!-- id: issue-147 -->
 - [x] Fix infinite recursion hang in dashboard audit (feat/issue-146) <!-- id: issue-146 -->
 - [x] Fully benchmark agent core and generate report (feat/issue-145) <!-- id: issue-145 -->

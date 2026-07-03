@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.125.0] - 2026-07-04
+
+### 🚀 Features
+- Fix integration test auto-upgrade hang on main branch (ISSUE-148)
+
+
 ## [2.124.0] - 2026-07-04
 
 ### 🚀 Features
