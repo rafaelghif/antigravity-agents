@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.123.0] - 2026-07-04
+
+### 🚀 Features
+- Fix infinite recursion hang in dashboard audit (ISSUE-146)
+
+### 🐛 Bug Fixes
+- inject environment flag to bypass recursive dashboard testing
+
+
 ## [2.122.0] - 2026-07-04
 
 ### 🚀 Features
