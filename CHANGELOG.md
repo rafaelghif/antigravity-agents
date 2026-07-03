@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.124.0] - 2026-07-04
+
+### 🚀 Features
+- Inject Cache-Control headers in dashboard (ISSUE-147)
+
+
 ## [2.123.0] - 2026-07-04
 
 ### 🚀 Features
