@@ -5,6 +5,8 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [ ] Consolidate and optimize rules to reduce token footprint (feat/issue-143) <!-- id: issue-143 -->
+
 ## Done
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Stage archived issue 140 and 141 specs (feat/issue-142) <!-- id: issue-142 -->
