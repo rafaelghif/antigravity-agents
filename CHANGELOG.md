@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.121.0] - 2026-07-04
+
+### 🚀 Features
+- Stage deleted issue_42 spec (ISSUE-144)
+
+
 ## [2.120.0] - 2026-07-04
 
 ### 🚀 Features
