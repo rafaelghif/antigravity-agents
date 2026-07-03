@@ -1,7 +1,7 @@
 ---
 id: issue-42
 title: "Test Issue"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-02
 github_url: "url"
@@ -14,7 +14,7 @@ github_number: 42
 
 
 ## Tasks
-- [ ] Implement remote synchronization fixes
+- [x] Implement remote synchronization fixes
 
 ## Acceptance Criteria
-- [ ] Verification complete
+- [x] Verification complete

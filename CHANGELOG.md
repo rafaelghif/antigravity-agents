@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.119.0] - 2026-07-04
+
+### 🚀 Features
+- Test Issue (ISSUE-42)
+
+### 🐛 Bug Fixes
+- differentiate empty remote issues list and safely update frontmatter status
+
+
 ## [2.118.1] - 2026-07-02
 
 ### ⚙️ Chores

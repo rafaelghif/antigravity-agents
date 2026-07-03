@@ -68,7 +68,15 @@ def get_locked_modules(branch: str) -> List[str]:
     try:
         with open(locks_file, 'r', encoding='utf-8') as f:
             locks = json.load(f)
-        return [module for module, info in locks.items() if info.get("branch") == branch]
+        ret = []
+        for module, info in locks.items():
+            if isinstance(info, dict):
+                if info.get("branch") == branch:
+                    ret.append(module)
+            elif isinstance(info, str):
+                if info == branch:
+                    ret.append(module)
+        return ret
     except Exception:
         return []
 
