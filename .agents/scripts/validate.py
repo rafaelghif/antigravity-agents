@@ -1070,7 +1070,9 @@ def audit_unit_tests() -> bool:
             
     if test_cmd:
         print(f"Running agent test suite: {' '.join(test_cmd)}")
-        test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        env = dict(os.environ)
+        env["IN_AUDIT_TEST"] = "true"
+        test_res = subprocess.run(test_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
         if test_res.returncode != 0:
             print_err(f"Agent unit tests failed!\nStdout:\n{test_res.stdout}\nStderr:\n{test_res.stderr}")
             failed = True
