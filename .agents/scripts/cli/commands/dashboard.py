@@ -537,6 +537,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if parsed_url.path == '/api/status':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
             self.end_headers()
             try:
                 query = parse_qs(parsed_url.query)
@@ -549,6 +552,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif parsed_url.path == '/api/profiles':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
             self.end_headers()
             try:
                 data = profile_cmd.load_profiles()
@@ -558,6 +564,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif parsed_url.path == '/api/ssh/public-key':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
             self.end_headers()
             try:
                 query = parse_qs(parsed_url.query)
@@ -713,6 +722,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 content_type = 'application/octet-stream'
                 
             self.send_response(200)
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
             if content_type.startswith('text/') or content_type in ('application/javascript', 'application/json'):
                 self.send_header('Content-Type', f'{content_type}; charset=utf-8')
             else:
