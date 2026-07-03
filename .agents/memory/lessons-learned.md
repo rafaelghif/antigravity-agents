@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-04]** **Context / Token Optimization**: Use targeted context optimization to minimize prompt token footprint while preserving compliance with rules.
 - **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
 - **[2026-07-02]** **Path Handling / OS Compatibility**: Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
 - **[2026-07-02]** **Git Profile & Credentials**: Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
