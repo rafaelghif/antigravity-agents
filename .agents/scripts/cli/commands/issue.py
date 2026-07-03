@@ -291,7 +291,7 @@ def sync_issues():
     try:
         import git_api
         remote_issues = git_api.fetch_github_issues()
-        if not remote_issues:
+        if remote_issues is None:
             print("[INFO] Operating in local offline mode using local issue cache.")
             return
             
@@ -314,16 +314,16 @@ def sync_issues():
             except Exception:
                 pass
                 
-        for issue in remote_issues:
+        for issue_item in remote_issues:
             # Skip pull requests
-            if "pull_request" in issue:
+            if "pull_request" in issue_item:
                 continue
                 
-            number = issue.get("number")
-            title = issue.get("title", "")
-            state = issue.get("state", "open")
-            html_url = issue.get("html_url", "")
-            body = issue.get("body", "") or ""
+            number = issue_item.get("number")
+            title = issue_item.get("title", "")
+            state = issue_item.get("state", "open")
+            html_url = issue_item.get("html_url", "")
+            body = issue_item.get("body", "") or ""
             
             if number in local_issues:
                 # Update status if mismatched
@@ -334,10 +334,23 @@ def sync_issues():
                     fm = parse_issue_frontmatter(content)
                     current_status = fm.get("status")
                     if current_status and current_status != state:
-                        content = re.sub(r'status:\s*' + re.escape(current_status), f'status: {state}', content)
-                        with open(path, 'w', encoding='utf-8') as f:
-                            f.write(content)
-                        print(f"[OK] Updated local issue #{number} status to '{state}'.")
+                        lines = content.split('\n')
+                        in_fm = False
+                        updated = False
+                        for idx, line in enumerate(lines):
+                            if line.strip() == '---':
+                                if in_fm:
+                                    break
+                                in_fm = True
+                                continue
+                            if in_fm and line.strip().startswith('status:'):
+                                lines[idx] = f"status: {state}"
+                                updated = True
+                        if updated:
+                            content = '\n'.join(lines)
+                            with open(path, 'w', encoding='utf-8') as f:
+                                f.write(content)
+                            print(f"[OK] Updated local issue #{number} status to '{state}'.")
                 except Exception:
                     pass
             else:
@@ -346,9 +359,10 @@ def sync_issues():
                 file_path = os.path.join(ISSUE_DIR, f"issue_{number}.md")
                 current_date = datetime.now().strftime("%Y-%m-%d")
                 
+                title_escaped = title.replace('"', '\\"')
                 template = f"""---
 id: {issue_id}
-title: "{title}"
+title: "{title_escaped}"
 status: {state}
 assignee: agent-antigravity
 created_at: {current_date}

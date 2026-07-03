@@ -72,6 +72,50 @@ class TestSync(unittest.TestCase):
         mock_file.assert_called_with(expected_path, 'w', encoding='utf-8')
         mock_file().write.assert_called()
 
+    @patch('os.makedirs')
+    @patch('git_api.fetch_github_issues')
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    def test_sync_issues_updates_mismatched_status(self, mock_listdir, mock_exists, mock_fetch, mock_makedirs):
+        # Existing local issue has status: open
+        # We also put status: open in the description body to ensure it is not touched
+        mock_exists.return_value = True
+        mock_listdir.return_value = ["issue_42.md"]
+        mock_fetch.return_value = [{"number": 42, "title": "Test Issue", "state": "closed", "html_url": "url"}]
+
+        local_content = """---
+id: issue-42
+title: "Test Issue"
+status: open
+assignee: agent-antigravity
+created_at: 2026-07-02
+github_url: "url"
+github_number: 42
+---
+
+# Issue Details
+Problem status: open
+"""
+
+        mock_file_handle = mock_open(read_data=local_content)
+        with patch('builtins.open', mock_file_handle):
+            issue.sync_issues()
+
+            # Inspect the calls to write
+            handle = mock_file_handle()
+            written_data = "".join(call[0][0] for call in handle.write.call_args_list)
+            # Frontmatter status should be updated to closed
+            self.assertIn("status: closed", written_data)
+            # Body status should still be open
+            self.assertIn("Problem status: open", written_data)
+
+    @patch('git_api.fetch_github_issues', return_value=None)
+    @patch('commands.issue.sync_board_with_issues')
+    def test_sync_issues_offline_mode(self, mock_sync_board, mock_fetch):
+        # When remote_issues is None, it should skip execution cleanly
+        issue.sync_issues()
+        mock_sync_board.assert_called_once()
+
     @patch('os.path.exists', return_value=True)
     def test_sync_lessons_to_rules(self, mock_exists):
         import sync

@@ -3,9 +3,9 @@
 This board tracks active development tasks for AAC V2.
 
 ## Todo
-- [ ] Test Issue (feat/issue-42) <!-- id: issue-42 -->
-## Doing
 
+## Doing
+- [ ] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 ## Done
 - [x] Stage archived issue 140 and 141 specs (feat/issue-142) <!-- id: issue-142 -->
 - [x] Implement lock, learn, sync, and fast-polling in local dashboard (feat/issue-141) <!-- id: issue-141 -->
