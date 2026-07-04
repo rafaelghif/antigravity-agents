@@ -383,6 +383,49 @@ class TestTokenCommand(unittest.TestCase):
         self.assertAlmostEqual(parsed6["weekly_pct"], 7.18, places=2)
         self.assertEqual(parsed6["weekly_remaining"], "6d 23h")
 
+        # Markdown table with rolling limits, account breakdown with asterisk/bold, and tasks breakdown with asterisk/bold
+        output7 = (
+            "Here is your current Antigravity token budget status:\n"
+            "\n"
+            "### 📊 Token Budget Overview\n"
+            "\n"
+            "| Quota Period | Limit (Tokens) | Used (Tokens) | Remaining (Tokens) | % Utilized |\n"
+            "| :--- | :--- | :--- | :--- | :--- |\n"
+            "| **Daily** | 500,000 | 290,483 | 209,517 | 58.10% |\n"
+            "| **Monthly** | 5,000,000 | 290,483 | 4,709,517 | 5.81% |\n"
+            "| **5-Hour Rolling** | 474,764 | 95,853 | 378,911 | 20.19% |\n"
+            "| **Weekly Rolling** | 793,238 | 290,482 | 502,756 | 36.62% |\n"
+            "\n"
+            "### 👤 Account Breakdown\n"
+            "\n"
+            "* **rafaelghifari.business@gmail.com**: 110,968 (Daily) | 110,968 (Monthly) | 110,968 (Total)\n"
+            "* **default**: 92,400 (Daily) | 92,400 (Monthly) | 92,400 (Total)\n"
+            "\n"
+            "### 📋 Task Breakdown\n"
+            "\n"
+            "* **unknown**: 185,969 total (174,000 prompt / 11,969 completion)\n"
+            "* **issue-182**: 1,100 total (1,000 prompt / 100 completion)\n"
+        )
+        parsed7 = token_cmd.parse_usage_output(output7)
+        self.assertEqual(parsed7["daily_limit"], 500000)
+        self.assertEqual(parsed7["daily_used"], 290483)
+        self.assertEqual(parsed7["five_hour_limit"], 474764)
+        self.assertEqual(parsed7["five_hour_used"], 95853)
+        self.assertAlmostEqual(parsed7["five_hour_pct"], 20.19, places=2)
+        self.assertEqual(parsed7["weekly_limit"], 793238)
+        self.assertEqual(parsed7["weekly_used"], 290482)
+        self.assertAlmostEqual(parsed7["weekly_pct"], 36.62, places=2)
+        
+        self.assertIn("rafaelghifari.business@gmail.com", parsed7["accounts"])
+        self.assertEqual(parsed7["accounts"]["rafaelghifari.business@gmail.com"]["daily_used"], 110968)
+        self.assertEqual(parsed7["accounts"]["rafaelghifari.business@gmail.com"]["monthly_used"], 110968)
+        self.assertEqual(parsed7["accounts"]["rafaelghifari.business@gmail.com"]["total_used"], 110968)
+        
+        self.assertIn("issue-182", parsed7["tasks"])
+        self.assertEqual(parsed7["tasks"]["issue-182"]["prompt_tokens"], 1000)
+        self.assertEqual(parsed7["tasks"]["issue-182"]["completion_tokens"], 100)
+        self.assertEqual(parsed7["tasks"]["issue-182"]["total_tokens"], 1100)
+
 
 
     @patch('subprocess.run')

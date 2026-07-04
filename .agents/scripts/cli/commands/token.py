@@ -514,7 +514,13 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
 
     # 2. Fall back to list/table matching if daily_limit or monthly_limit was not found
     if "daily_limit" not in stats or "monthly_limit" not in stats:
+        in_breakdown = False
         for line in lines:
+            line_lower = line.lower()
+            if "account breakdown:" in line_lower or "task breakdown:" in line_lower or "breakdown" in line_lower:
+                in_breakdown = True
+            if in_breakdown:
+                continue
             if "Daily" in line and "Limit" not in line and "Used" not in line:
                 clean_line = re.sub(r'Daily\s*(?:Quota)?', '', line, flags=re.IGNORECASE)
                 nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
@@ -539,81 +545,125 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
 
         # Parse 5-Hour rolling in list/table fallback
         if "five_hour_limit" not in stats:
-            five_hour_block_lines = []
-            for i, line in enumerate(lines):
-                if "5-Hour" in line:
-                    five_hour_block_lines.append(line)
-                    for offset in (1, 2):
-                        if i + offset < len(lines):
-                            next_line = lines[i + offset]
-                            if any(k in next_line for k in ("Weekly", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
-                                break
-                            five_hour_block_lines.append(next_line)
+            # Check for Markdown table row format first (e.g. | **5-Hour Rolling** | 474,764 | 95,853 | ...)
+            for line in lines:
+                if "|" in line and "5-Hour" in line:
+                    parts = [p.strip() for p in line.split('|') if p.strip()]
+                    if len(parts) >= 4:
+                        try:
+                            limit_str = re.sub(r'[^\d]', '', parts[1])
+                            used_str = re.sub(r'[^\d]', '', parts[2])
+                            if limit_str and used_str:
+                                stats["five_hour_limit"] = int(limit_str)
+                                stats["five_hour_used"] = int(used_str)
+                            for part in parts[3:]:
+                                if "%" in part:
+                                    pct_str = re.sub(r'[^\d.]', '', part)
+                                    if pct_str:
+                                        stats["five_hour_pct"] = float(pct_str)
+                                        break
+                        except Exception:
+                            pass
                     break
-            
-            if five_hour_block_lines:
-                five_hour_text = "\n".join(five_hour_block_lines)
+
+            if "five_hour_limit" not in stats:
+                five_hour_block_lines = []
+                for i, line in enumerate(lines):
+                    if "5-Hour" in line:
+                        five_hour_block_lines.append(line)
+                        for offset in (1, 2):
+                            if i + offset < len(lines):
+                                next_line = lines[i + offset]
+                                if any(k in next_line for k in ("Weekly", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
+                                    break
+                                five_hour_block_lines.append(next_line)
+                        break
                 
-                # Check for slash format: used / limit (e.g. 142,000 / 200,000)
-                m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', five_hour_text)
-                if m_slash:
-                    stats["five_hour_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
-                    stats["five_hour_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
-                else:
-                    # Look for Limit and Used separately using keywords
-                    m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
-                    m_used = re.search(r'Used\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
-                    if m_limit:
-                        stats["five_hour_limit"] = int(m_limit.group(1).replace(',', ''))
-                    if m_used:
-                        stats["five_hour_used"] = int(m_used.group(1).replace(',', ''))
-                        
-                pct_match = re.search(r'(\d+(?:\.\d+)?)%', five_hour_text)
-                if pct_match:
-                    stats["five_hour_pct"] = float(pct_match.group(1))
+                if five_hour_block_lines:
+                    five_hour_text = "\n".join(five_hour_block_lines)
                     
-                rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', five_hour_text, re.IGNORECASE)
-                if rem_match:
-                    stats["five_hour_remaining"] = normalize_time_string(rem_match.group(1).strip())
+                    # Check for slash format: used / limit (e.g. 142,000 / 200,000)
+                    m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', five_hour_text)
+                    if m_slash:
+                        stats["five_hour_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
+                        stats["five_hour_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
+                    else:
+                        # Look for Limit and Used separately using keywords
+                        m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
+                        m_used = re.search(r'Used\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
+                        if m_limit:
+                            stats["five_hour_limit"] = int(m_limit.group(1).replace(',', ''))
+                        if m_used:
+                            stats["five_hour_used"] = int(m_used.group(1).replace(',', ''))
+                            
+                    pct_match = re.search(r'(\d+(?:\.\d+)?)%', five_hour_text)
+                    if pct_match:
+                        stats["five_hour_pct"] = float(pct_match.group(1))
+                        
+                    rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', five_hour_text, re.IGNORECASE)
+                    if rem_match:
+                        stats["five_hour_remaining"] = normalize_time_string(rem_match.group(1).strip())
 
         # Parse Weekly rolling in list/table fallback
         if "weekly_limit" not in stats:
-            weekly_block_lines = []
-            for i, line in enumerate(lines):
-                if "Weekly" in line:
-                    weekly_block_lines.append(line)
-                    for offset in (1, 2):
-                        if i + offset < len(lines):
-                            next_line = lines[i + offset]
-                            if any(k in next_line for k in ("5-Hour", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
-                                break
-                            weekly_block_lines.append(next_line)
+            # Check for Markdown table row format first
+            for line in lines:
+                if "|" in line and "Weekly" in line:
+                    parts = [p.strip() for p in line.split('|') if p.strip()]
+                    if len(parts) >= 4:
+                        try:
+                            limit_str = re.sub(r'[^\d]', '', parts[1])
+                            used_str = re.sub(r'[^\d]', '', parts[2])
+                            if limit_str and used_str:
+                                stats["weekly_limit"] = int(limit_str)
+                                stats["weekly_used"] = int(used_str)
+                            for part in parts[3:]:
+                                if "%" in part:
+                                    pct_str = re.sub(r'[^\d.]', '', part)
+                                    if pct_str:
+                                        stats["weekly_pct"] = float(pct_str)
+                                        break
+                        except Exception:
+                            pass
                     break
-            
-            if weekly_block_lines:
-                weekly_text = "\n".join(weekly_block_lines)
+
+            if "weekly_limit" not in stats:
+                weekly_block_lines = []
+                for i, line in enumerate(lines):
+                    if "Weekly" in line:
+                        weekly_block_lines.append(line)
+                        for offset in (1, 2):
+                            if i + offset < len(lines):
+                                next_line = lines[i + offset]
+                                if any(k in next_line for k in ("5-Hour", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
+                                    break
+                                weekly_block_lines.append(next_line)
+                        break
                 
-                # Check for slash format: used / limit
-                m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', weekly_text)
-                if m_slash:
-                    stats["weekly_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
-                    stats["weekly_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
-                else:
-                    # Look for Limit and Used separately using keywords
-                    m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
-                    m_used = re.search(r'Used\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
-                    if m_limit:
-                        stats["weekly_limit"] = int(m_limit.group(1).replace(',', ''))
-                    if m_used:
-                        stats["weekly_used"] = int(m_used.group(1).replace(',', ''))
-                        
-                pct_match = re.search(r'(\d+(?:\.\d+)?)%', weekly_text)
-                if pct_match:
-                    stats["weekly_pct"] = float(pct_match.group(1))
+                if weekly_block_lines:
+                    weekly_text = "\n".join(weekly_block_lines)
                     
-                rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', weekly_text, re.IGNORECASE)
-                if rem_match:
-                    stats["weekly_remaining"] = normalize_time_string(rem_match.group(1).strip())
+                    # Check for slash format: used / limit
+                    m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', weekly_text)
+                    if m_slash:
+                        stats["weekly_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
+                        stats["weekly_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
+                    else:
+                        # Look for Limit and Used separately using keywords
+                        m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
+                        m_used = re.search(r'Used\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
+                        if m_limit:
+                            stats["weekly_limit"] = int(m_limit.group(1).replace(',', ''))
+                        if m_used:
+                            stats["weekly_used"] = int(m_used.group(1).replace(',', ''))
+                            
+                    pct_match = re.search(r'(\d+(?:\.\d+)?)%', weekly_text)
+                    if pct_match:
+                        stats["weekly_pct"] = float(pct_match.group(1))
+                        
+                    rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', weekly_text, re.IGNORECASE)
+                    if rem_match:
+                        stats["weekly_remaining"] = normalize_time_string(rem_match.group(1).strip())
 
     # Compute percentage overrides if limit and used are present
     if "five_hour_limit" in stats and "five_hour_used" in stats and "five_hour_pct" not in stats:
@@ -626,14 +676,14 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
     in_account_breakdown = False
     for line in lines:
         line_lower = line.lower()
-        if "account breakdown:" in line_lower:
+        if "account breakdown" in line_lower:
             in_account_breakdown = True
             continue
         if in_account_breakdown:
             if line.startswith("---") or line.startswith("===") or "task breakdown:" in line_lower:
                 in_account_breakdown = False
             else:
-                m = re.match(r'\s*-\s*([a-zA-Z0-9_.@+-:]+)\s*:\s*daily\s*([\d,]+)\s*\|\s*monthly\s*([\d,]+)\s*\|\s*total\s*([\d,]+)', line)
+                m = re.match(r'\s*[-*]\s*(?:\*\*)?([a-zA-Z0-9_.@+-:]+)(?:\*\*)?\s*:\s*(?:daily\s*)?([\d,]+)\s*(?:\(Daily\)|\(daily\)|daily)?\s*\|\s*(?:monthly\s*)?([\d,]+)\s*(?:\(Monthly\)|\(monthly\)|monthly)?\s*\|\s*(?:total\s*)?([\d,]+)(?:\(Total\)|\(total\)|total)?', line, re.IGNORECASE)
                 if m:
                     acc_name = m.group(1).strip()
                     daily = int(m.group(2).replace(',', ''))
@@ -666,14 +716,14 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
     in_task_breakdown = False
     for line in lines:
         line_lower = line.lower()
-        if "task breakdown:" in line_lower:
+        if "task breakdown" in line_lower:
             in_task_breakdown = True
             continue
         if in_task_breakdown:
             if line.startswith("---") or line.startswith("===") or "account breakdown:" in line_lower:
                 in_task_breakdown = False
             else:
-                m = re.match(r'\s*-\s*([a-zA-Z0-9_-]+)\s*:\s*([\d,]+)\s*total\s*\(([\d,]+)\s*prompt\s*/\s*([\d,]+)\s*completion\)', line)
+                m = re.match(r'\s*[-*]\s*(?:\*\*)?([a-zA-Z0-9_-]+)(?:\*\*)?\s*:\s*([\d,]+)\s*total\s*\(([\d,]+)\s*prompt\s*/\s*([\d,]+)\s*completion\)', line, re.IGNORECASE)
                 if m:
                     task_id = m.group(1).strip()
                     total = int(m.group(2).replace(',', ''))
