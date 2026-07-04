@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->
 
 ## Done
 - [x] Add Token Budget visualization to dashboard (feat/issue-168) <!-- id: issue-168 -->
