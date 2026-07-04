@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [/] Align MCP configuration with Google Antigravity specifications (feat/issue-171) <!-- id: issue-171 -->
 
 ## Done
+- [x] Align MCP configuration with Google Antigravity specifications (feat/issue-171) <!-- id: issue-171 -->
 - [x] Implement zero-dependency MCP server and registration command (feat/issue-170) <!-- id: issue-170 -->
 - [x] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->
 - [x] Add Token Budget visualization to dashboard (feat/issue-168) <!-- id: issue-168 -->
