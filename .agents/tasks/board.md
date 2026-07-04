@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Update README alignment version and workflow diagram (feat/issue-203) <!-- id: issue-203 -->
 - [x] Add prompt caching optimization rules (feat/issue-202) <!-- id: issue-202 -->
 - [x] Enforce early workspace read of context and schema files (feat/issue-201) <!-- id: issue-201 -->
 - [x] Document technical alignment and decision capture flow (feat/issue-200) <!-- id: issue-200 -->

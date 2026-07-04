@@ -1,7 +1,7 @@
 ---
 id: issue-203
 title: "Update README alignment version and workflow diagram"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
