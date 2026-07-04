@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Document technical alignment and decision capture flow (feat/issue-200) <!-- id: issue-200 -->
 - [x] Synchronize antigravityignore.template exclusions with active ignore rules (feat/issue-199) <!-- id: issue-199 -->
 - [x] Enforce workspace-level plans and artifacts rule (feat/issue-198) <!-- id: issue-198 -->
 - [x] Add complete transient exclusions to gitignore.template (feat/issue-197) <!-- id: issue-197 -->
