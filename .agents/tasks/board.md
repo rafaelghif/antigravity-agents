@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Add Token Budget visualization to dashboard (feat/issue-168) <!-- id: issue-168 -->
 
 ## Done
 - [x] Enhance API key masking security with cryptographic hashing (feat/issue-167) <!-- id: issue-167 -->
