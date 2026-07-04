@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Implement zero-dependency MCP server and registration command (feat/issue-170) <!-- id: issue-170 -->
 
 ## Done
 - [x] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->
