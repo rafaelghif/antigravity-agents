@@ -9,6 +9,9 @@
 
 **AAC V2** is an open-source, local-first guardrail and workspace customization framework built specifically for the **Antigravity CLI (agy)**. It leverages Antigravity's native custom Skills and Rules engines to enforce strict boundaries, directory structures, and code patterns on any autonomous agent working in your repository.
 
+> [!IMPORTANT]
+> **AAC V2** acts as a local security sandbox and quality gate. All configurations, credentials, tasks, and plans are stored strictly at the workspace level under `.agents/` to maintain team consistency without relying on global states.
+
 By placing a strict insulation layer around your workspace, AAC V2 prevents AI tools from:
 - 🔓 Leaking local credentials, API keys, or private `.env` files.
 - 🔀 Mutating critical base branches (`main`/`master`) directly.
@@ -53,6 +56,9 @@ flowchart TD
 ### 1. Run the Installer
 Run the bootstrap installer script inside your project's root folder:
 
+> [!NOTE]
+> The installer always downloads the verified source files directly from the Git repository to prevent version mismatch or missing local utilities.
+
 **Linux / macOS (Bash):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
@@ -74,6 +80,9 @@ Customize local developer identities or configure monorepo sub-project validatio
 ### 4. Start Coding with the Agent
 When prompting your agent (e.g. Cline, Aider, Cursor), refer to the master instruction:
 > "Read AGENTS.md and align with our workspace layout, rules, and memory ledger."
+
+> [!TIP]
+> Run `./helper.sh validate` locally before committing your changes. It executes all 10 audits in under 100ms, making it extremely fast and lightweight to run as part of your normal pre-commit flow.
 
 ---
 
