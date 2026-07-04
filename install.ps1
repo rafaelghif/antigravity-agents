@@ -181,7 +181,11 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
             $File.Name -eq "sync_cache.json" -or
             $File.Name -eq "cooldowns.json" -or
             $File.Name -eq "upgrade_state.json" -or
-            $File.Name -eq "schema.md") {
+            $File.Name -eq "schema.md" -or
+            $File.Name -eq "api_keys" -or
+            $File.Name -eq "active_api_keys" -or
+            $File.Name -eq "active_api_keys.ps1" -or
+            $File.Name -eq "active_api_profile_name") {
             continue
         }
         

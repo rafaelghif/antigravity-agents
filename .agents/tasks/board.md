@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Synchronize antigravityignore.template exclusions with active ignore rules (feat/issue-199) <!-- id: issue-199 -->
 - [x] Enforce workspace-level plans and artifacts rule (feat/issue-198) <!-- id: issue-198 -->
 - [x] Add complete transient exclusions to gitignore.template (feat/issue-197) <!-- id: issue-197 -->
 - [x] Make MCP server dynamically resolve target project scripts directory (feat/issue-196) <!-- id: issue-196 -->

@@ -42,8 +42,8 @@ Desktop.ini
 
 # Version Control & Agent Internal Transient files
 .git/
+.agents/locks/
 .agents/locks.json
-.agents/git_profiles.json
 
 # Media & Binary Assets
 *.png
@@ -86,6 +86,17 @@ id_ed25519
 *credential*
 .netrc
 .npmrc
-.npm/
+.pypirc
+.git-credentials
 .agents/git_profiles.json
-.agents/locks.json
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+.agents/active_context.md
+.agents/cooldowns.json
+.agents/sync_cache.json
+.agents/logs/
+.agents/archive/
+.agents/upgrade_state.json
+.agents/token_budget.json
