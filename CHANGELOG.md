@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.133.0] - 2026-07-04
+
+### 🚀 Features
+- Add development platform details to README (ISSUE-156)
+
+### 📝 Documentation
+- update version badge and add platform support details
+
+
 ## [2.132.0] - 2026-07-04
 
 ### 🚀 Features

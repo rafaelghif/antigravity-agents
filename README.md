@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.97.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-2.132.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -44,6 +44,7 @@ flowchart TD
 * **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
 * **⏩ Human Validation Bypass**: Skip strict validation audits during quick human hotfixes via `--bypass` flags or `AAC_BYPASS_COMPLIANCE=1` env variables.
 * **🚀 GitHub Action CI/CD Integration**: Block PR merges automatically in your organization if an agent attempts to push non-compliant code.
+* **💻 Verified OS Support**: Actively developed and tested on **Ubuntu (modern Linux runtimes like Ubuntu 26)** and standard POSIX shells. Exposes host/port overrides for WSL2/containerized compatibility.
 
 ---
 
