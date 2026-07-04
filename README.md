@@ -61,12 +61,12 @@ Run the bootstrap installer script inside your project's root folder:
 
 **Linux / macOS (Bash):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
 ```
 
 ### 2. Auto-Detect Your Stack

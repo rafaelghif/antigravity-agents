@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Fix installer repo URLs in README (feat/issue-163) <!-- id: issue-163 -->
 
 ## Done
 - [x] Add strict type checking for Python, TypeScript, and Java to validation guard (feat/issue-162) <!-- id: issue-162 -->
