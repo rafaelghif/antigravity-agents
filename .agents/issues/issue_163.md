@@ -1,7 +1,7 @@
 ---
 id: issue-163
 title: "Fix installer repo URLs in README"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

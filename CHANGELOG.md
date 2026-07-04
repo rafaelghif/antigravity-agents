@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.139.1] - 2026-07-04
+
+### 🐛 Bug Fixes
+- Fix installer repo URLs in README (ISSUE-163)
+
+### 📝 Documentation
+- fix installer download URLs in README
+
+### ⚙️ Chores
+- update branch name in task board for issue 163
+
+
 ## [2.139.0] - 2026-07-04
 
 ### 🚀 Features
