@@ -3,12 +3,12 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
 
 ## Done
+- [x] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
 - [x] Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (feat/issue-191) <!-- id: issue-191 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->

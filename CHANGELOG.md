@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.171.0] - 2026-07-04
+
+### 🚀 Features
+- restrict agent file version updates to agent repo in changelog command
+- detect project version from native config or CHANGELOG.md during bootstrap
+
+### 📝 Documentation
+- Fix project version and changelog mapping during bootstrap and release (ISSUE-192)
+
+
 ## [2.170.0] - 2026-07-04
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-192
 title: "Fix project version and changelog mapping during bootstrap and release"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
