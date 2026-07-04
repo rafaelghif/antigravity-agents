@@ -555,7 +555,15 @@ def audit_secrets_and_ignored_files() -> bool:
 # ==========================================================
 def audit_link_integrity() -> bool:
     print("\n[3/9] Auditing File Links inside Memory Registers...")
-    link_files = [".agents/memory/architecture.md", ".agents/schema.md"]
+    link_files = ["AGENTS.md", ".agents/rules.md", ".agents/schema.md", ".agents/memory/architecture.md"]
+    
+    # Dynamically scan issues and memory folders
+    for folder in (".agents/issues", ".agents/memory"):
+        if os.path.exists(folder):
+            for f in os.listdir(folder):
+                if f.endswith(".md"):
+                    link_files.append(os.path.join(folder, f))
+                    
     failed = False
     
     for f in link_files:
@@ -857,7 +865,7 @@ def audit_issue_files_schema() -> bool:
                     
             body = parts[2]
             # 2. Check required sections
-            required_sections = ["## Tasks", "## Acceptance Criteria"]
+            required_sections = ["## Tasks", "## Acceptance Criteria", "## Rule & Schema Compliance Audit"]
             for sec in required_sections:
                 if sec not in body:
                     print_err(f"Issue file '{f_name}' is missing required body section '{sec}'!")
@@ -1617,6 +1625,41 @@ def audit_codebase_rules_compliance() -> bool:
                             failed = True
     except Exception as e:
         print_warn(f"Failed to scan codebase rule compliance: {e}")
+
+    # 2. Check Clean Architecture imports in domain/ modules
+    try:
+        import ast
+        import sys
+        std_libs = getattr(sys, "stdlib_module_names", set())
+        if not std_libs:
+            std_libs = {"typing", "datetime", "uuid", "abc", "dataclasses", "enum", "math", "json", "collections", "sys", "os"}
+            
+        src_dir = "src"
+        if os.path.exists(src_dir):
+            for root, dirs, files in os.walk(src_dir):
+                if "domain" in root.lower().split(os.sep):
+                    for file in files:
+                        if file.endswith(".py"):
+                            filepath = os.path.join(root, file)
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                tree = ast.parse(f.read(), filename=filepath)
+                            for node in ast.walk(tree):
+                                if isinstance(node, ast.Import):
+                                    for alias in node.names:
+                                        name = alias.name.split('.')[0]
+                                        if name not in std_libs:
+                                            print_err(f"Domain entity '{filepath}' violates schema.md: imports external/non-domain module '{alias.name}'!")
+                                            failed = True
+                                elif isinstance(node, ast.ImportFrom):
+                                    if node.level > 0:
+                                        continue
+                                    if node.module:
+                                        name = node.module.split('.')[0]
+                                        if name not in std_libs and name != "domain":
+                                            print_err(f"Domain entity '{filepath}' violates schema.md: imports external/non-domain module '{node.module}'!")
+                                            failed = True
+    except Exception as e:
+        print_warn(f"Failed to scan clean architecture dependencies: {e}")
         
     if not failed:
         print_ok("Codebase rule compliance check passed.")

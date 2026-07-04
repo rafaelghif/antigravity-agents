@@ -34,3 +34,14 @@ Calling `sync_from_platform_usage` synchronously during token logging blocks the
 ## Acceptance Criteria
 - [x] `./helper.sh token log <p> <c>` returns instantly (< 100ms) without blocking.
 - [x] The background sync process executes successfully and updates local token budget.
+
+## Rule & Schema Compliance Audit
+- Target files to edit:
+  - [x] .agents/scripts/cli/commands/token.py <!-- id: audit-target-files -->
+- Active module locks:
+  - [x] .agents/scripts/cli/commands/token <!-- id: audit-module-locks -->
+- Non-negotiable rules checked:
+  - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
+  - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
+- Schema compliance check:
+  - [x] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->

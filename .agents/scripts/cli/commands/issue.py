@@ -539,6 +539,17 @@ created_at: {current_date}
 
 ## Acceptance Criteria
 - [ ] Criteria 1
+
+## Rule & Schema Compliance Audit
+- Target files to edit:
+  - [ ] None <!-- id: audit-target-files -->
+- Active module locks:
+  - [ ] None <!-- id: audit-module-locks -->
+- Non-negotiable rules checked:
+  - [ ] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
+  - [ ] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
+- Schema compliance check:
+  - [ ] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->
 """
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(template)
