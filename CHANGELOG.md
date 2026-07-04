@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.150.0] - 2026-07-04
+
+### 🚀 Features
+- support rolling window quota calculations and manual synchronization override for actual usage
+- Implement rolling window token quotas and manual override sync (ISSUE-175)
+
+
 ## [2.149.0] - 2026-07-04
 
 ### 🚀 Features
