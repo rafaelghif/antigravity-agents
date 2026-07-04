@@ -23,6 +23,21 @@ def print_warn(msg: str) -> None:
 def print_ok(msg: str) -> None:
     print(f"{GREEN}[OK] {msg}{RESET}")
 
+def get_active_profile_name() -> str:
+    """Detect active profile name from git_profiles.json."""
+    profiles_file = ".agents/git_profiles.json"
+    if os.path.exists(profiles_file):
+        try:
+            with open(profiles_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                profiles = data.get("profiles", [])
+                for p in profiles:
+                    if p.get("active"):
+                        return p.get("name", "default")
+        except Exception:
+            pass
+    return "default"
+
 def load_budget() -> dict:
     default_budget = {
         "monthly_limit": 5000000,
@@ -30,6 +45,7 @@ def load_budget() -> dict:
         "daily_limit": 500000,
         "daily_used": 0,
         "last_reset": datetime.utcnow().isoformat() + "Z",
+        "accounts": {},
         "tasks": {}
     }
     if not os.path.exists(BUDGET_FILE):
@@ -41,6 +57,8 @@ def load_budget() -> dict:
             for key in default_budget:
                 if key not in data:
                     data[key] = default_budget[key]
+            if "accounts" not in data:
+                data["accounts"] = {}
             return data
     except Exception:
         return default_budget
@@ -70,11 +88,18 @@ def check_date_resets(budget: dict) -> dict:
     if now_dt.year != last_reset_dt.year or now_dt.month != last_reset_dt.month:
         budget["monthly_used"] = 0
         budget["daily_used"] = 0
+        if "accounts" in budget:
+            for acc in budget["accounts"].values():
+                acc["daily_used"] = 0
+                acc["monthly_used"] = 0
         budget["last_reset"] = now_dt.isoformat() + "Z"
         print_ok("New month detected. Reset monthly and daily token usage counters.")
     # 2. Daily Reset
     elif now_dt.date() != last_reset_dt.date():
         budget["daily_used"] = 0
+        if "accounts" in budget:
+            for acc in budget["accounts"].values():
+                acc["daily_used"] = 0
         budget["last_reset"] = now_dt.isoformat() + "Z"
         print_ok("New day detected. Reset daily token usage counter.")
 
@@ -144,6 +169,20 @@ def run_log(args: List[str]) -> None:
     budget["daily_used"] += total
     budget["monthly_used"] += total
 
+    # Update per-account
+    account_name = get_active_profile_name()
+    if "accounts" not in budget:
+        budget["accounts"] = {}
+    if account_name not in budget["accounts"]:
+        budget["accounts"][account_name] = {
+            "daily_used": 0,
+            "monthly_used": 0,
+            "total_used": 0
+        }
+    budget["accounts"][account_name]["daily_used"] += total
+    budget["accounts"][account_name]["monthly_used"] += total
+    budget["accounts"][account_name]["total_used"] += total
+
     # Update task-specific
     if "tasks" not in budget:
         budget["tasks"] = {}
@@ -164,7 +203,7 @@ def run_log(args: List[str]) -> None:
     save_budget(budget)
     append_to_log(task_id, prompt, completion)
 
-    print_ok(f"Logged {total} tokens for task '{task_id}'.")
+    print_ok(f"Logged {total} tokens for task '{task_id}' (account: '{account_name}').")
     
     # Enforce strict warning alerts on budget limit breach
     if budget["daily_used"] > budget["daily_limit"]:
@@ -193,6 +232,14 @@ def run_status(args: List[str]) -> None:
     print(f"Monthly Used  : {monthly_used:,} tokens ({monthly_pct:.2f}% utilized)")
     print(f"Last Reset    : {budget.get('last_reset', 'N/A')}")
     print("-"*60)
+    print("Account Breakdown:")
+    accounts = budget.get("accounts", {})
+    if not accounts:
+        print("  No accounts logged yet.")
+    else:
+        for acc_name, acc_info in sorted(accounts.items()):
+            print(f"  - {acc_name:<15}: daily {acc_info.get('daily_used', 0):,} | monthly {acc_info.get('monthly_used', 0):,} | total {acc_info.get('total_used', 0):,}")
+    print("-"*60)
     print("Task Breakdown:")
     
     tasks = budget.get("tasks", {})
@@ -210,14 +257,22 @@ def run_reset(args: List[str]) -> None:
         budget["daily_used"] = 0
         budget["monthly_used"] = 0
         budget["tasks"] = {}
+        budget["accounts"] = {}
         budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
-        print_ok("Reset all token budget usage counters and task breakdown statistics.")
+        print_ok("Reset all token budget usage counters, task breakdown, and account statistics.")
     elif "--daily" in args:
         budget["daily_used"] = 0
+        if "accounts" in budget:
+            for acc in budget["accounts"].values():
+                acc["daily_used"] = 0
         budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
         print_ok("Reset daily token budget usage counter.")
     elif "--monthly" in args:
         budget["monthly_used"] = 0
+        if "accounts" in budget:
+            for acc in budget["accounts"].values():
+                acc["daily_used"] = 0
+                acc["monthly_used"] = 0
         budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
         print_ok("Reset monthly token budget usage counter.")
     else:

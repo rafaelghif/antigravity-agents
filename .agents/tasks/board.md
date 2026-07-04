@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Support per-account token budget counters (feat/issue-165) <!-- id: issue-165 -->
 - [x] Implement strict token budget tracker and logging CLI (feat/issue-164) <!-- id: issue-164 -->
 - [x] Fix installer repo URLs in README (fix/issue-163) <!-- id: issue-163 -->
 - [x] Add strict type checking for Python, TypeScript, and Java to validation guard (feat/issue-162) <!-- id: issue-162 -->

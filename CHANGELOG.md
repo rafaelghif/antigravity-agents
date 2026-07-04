@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.141.0] - 2026-07-04
+
+### 🚀 Features
+- support per-account token budget tracking
+- Support per-account token budget counters (ISSUE-165)
+
+### ⚙️ Chores
+- Implement strict token budget tracker and logging CLI (ISSUE-164)
+- synchronize rules final
+- synchronize lessons learned
+- synchronize lessons archive
+
+
 ## [2.140.0] - 2026-07-04
 
 ### 🚀 Features
