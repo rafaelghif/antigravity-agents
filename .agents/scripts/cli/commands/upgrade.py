@@ -67,8 +67,6 @@ def run(args: List[str]) -> None:
             ".agents/scripts/",
             ".agents/templates/",
             ".agents/skills/",
-            ".agents/rules.md",
-            "AGENTS.md",
             "helper.sh",
             "helper.ps1"
         ]
@@ -141,8 +139,6 @@ def check_and_run_auto_upgrade() -> None:
         ".agents/scripts/",
         ".agents/templates/",
         ".agents/skills/",
-        ".agents/rules.md",
-        "AGENTS.md",
         "helper.sh",
         "helper.ps1"
     ]

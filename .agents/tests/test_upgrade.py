@@ -24,8 +24,8 @@ class TestUpgradeCommand(unittest.TestCase):
         self.assertIsNotNone(checkout_call)
         cmd_args = checkout_call[0][0]
         self.assertIn(".agents/skills/", cmd_args)
-        self.assertIn(".agents/rules.md", cmd_args)
-        self.assertIn("AGENTS.md", cmd_args)
+        self.assertNotIn(".agents/rules.md", cmd_args)
+        self.assertNotIn("AGENTS.md", cmd_args)
         
     @patch('sys.exit', side_effect=raise_system_exit)
     @patch('subprocess.run')

@@ -128,6 +128,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
       ! -name "git_profiles.json" \
       ! -name "projects.json" \
       ! -name "locks.json" \
+      ! -name "rules.md" \
       ! -name ".DS_Store" \
       ! -name "*.pyc" \
       ! -name "*.pyo" \
@@ -136,6 +137,14 @@ echo "Downloading Antigravity Agent Core from GitHub..."
       ! -path ".agents/issues/*" \
       ! -path ".agents/plans/*" \
       ! -path ".agents/tests/*" \
+      ! -path ".agents/archive/*" \
+      ! -path ".agents/logs/*" \
+      ! -name "active_context.md" \
+      ! -name "token_budget.json" \
+      ! -name "sync_cache.json" \
+      ! -name "cooldowns.json" \
+      ! -name "upgrade_state.json" \
+      ! -name "schema.md" \
       -exec sh -c '
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
