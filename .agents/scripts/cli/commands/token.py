@@ -410,11 +410,12 @@ def parse_usage_output(output: str) -> dict:
                             if m_ref and "five_hour_remaining" not in stats:
                                 stats["five_hour_remaining"] = normalize_time_string(m_ref.group(1))
                                 
+        budget = load_budget()
         if "weekly_pct" in stats:
-            stats["weekly_limit"] = 2500000
+            stats["weekly_limit"] = budget.get("weekly_limit", 2500000)
             stats["weekly_used"] = int(stats["weekly_pct"] / 100.0 * stats["weekly_limit"])
         if "five_hour_pct" in stats:
-            stats["five_hour_limit"] = 200000
+            stats["five_hour_limit"] = budget.get("five_hour_limit", 200000)
             stats["five_hour_used"] = int(stats["five_hour_pct"] / 100.0 * stats["five_hour_limit"])
             
         if "active_account" in stats and "weekly_used" in stats:
@@ -681,6 +682,21 @@ def sync_from_platform_usage() -> dict:
                 if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
                 if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
                 if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+
+                # Dynamically calculate and learn limits from local logs and platform percentages
+                log_stats = get_rolling_window_stats()
+                local_weekly = log_stats.get("weekly_used", 0)
+                local_five_hour = log_stats.get("five_hour_used", 0)
+                
+                if "weekly_pct" in parsed and parsed["weekly_pct"] > 0:
+                    calculated_weekly_limit = int(local_weekly / (parsed["weekly_pct"] / 100.0))
+                    if calculated_weekly_limit > 0:
+                        budget["weekly_limit"] = calculated_weekly_limit
+                        
+                if "five_hour_pct" in parsed and parsed["five_hour_pct"] > 0:
+                    calculated_five_hour_limit = int(local_five_hour / (parsed["five_hour_pct"] / 100.0))
+                    if calculated_five_hour_limit > 0:
+                        budget["five_hour_limit"] = calculated_five_hour_limit
                 
                 # Update accounts and tasks breakdowns
                 if "accounts" in parsed:
