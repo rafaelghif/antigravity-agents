@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.134.0] - 2026-07-04
+
+### 🚀 Features
+- Add professional alerts and formatting enhancements to README (ISSUE-157)
+
+### 📝 Documentation
+- add visually clean alerts and structural formatting
+
+
 ## [2.133.0] - 2026-07-04
 
 ### 🚀 Features
