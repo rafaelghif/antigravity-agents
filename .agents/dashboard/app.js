@@ -245,6 +245,112 @@ window.loadData = async function(force = false) {
       }
     }
 
+    // 10. Token Budget rendering
+    if (data.token_budget) {
+      const budget = data.token_budget;
+      const dailyUsed = budget.daily_used || 0;
+      const dailyLimit = budget.daily_limit || 500000;
+      const dailyPct = dailyLimit > 0 ? (dailyUsed / dailyLimit * 100) : 0;
+      
+      const monthlyUsed = budget.monthly_used || 0;
+      const monthlyLimit = budget.monthly_limit || 5000000;
+      const monthlyPct = monthlyLimit > 0 ? (monthlyUsed / monthlyLimit * 100) : 0;
+      
+      // Daily progress
+      const dailyProgress = document.getElementById('token-daily-progress');
+      if (dailyProgress) {
+        dailyProgress.style.width = Math.min(dailyPct, 100) + '%';
+        if (dailyPct > 90) dailyProgress.style.backgroundColor = 'var(--accent-error)';
+        else if (dailyPct > 70) dailyProgress.style.backgroundColor = 'var(--accent-warning)';
+        else dailyProgress.style.backgroundColor = 'var(--accent-success)';
+      }
+      const dailyLabel = document.getElementById('token-daily-label');
+      if (dailyLabel) {
+        dailyLabel.textContent = `${dailyUsed.toLocaleString()} / ${dailyLimit.toLocaleString()} tokens (${dailyPct.toFixed(2)}% utilized)`;
+      }
+
+      // Monthly progress
+      const monthlyProgress = document.getElementById('token-monthly-progress');
+      if (monthlyProgress) {
+        monthlyProgress.style.width = Math.min(monthlyPct, 100) + '%';
+        if (monthlyPct > 90) monthlyProgress.style.backgroundColor = 'var(--accent-error)';
+        else if (monthlyPct > 70) monthlyProgress.style.backgroundColor = 'var(--accent-warning)';
+        else monthlyProgress.style.backgroundColor = 'var(--accent-success)';
+      }
+      const monthlyLabel = document.getElementById('token-monthly-label');
+      if (monthlyLabel) {
+        monthlyLabel.textContent = `${monthlyUsed.toLocaleString()} / ${monthlyLimit.toLocaleString()} tokens (${monthlyPct.toFixed(2)}% utilized)`;
+      }
+
+      // Account breakdown list
+      const accountsList = document.getElementById('token-accounts-list');
+      if (accountsList) {
+        accountsList.innerHTML = '';
+        const accounts = budget.accounts || {};
+        if (Object.keys(accounts).length > 0) {
+          for (const [name, info] of Object.entries(accounts)) {
+            const item = document.createElement('div');
+            item.className = 'lock-card-row';
+            item.style.padding = "0.6rem 0.8rem";
+            item.style.background = "rgba(255, 255, 255, 0.02)";
+            item.style.borderRadius = "8px";
+            item.style.marginBottom = "0.5rem";
+            item.innerHTML = `
+              <div class="lock-info-box">
+                <span class="module-name" style="color: var(--accent-primary); font-weight: 600;">🔑 ${name}</span>
+                <span class="holder-branch" style="margin-top: 0.3rem;">
+                  Daily: <code>${(info.daily_used || 0).toLocaleString()}</code> | 
+                  Monthly: <code>${(info.monthly_used || 0).toLocaleString()}</code> | 
+                  Total: <code>${(info.total_used || 0).toLocaleString()}</code>
+                </span>
+              </div>
+            `;
+            accountsList.appendChild(item);
+          }
+        } else {
+          accountsList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No active API account usage logged.</p>';
+        }
+      }
+
+      // Task breakdown list
+      const tasksList = document.getElementById('token-tasks-list');
+      if (tasksList) {
+        tasksList.innerHTML = '';
+        const tasks = budget.tasks || {};
+        if (Object.keys(tasks).length > 0) {
+          // Sort by updated_at desc
+          const sortedTasks = Object.entries(tasks).sort((a, b) => {
+            const aTime = a[1].updated_at || '';
+            const bTime = b[1].updated_at || '';
+            return bTime.localeCompare(aTime);
+          });
+          sortedTasks.forEach(([tId, info]) => {
+            const item = document.createElement('div');
+            item.className = 'git-status-item';
+            item.style.padding = "0.6rem 0.8rem";
+            item.style.background = "rgba(255, 255, 255, 0.02)";
+            item.style.borderRadius = "8px";
+            item.style.marginBottom = "0.5rem";
+            item.style.borderLeft = "3px solid var(--accent-primary)";
+            item.innerHTML = `
+              <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem;">
+                <span style="font-weight: 600; color: var(--accent-light);">🎫 Task: ${tId}</span>
+                <span class="text-muted">${info.updated_at ? new Date(info.updated_at).toLocaleString() : 'unknown'}</span>
+              </div>
+              <div style="margin-top: 0.3rem; font-size: 0.8rem; color: var(--text-secondary);">
+                Total: <code>${(info.total_tokens || 0).toLocaleString()}</code> tokens 
+                (<span style="color: var(--accent-warning);">${(info.prompt_tokens || 0).toLocaleString()}</span> prompt / 
+                <span style="color: var(--accent-success);">${(info.completion_tokens || 0).toLocaleString()}</span> completion)
+              </div>
+            `;
+            tasksList.appendChild(item);
+          });
+        } else {
+          tasksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No task token usage logged yet.</p>';
+        }
+      }
+    }
+
   } catch (err) {
     console.error('Failed to load status:', err);
     refreshBtns.forEach(btn => {

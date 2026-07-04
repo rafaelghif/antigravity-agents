@@ -47,6 +47,9 @@
         <button class="nav-btn" onclick="switchTab(this, 'profiles')">
           <span class="nav-icon">👤</span> Git Profiles
         </button>
+        <button class="nav-btn" onclick="switchTab(this, 'tokens')">
+          <span class="nav-icon">🪙</span> Token Budget
+        </button>
       </nav>
       <div class="sidebar-footer">
         <p>Operational Control Panel</p>
@@ -292,6 +295,60 @@
           <div class="card-body">
             <div id="profiles-list-container" class="profiles-list">
               <!-- dynamic list -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: TOKEN BUDGET -->
+      <div id="tokens-tab" class="tab-content">
+        <div class="overview-grid">
+          <!-- Token Limits & Usage Card -->
+          <div class="card card-glow">
+            <div class="card-header">
+              <h2>🪙 Token Limits & Usage</h2>
+            </div>
+            <div class="card-body">
+              <div class="token-limit-group">
+                <div class="token-limit-item">
+                  <h3>Daily Token Budget</h3>
+                  <div class="progress-bar-container">
+                    <div id="token-daily-progress" class="progress-bar" style="width: 0%;"></div>
+                  </div>
+                  <p id="token-daily-label">0 / 0 tokens (0% utilized)</p>
+                </div>
+                <div class="token-limit-item" style="margin-top: 1.5rem;">
+                  <h3>Monthly Token Budget</h3>
+                  <div class="progress-bar-container">
+                    <div id="token-monthly-progress" class="progress-bar" style="width: 0%;"></div>
+                  </div>
+                  <p id="token-monthly-label">0 / 0 tokens (0% utilized)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account breakdown card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>🔑 API Key / Account Breakdown</h2>
+            </div>
+            <div class="card-body">
+              <div id="token-accounts-list" class="locks-vertical-list">
+                <!-- dynamic accounts -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task breakdown card -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h2>🎫 Token Consumption per Task</h2>
+          </div>
+          <div class="card-body">
+            <div id="token-tasks-list" class="git-status-container">
+              <!-- dynamic task consumption -->
             </div>
           </div>
         </div>

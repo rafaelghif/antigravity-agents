@@ -289,6 +289,16 @@ def get_dashboard_data(force=False):
     with audit_thread_lock:
         is_auditing = audit_in_progress
 
+    # 9. Token Budget Data
+    token_budget = {}
+    budget_path = ".agents/token_budget.json"
+    if os.path.exists(budget_path):
+        try:
+            with open(budget_path, 'r', encoding='utf-8') as f:
+                token_budget = json.load(f)
+        except Exception:
+            pass
+
     return {
         "version": version,
         "locks": locks,
@@ -298,6 +308,7 @@ def get_dashboard_data(force=False):
         "rules": rules,
         "changelog": changelog_releases[:5], # top 5 releases
         "compliance": compliance,
+        "token_budget": token_budget,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "auditing": is_auditing
     }
