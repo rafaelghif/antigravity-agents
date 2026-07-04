@@ -10,7 +10,15 @@ Tracks API usage tokens and enforces budget limits.
   "monthly_used": 120000,
   "daily_limit": 500000,
   "daily_used": 15000,
-  "last_reset": "2026-06-27T00:00:00Z"
+  "last_reset": "2026-06-27T00:00:00Z",
+  "tasks": {
+    "issue-164": {
+      "prompt_tokens": 15000,
+      "completion_tokens": 3000,
+      "total_tokens": 18000,
+      "updated_at": "2026-07-04T08:05:00Z"
+    }
+  }
 }
 ```
 

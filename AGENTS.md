@@ -28,6 +28,7 @@
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
+- **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
 - **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.

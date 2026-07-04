@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Implement strict token budget tracker and logging CLI (feat/issue-164) <!-- id: issue-164 -->
 
 ## Done
 - [x] Fix installer repo URLs in README (fix/issue-163) <!-- id: issue-163 -->
