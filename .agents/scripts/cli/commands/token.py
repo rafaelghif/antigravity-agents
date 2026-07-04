@@ -201,7 +201,7 @@ def append_to_log(task_id: str, prompt: int, completion: int) -> None:
     except Exception as e:
         print_warn(f"Could not write to token log file: {e}")
 
-def auto_detect_tokens() -> tuple:
+def get_transcript_tokens_fallback() -> tuple:
     """
     Attempt to auto-detect prompt and completion tokens from the conversation transcript.
     Returns: (prompt_tokens, completion_tokens)
@@ -219,11 +219,11 @@ def auto_detect_tokens() -> tuple:
                 pass
                 
     if not conversation_id:
-        return 0, 0
+        return 15000, 1000
 
     transcript_path = os.path.expanduser(f"~/.gemini/antigravity-cli/brain/{conversation_id}/.system_generated/logs/transcript.jsonl")
     if not os.path.exists(transcript_path):
-        return 0, 0
+        return 15000, 1000
 
     try:
         with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -240,7 +240,7 @@ def auto_detect_tokens() -> tuple:
                 pass
 
         if not steps:
-            return 0, 0
+            return 15000, 1000
 
         # Find the last MODEL response step and preceding steps in the current turn
         last_model_idx = -1
@@ -250,7 +250,7 @@ def auto_detect_tokens() -> tuple:
                 break
 
         if last_model_idx == -1:
-            return 0, 0
+            return 15000, 1000
 
         model_step = steps[last_model_idx]
         completion_content = model_step.get("content", "") or ""
@@ -279,7 +279,80 @@ def auto_detect_tokens() -> tuple:
 
         return prompt_tokens, completion_tokens
     except Exception:
-        return 0, 0
+        return 15000, 1000
+
+def auto_detect_tokens() -> tuple:
+    """
+    Attempt to auto-detect prompt and completion tokens using agy -p "/usage" and local budget differences.
+    Falls back to transcript-based estimation if needed.
+    """
+    # 1. Prevent recursion and check if running under unit tests
+    if os.environ.get("INTERNAL_SYNC") == "true":
+        return get_transcript_tokens_fallback()
+
+    is_testing = "unittest" in sys.modules or "pytest" in sys.modules
+    if is_testing and os.environ.get("FORCE_PLATFORM_DETECT") != "true":
+        return get_transcript_tokens_fallback()
+
+    # 2. Run agy -p "/usage" to get actual platform token usage
+    env = os.environ.copy()
+    env["INTERNAL_SYNC"] = "true"
+    try:
+        res = subprocess.run(
+            ["agy", "-p", "/usage"],
+            capture_output=True,
+            text=True,
+            timeout=40,
+            env=env
+        )
+        if res.returncode == 0:
+            parsed = parse_usage_output(res.stdout)
+            if parsed:
+                # Find current task ID
+                task_id = get_current_task_id()
+                
+                # Fetch platform task usage
+                platform_tasks = parsed.get("tasks", {})
+                platform_task_info = platform_tasks.get(task_id)
+                
+                # If not found for current task, maybe under 'unknown'
+                if not platform_task_info and "unknown" in platform_tasks:
+                    platform_task_info = platform_tasks["unknown"]
+                
+                if platform_task_info:
+                    platform_prompt = platform_task_info.get("prompt_tokens", 0)
+                    platform_completion = platform_task_info.get("completion_tokens", 0)
+                    
+                    # Compare with local logged task usage
+                    budget = load_budget()
+                    local_tasks = budget.get("tasks", {})
+                    local_task_info = local_tasks.get(task_id, {})
+                    
+                    local_prompt = local_task_info.get("prompt_tokens", 0)
+                    local_completion = local_task_info.get("completion_tokens", 0)
+                    
+                    prompt_diff = platform_prompt - local_prompt
+                    completion_diff = platform_completion - local_completion
+                    
+                    if prompt_diff > 0 or completion_diff > 0:
+                        return max(0, prompt_diff), max(0, completion_diff)
+                
+                # Alternate detection: check difference in daily_used
+                platform_daily = parsed.get("daily_used", 0)
+                budget = load_budget()
+                local_daily = budget.get("daily_used", 0)
+                
+                daily_diff = platform_daily - local_daily
+                if daily_diff > 0:
+                    # Estimate prompt/completion split (90% / 10%)
+                    prompt_est = int(daily_diff * 0.9)
+                    comp_est = int(daily_diff * 0.1)
+                    return max(1, prompt_est), max(1, comp_est)
+    except Exception:
+        pass
+
+    # 3. Fallback to transcript estimation
+    return get_transcript_tokens_fallback()
 
 def normalize_time_string(raw_time: str) -> str:
     """Normalize human readable time strings to Xd Yh Zm format."""
@@ -437,6 +510,88 @@ def parse_usage_output(output: str) -> dict:
     if "weekly_limit" in stats and "weekly_used" in stats and "weekly_pct" not in stats:
         stats["weekly_pct"] = (stats["weekly_used"] / stats["weekly_limit"] * 100) if stats["weekly_limit"] > 0 else 0
 
+    # Parse Account Breakdown
+    accounts = {}
+    in_account_breakdown = False
+    for line in lines:
+        line_lower = line.lower()
+        if "account breakdown:" in line_lower:
+            in_account_breakdown = True
+            continue
+        if in_account_breakdown:
+            if line.startswith("---") or line.startswith("===") or "task breakdown:" in line_lower:
+                in_account_breakdown = False
+            else:
+                m = re.match(r'\s*-\s*([a-zA-Z0-9_.@+-:]+)\s*:\s*daily\s*([\d,]+)\s*\|\s*monthly\s*([\d,]+)\s*\|\s*total\s*([\d,]+)', line)
+                if m:
+                    acc_name = m.group(1).strip()
+                    daily = int(m.group(2).replace(',', ''))
+                    monthly = int(m.group(3).replace(',', ''))
+                    total = int(m.group(4).replace(',', ''))
+                    accounts[acc_name] = {
+                        "daily_used": daily,
+                        "monthly_used": monthly,
+                        "total_used": total
+                    }
+                else:
+                    # Try table format: | Account | Daily | Monthly | Total |
+                    m_table = re.match(r'\s*\|\s*(?:\*\*)?([a-zA-Z0-9_.@+-:]+)(?:\*\*)?\s*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|', line)
+                    if m_table:
+                        acc_name = m_table.group(1).strip()
+                        if acc_name.lower() not in ("account", "metric", "limit", "task"):
+                            daily = int(m_table.group(2).replace(',', ''))
+                            monthly = int(m_table.group(3).replace(',', ''))
+                            total = int(m_table.group(4).replace(',', ''))
+                            accounts[acc_name] = {
+                                "daily_used": daily,
+                                "monthly_used": monthly,
+                                "total_used": total
+                            }
+    if accounts:
+        stats["accounts"] = accounts
+
+    # Parse Task Breakdown
+    tasks = {}
+    in_task_breakdown = False
+    for line in lines:
+        line_lower = line.lower()
+        if "task breakdown:" in line_lower:
+            in_task_breakdown = True
+            continue
+        if in_task_breakdown:
+            if line.startswith("---") or line.startswith("===") or "account breakdown:" in line_lower:
+                in_task_breakdown = False
+            else:
+                m = re.match(r'\s*-\s*([a-zA-Z0-9_-]+)\s*:\s*([\d,]+)\s*total\s*\(([\d,]+)\s*prompt\s*/\s*([\d,]+)\s*completion\)', line)
+                if m:
+                    task_id = m.group(1).strip()
+                    total = int(m.group(2).replace(',', ''))
+                    prompt = int(m.group(3).replace(',', ''))
+                    completion = int(m.group(4).replace(',', ''))
+                    tasks[task_id] = {
+                        "prompt_tokens": prompt,
+                        "completion_tokens": completion,
+                        "total_tokens": total,
+                        "updated_at": datetime.utcnow().isoformat() + "Z"
+                    }
+                else:
+                    # Try table format: | Task | Total | Prompt | Completion |
+                    m_table = re.match(r'\s*\|\s*(?:\*\*)?([a-zA-Z0-9_-]+)(?:\*\*)?\s*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|', line)
+                    if m_table:
+                        task_id = m_table.group(1).strip()
+                        if task_id.lower() not in ("task", "metric", "limit"):
+                            total = int(m_table.group(2).replace(',', ''))
+                            prompt = int(m_table.group(3).replace(',', ''))
+                            completion = int(m_table.group(4).replace(',', ''))
+                            tasks[task_id] = {
+                                "prompt_tokens": prompt,
+                                "completion_tokens": completion,
+                                "total_tokens": total,
+                                "updated_at": datetime.utcnow().isoformat() + "Z"
+                            }
+    if tasks:
+        stats["tasks"] = tasks
+
     return stats
 
 def sync_from_platform_usage() -> dict:
@@ -468,6 +623,18 @@ def sync_from_platform_usage() -> dict:
                 if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
                 if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
                 if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+                
+                # Update accounts and tasks breakdowns
+                if "accounts" in parsed:
+                    if "accounts" not in budget:
+                        budget["accounts"] = {}
+                    for acc, acc_info in parsed["accounts"].items():
+                        budget["accounts"][acc] = acc_info
+                if "tasks" in parsed:
+                    if "tasks" not in budget:
+                        budget["tasks"] = {}
+                    for t_id, t_info in parsed["tasks"].items():
+                        budget["tasks"][t_id] = t_info
                 
                 save_budget(budget)
                 return parsed

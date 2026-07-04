@@ -183,6 +183,33 @@ class TestTokenCommand(unittest.TestCase):
             self.assertGreater(prompt, 0)
             self.assertGreater(completion, 0)
 
+    @patch('subprocess.run')
+    @patch.object(token_cmd, 'load_budget')
+    @patch.object(token_cmd, 'get_current_task_id', return_value="issue-176")
+    def test_auto_detect_tokens_via_usage(self, mock_task, mock_load, mock_run):
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.stdout = (
+            "Task Breakdown:\n"
+            "  - issue-176      : 20,000 total (18,000 prompt / 2,000 completion)\n"
+        )
+        mock_run.return_value = mock_proc
+
+        mock_load.return_value = {
+            "tasks": {
+                "issue-176": {
+                    "prompt_tokens": 15000,
+                    "completion_tokens": 114,
+                    "total_tokens": 15114
+                }
+            }
+        }
+
+        with patch.dict(os.environ, {"FORCE_PLATFORM_DETECT": "true"}):
+            prompt, completion = token_cmd.auto_detect_tokens()
+            self.assertEqual(prompt, 3000)
+            self.assertEqual(completion, 1886)
+
     def test_get_reset_intervals_remaining(self):
         resets = token_cmd.get_reset_intervals_remaining()
         self.assertIn("five_hour", resets)
@@ -267,6 +294,34 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(parsed3["five_hour_used"], 142000)
         self.assertEqual(parsed3["five_hour_remaining"], "4h 45m")
         self.assertEqual(parsed3["weekly_remaining"], "131h 47m")
+
+        # Breakdown parsing format
+        output4 = (
+            "Daily Limit   : 500,000 tokens\n"
+            "Daily Used    : 161,515 tokens\n"
+            "Monthly Limit : 5,000,000 tokens\n"
+            "Monthly Used  : 161,515 tokens\n"
+            "------------------------------------------------------------\n"
+            "Account Breakdown:\n"
+            "  - merioptasari@gmail.com: daily 15,115 | monthly 15,115 | total 15,115\n"
+            "  - default        : daily 92,400 | monthly 92,400 | total 92,400\n"
+            "------------------------------------------------------------\n"
+            "Task Breakdown:\n"
+            "  - issue-176      : 15,114 total (15,000 prompt / 114 completion)\n"
+            "  - unknown        : 107,515 total (99,000 prompt / 8,515 completion)\n"
+            "============================================================\n"
+        )
+        parsed4 = token_cmd.parse_usage_output(output4)
+        self.assertIn("accounts", parsed4)
+        self.assertIn("merioptasari@gmail.com", parsed4["accounts"])
+        self.assertEqual(parsed4["accounts"]["merioptasari@gmail.com"]["daily_used"], 15115)
+        self.assertEqual(parsed4["accounts"]["default"]["total_used"], 92400)
+        self.assertIn("tasks", parsed4)
+        self.assertIn("issue-176", parsed4["tasks"])
+        self.assertEqual(parsed4["tasks"]["issue-176"]["prompt_tokens"], 15000)
+        self.assertEqual(parsed4["tasks"]["issue-176"]["completion_tokens"], 114)
+        self.assertEqual(parsed4["tasks"]["issue-176"]["total_tokens"], 15114)
+
 
     @patch('subprocess.run')
     @patch.object(token_cmd, 'load_budget')
