@@ -1,7 +1,7 @@
 ---
 id: issue-197
 title: "Add complete transient exclusions to gitignore.template"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

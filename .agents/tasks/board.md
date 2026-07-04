@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Add complete transient exclusions to gitignore.template (feat/issue-197) <!-- id: issue-197 -->
 - [x] Make MCP server dynamically resolve target project scripts directory (feat/issue-196) <!-- id: issue-196 -->
 - [x] Exclude active context logs and budgets from installer (feat/issue-194) <!-- id: issue-194 -->
 - [x] Fix installer memory leak and identity separation for target projects (feat/issue-193) <!-- id: issue-193 -->
