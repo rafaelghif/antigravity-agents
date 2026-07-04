@@ -353,6 +353,22 @@ class TestValidate(unittest.TestCase):
         mock_run.assert_called_once()
         self.assertIn("prettier", mock_run.call_args[0][0][0])
 
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/gofmt" if name in ("gofmt", "go") else None)
+    @patch('subprocess.run')
+    def test_auto_lint_file_go(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.go")
+        self.assertTrue(res)
+        self.assertEqual(mock_run.call_count, 2)
+        
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/rustfmt" if name in ("rustfmt", "rustc") else None)
+    @patch('subprocess.run')
+    def test_auto_lint_file_rust(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.rs")
+        self.assertTrue(res)
+        self.assertEqual(mock_run.call_count, 2)
+
     @patch('validate.get_current_branch')
     @patch('validate.get_base_branch')
     @patch('subprocess.run')

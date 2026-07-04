@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.137.0] - 2026-07-04
+
+### 🚀 Features
+- add Go, Rust, Ruby, C/C++, Shell, YAML, and JSON format/lint checks
+- Expand multi-language lint support in validation guard and simplify readme (ISSUE-160)
+
+
 ## [2.136.0] - 2026-07-04
 
 ### 🚀 Features
