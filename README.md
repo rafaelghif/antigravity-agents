@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.132.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-2.181.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -26,14 +26,15 @@ AAC V2 forces AI agents to run inside a repeatable, secure lifecycle loop:
 
 ```mermaid
 flowchart TD
-    A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Claim Task on Board<br><code>board.md</code>"]
-    B --> C["3. Checkout Feature Branch<br><code>./helper.sh issue checkout &lt;id&gt;</code>"]
-    C --> D["4. Lock Active Module<br><code>./helper.sh lock &lt;module&gt;</code>"]
-    D --> E["5. Code, Lint, &amp; Test<br><code>validate.py</code>"]
-    E -- "Fail Audit" --> F["6. Self-Heal Workspace<br><code>self-healing/SKILL.md</code>"]
-    F --> E
-    E -- "Pass Audit" --> G["7. Commit with Task ID<br><code>./helper.sh commit</code>"]
-    G --> H["8. Close Task &amp; Merge<br><code>./helper.sh issue close &lt;id&gt;</code>"]
+    A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & issue_[id].md</code>"]
+    B --> C["3. Claim & Checkout Branch<br><code>./helper.sh issue checkout &lt;id&gt;</code>"]
+    C --> D["4. Read Schema & Context<br><code>schema.md & active_context.md</code>"]
+    D --> E["5. Lock Active Module<br><code>./helper.sh lock &lt;module&gt;</code>"]
+    E --> F["6. Code, Lint, &amp; Test<br><code>validate.py</code>"]
+    F -- "Fail Audit" --> G["7. Self-Heal Workspace<br><code>self-healing/SKILL.md</code>"]
+    G --> F
+    F -- "Pass Audit" --> H["8. Commit with Task ID<br><code>Conventional Commits</code>"]
+    H --> I["9. Close Task &amp; Merge<br><code>./helper.sh issue close &lt;id&gt;</code>"]
 ```
 
 ---
@@ -44,6 +45,8 @@ flowchart TD
 * **👤 Zero-Trust Git Profiles**: Rotate commits metadata and GPG/SSH keys dynamically, preventing corporate credential leaks.
 * **🔒 Collaborative Module Locks**: Restrict parallel edits on directories to prevent agents from clashing.
 * **📦 Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, keeping agent index files tiny and saving up to **80% in LLM token budgets**.
+* **🧠 Prompt Caching & Token Optimization**: Enforces reuse of retrieved information across turns to maximize prompt cache hits and prevent redundant file reads.
+* **🎯 Strict Workspace Spec Reads**: Guarantees that the agent reads `active_context.md` and `schema.md` at session startup to prevent hallucinated designs or schemas.
 * **🪙 Token Budget Tracker (Beta)**: Local token tracking, logging, and synchronization with platform usage (Note: platform quota synchronization is a beta feature currently undergoing active improvement and validation).
 * **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
 * **⏩ Human Validation Bypass**: Skip strict validation audits during quick human hotfixes via `--bypass` flags or `AAC_BYPASS_COMPLIANCE=1` env variables.
