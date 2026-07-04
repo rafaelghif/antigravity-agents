@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.132.0] - 2026-07-04
+
+### 🚀 Features
+- Track lessons-archive in git (ISSUE-155)
+
+### ⚙️ Chores
+- track archived lessons learned
+
+
 ## [2.131.0] - 2026-07-04
 
 ### 🚀 Features
