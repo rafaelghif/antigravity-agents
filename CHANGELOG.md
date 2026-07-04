@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.148.0] - 2026-07-04
+
+### 🚀 Features
+- support automatic token account detection from CLI logs and auto-detect token usage
+- Automate token active account detection from CLI logs (ISSUE-173)
+
+
 ## [2.147.0] - 2026-07-04
 
 ### 🚀 Features
