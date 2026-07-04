@@ -18,7 +18,26 @@ class TestBootstrapCommand(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         os.chdir(self.temp_dir)
         
+        from unittest.mock import MagicMock
+        self.run_patcher = patch('subprocess.run')
+        self.mock_run = self.run_patcher.start()
+        
+        def run_side_effect(cmd, *args, **kwargs):
+            if len(cmd) >= 3 and cmd[0] == 'git' and cmd[1] == 'clone':
+                src = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+                dest = cmd[-1]
+                import shutil
+                shutil.copytree(os.path.join(src, ".agents"), os.path.join(dest, ".agents"), dirs_exist_ok=True)
+                for f in ["AGENTS.md", "helper.sh", "helper.ps1"]:
+                    src_f = os.path.join(src, f)
+                    if os.path.exists(src_f):
+                        shutil.copy2(src_f, os.path.join(dest, f))
+                return MagicMock(returncode=0)
+            return MagicMock(returncode=0)
+        self.mock_run.side_effect = run_side_effect
+        
     def tearDown(self):
+        self.run_patcher.stop()
         os.chdir(self.old_cwd)
         # Force clean file handles if any
         shutil.rmtree(self.temp_dir)
@@ -142,12 +161,12 @@ class TestBootstrapCommand(unittest.TestCase):
     @patch('os.walk')
     def test_copy_core_files_exclusions(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
         # Setup mock for os.walk
-        mock_exists.side_effect = lambda path: False if "valid.py" in path or "git_profiles" in path or "locks.json" in path or "cached.pyc" in path else True
+        mock_exists.side_effect = lambda path: False if "valid.py" in path or "git_profiles" in path or "locks.json" in path or "cached.pyc" in path or "memory" in path or "projects.example" in path else True
         mock_walk.return_value = [
             ('/src/root/.agents/scripts', ['__pycache__', 'valid_dir'], ['git_profiles.json', 'locks.json', 'valid.py', 'cached.pyc'])
         ]
         
-        bootstrap.copy_core_files()
+        bootstrap.copy_core_files('/src/root')
         
         # Verify copy2 was called for valid.py but NOT for git_profiles.json, locks.json, or cached.pyc
         # Filter mock calls
@@ -165,17 +184,17 @@ class TestBootstrapCommand(unittest.TestCase):
     @patch('os.path.exists')
     @patch('os.walk')
     def test_copy_core_files_force_update(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
-        mock_exists.return_value = True
+        mock_exists.side_effect = lambda path: False if "memory" in path or "projects.example" in path else True
         mock_walk.return_value = [
             ('/src/root/.agents/scripts', [], ['valid.py'])
         ]
         
         # Should not copy without force since it exists
-        bootstrap.copy_core_files(force=False)
+        bootstrap.copy_core_files('/src/root', force=False)
         mock_copy2.assert_not_called()
         
         # Should copy with force
-        bootstrap.copy_core_files(force=True)
+        bootstrap.copy_core_files('/src/root', force=True)
         mock_copy2.assert_called()
 
     def test_bootstrap_core_dirs_isolation(self, mock_input):
