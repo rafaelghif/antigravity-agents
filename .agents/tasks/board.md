@@ -9,6 +9,7 @@ This board tracks active development tasks.
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 
 ## Doing
+- [ ] Enforce issue schemas and implement atomic file writing (feat/issue-189) <!-- id: issue-189 -->
 
 ## Done
 - [x] Self heal active context and enhance CLI DX (feat/issue-188) <!-- id: issue-188 -->

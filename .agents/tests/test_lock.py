@@ -23,10 +23,12 @@ class TestLockCommand(unittest.TestCase):
         locks = lock.load_locks()
         self.assertEqual(locks.get("module-x"), "feat/issue-1")
 
-    @patch('builtins.open', new_callable=mock_open)
-    def test_save_locks(self, mock_file):
+    @patch('os.replace')
+    @patch('tempfile.NamedTemporaryFile')
+    def test_save_locks(self, mock_temp_file, mock_replace):
         lock.save_locks({"mod-y": "some-branch"})
-        mock_file.assert_called_once_with(lock.LOCK_FILE, 'w', encoding='utf-8')
+        mock_temp_file.assert_called_once()
+        mock_replace.assert_called_once()
 
     @patch('subprocess.run')
     @patch('os.path.exists')

@@ -806,10 +806,71 @@ def audit_workspace_sync() -> bool:
 # ==========================================================
 # 6. Task Board Schema Compliance Check
 # ==========================================================
+def audit_issue_files_schema() -> bool:
+    failed = False
+    issues_dir = ".agents/issues"
+    if not os.path.exists(issues_dir):
+        return True
+        
+    for f_name in os.listdir(issues_dir):
+        if not f_name.endswith(".md"):
+            continue
+        path = os.path.join(issues_dir, f_name)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 1. Check YAML frontmatter existence
+            if not content.startswith("---"):
+                print_err(f"Issue file '{f_name}' is missing frontmatter start marker '---'!")
+                failed = True
+                continue
+                
+            parts = content.split("---", 2)
+            if len(parts) < 3:
+                print_err(f"Issue file '{f_name}' has malformed frontmatter block (unclosed '---')!")
+                failed = True
+                continue
+                
+            frontmatter = parts[1]
+            # Validate required metadata fields
+            required_fields = ["id:", "title:", "status:", "assignee:", "created_at:"]
+            for field in required_fields:
+                if field not in frontmatter.lower():
+                    print_err(f"Issue file '{f_name}' frontmatter is missing required metadata field '{field[:-1]}'!")
+                    failed = True
+                    
+            body = parts[2]
+            # 2. Check required sections
+            required_sections = ["## Tasks", "## Acceptance Criteria"]
+            for sec in required_sections:
+                if sec not in body:
+                    print_err(f"Issue file '{f_name}' is missing required body section '{sec}'!")
+                    failed = True
+                    
+            # 3. Check that all tasks have tracking IDs
+            tasks_match = re.search(r'## Tasks\s*\n(.*?)(?=\n## Acceptance Criteria|$)', body, re.DOTALL)
+            if tasks_match:
+                tasks_body = tasks_match.group(1)
+                sub_task_lines = re.findall(r'([-*]\s*\[[xX /]\].*)', tasks_body)
+                for tl in sub_task_lines:
+                    if "<!-- id:" not in tl:
+                        print_warn(f"Issue file '{f_name}' task line is missing tracking ID: '{tl.strip()}'")
+                            
+        except Exception as e:
+            print_warn(f"Failed to scan issue file schema for '{f_name}': {e}")
+            
+    return not failed
+
 def audit_task_board_schema() -> bool:
     print("\n[6/9] Auditing Task Board Schema Compliance...")
     task_board = ".agents/tasks/board.md"
     failed = False
+    
+    # Run issue files schema validation
+    if not audit_issue_files_schema():
+        failed = True
+        
     if os.path.exists(task_board):
         try:
             with open(task_board, 'r', encoding='utf-8') as f:

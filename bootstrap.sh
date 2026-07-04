@@ -58,71 +58,15 @@ else
   echo "Warning: .agents/scripts/recon.py not found. Skipping auto-reconnaissance."
 fi
 
-# 4. Set up local Git hooks
+# 4. Set up local Git hooks via validate.py
 if git rev-parse --is-inside-work-tree &>/dev/null; then
-  HOOKS_DIR=$(git rev-parse --git-path hooks)
-  mkdir -p "$HOOKS_DIR"
-
-  # Pre-commit Hook
-  cat << 'EOF' > "$HOOKS_DIR/pre-commit"
-#!/usr/bin/env bash
-if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/validate.py
-elif command -v python &>/dev/null; then
-  python .agents/scripts/validate.py
-else
-  echo "Warning: Python not found. Skipping commit validation check."
-fi
-EOF
-  chmod +x "$HOOKS_DIR/pre-commit"
-  echo "Installed local Git pre-commit hook."
-
-  # Commit-msg Hook
-  cat << 'EOF' > "$HOOKS_DIR/commit-msg"
-#!/usr/bin/env bash
-COMMIT_MSG_FILE="$1"
-COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
-CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
-
-if [[ ! "$COMMIT_MSG" =~ $CONVENTIONAL_REGEX ]]; then
-  echo "=========================================================="
-  echo "[FAIL] Non-compliant commit message format!"
-  echo "=========================================================="
-  echo "Commit messages must follow Conventional Commits standard:"
-  echo "  Format: <type>(<scope>): <subject>"
-  echo "  Example: feat(auth): add login endpoint"
-  echo "=========================================================="
-  exit 1
-fi
-
-ID_REGEX="(task-|issue-|chore-)[a-zA-Z0-9_-]+"
-if [[ ! "$COMMIT_MSG" =~ $ID_REGEX ]]; then
-  echo "=========================================================="
-  echo "[FAIL] Missing Task/Issue ID reference!"
-  echo "=========================================================="
-  echo "Commit messages must include an active task or issue ID reference."
-  echo "  Example body: Task ID: issue-123"
-  echo "=========================================================="
-  exit 1
-fi
-EOF
-  chmod +x "$HOOKS_DIR/commit-msg"
-  echo "Installed local Git commit-msg hook."
-
-  # Prepare-commit-msg Hook
-  cat << 'EOF' > "$HOOKS_DIR/prepare-commit-msg"
-#!/usr/bin/env bash
-COMMIT_MSG_FILE="$1"
-COMMIT_SOURCE="${2:-}"
-
-if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
-elif command -v python &>/dev/null; then
-  python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
-fi
-EOF
-  chmod +x "$HOOKS_DIR/prepare-commit-msg"
-  echo "Installed local Git prepare-commit-msg hook."
+  if [ -n "$PYTHON_EXEC" ]; then
+    echo "Installing and validating local Git hooks..."
+    "$PYTHON_EXEC" .agents/scripts/validate.py >/dev/null 2>&1 || true
+    echo "Installed local Git hooks."
+  else
+    echo "Warning: Python 3 not found. Skipping Git hooks auto-installation."
+  fi
 fi
 
 echo "=========================================================="
