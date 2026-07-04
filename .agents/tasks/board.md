@@ -6,6 +6,7 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
+- [ ] Dynamically learn weekly and five hour limits from platform percentage (feat/issue-178) <!-- id: issue-178 -->
 
 ## Done
 - [x] Support block percentage format in agy usage command (feat/issue-177) <!-- id: issue-177 -->

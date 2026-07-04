@@ -354,27 +354,38 @@ class TestTokenCommand(unittest.TestCase):
     @patch('subprocess.run')
     @patch.object(token_cmd, 'load_budget')
     @patch.object(token_cmd, 'save_budget')
-    def test_sync_from_platform_usage(self, mock_save, mock_load, mock_run):
+    @patch.object(token_cmd, 'get_rolling_window_stats')
+    def test_sync_from_platform_usage(self, mock_rolling, mock_save, mock_load, mock_run):
         mock_load.return_value = {
             "daily_limit": 500000,
             "daily_used": 0,
             "monthly_limit": 5000000,
-            "monthly_used": 0
+            "monthly_used": 0,
+            "weekly_limit": 2500000,
+            "five_hour_limit": 200000
+        }
+        mock_rolling.return_value = {
+            "weekly_used": 180000,
+            "five_hour_used": 20000
         }
         mock_proc = MagicMock()
         mock_proc.returncode = 0
         mock_proc.stdout = (
-            "Daily Limit   : 500,000 tokens\n"
-            "Daily Used    : 100,000 tokens\n"
-            "Monthly Limit : 5,000,000 tokens\n"
-            "Monthly Used  : 200,000 tokens\n"
+            "└ Models & Quota\n"
+            "  Account: merioptasari@gmail.com\n"
+            "GEMINI MODELS\n"
+            "  Weekly Limit\n"
+            "    [████░░░] 63.38%\n"
+            "  Five Hour Limit\n"
+            "    [████░░░] 79.81%\n"
         )
         mock_run.return_value = mock_proc
         
         parsed = token_cmd.sync_from_platform_usage()
-        self.assertEqual(parsed["daily_used"], 100000)
-        self.assertEqual(parsed["monthly_used"], 200000)
         mock_save.assert_called_once()
+        saved_budget = mock_save.call_args[0][0]
+        self.assertEqual(saved_budget["weekly_limit"], 491534)
+        self.assertEqual(saved_budget["five_hour_limit"], 99058)
 
 if __name__ == '__main__':
     unittest.main()
