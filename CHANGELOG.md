@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.159.0] - 2026-07-04
+
+### 🚀 Features
+- optimize token sync to run asynchronously in background
+- Optimize token sync to run asynchronously in background (ISSUE-182)
+
+### 📝 Documentation
+- update lessons learned memory
+
+### ⚙️ Chores
+- Fix token usage sync and remaining display (ISSUE-181)
+
+
 ## [2.158.0] - 2026-07-04
 
 ### 🚀 Features
