@@ -7,7 +7,7 @@
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
 
-**AAC V2** is an open-source, local-first guardrail and workspace customization framework built specifically for the **Antigravity CLI (agy)**. It leverages Antigravity's native custom Skills and Rules engines to enforce strict boundaries, directory structures, and code patterns on any autonomous agent working in your repository.
+**AAC V2** is an open-source, local-first guardrail and workspace customization framework built to help developers build applications with **enterprise-grade** and **world-class quality standards** using the **Antigravity CLI (agy)**. It leverages Antigravity's native custom Skills and Rules engines to enforce strict boundaries, directory structures, and code patterns on any autonomous agent working in your repository.
 
 > [!IMPORTANT]
 > **AAC V2** acts as a local security sandbox and quality gate. All configurations, credentials, tasks, and plans are stored strictly at the workspace level under `.agents/` to maintain team consistency without relying on global states.

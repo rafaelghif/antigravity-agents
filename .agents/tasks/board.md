@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Highlight enterprise-grade and world-class standards in documentation (feat/issue-159) <!-- id: issue-159 -->
 - [x] Harden dashboard static file path traversal verification (feat/issue-158) <!-- id: issue-158 -->
 - [x] Add professional alerts and formatting enhancements to README (feat/issue-157) <!-- id: issue-157 -->
 - [x] Add development platform details to README (feat/issue-156) <!-- id: issue-156 -->
