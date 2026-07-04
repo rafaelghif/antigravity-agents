@@ -1,7 +1,7 @@
 ---
 id: issue-169
 title: "Document token budget CLI command in README.md"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
