@@ -66,6 +66,7 @@ def print_help():
   🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
   🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
   📊 {GREEN}{BOLD}dashboard{RESET}       Launches the local interactive web-based dashboard dashboard.
+  🪙 {GREEN}{BOLD}token{RESET}           Logs and displays LLM token budget usage statistics.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -161,7 +162,15 @@ def print_command_help(cmd):
         "dashboard": f"""{CYAN}{BOLD}Command: dashboard{RESET}
 📊 Launches the local interactive web-based visual dashboard.
 
-{BOLD}Usage:{RESET} ./helper.sh dashboard"""
+{BOLD}Usage:{RESET} ./helper.sh dashboard""",
+
+        "token": f"""{CYAN}{BOLD}Command: token{RESET}
+🪙 Manages LLM token usage tracking and daily/monthly budgets.
+
+{BOLD}Usage:{RESET}
+  - ./helper.sh token log <prompt> <completion> [--task <id>] : Logs token usage for a task.
+  - ./helper.sh token status                                  : Displays budget utilization statistics.
+  - ./helper.sh token reset [--daily | --monthly | --all]     : Resets budget counters."""
     }
 
     if cmd in command_help:
@@ -198,7 +207,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)

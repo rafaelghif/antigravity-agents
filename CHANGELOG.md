@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.140.0] - 2026-07-04
+
+### 🚀 Features
+- implement strict token budget tracker and logging CLI helper
+- Implement strict token budget tracker and logging CLI (ISSUE-164)
+
+### ⚙️ Chores
+- Fix installer repo URLs in README (ISSUE-163)
+- synchronize rules and archive old rules
+- record documentation URL fix lesson
+
+
 ## [2.139.1] - 2026-07-04
 
 ### 🐛 Bug Fixes
