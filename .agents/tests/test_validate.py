@@ -50,7 +50,7 @@ class TestValidate(unittest.TestCase):
         mock_exists.side_effect = lambda path: False if 'git_profiles.json' in path else True
         
         # Mock git diff returning staged files
-        mock_run.return_value = MagicMock(returncode=0, stdout="src/main.py\n")
+        mock_run.return_value = MagicMock(returncode=0, stdout="A\tsrc/main.py\n")
         
         # Scenario 1: normal file
         mock_git.return_value = False

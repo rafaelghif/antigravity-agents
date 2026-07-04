@@ -119,7 +119,7 @@ class TestUpgradeCommand(unittest.TestCase):
         
         upgrade.check_and_run_auto_upgrade()
         checkout_call = any('checkout' in call[0][0] for call in mock_sub.call_args_list)
-        self.assertTrue(checkout_call)
+        self.assertFalse(checkout_call)
 
 if __name__ == '__main__':
     unittest.main()

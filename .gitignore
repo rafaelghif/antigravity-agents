@@ -7,6 +7,7 @@ __pycache__/
 # <<< ANTIGRAVITY AGENT START >>>
 # Ignore agent transient locks
 .agents/locks/
+.agents/locks.json
 
 # Ignore local agent git profiles configuration
 .agents/git_profiles.json
