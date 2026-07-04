@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.177.0] - 2026-07-04
+
+### 🚀 Features
+- enforce workspace-level artifact tracking for plans and specs
+- Enforce workspace-level plans and artifacts rule (ISSUE-198)
+
+
 ## [2.176.0] - 2026-07-04
 
 ### 🚀 Features

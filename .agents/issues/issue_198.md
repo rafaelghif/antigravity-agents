@@ -1,7 +1,7 @@
 ---
 id: issue-198
 title: "Enforce workspace-level plans and artifacts rule"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
