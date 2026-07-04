@@ -34,6 +34,10 @@
 - **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.
 - **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.
 - **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.
+- **ALWAYS** specify pinned dependency versions (never use wildcard `*` or blank versions) to ensure deterministic, reproducible builds and block supply chain attacks.
+- **ALWAYS** implement robust, explicit error handling with structured logging or standardized traceback reporting instead of bare prints or silent exception catches.
+- **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.
+
 
 ## 3. CLI Helper Commands Reference
 All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):
