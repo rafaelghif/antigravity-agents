@@ -3,6 +3,19 @@ __pycache__/
 node_modules/
 vendor/
 .pytest_cache/
+
+# Ignore agent transient locks and workspace states
+.agents/locks/
 .agents/locks.json
 .agents/git_profiles.json
+.agents/api_keys
+.agents/active_api_keys
+.agents/active_api_keys.ps1
+.agents/active_api_profile_name
+.agents/active_context.md
+.agents/cooldowns.json
+.agents/sync_cache.json
 .agents/logs/
+.agents/archive/
+.agents/upgrade_state.json
+.agents/token_budget.json

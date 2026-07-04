@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.176.0] - 2026-07-04
+
+### 🚀 Features
+- add comprehensive transient agent files to gitignore template
+- Add complete transient exclusions to gitignore.template (ISSUE-197)
+
+
 ## [2.175.0] - 2026-07-04
 
 ### 🚀 Features
