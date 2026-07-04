@@ -1,0 +1,29 @@
+# AAC V2 Project Rules
+
+These rules extend the core guidelines in `AGENTS.md` with project-specific language and tool specifications.
+
+## 1. Programming Language & Tools ({{NAME}}'s codebase)
+- Use **{{STACK}}** for the main product stack.
+- Rely on the standard conventions and packages of the ecosystem.
+
+## 2. Style Guidelines & Linting
+- Follow standard style guidelines for **{{STACK}}**.
+- Keep functions short, focused, and under 50 lines where practical.
+- Commit message subjects must be descriptive and explain the technical change made; generic messages such as `fix: issue-122` or `chore: task-100` are strictly forbidden. Always explain what was changed.
+
+## 3. Testing Requirements
+- Every new feature or command module MUST have corresponding unit/integration tests.
+- The test command is: `{{TEST_CMD}}`.
+- Mock external dependencies, databases, or API calls to ensure tests remain deterministic and fast.
+
+## 4. Plug-and-Play Adaptation & Self-Learning
+- **Stack Adaptiveness**: The agent layout is project-agnostic. `./helper.sh bootstrap` auto-detects and supports any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) for the project.
+- **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work.
+- **Token & Context Efficiency**: The agent MUST record found filepaths in its thinking block and is prohibited from calling search tools (`grep_search`, `list_dir`) for the same files or directories more than once per conversation session. The agent MUST use the narrowest possible line range when using the `view_file` tool to read files.
+- **Strict Token Budget Tracking**: The agent MUST log all token usage at the end of each user response or subtask by executing `./helper.sh token log <prompt> <completion> [--task <id>].`
+- **Strict Task Splitting & Context Insulation**: Before starting any task, the agent MUST split the work into small, atomic subtasks in the issue specification. The agent MUST work on only one subtask at a time, running validation and committing after each atomic step, and running `./helper.sh context optimize` to prune stale history and avoid hallucination.
+- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.
+- **Workspace-Level Artifacts Constraint**: To ensure Git tracking and multi-developer consistency, the agent MUST write all plans, designs, specifications, impact analyses, and markdown artifacts strictly under the project's `.agents/` directory (e.g. `.agents/plans/` and `.agents/issues/`). The agent is strictly prohibited from writing these files to global agent appData/brain directories or user home directories, overriding any standard artifact path instructions. All files under `.agents/` must be tracked in Git.
+
+## 5. Synthesized Rules (Self-Learning Memory)
+- (No lessons learned logged yet)
