@@ -914,11 +914,30 @@ def run_log(args: List[str]) -> None:
 
     print_ok(f"Logged {total} tokens for task '{task_id}' (account: '{account_name}').")
     
-    # Run automatic sync from platform usage if not already running internally
+    # Run automatic sync from platform usage in the background if not already running internally
     if os.environ.get("INTERNAL_SYNC") != "true":
-        sync_from_platform_usage()
-        # Reload budget after sync to get updated limit/used check
-        budget = load_budget()
+        try:
+            helper_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
+            cmd_args = [sys.executable, helper_path, "token", "sync", "--auto"]
+            if os.name == 'nt':
+                # Windows detached process flag
+                DETACHED_PROCESS = 0x00000008
+                subprocess.Popen(
+                    cmd_args,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=DETACHED_PROCESS
+                )
+            else:
+                # POSIX detached process
+                subprocess.Popen(
+                    cmd_args,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True
+                )
+        except Exception:
+            pass
 
     # Enforce strict warning alerts on budget limit breach
     if budget["daily_used"] > budget["daily_limit"]:
