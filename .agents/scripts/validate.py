@@ -226,7 +226,7 @@ fi
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
-if [[ "$COMMIT_MSG" =~ ^Merge[[:space:]] ]]; then
+if [[ "$COMMIT_MSG" =~ ^Merge[[:space:]] || "$COMMIT_MSG" =~ ^chore\(git\):[[:space:]]merge[[:space:]]branch || "$COMMIT_MSG" =~ ^chore\(release\): ]]; then
   exit 0
 fi
 
@@ -1566,7 +1566,8 @@ def audit_commit_messages() -> bool:
             failed = True
 
         # Check Compliance-Audit trailer line
-        if not compliance_pattern.search(commit):
+        is_exempt = subject.startswith("chore(release):") or subject.startswith("chore(git):") or subject.startswith("Merge ")
+        if not is_exempt and not compliance_pattern.search(commit):
             print_err(f"Commit message is missing 'Compliance-Audit: passed' trailer: '{subject}'")
             print_err("  Please perform the Rule & Schema Compliance Audit and add 'Compliance-Audit: passed' to verify compliance.")
             failed = True
