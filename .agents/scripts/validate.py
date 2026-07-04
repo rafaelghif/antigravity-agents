@@ -1517,6 +1517,23 @@ def run_validations() -> None:
 
     failed = False
     
+    # Self-heal active context manifest if missing on a feature branch
+    context_file = ".agents/active_context.md"
+    if not os.path.exists(context_file):
+        branch = get_current_branch()
+        if branch and branch not in ('main', 'master', 'HEAD'):
+            match = re.search(r'(task-\d+|issue-\d+)', branch.lower())
+            if match:
+                print("Active context manifest '.agents/active_context.md' is missing. Regenerating...")
+                try:
+                    cli_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "cli"))
+                    if cli_dir not in sys.path:
+                        sys.path.insert(0, cli_dir)
+                    import commands.context as context_cmd
+                    context_cmd.optimize_context()
+                except Exception as e:
+                    print(f"Warning: Failed to auto-generate context manifest: {e}")
+    
     print("==========================================================")
     print("   Running AAC V2 Local Validation Guard...              ")
     print("==========================================================")

@@ -654,6 +654,16 @@ created_at: {current_date}
             subprocess.run(['git', 'checkout', branch_name])
         else:
             subprocess.run(['git', '-c', 'advice.detachedHead=false', 'checkout', '-b', branch_name])
+            
+        # Optimize context dynamically after checkout
+        try:
+            cmd_dir = os.path.dirname(os.path.abspath(__file__))
+            if cmd_dir not in sys.path:
+                sys.path.insert(0, cmd_dir)
+            import commands.context as context_cmd
+            context_cmd.optimize_context()
+        except Exception as e:
+            print(f"Warning: Failed to optimize context after checkout: {e}")
         
     elif action == "close":
         if len(args) < 2:
