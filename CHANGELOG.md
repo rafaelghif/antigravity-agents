@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.144.0] - 2026-07-04
+
+### 🚀 Features
+- add Token Budget visualization to dashboard
+- Add Token Budget visualization to dashboard (ISSUE-168)
+
+
 ## [2.143.0] - 2026-07-04
 
 ### 🚀 Features

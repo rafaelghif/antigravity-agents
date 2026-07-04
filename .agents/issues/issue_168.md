@@ -1,7 +1,7 @@
 ---
 id: issue-168
 title: "Add Token Budget visualization to dashboard"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
