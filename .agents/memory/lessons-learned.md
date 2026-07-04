@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-04]** **installation**: Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
 - **[2026-07-04]** **Testing**: When testing validation of critical files, ensure unit tests mock all JSON schema lookups (like validate_json_schema) to avoid test failures when untracked transient configuration files like locks.json are deleted.
 - **[2026-07-04]** **Context / Token Optimization**: Use targeted context optimization to minimize prompt token footprint while preserving compliance with rules.
 - **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated and sys.exit mocks raise SystemExit to prevent uncontrolled test discovery side-effects.
