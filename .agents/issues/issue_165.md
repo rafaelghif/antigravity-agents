@@ -1,7 +1,7 @@
 ---
 id: issue-165
 title: "Support per-account token budget counters"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
