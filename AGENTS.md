@@ -103,8 +103,19 @@ If you're about to paste a paragraph of explanation into this file, it almost ce
 - No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.
 - When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.
 
-## 7. Tool permissions
+## 7. Technical Alignment & Decision Capture Flow
+When aligning on technical details, features, or database specifications:
+1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.
+2. **Alignment Storage (Workspace Level)**:
+   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md`.
+   * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.
+   * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.
+   * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.
+3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity), `.agents/active_context.md` (for the active subtasks checklist), and `@.agents/memory/architecture.md` (for architectural boundaries).
+4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill's description. They are strictly prohibited from being auto-loaded globally to optimize context size.
+
+## 8. Tool permissions
 Default to `request-review` in `./helper.sh config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.
 
-## 8. Maintaining this file
+## 9. Maintaining this file
 Reviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.
