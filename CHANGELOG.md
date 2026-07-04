@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.128.0] - 2026-07-04
+
+### 🚀 Features
+- add force update flag to overwrite existing files
+- add host, port, and external access overrides
+
+### 🐛 Bug Fixes
+- prevent hangs in non-interactive CI/CD environments
+
+### 📝 Documentation
+- Enhance and harden bootstrapper, dashboard, and validation interactivity (ISSUE-151)
+
+
 ## [2.127.1] - 2026-07-04
 
 ### ⚙️ Chores

@@ -1,7 +1,7 @@
 ---
 id: issue-151
 title: "Enhance and harden bootstrapper, dashboard, and validation interactivity"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
