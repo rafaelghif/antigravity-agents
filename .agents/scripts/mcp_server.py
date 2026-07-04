@@ -5,9 +5,17 @@ import platform
 import importlib.util
 from datetime import datetime
 
-# Initialize and load token module dynamically
+# Initialize and load modules dynamically
 scripts_dir = os.path.dirname(os.path.abspath(__file__))
-token_cmd_file = os.path.join(scripts_dir, 'cli', 'commands', 'token.py')
+
+# Resolve scripts directory dynamically to target/workspace if available
+cwd_scripts_dir = os.path.abspath(os.path.join(os.getcwd(), '.agents', 'scripts'))
+if os.path.isdir(cwd_scripts_dir):
+    target_scripts_dir = cwd_scripts_dir
+else:
+    target_scripts_dir = scripts_dir
+
+token_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'token.py')
 token_cmd = None
 if os.path.exists(token_cmd_file):
     try:
@@ -15,10 +23,10 @@ if os.path.exists(token_cmd_file):
         token_cmd = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(token_cmd)
     except Exception as e:
-        sys.stderr.write(f"Error loading token module: {e}\n")
+        sys.stderr.write(f"Error loading token module from {token_cmd_file}: {e}\n")
 
 # Same for lock command
-lock_cmd_file = os.path.join(scripts_dir, 'cli', 'commands', 'lock.py')
+lock_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'lock.py')
 lock_cmd = None
 if os.path.exists(lock_cmd_file):
     try:
@@ -26,10 +34,10 @@ if os.path.exists(lock_cmd_file):
         lock_cmd = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(lock_cmd)
     except Exception as e:
-        sys.stderr.write(f"Error loading lock module: {e}\n")
+        sys.stderr.write(f"Error loading lock module from {lock_cmd_file}: {e}\n")
 
 # Same for validate module
-validate_file = os.path.join(scripts_dir, 'validate.py')
+validate_file = os.path.join(target_scripts_dir, 'validate.py')
 validate_module = None
 if os.path.exists(validate_file):
     try:
@@ -37,7 +45,7 @@ if os.path.exists(validate_file):
         validate_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(validate_module)
     except Exception as e:
-        sys.stderr.write(f"Error loading validate module: {e}\n")
+        sys.stderr.write(f"Error loading validate module from {validate_file}: {e}\n")
 
 def list_tools():
     return {
