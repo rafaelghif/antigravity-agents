@@ -6,9 +6,9 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
-- [ ] Fix token usage sync and remaining display (feat/issue-181) <!-- id: 181 -->
 
 ## Done
+- [x] Fix token usage sync and remaining display (feat/issue-181) <!-- id: 181 -->
 - [x] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->
 - [x] Fix platform token sync loop by scanning conversation databases (feat/issue-179) <!-- id: issue-179 -->
 - [x] Dynamically learn weekly and five hour limits from platform percentage (feat/issue-178) <!-- id: issue-178 -->
