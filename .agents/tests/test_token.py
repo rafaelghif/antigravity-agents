@@ -339,7 +339,7 @@ class TestTokenCommand(unittest.TestCase):
             "    [████████████████████████████████████████░░░░░░░░░░] 79.81%\n"
             "    80% remaining · Refreshes in 4h 44m\n"
         )
-        parsed5 = token_cmd.parse_usage_output(output5)
+        parsed5 = token_cmd.parse_usage_output(output5, budget={"weekly_limit": 2500000, "five_hour_limit": 200000})
         self.assertEqual(parsed5["active_account"], "merioptasari@gmail.com")
         self.assertAlmostEqual(parsed5["weekly_pct"], 36.62, places=2)
         self.assertAlmostEqual(parsed5["five_hour_pct"], 20.19, places=2)
@@ -355,7 +355,8 @@ class TestTokenCommand(unittest.TestCase):
     @patch.object(token_cmd, 'load_budget')
     @patch.object(token_cmd, 'save_budget')
     @patch.object(token_cmd, 'get_rolling_window_stats')
-    def test_sync_from_platform_usage(self, mock_rolling, mock_save, mock_load, mock_run):
+    @patch.object(token_cmd, 'scan_conversations_for_usage', return_value=None)
+    def test_sync_from_platform_usage(self, mock_scan, mock_rolling, mock_save, mock_load, mock_run):
         mock_load.return_value = {
             "daily_limit": 500000,
             "daily_used": 0,
@@ -386,6 +387,73 @@ class TestTokenCommand(unittest.TestCase):
         saved_budget = mock_save.call_args[0][0]
         self.assertEqual(saved_budget["weekly_limit"], 491534)
         self.assertEqual(saved_budget["five_hour_limit"], 99058)
+
+    @patch('subprocess.run')
+    @patch.object(token_cmd, 'load_budget')
+    @patch.object(token_cmd, 'save_budget')
+    @patch.object(token_cmd, 'get_rolling_window_stats')
+    @patch.object(token_cmd, 'scan_conversations_for_usage')
+    def test_sync_from_platform_usage_db(self, mock_scan, mock_rolling, mock_save, mock_load, mock_run):
+        mock_load.return_value = {
+            "daily_limit": 500000,
+            "daily_used": 0,
+            "monthly_limit": 5000000,
+            "monthly_used": 0,
+            "weekly_limit": 2500000,
+            "five_hour_limit": 200000
+        }
+        mock_rolling.return_value = {
+            "weekly_used": 180000,
+            "five_hour_used": 20000
+        }
+        usage_text = (
+            "└ Models & Quota\n"
+            "  Account: merioptasari@gmail.com\n"
+            "GEMINI MODELS\n"
+            "  Weekly Limit\n"
+            "    [████░░░] 63.38%\n"
+            "  Five Hour Limit\n"
+            "    [████░░░] 79.81%\n"
+        )
+        mock_scan.return_value = usage_text
+        
+        parsed = token_cmd.sync_from_platform_usage()
+        # Verify subprocess was NOT run since DB search was successful
+        mock_run.assert_not_called()
+        mock_save.assert_called_once()
+        saved_budget = mock_save.call_args[0][0]
+        self.assertEqual(saved_budget["weekly_limit"], 491534)
+        self.assertEqual(saved_budget["five_hour_limit"], 99058)
+        self.assertTrue(parsed.get("synced_from_db"))
+
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('os.path.getmtime')
+    @patch('sqlite3.connect')
+    def test_scan_conversations_for_usage(self, mock_connect, mock_getmtime, mock_listdir, mock_exists):
+        mock_exists.return_value = True
+        mock_listdir.return_value = ["conv1.db", "conv2.db"]
+        mock_getmtime.side_effect = lambda path: 1000 if "conv1.db" in path else 2000
+        
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+        
+        mock_cursor.fetchone.return_value = ("steps",)
+        
+        usage_text = (
+            "└ Models & Quota\n"
+            "  Account: test@gmail.com\n"
+            "GEMINI MODELS\n"
+            "  Weekly Limit\n"
+            "    [██░░] 50.00%\n"
+        )
+        mock_cursor.fetchall.return_value = [(usage_text.encode('utf-8'),)]
+        
+        result = token_cmd.scan_conversations_for_usage()
+        self.assertEqual(result, usage_text)
+        mock_connect.assert_called_with(os.path.expanduser("~/.gemini/antigravity-cli/conversations/conv2.db"))
 
 if __name__ == '__main__':
     unittest.main()

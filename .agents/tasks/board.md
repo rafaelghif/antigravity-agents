@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] Fix platform token sync loop by scanning conversation databases (feat/issue-179) <!-- id: issue-179 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
