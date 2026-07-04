@@ -355,7 +355,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.130.0"
+    AAC_VERSION = "2.131.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     if not os.path.exists(agents_file):
@@ -473,8 +473,8 @@ This board tracks active development tasks.
                         with open(profiles_file, 'w', encoding='utf-8') as f:
                             json.dump({"profiles": [new_profile]}, f, indent=2)
                         
-                        subprocess.run(['git', 'config', 'user.name', prof_name])
-                        subprocess.run(['git', 'config', 'user.email', prof_email])
+                        subprocess.run(['git', 'config', '--local', 'user.name', prof_name])
+                        subprocess.run(['git', 'config', '--local', 'user.email', prof_email])
                         print(f"[OK] Created active profile '{prof_name}' and updated local Git config.")
             except Exception as e:
                 print(f"Skipping profile wizard: {e}")
