@@ -355,7 +355,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.139.0"
+    AAC_VERSION = "2.139.1"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     if not os.path.exists(agents_file):

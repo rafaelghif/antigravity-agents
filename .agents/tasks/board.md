@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Fix installer repo URLs in README (fix/issue-163) <!-- id: issue-163 -->
 - [x] Add strict type checking for Python, TypeScript, and Java to validation guard (feat/issue-162) <!-- id: issue-162 -->
 - [x] Add enterprise-grade code rules to AGENTS.md (feat/issue-161) <!-- id: issue-161 -->
 - [x] Expand multi-language lint support in validation guard and simplify readme (feat/issue-160) <!-- id: issue-160 -->
