@@ -70,68 +70,7 @@ fi
 # 2. Safely acquire and copy agent directory structure
 mkdir -p "$TARGET_ABS/.agents"
 
-if [ "${ANTIGRAVITY_LOCAL_DEV:-0}" = "1" ] && [ -d "$SRC_DIR/.agents" ]; then
-  echo "Using local source files from: $SRC_DIR"
-  
-  # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc
-  (
-    cd "$SRC_DIR"
-    find .agents -type f \
-      ! -path "*/__pycache__/*" \
-      ! -path "*/.git/*" \
-      ! -name "git_profiles.json" \
-      ! -name "projects.json" \
-      ! -name "locks.json" \
-      ! -name ".DS_Store" \
-      ! -name "*.pyc" \
-      ! -name "*.pyo" \
-      ! -path ".agents/memory/*" \
-      ! -path ".agents/tasks/*" \
-      ! -path ".agents/issues/*" \
-      ! -path ".agents/plans/*" \
-      ! -path ".agents/tests/*" \
-      -exec sh -c '
-        for file; do
-          dest_file="'"$TARGET_ABS"'/$file"
-          mkdir -p "$(dirname "$dest_file")"
-          cp -n "$file" "$dest_file" 2>/dev/null || true
-        done
-      ' _ {} +
-  )
-  
-  # Initialize clean memory folder in target
-  mkdir -p "$TARGET_ABS/.agents/memory/decisions"
-  mkdir -p "$TARGET_ABS/.agents/memory/blueprints"
-  if [ -d "$SRC_DIR/.agents/memory/blueprints" ]; then
-    cp -r "$SRC_DIR/.agents/memory/blueprints/"* "$TARGET_ABS/.agents/memory/blueprints/" 2>/dev/null || true
-  fi
-  if [ -d "$SRC_DIR/.agents/memory/templates" ]; then
-    for t in "$SRC_DIR/.agents/memory/templates/"*.template; do
-      [ -f "$t" ] || continue
-      filename_t=$(basename "$t" .template)
-      cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
-    done
-  fi
-
-  # Copy projects.example to projects.json if it doesn't exist
-  if [ -f "$SRC_DIR/.agents/projects.example" ] && [ ! -f "$TARGET_ABS/.agents/projects.json" ]; then
-    cp "$SRC_DIR/.agents/projects.example" "$TARGET_ABS/.agents/projects.json" || true
-  fi
-
-  cp -n "$SRC_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
-  cp -n "$SRC_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
-  
-  if [ ! -f "$TARGET_ABS/AGENTS.md" ]; then
-    cp "$SRC_DIR/AGENTS.md" "$TARGET_ABS/AGENTS.md"
-    echo "Created AGENTS.md."
-  else
-    echo "AGENTS.md already exists. Skipping overwrite."
-  fi
-  
-  # Run local bootstrap.sh
-  (cd "$TARGET_ABS" && bash "$SRC_DIR/bootstrap.sh")
-else
-  echo "Local source files not found. Downloading Antigravity Agent Core from GitHub..."
+echo "Downloading Antigravity Agent Core from GitHub..."
   
   # Verifying network connection to GitHub
   echo "Verifying network connection to GitHub..."
@@ -240,7 +179,6 @@ else
   
   # Cleanup
   rm -rf "$TEMP_DIR"
-fi
 
 chmod +x "$TARGET_ABS/helper.sh"
 

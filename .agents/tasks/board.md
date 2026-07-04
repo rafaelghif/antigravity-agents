@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Enforce Git source repository downloading for all installations, bootstrapping, and upgrades (feat/issue-152) <!-- id: issue-152 -->
 - [x] Implement comprehensive architectural and dashboard hardening (feat/issue-150) <!-- id: issue-150 -->
 - [x] Generate critical architectural analysis (feat/issue-149) <!-- id: issue-149 -->
 - [x] Fix integration test auto-upgrade hang on main branch (feat/issue-148) <!-- id: issue-148 -->

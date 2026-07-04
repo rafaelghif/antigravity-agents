@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.129.0] - 2026-07-04
+
+### 🚀 Features
+- remove local dev copy option and always fetch from Git
+- enforce Git repository templates cloning and keep tests offline
+
+### 📝 Documentation
+- Enforce Git source repository downloading for all installations, bootstrapping, and upgrades (ISSUE-152)
+
+
 ## [2.128.0] - 2026-07-04
 
 ### 🚀 Features

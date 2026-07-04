@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import json
+import subprocess
 
 def detect_project_stack(root=".") -> str:
     """Detect the programming stack from the files present in the root directory."""
@@ -88,14 +89,10 @@ def read_template(src_root, filename, fallbacks=None):
         return fallbacks
     return ""
 
-def copy_core_files(force=False):
-    """Copy all core agent files and skills from the running installation source
-    to the target project workspace if they are missing or if force update is requested."""
+def copy_core_files(src_root, force=False):
+    """Copy all core agent files and skills from the Git source directory
+    to the target project workspace."""
     import shutil
-    
-    # Locate the running script's project root (where .agents directory is located)
-    # Since this command runs from .agents/scripts/cli/commands/bootstrap.py
-    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     target_root = os.path.abspath(".")
     
     # If target is the same as source, nothing to copy
@@ -275,6 +272,27 @@ def run(args):
 
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture...")
 
+    import tempfile
+    import shutil
+    import atexit
+    
+    source_repo = "https://github.com/rafaelghif/antigravity-agents.git"
+    print(f"Fetching latest source templates and core files from Git: {source_repo}...")
+    temp_src_root = tempfile.mkdtemp()
+    atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
+    
+    res = subprocess.run(
+        ['git', 'clone', '--depth', '1', source_repo, temp_src_root],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    if res.returncode != 0:
+        print(f"\033[91mError: Failed to fetch templates from Git repository: {res.stderr.strip()}\033[0m")
+        sys.exit(1)
+        
+    src_root = temp_src_root
+
     # 1. Generate Folder Structure
     if arch == "clean":
         create_clean_architecture(".")
@@ -288,10 +306,7 @@ def run(args):
     os.makedirs(".agents/tasks", exist_ok=True)
     os.makedirs(".agents/issues", exist_ok=True)
 
-    copy_core_files(force=force_update)
-
-    # 2. Write Base Configuration Files
-    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
+    copy_core_files(src_root, force=force_update)
     
     if stack == "python":
         req_content = read_template(src_root, "python_requirements.txt.template", "# Project dependencies\npytest\nflake8\n")
@@ -340,8 +355,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.128.0"
-    src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
+    AAC_VERSION = "2.129.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     if not os.path.exists(agents_file):
@@ -459,7 +473,6 @@ This board tracks active development tasks.
                         with open(profiles_file, 'w', encoding='utf-8') as f:
                             json.dump({"profiles": [new_profile]}, f, indent=2)
                         
-                        import subprocess
                         subprocess.run(['git', 'config', 'user.name', prof_name])
                         subprocess.run(['git', 'config', 'user.email', prof_email])
                         print(f"[OK] Created active profile '{prof_name}' and updated local Git config.")
