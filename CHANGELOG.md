@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.147.0] - 2026-07-04
+
+### 🚀 Features
+- improve MCP path portability and automate registration in bootstrap
+- Improve MCP path portability and automate registration in bootstrap (ISSUE-172)
+
+
 ## [2.146.0] - 2026-07-04
 
 ### 🚀 Features

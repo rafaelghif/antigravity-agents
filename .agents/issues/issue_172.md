@@ -1,7 +1,7 @@
 ---
 id: issue-172
 title: "Improve MCP path portability and automate registration in bootstrap"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
