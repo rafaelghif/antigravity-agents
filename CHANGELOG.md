@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.161.0] - 2026-07-04
+
+### 🚀 Features
+- optimize token sync reliability, age validation, and automatic staleness check
+- Optimize token sync reliability and freshness guards (ISSUE-184)
+
+### 📝 Documentation
+- record markdown table parser lesson
+
+### ⚙️ Chores
+- Fix platform usage parser for table and markdown account breakdowns (ISSUE-183)
+
+
 ## [2.160.0] - 2026-07-04
 
 ### 🚀 Features
