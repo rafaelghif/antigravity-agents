@@ -1,7 +1,7 @@
 ---
 id: issue-161
 title: "Add enterprise-grade code rules to AGENTS.md"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.138.0] - 2026-07-04
+
+### 🚀 Features
+- Add enterprise-grade code rules to AGENTS.md (ISSUE-161)
+
+### 📝 Documentation
+- append enterprise code rules to non-negotiable list
+
+
 ## [2.137.0] - 2026-07-04
 
 ### 🚀 Features

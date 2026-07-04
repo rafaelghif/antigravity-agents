@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Add enterprise-grade code rules to AGENTS.md (feat/issue-161) <!-- id: issue-161 -->
 - [x] Expand multi-language lint support in validation guard and simplify readme (feat/issue-160) <!-- id: issue-160 -->
 - [x] Highlight enterprise-grade and world-class standards in documentation (feat/issue-159) <!-- id: issue-159 -->
 - [x] Harden dashboard static file path traversal verification (feat/issue-158) <!-- id: issue-158 -->
