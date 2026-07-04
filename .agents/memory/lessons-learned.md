@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-04]** **token-budget**: Implemented automatic platform token usage sync by executing agy -p "/usage" and parsing the output (table, list, and console text formats) robustly via regex, avoiding infinite recursion via INTERNAL_SYNC environment guards, and improving active account detection via ~/.gemini/google_accounts.json.
 - **[2026-07-04]** **token-audit**: Supported per-account token budget tracking in token.py by dynamically detecting active profile from git_profiles.json
 - **[2026-07-04]** **token-audit**: Implemented a strict local token budget tracker and logging CLI subcommand 'token' supporting log, status, and reset, including dynamic date-based resets and branch-based task auto-detection
 - **[2026-07-04]** **Database Schema**: Strictly align API and database models with the project schemas to maintain interface integrity.
