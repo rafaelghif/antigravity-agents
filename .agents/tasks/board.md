@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Exclude active context logs and budgets from installer (feat/issue-194) <!-- id: issue-194 -->
 - [x] Fix installer memory leak and identity separation for target projects (feat/issue-193) <!-- id: issue-193 -->
 - [x] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
 - [x] Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (feat/issue-191) <!-- id: issue-191 -->

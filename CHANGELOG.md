@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.173.0] - 2026-07-04
+
+### 🚀 Features
+- Exclude active context logs and budgets from installer (ISSUE-194)
+
+
 ## [2.172.0] - 2026-07-04
 
 ### 🚀 Features
