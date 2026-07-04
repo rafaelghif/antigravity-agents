@@ -103,7 +103,43 @@ def get_active_api_account() -> str:
     except Exception:
         pass
 
-    return "default"
+def recalculate_used_from_log(budget: dict) -> dict:
+    """Recalculate daily_used and monthly_used from token_usage.log dynamically."""
+    from datetime import datetime, timezone
+    import re
+    
+    now = datetime.now(timezone.utc)
+    today_utc = now.date()
+    this_month_utc = (now.year, now.month)
+    
+    daily_sum = 0
+    monthly_sum = 0
+    
+    log_path = ".agents/logs/token_usage.log"
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                m = re.match(r'\[(.*?)\] Task:.*?\|.*\|.*\| Total:\s*(\d+)', line)
+                if m:
+                    ts_str = m.group(1)
+                    ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S UTC").replace(tzinfo=timezone.utc)
+                    total = int(m.group(2))
+                    
+                    if ts.date() == today_utc:
+                        daily_sum += total
+                    if ts.year == this_month_utc[0] and ts.month == this_month_utc[1]:
+                        monthly_sum += total
+        except Exception:
+            pass
+            
+    budget["daily_used"] = daily_sum
+    budget["monthly_used"] = monthly_sum
+    return budget
 
 def load_budget() -> dict:
     default_budget = {
@@ -116,7 +152,7 @@ def load_budget() -> dict:
         "tasks": {}
     }
     if not os.path.exists(BUDGET_FILE):
-        return default_budget
+        return recalculate_used_from_log(default_budget)
     try:
         with open(BUDGET_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -126,9 +162,16 @@ def load_budget() -> dict:
                     data[key] = default_budget[key]
             if "accounts" not in data:
                 data["accounts"] = {}
-            return data
+                
+            # Self-heal corrupted daily/monthly limits
+            if data.get("daily_limit", 0) < 500000:
+                data["daily_limit"] = 500000
+            if data.get("monthly_limit", 0) < 5000000:
+                data["monthly_limit"] = 5000000
+                
+            return recalculate_used_from_log(data)
     except Exception:
-        return default_budget
+        return recalculate_used_from_log(default_budget)
 
 def save_budget(data: dict) -> None:
     os.makedirs(os.path.dirname(BUDGET_FILE), exist_ok=True)
@@ -364,7 +407,7 @@ def normalize_time_string(raw_time: str) -> str:
     raw_time = re.sub(r'\s+', ' ', raw_time).strip()
     return raw_time
 
-def parse_usage_output(output: str) -> dict:
+def parse_usage_output(output: str, budget: dict = None) -> dict:
     """Parse output of agy -p '/usage' to extract limits and remaining reset times."""
     stats = {}
     lines = output.split('\n')
@@ -410,7 +453,8 @@ def parse_usage_output(output: str) -> dict:
                             if m_ref and "five_hour_remaining" not in stats:
                                 stats["five_hour_remaining"] = normalize_time_string(m_ref.group(1))
                                 
-        budget = load_budget()
+        if budget is None:
+            budget = load_budget()
         if "weekly_pct" in stats:
             stats["weekly_limit"] = budget.get("weekly_limit", 2500000)
             stats["weekly_used"] = int(stats["weekly_pct"] / 100.0 * stats["weekly_limit"])
@@ -653,67 +697,135 @@ def parse_usage_output(output: str) -> dict:
 
     return stats
 
-def sync_from_platform_usage() -> dict:
-    """Run agy -p '/usage' and parse output to sync token_budget.json with platform usage."""
-    import subprocess
+def scan_conversations_for_usage() -> str:
+    """
+    Scan global Antigravity conversation databases for the most recent /usage slash command output.
+    Returns the raw string output if found, or None.
+    """
     import os
-    env = os.environ.copy()
-    env["INTERNAL_SYNC"] = "true"
+    import sqlite3
+    
+    db_dir = os.path.expanduser("~/.gemini/antigravity-cli/conversations")
+    if not os.path.exists(db_dir):
+        return None
+        
     try:
-        res = subprocess.run(
-            ["agy", "-p", "/usage"],
-            capture_output=True,
-            text=True,
-            timeout=40,
-            env=env
-        )
-        if res.returncode == 0:
-            parsed = parse_usage_output(res.stdout)
-            if parsed:
-                budget = load_budget()
-                # Update core limits and used
-                if "daily_limit" in parsed: budget["daily_limit"] = parsed["daily_limit"]
-                if "daily_used" in parsed: budget["daily_used"] = parsed["daily_used"]
-                if "monthly_limit" in parsed: budget["monthly_limit"] = parsed["monthly_limit"]
-                if "monthly_used" in parsed: budget["monthly_used"] = parsed["monthly_used"]
-                
-                # Rolling window overrides
-                if "weekly_pct" in parsed: budget["weekly_pct_override"] = parsed["weekly_pct"]
-                if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
-                if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
-                if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
-
-                # Dynamically calculate and learn limits from local logs and platform percentages
-                log_stats = get_rolling_window_stats()
-                local_weekly = log_stats.get("weekly_used", 0)
-                local_five_hour = log_stats.get("five_hour_used", 0)
-                
-                if "weekly_pct" in parsed and parsed["weekly_pct"] > 0:
-                    calculated_weekly_limit = int(local_weekly / (parsed["weekly_pct"] / 100.0))
-                    if calculated_weekly_limit > 0:
-                        budget["weekly_limit"] = calculated_weekly_limit
-                        
-                if "five_hour_pct" in parsed and parsed["five_hour_pct"] > 0:
-                    calculated_five_hour_limit = int(local_five_hour / (parsed["five_hour_pct"] / 100.0))
-                    if calculated_five_hour_limit > 0:
-                        budget["five_hour_limit"] = calculated_five_hour_limit
-                
-                # Update accounts and tasks breakdowns
-                if "accounts" in parsed:
-                    if "accounts" not in budget:
-                        budget["accounts"] = {}
-                    for acc, acc_info in parsed["accounts"].items():
-                        budget["accounts"][acc] = acc_info
-                if "tasks" in parsed:
-                    if "tasks" not in budget:
-                        budget["tasks"] = {}
-                    for t_id, t_info in parsed["tasks"].items():
-                        budget["tasks"][t_id] = t_info
-                
-                save_budget(budget)
-                return parsed
+        db_files = [
+            os.path.join(db_dir, f)
+            for f in os.listdir(db_dir)
+            if f.endswith(".db")
+        ]
+        if not db_files:
+            return None
+            
+        # Sort by modification time (newest first)
+        db_files.sort(key=os.path.getmtime, reverse=True)
+        
+        # Scan the 10 most recently modified databases
+        for db_path in db_files[:10]:
+            try:
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                # Check if steps table exists
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='steps'")
+                if not cursor.fetchone():
+                    conn.close()
+                    continue
+                    
+                # Query steps payload newest first
+                cursor.execute("SELECT step_payload FROM steps ORDER BY idx DESC")
+                for (payload,) in cursor.fetchall():
+                    if not payload:
+                        continue
+                    try:
+                        text = payload.decode('utf-8', errors='ignore')
+                        # Check for distinctive markers of the platform /usage output
+                        if "Weekly Limit" in text and "GEMINI MODELS" in text:
+                            conn.close()
+                            return text
+                    except Exception:
+                        pass
+                conn.close()
+            except Exception:
+                pass
     except Exception:
         pass
+    return None
+
+def sync_from_platform_usage() -> dict:
+    """Sync token_budget.json by scanning conversation databases or running agy -p '/usage' as fallback."""
+    import subprocess
+    import os
+    
+    # 1. Try scanning conversation DBs first for the real platform usage output
+    db_usage = scan_conversations_for_usage()
+    parsed = None
+    if db_usage:
+        parsed = parse_usage_output(db_usage)
+        if parsed:
+            parsed["synced_from_db"] = True
+            
+    # 2. If not found in DBs, run agy -p '/usage' as a fallback
+    if not parsed:
+        env = os.environ.copy()
+        env["INTERNAL_SYNC"] = "true"
+        try:
+            res = subprocess.run(
+                ["agy", "-p", "/usage"],
+                capture_output=True,
+                text=True,
+                timeout=40,
+                env=env
+            )
+            if res.returncode == 0:
+                parsed = parse_usage_output(res.stdout)
+        except Exception:
+            pass
+            
+    if parsed:
+        budget = load_budget()
+        # Update core limits and used
+        if "daily_limit" in parsed: budget["daily_limit"] = parsed["daily_limit"]
+        if "daily_used" in parsed: budget["daily_used"] = parsed["daily_used"]
+        if "monthly_limit" in parsed: budget["monthly_limit"] = parsed["monthly_limit"]
+        if "monthly_used" in parsed: budget["monthly_used"] = parsed["monthly_used"]
+        
+        # Rolling window overrides
+        if "weekly_pct" in parsed: budget["weekly_pct_override"] = parsed["weekly_pct"]
+        if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
+        if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
+        if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+
+        # Dynamically calculate and learn limits from local logs and platform percentages
+        log_stats = get_rolling_window_stats()
+        local_weekly = log_stats.get("weekly_used", 0)
+        local_five_hour = log_stats.get("five_hour_used", 0)
+        
+        if "weekly_pct" in parsed and parsed["weekly_pct"] > 0:
+            calculated_weekly_limit = int(local_weekly / (parsed["weekly_pct"] / 100.0))
+            if calculated_weekly_limit > 0:
+                budget["weekly_limit"] = calculated_weekly_limit
+                
+        if "five_hour_pct" in parsed and parsed["five_hour_pct"] > 0:
+            calculated_five_hour_limit = int(local_five_hour / (parsed["five_hour_pct"] / 100.0))
+            if calculated_five_hour_limit > 0:
+                budget["five_hour_limit"] = calculated_five_hour_limit
+        
+        # Update accounts and tasks breakdowns
+        if "accounts" in parsed:
+            if "accounts" not in budget:
+                budget["accounts"] = {}
+            for acc, acc_info in parsed["accounts"].items():
+                budget["accounts"][acc] = acc_info
+        if "tasks" in parsed:
+            if "tasks" not in budget:
+                budget["tasks"] = {}
+            for t_id, t_info in parsed["tasks"].items():
+                budget["tasks"][t_id] = t_info
+        
+        save_budget(budget)
+        return parsed
+        
     return {}
 
 def run_log(args: List[str]) -> None:
