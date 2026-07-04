@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->
 - [x] Add Token Budget visualization to dashboard (feat/issue-168) <!-- id: issue-168 -->
 - [x] Enhance API key masking security with cryptographic hashing (feat/issue-167) <!-- id: issue-167 -->
 - [x] Track token budget per API key or active API account (feat/issue-166) <!-- id: issue-166 -->

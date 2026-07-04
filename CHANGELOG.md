@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.144.1] - 2026-07-04
+
+### 📝 Documentation
+- document token budget CLI command in README.md
+- Document token budget CLI command in README.md (ISSUE-169)
+
+
 ## [2.144.0] - 2026-07-04
 
 ### 🚀 Features
