@@ -842,6 +842,7 @@ created_at: {current_date}
                 "README.md",
                 ".agents/scripts/cli/commands/issue.py",
                 ".agents/memory/lessons-learned.md",
+                ".agents/memory/lessons-archive.md",
                 ".agents/rules.md",
                 ".agents/locks.json"
             ]
