@@ -483,6 +483,27 @@ This board tracks active development tasks.
             print("or run: ./helper.sh profile add <name> <email>")
         print("==========================================================")
 
+    # 8.5. Automatic Model Context Protocol (MCP) Registration
+    print("\n==========================================================")
+    print("   Setting up Model Context Protocol (MCP) Tools...      ")
+    print("==========================================================")
+    try:
+        # Resolve mcp_server.py path (which is inside .agents/scripts/)
+        cmd_dir = os.path.dirname(os.path.abspath(__file__)) # .agents/scripts/cli/commands
+        script_dir = os.path.dirname(os.path.dirname(cmd_dir)) # .agents/scripts
+        mcp_script = os.path.join(script_dir, "mcp_server.py")
+        if os.path.exists(mcp_script):
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("mcp_server", mcp_script)
+            mcp_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mcp_module)
+            mcp_module.register_server()
+        else:
+            print(f"[WARN] mcp_server.py not found at '{mcp_script}', skipping registration.")
+    except Exception as e:
+        print(f"[WARN] Failed to automatically register MCP server: {e}")
+    print("==========================================================")
+
     # 9. Next Steps Configuration Guide
     print("\n==========================================================")
     print("   Next Steps: Workspace Configuration Guide             ")
