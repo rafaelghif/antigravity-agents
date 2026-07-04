@@ -1,7 +1,7 @@
 ---
 id: issue-200
 title: "Document technical alignment and decision capture flow"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

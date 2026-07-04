@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.179.0] - 2026-07-04
+
+### 🚀 Features
+- formalize technical capture flow and on-demand skill loading in guidelines
+- Document technical alignment and decision capture flow (ISSUE-200)
+
+
 ## [2.178.0] - 2026-07-04
 
 ### 🚀 Features
