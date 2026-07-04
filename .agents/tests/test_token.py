@@ -349,6 +349,40 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(parsed5["five_hour_limit"], 200000)
         self.assertIn("merioptasari@gmail.com", parsed5["accounts"])
 
+        # New multi-line platform layout
+        output6 = (
+            "### **Antigravity Token Budget Status**\n"
+            "\n"
+            "#### **Global Utilization**\n"
+            "| Interval | Limit | Used | % Utilized |\n"
+            "| :--- | :--- | :--- | :--- |\n"
+            "| **Daily** | 500,000 | 259,180 | 51.84% |\n"
+            "| **Monthly** | 5,000,000 | 259,180 | 5.18% |\n"
+            "\n"
+            "* **Last Reset:** `2026-07-04T01:08:28Z`\n"
+            "\n"
+            "#### **Rolling Quotas & Resets**\n"
+            "* **5-Hour Rolling Limit:** 71,915 tokens\n"
+            "  * **Used:** 64,550 tokens (89.76% utilized)\n"
+            "  * **Reset in:** 6 days, 23 hours\n"
+            "* **Weekly Rolling Limit:** 3,609,749 tokens\n"
+            "  * **Used:** 259,179 tokens (7.18% utilized)\n"
+            "  * **Reset in:** 6 days, 23 hours\n"
+        )
+        parsed6 = token_cmd.parse_usage_output(output6)
+        self.assertEqual(parsed6["daily_limit"], 500000)
+        self.assertEqual(parsed6["daily_used"], 259180)
+        self.assertEqual(parsed6["monthly_limit"], 5000000)
+        self.assertEqual(parsed6["monthly_used"], 259180)
+        self.assertEqual(parsed6["five_hour_limit"], 71915)
+        self.assertEqual(parsed6["five_hour_used"], 64550)
+        self.assertAlmostEqual(parsed6["five_hour_pct"], 89.76, places=2)
+        self.assertEqual(parsed6["five_hour_remaining"], "6d 23h")
+        self.assertEqual(parsed6["weekly_limit"], 3609749)
+        self.assertEqual(parsed6["weekly_used"], 259179)
+        self.assertAlmostEqual(parsed6["weekly_pct"], 7.18, places=2)
+        self.assertEqual(parsed6["weekly_remaining"], "6d 23h")
+
 
 
     @patch('subprocess.run')

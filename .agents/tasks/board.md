@@ -6,6 +6,7 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
+- [ ] Fix token usage sync and remaining display (feat/issue-181) <!-- id: 181 -->
 
 ## Done
 - [x] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->

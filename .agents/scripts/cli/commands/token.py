@@ -539,73 +539,81 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
 
         # Parse 5-Hour rolling in list/table fallback
         if "five_hour_limit" not in stats:
-            five_hour_line = ""
-            five_hour_reset_line = ""
+            five_hour_block_lines = []
             for i, line in enumerate(lines):
                 if "5-Hour" in line:
-                    five_hour_line = line
-                    if i + 1 < len(lines) and ("Reset" in lines[i+1] or "resets" in lines[i+1].lower()):
-                        five_hour_reset_line = lines[i+1]
+                    five_hour_block_lines.append(line)
+                    for offset in (1, 2):
+                        if i + offset < len(lines):
+                            next_line = lines[i + offset]
+                            if any(k in next_line for k in ("Weekly", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
+                                break
+                            five_hour_block_lines.append(next_line)
+                    break
+            
+            if five_hour_block_lines:
+                five_hour_text = "\n".join(five_hour_block_lines)
+                
+                # Check for slash format: used / limit (e.g. 142,000 / 200,000)
+                m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', five_hour_text)
+                if m_slash:
+                    stats["five_hour_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
+                    stats["five_hour_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
+                else:
+                    # Look for Limit and Used separately using keywords
+                    m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
+                    m_used = re.search(r'Used\b[^\d]*([\d,]+)', five_hour_text, re.IGNORECASE)
+                    if m_limit:
+                        stats["five_hour_limit"] = int(m_limit.group(1).replace(',', ''))
+                    if m_used:
+                        stats["five_hour_used"] = int(m_used.group(1).replace(',', ''))
                         
-            if five_hour_line:
-                clean_line = re.sub(r'\b5-Hour\b', '', five_hour_line, flags=re.IGNORECASE)
-                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
-                if len(nums) >= 2:
-                    if "utiliz" in five_hour_line or "Used" in five_hour_line or "/" in five_hour_line:
-                        if "Used:" in five_hour_line:
-                            stats["five_hour_limit"] = nums[0]
-                            stats["five_hour_used"] = nums[1]
-                        else:
-                            stats["five_hour_used"] = nums[0]
-                            stats["five_hour_limit"] = nums[1]
-                    else:
-                        stats["five_hour_limit"] = nums[0]
-                        stats["five_hour_used"] = nums[1]
-                        
-                pct_match = re.search(r'(\d+(?:\.\d+)?)%', five_hour_line)
+                pct_match = re.search(r'(\d+(?:\.\d+)?)%', five_hour_text)
                 if pct_match:
                     stats["five_hour_pct"] = float(pct_match.group(1))
                     
-                reset_text = five_hour_line + " " + five_hour_reset_line
-                rem_match = re.search(r'(?:Resets? in|Reset in)[^\d]*(\d+\s*d\s*\d+\s*h\s*\d+\s*m|\d+\s*d\s*\d+\s*h|\d+\s*days?,\s*\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*h\s*\d+\s*m|\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*hours?|\d+\s*minutes?)', reset_text, re.IGNORECASE)
+                rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', five_hour_text, re.IGNORECASE)
                 if rem_match:
-                    raw_time = rem_match.group(1).strip()
-                    stats["five_hour_remaining"] = normalize_time_string(raw_time)
+                    stats["five_hour_remaining"] = normalize_time_string(rem_match.group(1).strip())
 
         # Parse Weekly rolling in list/table fallback
         if "weekly_limit" not in stats:
-            weekly_line = ""
-            weekly_reset_line = ""
+            weekly_block_lines = []
             for i, line in enumerate(lines):
                 if "Weekly" in line:
-                    weekly_line = line
-                    if i + 1 < len(lines) and ("Reset" in lines[i+1] or "resets" in lines[i+1].lower()):
-                        weekly_reset_line = lines[i+1]
+                    weekly_block_lines.append(line)
+                    for offset in (1, 2):
+                        if i + offset < len(lines):
+                            next_line = lines[i + offset]
+                            if any(k in next_line for k in ("5-Hour", "Daily", "Monthly", "Account Breakdown", "Task Breakdown", "---", "===")):
+                                break
+                            weekly_block_lines.append(next_line)
+                    break
+            
+            if weekly_block_lines:
+                weekly_text = "\n".join(weekly_block_lines)
+                
+                # Check for slash format: used / limit
+                m_slash = re.search(r'([\d,`\s]+)\s*/\s*([\d,`\s]+)', weekly_text)
+                if m_slash:
+                    stats["weekly_used"] = int(m_slash.group(1).replace('`','').replace(',','').strip())
+                    stats["weekly_limit"] = int(m_slash.group(2).replace('`','').replace(',','').strip())
+                else:
+                    # Look for Limit and Used separately using keywords
+                    m_limit = re.search(r'Limit\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
+                    m_used = re.search(r'Used\b[^\d]*([\d,]+)', weekly_text, re.IGNORECASE)
+                    if m_limit:
+                        stats["weekly_limit"] = int(m_limit.group(1).replace(',', ''))
+                    if m_used:
+                        stats["weekly_used"] = int(m_used.group(1).replace(',', ''))
                         
-            if weekly_line:
-                clean_line = re.sub(r'\bWeekly\b', '', weekly_line, flags=re.IGNORECASE)
-                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
-                if len(nums) >= 2:
-                    if "utiliz" in weekly_line or "Used" in weekly_line or "/" in weekly_line:
-                        if "Used:" in weekly_line:
-                            stats["weekly_limit"] = nums[0]
-                            stats["weekly_used"] = nums[1]
-                        else:
-                            stats["weekly_used"] = nums[0]
-                            stats["weekly_limit"] = nums[1]
-                    else:
-                        stats["weekly_limit"] = nums[0]
-                        stats["weekly_used"] = nums[1]
-                        
-                pct_match = re.search(r'(\d+(?:\.\d+)?)%', weekly_line)
+                pct_match = re.search(r'(\d+(?:\.\d+)?)%', weekly_text)
                 if pct_match:
                     stats["weekly_pct"] = float(pct_match.group(1))
                     
-                reset_text = weekly_line + " " + weekly_reset_line
-                rem_match = re.search(r'(?:Resets? in|Reset in)[^\d]*(\d+\s*d\s*\d+\s*h\s*\d+\s*m|\d+\s*d\s*\d+\s*h|\d+\s*days?,\s*\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*h\s*\d+\s*m|\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*hours?|\d+\s*minutes?)', reset_text, re.IGNORECASE)
+                rem_match = re.search(r'(?:Resets?\s+in|Reset\s+In|Refreshes?\s+in)[^\d]*([a-zA-Z0-9\s,]+)', weekly_text, re.IGNORECASE)
                 if rem_match:
-                    raw_time = rem_match.group(1).strip()
-                    stats["weekly_remaining"] = normalize_time_string(raw_time)
+                    stats["weekly_remaining"] = normalize_time_string(rem_match.group(1).strip())
 
     # Compute percentage overrides if limit and used are present
     if "five_hour_limit" in stats and "five_hour_used" in stats and "five_hour_pct" not in stats:
@@ -1121,29 +1129,43 @@ def run_status(args: List[str]) -> None:
     daily_used = budget.get("daily_used", 0)
     daily_limit = budget.get("daily_limit", 500000)
     daily_pct = (daily_used / daily_limit * 100) if daily_limit > 0 else 0
+    daily_rem = max(0, daily_limit - daily_used)
 
     monthly_used = budget.get("monthly_used", 0)
     monthly_limit = budget.get("monthly_limit", 5000000)
     monthly_pct = (monthly_used / monthly_limit * 100) if monthly_limit > 0 else 0
+    monthly_rem = max(0, monthly_limit - monthly_used)
 
     print("="*60)
     print("                Antigravity Token Budget Status")
     print("="*60)
-    print(f"Daily Limit   : {daily_limit:,} tokens")
-    print(f"Daily Used    : {daily_used:,} tokens ({daily_pct:.2f}% utilized)")
-    print(f"Monthly Limit : {monthly_limit:,} tokens")
-    print(f"Monthly Used  : {monthly_used:,} tokens ({monthly_pct:.2f}% utilized)")
-    print(f"Last Reset    : {budget.get('last_reset', 'N/A')}")
+    print(f"Daily Limit       : {daily_limit:,} tokens")
+    print(f"Daily Used        : {daily_used:,} tokens ({daily_pct:.2f}% utilized)")
+    print(f"Daily Remaining   : {daily_rem:,} tokens")
+    print(f"Monthly Limit     : {monthly_limit:,} tokens")
+    print(f"Monthly Used      : {monthly_used:,} tokens ({monthly_pct:.2f}% utilized)")
+    print(f"Monthly Remaining : {monthly_rem:,} tokens")
+    print(f"Last Reset        : {budget.get('last_reset', 'N/A')}")
     
     r_stats = get_rolling_stats()
+    five_hour_limit = r_stats['five_hour_limit']
+    five_hour_used = r_stats['five_hour_used']
+    five_hour_rem = max(0, five_hour_limit - five_hour_used)
+    
+    weekly_limit = r_stats['weekly_limit']
+    weekly_used = r_stats['weekly_used']
+    weekly_rem = max(0, weekly_limit - weekly_used)
+
     print("-"*60)
     print("Rolling Quotas & Resets:")
-    print(f"  - 5-Hour Rolling Limit : {r_stats['five_hour_limit']:,} tokens")
-    print(f"  - 5-Hour Rolling Used  : {r_stats['five_hour_used']:,} tokens ({r_stats['five_hour_pct']:.2f}% utilized)")
-    print(f"  - 5-Hour Reset In      : {r_stats['five_hour_remaining']}")
-    print(f"  - Weekly Rolling Limit : {r_stats['weekly_limit']:,} tokens")
-    print(f"  - Weekly Rolling Used  : {r_stats['weekly_used']:,} tokens ({r_stats['weekly_pct']:.2f}% utilized)")
-    print(f"  - Weekly Reset In      : {r_stats['weekly_remaining']}")
+    print(f"  - 5-Hour Rolling Limit     : {five_hour_limit:,} tokens")
+    print(f"  - 5-Hour Rolling Used      : {five_hour_used:,} tokens ({r_stats['five_hour_pct']:.2f}% utilized)")
+    print(f"  - 5-Hour Rolling Remaining : {five_hour_rem:,} tokens")
+    print(f"  - 5-Hour Reset In          : {r_stats['five_hour_remaining']}")
+    print(f"  - Weekly Rolling Limit     : {weekly_limit:,} tokens")
+    print(f"  - Weekly Rolling Used      : {weekly_used:,} tokens ({r_stats['weekly_pct']:.2f}% utilized)")
+    print(f"  - Weekly Rolling Remaining : {weekly_rem:,} tokens")
+    print(f"  - Weekly Reset In          : {r_stats['weekly_remaining']}")
     
     print("-"*60)
     print("Account Breakdown:")
