@@ -473,8 +473,8 @@ This board tracks active development tasks.
                         with open(profiles_file, 'w', encoding='utf-8') as f:
                             json.dump({"profiles": [new_profile]}, f, indent=2)
                         
-                        subprocess.run(['git', 'config', 'user.name', prof_name])
-                        subprocess.run(['git', 'config', 'user.email', prof_email])
+                        subprocess.run(['git', 'config', '--local', 'user.name', prof_name])
+                        subprocess.run(['git', 'config', '--local', 'user.email', prof_email])
                         print(f"[OK] Created active profile '{prof_name}' and updated local Git config.")
             except Exception as e:
                 print(f"Skipping profile wizard: {e}")
