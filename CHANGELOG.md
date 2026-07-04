@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.178.0] - 2026-07-04
+
+### 🚀 Features
+- align ignore templates and installer exclusions with active ignores
+- Synchronize antigravityignore.template exclusions with active ignore rules (ISSUE-199)
+
+
 ## [2.177.0] - 2026-07-04
 
 ### 🚀 Features

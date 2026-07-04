@@ -1,7 +1,7 @@
 ---
 id: issue-199
 title: "Synchronize antigravityignore.template exclusions with active ignore rules"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
