@@ -292,8 +292,30 @@ def bump_semver(current: str, categories: Dict[str, List[str]]) -> str:
         
     return f"{major}.{minor}.{patch}"
 
+def is_agent_core_repo() -> bool:
+    """Check if the current workspace is the Antigravity Agent Core repository itself."""
+    try:
+        import git_api
+        repo = git_api.get_repo_info()
+        if repo and "antigravity-agents" in repo.lower():
+            return True
+    except Exception:
+        pass
+    
+    agents_path = "AGENTS.md"
+    if os.path.exists(agents_path):
+        try:
+            with open(agents_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            product_match = re.search(r"-\s+\*\*Product:\*\*\s*(\S+)", content)
+            if product_match and product_match.group(1) == "test-proj":
+                return True
+        except Exception:
+            pass
+    return False
+
 def update_version_in_files(old_version: str, new_version: str) -> None:
-    """Update version strings in AGENTS.md, bootstrap.py, and bootstrap.sh."""
+    """Update version strings in AGENTS.md, native project configs, or agent bootstrap files."""
     # 1. Update AGENTS.md
     agents_path = "AGENTS.md"
     if os.path.exists(agents_path):
@@ -308,45 +330,154 @@ def update_version_in_files(old_version: str, new_version: str) -> None:
             f.write(content)
         print(f"[OK] Updated AGENTS.md version from {old_version} to {new_version}.")
 
-    # 2. Update bootstrap.py
-    bootstrap_py = ".agents/scripts/cli/commands/bootstrap.py"
-    if os.path.exists(bootstrap_py):
-        with open(bootstrap_py, 'r', encoding='utf-8') as f:
-            content = f.read()
-        content = re.sub(
-            r'AAC_VERSION\s*=\s*["\']' + re.escape(old_version) + r'["\']',
-            f'AAC_VERSION = "{new_version}"',
-            content
-        )
-        with open(bootstrap_py, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print(f"[OK] Updated bootstrap.py AAC_VERSION to {new_version}.")
+    # 2. Conditionally update files based on repository type
+    if is_agent_core_repo():
+        # Update bootstrap.py
+        bootstrap_py = ".agents/scripts/cli/commands/bootstrap.py"
+        if os.path.exists(bootstrap_py):
+            with open(bootstrap_py, 'r', encoding='utf-8') as f:
+                content = f.read()
+            content = re.sub(
+                r'AAC_VERSION\s*=\s*["\']' + re.escape(old_version) + r'["\']',
+                f'AAC_VERSION = "{new_version}"',
+                content
+            )
+            with open(bootstrap_py, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[OK] Updated bootstrap.py AAC_VERSION to {new_version}.")
 
-    # 3. Update bootstrap.sh
-    bootstrap_sh = "bootstrap.sh"
-    if os.path.exists(bootstrap_sh):
-        with open(bootstrap_sh, 'r', encoding='utf-8') as f:
-            content = f.read()
-        content = re.sub(
-            r"- \*\*Version:\*\* " + re.escape(old_version),
-            f"- **Version:** {new_version}",
-            content
-        )
-        # Also replace inside the inline Python block string replacement
-        content = content.replace(f"- **Version:** {old_version}", f"- **Version:** {new_version}")
-        with open(bootstrap_sh, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print(f"[OK] Updated bootstrap.sh version to {new_version}.")
+        # Update bootstrap.sh
+        bootstrap_sh = "bootstrap.sh"
+        if os.path.exists(bootstrap_sh):
+            with open(bootstrap_sh, 'r', encoding='utf-8') as f:
+                content = f.read()
+            content = re.sub(
+                r"- \*\*Version:\*\* " + re.escape(old_version),
+                f"- **Version:** {new_version}",
+                content
+            )
+            # Also replace inside the inline Python block string replacement
+            content = content.replace(f"- **Version:** {old_version}", f"- **Version:** {new_version}")
+            with open(bootstrap_sh, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[OK] Updated bootstrap.sh version to {new_version}.")
 
-    # 4. Update bootstrap.ps1
-    bootstrap_ps1 = "bootstrap.ps1"
-    if os.path.exists(bootstrap_ps1):
-        with open(bootstrap_ps1, 'r', encoding='utf-8') as f:
-            content = f.read()
-        content = content.replace(f"- **Version:** {old_version}", f"- **Version:** {new_version}")
-        with open(bootstrap_ps1, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print(f"[OK] Updated bootstrap.ps1 version to {new_version}.")
+        # Update bootstrap.ps1
+        bootstrap_ps1 = "bootstrap.ps1"
+        if os.path.exists(bootstrap_ps1):
+            with open(bootstrap_ps1, 'r', encoding='utf-8') as f:
+                content = f.read()
+            content = content.replace(f"- **Version:** {old_version}", f"- **Version:** {new_version}")
+            with open(bootstrap_ps1, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[OK] Updated bootstrap.ps1 version to {new_version}.")
+    else:
+        # Update native project configurations
+        import json
+        
+        # package.json
+        pkg_path = "package.json"
+        if os.path.exists(pkg_path):
+            try:
+                with open(pkg_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if isinstance(data, dict) and "version" in data:
+                    data["version"] = new_version
+                    with open(pkg_path, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2)
+                    print(f"[OK] Updated package.json version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update package.json version: {e}")
+
+        # Cargo.toml
+        cargo_path = "Cargo.toml"
+        if os.path.exists(cargo_path):
+            try:
+                with open(cargo_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                pattern = r'(^|\n)(\s*version\s*=\s*["\'])' + re.escape(old_version) + r'(["\'])'
+                new_content = re.sub(pattern, r'\1\2' + new_version + r'\3', content)
+                if new_content != content:
+                    with open(cargo_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                    print(f"[OK] Updated Cargo.toml version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update Cargo.toml version: {e}")
+
+        # pyproject.toml
+        pyproject_path = "pyproject.toml"
+        if os.path.exists(pyproject_path):
+            try:
+                with open(pyproject_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                pattern = r'(^|\n)(\s*version\s*=\s*["\'])' + re.escape(old_version) + r'(["\'])'
+                new_content = re.sub(pattern, r'\1\2' + new_version + r'\3', content)
+                if new_content != content:
+                    with open(pyproject_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                    print(f"[OK] Updated pyproject.toml version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update pyproject.toml version: {e}")
+
+        # setup.py
+        setup_path = "setup.py"
+        if os.path.exists(setup_path):
+            try:
+                with open(setup_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                pattern = r'(version\s*=\s*["\'])' + re.escape(old_version) + r'(["\'])'
+                new_content = re.sub(pattern, r'\1' + new_version + r'\2', content)
+                if new_content != content:
+                    with open(setup_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                    print(f"[OK] Updated setup.py version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update setup.py version: {e}")
+
+        # composer.json
+        composer_path = "composer.json"
+        if os.path.exists(composer_path):
+            try:
+                with open(composer_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if isinstance(data, dict) and "version" in data:
+                    data["version"] = new_version
+                    with open(composer_path, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2)
+                    print(f"[OK] Updated composer.json version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update composer.json version: {e}")
+
+        # pom.xml
+        pom_path = "pom.xml"
+        if os.path.exists(pom_path):
+            try:
+                with open(pom_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                pattern = r'(<version>)' + re.escape(old_version) + r'(</version>)'
+                new_content = re.sub(pattern, r'\1' + new_version + r'\2', content)
+                if new_content != content:
+                    with open(pom_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                    print(f"[OK] Updated pom.xml version to {new_version}.")
+            except Exception as e:
+                print(f"[WARN] Failed to update pom.xml version: {e}")
+
+        # Gradle files
+        for gradle_file in ("build.gradle", "build.gradle.kts"):
+            gradle_path = gradle_file
+            if os.path.exists(gradle_path):
+                try:
+                    with open(gradle_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    pattern = r'(version\s*=\s*["\'])' + re.escape(old_version) + r'(["\'])'
+                    new_content = re.sub(pattern, r'\1' + new_version + r'\2', content)
+                    if new_content != content:
+                        with open(gradle_path, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        print(f"[OK] Updated {gradle_file} version to {new_version}.")
+                except Exception as e:
+                    print(f"[WARN] Failed to update {gradle_file} version: {e}")
 
 def update_changelog(new_version: str, categories: Dict[str, List[str]]) -> None:
     """Prepend new version changes to CHANGELOG.md."""

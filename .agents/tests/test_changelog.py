@@ -137,5 +137,49 @@ class TestChangelog(unittest.TestCase):
         commit = changelog.get_boundary_commit("2.28.0")
         self.assertEqual(commit, "tag_commit_hash")
 
+    @patch('commands.changelog.is_agent_core_repo')
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('json.load')
+    @patch('json.dump')
+    def test_update_version_in_files_non_agent_repo(self, mock_json_dump, mock_json_load, mock_open_file, mock_exists, mock_is_agent):
+        mock_is_agent.return_value = False
+        
+        # We mock exists such that package.json exists, but bootstrap.py does not.
+        def exists_side_effect(path):
+            if path == "package.json":
+                return True
+            if path == "AGENTS.md":
+                return True
+            return False
+        mock_exists.side_effect = exists_side_effect
+        mock_json_load.return_value = {"name": "test-project", "version": "1.0.0"}
+        
+        changelog.update_version_in_files("1.0.0", "1.1.0")
+        
+        # Verify that json.dump was called to update version to 1.1.0
+        mock_json_dump.assert_called_once()
+        args, kwargs = mock_json_dump.call_args
+        self.assertEqual(args[0]["version"], "1.1.0")
+
+    @patch('git_api.get_repo_info')
+    @patch('os.path.exists')
+    def test_is_agent_core_repo(self, mock_exists, mock_repo_info):
+        # Case 1: git_api returns antigravity-agents remote url
+        mock_repo_info.return_value = "rafaelghif/antigravity-agents"
+        mock_exists.return_value = False
+        self.assertTrue(changelog.is_agent_core_repo())
+
+        # Case 2: git_api does not return it, but AGENTS.md product is test-proj
+        mock_repo_info.return_value = None
+        mock_exists.return_value = True
+        with patch('builtins.open', new_callable=mock_open, read_data="- **Product:** test-proj\n"):
+            self.assertTrue(changelog.is_agent_core_repo())
+            
+        # Case 3: neither matches
+        mock_exists.return_value = True
+        with patch('builtins.open', new_callable=mock_open, read_data="- **Product:** custom-project\n"):
+            self.assertFalse(changelog.is_agent_core_repo())
+
 if __name__ == '__main__':
     unittest.main()
