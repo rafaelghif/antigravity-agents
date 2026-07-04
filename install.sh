@@ -145,6 +145,10 @@ echo "Downloading Antigravity Agent Core from GitHub..."
       ! -name "cooldowns.json" \
       ! -name "upgrade_state.json" \
       ! -name "schema.md" \
+      ! -name "api_keys" \
+      ! -name "active_api_keys" \
+      ! -name "active_api_keys.ps1" \
+      ! -name "active_api_profile_name" \
       -exec sh -c '
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
