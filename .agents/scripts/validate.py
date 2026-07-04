@@ -248,6 +248,16 @@ if [[ ! "$COMMIT_MSG" =~ $ID_REGEX ]]; then
   echo "=========================================================="
   exit 1
 fi
+
+COMPLIANCE_REGEX="Compliance-Audit:[[:space:]]*passed"
+if [[ ! "$COMMIT_MSG" =~ $COMPLIANCE_REGEX ]]; then
+  echo "=========================================================="
+  echo "[FAIL] Missing Compliance-Audit: passed reference!"
+  echo "=========================================================="
+  echo "Commit messages must include 'Compliance-Audit: passed' to verify compliance."
+  echo "=========================================================="
+  exit 1
+fi
 """,
             "prepare-commit-msg": r"""#!/usr/bin/env bash
 COMMIT_MSG_FILE="$1"
@@ -1502,6 +1512,8 @@ def audit_commit_messages() -> bool:
     conv_pattern = re.compile(r'^(feat|fix|chore|refactor|docs|test|style|ci|perf|build|revert)(\(.*\))?!?: .+$', re.IGNORECASE)
     # Refs pattern (anywhere in commit message)
     refs_pattern = re.compile(r'Refs:\s*(issue|task)-\d+', re.IGNORECASE)
+    # Compliance Audit pattern (anywhere in commit message)
+    compliance_pattern = re.compile(r'Compliance-Audit:\s*passed', re.IGNORECASE)
 
     failed = False
     for commit in commits:
@@ -1548,11 +1560,61 @@ def audit_commit_messages() -> bool:
             print_err("  Example: 'Refs: issue-106'")
             failed = True
 
+        # Check Compliance-Audit trailer line
+        if not compliance_pattern.search(commit):
+            print_err(f"Commit message is missing 'Compliance-Audit: passed' trailer: '{subject}'")
+            print_err("  Please perform the Rule & Schema Compliance Audit and add 'Compliance-Audit: passed' to verify compliance.")
+            failed = True
+
     if failed:
         return False
         
     print_ok("All commit messages are compliant with Conventional Commits and reference task IDs.")
     return True
+
+# ==========================================================
+# 11. Codebase Rule & Guidelines Compliance Audit
+# ==========================================================
+def audit_codebase_rules_compliance() -> bool:
+    print("\n[11/11] Auditing Codebase Rule & Guidelines Compliance...")
+    failed = False
+    
+    # Precise regex to match open calls with write modes on locks.json or token_budget.json
+    raw_write_pattern = re.compile(r'open\s*\(\s*[^)]*(?:locks\.json|token_budget\.json|LOCK_FILE|BUDGET_FILE)[^)]*,\s*[\'"](?:w|a|r\+)')
+    
+    # 1. Scan for inline file creation templates in scripts (*.sh, *.ps1)
+    try:
+        res = subprocess.run(['git', 'ls-files'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res.returncode == 0:
+            tracked_files = [f.strip() for f in res.stdout.splitlines() if f.strip()]
+            for filepath in tracked_files:
+                if filepath.endswith(('.sh', '.ps1')):
+                    if not os.path.exists(filepath):
+                        continue
+                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    # Check for inline file output content using redirection or here-docs
+                    if "cat << 'EOF'" in content or "cat <<EOF" in content:
+                        print_err(f"Script file '{filepath}' violates 'no duplicate/inline templates' rule by writing files inline!")
+                        failed = True
+                        
+                elif filepath.endswith('.py') and "validate.py" not in filepath and "test_" not in filepath:
+                    if not os.path.exists(filepath):
+                        continue
+                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    # Look for raw writes to locks.json or token_budget.json
+                    if raw_write_pattern.search(content):
+                        # Verify if tempfile is imported or used in the same file to confirm atomic usage
+                        if "NamedTemporaryFile" not in content:
+                            print_err(f"Python script '{filepath}' violates 'atomic file writing' guidelines by using raw open write mode on critical JSON files!")
+                            failed = True
+    except Exception as e:
+        print_warn(f"Failed to scan codebase rule compliance: {e}")
+        
+    if not failed:
+        print_ok("Codebase rule compliance check passed.")
+    return not failed
 
 # ==========================================================
 # Main Execution Entry Point
@@ -1625,6 +1687,7 @@ def run_validations() -> None:
     results["Local Unit Tests"] = audit_unit_tests()
     results["Module Lock Compliance"] = audit_module_locks()
     results["Commit Message Compliance"] = audit_commit_messages()
+    results["Codebase Rule Compliance"] = audit_codebase_rules_compliance()
     
     # Print the Colored Audit Summary Table
     print("\n==========================================================")

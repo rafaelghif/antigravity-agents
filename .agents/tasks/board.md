@@ -9,6 +9,7 @@ This board tracks active development tasks.
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 
 ## Doing
+- [ ] Enforce programmatic rule audits and commit compliance headers (feat/issue-190) <!-- id: issue-190 -->
 
 ## Done
 - [x] Enforce issue schemas and implement atomic file writing (feat/issue-189) <!-- id: issue-189 -->
