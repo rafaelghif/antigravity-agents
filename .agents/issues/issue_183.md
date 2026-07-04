@@ -1,7 +1,7 @@
 ---
 id: 183
 title: "Fix platform usage parser for table and markdown account breakdowns"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

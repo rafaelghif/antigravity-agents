@@ -6,9 +6,9 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
-- [ ] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->
 
 ## Done
+- [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->
 - [x] Optimize token sync to run asynchronously in background (feat/issue-182) <!-- id: 182 -->
 - [x] Fix token usage sync and remaining display (feat/issue-181) <!-- id: 181 -->
 - [x] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->
