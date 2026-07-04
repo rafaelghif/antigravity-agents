@@ -50,6 +50,7 @@ def get_active_api_account() -> str:
             pass
 
     # 3. Check environment variables for API keys
+    import hashlib
     for key_var, prefix in (
         ("GEMINI_API_KEY", "gemini"),
         ("OPENAI_API_KEY", "openai"),
@@ -58,10 +59,10 @@ def get_active_api_account() -> str:
         key_val = os.environ.get(key_var)
         if key_val:
             key_val = key_val.strip()
-            if len(key_val) > 8:
-                return f"{prefix}:{key_val[:4]}...{key_val[-4:]}"
-            else:
-                return f"{prefix}:{key_val}"
+            # Compute a cryptographically secure hash of the key
+            key_hash = hashlib.sha256(key_val.encode('utf-8')).hexdigest()
+            # Expose only the provider and a short 8-char slice of the hash
+            return f"{prefix}:sha256-{key_hash[:8]}"
 
     return "default"
 

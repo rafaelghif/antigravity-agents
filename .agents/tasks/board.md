@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Enhance API key masking security with cryptographic hashing (feat/issue-167) <!-- id: issue-167 -->
 - [x] Track token budget per API key or active API account (feat/issue-166) <!-- id: issue-166 -->
 - [x] Support per-account token budget counters (feat/issue-165) <!-- id: issue-165 -->
 - [x] Implement strict token budget tracker and logging CLI (feat/issue-164) <!-- id: issue-164 -->

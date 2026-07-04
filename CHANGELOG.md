@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.143.0] - 2026-07-04
+
+### 🚀 Features
+- enhance API key masking security with cryptographic hashing
+- Enhance API key masking security with cryptographic hashing (ISSUE-167)
+
+
 ## [2.142.0] - 2026-07-04
 
 ### 🚀 Features
