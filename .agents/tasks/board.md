@@ -4,13 +4,14 @@ This board tracks active development tasks.
 
 ## Todo
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
-- [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
-- [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
-- [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 
 ## Doing
 
 ## Done
+- [x] Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (feat/issue-191) <!-- id: issue-191 -->
+- [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
+- [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
+- [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 - [x] Enforce programmatic rule audits and commit compliance headers (feat/issue-190) <!-- id: issue-190 -->
 - [x] Enforce issue schemas and implement atomic file writing (feat/issue-189) <!-- id: issue-189 -->
 - [x] Self heal active context and enhance CLI DX (feat/issue-188) <!-- id: issue-188 -->

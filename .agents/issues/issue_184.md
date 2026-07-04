@@ -40,3 +40,14 @@ The token tracker has two major sync/validity issues:
 - [x] `token status` displays correct platform rolling limits and used counts without rounding/calculation errors.
 - [x] Stale database steps are skipped, and the fallback sync triggers automatically to fetch live platform data.
 - [x] `token status` triggers syncs automatically when the budget is older than 2 minutes.
+
+## Rule & Schema Compliance Audit
+- Target files to edit:
+  - [x] .agents/scripts/cli/commands/token.py <!-- id: audit-target-files -->
+- Active module locks:
+  - [x] .agents/scripts/cli/commands/token <!-- id: audit-module-locks -->
+- Non-negotiable rules checked:
+  - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
+  - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
+- Schema compliance check:
+  - [x] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->

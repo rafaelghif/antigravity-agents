@@ -31,3 +31,14 @@ The token parser fails to parse limits and used quotas for 5-Hour and Weekly lim
 ## Acceptance Criteria
 - [x] Markdown table format correctly syncs 5-Hour and Weekly limits and used counts.
 - [x] Account and task breakdowns are parsed successfully from asterisk/bold formats.
+
+## Rule & Schema Compliance Audit
+- Target files to edit:
+  - [x] .agents/scripts/cli/commands/token.py <!-- id: audit-target-files -->
+- Active module locks:
+  - [x] .agents/scripts/cli/commands/token <!-- id: audit-module-locks -->
+- Non-negotiable rules checked:
+  - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
+  - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
+- Schema compliance check:
+  - [x] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->
