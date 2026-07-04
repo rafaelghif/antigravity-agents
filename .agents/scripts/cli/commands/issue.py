@@ -748,7 +748,9 @@ created_at: {current_date}
         print("Triggering pre-close validation guard...")
         val_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../validate.py'))
         if os.path.exists(val_path):
-            val_res = subprocess.run([sys.executable, val_path])
+            env = os.environ.copy()
+            env["AAC_ENFORCE_SUBTASKS"] = "true"
+            val_res = subprocess.run([sys.executable, val_path], env=env)
             if val_res.returncode != 0:
                 print("Error: Validation guard failed. Issue close aborted.")
                 sys.exit(1)
@@ -843,8 +845,7 @@ created_at: {current_date}
                 ".agents/scripts/cli/commands/issue.py",
                 ".agents/memory/lessons-learned.md",
                 ".agents/memory/lessons-archive.md",
-                ".agents/rules.md",
-                ".agents/locks.json"
+                ".agents/rules.md"
             ]
             for f_to_stage in files_to_stage:
                 if os.path.exists(f_to_stage):

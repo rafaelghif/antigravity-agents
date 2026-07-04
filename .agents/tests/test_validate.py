@@ -229,7 +229,7 @@ class TestValidate(unittest.TestCase):
     @patch('os.listdir', return_value=['issue_040.md'])
     @patch('builtins.open', new_callable=mock_open)
     @patch('sys.argv', ['validate.py'])
-    @patch.dict('os.environ', {}, clear=True)
+    @patch.dict('os.environ', {'AAC_ENFORCE_SUBTASKS': 'true'}, clear=True)
     def test_audit_git_branch_alignment_fails_with_unresolved_subtasks(self, mock_file_open, mock_listdir, mock_exists, mock_run, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-040"
         mock_exists.return_value = True
@@ -243,7 +243,7 @@ class TestValidate(unittest.TestCase):
     @patch('builtins.open', new_callable=mock_open)
     @patch('sys.argv', ['validate.py'])
     @patch('sys.stdin.isatty', return_value=True)
-    @patch.dict('os.environ', {'ANTIGRAVITY_NONINTERACTIVE': '1'}, clear=True)
+    @patch.dict('os.environ', {'ANTIGRAVITY_NONINTERACTIVE': '1', 'AAC_ENFORCE_SUBTASKS': 'true'}, clear=True)
     def test_audit_git_branch_alignment_non_interactive_env(self, mock_isatty, mock_file_open, mock_listdir, mock_exists, mock_run, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-040"
         mock_exists.return_value = True
