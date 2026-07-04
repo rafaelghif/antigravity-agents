@@ -6,6 +6,7 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
+- [ ] Optimize token sync reliability and freshness guards (feat/issue-184) <!-- id: 184 -->
 
 ## Done
 - [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->

@@ -508,9 +508,16 @@ class TestTokenCommand(unittest.TestCase):
     @patch('os.path.getmtime')
     @patch('sqlite3.connect')
     def test_scan_conversations_for_usage(self, mock_connect, mock_getmtime, mock_listdir, mock_exists):
-        mock_exists.return_value = True
+        import time
+        now = time.time()
+        # Skip brain directory, allow conversations dir
+        def exists_side_effect(path):
+            if "brain" in path:
+                return False
+            return True
+        mock_exists.side_effect = exists_side_effect
         mock_listdir.return_value = ["conv1.db", "conv2.db"]
-        mock_getmtime.side_effect = lambda path: 1000 if "conv1.db" in path else 2000
+        mock_getmtime.side_effect = lambda path: now - 10 if "conv1.db" in path else now - 5
         
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -531,6 +538,45 @@ class TestTokenCommand(unittest.TestCase):
         result = token_cmd.scan_conversations_for_usage()
         self.assertEqual(result, usage_text)
         mock_connect.assert_called_with(os.path.expanduser("~/.gemini/antigravity-cli/conversations/conv2.db"))
+
+    @patch('os.path.isdir')
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('os.path.getmtime')
+    def test_scan_conversations_for_usage_transcript(self, mock_getmtime, mock_listdir, mock_exists, mock_isdir):
+        import time
+        now = time.time()
+        
+        mock_isdir.return_value = True
+        
+        # Mock brain path to exist
+        def exists_side_effect(path):
+            if "brain" in path:
+                return True
+            return False
+        mock_exists.side_effect = exists_side_effect
+        mock_listdir.return_value = ["cid1", "cid2"]
+        mock_getmtime.return_value = now - 10
+        
+        usage_text = (
+            "└ Models & Quota\n"
+            "  Account: test@gmail.com\n"
+            "GEMINI MODELS\n"
+            "  Weekly Limit\n"
+            "    [██░░] 50.00%\n"
+        )
+        
+        import json
+        from datetime import datetime, timezone
+        step1 = {
+            "step_index": 1,
+            "created_at": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
+            "content": usage_text
+        }
+        
+        with patch('builtins.open', mock_open(read_data=json.dumps(step1) + "\n")):
+            result = token_cmd.scan_conversations_for_usage()
+            self.assertEqual(result, usage_text)
 
 if __name__ == '__main__':
     unittest.main()

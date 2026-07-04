@@ -470,6 +470,7 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
                     "total_used": stats.get("weekly_used", 0)
                 }
             }
+        stats["is_block_format"] = True
         return stats
 
     # 1. First attempt: parse using direct colon format (Console Text output)
@@ -757,12 +758,64 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
 
 def scan_conversations_for_usage() -> str:
     """
-    Scan global Antigravity conversation databases for the most recent /usage slash command output.
-    Returns the raw string output if found, or None.
+    Scan global Antigravity conversation transcript files or databases for the most recent /usage command output.
+    Returns the raw string output if found and recent (within 5 minutes), or None.
     """
     import os
+    import json
     import sqlite3
+    from datetime import datetime, timezone
     
+    # 1. Scan transcript.jsonl files first (clean, no binary corruption)
+    brain_dir = os.path.expanduser("~/.gemini/antigravity-cli/brain")
+    if os.path.exists(brain_dir):
+        try:
+            conversation_ids = [
+                d for d in os.listdir(brain_dir)
+                if os.path.isdir(os.path.join(brain_dir, d)) and not d.startswith(".")
+            ]
+            if conversation_ids:
+                # Sort by modification time (newest first)
+                conversation_ids.sort(
+                    key=lambda x: os.path.getmtime(os.path.join(brain_dir, x)),
+                    reverse=True
+                )
+                # Scan the 5 most recently modified conversations
+                for cid in conversation_ids[:5]:
+                    dir_path = os.path.join(brain_dir, cid)
+                    # Skip if directory is older than 5 minutes
+                    if (datetime.now().timestamp() - os.path.getmtime(dir_path)) > 300:
+                        continue
+                        
+                    transcript_path = os.path.join(dir_path, ".system_generated/logs/transcript.jsonl")
+                    if os.path.exists(transcript_path):
+                        try:
+                            with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                lines = f.readlines()
+                            for line in reversed(lines):
+                                line = line.strip()
+                                if not line:
+                                    continue
+                                try:
+                                    step = json.loads(line)
+                                    content = step.get("content", "") or ""
+                                    text = str(content)
+                                    if "Weekly Limit" in text and "GEMINI MODELS" in text:
+                                        # Double check step creation age
+                                        created_at_str = step.get("created_at")
+                                        if created_at_str:
+                                            created_at = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+                                            age = (datetime.now(timezone.utc) - created_at).total_seconds()
+                                            if age <= 300:
+                                                return text
+                                except Exception:
+                                    pass
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+    # 2. Fallback to scanning SQLite databases (check modification time first)
     db_dir = os.path.expanduser("~/.gemini/antigravity-cli/conversations")
     if not os.path.exists(db_dir):
         return None
@@ -779,25 +832,26 @@ def scan_conversations_for_usage() -> str:
         # Sort by modification time (newest first)
         db_files.sort(key=os.path.getmtime, reverse=True)
         
-        # Scan the 10 most recently modified databases
+        # Scan recently modified databases
         for db_path in db_files[:10]:
+            # Skip if database has not been modified in the last 5 minutes
+            if (datetime.now().timestamp() - os.path.getmtime(db_path)) > 300:
+                continue
+                
             try:
                 conn = sqlite3.connect(db_path)
                 cursor = conn.cursor()
-                # Check if steps table exists
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='steps'")
                 if not cursor.fetchone():
                     conn.close()
                     continue
                     
-                # Query steps payload newest first
                 cursor.execute("SELECT step_payload FROM steps ORDER BY idx DESC")
                 for (payload,) in cursor.fetchall():
                     if not payload:
                         continue
                     try:
                         text = payload.decode('utf-8', errors='ignore')
-                        # Check for distinctive markers of the platform /usage output
                         if "Weekly Limit" in text and "GEMINI MODELS" in text:
                             conn.close()
                             return text
@@ -808,6 +862,7 @@ def scan_conversations_for_usage() -> str:
                 pass
     except Exception:
         pass
+        
     return None
 
 def sync_from_platform_usage() -> dict:
@@ -851,23 +906,33 @@ def sync_from_platform_usage() -> dict:
         # Rolling window overrides
         if "weekly_pct" in parsed: budget["weekly_pct_override"] = parsed["weekly_pct"]
         if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
+        if "weekly_used" in parsed: budget["weekly_used_override"] = parsed["weekly_used"]
         if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
         if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+        if "five_hour_used" in parsed: budget["five_hour_used_override"] = parsed["five_hour_used"]
 
-        # Dynamically calculate and learn limits from local logs and platform percentages
-        log_stats = get_rolling_window_stats()
-        local_weekly = log_stats.get("weekly_used", 0)
-        local_five_hour = log_stats.get("five_hour_used", 0)
-        
-        if "weekly_pct" in parsed and parsed["weekly_pct"] > 0:
-            calculated_weekly_limit = int(local_weekly / (parsed["weekly_pct"] / 100.0))
-            if calculated_weekly_limit > 0:
-                budget["weekly_limit"] = calculated_weekly_limit
-                
-        if "five_hour_pct" in parsed and parsed["five_hour_pct"] > 0:
-            calculated_five_hour_limit = int(local_five_hour / (parsed["five_hour_pct"] / 100.0))
-            if calculated_five_hour_limit > 0:
-                budget["five_hour_limit"] = calculated_five_hour_limit
+        budget["last_sync"] = datetime.utcnow().isoformat() + "Z"
+
+        # Update or dynamically calculate rolling limits
+        if "weekly_limit" in parsed and not parsed.get("is_block_format"):
+            budget["weekly_limit"] = parsed["weekly_limit"]
+        else:
+            log_stats = get_rolling_window_stats()
+            local_weekly = log_stats.get("weekly_used", 0)
+            if "weekly_pct" in parsed and parsed["weekly_pct"] > 0:
+                calculated_weekly_limit = int(local_weekly / (parsed["weekly_pct"] / 100.0))
+                if calculated_weekly_limit > 0:
+                    budget["weekly_limit"] = calculated_weekly_limit
+
+        if "five_hour_limit" in parsed and not parsed.get("is_block_format"):
+            budget["five_hour_limit"] = parsed["five_hour_limit"]
+        else:
+            log_stats = get_rolling_window_stats()
+            local_five_hour = log_stats.get("five_hour_used", 0)
+            if "five_hour_pct" in parsed and parsed["five_hour_pct"] > 0:
+                calculated_five_hour_limit = int(local_five_hour / (parsed["five_hour_pct"] / 100.0))
+                if calculated_five_hour_limit > 0:
+                    budget["five_hour_limit"] = calculated_five_hour_limit
         
         # Update accounts and tasks breakdowns
         if "accounts" in parsed:
@@ -885,6 +950,33 @@ def sync_from_platform_usage() -> dict:
         return parsed
         
     return {}
+
+def trigger_background_sync() -> None:
+    """Spawns helper.py token sync --auto in a detached background process."""
+    import subprocess
+    import sys
+    try:
+        helper_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
+        cmd_args = [sys.executable, helper_path, "token", "sync", "--auto"]
+        if os.name == 'nt':
+            # Windows detached process flag
+            DETACHED_PROCESS = 0x00000008
+            subprocess.Popen(
+                cmd_args,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=DETACHED_PROCESS
+            )
+        else:
+            # POSIX detached process
+            subprocess.Popen(
+                cmd_args,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True
+            )
+    except Exception:
+        pass
 
 def run_log(args: List[str]) -> None:
     task_id = None
@@ -966,28 +1058,7 @@ def run_log(args: List[str]) -> None:
     
     # Run automatic sync from platform usage in the background if not already running internally
     if os.environ.get("INTERNAL_SYNC") != "true":
-        try:
-            helper_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
-            cmd_args = [sys.executable, helper_path, "token", "sync", "--auto"]
-            if os.name == 'nt':
-                # Windows detached process flag
-                DETACHED_PROCESS = 0x00000008
-                subprocess.Popen(
-                    cmd_args,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=DETACHED_PROCESS
-                )
-            else:
-                # POSIX detached process
-                subprocess.Popen(
-                    cmd_args,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True
-                )
-        except Exception:
-            pass
+        trigger_background_sync()
 
     # Enforce strict warning alerts on budget limit breach
     if budget["daily_used"] > budget["daily_limit"]:
@@ -1143,15 +1214,28 @@ def get_rolling_stats() -> dict:
     stats["monthly_remaining"] = resets["monthly"]
     
     budget = load_budget()
+    
+    # Weekly overrides
+    if budget.get("weekly_used_override") is not None:
+        stats["weekly_used"] = budget["weekly_used_override"]
+    elif budget.get("weekly_pct_override") is not None:
+        stats["weekly_used"] = int(budget["weekly_pct_override"] / 100 * stats["weekly_limit"])
+        
     if budget.get("weekly_pct_override") is not None:
         stats["weekly_pct"] = budget["weekly_pct_override"]
-        stats["weekly_used"] = int(stats["weekly_pct"] / 100 * stats["weekly_limit"])
+        
     if budget.get("weekly_remaining_override") is not None:
         stats["weekly_remaining"] = budget["weekly_remaining_override"]
         
+    # Five hour overrides
+    if budget.get("five_hour_used_override") is not None:
+        stats["five_hour_used"] = budget["five_hour_used_override"]
+    elif budget.get("five_hour_pct_override") is not None:
+        stats["five_hour_used"] = int(budget["five_hour_pct_override"] / 100 * stats["five_hour_limit"])
+        
     if budget.get("five_hour_pct_override") is not None:
         stats["five_hour_pct"] = budget["five_hour_pct_override"]
-        stats["five_hour_used"] = int(stats["five_hour_pct"] / 100 * stats["five_hour_limit"])
+        
     if budget.get("five_hour_remaining_override") is not None:
         stats["five_hour_remaining"] = budget["five_hour_remaining_override"]
         
@@ -1193,6 +1277,43 @@ def run_sync(args: List[str]) -> None:
 
 def run_status(args: List[str]) -> None:
     budget = load_budget()
+    from datetime import datetime, timezone
+    
+    last_sync_str = budget.get("last_sync")
+    should_sync = True
+    if last_sync_str:
+        try:
+            if last_sync_str.endswith("Z"):
+                last_sync_str = last_sync_str[:-1] + "+00:00"
+            last_sync = datetime.fromisoformat(last_sync_str)
+            age = (datetime.now(timezone.utc) - last_sync.replace(tzinfo=timezone.utc)).total_seconds()
+            if age <= 120:
+                should_sync = False
+        except Exception:
+            pass
+            
+    if should_sync:
+        db_usage = scan_conversations_for_usage()
+        if db_usage:
+            parsed = parse_usage_output(db_usage)
+            if parsed:
+                if "daily_limit" in parsed: budget["daily_limit"] = parsed["daily_limit"]
+                if "daily_used" in parsed: budget["daily_used"] = parsed["daily_used"]
+                if "monthly_limit" in parsed: budget["monthly_limit"] = parsed["monthly_limit"]
+                if "monthly_used" in parsed: budget["monthly_used"] = parsed["monthly_used"]
+                if "weekly_pct" in parsed: budget["weekly_pct_override"] = parsed["weekly_pct"]
+                if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
+                if "weekly_used" in parsed: budget["weekly_used_override"] = parsed["weekly_used"]
+                if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
+                if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+                if "five_hour_used" in parsed: budget["five_hour_used_override"] = parsed["five_hour_used"]
+                if "weekly_limit" in parsed: budget["weekly_limit"] = parsed["weekly_limit"]
+                if "five_hour_limit" in parsed: budget["five_hour_limit"] = parsed["five_hour_limit"]
+                budget["last_sync"] = datetime.utcnow().isoformat() + "Z"
+                save_budget(budget)
+        else:
+            trigger_background_sync()
+
     budget = check_date_resets(budget)
 
     daily_used = budget.get("daily_used", 0)
