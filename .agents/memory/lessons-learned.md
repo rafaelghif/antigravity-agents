@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-04]** **token-audit**: Implemented a strict local token budget tracker and logging CLI subcommand 'token' supporting log, status, and reset, including dynamic date-based resets and branch-based task auto-detection
 - **[2026-07-04]** **Database Schema**: Strictly align API and database models with the project schemas to maintain interface integrity.
 - **[2026-07-04]** **documentation**: Fixed installer repository raw.githubusercontent.com URLs in README.md from rafaelghifari to rafaelghif
 - **[2026-07-04]** **installation**: Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
