@@ -1,7 +1,7 @@
 ---
 id: issue-154
 title: "Explicitly restrict git configuration to local workspace level"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

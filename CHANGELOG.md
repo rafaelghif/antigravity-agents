@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.131.0] - 2026-07-04
+
+### 🚀 Features
+- explicitly pass --local flag to git config commands
+- Explicitly restrict git configuration to local workspace level (ISSUE-154)
+
+
 ## [2.130.0] - 2026-07-04
 
 ### 🚀 Features
