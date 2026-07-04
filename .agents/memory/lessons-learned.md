@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-04]** **token-budget**: Fixed platform usage parser to correctly parse limits and used tokens from Markdown table column format and support bullet lists (*) and bold tags (**) in account/task breakdowns.
 - **[2026-07-04]** **token-budget**: Optimized token logging latency by spawning the platform sync process as a detached background subprocess (using Popen with start_new_session/CREATE_NEW_PROCESS_GROUP), eliminating the 3-5 seconds user blocking wait.
 - **[2026-07-04]** **token-budget**: Fixed rolling window token quotas parsing from platform /usage command by implementing multi-line block extraction (avoiding fragile line+1 checks), and added remaining tokens calculation/display to the token status CLI command.
 - **[2026-07-04]** **token-budget**: Implemented automatic platform token usage sync by executing agy -p "/usage" and parsing the output (table, list, and console text formats) robustly via regex, avoiding infinite recursion via INTERNAL_SYNC environment guards, and improving active account detection via ~/.gemini/google_accounts.json.
