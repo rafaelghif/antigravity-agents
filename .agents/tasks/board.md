@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Align MCP configuration with Google Antigravity specifications (feat/issue-171) <!-- id: issue-171 -->
 
 ## Done
 - [x] Implement zero-dependency MCP server and registration command (feat/issue-170) <!-- id: issue-170 -->

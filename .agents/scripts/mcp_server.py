@@ -290,11 +290,60 @@ def register_server():
         os.makedirs(config_dir, exist_ok=True)
         with open(config_file, 'w', encoding='utf-8') as f:
             json.dump(settings, f, indent=2)
-        print(f"[OK] Successfully registered MCP server 'aac-v2-tools' in settings:")
+        print(f"[OK] Successfully registered MCP server 'aac-v2-tools' in Cline settings:")
         print(f"     File: {config_file}")
     except Exception as e:
-        print(f"[FAIL] Failed to write settings file: {e}")
+        print(f"[FAIL] Failed to write Cline settings file: {e}")
         sys.exit(1)
+
+    # 2. Workspace-level config: .agents/mcp_config.json
+    workspace_dir = os.path.dirname(os.path.dirname(script_path))
+    workspace_config_file = os.path.join(workspace_dir, "mcp_config.json")
+    workspace_settings = {}
+    if os.path.exists(workspace_config_file):
+        try:
+            with open(workspace_config_file, 'r', encoding='utf-8') as f:
+                workspace_settings = json.load(f)
+        except Exception:
+            pass
+    if "mcpServers" not in workspace_settings:
+        workspace_settings["mcpServers"] = {}
+    workspace_settings["mcpServers"]["aac-v2-tools"] = {
+        "command": "python3",
+        "args": [script_path]
+    }
+    try:
+        with open(workspace_config_file, 'w', encoding='utf-8') as f:
+            json.dump(workspace_settings, f, indent=2)
+        print(f"[OK] Successfully registered MCP server in workspace config:")
+        print(f"     File: {workspace_config_file}")
+    except Exception as e:
+        print(f"[WARN] Failed to write workspace mcp_config.json: {e}")
+
+    # 3. Global Antigravity config: ~/.gemini/config/mcp_config.json
+    global_config_dir = os.path.join(home, ".gemini", "config")
+    global_config_file = os.path.join(global_config_dir, "mcp_config.json")
+    global_settings = {}
+    if os.path.exists(global_config_file):
+        try:
+            with open(global_config_file, 'r', encoding='utf-8') as f:
+                global_settings = json.load(f)
+        except Exception:
+            pass
+    if "mcpServers" not in global_settings:
+        global_settings["mcpServers"] = {}
+    global_settings["mcpServers"]["aac-v2-tools"] = {
+        "command": "python3",
+        "args": [script_path]
+    }
+    try:
+        os.makedirs(global_config_dir, exist_ok=True)
+        with open(global_config_file, 'w', encoding='utf-8') as f:
+            json.dump(global_settings, f, indent=2)
+        print(f"[OK] Successfully registered MCP server in global Antigravity config:")
+        print(f"     File: {global_config_file}")
+    except Exception as e:
+        print(f"[WARN] Failed to write global mcp_config.json: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ("--register", "register"):
