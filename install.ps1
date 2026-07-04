@@ -89,106 +89,7 @@ $LocalDev = $env:ANTIGRAVITY_LOCAL_DEV -eq "1"
 $SrcAgents = Join-Path $SrcDir ".agents"
 
 # 2. Copy/Download Agent files
-if ($LocalDev -and (Test-Path $SrcAgents)) {
-    Write-Host "Using local source files from: $SrcDir"
-    
-    $Files = Get-ChildItem -Path $SrcAgents -Recurse -File
-    foreach ($File in $Files) {
-        $RelativePath = $File.FullName.Substring($SrcDir.Length + 1)
-        # Exclude specific files and directories (handling both slash directions)
-        if ($RelativePath -like "*\__pycache__\*" -or $RelativePath -like "*/__pycache__/*" -or
-            $RelativePath -like "*\.git\*" -or $RelativePath -like "*/.git/*" -or
-            $File.Name -eq "git_profiles.json" -or
-            $File.Name -eq "projects.json" -or
-            $File.Name -eq "locks.json" -or
-            $File.Name -eq ".DS_Store" -or
-            $File.Extension -eq ".pyc" -or
-            $File.Extension -eq ".pyo" -or
-            $RelativePath -like ".agents\memory\*" -or $RelativePath -like ".agents/memory/*" -or
-            $RelativePath -like ".agents\tasks\*" -or $RelativePath -like ".agents/tasks/*" -or
-            $RelativePath -like ".agents\issues\*" -or $RelativePath -like ".agents/issues/*" -or
-            $RelativePath -like ".agents\plans\*" -or $RelativePath -like ".agents/plans/*" -or
-            $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*") {
-            continue
-        }
-        
-        $DestFile = Join-Path $TargetAbs $RelativePath
-        $DestDir = Split-Path $DestFile -Parent
-        if (-not (Test-Path $DestDir)) {
-            New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
-        }
-        if (-not (Test-Path $DestFile)) {
-            Copy-Item -Path $File.FullName -Destination $DestFile -Force | Out-Null
-        }
-    }
-    
-    # Initialize clean memory folder in target
-    $DestMemory = Join-Path $TargetAbs ".agents\memory"
-    $DestDecisions = Join-Path $DestMemory "decisions"
-    $DestBlueprints = Join-Path $DestMemory "blueprints"
-    
-    if (-not (Test-Path $DestDecisions)) {
-        New-Item -ItemType Directory -Force -Path $DestDecisions | Out-Null
-    }
-    if (-not (Test-Path $DestBlueprints)) {
-        New-Item -ItemType Directory -Force -Path $DestBlueprints | Out-Null
-    }
-    
-    $SrcBlueprints = Join-Path $SrcDir ".agents\memory\blueprints"
-    if (Test-Path $SrcBlueprints) {
-        Copy-Item -Path "$SrcBlueprints\*" -Destination $DestBlueprints -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-    }
-    
-    $SrcTemplates = Join-Path $SrcDir ".agents\memory\templates"
-    if (Test-Path $SrcTemplates) {
-        $Templates = Get-ChildItem -Path $SrcTemplates -Filter "*.template"
-        foreach ($T in $Templates) {
-            $FilenameT = $T.BaseName
-            $DestT = Join-Path $DestMemory $FilenameT
-            if (-not (Test-Path $DestT)) {
-                Copy-Item -Path $T.FullName -Destination $DestT -Force | Out-Null
-            }
-        }
-    }
-
-    # Copy projects.example to projects.json if it doesn't exist
-    $SrcProjExample = Join-Path $SrcDir ".agents\projects.example"
-    $DestProjJson = Join-Path $TargetAbs ".agents\projects.json"
-    if ((Test-Path $SrcProjExample) -and -not (Test-Path $DestProjJson)) {
-        Copy-Item -Path $SrcProjExample -Destination $DestProjJson -Force | Out-Null
-    }
-
-    $SrcHelperSh = Join-Path $SrcDir "helper.sh"
-    $DestHelperSh = Join-Path $TargetAbs "helper.sh"
-    if ((Test-Path $SrcHelperSh) -and -not (Test-Path $DestHelperSh)) {
-        Copy-Item -Path $SrcHelperSh -Destination $DestHelperSh -Force | Out-Null
-    }
-
-    $SrcHelperPs = Join-Path $SrcDir "helper.ps1"
-    $DestHelperPs = Join-Path $TargetAbs "helper.ps1"
-    if ((Test-Path $SrcHelperPs) -and -not (Test-Path $DestHelperPs)) {
-        Copy-Item -Path $SrcHelperPs -Destination $DestHelperPs -Force | Out-Null
-    }
-    
-    $SrcAgentsMd = Join-Path $SrcDir "AGENTS.md"
-    $DestAgentsMd = Join-Path $TargetAbs "AGENTS.md"
-    if (-not (Test-Path $DestAgentsMd)) {
-        Copy-Item -Path $SrcAgentsMd -Destination $DestAgentsMd -Force | Out-Null
-        Write-Host "Created AGENTS.md."
-    } else {
-        Write-Host "AGENTS.md already exists. Skipping overwrite."
-    }
-
-    # Run local bootstrap.ps1
-    $OriginalLocation = Get-Location
-    Set-Location -Path $TargetAbs
-    try {
-        & (Join-Path $SrcDir "bootstrap.ps1")
-    } finally {
-        Set-Location -Path $OriginalLocation
-    }
-} else {
-    Write-Host "Local source files not found. Downloading Antigravity Agent Core from GitHub..."
+Write-Host "Downloading Antigravity Agent Core from GitHub..."
     Write-Host "Verifying network connection to GitHub..."
     
     $Connected = $false
@@ -353,7 +254,6 @@ if ($LocalDev -and (Test-Path $SrcAgents)) {
     
     # Cleanup
     Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-}
 
 # 3. Initialize Git if not present in target
 if (-not (Test-Path (Join-Path $TargetAbs ".git"))) {
