@@ -3,6 +3,7 @@ import os
 import json
 import re
 import subprocess
+import tempfile
 from datetime import datetime
 from typing import List
 
@@ -176,8 +177,11 @@ def load_budget() -> dict:
 def save_budget(data: dict) -> None:
     os.makedirs(os.path.dirname(BUDGET_FILE), exist_ok=True)
     try:
-        with open(BUDGET_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
+        dir_name = os.path.dirname(BUDGET_FILE) or "."
+        with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
+            json.dump(data, tf, indent=2)
+            temp_name = tf.name
+        os.replace(temp_name, BUDGET_FILE)
     except Exception as e:
         print_err(f"Failed to save token budget: {e}")
 

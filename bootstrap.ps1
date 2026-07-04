@@ -51,7 +51,7 @@ $ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if ((Test-Path "AGENTS.md") -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.165.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.165.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.166.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.166.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -67,7 +67,7 @@ if (Test-Path ".agents/scripts/recon.py") {
     Write-Host "Warning: .agents/scripts/recon.py not found. Skipping auto-reconnaissance." -ForegroundColor Yellow
 }
 
-# 4. Set up local Git hooks
+# 4. Set up local Git hooks via validate.py
 $IsGit = $false
 try {
     $GitCheck = git rev-parse --is-inside-work-tree 2>&1
@@ -77,74 +77,14 @@ try {
 } catch {}
 
 if ($IsGit) {
-    $HooksDir = (git rev-parse --git-path hooks)
-    if (-not [System.IO.Path]::IsPathRooted($HooksDir)) {
-        $HooksDir = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $HooksDir))
+    if ($PythonExec) {
+        Write-Host "Installing and validating local Git hooks..."
+        $HelperScript = Join-Path $ScriptDir ".agents/scripts/validate.py"
+        & $PythonExec $HelperScript > $null 2>&1
+        Write-Host "Installed local Git hooks."
+    } else {
+        Write-Host "Warning: Python 3 not found. Skipping Git hooks auto-installation." -ForegroundColor Yellow
     }
-    if (-not (Test-Path $HooksDir)) {
-        New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
-    }
-    
-    $PreCommitContent = @"
-#!/usr/bin/env bash
-if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/validate.py
-elif command -v python &>/dev/null; then
-  python .agents/scripts/validate.py
-else
-  echo "Warning: Python not found. Skipping commit validation check."
-fi
-"@
-    $PreCommitPath = Join-Path $HooksDir "pre-commit"
-    [System.IO.File]::WriteAllText($PreCommitPath, $PreCommitContent.Replace("`r`n", "`n"))
-    Write-Host "Installed local Git pre-commit hook."
-
-    $CommitMsgContent = @"
-#!/usr/bin/env bash
-COMMIT_MSG_FILE="`$1"
-COMMIT_MSG=`$(cat "`$COMMIT_MSG_FILE")
-CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
-
-if [[ ! "`$COMMIT_MSG" =~ `$CONVENTIONAL_REGEX ]]; then
-  echo "=========================================================="
-  echo "[FAIL] Non-compliant commit message format!"
-  echo "=========================================================="
-  echo "Commit messages must follow Conventional Commits standard:"
-  echo "  Format: <type>(<scope>): <subject>"
-  echo "  Example: feat(auth): add login endpoint"
-  echo "=========================================================="
-  exit 1
-fi
-
-ID_REGEX="(task-|issue-|chore-)[a-zA-Z0-9_-]+"
-if [[ ! "`$COMMIT_MSG" =~ `$ID_REGEX ]]; then
-  echo "=========================================================="
-  echo "[FAIL] Missing Task/Issue ID reference!"
-  echo "=========================================================="
-  echo "Commit messages must include an active task or issue ID reference."
-  echo "  Example body: Task ID: issue-123"
-  echo "=========================================================="
-  exit 1
-fi
-"@
-    $CommitMsgPath = Join-Path $HooksDir "commit-msg"
-    [System.IO.File]::WriteAllText($CommitMsgPath, $CommitMsgContent.Replace("`r`n", "`n"))
-    Write-Host "Installed local Git commit-msg hook."
-
-    $PrepareCommitMsgContent = @"
-#!/usr/bin/env bash
-COMMIT_MSG_FILE="`$1"
-COMMIT_SOURCE="`${2:-}"
-
-if command -v python3 &>/dev/null; then
-  python3 .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
-elif command -v python &>/dev/null; then
-  python .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
-fi
-"@
-    $PrepareCommitMsgPath = Join-Path $HooksDir "prepare-commit-msg"
-    [System.IO.File]::WriteAllText($PrepareCommitMsgPath, $PrepareCommitMsgContent.Replace("`r`n", "`n"))
-    Write-Host "Installed local Git prepare-commit-msg hook."
 }
 
 Write-Host "==========================================================" -ForegroundColor Green

@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import subprocess
+import tempfile
 
 LOCK_FILE = ".agents/locks.json"
 
@@ -68,8 +69,11 @@ def load_locks() -> dict:
 
 def save_locks(locks: dict) -> None:
     try:
-        with open(LOCK_FILE, 'w', encoding='utf-8') as f:
-            json.dump(locks, f, indent=2)
+        dir_name = os.path.dirname(LOCK_FILE) or "."
+        with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
+            json.dump(locks, tf, indent=2)
+            temp_name = tf.name
+        os.replace(temp_name, LOCK_FILE)
     except Exception as e:
         print(f"Error saving locks: {e}")
 
