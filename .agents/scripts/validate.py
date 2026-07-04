@@ -670,7 +670,9 @@ def audit_git_branch_alignment() -> bool:
             required_unchecked = [t for t in unchecked if not any(opt in t.lower() for opt in ('(optional)', '[optional]'))]
             
             if required_unchecked:
-                if "--skip-subtasks" in sys.argv or os.getenv("SKIP_SUBTASK_AUDIT") == "true":
+                if os.environ.get("AAC_ENFORCE_SUBTASKS") != "true" and "--enforce-subtasks" not in sys.argv:
+                    print_warn(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks (warning: intermediate commit).")
+                elif "--skip-subtasks" in sys.argv or os.getenv("SKIP_SUBTASK_AUDIT") == "true":
                     print_warn(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks (bypassed).")
                 elif sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1" and os.getenv("CI") != "true" and os.environ.get("IN_AUDIT_TEST") != "true" and 'unittest' not in sys.modules and 'pytest' not in sys.modules:
                     print_warn(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks:")

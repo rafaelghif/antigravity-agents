@@ -43,6 +43,7 @@ Desktop.ini
 # Version Control & Agent Internal Transient files
 .git/
 .agents/locks/
+.agents/locks.json
 
 # Media & Binary Assets
 *.png

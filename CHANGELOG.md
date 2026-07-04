@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.164.0] - 2026-07-04
+
+### 🚀 Features
+- decouple locks.json from git staging and resolve intermediate subtask deadlock
+- Fix subtask deadlock and staging locks in CLI (ISSUE-187)
+
+
 ## [2.163.0] - 2026-07-04
 
 ### 🚀 Features
