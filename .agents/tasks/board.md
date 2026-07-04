@@ -5,9 +5,9 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
-- [/] Implement zero-dependency MCP server and registration command (feat/issue-170) <!-- id: issue-170 -->
 
 ## Done
+- [x] Implement zero-dependency MCP server and registration command (feat/issue-170) <!-- id: issue-170 -->
 - [x] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->
 - [x] Add Token Budget visualization to dashboard (feat/issue-168) <!-- id: issue-168 -->
 - [x] Enhance API key masking security with cryptographic hashing (feat/issue-167) <!-- id: issue-167 -->

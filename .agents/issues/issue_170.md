@@ -1,7 +1,7 @@
 ---
 id: issue-170
 title: "Implement zero-dependency MCP server and registration command"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
