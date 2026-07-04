@@ -1,7 +1,7 @@
 ---
 id: issue-167
 title: "Enhance API key masking security with cryptographic hashing"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
