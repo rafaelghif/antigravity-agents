@@ -1,7 +1,7 @@
 ---
 id: issue-160
 title: "Expand multi-language lint support in validation guard and simplify readme"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
