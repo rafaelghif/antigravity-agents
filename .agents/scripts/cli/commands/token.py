@@ -30,7 +30,8 @@ def get_active_api_account() -> str:
     2. Check local file: .agents/active_api_profile_name.
     3. Check env vars for actual keys: GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY.
        If found, mask and use as account name (e.g. 'gemini:AIza...8b9c').
-    4. Fallback to 'default'.
+    4. Scan global Antigravity CLI logs in ~/.gemini/antigravity-cli/log/ for active email.
+    5. Fallback to 'default'.
     """
     # 1. Check environment variables
     for var in ("ACTIVE_API_PROFILE", "API_ACCOUNT", "GEMINI_API_PROFILE"):
@@ -63,6 +64,32 @@ def get_active_api_account() -> str:
             key_hash = hashlib.sha256(key_val.encode('utf-8')).hexdigest()
             # Expose only the provider and a short 8-char slice of the hash
             return f"{prefix}:sha256-{key_hash[:8]}"
+
+    # 4. Scan global Antigravity CLI log files
+    try:
+        log_dir = os.path.expanduser("~/.gemini/antigravity-cli/log")
+        if os.path.exists(log_dir):
+            log_files = [
+                os.path.join(log_dir, f)
+                for f in os.listdir(log_dir)
+                if f.startswith("cli-") and f.endswith(".log")
+            ]
+            if log_files:
+                # Sort by modification time (newest first)
+                log_files.sort(key=os.path.getmtime, reverse=True)
+                # Matches "OAuth: authenticated successfully as <email>" or "applyAuthResult: email=<email>"
+                email_pattern = re.compile(
+                    r"(?:OAuth: authenticated successfully as |applyAuthResult: email=)([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
+                )
+                for log_file in log_files[:5]:
+                    with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+                        lines = f.readlines()
+                        for line in reversed(lines):
+                            m = email_pattern.search(line)
+                            if m:
+                                return m.group(1).strip()
+    except Exception:
+        pass
 
     return "default"
 
@@ -162,28 +189,115 @@ def append_to_log(task_id: str, prompt: int, completion: int) -> None:
     except Exception as e:
         print_warn(f"Could not write to token log file: {e}")
 
-def run_log(args: List[str]) -> None:
-    if len(args) < 2:
-        print("Usage: helper.py token log <prompt_tokens> <completion_tokens> [--task <task_id>]")
-        sys.exit(1)
+def auto_detect_tokens() -> tuple:
+    """
+    Attempt to auto-detect prompt and completion tokens from the conversation transcript.
+    Returns: (prompt_tokens, completion_tokens)
+    """
+    conversation_id = os.environ.get("ANTIGRAVITY_CONVERSATION_ID")
+    if not conversation_id:
+        brain_dir = os.path.expanduser("~/.gemini/antigravity-cli/brain")
+        if os.path.exists(brain_dir):
+            try:
+                dirs = [d for d in os.listdir(brain_dir) if os.path.isdir(os.path.join(brain_dir, d)) and not d.startswith(".")]
+                if dirs:
+                    dirs.sort(key=lambda x: os.path.getmtime(os.path.join(brain_dir, x)), reverse=True)
+                    conversation_id = dirs[0]
+            except Exception:
+                pass
+                
+    if not conversation_id:
+        return 0, 0
+
+    transcript_path = os.path.expanduser(f"~/.gemini/antigravity-cli/brain/{conversation_id}/.system_generated/logs/transcript.jsonl")
+    if not os.path.exists(transcript_path):
+        return 0, 0
 
     try:
-        prompt = int(args[0])
-        completion = int(args[1])
-        if prompt < 0 or completion < 0:
-            raise ValueError()
-    except ValueError:
-        print_err("Prompt and completion tokens must be non-negative integers.")
-        sys.exit(1)
+        with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+            
+        steps = []
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                steps.append(json.loads(line))
+            except Exception:
+                pass
 
+        if not steps:
+            return 0, 0
+
+        # Find the last MODEL response step and preceding steps in the current turn
+        last_model_idx = -1
+        for idx in range(len(steps) - 1, -1, -1):
+            if steps[idx].get("source") == "MODEL":
+                last_model_idx = idx
+                break
+
+        if last_model_idx == -1:
+            return 0, 0
+
+        model_step = steps[last_model_idx]
+        completion_content = model_step.get("content", "") or ""
+        tool_calls = model_step.get("tool_calls", [])
+        if tool_calls:
+            completion_content += json.dumps(tool_calls)
+
+        completion_tokens = max(1, int(len(completion_content) / 3.8))
+
+        start_turn_idx = 0
+        for idx in range(last_model_idx - 1, -1, -1):
+            if steps[idx].get("source") == "MODEL":
+                start_turn_idx = idx + 1
+                break
+
+        prompt_content = ""
+        for idx in range(start_turn_idx, last_model_idx):
+            step = steps[idx]
+            prompt_content += (step.get("content", "") or "")
+            if "tool_calls" in step:
+                prompt_content += json.dumps(step.get("tool_calls", []))
+
+        prompt_tokens = max(1, int(len(prompt_content) / 3.8))
+        if prompt_tokens < 100:
+            prompt_tokens = 15000  # standard system + rules baseline fallback
+
+        return prompt_tokens, completion_tokens
+    except Exception:
+        return 0, 0
+
+def run_log(args: List[str]) -> None:
     task_id = None
     if "--task" in args:
         try:
             idx = args.index("--task")
             if idx + 1 < len(args):
                 task_id = args[idx + 1]
+                # Remove --task and its value from args to simplify parsing
+                args = args[:idx] + args[idx + 2:]
         except Exception:
             pass
+
+    prompt = 0
+    completion = 0
+
+    if len(args) >= 2:
+        try:
+            prompt = int(args[0])
+            completion = int(args[1])
+            if prompt < 0 or completion < 0:
+                raise ValueError()
+        except ValueError:
+            print_err("Prompt and completion tokens must be non-negative integers.")
+            sys.exit(1)
+    else:
+        prompt, completion = auto_detect_tokens()
+        if prompt == 0 and completion == 0:
+            print_err("No tokens specified and could not auto-detect token usage from transcript.")
+            sys.exit(1)
 
     if not task_id:
         task_id = get_current_task_id()

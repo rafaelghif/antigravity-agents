@@ -152,5 +152,35 @@ class TestTokenCommand(unittest.TestCase):
             self.assertEqual(saved_data["monthly_used"], 20000)
             self.assertEqual(saved_data["accounts"]["gemini:sha256-ba88894d"]["daily_used"], 0)
 
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('builtins.open', new_callable=mock_open, read_data="I0704 08:38:25.047474 180703 server_oauth.go:219] OAuth: authenticated successfully as test-user@example.com\n")
+    @patch('os.path.getmtime', return_value=123456789.0)
+    def test_get_active_api_account_logs(self, mock_getmtime, mock_file, mock_listdir, mock_exists):
+        def exists_side_effect(path):
+            if "active_api_profile_name" in path:
+                return False
+            return True
+        mock_exists.side_effect = exists_side_effect
+        mock_listdir.return_value = ["cli-20260704_083824.log"]
+        
+        with patch.dict(os.environ, {}, clear=True):
+            account = token_cmd.get_active_api_account()
+            self.assertEqual(account, "test-user@example.com")
+
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open)
+    def test_auto_detect_tokens(self, mock_file, mock_exists):
+        transcript_data = (
+            '{"source": "USER", "content": "hello agent"}\n'
+            '{"source": "MODEL", "content": "hello user", "tool_calls": []}\n'
+        )
+        mock_file.return_value.readlines.return_value = transcript_data.strip().split('\n')
+        
+        with patch.dict(os.environ, {"ANTIGRAVITY_CONVERSATION_ID": "dummy-conv-id"}):
+            prompt, completion = token_cmd.auto_detect_tokens()
+            self.assertGreater(prompt, 0)
+            self.assertGreater(completion, 0)
+
 if __name__ == '__main__':
     unittest.main()
