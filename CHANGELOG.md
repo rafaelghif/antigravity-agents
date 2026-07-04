@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.139.0] - 2026-07-04
+
+### 🚀 Features
+- add mypy, tsc, and javac compiler validation checks
+- Add strict type checking for Python, TypeScript, and Java to validation guard (ISSUE-162)
+
+
 ## [2.138.0] - 2026-07-04
 
 ### 🚀 Features
