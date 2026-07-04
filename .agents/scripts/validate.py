@@ -879,7 +879,7 @@ def run_project_lint_command(project_name: str, project_path: str, lint_command:
     return True
 
 def auto_format_file(file_path: str) -> None:
-    """Run auto-formatters (black, prettier, php-cs-fixer) on the file if available."""
+    """Run auto-formatters (black, prettier, php-cs-fixer, gofmt, rustfmt, clang-format, rubocop) on the file if available."""
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".py":
         if shutil.which("black"):
@@ -893,7 +893,23 @@ def auto_format_file(file_path: str) -> None:
         elif shutil.which("phpcbf"):
             subprocess.run(['phpcbf', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             
-    elif ext in (".js", ".jsx", ".ts", ".tsx"):
+    elif ext == ".go":
+        if shutil.which("gofmt"):
+            subprocess.run(['gofmt', '-w', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    elif ext == ".rs":
+        if shutil.which("rustfmt"):
+            subprocess.run(['rustfmt', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    elif ext == ".rb":
+        if shutil.which("rubocop"):
+            subprocess.run(['rubocop', '-A', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    elif ext in (".c", ".cpp", ".h", ".hpp"):
+        if shutil.which("clang-format"):
+            subprocess.run(['clang-format', '-i', file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    elif ext in (".js", ".jsx", ".ts", ".tsx", ".html", ".css", ".scss", ".json", ".yaml", ".yml"):
         prettier_bin = None
         curr_dir = os.path.dirname(os.path.abspath(file_path))
         while curr_dir and curr_dir != os.path.dirname(curr_dir):
@@ -937,6 +953,65 @@ def auto_lint_file(file_path: str) -> bool:
             return True
         return True
         
+    elif ext == ".go":
+        if shutil.which("golangci-lint"):
+            res = subprocess.run(['golangci-lint', 'run', file_path], stdout=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"golangci-lint violations in '{file_path}':\n{res.stdout}")
+                return False
+        elif shutil.which("go"):
+            res = subprocess.run(['go', 'vet', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"go vet violations in '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
+    elif ext == ".rs":
+        if shutil.which("rustc"):
+            res = subprocess.run(['rustc', '-Z', 'no-codegen', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"rustc compilation syntax check failed for '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
+    elif ext == ".rb":
+        if shutil.which("rubocop"):
+            res = subprocess.run(['rubocop', file_path], stdout=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"rubocop violations in '{file_path}':\n{res.stdout}")
+                return False
+        elif shutil.which("ruby"):
+            res = subprocess.run(['ruby', '-c', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"Ruby syntax check failed for '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
+    elif ext in (".sh", ".bash"):
+        if shutil.which("shellcheck"):
+            res = subprocess.run(['shellcheck', file_path], stdout=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"shellcheck violations in '{file_path}':\n{res.stdout}")
+                return False
+        return True
+
+    elif ext in (".yaml", ".yml"):
+        if shutil.which("yamllint"):
+            res = subprocess.run(['yamllint', file_path], stdout=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"yamllint violations in '{file_path}':\n{res.stdout}")
+                return False
+        return True
+
+    elif ext == ".json":
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json.load(f)
+            return True
+        except Exception as e:
+            print_err(f"JSON syntax check failed for '{file_path}':\n{e}")
+            return False
+
     elif ext in (".js", ".jsx", ".ts", ".tsx"):
         eslint_bin = None
         curr_dir = os.path.dirname(os.path.abspath(file_path))
