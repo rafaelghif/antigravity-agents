@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.149.0] - 2026-07-04
+
+### 🚀 Features
+- implement remaining reset time displays and visual usage trend chart on dashboard and CLI
+- Implement token usage trend and remaining reset time displays (ISSUE-174)
+
+
 ## [2.148.0] - 2026-07-04
 
 ### 🚀 Features

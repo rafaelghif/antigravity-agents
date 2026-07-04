@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.148.0
+- **Version:** 2.149.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
