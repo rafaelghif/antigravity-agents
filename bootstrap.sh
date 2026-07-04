@@ -61,16 +61,15 @@ fi
 # 4. Set up local Git hooks
 if git rev-parse --is-inside-work-tree &>/dev/null; then
   HOOKS_DIR=$(git rev-parse --git-path hooks)
-  PREFIX=$(git rev-parse --show-prefix)
   mkdir -p "$HOOKS_DIR"
 
   # Pre-commit Hook
-  cat << EOF > "$HOOKS_DIR/pre-commit"
+  cat << 'EOF' > "$HOOKS_DIR/pre-commit"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
-  python3 "${PREFIX}.agents/scripts/validate.py"
+  python3 .agents/scripts/validate.py
 elif command -v python &>/dev/null; then
-  python "${PREFIX}.agents/scripts/validate.py"
+  python .agents/scripts/validate.py
 else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
@@ -111,15 +110,15 @@ EOF
   echo "Installed local Git commit-msg hook."
 
   # Prepare-commit-msg Hook
-  cat << EOF > "$HOOKS_DIR/prepare-commit-msg"
+  cat << 'EOF' > "$HOOKS_DIR/prepare-commit-msg"
 #!/usr/bin/env bash
-COMMIT_MSG_FILE="\$1"
-COMMIT_SOURCE="\${2:-}"
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
 
 if command -v python3 &>/dev/null; then
-  python3 "${PREFIX}.agents/scripts/prepare_commit_msg.py" "\$COMMIT_MSG_FILE" "\$COMMIT_SOURCE"
+  python3 .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
 elif command -v python &>/dev/null; then
-  python "${PREFIX}.agents/scripts/prepare_commit_msg.py" "\$COMMIT_MSG_FILE" "\$COMMIT_SOURCE"
+  python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
 fi
 EOF
   chmod +x "$HOOKS_DIR/prepare-commit-msg"

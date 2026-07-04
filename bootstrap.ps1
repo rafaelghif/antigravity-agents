@@ -85,14 +85,12 @@ if ($IsGit) {
         New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
     }
     
-    $Prefix = (git rev-parse --show-prefix)
-
     $PreCommitContent = @"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
-  python3 "${Prefix}.agents/scripts/validate.py"
+  python3 .agents/scripts/validate.py
 elif command -v python &>/dev/null; then
-  python "${Prefix}.agents/scripts/validate.py"
+  python .agents/scripts/validate.py
 else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
@@ -139,9 +137,9 @@ COMMIT_MSG_FILE="`$1"
 COMMIT_SOURCE="`${2:-}"
 
 if command -v python3 &>/dev/null; then
-  python3 "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python3 .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 elif command -v python &>/dev/null; then
-  python "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 fi
 "@
     $PrepareCommitMsgPath = Join-Path $HooksDir "prepare-commit-msg"
