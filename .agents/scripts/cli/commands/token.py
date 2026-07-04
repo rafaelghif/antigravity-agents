@@ -23,19 +23,46 @@ def print_warn(msg: str) -> None:
 def print_ok(msg: str) -> None:
     print(f"{GREEN}[OK] {msg}{RESET}")
 
-def get_active_profile_name() -> str:
-    """Detect active profile name from git_profiles.json."""
-    profiles_file = ".agents/git_profiles.json"
-    if os.path.exists(profiles_file):
+def get_active_api_account() -> str:
+    """
+    Detect the active API account or logged-in account name.
+    1. Check env vars: ACTIVE_API_PROFILE, API_ACCOUNT, GEMINI_API_PROFILE.
+    2. Check local file: .agents/active_api_profile_name.
+    3. Check env vars for actual keys: GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY.
+       If found, mask and use as account name (e.g. 'gemini:AIza...8b9c').
+    4. Fallback to 'default'.
+    """
+    # 1. Check environment variables
+    for var in ("ACTIVE_API_PROFILE", "API_ACCOUNT", "GEMINI_API_PROFILE"):
+        val = os.environ.get(var)
+        if val:
+            return val.strip()
+
+    # 2. Check local active profile file
+    profile_file = ".agents/active_api_profile_name"
+    if os.path.exists(profile_file):
         try:
-            with open(profiles_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                profiles = data.get("profiles", [])
-                for p in profiles:
-                    if p.get("active"):
-                        return p.get("name", "default")
+            with open(profile_file, 'r', encoding='utf-8') as f:
+                val = f.read().strip()
+                if val:
+                    return val
         except Exception:
             pass
+
+    # 3. Check environment variables for API keys
+    for key_var, prefix in (
+        ("GEMINI_API_KEY", "gemini"),
+        ("OPENAI_API_KEY", "openai"),
+        ("ANTHROPIC_API_KEY", "anthropic")
+    ):
+        key_val = os.environ.get(key_var)
+        if key_val:
+            key_val = key_val.strip()
+            if len(key_val) > 8:
+                return f"{prefix}:{key_val[:4]}...{key_val[-4:]}"
+            else:
+                return f"{prefix}:{key_val}"
+
     return "default"
 
 def load_budget() -> dict:
@@ -170,7 +197,7 @@ def run_log(args: List[str]) -> None:
     budget["monthly_used"] += total
 
     # Update per-account
-    account_name = get_active_profile_name()
+    account_name = get_active_api_account()
     if "accounts" not in budget:
         budget["accounts"] = {}
     if account_name not in budget["accounts"]:

@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Track token budget per API key or active API account (feat/issue-166) <!-- id: issue-166 -->
 
 ## Done
 - [x] Support per-account token budget counters (feat/issue-165) <!-- id: issue-165 -->
