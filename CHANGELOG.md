@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.158.0] - 2026-07-04
+
+### 🚀 Features
+- update /usage parser for multi-line block layout and add remaining tokens display
+- Fix token usage sync and remaining display (ISSUE-181)
+
+
 ## [2.157.0] - 2026-07-04
 
 ### 🚀 Features
