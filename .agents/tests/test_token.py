@@ -32,6 +32,7 @@ class TestTokenCommand(unittest.TestCase):
         with patch.object(token_cmd, 'load_budget') as mock_load, \
              patch.object(token_cmd, 'save_budget') as mock_save, \
              patch.object(token_cmd, 'append_to_log') as mock_append, \
+             patch.object(token_cmd, 'sync_from_platform_usage', return_value={}) as mock_sync, \
              patch.object(token_cmd, 'get_active_api_account', return_value="gemini:sha256-ba88894d"):
              
             mock_load.return_value = {
@@ -188,6 +189,109 @@ class TestTokenCommand(unittest.TestCase):
         self.assertIn("daily", resets)
         self.assertIn("weekly", resets)
         self.assertIn("monthly", resets)
+
+    @patch('os.path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='{"active": "active-json-user@example.com"}')
+    def test_get_active_api_account_google_accounts_json(self, mock_file, mock_exists):
+        def exists_side_effect(path):
+            if "google_accounts.json" in path:
+                return True
+            return False
+        mock_exists.side_effect = exists_side_effect
+        
+        with patch.dict(os.environ, {}, clear=True):
+            account = token_cmd.get_active_api_account()
+            self.assertEqual(account, "active-json-user@example.com")
+
+    def test_parse_usage_output(self):
+        # Table format
+        output1 = (
+            "### **Token Budget Summary**\n"
+            "| Metric | Limit | Used | Utilization |\n"
+            "| :--- | :--- | :--- | :--- |\n"
+            "| **Daily** | 500,000 tokens | 161,515 tokens | 32.30% |\n"
+            "| **Monthly** | 5,000,000 tokens | 161,515 tokens | 3.23% |\n\n"
+            "### **Rolling Quotas & Resets**\n"
+            "* **5-Hour Rolling Limit:** 200,000 tokens (Used: **179,515 tokens** or **89.76%** utilized)\n"
+            "  * *Reset in:* **4 hours, 9 minutes**\n"
+            "* **Weekly Rolling Limit:** 2,500,000 tokens (Used: **179,515 tokens** or **7.18%** utilized)\n"
+            "  * *Reset in:* **6 days, 23 hours, 9 minutes**\n"
+        )
+        parsed1 = token_cmd.parse_usage_output(output1)
+        self.assertEqual(parsed1["daily_limit"], 500000)
+        self.assertEqual(parsed1["daily_used"], 161515)
+        self.assertEqual(parsed1["monthly_limit"], 5000000)
+        self.assertEqual(parsed1["monthly_used"], 161515)
+        self.assertEqual(parsed1["five_hour_limit"], 200000)
+        self.assertEqual(parsed1["five_hour_used"], 179515)
+        self.assertEqual(parsed1["five_hour_remaining"], "4h 9m")
+        self.assertEqual(parsed1["weekly_limit"], 2500000)
+        self.assertEqual(parsed1["weekly_used"], 179515)
+        self.assertEqual(parsed1["weekly_remaining"], "6d 23h 9m")
+
+        # List format
+        output2 = (
+            "### Antigravity Token Budget Status\n\n"
+            "#### Core Quotas\n"
+            "*   **Daily Quota:** `161,515` / `500,000` tokens (**32.30%** utilized)\n"
+            "*   **Monthly Quota:** `161,515` / `5,000,000` tokens (**3.23%** utilized)\n\n"
+            "#### Rolling Quotas\n"
+            "*   **5-Hour Rolling Limit:** `142,000` / `200,000` tokens (**71.00%** utilized) — *Resets in 4h 45m*\n"
+            "*   **Weekly Rolling Limit:** `1,950,000` / `2,500,000` tokens (**78.00%** utilized) — *Resets in 131h 47m*\n"
+        )
+        parsed2 = token_cmd.parse_usage_output(output2)
+        self.assertEqual(parsed2["daily_limit"], 500000)
+        self.assertEqual(parsed2["daily_used"], 161515)
+        self.assertEqual(parsed2["five_hour_used"], 142000)
+        self.assertEqual(parsed2["five_hour_limit"], 200000)
+        self.assertEqual(parsed2["five_hour_remaining"], "4h 45m")
+        self.assertEqual(parsed2["weekly_remaining"], "131h 47m")
+
+        # Console text format
+        output3 = (
+            "Daily Limit   : 500,000 tokens\n"
+            "Daily Used    : 161,515 tokens (32.30% utilized)\n"
+            "Monthly Limit : 5,000,000 tokens\n"
+            "Monthly Used  : 161,515 tokens (3.23% utilized)\n"
+            "  - 5-Hour Rolling Limit : 200,000 tokens\n"
+            "  - 5-Hour Rolling Used  : 142,000 tokens (71.00% utilized)\n"
+            "  - 5-Hour Reset In      : 4h 45m\n"
+            "  - Weekly Rolling Limit : 2,500,000 tokens\n"
+            "  - Weekly Rolling Used  : 1,950,000 tokens (78.00% utilized)\n"
+            "  - Weekly Reset In      : 131h 47m\n"
+        )
+        parsed3 = token_cmd.parse_usage_output(output3)
+        self.assertEqual(parsed3["daily_limit"], 500000)
+        self.assertEqual(parsed3["daily_used"], 161515)
+        self.assertEqual(parsed3["five_hour_limit"], 200000)
+        self.assertEqual(parsed3["five_hour_used"], 142000)
+        self.assertEqual(parsed3["five_hour_remaining"], "4h 45m")
+        self.assertEqual(parsed3["weekly_remaining"], "131h 47m")
+
+    @patch('subprocess.run')
+    @patch.object(token_cmd, 'load_budget')
+    @patch.object(token_cmd, 'save_budget')
+    def test_sync_from_platform_usage(self, mock_save, mock_load, mock_run):
+        mock_load.return_value = {
+            "daily_limit": 500000,
+            "daily_used": 0,
+            "monthly_limit": 5000000,
+            "monthly_used": 0
+        }
+        mock_proc = MagicMock()
+        mock_proc.returncode = 0
+        mock_proc.stdout = (
+            "Daily Limit   : 500,000 tokens\n"
+            "Daily Used    : 100,000 tokens\n"
+            "Monthly Limit : 5,000,000 tokens\n"
+            "Monthly Used  : 200,000 tokens\n"
+        )
+        mock_run.return_value = mock_proc
+        
+        parsed = token_cmd.sync_from_platform_usage()
+        self.assertEqual(parsed["daily_used"], 100000)
+        self.assertEqual(parsed["monthly_used"], 200000)
+        mock_save.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()

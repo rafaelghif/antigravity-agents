@@ -65,7 +65,19 @@ def get_active_api_account() -> str:
             # Expose only the provider and a short 8-char slice of the hash
             return f"{prefix}:sha256-{key_hash[:8]}"
 
-    # 4. Scan global Antigravity CLI log files
+    # 4. Check global google_accounts.json for active account
+    try:
+        acc_file = os.path.expanduser("~/.gemini/google_accounts.json")
+        if os.path.exists(acc_file):
+            with open(acc_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                active = data.get("active")
+                if active:
+                    return active.strip()
+    except Exception:
+        pass
+
+    # 5. Scan global Antigravity CLI log files
     try:
         log_dir = os.path.expanduser("~/.gemini/antigravity-cli/log")
         if os.path.exists(log_dir):
@@ -269,6 +281,200 @@ def auto_detect_tokens() -> tuple:
     except Exception:
         return 0, 0
 
+def normalize_time_string(raw_time: str) -> str:
+    """Normalize human readable time strings to Xd Yh Zm format."""
+    raw_time = raw_time.replace(',', '').lower()
+    raw_time = re.sub(r'\bdays?\b', 'd', raw_time)
+    raw_time = re.sub(r'\bhours?\b', 'h', raw_time)
+    raw_time = re.sub(r'\bminutes?\b', 'm', raw_time)
+    raw_time = re.sub(r'(\d+)\s*([dhm])', r'\1\2', raw_time)
+    raw_time = re.sub(r'\s+', ' ', raw_time).strip()
+    return raw_time
+
+def parse_usage_output(output: str) -> dict:
+    """Parse output of agy -p '/usage' to extract limits and remaining reset times."""
+    stats = {}
+    lines = output.split('\n')
+    
+    # 1. First attempt: parse using direct colon format (Console Text output)
+    for line in lines:
+        line_strip = line.strip()
+        if not line_strip:
+            continue
+            
+        m_daily_limit = re.search(r'Daily\s+Limit\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_daily_limit:
+            stats["daily_limit"] = int(m_daily_limit.group(1).replace(',', ''))
+        m_daily_used = re.search(r'Daily\s+Used\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_daily_used:
+            stats["daily_used"] = int(m_daily_used.group(1).replace(',', ''))
+            
+        m_monthly_limit = re.search(r'Monthly\s+Limit\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_monthly_limit:
+            stats["monthly_limit"] = int(m_monthly_limit.group(1).replace(',', ''))
+        m_monthly_used = re.search(r'Monthly\s+Used\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_monthly_used:
+            stats["monthly_used"] = int(m_monthly_used.group(1).replace(',', ''))
+
+        m_5h_limit = re.search(r'5-Hour\s+(?:Rolling\s+)?Limit\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_5h_limit:
+            stats["five_hour_limit"] = int(m_5h_limit.group(1).replace(',', ''))
+        m_5h_used = re.search(r'5-Hour\s+(?:Rolling\s+)?Used\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_5h_used:
+            stats["five_hour_used"] = int(m_5h_used.group(1).replace(',', ''))
+        m_5h_reset = re.search(r'5-Hour\s+Reset\s+In\s*:\s*(.+)', line_strip, re.IGNORECASE)
+        if m_5h_reset:
+            stats["five_hour_remaining"] = normalize_time_string(m_5h_reset.group(1))
+
+        m_weekly_limit = re.search(r'Weekly\s+(?:Rolling\s+)?Limit\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_weekly_limit:
+            stats["weekly_limit"] = int(m_weekly_limit.group(1).replace(',', ''))
+        m_weekly_used = re.search(r'Weekly\s+(?:Rolling\s+)?Used\s*:\s*([\d,]+)', line_strip, re.IGNORECASE)
+        if m_weekly_used:
+            stats["weekly_used"] = int(m_weekly_used.group(1).replace(',', ''))
+        m_weekly_reset = re.search(r'Weekly\s+Reset\s+In\s*:\s*(.+)', line_strip, re.IGNORECASE)
+        if m_weekly_reset:
+            stats["weekly_remaining"] = normalize_time_string(m_weekly_reset.group(1))
+
+    # 2. Fall back to list/table matching if daily_limit or monthly_limit was not found
+    if "daily_limit" not in stats or "monthly_limit" not in stats:
+        for line in lines:
+            if "Daily" in line and "Limit" not in line and "Used" not in line:
+                clean_line = re.sub(r'Daily\s*(?:Quota)?', '', line, flags=re.IGNORECASE)
+                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
+                if len(nums) >= 2:
+                    if "Quota" in line or "/" in line: # Bullet list
+                        stats["daily_used"] = nums[0]
+                        stats["daily_limit"] = nums[1]
+                    else: # Table
+                        stats["daily_limit"] = nums[0]
+                        stats["daily_used"] = nums[1]
+                        
+            if "Monthly" in line and "Limit" not in line and "Used" not in line:
+                clean_line = re.sub(r'Monthly\s*(?:Quota)?', '', line, flags=re.IGNORECASE)
+                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
+                if len(nums) >= 2:
+                    if "Quota" in line or "/" in line:
+                        stats["monthly_used"] = nums[0]
+                        stats["monthly_limit"] = nums[1]
+                    else:
+                        stats["monthly_limit"] = nums[0]
+                        stats["monthly_used"] = nums[1]
+
+        # Parse 5-Hour rolling in list/table fallback
+        if "five_hour_limit" not in stats:
+            five_hour_line = ""
+            five_hour_reset_line = ""
+            for i, line in enumerate(lines):
+                if "5-Hour" in line:
+                    five_hour_line = line
+                    if i + 1 < len(lines) and ("Reset" in lines[i+1] or "resets" in lines[i+1].lower()):
+                        five_hour_reset_line = lines[i+1]
+                        
+            if five_hour_line:
+                clean_line = re.sub(r'\b5-Hour\b', '', five_hour_line, flags=re.IGNORECASE)
+                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
+                if len(nums) >= 2:
+                    if "utiliz" in five_hour_line or "Used" in five_hour_line or "/" in five_hour_line:
+                        if "Used:" in five_hour_line:
+                            stats["five_hour_limit"] = nums[0]
+                            stats["five_hour_used"] = nums[1]
+                        else:
+                            stats["five_hour_used"] = nums[0]
+                            stats["five_hour_limit"] = nums[1]
+                    else:
+                        stats["five_hour_limit"] = nums[0]
+                        stats["five_hour_used"] = nums[1]
+                        
+                pct_match = re.search(r'(\d+(?:\.\d+)?)%', five_hour_line)
+                if pct_match:
+                    stats["five_hour_pct"] = float(pct_match.group(1))
+                    
+                reset_text = five_hour_line + " " + five_hour_reset_line
+                rem_match = re.search(r'(?:Resets? in|Reset in)[^\d]*(\d+\s*d\s*\d+\s*h\s*\d+\s*m|\d+\s*d\s*\d+\s*h|\d+\s*days?,\s*\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*h\s*\d+\s*m|\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*hours?|\d+\s*minutes?)', reset_text, re.IGNORECASE)
+                if rem_match:
+                    raw_time = rem_match.group(1).strip()
+                    stats["five_hour_remaining"] = normalize_time_string(raw_time)
+
+        # Parse Weekly rolling in list/table fallback
+        if "weekly_limit" not in stats:
+            weekly_line = ""
+            weekly_reset_line = ""
+            for i, line in enumerate(lines):
+                if "Weekly" in line:
+                    weekly_line = line
+                    if i + 1 < len(lines) and ("Reset" in lines[i+1] or "resets" in lines[i+1].lower()):
+                        weekly_reset_line = lines[i+1]
+                        
+            if weekly_line:
+                clean_line = re.sub(r'\bWeekly\b', '', weekly_line, flags=re.IGNORECASE)
+                nums = [int(s.replace(',', '')) for s in re.findall(r'\b\d{1,3}(?:,\d{3})+\b|\b\d+\b', clean_line)]
+                if len(nums) >= 2:
+                    if "utiliz" in weekly_line or "Used" in weekly_line or "/" in weekly_line:
+                        if "Used:" in weekly_line:
+                            stats["weekly_limit"] = nums[0]
+                            stats["weekly_used"] = nums[1]
+                        else:
+                            stats["weekly_used"] = nums[0]
+                            stats["weekly_limit"] = nums[1]
+                    else:
+                        stats["weekly_limit"] = nums[0]
+                        stats["weekly_used"] = nums[1]
+                        
+                pct_match = re.search(r'(\d+(?:\.\d+)?)%', weekly_line)
+                if pct_match:
+                    stats["weekly_pct"] = float(pct_match.group(1))
+                    
+                reset_text = weekly_line + " " + weekly_reset_line
+                rem_match = re.search(r'(?:Resets? in|Reset in)[^\d]*(\d+\s*d\s*\d+\s*h\s*\d+\s*m|\d+\s*d\s*\d+\s*h|\d+\s*days?,\s*\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*h\s*\d+\s*m|\d+\s*hours?,\s*\d+\s*minutes?|\d+\s*hours?|\d+\s*minutes?)', reset_text, re.IGNORECASE)
+                if rem_match:
+                    raw_time = rem_match.group(1).strip()
+                    stats["weekly_remaining"] = normalize_time_string(raw_time)
+
+    # Compute percentage overrides if limit and used are present
+    if "five_hour_limit" in stats and "five_hour_used" in stats and "five_hour_pct" not in stats:
+        stats["five_hour_pct"] = (stats["five_hour_used"] / stats["five_hour_limit"] * 100) if stats["five_hour_limit"] > 0 else 0
+    if "weekly_limit" in stats and "weekly_used" in stats and "weekly_pct" not in stats:
+        stats["weekly_pct"] = (stats["weekly_used"] / stats["weekly_limit"] * 100) if stats["weekly_limit"] > 0 else 0
+
+    return stats
+
+def sync_from_platform_usage() -> dict:
+    """Run agy -p '/usage' and parse output to sync token_budget.json with platform usage."""
+    import subprocess
+    import os
+    env = os.environ.copy()
+    env["INTERNAL_SYNC"] = "true"
+    try:
+        res = subprocess.run(
+            ["agy", "-p", "/usage"],
+            capture_output=True,
+            text=True,
+            timeout=40,
+            env=env
+        )
+        if res.returncode == 0:
+            parsed = parse_usage_output(res.stdout)
+            if parsed:
+                budget = load_budget()
+                # Update core limits and used
+                if "daily_limit" in parsed: budget["daily_limit"] = parsed["daily_limit"]
+                if "daily_used" in parsed: budget["daily_used"] = parsed["daily_used"]
+                if "monthly_limit" in parsed: budget["monthly_limit"] = parsed["monthly_limit"]
+                if "monthly_used" in parsed: budget["monthly_used"] = parsed["monthly_used"]
+                
+                # Rolling window overrides
+                if "weekly_pct" in parsed: budget["weekly_pct_override"] = parsed["weekly_pct"]
+                if "weekly_remaining" in parsed: budget["weekly_remaining_override"] = parsed["weekly_remaining"]
+                if "five_hour_pct" in parsed: budget["five_hour_pct_override"] = parsed["five_hour_pct"]
+                if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
+                
+                save_budget(budget)
+                return parsed
+    except Exception:
+        pass
+    return {}
+
 def run_log(args: List[str]) -> None:
     task_id = None
     if "--task" in args:
@@ -347,6 +553,12 @@ def run_log(args: List[str]) -> None:
 
     print_ok(f"Logged {total} tokens for task '{task_id}' (account: '{account_name}').")
     
+    # Run automatic sync from platform usage if not already running internally
+    if os.environ.get("INTERNAL_SYNC") != "true":
+        sync_from_platform_usage()
+        # Reload budget after sync to get updated limit/used check
+        budget = load_budget()
+
     # Enforce strict warning alerts on budget limit breach
     if budget["daily_used"] > budget["daily_limit"]:
         print_warn(f"Daily token budget limit exceeded! Used: {budget['daily_used']}/{budget['daily_limit']}")
@@ -516,6 +728,15 @@ def get_rolling_stats() -> dict:
     return stats
 
 def run_sync(args: List[str]) -> None:
+    if not args or "--auto" in args:
+        print("Synchronizing actual platform token quotas from agy /usage...")
+        parsed = sync_from_platform_usage()
+        if parsed:
+            print_ok("Successfully synchronized actual platform token quotas with local budget.")
+        else:
+            print_err("Failed to synchronize token quotas from agy.")
+        return
+
     budget = load_budget()
     i = 0
     while i < len(args):
