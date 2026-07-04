@@ -1,7 +1,7 @@
 ---
 id: issue-158
 title: "Harden dashboard static file path traversal verification"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

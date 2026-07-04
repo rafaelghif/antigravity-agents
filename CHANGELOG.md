@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.135.0] - 2026-07-04
+
+### 🚀 Features
+- Harden dashboard static file path traversal verification (ISSUE-158)
+
+### 🐛 Bug Fixes
+- append trailing slash to path traversal base prefix check
+
+
 ## [2.134.0] - 2026-07-04
 
 ### 🚀 Features
