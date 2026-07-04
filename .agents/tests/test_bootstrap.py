@@ -160,6 +160,24 @@ class TestBootstrapCommand(unittest.TestCase):
         self.assertNotIn("locks.json", copied_files)
         self.assertNotIn("cached.pyc", copied_files)
 
+    @patch('shutil.copy2')
+    @patch('os.makedirs')
+    @patch('os.path.exists')
+    @patch('os.walk')
+    def test_copy_core_files_force_update(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
+        mock_exists.return_value = True
+        mock_walk.return_value = [
+            ('/src/root/.agents/scripts', [], ['valid.py'])
+        ]
+        
+        # Should not copy without force since it exists
+        bootstrap.copy_core_files(force=False)
+        mock_copy2.assert_not_called()
+        
+        # Should copy with force
+        bootstrap.copy_core_files(force=True)
+        mock_copy2.assert_called()
+
     def test_bootstrap_core_dirs_isolation(self, mock_input):
         import inspect
         source = inspect.getsource(bootstrap.copy_core_files)

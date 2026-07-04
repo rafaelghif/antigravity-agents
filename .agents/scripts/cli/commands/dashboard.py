@@ -533,6 +533,8 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 
 class DashboardHandler(BaseHTTPRequestHandler):
     def is_client_allowed(self) -> bool:
+        if os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL") == "true":
+            return True
         client_ip = self.client_address[0]
         return client_ip in ('127.0.0.1', '::1', 'localhost')
 
@@ -779,34 +781,76 @@ def run(args):
     t = threading.Thread(target=initial_audit_worker, daemon=True)
     t.start()
 
+    host = '127.0.0.1'
     port = 8000
+    allow_external = False
+
+    # Argument parsing
+    i = 0
+    while i < len(args):
+        arg = args[i].lower()
+        if arg == '--host':
+            if i + 1 < len(args):
+                host = args[i+1]
+                i += 1
+        elif arg == '--port':
+            if i + 1 < len(args):
+                try:
+                    port = int(args[i+1])
+                except ValueError:
+                    print(f"\033[91mError: Invalid port number '{args[i+1]}'.\033[0m")
+                    sys.exit(1)
+                i += 1
+        elif arg == '--allow-external':
+            allow_external = True
+        i += 1
+
+    if os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL") == "true":
+        allow_external = True
+
+    if host not in ('127.0.0.1', '::1', 'localhost'):
+        allow_external = True
+
+    if allow_external:
+        os.environ["AAC_DASHBOARD_ALLOW_EXTERNAL"] = "true"
+
     server = None
-    # Auto port binding to avoid port conflicts
-    while port < 8020:
+    # Auto port binding if port is default, otherwise try the specified port first
+    start_port = port
+    while port < start_port + 20:
         try:
-            server = ThreadingHTTPServer(('127.0.0.1', port), DashboardHandler)
+            server = ThreadingHTTPServer((host, port), DashboardHandler)
             break
         except OSError:
+            if start_port != 8000:
+                print(f"\033[91mError: Could not bind HTTPServer to {host}:{port}.\033[0m")
+                sys.exit(1)
             port += 1
             
     if not server:
-        print("\033[91mError: Could not bind HTTPServer to any local port between 8000-8020.\033[0m")
+        print(f"\033[91mError: Could not bind HTTPServer to any port between {start_port}-{start_port+20}.\033[0m")
         sys.exit(1)
         
-    url = f"http://127.0.0.1:{port}/"
+    url = f"http://{host}:{port}/"
+    if host == '0.0.0.0':
+        url = f"http://127.0.0.1:{port}/ (accessible externally at your LAN IP)"
+
     print(f"\033[92m==========================================================\033[0m")
     print(f"\033[92m🚀 AAC V2 Local Dashboard Server started at: {url}\033[0m")
+    if allow_external:
+        print(f"\033[93m⚠️  [WARNING] External access is enabled! Make sure your network is secure.\033[0m")
     print(f"\033[92m==========================================================\033[0m")
     print("\033[93mPress Ctrl+C to terminate dashboard server.\033[0m\n")
     
-    # Auto-open browser tab
-    try:
-        webbrowser.open_new_tab(url)
-    except Exception:
-        pass
+    # Auto-open browser tab if not external-only/headless
+    if host in ('127.0.0.1', '::1', 'localhost'):
+        try:
+            webbrowser.open_new_tab(f"http://127.0.0.1:{port}/")
+        except Exception:
+            pass
         
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n\033[93mDashboard server stopped. Exiting.\033[0m")
+        print("\nStopping dashboard server...")
         sys.exit(0)

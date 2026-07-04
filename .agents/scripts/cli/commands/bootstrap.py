@@ -88,9 +88,9 @@ def read_template(src_root, filename, fallbacks=None):
         return fallbacks
     return ""
 
-def copy_core_files():
+def copy_core_files(force=False):
     """Copy all core agent files and skills from the running installation source
-    to the target project workspace if they are missing."""
+    to the target project workspace if they are missing or if force update is requested."""
     import shutil
     
     # Locate the running script's project root (where .agents directory is located)
@@ -153,7 +153,7 @@ def copy_core_files():
                         if is_ignored(src_file):
                             continue
                         dest_file = os.path.join(dest_folder, file)
-                        if not os.path.exists(dest_file):
+                        if not os.path.exists(dest_file) or force:
                             try:
                                 shutil.copy2(src_file, dest_file)
                             except Exception:
@@ -175,7 +175,7 @@ def copy_core_files():
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)
-        if os.path.exists(src_file) and not os.path.exists(dest_file):
+        if os.path.exists(src_file) and (not os.path.exists(dest_file) or force):
             try:
                 # Ensure parent dir exists
                 os.makedirs(os.path.dirname(dest_file), exist_ok=True)
@@ -232,6 +232,15 @@ def run(args):
     print("   Antigravity V2 Project Bootstrapper                    ")
     print("==========================================================")
     
+    force_update = False
+    clean_args = []
+    for arg in args:
+        if arg.lower() in ('--force', '-f', '--update'):
+            force_update = True
+        else:
+            clean_args.append(arg)
+    args = clean_args
+    
     # Auto-detect stack
     detected_stack = detect_project_stack(".")
     
@@ -279,7 +288,7 @@ def run(args):
     os.makedirs(".agents/tasks", exist_ok=True)
     os.makedirs(".agents/issues", exist_ok=True)
 
-    copy_core_files()
+    copy_core_files(force=force_update)
 
     # 2. Write Base Configuration Files
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
@@ -331,7 +340,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.127.1"
+    AAC_VERSION = "2.128.0"
     src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
     src_agents = os.path.join(src_root, "AGENTS.md")
     
