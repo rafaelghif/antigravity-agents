@@ -165,6 +165,7 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
             $File.Name -eq "git_profiles.json" -or
             $File.Name -eq "projects.json" -or
             $File.Name -eq "locks.json" -or
+            $File.Name -eq "rules.md" -or
             $File.Name -eq ".DS_Store" -or
             $File.Extension -eq ".pyc" -or
             $File.Extension -eq ".pyo" -or
@@ -172,7 +173,15 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
             $RelativePath -like ".agents\tasks\*" -or $RelativePath -like ".agents/tasks/*" -or
             $RelativePath -like ".agents\issues\*" -or $RelativePath -like ".agents/issues/*" -or
             $RelativePath -like ".agents\plans\*" -or $RelativePath -like ".agents/plans/*" -or
-            $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*") {
+            $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*" -or
+            $RelativePath -like ".agents\archive\*" -or $RelativePath -like ".agents/archive/*" -or
+            $RelativePath -like ".agents\logs\*" -or $RelativePath -like ".agents/logs/*" -or
+            $File.Name -eq "active_context.md" -or
+            $File.Name -eq "token_budget.json" -or
+            $File.Name -eq "sync_cache.json" -or
+            $File.Name -eq "cooldowns.json" -or
+            $File.Name -eq "upgrade_state.json" -or
+            $File.Name -eq "schema.md") {
             continue
         }
         
