@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.167.0] - 2026-07-04
+
+### 🚀 Features
+- enforce programmatic codebase rule compliance and require audit trailer
+- Enforce programmatic rule audits and commit compliance headers (ISSUE-190)
+
+
 ## [2.166.0] - 2026-07-04
 
 ### 🚀 Features
