@@ -105,6 +105,17 @@ class TestDashboardCommand(unittest.TestCase):
         handler.wfile.seek(0)
         self.assertIn(b"Forbidden: Directory Traversal Blocked", handler.wfile.read())
 
+    def test_serve_static_file_traversal_prefix_blocked(self):
+        import io
+        handler = MagicMock()
+        handler.wfile = io.BytesIO()
+        
+        dashboard.DashboardHandler.serve_static_file(handler, "/../dashboard-alternative/index.html")
+        
+        handler.send_response.assert_called_with(403)
+        handler.wfile.seek(0)
+        self.assertIn(b"Forbidden: Directory Traversal Blocked", handler.wfile.read())
+
     @patch('os.path.exists', return_value=False)
     def test_serve_static_file_not_found(self, mock_exists):
         import io

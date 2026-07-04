@@ -727,7 +727,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
         filepath = os.path.abspath(os.path.join(dashboard_dir, clean_path))
         
         # Path Traversal Guard: verify the resolved path starts with dashboard_dir
-        if not filepath.startswith(os.path.abspath(dashboard_dir)):
+        base_dir = os.path.abspath(dashboard_dir)
+        if not base_dir.endswith(os.path.sep):
+            base_dir += os.path.sep
+            
+        if not filepath.startswith(base_dir) and filepath != os.path.abspath(dashboard_dir):
             self.send_response(403)
             self.send_header('Content-Type', 'text/plain; charset=utf-8')
             self.end_headers()
