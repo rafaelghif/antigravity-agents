@@ -939,6 +939,11 @@ def auto_lint_file(file_path: str) -> bool:
                 if res.returncode != 0:
                     print_err(f"flake8 violations in '{file_path}':\n{res.stdout}")
                     return False
+            if shutil.which("mypy"):
+                res_mypy = subprocess.run(['mypy', '--ignore-missing-imports', file_path], stdout=subprocess.PIPE, text=True)
+                if res_mypy.returncode != 0:
+                    print_err(f"mypy type-checking violations in '{file_path}':\n{res_mypy.stdout}")
+                    return False
             return True
         except py_compile.PyCompileError as e:
             print_err(f"Python syntax compilation failed for '{file_path}':\n{e}")
@@ -1012,6 +1017,15 @@ def auto_lint_file(file_path: str) -> bool:
             print_err(f"JSON syntax check failed for '{file_path}':\n{e}")
             return False
 
+    elif ext == ".java":
+        if shutil.which("javac"):
+            import tempfile
+            res = subprocess.run(['javac', '-d', tempfile.gettempdir(), file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"Java compilation errors in '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
     elif ext in (".js", ".jsx", ".ts", ".tsx"):
         eslint_bin = None
         curr_dir = os.path.dirname(os.path.abspath(file_path))
@@ -1035,6 +1049,23 @@ def auto_lint_file(file_path: str) -> bool:
             if res.returncode != 0 and "eslint" in (res.stderr or res.stdout).lower():
                 print_err(f"ESLint violations in '{file_path}':\n{res.stdout or res.stderr}")
                 return False
+
+        if ext in (".ts", ".tsx"):
+            tsc_bin = None
+            curr_dir = os.path.dirname(os.path.abspath(file_path))
+            while curr_dir and curr_dir != os.path.dirname(curr_dir):
+                bin_path = os.path.join(curr_dir, "node_modules", ".bin", "tsc")
+                if os.path.exists(bin_path):
+                    tsc_bin = bin_path
+                    break
+                curr_dir = os.path.dirname(curr_dir)
+            if not tsc_bin:
+                tsc_bin = shutil.which("tsc")
+            if tsc_bin:
+                res_tsc = subprocess.run([tsc_bin, '--noEmit', '--skipLibCheck', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if res_tsc.returncode != 0:
+                    print_err(f"TypeScript compilation errors in '{file_path}':\n{res_tsc.stdout or res_tsc.stderr}")
+                    return False
         return True
         
     return True

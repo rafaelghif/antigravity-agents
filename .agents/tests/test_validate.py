@@ -331,6 +331,32 @@ class TestValidate(unittest.TestCase):
         mock_run.assert_called_once()
         self.assertIn("/usr/bin/eslint", mock_run.call_args[0][0][0])
 
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/" + name if name in ("eslint", "tsc") else None)
+    @patch('subprocess.run')
+    def test_auto_lint_file_ts(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.ts")
+        self.assertTrue(res)
+        self.assertEqual(mock_run.call_count, 2)
+        
+    @patch('py_compile.compile')
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/" + name if name in ("flake8", "mypy") else None)
+    @patch('subprocess.run')
+    def test_auto_lint_file_python_mypy(self, mock_run, mock_which, mock_compile):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.py")
+        self.assertTrue(res)
+        self.assertEqual(mock_run.call_count, 2)
+
+    @patch('shutil.which', side_effect=lambda name: "/usr/bin/javac" if name == "javac" else None)
+    @patch('subprocess.run')
+    def test_auto_lint_file_java(self, mock_run, mock_which):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = validate.auto_lint_file("test.java")
+        self.assertTrue(res)
+        mock_run.assert_called_once()
+        self.assertIn("javac", mock_run.call_args[0][0][0])
+
     @patch('shutil.which', side_effect=lambda bin_name: "/usr/bin/shlint" if bin_name == "shlint" else None)
     @patch('subprocess.run')
     def test_run_project_lint_command(self, mock_run, mock_which):

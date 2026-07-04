@@ -136,13 +136,16 @@ class TestDashboardCommand(unittest.TestCase):
     def test_get_dashboard_data_async_force(self, mock_sub, mock_file, mock_exists, mock_silent_val):
         mock_sub.return_value = MagicMock(returncode=0, stdout="feat/issue-126")
         mock_file.return_value.read.return_value = "- **Version:** 2.106.0"
-        mock_silent_val.return_value = {"Critical Files": True}
+        import time
+        def slow_validation(*args, **kwargs):
+            time.sleep(0.1)
+            return {"Critical Files": True}
+        mock_silent_val.side_effect = slow_validation
         
         # Reset global state to clean state
         dashboard.audit_in_progress = False
         
         # Force audit check - should spawn a thread and return immediately
-        import time
         data = dashboard.get_dashboard_data(force=True)
         
         # Immediate auditing state should be True
