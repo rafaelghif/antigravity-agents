@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.145.0] - 2026-07-04
+
+### 🚀 Features
+- implement zero-dependency MCP server and registration command
+- Implement zero-dependency MCP server and registration command (ISSUE-170)
+
+### ⚙️ Chores
+- Document token budget CLI command in README.md (ISSUE-169)
+
+
 ## [2.144.1] - 2026-07-04
 
 ### 📝 Documentation

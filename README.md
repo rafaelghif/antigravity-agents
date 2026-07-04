@@ -112,6 +112,7 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatcher comman
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
 | **`context`** | `./helper.sh context optimize` | Rebuilds active context manifest and archives done issues. |
 | **`token`** | `./helper.sh token <subcommand>` | Strict token budget tracker. Supports `log`, `status`, and `reset`. |
+| **`mcp`** | `./helper.sh mcp <subcommand>` | Model Context Protocol integration. Supports `register` and `start`. |
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons to `lessons-learned.md`. |

@@ -67,6 +67,7 @@ def print_help():
   🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
   📊 {GREEN}{BOLD}dashboard{RESET}       Launches the local interactive web-based dashboard dashboard.
   🪙 {GREEN}{BOLD}token{RESET}           Logs and displays LLM token budget usage statistics.
+  🔌 {GREEN}{BOLD}mcp{RESET}             Manages MCP tool integration and server registration.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -170,7 +171,14 @@ def print_command_help(cmd):
 {BOLD}Usage:{RESET}
   - ./helper.sh token log <prompt> <completion> [--task <id>] : Logs token usage for a task.
   - ./helper.sh token status                                  : Displays budget utilization statistics.
-  - ./helper.sh token reset [--daily | --monthly | --all]     : Resets budget counters."""
+  - ./helper.sh token reset [--daily | --monthly | --all]     : Resets budget counters.""",
+
+        "mcp": f"""{CYAN}{BOLD}Command: mcp{RESET}
+🔌 Manages model context protocol (MCP) server integration.
+
+{BOLD}Usage:{RESET}
+  - ./helper.sh mcp register : Registers the workspace tools server with Cline/VS Code config.
+  - ./helper.sh mcp start    : Starts the zero-dependency JSON-RPC MCP server on stdin/stdout."""
     }
 
     if cmd in command_help:
@@ -207,7 +215,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
