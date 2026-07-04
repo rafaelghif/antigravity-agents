@@ -44,6 +44,7 @@ flowchart TD
 * **👤 Zero-Trust Git Profiles**: Rotate commits metadata and GPG/SSH keys dynamically, preventing corporate credential leaks.
 * **🔒 Collaborative Module Locks**: Restrict parallel edits on directories to prevent agents from clashing.
 * **📦 Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, keeping agent index files tiny and saving up to **80% in LLM token budgets**.
+* **🪙 Token Budget Tracker (Beta)**: Local token tracking, logging, and synchronization with platform usage (Note: platform quota synchronization is a beta feature currently undergoing active improvement and validation).
 * **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
 * **⏩ Human Validation Bypass**: Skip strict validation audits during quick human hotfixes via `--bypass` flags or `AAC_BYPASS_COMPLIANCE=1` env variables.
 * **🚀 GitHub Action CI/CD Integration**: Block PR merges automatically in your organization if an agent attempts to push non-compliant code.
@@ -111,7 +112,7 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatcher comman
 | **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative koding. Run with `--release` to unlock. |
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
 | **`context`** | `./helper.sh context optimize` | Rebuilds active context manifest and archives done issues. |
-| **`token`** | `./helper.sh token <subcommand>` | Strict token budget tracker. Supports `log`, `status`, `sync`, and `reset` (synced via agy `/usage` command). |
+| **`token` (Beta)** | `./helper.sh token <subcommand>` | Beta - local token budget tracker. Supports `log`, `status`, `sync`, and `reset`. (Note: platform quota synchronization is still in development and undergoing active improvement). |
 | **`mcp`** | `./helper.sh mcp <subcommand>` | Model Context Protocol integration. Supports `register` and `start`. |
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
