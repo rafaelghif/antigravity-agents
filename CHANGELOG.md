@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.130.0] - 2026-07-04
+
+### 🚀 Features
+- Sync self-learning and repository rules after issue-152 (ISSUE-153)
+
+### ⚙️ Chores
+- sync self-learning and repository rules
+
+
 ## [2.129.0] - 2026-07-04
 
 ### 🚀 Features

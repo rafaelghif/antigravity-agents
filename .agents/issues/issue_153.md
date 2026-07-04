@@ -1,7 +1,7 @@
 ---
 id: issue-153
 title: "Sync self-learning and repository rules after issue-152"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
