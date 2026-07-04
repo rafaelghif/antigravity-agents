@@ -262,7 +262,7 @@ class TestDashboardCommand(unittest.TestCase):
         old_env = os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL")
         try:
             # Test 1: Default arguments
-            with patch('sys.exit') as mock_exit:
+            with patch('sys.exit', side_effect=SystemExit) as mock_exit:
                 dashboard.run([])
                 mock_server.assert_called_with(('127.0.0.1', 8000), dashboard.DashboardHandler)
                 mock_open_tab.assert_called_with('http://127.0.0.1:8000/')
@@ -270,7 +270,7 @@ class TestDashboardCommand(unittest.TestCase):
             # Test 2: Custom host and port
             mock_server.reset_mock()
             mock_open_tab.reset_mock()
-            with patch('sys.exit') as mock_exit:
+            with patch('sys.exit', side_effect=SystemExit) as mock_exit:
                 dashboard.run(['--host', '0.0.0.0', '--port', '9000'])
                 mock_server.assert_called_with(('0.0.0.0', 9000), dashboard.DashboardHandler)
                 mock_open_tab.assert_not_called()

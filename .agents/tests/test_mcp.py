@@ -44,7 +44,7 @@ class TestMcpServer(unittest.TestCase):
         self.assertEqual(res["id"], 2)
         self.assertIn("tools", res["result"])
 
-    @patch('sys.exit')
+    @patch('sys.exit', side_effect=SystemExit)
     def test_call_tool_unknown(self, mock_exit):
         res = mcp_server.call_tool("invalid_tool_name", {})
         self.assertTrue(res.get("isError"))

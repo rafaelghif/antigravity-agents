@@ -112,7 +112,7 @@ class TestProfileCommand(unittest.TestCase):
         saved_data = mock_save.call_args[0][0]
         self.assertTrue(saved_data["profiles"][1]["active"])
 
-    @patch('sys.exit')
+    @patch('sys.exit', side_effect=SystemExit)
     @patch('subprocess.run')
     @patch('profile.load_profiles')
     @patch('profile.save_profiles')
