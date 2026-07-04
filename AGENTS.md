@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.179.0
+- **Version:** 2.180.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -12,6 +12,7 @@
 *(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*
 
 - **ALWAYS** perform an explicit **Rule & Schema Compliance Audit** in your thought block or response before executing any file modifications. List: (a) target files to edit, (b) active module locks, (c) applicable non-negotiable rules from `AGENTS.md` and `.agents/rules.md` (you MUST explicitly load and read `.agents/rules.md` to verify self-learned guidelines), and (d) verification of conformity with `.agents/schema.md`.
+- **ALWAYS** load and read the workspace's `.agents/active_context.md`, `.agents/schema.md`, and the active issue specification file `.agents/issues/issue_[id].md` at the very beginning of the first conversation turn to align on task checklist, database/API schemas, and scope boundaries before formulating any implementation plan or writing code.
 - **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.
 - **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
 - **ALWAYS** run the project's test command before marking a task `Completed`.
