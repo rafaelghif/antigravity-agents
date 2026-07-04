@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.160.0] - 2026-07-04
+
+### 🚀 Features
+- fix platform usage parser for markdown tables and breakdowns
+- Fix platform usage parser for table and markdown account breakdowns (ISSUE-183)
+
+### 📝 Documentation
+- record background sync lesson
+
+### ⚙️ Chores
+- Optimize token sync to run asynchronously in background (ISSUE-182)
+
+
 ## [2.159.0] - 2026-07-04
 
 ### 🚀 Features
