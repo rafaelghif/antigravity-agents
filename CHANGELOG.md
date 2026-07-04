@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.127.1] - 2026-07-04
+
+### ⚙️ Chores
+- Implement comprehensive architectural and dashboard hardening (ISSUE-150)
+- sync session learnings and rule registrations
+
+
 ## [2.127.0] - 2026-07-04
 
 ### 🚀 Features
