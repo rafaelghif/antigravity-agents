@@ -265,7 +265,7 @@ def copy_core_files(src_root, force=False):
                     pass
                 
     # Root helper wrappers
-    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example", ".agents/rules.md"]
+    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example"]
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)
@@ -452,7 +452,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.171.0"
+    AAC_VERSION = "2.172.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")
@@ -502,19 +502,29 @@ def run(args):
             f.write(content)
         print("Updated AGENTS.md with new stack and product.")
 
-    # 6. Update .agents/rules.md
+    # 6. Update or Create .agents/rules.md
     rules_file = ".agents/rules.md"
-    if os.path.exists(rules_file):
-        test_cmds = {
-            "python": "pytest", 
-            "node": "npm run test", 
-            "php": "./vendor/bin/phpunit",
-            "go": "go test ./...",
-            "rust": "cargo test",
-            "csharp": "dotnet test",
-            "java": "gradle test"
-        }
-        test_cmd = test_cmds.get(stack, f"run {stack} tests")
+    test_cmds = {
+        "python": "pytest", 
+        "node": "npm run test", 
+        "php": "./vendor/bin/phpunit",
+        "go": "go test ./...",
+        "rust": "cargo test",
+        "csharp": "dotnet test",
+        "java": "gradle test"
+    }
+    test_cmd = test_cmds.get(stack, f"run {stack} tests")
+    
+    if not os.path.exists(rules_file) or force_update:
+        rules_content = read_template(src_root, "rules.md.template")
+        if rules_content:
+            rules_content = rules_content.replace("{{NAME}}", name)
+            rules_content = rules_content.replace("{{STACK}}", stack.capitalize())
+            rules_content = rules_content.replace("{{TEST_CMD}}", test_cmd)
+            with open(rules_file, 'w', encoding='utf-8') as f:
+                f.write(rules_content)
+            print("Generated '.agents/rules.md' from template.")
+    else:
         with open(rules_file, 'r', encoding='utf-8') as f:
             rules_content = f.read()
         rules_content = re.sub(r'Use \*\*.*?\*\* for the main product stack\.', f'Use **{stack.capitalize()}** for the main product stack.', rules_content)

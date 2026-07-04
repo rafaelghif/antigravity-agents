@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.171.0
+- **Version:** 2.172.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -38,6 +38,8 @@
 - **ALWAYS** specify pinned dependency versions (never use wildcard `*` or blank versions) to ensure deterministic, reproducible builds and block supply chain attacks.
 - **ALWAYS** implement robust, explicit error handling with structured logging or standardized traceback reporting instead of bare prints or silent exception catches.
 - **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.
+- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.
+
 
 
 ## 3. CLI Helper Commands Reference
