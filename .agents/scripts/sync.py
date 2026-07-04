@@ -82,8 +82,8 @@ def sync_adrs_to_architecture_md():
         
     adrs_registry_str = "\n".join(adrs_lines)
     
-    # Replace registry under Decisions & ADR Registry
-    registry_pattern = r'(## 3\. Decisions & ADR Registry\nAll major architectural changes must be registered as ADRs:\n)([\s\S]*?)$'
+    # Replace registry under Decisions & ADR Registry only matching consecutive ADR link list
+    registry_pattern = r'(## 3\. Decisions & ADR Registry\nAll major architectural changes must be registered as ADRs:\r?\n)((?:- \[.*?\]\(file:\/\/.*?decisions\/.*?\)(?:\r?\n)?)*)'
     new_content = re.sub(registry_pattern, rf"\1{adrs_registry_str}\n", content)
     
     with open(arch_file, 'w', encoding='utf-8') as af:

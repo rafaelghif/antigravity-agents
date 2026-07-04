@@ -178,7 +178,7 @@ class TestValidate(unittest.TestCase):
     @patch('os.getenv')
     @patch('validate.get_commit_sha')
     @patch('git_api.post_commit_status')
-    @patch('sys.exit')
+    @patch('sys.exit', side_effect=SystemExit)
     @patch('validate.audit_critical_files', return_value=True)
     @patch('validate.audit_secrets_and_ignored_files', return_value=True)
     @patch('validate.audit_link_integrity', return_value=True)
@@ -193,7 +193,8 @@ class TestValidate(unittest.TestCase):
         m_getenv.side_effect = lambda k: "true" if k in ("CI", "GITHUB_ACTIONS") else None
         m_sha.return_value = "dummy-sha-12345"
         
-        validate.run_validations()
+        with self.assertRaises(SystemExit):
+            validate.run_validations()
         
         # Verify post_commit_status was called with success
         m_post_status.assert_any_call("dummy-sha-12345", "pending", description="Running AAC V2 Validation Guard...")

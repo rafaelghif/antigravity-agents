@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.162.0] - 2026-07-04
+
+### 🚀 Features
+- support python command on Windows and align sys.exit mocks in unit tests
+- Fix audit vulnerabilities and bugs (ISSUE-185)
+
+### 🐛 Bug Fixes
+- remove relative path prefixing from Git hooks in bootstrap scripts
+- improve ADR registry replacement regex in sync script
+- run auto-upgrade check in detached background process
+- add CSRF protection to local web dashboard
+
+### 📝 Documentation
+- record sync freshness lesson
+
+### ⚙️ Chores
+- Optimize token sync reliability and freshness guards (ISSUE-184)
+
+
 ## [2.161.0] - 2026-07-04
 
 ### 🚀 Features

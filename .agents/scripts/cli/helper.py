@@ -275,13 +275,38 @@ def main():
         log_cli_execution(cmd, sys.argv[2:], status, duration_ms, error_msg)
         try:
             if cmd not in ('upgrade', 'dashboard'):
-                cmd_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "commands"))
-                if cmd_dir not in sys.path:
-                    sys.path.insert(0, cmd_dir)
-                import upgrade
-                import threading
-                t = threading.Thread(target=upgrade.check_and_run_auto_upgrade, daemon=True)
-                t.start()
+                state_file = ".agents/upgrade_state.json"
+                now = time.time()
+                should_check = True
+                try:
+                    if os.path.exists(state_file):
+                        with open(state_file, 'r', encoding='utf-8') as f:
+                            state = json.load(f)
+                        last_check = state.get("last_check_timestamp", 0)
+                        if now - last_check < 1800:
+                            should_check = False
+                except Exception:
+                    pass
+
+                if should_check and os.environ.get("AAC_DISABLE_AUTO_UPDATE") != "true" and os.environ.get("IN_AUDIT_TEST") != "true":
+                    import subprocess
+                    helper_path = os.path.abspath(__file__)
+                    cmd_args = [sys.executable, helper_path, "upgrade", "--background-check"]
+                    if os.name == 'nt':
+                        DETACHED_PROCESS = 0x00000008
+                        subprocess.Popen(
+                            cmd_args,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            creationflags=DETACHED_PROCESS
+                        )
+                    else:
+                        subprocess.Popen(
+                            cmd_args,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            start_new_session=True
+                        )
         except Exception:
             pass
 

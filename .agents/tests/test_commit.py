@@ -40,8 +40,9 @@ class TestCommitCommand(unittest.TestCase):
             MagicMock(returncode=0)                            # validator check/run
         ]
         
-        with patch('sys.exit') as mock_exit:
-            commit.run(["--no-verify"])
+        with patch('sys.exit', side_effect=SystemExit) as mock_exit:
+            with self.assertRaises(SystemExit):
+                commit.run(["--no-verify"])
             
             # Verify that git config was NOT called with developer@company.com
             call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
@@ -54,8 +55,9 @@ class TestCommitCommand(unittest.TestCase):
             MagicMock(returncode=0)             # git commit execution
         ]
         
-        with patch('sys.exit') as mock_exit:
-            commit.run(["--no-verify"])
+        with patch('sys.exit', side_effect=SystemExit) as mock_exit:
+            with self.assertRaises(SystemExit):
+                commit.run(["--no-verify"])
             
             # Verify that git config was NOT called with developer@company.com
             call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
@@ -77,8 +79,9 @@ class TestCommitCommand(unittest.TestCase):
             MagicMock(returncode=0),            # git config --unset core.sshCommand
             MagicMock(returncode=0)             # git commit execution
         ]
-        with patch('sys.exit') as mock_exit:
-            commit.run(["--no-verify"])
+        with patch('sys.exit', side_effect=SystemExit) as mock_exit:
+            with self.assertRaises(SystemExit):
+                commit.run(["--no-verify"])
             call_args_strs = [" ".join(call[0][0]) for call in mock_run.call_args_list]
             self.assertTrue(any("dev@custom.com" in cmd for cmd in call_args_strs))
 

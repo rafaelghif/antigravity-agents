@@ -51,7 +51,7 @@ $ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if ((Test-Path "AGENTS.md") -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.161.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.161.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.162.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.162.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -85,14 +85,12 @@ if ($IsGit) {
         New-Item -ItemType Directory -Path $HooksDir -Force | Out-Null
     }
     
-    $Prefix = (git rev-parse --show-prefix)
-
     $PreCommitContent = @"
 #!/usr/bin/env bash
 if command -v python3 &>/dev/null; then
-  python3 "${Prefix}.agents/scripts/validate.py"
+  python3 .agents/scripts/validate.py
 elif command -v python &>/dev/null; then
-  python "${Prefix}.agents/scripts/validate.py"
+  python .agents/scripts/validate.py
 else
   echo "Warning: Python not found. Skipping commit validation check."
 fi
@@ -139,9 +137,9 @@ COMMIT_MSG_FILE="`$1"
 COMMIT_SOURCE="`${2:-}"
 
 if command -v python3 &>/dev/null; then
-  python3 "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python3 .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 elif command -v python &>/dev/null; then
-  python "${Prefix}.agents/scripts/prepare_commit_msg.py" "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
+  python .agents/scripts/prepare_commit_msg.py "`$COMMIT_MSG_FILE" "`$COMMIT_SOURCE"
 fi
 "@
     $PrepareCommitMsgPath = Join-Path $HooksDir "prepare-commit-msg"

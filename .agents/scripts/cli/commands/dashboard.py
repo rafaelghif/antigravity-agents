@@ -584,8 +584,27 @@ class DashboardHandler(BaseHTTPRequestHandler):
     def is_client_allowed(self) -> bool:
         if os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL") == "true":
             return True
+        
+        # Verify client address IP
         client_ip = self.client_address[0]
-        return client_ip in ('127.0.0.1', '::1', 'localhost')
+        if client_ip not in ('127.0.0.1', '::1', 'localhost'):
+            return False
+            
+        # Verify Origin header to prevent CSRF
+        origin = self.headers.get('Origin')
+        if origin:
+            parsed_origin = urlparse(origin)
+            if parsed_origin.hostname not in ('localhost', '127.0.0.1', '::1', None):
+                return False
+                
+        # Verify Referer header to prevent CSRF
+        referer = self.headers.get('Referer')
+        if referer:
+            parsed_referer = urlparse(referer)
+            if parsed_referer.hostname not in ('localhost', '127.0.0.1', '::1', None):
+                return False
+                
+        return True
 
     def reject_request(self):
         self.send_response(403)

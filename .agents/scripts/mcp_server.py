@@ -279,8 +279,9 @@ def register_server():
         settings["mcpServers"] = {}
         
     script_path = os.path.abspath(__file__)
+    python_cmd = "python" if platform.system() == "Windows" else "python3"
     settings["mcpServers"]["aac-v2-tools"] = {
-        "command": "python3",
+        "command": python_cmd,
         "args": [script_path],
         "disabled": False,
         "alwaysAllow": True
@@ -310,7 +311,7 @@ def register_server():
         workspace_settings["mcpServers"] = {}
     project_root = os.path.dirname(workspace_dir)
     workspace_settings["mcpServers"]["aac-v2-tools"] = {
-        "command": "python3",
+        "command": python_cmd,
         "args": [os.path.relpath(script_path, project_root)]
     }
     try:
@@ -334,7 +335,7 @@ def register_server():
     if "mcpServers" not in global_settings:
         global_settings["mcpServers"] = {}
     global_settings["mcpServers"]["aac-v2-tools"] = {
-        "command": "python3",
+        "command": python_cmd,
         "args": [script_path]
     }
     try:
