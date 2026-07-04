@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.163.0] - 2026-07-04
+
+### 🚀 Features
+- add lessons-archive.md to files_to_stage in issue close
+- Fix lessons-archive.md staging in issue close (ISSUE-186)
+
+
 ## [2.162.0] - 2026-07-04
 
 ### 🚀 Features

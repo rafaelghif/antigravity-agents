@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Fix lessons-archive.md staging in issue close (feat/issue-186) <!-- id: issue-186 -->
 - [x] Fix audit vulnerabilities and bugs (feat/issue-185) <!-- id: issue-185 -->
 - [x] Optimize token sync reliability and freshness guards (feat/issue-184) <!-- id: 184 -->
 - [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->
