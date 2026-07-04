@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.154.0] - 2026-07-04
+
+### 🚀 Features
+- support block percentage format in agy usage command
+- Support block percentage format in agy usage command (ISSUE-177)
+
+
 ## [2.153.0] - 2026-07-04
 
 ### 🚀 Features

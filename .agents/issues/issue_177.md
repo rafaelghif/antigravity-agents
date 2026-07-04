@@ -1,7 +1,7 @@
 ---
 id: issue-177
 title: "Support block percentage format in agy usage command"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
