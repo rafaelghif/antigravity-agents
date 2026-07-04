@@ -1,7 +1,7 @@
 ---
 id: issue-157
 title: "Add professional alerts and formatting enhancements to README"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
