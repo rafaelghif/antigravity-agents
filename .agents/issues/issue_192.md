@@ -12,7 +12,7 @@ created_at: 2026-07-04
 Fix project version and changelog mapping during bootstrap and release
 
 ## Tasks
-- [ ] Implement detect_project_version in bootstrap.py and preserve existing version in AGENTS.md <!-- id: task-1 -->
+- [x] Implement detect_project_version in bootstrap.py and preserve existing version in AGENTS.md <!-- id: task-1 -->
 - [ ] Restrict changelog.py wrapper updates to agent core repo and implement native version file bumping <!-- id: task-2 -->
 - [ ] Run validation suite and verify tests pass <!-- id: task-3 -->
 
