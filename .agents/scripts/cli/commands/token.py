@@ -368,7 +368,65 @@ def parse_usage_output(output: str) -> dict:
     """Parse output of agy -p '/usage' to extract limits and remaining reset times."""
     stats = {}
     lines = output.split('\n')
-    
+
+    # 0. Check for new block-percentage format
+    has_blocks = any("██" in line or "░░" in line for line in lines)
+    if has_blocks:
+        # Detect active account
+        for line in lines:
+            m_acc = re.search(r'Account\s*:\s*([a-zA-Z0-9_.@+-:]+)', line, re.IGNORECASE)
+            if m_acc:
+                stats["active_account"] = m_acc.group(1).strip()
+
+        current_group = None
+        for i, line in enumerate(lines):
+            line_strip = line.strip()
+            if "GEMINI MODELS" in line_strip:
+                current_group = "gemini"
+            elif "CLAUDE AND GPT MODELS" in line_strip:
+                current_group = "claude"
+                
+            if current_group == "gemini":
+                if "Weekly Limit" in line_strip:
+                    for offset in (1, 2, 3):
+                        if i + offset < len(lines):
+                            next_line = lines[i + offset].strip()
+                            m_pct = re.search(r'(\d+(?:\.\d+)?)%', next_line)
+                            if m_pct and "weekly_remaining_pct" not in stats:
+                                stats["weekly_remaining_pct"] = float(m_pct.group(1))
+                                stats["weekly_pct"] = 100.0 - stats["weekly_remaining_pct"]
+                            m_ref = re.search(r'Refreshes in\s*(.+)', next_line, re.IGNORECASE)
+                            if m_ref and "weekly_remaining" not in stats:
+                                stats["weekly_remaining"] = normalize_time_string(m_ref.group(1))
+                elif "Five Hour Limit" in line_strip or "5-Hour Limit" in line_strip:
+                    for offset in (1, 2, 3):
+                        if i + offset < len(lines):
+                            next_line = lines[i + offset].strip()
+                            m_pct = re.search(r'(\d+(?:\.\d+)?)%', next_line)
+                            if m_pct and "five_hour_remaining_pct" not in stats:
+                                stats["five_hour_remaining_pct"] = float(m_pct.group(1))
+                                stats["five_hour_pct"] = 100.0 - stats["five_hour_remaining_pct"]
+                            m_ref = re.search(r'Refreshes in\s*(.+)', next_line, re.IGNORECASE)
+                            if m_ref and "five_hour_remaining" not in stats:
+                                stats["five_hour_remaining"] = normalize_time_string(m_ref.group(1))
+                                
+        if "weekly_pct" in stats:
+            stats["weekly_limit"] = 2500000
+            stats["weekly_used"] = int(stats["weekly_pct"] / 100.0 * stats["weekly_limit"])
+        if "five_hour_pct" in stats:
+            stats["five_hour_limit"] = 200000
+            stats["five_hour_used"] = int(stats["five_hour_pct"] / 100.0 * stats["five_hour_limit"])
+            
+        if "active_account" in stats and "weekly_used" in stats:
+            stats["accounts"] = {
+                stats["active_account"]: {
+                    "daily_used": stats.get("five_hour_used", 0),
+                    "monthly_used": stats.get("weekly_used", 0),
+                    "total_used": stats.get("weekly_used", 0)
+                }
+            }
+        return stats
+
     # 1. First attempt: parse using direct colon format (Console Text output)
     for line in lines:
         line_strip = line.strip()

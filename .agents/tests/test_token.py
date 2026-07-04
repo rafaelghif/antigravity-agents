@@ -322,6 +322,34 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(parsed4["tasks"]["issue-176"]["completion_tokens"], 114)
         self.assertEqual(parsed4["tasks"]["issue-176"]["total_tokens"], 15114)
 
+        # Block percentage format
+        output5 = (
+            "└ Models & Quota\n"
+            "\n"
+            "  Account: merioptasari@gmail.com\n"
+            "\n"
+            "GEMINI MODELS\n"
+            "  Models within this group: Gemini Flash, Gemini Pro\n"
+            "\n"
+            "  Weekly Limit\n"
+            "    [████████████████████████████████░░░░░░░░░░░░░░░░░░] 63.38%\n"
+            "    63% remaining · Refreshes in 125h 11m\n"
+            "\n"
+            "  Five Hour Limit\n"
+            "    [████████████████████████████████████████░░░░░░░░░░] 79.81%\n"
+            "    80% remaining · Refreshes in 4h 44m\n"
+        )
+        parsed5 = token_cmd.parse_usage_output(output5)
+        self.assertEqual(parsed5["active_account"], "merioptasari@gmail.com")
+        self.assertAlmostEqual(parsed5["weekly_pct"], 36.62, places=2)
+        self.assertAlmostEqual(parsed5["five_hour_pct"], 20.19, places=2)
+        self.assertEqual(parsed5["weekly_remaining"], "125h 11m")
+        self.assertEqual(parsed5["five_hour_remaining"], "4h 44m")
+        self.assertEqual(parsed5["weekly_limit"], 2500000)
+        self.assertEqual(parsed5["five_hour_limit"], 200000)
+        self.assertIn("merioptasari@gmail.com", parsed5["accounts"])
+
+
 
     @patch('subprocess.run')
     @patch.object(token_cmd, 'load_budget')

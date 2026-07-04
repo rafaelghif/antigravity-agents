@@ -6,6 +6,7 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
+- [ ] Support block percentage format in agy usage command (feat/issue-177) <!-- id: issue-177 -->
 
 ## Done
 - [x] Integrate agy usage command extraction (feat/issue-176) <!-- id: issue-176 -->
