@@ -7,6 +7,7 @@ This board tracks active development tasks for AAC V2.
 ## Doing
 
 ## Done
+- [x] Track lessons-archive in git (feat/issue-155) <!-- id: issue-155 -->
 - [x] Explicitly restrict git configuration to local workspace level (feat/issue-154) <!-- id: issue-154 -->
 - [x] Sync self-learning and repository rules after issue-152 (feat/issue-153) <!-- id: issue-153 -->
 - [x] Enforce Git source repository downloading for all installations, bootstrapping, and upgrades (feat/issue-152) <!-- id: issue-152 -->
