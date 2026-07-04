@@ -22,6 +22,10 @@ def print_ok(msg: str) -> None:
     print(f"{GREEN}[OK] {msg}{RESET}")
 
 def run(args: List[str]) -> None:
+    if args and args[0] == "--background-check":
+        check_and_run_auto_upgrade()
+        sys.exit(0)
+
     print("="*60)
     print("      Antigravity Agent Core (AAC) V2 Auto-Upgrader")
     print("="*60)
