@@ -316,6 +316,7 @@
                     <div id="token-daily-progress" class="progress-bar" style="width: 0%;"></div>
                   </div>
                   <p id="token-daily-label">0 / 0 tokens (0% utilized)</p>
+                  <p style="font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-muted);">Reset In: <strong id="reset-daily" style="color: var(--accent-primary);">--</strong></p>
                 </div>
                 <div class="token-limit-item" style="margin-top: 1.5rem;">
                   <h3>Monthly Token Budget</h3>
@@ -323,16 +324,23 @@
                     <div id="token-monthly-progress" class="progress-bar" style="width: 0%;"></div>
                   </div>
                   <p id="token-monthly-label">0 / 0 tokens (0% utilized)</p>
+                  <p style="font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-muted);">Reset In: <strong id="reset-monthly" style="color: var(--accent-primary);">--</strong></p>
                 </div>
-                <!-- Reset Timers -->
                 <div class="token-limit-item" style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.2rem;">
-                  <h3>⏱️ Reset Intervals Remaining</h3>
-                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-top: 0.6rem; font-size: 0.8rem; color: var(--text-secondary);">
-                    <div>5-Hour: <strong id="reset-5h" style="color: var(--accent-primary);">--</strong></div>
-                    <div>Daily: <strong id="reset-daily" style="color: var(--accent-primary);">--</strong></div>
-                    <div>Weekly: <strong id="reset-weekly" style="color: var(--accent-primary);">--</strong></div>
-                    <div>Monthly: <strong id="reset-monthly" style="color: var(--accent-primary);">--</strong></div>
+                  <h3>5-Hour Rolling Budget</h3>
+                  <div class="progress-bar-container">
+                    <div id="token-fivehour-progress" class="progress-bar" style="width: 0%;"></div>
                   </div>
+                  <p id="token-fivehour-label">0 / 0 tokens (0% utilized)</p>
+                  <p style="font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-muted);">Next Reset In: <strong id="reset-5h" style="color: var(--accent-primary);">--</strong></p>
+                </div>
+                <div class="token-limit-item" style="margin-top: 1.5rem;">
+                  <h3>Weekly Rolling Budget</h3>
+                  <div class="progress-bar-container">
+                    <div id="token-weekly-progress" class="progress-bar" style="width: 0%;"></div>
+                  </div>
+                  <p id="token-weekly-label">0 / 0 tokens (0% utilized)</p>
+                  <p style="font-size: 0.75rem; margin-top: 0.25rem; color: var(--text-muted);">Next Reset In: <strong id="reset-weekly" style="color: var(--accent-primary);">--</strong></p>
                 </div>
               </div>
             </div>

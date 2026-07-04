@@ -407,6 +407,139 @@ def get_reset_intervals_remaining() -> dict:
         "monthly": format_td(monthly_remaining)
     }
 
+def get_rolling_window_stats() -> dict:
+    """
+    Calculate rolling window token usage and remaining reset times from log.
+    - 5-Hour rolling window
+    - 7-Day (weekly) rolling window
+    """
+    from datetime import datetime, timedelta, timezone
+    import re
+    now = datetime.now(timezone.utc)
+    
+    five_hour_limit = 200000
+    weekly_limit = 2500000
+    
+    budget = load_budget()
+    five_hour_limit = budget.get("five_hour_limit", 200000)
+    weekly_limit = budget.get("weekly_limit", 2500000)
+    
+    five_hour_used = 0
+    weekly_used = 0
+    
+    five_hour_oldest = None
+    weekly_oldest = None
+    
+    log_path = ".agents/logs/token_usage.log"
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                m = re.match(r'\[(.*?)\] Task:.*?\|.*\|.*\| Total:\s*(\d+)', line)
+                if m:
+                    ts_str = m.group(1)
+                    ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S UTC").replace(tzinfo=timezone.utc)
+                    total = int(m.group(2))
+                    
+                    if now - ts <= timedelta(hours=5):
+                        five_hour_used += total
+                        if not five_hour_oldest or ts < five_hour_oldest:
+                            five_hour_oldest = ts
+                            
+                    if now - ts <= timedelta(days=7):
+                        weekly_used += total
+                        if not weekly_oldest or ts < weekly_oldest:
+                            weekly_oldest = ts
+        except Exception:
+            pass
+            
+    if five_hour_oldest:
+        five_hour_rem = (five_hour_oldest + timedelta(hours=5)) - now
+        if five_hour_rem.total_seconds() < 0:
+            five_hour_rem_str = "0h 0m"
+        else:
+            total_secs = int(five_hour_rem.total_seconds())
+            five_hour_rem_str = f"{total_secs // 3600}h {(total_secs % 3600) // 60}m"
+    else:
+        five_hour_rem_str = "0h 0m"
+        
+    if weekly_oldest:
+        weekly_rem = (weekly_oldest + timedelta(days=7)) - now
+        if weekly_rem.total_seconds() < 0:
+            weekly_rem_str = "0h 0m"
+        else:
+            total_secs = int(weekly_rem.total_seconds())
+            days = weekly_rem.days
+            hours = (total_secs // 3600) % 24
+            mins = (total_secs % 3600) // 60
+            if days > 0:
+                weekly_rem_str = f"{days}d {hours}h {mins}m"
+            else:
+                weekly_rem_str = f"{hours}h {mins}m"
+    else:
+        weekly_rem_str = "0h 0m"
+        
+    return {
+        "five_hour_used": five_hour_used,
+        "five_hour_limit": five_hour_limit,
+        "five_hour_pct": (five_hour_used / five_hour_limit * 100) if five_hour_limit > 0 else 0,
+        "five_hour_remaining": five_hour_rem_str,
+        "weekly_used": weekly_used,
+        "weekly_limit": weekly_limit,
+        "weekly_pct": (weekly_used / weekly_limit * 100) if weekly_limit > 0 else 0,
+        "weekly_remaining": weekly_rem_str
+    }
+
+def get_rolling_stats() -> dict:
+    stats = get_rolling_window_stats()
+    resets = get_reset_intervals_remaining()
+    stats["daily_remaining"] = resets["daily"]
+    stats["monthly_remaining"] = resets["monthly"]
+    
+    budget = load_budget()
+    if budget.get("weekly_pct_override") is not None:
+        stats["weekly_pct"] = budget["weekly_pct_override"]
+        stats["weekly_used"] = int(stats["weekly_pct"] / 100 * stats["weekly_limit"])
+    if budget.get("weekly_remaining_override") is not None:
+        stats["weekly_remaining"] = budget["weekly_remaining_override"]
+        
+    if budget.get("five_hour_pct_override") is not None:
+        stats["five_hour_pct"] = budget["five_hour_pct_override"]
+        stats["five_hour_used"] = int(stats["five_hour_pct"] / 100 * stats["five_hour_limit"])
+    if budget.get("five_hour_remaining_override") is not None:
+        stats["five_hour_remaining"] = budget["five_hour_remaining_override"]
+        
+    return stats
+
+def run_sync(args: List[str]) -> None:
+    budget = load_budget()
+    i = 0
+    while i < len(args):
+        arg = args[i].lower()
+        if arg == "--weekly":
+            if i + 1 < len(args):
+                budget["weekly_pct_override"] = float(args[i+1])
+                i += 1
+        elif arg == "--weekly-rem":
+            if i + 1 < len(args):
+                budget["weekly_remaining_override"] = args[i+1]
+                i += 1
+        elif arg == "--five-hour":
+            if i + 1 < len(args):
+                budget["five_hour_pct_override"] = float(args[i+1])
+                i += 1
+        elif arg == "--five-hour-rem":
+            if i + 1 < len(args):
+                budget["five_hour_remaining_override"] = args[i+1]
+                i += 1
+        i += 1
+    save_budget(budget)
+    print_ok("Successfully synchronized actual platform token quotas with local budget.")
+
 def run_status(args: List[str]) -> None:
     budget = load_budget()
     budget = check_date_resets(budget)
@@ -428,13 +561,15 @@ def run_status(args: List[str]) -> None:
     print(f"Monthly Used  : {monthly_used:,} tokens ({monthly_pct:.2f}% utilized)")
     print(f"Last Reset    : {budget.get('last_reset', 'N/A')}")
     
-    resets = get_reset_intervals_remaining()
+    r_stats = get_rolling_stats()
     print("-"*60)
-    print("Reset Intervals Remaining:")
-    print(f"  - 5-Hour Reset : {resets['five_hour']}")
-    print(f"  - Daily Reset  : {resets['daily']}")
-    print(f"  - Weekly Reset : {resets['weekly']}")
-    print(f"  - Monthly Reset: {resets['monthly']}")
+    print("Rolling Quotas & Resets:")
+    print(f"  - 5-Hour Rolling Limit : {r_stats['five_hour_limit']:,} tokens")
+    print(f"  - 5-Hour Rolling Used  : {r_stats['five_hour_used']:,} tokens ({r_stats['five_hour_pct']:.2f}% utilized)")
+    print(f"  - 5-Hour Reset In      : {r_stats['five_hour_remaining']}")
+    print(f"  - Weekly Rolling Limit : {r_stats['weekly_limit']:,} tokens")
+    print(f"  - Weekly Rolling Used  : {r_stats['weekly_used']:,} tokens ({r_stats['weekly_pct']:.2f}% utilized)")
+    print(f"  - Weekly Reset In      : {r_stats['weekly_remaining']}")
     
     print("-"*60)
     print("Account Breakdown:")
@@ -488,7 +623,7 @@ def run_reset(args: List[str]) -> None:
 
 def run(args: List[str]) -> None:
     if not args:
-        print("Usage: helper.py token <log | status | reset> [args...]")
+        print("Usage: helper.py token <log | status | sync | reset> [args...]")
         sys.exit(1)
 
     subcommand = args[0].lower()
@@ -496,8 +631,10 @@ def run(args: List[str]) -> None:
         run_log(args[1:])
     elif subcommand == "status":
         run_status(args[1:])
+    elif subcommand == "sync":
+        run_sync(args[1:])
     elif subcommand == "reset":
         run_reset(args[1:])
     else:
-        print_err(f"Unknown token budget subcommand: '{subcommand}'. Supported subcommands: log, status, reset.")
+        print_err(f"Unknown token budget subcommand: '{subcommand}'. Supported subcommands: log, status, sync, reset.")
         sys.exit(1)

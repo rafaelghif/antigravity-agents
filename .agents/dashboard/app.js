@@ -282,17 +282,47 @@ window.loadData = async function(force = false) {
         monthlyLabel.textContent = `${monthlyUsed.toLocaleString()} / ${monthlyLimit.toLocaleString()} tokens (${monthlyPct.toFixed(2)}% utilized)`;
       }
 
-      // Reset Timers rendering
-      if (budget.resets) {
-        const r5 = document.getElementById('reset-5h');
-        const rd = document.getElementById('reset-daily');
-        const rw = document.getElementById('reset-weekly');
-        const rm = document.getElementById('reset-monthly');
-        if (r5) r5.textContent = budget.resets.five_hour || '--';
-        if (rd) rd.textContent = budget.resets.daily || '--';
-        if (rw) rw.textContent = budget.resets.weekly || '--';
-        if (rm) rm.textContent = budget.resets.monthly || '--';
+      // Reset Timers (Daily/Monthly)
+      const rd = document.getElementById('reset-daily');
+      if (rd) rd.textContent = budget.daily_remaining || '--';
+      const rm = document.getElementById('reset-monthly');
+      if (rm) rm.textContent = budget.monthly_remaining || '--';
+
+      // 5-Hour rolling progress
+      const fiveHourUsed = budget.five_hour_used || 0;
+      const fiveHourLimit = budget.five_hour_limit || 200000;
+      const fiveHourPct = budget.five_hour_pct || 0;
+      const fiveHourProgress = document.getElementById('token-fivehour-progress');
+      if (fiveHourProgress) {
+        fiveHourProgress.style.width = Math.min(fiveHourPct, 100) + '%';
+        if (fiveHourPct > 90) fiveHourProgress.style.backgroundColor = 'var(--accent-error)';
+        else if (fiveHourPct > 70) fiveHourProgress.style.backgroundColor = 'var(--accent-warning)';
+        else fiveHourProgress.style.backgroundColor = 'var(--accent-success)';
       }
+      const fiveHourLabel = document.getElementById('token-fivehour-label');
+      if (fiveHourLabel) {
+        fiveHourLabel.textContent = `${fiveHourUsed.toLocaleString()} / ${fiveHourLimit.toLocaleString()} tokens (${fiveHourPct.toFixed(2)}% utilized)`;
+      }
+      const r5 = document.getElementById('reset-5h');
+      if (r5) r5.textContent = budget.five_hour_remaining || '--';
+
+      // Weekly rolling progress
+      const weeklyUsed = budget.weekly_used || 0;
+      const weeklyLimit = budget.weekly_limit || 2500000;
+      const weeklyPct = budget.weekly_pct || 0;
+      const weeklyProgress = document.getElementById('token-weekly-progress');
+      if (weeklyProgress) {
+        weeklyProgress.style.width = Math.min(weeklyPct, 100) + '%';
+        if (weeklyPct > 90) weeklyProgress.style.backgroundColor = 'var(--accent-error)';
+        else if (weeklyPct > 70) weeklyProgress.style.backgroundColor = 'var(--accent-warning)';
+        else weeklyProgress.style.backgroundColor = 'var(--accent-success)';
+      }
+      const weeklyLabel = document.getElementById('token-weekly-label');
+      if (weeklyLabel) {
+        weeklyLabel.textContent = `${weeklyUsed.toLocaleString()} / ${weeklyLimit.toLocaleString()} tokens (${weeklyPct.toFixed(2)}% utilized)`;
+      }
+      const rw = document.getElementById('reset-weekly');
+      if (rw) rw.textContent = budget.weekly_remaining || '--';
 
       // Account breakdown list
       const accountsList = document.getElementById('token-accounts-list');
