@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.146.0] - 2026-07-04
+
+### 🚀 Features
+- align MCP configuration with Google Antigravity specifications
+- Align MCP configuration with Google Antigravity specifications (ISSUE-171)
+
+
 ## [2.145.0] - 2026-07-04
 
 ### 🚀 Features
