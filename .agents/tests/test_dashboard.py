@@ -239,5 +239,33 @@ class TestDashboardCommand(unittest.TestCase):
             mock_sync_module.sync_adrs_to_architecture_md.assert_called_once()
             mock_sync_module.sync_lessons_to_rules.assert_called_once()
 
+    @patch('dashboard.ThreadingHTTPServer')
+    @patch('threading.Thread')
+    @patch('webbrowser.open_new_tab')
+    def test_dashboard_run_args(self, mock_open_tab, mock_thread, mock_server):
+        mock_server_instance = MagicMock()
+        mock_server.return_value = mock_server_instance
+        old_env = os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL")
+        try:
+            # Test 1: Default arguments
+            with patch('sys.exit') as mock_exit:
+                dashboard.run([])
+                mock_server.assert_called_with(('127.0.0.1', 8000), dashboard.DashboardHandler)
+                mock_open_tab.assert_called_with('http://127.0.0.1:8000/')
+                
+            # Test 2: Custom host and port
+            mock_server.reset_mock()
+            mock_open_tab.reset_mock()
+            with patch('sys.exit') as mock_exit:
+                dashboard.run(['--host', '0.0.0.0', '--port', '9000'])
+                mock_server.assert_called_with(('0.0.0.0', 9000), dashboard.DashboardHandler)
+                mock_open_tab.assert_not_called()
+                self.assertEqual(os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL"), "true")
+        finally:
+            if old_env is None:
+                os.environ.pop("AAC_DASHBOARD_ALLOW_EXTERNAL", None)
+            else:
+                os.environ["AAC_DASHBOARD_ALLOW_EXTERNAL"] = old_env
+
 if __name__ == '__main__':
     unittest.main()
