@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.156.0] - 2026-07-04
+
+### 🚀 Features
+- scan conversation databases to sync platform token usage and decouple test dependencies
+- Fix platform token sync loop by scanning conversation databases (ISSUE-179)
+
+
 ## [2.155.0] - 2026-07-04
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-179
 title: "Fix platform token sync loop by scanning conversation databases"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
