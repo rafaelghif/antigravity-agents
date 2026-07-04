@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.151.0] - 2026-07-04
+
+### 🚀 Features
+- integrate agy usage command extraction and improve active account detection
+- Integrate agy usage command extraction (ISSUE-176)
+
+
 ## [2.150.0] - 2026-07-04
 
 ### 🚀 Features
