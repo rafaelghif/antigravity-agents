@@ -1,7 +1,7 @@
 ---
 id: issue-166
 title: "Track token budget per API key or active API account"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.142.0] - 2026-07-04
+
+### 🚀 Features
+- track token budget per API key or active API account
+- Track token budget per API key or active API account (ISSUE-166)
+
+### ⚙️ Chores
+- Support per-account token budget counters (ISSUE-165)
+- synchronize lessons learned
+
+
 ## [2.141.0] - 2026-07-04
 
 ### 🚀 Features
