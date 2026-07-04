@@ -1,7 +1,7 @@
 ---
 id: issue-191
 title: "Enforce programmatic checks for AGENTS.md, rules.md, and schema.md"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
@@ -12,15 +12,15 @@ created_at: 2026-07-04
 Enforce programmatic checks for AGENTS.md, rules.md, and schema.md
 
 ## Tasks
-- [ ] Update `audit_link_integrity` to dynamically scan AGENTS.md, rules.md, schema.md, and all issues/memory files <!-- id: task-validate-links -->
-- [ ] Require `Rule & Schema Compliance Audit` section in `audit_issue_files_schema` validation <!-- id: task-validate-issue-schema-audit -->
-- [ ] Add Clean Architecture domain entity import constraints check using ast module in `audit_codebase_rules_compliance` <!-- id: task-validate-clean-arch -->
-- [ ] Update `issue_example.md` and all open issues to include the compliance audit section <!-- id: task-update-open-issues -->
+- [x] Update `audit_link_integrity` to dynamically scan AGENTS.md, rules.md, schema.md, and all issues/memory files <!-- id: task-validate-links -->
+- [x] Require `Rule & Schema Compliance Audit` section in `audit_issue_files_schema` validation <!-- id: task-validate-issue-schema-audit -->
+- [x] Add Clean Architecture domain entity import constraints check using ast module in `audit_codebase_rules_compliance` <!-- id: task-validate-clean-arch -->
+- [x] Update `issue_example.md` and all open issues to include the compliance audit section <!-- id: task-update-open-issues -->
 
 ## Acceptance Criteria
-- [ ] `./helper.sh validate` scans all workspace markdown files for link integrity.
-- [ ] `validate.py` requires all open issues to have the `Rule & Schema Compliance Audit` section.
-- [ ] `validate.py` blocks domain modules from importing non-standard/non-domain packages.
+- [x] `./helper.sh validate` scans all workspace markdown files for link integrity.
+- [x] `validate.py` requires all open issues to have the `Rule & Schema Compliance Audit` section.
+- [x] `validate.py` blocks domain modules from importing non-standard/non-domain packages.
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:

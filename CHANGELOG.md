@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.170.0] - 2026-07-04
+
+### 🚀 Features
+- enforce strict programmatic checks on rules, schemas, and links
+- Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (ISSUE-191)
+
+
 ## [2.169.0] - 2026-07-04
 
 ### 🚀 Features
