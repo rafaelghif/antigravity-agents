@@ -9,9 +9,9 @@ This board tracks active development tasks.
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 
 ## Doing
-- [ ] Fix audit vulnerabilities and bugs (feat/issue-185) <!-- id: issue-185 -->
 
 ## Done
+- [x] Fix audit vulnerabilities and bugs (feat/issue-185) <!-- id: issue-185 -->
 - [x] Optimize token sync reliability and freshness guards (feat/issue-184) <!-- id: 184 -->
 - [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->
 - [x] Optimize token sync to run asynchronously in background (feat/issue-182) <!-- id: 182 -->
