@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.126.0] - 2026-07-04
+
+### 🚀 Features
+- Generate critical architectural analysis (ISSUE-149)
+
+
 ## [2.125.0] - 2026-07-04
 
 ### 🚀 Features
