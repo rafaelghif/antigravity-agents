@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.155.0] - 2026-07-04
+
+### 🚀 Features
+- dynamically calculate and learn rolling limits based on local used logs and platform remaining percentage
+- Dynamically learn weekly and five hour limits from platform percentage (ISSUE-178)
+
+
 ## [2.154.0] - 2026-07-04
 
 ### 🚀 Features

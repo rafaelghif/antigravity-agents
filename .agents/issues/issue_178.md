@@ -1,7 +1,7 @@
 ---
 id: issue-178
 title: "Dynamically learn weekly and five hour limits from platform percentage"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
