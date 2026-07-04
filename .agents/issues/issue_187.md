@@ -1,7 +1,7 @@
 ---
 id: issue-187
 title: "Fix subtask deadlock and staging locks in CLI"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
@@ -12,10 +12,10 @@ created_at: 2026-07-04
 Fix subtask deadlock and staging locks in CLI
 
 ## Tasks
-- [ ] Allow intermediate commits to pass branch alignment subtask check unless AAC_ENFORCE_SUBTASKS is set <!-- id: task-deadlock -->
-- [ ] Remove locks.json from files_to_stage in issue close subcommand <!-- id: task-locks -->
-- [ ] Add locks.json to .antigravityignore file <!-- id: task-ignore -->
+- [x] Allow intermediate commits to pass branch alignment subtask check unless AAC_ENFORCE_SUBTASKS is set <!-- id: task-deadlock -->
+- [x] Remove locks.json from files_to_stage in issue close subcommand <!-- id: task-locks -->
+- [x] Add locks.json to .antigravityignore file <!-- id: task-ignore -->
 
 ## Acceptance Criteria
-- [ ] The validation guard passes intermediate commits when subtasks are incomplete.
-- [ ] Staging and merge execution does not stage or commit locks.json.
+- [x] The validation guard passes intermediate commits when subtasks are incomplete.
+- [x] Staging and merge execution does not stage or commit locks.json.
