@@ -5,6 +5,7 @@ This board tracks active development tasks for AAC V2.
 ## Todo
 
 ## Doing
+- [/] Support per-account token budget counters (feat/issue-165) <!-- id: issue-165 -->
 
 ## Done
 - [x] Implement strict token budget tracker and logging CLI (feat/issue-164) <!-- id: issue-164 -->

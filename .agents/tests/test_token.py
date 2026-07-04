@@ -24,13 +24,15 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(budget["monthly_limit"], 5000000)
         self.assertEqual(budget["daily_limit"], 500000)
         self.assertEqual(budget["tasks"], {})
+        self.assertEqual(budget["accounts"], {})
 
     @patch('sys.exit', side_effect=raise_system_exit)
     def test_log_success(self, mock_exit):
         # Use patch.object to mock methods on the dynamically loaded module
         with patch.object(token_cmd, 'load_budget') as mock_load, \
              patch.object(token_cmd, 'save_budget') as mock_save, \
-             patch.object(token_cmd, 'append_to_log') as mock_append:
+             patch.object(token_cmd, 'append_to_log') as mock_append, \
+             patch.object(token_cmd, 'get_active_profile_name', return_value="corporate-work"):
              
             mock_load.return_value = {
                 "monthly_limit": 5000000,
@@ -38,6 +40,7 @@ class TestTokenCommand(unittest.TestCase):
                 "daily_limit": 500000,
                 "daily_used": 0,
                 "last_reset": datetime.utcnow().isoformat() + "Z",
+                "accounts": {},
                 "tasks": {}
             }
             
@@ -51,6 +54,10 @@ class TestTokenCommand(unittest.TestCase):
             self.assertEqual(saved_data["monthly_used"], 6000)
             self.assertIn("issue-164", saved_data["tasks"])
             self.assertEqual(saved_data["tasks"]["issue-164"]["total_tokens"], 6000)
+            
+            # Verify account tracking
+            self.assertIn("corporate-work", saved_data["accounts"])
+            self.assertEqual(saved_data["accounts"]["corporate-work"]["total_used"], 6000)
 
     @patch('sys.exit', side_effect=raise_system_exit)
     def test_log_invalid_values(self, mock_exit):
@@ -70,12 +77,21 @@ class TestTokenCommand(unittest.TestCase):
             "daily_limit": 500000,
             "daily_used": 10000,
             "last_reset": yesterday,
+            "accounts": {
+                "corporate-work": {
+                    "daily_used": 10000,
+                    "monthly_used": 20000,
+                    "total_used": 30000
+                }
+            },
             "tasks": {}
         }
         
         updated = token_cmd.check_date_resets(budget)
         self.assertEqual(updated["daily_used"], 0)
         self.assertEqual(updated["monthly_used"], 20000) # Monthly should not be reset on daily boundary
+        self.assertEqual(updated["accounts"]["corporate-work"]["daily_used"], 0)
+        self.assertEqual(updated["accounts"]["corporate-work"]["monthly_used"], 20000)
 
     def test_check_date_resets_monthly(self):
         last_month = (datetime.utcnow() - timedelta(days=32)).isoformat() + "Z"
@@ -85,12 +101,21 @@ class TestTokenCommand(unittest.TestCase):
             "daily_limit": 500000,
             "daily_used": 10000,
             "last_reset": last_month,
+            "accounts": {
+                "corporate-work": {
+                    "daily_used": 10000,
+                    "monthly_used": 20000,
+                    "total_used": 30000
+                }
+            },
             "tasks": {}
         }
         
         updated = token_cmd.check_date_resets(budget)
         self.assertEqual(updated["daily_used"], 0)
         self.assertEqual(updated["monthly_used"], 0) # Both should reset
+        self.assertEqual(updated["accounts"]["corporate-work"]["daily_used"], 0)
+        self.assertEqual(updated["accounts"]["corporate-work"]["monthly_used"], 0)
 
     def test_reset_command(self):
         with patch.object(token_cmd, 'load_budget') as mock_load, \
@@ -102,6 +127,13 @@ class TestTokenCommand(unittest.TestCase):
                 "daily_limit": 500000,
                 "daily_used": 10000,
                 "last_reset": "2026-06-27T00:00:00Z",
+                "accounts": {
+                    "corporate-work": {
+                        "daily_used": 10000,
+                        "monthly_used": 20000,
+                        "total_used": 30000
+                    }
+                },
                 "tasks": {"issue-164": {}}
             }
             
@@ -109,6 +141,7 @@ class TestTokenCommand(unittest.TestCase):
             saved_data = mock_save.call_args[0][0]
             self.assertEqual(saved_data["daily_used"], 0)
             self.assertEqual(saved_data["monthly_used"], 20000)
+            self.assertEqual(saved_data["accounts"]["corporate-work"]["daily_used"], 0)
 
 if __name__ == '__main__':
     unittest.main()
