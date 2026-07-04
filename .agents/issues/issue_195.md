@@ -1,7 +1,7 @@
 ---
 id: issue-195
 title: "Fix upgrade.py to exclude AGENTS.md and rules.md from auto-checkout"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

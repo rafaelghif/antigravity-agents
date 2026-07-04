@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.174.0] - 2026-07-04
+
+### 🚀 Features
+- exclude AGENTS.md and rules.md from auto-checkout and fix installer exclusions
+- Fix upgrade.py to exclude AGENTS.md and rules.md from auto-checkout (ISSUE-195)
+
+
 ## [2.173.0] - 2026-07-04
 
 ### 🚀 Features
