@@ -1,7 +1,7 @@
 ---
 id: issue-201
 title: "Enforce early workspace read of context and schema files"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

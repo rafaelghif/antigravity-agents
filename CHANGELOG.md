@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.180.0] - 2026-07-04
+
+### 🚀 Features
+- mandate early workspace read of context and schema files at startup
+- Enforce early workspace read of context and schema files (ISSUE-201)
+
+
 ## [2.179.0] - 2026-07-04
 
 ### 🚀 Features
