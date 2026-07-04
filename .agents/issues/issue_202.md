@@ -1,7 +1,7 @@
 ---
 id: issue-202
 title: "Add prompt caching optimization rules"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

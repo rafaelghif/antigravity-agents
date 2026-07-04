@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.181.0] - 2026-07-04
+
+### 🚀 Features
+- enforce prompt caching and token optimization constraints
+- Add prompt caching optimization rules (ISSUE-202)
+
+
 ## [2.180.0] - 2026-07-04
 
 ### 🚀 Features
