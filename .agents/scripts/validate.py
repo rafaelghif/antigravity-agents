@@ -225,6 +225,11 @@ fi
             "commit-msg": r"""#!/usr/bin/env bash
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+if [[ "$COMMIT_MSG" =~ ^Merge[[:space:]] ]]; then
+  exit 0
+fi
+
 CONVENTIONAL_REGEX="^(feat|fix|chore|refactor|docs|test|style|perf|ci)(\([a-z0-9_-]+\))?: .+"
 
 if [[ ! "$COMMIT_MSG" =~ $CONVENTIONAL_REGEX ]]; then
