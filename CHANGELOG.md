@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.152.0] - 2026-07-04
+
+### 🚀 Features
+- Integrate agy usage command extraction (ISSUE-176)
+
+### 🐛 Bug Fixes
+- parse task and account breakdowns from agy /usage and use diffs for auto detection
+- integrate agy /usage command for accurate token detection
+
+
 ## [2.151.0] - 2026-07-04
 
 ### 🚀 Features
