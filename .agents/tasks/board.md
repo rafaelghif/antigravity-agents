@@ -4,15 +4,16 @@ This board tracks active development tasks.
 
 ## Todo
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
-
-## Doing
-
-## Done
-- [x] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
-- [x] Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (feat/issue-191) <!-- id: issue-191 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
+- [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
+## Doing
+
+## Done
+- [x] Fix installer memory leak and identity separation for target projects (feat/issue-193) <!-- id: issue-193 -->
+- [x] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
+- [x] Enforce programmatic checks for AGENTS.md, rules.md, and schema.md (feat/issue-191) <!-- id: issue-191 -->
 - [x] Enforce programmatic rule audits and commit compliance headers (feat/issue-190) <!-- id: issue-190 -->
 - [x] Enforce issue schemas and implement atomic file writing (feat/issue-189) <!-- id: issue-189 -->
 - [x] Self heal active context and enhance CLI DX (feat/issue-188) <!-- id: issue-188 -->
@@ -29,7 +30,6 @@ This board tracks active development tasks.
 - [x] Support block percentage format in agy usage command (feat/issue-177) <!-- id: issue-177 -->
 - [x] Integrate agy usage command extraction (feat/issue-176) <!-- id: issue-176 -->
 - [x] Fix installer repo URLs in README (feat/issue-163) <!-- id: issue-163 -->
-- [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Enhance API key masking security with cryptographic hashing (feat/issue-167) <!-- id: issue-167 -->
 - [x] Improve MCP path portability and automate registration in bootstrap (feat/issue-172) <!-- id: issue-172 -->
 - [x] Document token budget CLI command in README.md (feat/issue-169) <!-- id: issue-169 -->

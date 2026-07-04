@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.172.0] - 2026-07-04
+
+### 🚀 Features
+- Fix installer memory leak and identity separation for target projects (ISSUE-193)
+
+
 ## [2.171.0] - 2026-07-04
 
 ### 🚀 Features
