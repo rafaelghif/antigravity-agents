@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.153.0] - 2026-07-04
+
+### 🚀 Features
+- document agy /usage integration for accurate token tracking in README
+- Integrate agy usage command extraction (ISSUE-176)
+
+
 ## [2.152.0] - 2026-07-04
 
 ### 🚀 Features

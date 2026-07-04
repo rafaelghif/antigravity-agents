@@ -1,7 +1,7 @@
 ---
 id: issue-176
 title: "Integrate agy usage command extraction"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
