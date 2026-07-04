@@ -1,7 +1,7 @@
 ---
 id: issue-180
 title: "Add beta notice for token tracking features in README"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

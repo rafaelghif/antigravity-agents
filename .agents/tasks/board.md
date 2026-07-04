@@ -6,9 +6,9 @@ This board tracks active development tasks.
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
-- [ ] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->
 
 ## Done
+- [x] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->
 - [x] Fix platform token sync loop by scanning conversation databases (feat/issue-179) <!-- id: issue-179 -->
 - [x] Dynamically learn weekly and five hour limits from platform percentage (feat/issue-178) <!-- id: issue-178 -->
 - [x] Support block percentage format in agy usage command (feat/issue-177) <!-- id: issue-177 -->
