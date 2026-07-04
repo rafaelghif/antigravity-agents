@@ -1,7 +1,7 @@
 ---
 id: issue-164
 title: "Implement strict token budget tracker and logging CLI"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
