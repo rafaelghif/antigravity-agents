@@ -34,6 +34,103 @@ def detect_project_stack(root=".") -> str:
             
     return ""
 
+def detect_project_version(root=".") -> str:
+    """Detect the current version of the project from standard config files or CHANGELOG.md."""
+    # 1. Try CHANGELOG.md first as it represents release history
+    changelog_path = os.path.join(root, "CHANGELOG.md")
+    if os.path.exists(changelog_path):
+        try:
+            with open(changelog_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    match = re.search(r"^##\s+\[(\d+\.\d+\.\d+)\]", line)
+                    if match:
+                        return match.group(1).strip()
+        except Exception:
+            pass
+
+    # 2. Node (package.json)
+    package_json_path = os.path.join(root, "package.json")
+    if os.path.exists(package_json_path):
+        try:
+            with open(package_json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, dict) and "version" in data:
+                    return str(data["version"]).strip()
+        except Exception:
+            pass
+
+    # 3. Rust (Cargo.toml)
+    cargo_toml_path = os.path.join(root, "Cargo.toml")
+    if os.path.exists(cargo_toml_path):
+        try:
+            with open(cargo_toml_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r'(?:^|\n)\s*version\s*=\s*["\']([^"\']+)["\']', content)
+            if match:
+                return match.group(1).strip()
+        except Exception:
+            pass
+
+    # 4. Python (pyproject.toml or setup.py)
+    pyproject_path = os.path.join(root, "pyproject.toml")
+    if os.path.exists(pyproject_path):
+        try:
+            with open(pyproject_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r'(?:^|\n)\s*version\s*=\s*["\']([^"\']+)["\']', content)
+            if match:
+                return match.group(1).strip()
+        except Exception:
+            pass
+
+    setup_py_path = os.path.join(root, "setup.py")
+    if os.path.exists(setup_py_path):
+        try:
+            with open(setup_py_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+            if match:
+                return match.group(1).strip()
+        except Exception:
+            pass
+
+    # 5. PHP (composer.json)
+    composer_json_path = os.path.join(root, "composer.json")
+    if os.path.exists(composer_json_path):
+        try:
+            with open(composer_json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, dict) and "version" in data:
+                    return str(data["version"]).strip()
+        except Exception:
+            pass
+
+    # 6. Java (pom.xml or build.gradle)
+    pom_path = os.path.join(root, "pom.xml")
+    if os.path.exists(pom_path):
+        try:
+            with open(pom_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r'<version>([^<]+)</version>', content)
+            if match:
+                return match.group(1).strip()
+        except Exception:
+            pass
+
+    for gradle_file in ("build.gradle", "build.gradle.kts"):
+        gradle_path = os.path.join(root, gradle_file)
+        if os.path.exists(gradle_path):
+            try:
+                with open(gradle_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+                if match:
+                    return match.group(1).strip()
+            except Exception:
+                pass
+
+    return ""
+
 def create_clean_architecture(root):
     dirs = [
         "src/core/entities",
@@ -358,6 +455,9 @@ def run(args):
     AAC_VERSION = "2.170.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
+    detected_ver = detect_project_version(".")
+    project_version = detected_ver if detected_ver else "0.1.0"
+    
     if not os.path.exists(agents_file):
         if os.path.exists(src_agents):
             try:
@@ -367,31 +467,40 @@ def run(args):
                 template = re.sub(r'# AGENTS.md — .*', f'# AGENTS.md — {name}', template)
                 template = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', template)
                 template = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', template)
-                template = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {AAC_VERSION}', template)
+                template = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', template)
                 with open(agents_file, 'w', encoding='utf-8') as f:
                     f.write(template)
-                print("Created AGENTS.md from source repository template.")
+                print(f"Created AGENTS.md from source repository template (version: {project_version}).")
             except Exception as e:
                 print(f"Warning: Could not create AGENTS.md from source template: {e}")
         else:
             # Fallback to minimal header if source doesn't exist
-            fallback = f"# AGENTS.md — {name}\n\n- **Product:** {name}\n- **Version:** {AAC_VERSION}\n- **Stack:** {stack.capitalize()} ({arch.upper()})\n"
+            fallback = f"# AGENTS.md — {name}\n\n- **Product:** {name}\n- **Version:** {project_version}\n- **Stack:** {stack.capitalize()} ({arch.upper()})\n"
             with open(agents_file, 'w', encoding='utf-8') as f:
                 f.write(fallback)
-            print("Created fallback minimal AGENTS.md.")
+            print(f"Created fallback minimal AGENTS.md (version: {project_version}).")
     else:
         with open(agents_file, 'r', encoding='utf-8') as f:
             content = f.read()
         content = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', content)
         content = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', content)
-        if re.search(r'-\s+\*\*Version:\*\*.*', content):
-            content = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {AAC_VERSION}', content)
+        
+        # Read existing version from AGENTS.md
+        existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
+        if existing_version_match:
+            # Keep existing version
+            print(f"Preserving existing version in AGENTS.md: {existing_version_match.group(1)}")
         else:
-            # Insert after the Product line
-            content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** ' + AAC_VERSION, content)
+            if re.search(r'-\s+\*\*Version:\*\*.*', content):
+                content = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', content)
+            else:
+                # Insert after the Product line
+                content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** ' + project_version, content)
+            print(f"Set project version in AGENTS.md: {project_version}")
+            
         with open(agents_file, 'w', encoding='utf-8') as f:
             f.write(content)
-        print("Updated AGENTS.md with new stack, product, and version.")
+        print("Updated AGENTS.md with new stack and product.")
 
     # 6. Update .agents/rules.md
     rules_file = ".agents/rules.md"
