@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.169.0] - 2026-07-04
+
+### 🚀 Features
+- bypass merge and release commit messages in commit-msg validation
+- Enforce programmatic rule audits and commit compliance headers (ISSUE-190)
+
+
+## [2.168.0] - 2026-07-04
+
+### 🚀 Features
+- Enforce programmatic rule audits and commit compliance headers (ISSUE-190)
+
+
+## [2.167.0] - 2026-07-04
+
+### 🚀 Features
+- enforce programmatic codebase rule compliance and require audit trailer
+- Enforce programmatic rule audits and commit compliance headers (ISSUE-190)
+
+
 ## [2.166.0] - 2026-07-04
 
 ### 🚀 Features

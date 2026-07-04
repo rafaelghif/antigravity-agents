@@ -402,7 +402,7 @@ class TestValidate(unittest.TestCase):
     def test_audit_commit_messages_success(self, mock_run, mock_base_branch, mock_get_branch):
         mock_get_branch.return_value = "feat/issue-106"
         mock_base_branch.return_value = "main"
-        mock_run.return_value = MagicMock(returncode=0, stdout="feat: correct subject line\n\nRefs: issue-106\x00")
+        mock_run.return_value = MagicMock(returncode=0, stdout="feat: correct subject line\n\nRefs: issue-106\nCompliance-Audit: passed\x00")
         self.assertTrue(validate.audit_commit_messages())
 
     @patch('validate.get_current_branch')
