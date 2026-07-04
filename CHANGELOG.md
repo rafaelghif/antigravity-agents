@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.127.0] - 2026-07-04
+
+### 🚀 Features
+- harden auto-upgrade, restrict dashboard HTTP access, and decouple locks
+- Implement comprehensive architectural and dashboard hardening (ISSUE-150)
+
+
 ## [2.126.0] - 2026-07-04
 
 ### 🚀 Features

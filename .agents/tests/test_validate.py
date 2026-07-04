@@ -30,8 +30,9 @@ class TestValidate(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=1)
         self.assertFalse(validate.is_git_ignored("normal_file.txt"))
 
+    @patch('validate.validate_json_schema', return_value=True)
     @patch('os.path.exists')
-    def test_audit_critical_files(self, mock_exists):
+    def test_audit_critical_files(self, mock_exists, mock_json_schema):
         # All exist
         mock_exists.return_value = True
         self.assertTrue(validate.audit_critical_files())
@@ -50,7 +51,7 @@ class TestValidate(unittest.TestCase):
         mock_exists.side_effect = lambda path: False if 'git_profiles.json' in path else True
         
         # Mock git diff returning staged files
-        mock_run.return_value = MagicMock(returncode=0, stdout="src/main.py\n")
+        mock_run.return_value = MagicMock(returncode=0, stdout="A\tsrc/main.py\n")
         
         # Scenario 1: normal file
         mock_git.return_value = False

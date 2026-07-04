@@ -304,13 +304,19 @@ def audit_secrets_and_ignored_files() -> bool:
     is_git = True
     try:
         res = subprocess.run(
-            ['git', 'diff', '--cached', '--name-only'],
+            ['git', 'diff', '--cached', '--name-status'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             check=True
         )
-        staged_files = [line.strip() for line in res.stdout.splitlines() if line.strip()]
+        for line in res.stdout.splitlines():
+            if line.strip():
+                parts = line.strip().split(None, 1)
+                if len(parts) == 2:
+                    status, path = parts
+                    if status.strip() != 'D':
+                        staged_files.append(path.strip())
     except Exception:
         is_git = False
         # Fallback file scanner excluding common build/dependency files
@@ -661,17 +667,34 @@ def audit_git_branch_alignment() -> bool:
             sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "cli")))
             import commands.issue as issue_cmd
             all_tasks, unchecked = issue_cmd.get_issue_tasks(issue_content)
+            required_unchecked = [t for t in unchecked if not any(opt in t.lower() for opt in ('(optional)', '[optional]'))]
             
-            if unchecked:
+            if required_unchecked:
                 if "--skip-subtasks" in sys.argv or os.getenv("SKIP_SUBTASK_AUDIT") == "true":
-                    print_warn(f"Active issue '{issue_id}' has {len(unchecked)} unresolved subtasks (bypassed).")
+                    print_warn(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks (bypassed).")
+                elif sys.stdin.isatty() and os.environ.get("IN_AUDIT_TEST") != "true" and 'unittest' not in sys.modules and 'pytest' not in sys.modules:
+                    print_warn(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks:")
+                    for task in required_unchecked:
+                        print_warn(f"  {task.strip()}")
+                    try:
+                        print(f"{YELLOW}Active issue has unresolved required subtasks. Continue anyway? (y/N): {RESET}", end="", flush=True)
+                        ans = sys.stdin.readline().strip().lower()
+                        if ans in ('y', 'yes'):
+                            print_warn("Unresolved required subtask check bypassed by user choice.")
+                        else:
+                            return False
+                    except Exception:
+                        return False
                 else:
-                    print_err(f"Active issue '{issue_id}' has {len(unchecked)} unresolved subtasks:")
-                    for task in unchecked:
+                    print_err(f"Active issue '{issue_id}' has {len(required_unchecked)} unresolved required subtasks:")
+                    for task in required_unchecked:
                         print_err(f"  {task.strip()}")
                     return False
             else:
-                print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
+                if unchecked:
+                    print_ok(f"All required subtasks in issue '{issue_id}' resolved. (Skipped {len(unchecked)} optional tasks).")
+                else:
+                    print_ok(f"All subtasks in issue '{issue_id}' have been resolved.")
         except Exception as e:
             print_warn(f"Failed to parse subtasks in '{matched_path}': {e}")
     # Branch Type Enforcer: verify branch prefix alignment with commit types

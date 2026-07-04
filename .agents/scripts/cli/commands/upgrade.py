@@ -109,14 +109,6 @@ def check_and_run_auto_upgrade() -> None:
     except Exception:
         pass
 
-    # Save timestamp immediately to lock and prevent concurrent checks
-    try:
-        os.makedirs(".agents", exist_ok=True)
-        with open(state_file, 'w', encoding='utf-8') as f:
-            json.dump({"last_check_timestamp": now}, f)
-    except Exception:
-        pass
-
     # 3. Check inside Git worktree
     git_check = subprocess.run(
         ['git', 'rev-parse', '--is-inside-work-tree'],
@@ -172,7 +164,7 @@ def check_and_run_auto_upgrade() -> None:
 
     # 7. Fetch remote tracking branch
     res_fetch = subprocess.run(
-        ['git', 'fetch', '--depth', '1', remote_url, active_branch],
+        ['git', 'fetch', '--quiet', '--depth', '1', remote_url, active_branch],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True
@@ -197,17 +189,13 @@ def check_and_run_auto_upgrade() -> None:
         stderr=subprocess.PIPE,
         text=True
     )
-    if res_diff.returncode == 0:
-        return
-
-    # 10. Perform auto-checkout
-    res_checkout = subprocess.run(
-        ['git', 'checkout', 'FETCH_HEAD', '--'] + paths_to_update,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    if res_checkout.returncode == 0:
-        if os.name != 'nt' and os.path.exists("helper.sh"):
-            os.chmod("helper.sh", 0o755)
-        print(f"\n{GREEN}🎉 [AUTO-UPDATE] Antigravity Agent Core has been automatically upgraded to the latest version!{RESET}")
+    
+    upgrade_available = (res_diff.returncode != 0)
+    
+    # Save check state and flag
+    try:
+        os.makedirs(".agents", exist_ok=True)
+        with open(state_file, 'w', encoding='utf-8') as f:
+            json.dump({"last_check_timestamp": now, "upgrade_available": upgrade_available}, f, indent=2)
+    except Exception:
+        pass

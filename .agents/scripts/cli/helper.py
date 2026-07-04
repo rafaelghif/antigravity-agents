@@ -178,6 +178,18 @@ def main():
     
     cmd = sys.argv[1].lower()
     
+    # Check if an upgrade is available and notify the user
+    if cmd not in ('upgrade', 'help', '-h', '--help') and cmd not in help_args:
+        try:
+            state_file = ".agents/upgrade_state.json"
+            if os.path.exists(state_file):
+                with open(state_file, 'r', encoding='utf-8') as f:
+                    state = json.load(f)
+                if state.get("upgrade_available"):
+                    print(f"\033[93m[WARN] A new version of Antigravity Agent Core is available! Run './helper.sh upgrade' to apply it.\033[0m\n")
+        except Exception:
+            pass
+            
     if cmd in help_args:
         if len(sys.argv) > 2:
             sub_cmd = sys.argv[2].lower()
@@ -251,7 +263,7 @@ def main():
                     sys.path.insert(0, cmd_dir)
                 import upgrade
                 import threading
-                t = threading.Thread(target=upgrade.check_and_run_auto_upgrade, daemon=False)
+                t = threading.Thread(target=upgrade.check_and_run_auto_upgrade, daemon=True)
                 t.start()
         except Exception:
             pass

@@ -532,7 +532,20 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 class DashboardHandler(BaseHTTPRequestHandler):
+    def is_client_allowed(self) -> bool:
+        client_ip = self.client_address[0]
+        return client_ip in ('127.0.0.1', '::1', 'localhost')
+
+    def reject_request(self):
+        self.send_response(403)
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(b"Forbidden: External connections are not allowed.")
+
     def do_GET(self):
+        if not self.is_client_allowed():
+            self.reject_request()
+            return
         parsed_url = urlparse(self.path)
         if parsed_url.path == '/api/status':
             self.send_response(200)
@@ -582,6 +595,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.serve_static_file(parsed_url.path)
 
     def do_POST(self):
+        if not self.is_client_allowed():
+            self.reject_request()
+            return
         parsed_url = urlparse(self.path)
         if parsed_url.path == '/api/task/toggle':
             content_length = int(self.headers.get('Content-Length', 0))
