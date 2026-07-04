@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.166.0] - 2026-07-04
+
+### 🚀 Features
+- enforce markdown issue schemas and implement atomic file writes
+- Enforce issue schemas and implement atomic file writing (ISSUE-189)
+
+
 ## [2.165.0] - 2026-07-04
 
 ### 🚀 Features
