@@ -3,7 +3,7 @@
     "aac-v2-tools": {
       "command": "python3",
       "args": [
-        "/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/mcp_server.py"
+        ".agents/scripts/mcp_server.py"
       ]
     }
   }

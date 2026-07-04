@@ -308,9 +308,10 @@ def register_server():
             pass
     if "mcpServers" not in workspace_settings:
         workspace_settings["mcpServers"] = {}
+    project_root = os.path.dirname(workspace_dir)
     workspace_settings["mcpServers"]["aac-v2-tools"] = {
         "command": "python3",
-        "args": [script_path]
+        "args": [os.path.relpath(script_path, project_root)]
     }
     try:
         with open(workspace_config_file, 'w', encoding='utf-8') as f:

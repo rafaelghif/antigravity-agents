@@ -3,9 +3,9 @@
 > Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.
 
 ## 1. What this project is
-- **Product:** Antigravity Agent Core (AAC) V2 — a highly optimized, project-agnostic operational workspace layout and developer protocol designed to help developers build software with enterprise-grade and world-class quality standards through strict guardrails, context insulation, and robust agentic workflows.
-- **Version:** 2.146.0
-- **Stack:** Python 3
+- **Product:** test-proj
+- **Version:** 2.147.0
+- **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
 ## 2. Non-negotiable rules
