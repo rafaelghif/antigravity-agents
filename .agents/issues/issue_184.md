@@ -1,7 +1,7 @@
 ---
 id: 184
 title: "Optimize token sync reliability and freshness guards"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---
