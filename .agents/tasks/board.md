@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Self heal active context and enhance CLI DX (feat/issue-188) <!-- id: issue-188 -->
 - [x] Fix subtask deadlock and staging locks in CLI (feat/issue-187) <!-- id: issue-187 -->
 - [x] Fix lessons-archive.md staging in issue close (feat/issue-186) <!-- id: issue-186 -->
 - [x] Fix audit vulnerabilities and bugs (feat/issue-185) <!-- id: issue-185 -->
