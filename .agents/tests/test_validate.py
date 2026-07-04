@@ -235,6 +235,20 @@ class TestValidate(unittest.TestCase):
         mock_file_open.return_value.read.return_value = "---\nid: issue-040\n---\n## Tasks\n- [ ] Task 1\n"
         self.assertFalse(validate.audit_git_branch_alignment())
 
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('os.listdir', return_value=['issue_040.md'])
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('sys.argv', ['validate.py'])
+    @patch('sys.stdin.isatty', return_value=True)
+    @patch.dict('os.environ', {'ANTIGRAVITY_NONINTERACTIVE': '1'}, clear=True)
+    def test_audit_git_branch_alignment_non_interactive_env(self, mock_isatty, mock_file_open, mock_listdir, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-040"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "---\nid: issue-040\n---\n## Tasks\n- [ ] Task 1\n"
+        self.assertFalse(validate.audit_git_branch_alignment())
+
     @patch('os.path.exists', return_value=True)
     @patch('subprocess.run')
     @patch('builtins.open', new_callable=mock_open, read_data='{"profiles": [{"name": "p1", "email": "p1@test.com", "active": true, "signing_key": "4A1D5B"}]}')
