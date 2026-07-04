@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.165.0] - 2026-07-04
+
+### 🚀 Features
+- implement dynamic self-healing context manifests on validation and checkout
+- Self heal active context and enhance CLI DX (ISSUE-188)
+
+
 ## [2.164.0] - 2026-07-04
 
 ### 🚀 Features
