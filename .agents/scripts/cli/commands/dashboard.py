@@ -58,6 +58,11 @@ spec_learn = importlib.util.spec_from_file_location("learn_cmd", os.path.join(cm
 learn_cmd = importlib.util.module_from_spec(spec_learn)
 spec_learn.loader.exec_module(learn_cmd)
 
+# Dynamically import custom token command module
+spec_token = importlib.util.spec_from_file_location("token_cmd", os.path.join(cmd_dir, "token.py"))
+token_cmd = importlib.util.module_from_spec(spec_token)
+spec_token.loader.exec_module(token_cmd)
+
 def get_issue_frontmatter(path):
     fm = {}
     if not os.path.exists(path):
@@ -296,6 +301,38 @@ def get_dashboard_data(force=False):
         try:
             with open(budget_path, 'r', encoding='utf-8') as f:
                 token_budget = json.load(f)
+            # Add reset intervals remaining
+            try:
+                token_budget["resets"] = token_cmd.get_reset_intervals_remaining()
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    # Parse log entries for trend chart
+    token_trend = []
+    log_path = ".agents/logs/token_usage.log"
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            for line in lines[-15:]:  # return last 15 entries
+                line = line.strip()
+                if not line:
+                    continue
+                # Format: [2026-07-04 01:05:54 UTC] Task: issue-164 | Prompt: 15000 | Completion: 3000 | Total: 18000
+                m = re.search(
+                    r'\[(.*?)\] Task:\s*(\S+)\s*\|\s*Prompt:\s*(\d+)\s*\|\s*Completion:\s*(\d+)\s*\|\s*Total:\s*(\d+)',
+                    line
+                )
+                if m:
+                    token_trend.append({
+                        "timestamp": m.group(1),
+                        "task": m.group(2),
+                        "prompt": int(m.group(3)),
+                        "completion": int(m.group(4)),
+                        "total": int(m.group(5))
+                    })
         except Exception:
             pass
 
@@ -309,6 +346,7 @@ def get_dashboard_data(force=False):
         "changelog": changelog_releases[:5], # top 5 releases
         "compliance": compliance,
         "token_budget": token_budget,
+        "token_trend": token_trend,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "auditing": is_auditing
     }

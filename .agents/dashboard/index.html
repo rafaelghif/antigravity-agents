@@ -324,6 +324,16 @@
                   </div>
                   <p id="token-monthly-label">0 / 0 tokens (0% utilized)</p>
                 </div>
+                <!-- Reset Timers -->
+                <div class="token-limit-item" style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.2rem;">
+                  <h3>⏱️ Reset Intervals Remaining</h3>
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-top: 0.6rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    <div>5-Hour: <strong id="reset-5h" style="color: var(--accent-primary);">--</strong></div>
+                    <div>Daily: <strong id="reset-daily" style="color: var(--accent-primary);">--</strong></div>
+                    <div>Weekly: <strong id="reset-weekly" style="color: var(--accent-primary);">--</strong></div>
+                    <div>Monthly: <strong id="reset-monthly" style="color: var(--accent-primary);">--</strong></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -337,6 +347,22 @@
               <div id="token-accounts-list" class="locks-vertical-list">
                 <!-- dynamic accounts -->
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Token Trend Card -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h2>📊 Token Usage Trend (Last 15 Invocations)</h2>
+          </div>
+          <div class="card-body">
+            <div id="token-trend-container" style="display: flex; align-items: flex-end; height: 160px; gap: 0.5rem; padding: 1rem 0; border-bottom: 2px solid rgba(255,255,255,0.1); overflow-x: auto;">
+              <!-- dynamic trend bars -->
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
+              <span>Older logs</span>
+              <span>Newest logs</span>
             </div>
           </div>
         </div>

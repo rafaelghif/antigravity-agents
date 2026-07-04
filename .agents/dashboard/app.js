@@ -282,6 +282,18 @@ window.loadData = async function(force = false) {
         monthlyLabel.textContent = `${monthlyUsed.toLocaleString()} / ${monthlyLimit.toLocaleString()} tokens (${monthlyPct.toFixed(2)}% utilized)`;
       }
 
+      // Reset Timers rendering
+      if (budget.resets) {
+        const r5 = document.getElementById('reset-5h');
+        const rd = document.getElementById('reset-daily');
+        const rw = document.getElementById('reset-weekly');
+        const rm = document.getElementById('reset-monthly');
+        if (r5) r5.textContent = budget.resets.five_hour || '--';
+        if (rd) rd.textContent = budget.resets.daily || '--';
+        if (rw) rw.textContent = budget.resets.weekly || '--';
+        if (rm) rm.textContent = budget.resets.monthly || '--';
+      }
+
       // Account breakdown list
       const accountsList = document.getElementById('token-accounts-list');
       if (accountsList) {
@@ -347,6 +359,39 @@ window.loadData = async function(force = false) {
           });
         } else {
           tasksList.innerHTML = '<p class="text-muted" style="font-size: 0.85rem;">No task token usage logged yet.</p>';
+        }
+      }
+      
+      // Token Trend Chart rendering
+      const trendContainer = document.getElementById('token-trend-container');
+      if (trendContainer) {
+        trendContainer.innerHTML = '';
+        const trend = data.token_trend || [];
+        if (trend.length > 0) {
+          const maxVal = Math.max(...trend.map(d => d.total || 1), 1);
+          trend.forEach(d => {
+            const pct = (d.total / maxVal) * 100;
+            const barWrapper = document.createElement('div');
+            barWrapper.className = 'trend-bar-wrapper';
+            
+            const tooltipContent = `
+              <strong>Task:</strong> ${d.task}<br>
+              <strong>Total:</strong> ${d.total.toLocaleString()} tokens<br>
+              <strong>Prompt:</strong> ${d.prompt.toLocaleString()} tokens<br>
+              <strong>Completion:</strong> ${d.completion.toLocaleString()} tokens<br>
+              <span style="color: var(--text-muted); font-size: 0.65rem;">${d.timestamp}</span>
+            `;
+            
+            barWrapper.innerHTML = `
+              <div class="trend-bar" style="height: ${Math.max(pct, 5)}%;">
+                <div class="trend-tooltip">${tooltipContent}</div>
+              </div>
+              <div class="trend-bar-label">${d.task}</div>
+            `;
+            trendContainer.appendChild(barWrapper);
+          });
+        } else {
+          trendContainer.innerHTML = '<p class="text-muted" style="font-size: 0.85rem; width: 100%; text-align: center; margin-top: 3rem;">No trend data available. Start logging tokens to see your usage trend.</p>';
         }
       }
     }

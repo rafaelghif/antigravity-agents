@@ -757,3 +757,63 @@ body {
   color: var(--text-muted);
   margin: 0;
 }
+
+.trend-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 40px;
+  cursor: pointer;
+}
+
+.trend-bar {
+  width: 70%;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent-primary);
+  min-height: 4px;
+  transition: height 0.3s ease, filter 0.2s ease;
+  position: relative;
+}
+
+.trend-bar:hover {
+  filter: brightness(1.2);
+}
+
+.trend-tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.trend-bar:hover .trend-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.trend-bar-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

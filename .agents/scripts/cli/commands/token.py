@@ -353,6 +353,60 @@ def run_log(args: List[str]) -> None:
     if budget["monthly_used"] > budget["monthly_limit"]:
         print_warn(f"Monthly token budget limit exceeded! Used: {budget['monthly_used']}/{budget['monthly_limit']}")
 
+def get_reset_intervals_remaining() -> dict:
+    """
+    Calculate the time remaining (hours and minutes) until the next resets.
+    - 5-Hour Reset (intervals: 00:00, 05:00, 10:00, 15:00, 20:00 UTC)
+    - Daily Reset (midnight UTC)
+    - Weekly Reset (Sunday midnight UTC)
+    - Monthly Reset (1st of next month midnight UTC)
+    """
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    
+    # 1. 5-Hour Reset remaining
+    current_hour = now.hour
+    next_hour = ((current_hour // 5) + 1) * 5
+    if next_hour >= 24:
+        next_dt = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        next_dt = now.replace(hour=next_hour, minute=0, second=0, microsecond=0)
+    five_hour_remaining = next_dt - now
+    
+    # 2. Daily Reset remaining
+    next_day_dt = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    daily_remaining = next_day_dt - now
+    
+    # 3. Weekly Reset remaining (until Sunday midnight UTC)
+    days_to_sunday = 6 - now.weekday()
+    next_sunday_dt = (now + timedelta(days=days_to_sunday if days_to_sunday > 0 else 7)).replace(hour=0, minute=0, second=0, microsecond=0)
+    if now.weekday() == 6:
+        next_sunday_dt = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    weekly_remaining = next_sunday_dt - now
+    
+    # 4. Monthly Reset remaining
+    if now.month == 12:
+        next_month_dt = datetime(now.year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        next_month_dt = datetime(now.year, now.month + 1, 1, tzinfo=timezone.utc)
+    monthly_remaining = next_month_dt - now
+    
+    def format_td(td: timedelta) -> str:
+        total_seconds = int(td.total_seconds())
+        days = td.days
+        hours = (total_seconds // 3600) % 24
+        minutes = (total_seconds % 3600) // 60
+        if days > 0:
+            return f"{days}d {hours}h {minutes}m"
+        return f"{hours}h {minutes}m"
+        
+    return {
+        "five_hour": format_td(five_hour_remaining),
+        "daily": format_td(daily_remaining),
+        "weekly": format_td(weekly_remaining),
+        "monthly": format_td(monthly_remaining)
+    }
+
 def run_status(args: List[str]) -> None:
     budget = load_budget()
     budget = check_date_resets(budget)
@@ -373,6 +427,15 @@ def run_status(args: List[str]) -> None:
     print(f"Monthly Limit : {monthly_limit:,} tokens")
     print(f"Monthly Used  : {monthly_used:,} tokens ({monthly_pct:.2f}% utilized)")
     print(f"Last Reset    : {budget.get('last_reset', 'N/A')}")
+    
+    resets = get_reset_intervals_remaining()
+    print("-"*60)
+    print("Reset Intervals Remaining:")
+    print(f"  - 5-Hour Reset : {resets['five_hour']}")
+    print(f"  - Daily Reset  : {resets['daily']}")
+    print(f"  - Weekly Reset : {resets['weekly']}")
+    print(f"  - Monthly Reset: {resets['monthly']}")
+    
     print("-"*60)
     print("Account Breakdown:")
     accounts = budget.get("accounts", {})

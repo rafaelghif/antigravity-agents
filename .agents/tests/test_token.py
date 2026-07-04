@@ -182,5 +182,12 @@ class TestTokenCommand(unittest.TestCase):
             self.assertGreater(prompt, 0)
             self.assertGreater(completion, 0)
 
+    def test_get_reset_intervals_remaining(self):
+        resets = token_cmd.get_reset_intervals_remaining()
+        self.assertIn("five_hour", resets)
+        self.assertIn("daily", resets)
+        self.assertIn("weekly", resets)
+        self.assertIn("monthly", resets)
+
 if __name__ == '__main__':
     unittest.main()
