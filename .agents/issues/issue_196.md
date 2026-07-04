@@ -1,7 +1,7 @@
 ---
 id: issue-196
 title: "Make MCP server dynamically resolve target project scripts directory"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-04
 ---

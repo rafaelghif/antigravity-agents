@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.175.0] - 2026-07-04
+
+### 🚀 Features
+- resolve workspace scripts directory dynamically in mcp_server
+- Make MCP server dynamically resolve target project scripts directory (ISSUE-196)
+
+
 ## [2.174.0] - 2026-07-04
 
 ### 🚀 Features

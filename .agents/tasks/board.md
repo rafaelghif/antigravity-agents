@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Make MCP server dynamically resolve target project scripts directory (feat/issue-196) <!-- id: issue-196 -->
 - [x] Exclude active context logs and budgets from installer (feat/issue-194) <!-- id: issue-194 -->
 - [x] Fix installer memory leak and identity separation for target projects (feat/issue-193) <!-- id: issue-193 -->
 - [x] Fix project version and changelog mapping during bootstrap and release (feat/issue-192) <!-- id: issue-192 -->
@@ -180,3 +181,4 @@ This board tracks active development tasks.
 - [x] Implement adoption features: Human Bypass Mode, Local Visual Dashboard, and GitHub Issue Task Sync (feat/issue-127) <!-- id: issue-127 -->
 - [x] Set up automated compliance validation suite (feat/issue-011) <!-- id: issue-011 -->
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
+- [x] Fix upgrade.py to exclude AGENTS.md and rules.md from auto-checkout (feat/issue-195) <!-- id: issue-195 -->
