@@ -653,6 +653,53 @@ created_at: {current_date}
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'. Please run 'create' first.")
             sys.exit(1)
+
+        # Dynamic contributor assignee assignment
+        active_profile_name = None
+        profiles_file = ".agents/git_profiles.json"
+        if os.path.exists(profiles_file):
+            try:
+                import json
+                with open(profiles_file, 'r', encoding='utf-8') as f:
+                    lines = [line for line in f if not line.strip().startswith("#")]
+                    data = json.loads("".join(lines))
+                    profiles = data.get("profiles", [])
+                    active_profile = next((p for p in profiles if p.get("active")), None)
+                    if active_profile:
+                        active_profile_name = active_profile.get("name")
+            except Exception:
+                pass
+
+        if active_profile_name:
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                fm = parse_issue_frontmatter(content)
+                curr_assignee = fm.get("assignee")
+                if curr_assignee != active_profile_name:
+                    lines = content.splitlines()
+                    boundary_indices = [idx for idx, line in enumerate(lines) if line.strip() == '---']
+                    if len(boundary_indices) >= 2:
+                        insert_idx = boundary_indices[1]
+                        
+                        # Remove existing assignee line if present
+                        assignee_line_idx = -1
+                        for idx in range(boundary_indices[0] + 1, boundary_indices[1]):
+                            if lines[idx].strip().startswith("assignee:"):
+                                assignee_line_idx = idx
+                                break
+                        
+                        if assignee_line_idx != -1:
+                            lines[assignee_line_idx] = f"assignee: {active_profile_name}"
+                        else:
+                            lines.insert(insert_idx, f"assignee: {active_profile_name}")
+                            
+                        new_content = "\n".join(lines) + "\n"
+                        with open(path, 'w', encoding='utf-8') as f:
+                            f.write(new_content)
+                        print(f"\033[92m[OK]\033[0m Assigned issue '{issue_id}' to active profile '{active_profile_name}' in frontmatter.")
+            except Exception as e:
+                print(f"Warning: Failed to update issue assignee: {e}")
             
         # Determine branch name
         slug = issue_id.lower().replace('_', '-')

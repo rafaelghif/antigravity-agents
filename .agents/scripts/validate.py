@@ -856,6 +856,35 @@ def audit_git_branch_alignment() -> bool:
             # Dynamically import issue command to use its helper
             sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "cli")))
             import commands.issue as issue_cmd
+            
+            # Contributor identity alignment check
+            fm = issue_cmd.parse_issue_frontmatter(issue_content)
+            assignee = fm.get("assignee")
+            if assignee:
+                profiles_file = ".agents/git_profiles.json"
+                if os.path.exists(profiles_file):
+                    try:
+                        with open(profiles_file, 'r', encoding='utf-8') as pf:
+                            lines = [line for line in pf if not line.strip().startswith("#")]
+                            data = json.loads("".join(lines))
+                            profiles = data.get("profiles", [])
+                            matching_profile = next((p for p in profiles if p.get("name") == assignee), None)
+                            if matching_profile:
+                                expected_email = matching_profile.get("email")
+                                res_email = subprocess.run(['git', 'config', 'user.email'], stdout=subprocess.PIPE, text=True)
+                                current_email = res_email.stdout.strip()
+                                if current_email != expected_email:
+                                    print_err(f"Branch contributor identity mismatch! Issue is assigned to '{assignee}' "
+                                              f"with email '{expected_email}', but current Git Config email is '{current_email}'.")
+                                    print_err(f"Please switch to profile '{assignee}' using: './helper.sh profile switch {assignee}'")
+                                    return False
+                                else:
+                                    print_ok(f"Branch contributor identity aligns with assignee '{assignee}' ({expected_email}).")
+                            else:
+                                print_warn(f"Issue assignee '{assignee}' is not registered in git_profiles.json.")
+                    except Exception as e:
+                        print_warn(f"Failed to verify contributor identity alignment: {e}")
+
             all_tasks, unchecked = issue_cmd.get_issue_tasks(issue_content)
             required_unchecked = [t for t in unchecked if not any(opt in t.lower() for opt in ('(optional)', '[optional]'))]
             
