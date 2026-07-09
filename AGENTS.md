@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.188.0
+- **Version:** 2.189.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -42,8 +42,6 @@
 - **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.
 - **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.
 - **ALWAYS** chain consecutive commands or prompt loops internally (e.g. running syntax compilation, unit tests, and validation checks sequentially) to minimize user interactions, achieving zero-touch verification whenever performing changes.
-
-
 
 ## 3. CLI Helper Commands Reference
 All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):
