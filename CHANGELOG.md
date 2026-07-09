@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.207.0] - 2026-07-09
+
+### 🚀 Features
+- ignore issue directory in git status checks to avoid tracking task lists
+- relocate locks, budget, and logs to state directory
+- relocate active_context.md to state directory
+- ignore state directory and add V4 upgrade blueprint
+- implement asynchronous multi-agent swarm mailbox protocol
+- implement multi-developer identity isolation, GPG key auto-import, and contributor email validation
+
+### 📝 Documentation
+- Implement V4 Phase 1: Git Cleanliness & Metadata Isolation (ISSUE-227)
+
+### ⚙️ Chores
+- Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (ISSUE-226)
+- Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (ISSUE-225)
+- mark task-state-ignore as completed
+
+
 ## [2.206.0] - 2026-07-09
 
 ### 🚀 Features
