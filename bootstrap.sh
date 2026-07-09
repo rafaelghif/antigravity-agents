@@ -37,9 +37,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.190.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.191.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.190.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.191.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
@@ -67,6 +67,12 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   else
     echo "Warning: Python 3 not found. Skipping Git hooks auto-installation."
   fi
+fi
+
+# 5. Run the python bootstrap setup wizard
+if [ -n "$PYTHON_EXEC" ] && [ -f ".agents/scripts/cli/helper.py" ]; then
+  echo "Running project setup wizard..."
+  "$PYTHON_EXEC" .agents/scripts/cli/helper.py bootstrap "$@"
 fi
 
 echo "=========================================================="

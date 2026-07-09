@@ -51,7 +51,7 @@ $ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if ((Test-Path "AGENTS.md") -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.190.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.190.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.191.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.191.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -85,6 +85,12 @@ if ($IsGit) {
     } else {
         Write-Host "Warning: Python 3 not found. Skipping Git hooks auto-installation." -ForegroundColor Yellow
     }
+}
+
+# 5. Run the python bootstrap setup wizard
+if ($PythonExec -and (Test-Path ".agents/scripts/cli/helper.py")) {
+    Write-Host "Running project setup wizard..."
+    & $PythonExec .agents/scripts/cli/helper.py bootstrap $args
 }
 
 Write-Host "==========================================================" -ForegroundColor Green
