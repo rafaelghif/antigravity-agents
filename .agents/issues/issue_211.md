@@ -1,7 +1,7 @@
 ---
 id: issue-211
 title: "Implement agent soul profile and heartbeat workspace diagnostics"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
