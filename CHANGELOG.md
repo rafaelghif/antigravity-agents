@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.199.0] - 2026-07-09
+
+### 🚀 Features
+- refine AAC V3 architectural upgrade blueprint with swarm and sandboxing details
+- Refine AAC V3 Upgrade Blueprint with Multi-Agent Swarm and Sandboxing (ISSUE-220)
+
+
 ## [2.198.0] - 2026-07-09
 
 ### 🚀 Features
