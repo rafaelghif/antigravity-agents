@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.205.0] - 2026-07-09
+
+### 🚀 Features
+- implement multi-developer identity isolation, GPG key auto-import, and contributor email validation
+- Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (ISSUE-226)
+
+### ⚙️ Chores
+- Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (ISSUE-225)
+
+
 ## [2.204.0] - 2026-07-09
 
 ### 🚀 Features
