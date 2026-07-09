@@ -336,5 +336,55 @@ class TestProfileCommand(unittest.TestCase):
         self.assertFalse(saved_data["profiles"][0]["active"])
         self.assertTrue(saved_data["profiles"][1]["active"])
 
+    @patch('subprocess.run')
+    def test_extract_gpg_key_id_with_colons(self, mock_run):
+        # Mock gpg --show-keys --with-colons output
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="pub:u:2048:1:3AA5C34371567BD2:2026-07-09:::\nfpr:::::::::C9B90D8F19B91395A3BE95FE3AA5C34371567BD2:\n"
+        )
+        key_id = profile.extract_gpg_key_id("mock-key-block")
+        self.assertEqual(key_id, "3AA5C34371567BD2")
+
+    @patch('subprocess.run')
+    def test_extract_gpg_key_id_fallback(self, mock_run):
+        # First call fails or doesn't match pub/fpr records, fallback succeeded
+        mock_run.side_effect = [
+            MagicMock(returncode=1),
+            MagicMock(returncode=0, stdout="pub   ed25519 2026-07-09 [SC]\n      3AA5C34371567BD2\n")
+        ]
+        key_id = profile.extract_gpg_key_id("mock-key-block")
+        self.assertEqual(key_id, "3AA5C34371567BD2")
+
+    @patch('subprocess.run')
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="mock-file-key-block")
+    @patch('profile.extract_gpg_key_id', return_value="3AA5C34371567BD2")
+    def test_apply_git_config_with_dynamic_gpg_file(self, mock_extract, mock_file, mock_exists, mock_run):
+        # Mock git run commands
+        mock_run.return_value = MagicMock(returncode=0)
+        
+        prof = {
+            "name": "p1",
+            "email": "p1@test.com",
+            "gpg_private_key_file": "~/.gnupg/p1.key"
+        }
+        profile.apply_git_config(prof)
+        
+        # Verify gpg import was run with key content
+        import_call = None
+        for call in mock_run.call_args_list:
+            cmd = call[0][0]
+            if "gpg" in cmd and "--import" in cmd:
+                import_call = call
+                break
+        
+        self.assertIsNotNone(import_call)
+        self.assertEqual(import_call[1]["input"], "mock-file-key-block")
+        
+        # Verify git configured user.signingkey
+        signingkey_call = any("user.signingkey" in cmd and "3AA5C34371567BD2" in cmd for cmd in [call[0][0] for call in mock_run.call_args_list if isinstance(call[0][0], list)])
+        self.assertTrue(signingkey_call)
+
 if __name__ == '__main__':
     unittest.main()

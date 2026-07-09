@@ -1,5 +1,7 @@
 import unittest
 from unittest.mock import patch, mock_open, MagicMock
+import json
+import io
 import sys
 import os
 
@@ -523,6 +525,46 @@ class TestValidate(unittest.TestCase):
         audit_func = validate.make_skill_audit("test_skill", "path/to/validate.py")
         result = audit_func()
         self.assertFalse(result)
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_audit_git_branch_alignment_contributor_mismatch(self, mock_open_file, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-225"
+        mock_exists.side_effect = lambda path: True
+        
+        mock_issue_md = "---\nid: issue-225\ntitle: Test\nstatus: open\nassignee: dev-alice\n---\nTasks:\n- [x] Subtask 1\n"
+        mock_profiles_json = json.dumps({
+            "profiles": [
+                {"name": "dev-alice", "email": "alice@corp.com", "active": True}
+            ]
+        })
+        
+        mock_open_file.side_effect = lambda path, *args, **kwargs: io.StringIO(mock_profiles_json) if "profiles" in path else io.StringIO(mock_issue_md)
+        mock_run.return_value = MagicMock(returncode=0, stdout="bob@corp.com\n")
+        
+        self.assertFalse(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_current_branch')
+    @patch('subprocess.run')
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_audit_git_branch_alignment_contributor_match(self, mock_open_file, mock_exists, mock_run, mock_get_branch):
+        mock_get_branch.return_value = "feat/issue-225"
+        mock_exists.side_effect = lambda path: True
+        
+        mock_issue_md = "---\nid: issue-225\ntitle: Test\nstatus: open\nassignee: dev-alice\n---\nTasks:\n- [x] Subtask 1\n"
+        mock_profiles_json = json.dumps({
+            "profiles": [
+                {"name": "dev-alice", "email": "alice@corp.com", "active": True}
+            ]
+        })
+        
+        mock_open_file.side_effect = lambda path, *args, **kwargs: io.StringIO(mock_profiles_json) if "profiles" in path else io.StringIO(mock_issue_md)
+        mock_run.return_value = MagicMock(returncode=0, stdout="alice@corp.com\n")
+        
+        self.assertTrue(validate.audit_git_branch_alignment())
 
 if __name__ == '__main__':
     unittest.main()

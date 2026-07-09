@@ -163,6 +163,43 @@ def handle_list(args: List[str]) -> None:
         else:
             print(f"    {name} ({email})")
 
+def extract_gpg_key_id(key_block: str) -> str:
+    """Extract Key ID/fingerprint from GPG armored key block using gpg --show-keys."""
+    try:
+        # Try colons first
+        res = subprocess.run(
+            ['gpg', '--show-keys', '--with-colons'],
+            input=key_block,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                parts = line.split(':')
+                if len(parts) > 4 and parts[0] == 'pub':
+                    return parts[4] # Standard key ID field in colon format
+                if len(parts) > 9 and parts[0] == 'fpr':
+                    return parts[9] # Fingerprint field
+                    
+        # Fallback to standard show-keys
+        res2 = subprocess.run(
+            ['gpg', '--show-keys'],
+            input=key_block,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res2.returncode == 0:
+            lines = res2.stdout.splitlines()
+            for i, line in enumerate(lines):
+                if "pub " in line or "sec " in line:
+                    if i + 1 < len(lines):
+                        return lines[i+1].strip()
+    except Exception:
+        pass
+    return None
+
 def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> None:
     """Immediately configure the local Git repository settings."""
     # Check if we are inside a Git repository
@@ -179,6 +216,46 @@ def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> Non
     email = profile.get("email")
     name = profile.get("name")
     signing_key = None if force_no_gpg else profile.get("signing_key")
+    
+    # Dynamic GPG private key block loading
+    if not force_no_gpg:
+        gpg_key_block = None
+        if "gpg_private_key" in profile:
+            gpg_key_block = profile["gpg_private_key"]
+        elif "gpg_private_key_env" in profile:
+            env_var = profile["gpg_private_key_env"]
+            gpg_key_block = os.environ.get(env_var)
+        elif "gpg_private_key_file" in profile:
+            key_file = os.path.expanduser(profile["gpg_private_key_file"])
+            if os.path.exists(key_file):
+                try:
+                    with open(key_file, 'r', encoding='utf-8') as f:
+                        gpg_key_block = f.read()
+                except Exception:
+                    pass
+
+        if gpg_key_block:
+            print("Importing dynamic GPG private key...")
+            try:
+                res_import = subprocess.run(
+                    ['gpg', '--import', '--batch', '--yes'],
+                    input=gpg_key_block,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                if res_import.returncode == 0:
+                    print_ok("Successfully imported GPG private key dynamically.")
+                    # Try to extract the Key ID to configure user.signingkey if not already explicitly set
+                    if not signing_key:
+                        extracted_id = extract_gpg_key_id(gpg_key_block)
+                        if extracted_id:
+                            signing_key = extracted_id
+                            print_ok(f"Automatically resolved GPG signing key ID: {signing_key}")
+                else:
+                    print_warn(f"Failed to import GPG private key: {res_import.stderr.strip()}")
+            except Exception as e:
+                print_warn(f"Error importing GPG key: {e}")
     
     try:
         if email:
