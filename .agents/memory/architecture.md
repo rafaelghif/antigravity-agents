@@ -32,3 +32,8 @@ All major architectural changes must be registered as ADRs:
 - [ADR 0002: Strict Workspace-Level Tasking & Commit Validation Gates](file://./decisions/0002-strict-validation-gates.md)
 - [ADR 0003: AAC V3 Aligned Specifications](file://./decisions/0003-v3-upgrade-specifications.md)
 
+## 4. Upgrade Blueprints
+All active architecture evolution proposals:
+- [AAC V3 Upgrade Blueprint](file://../plans/aac_v3_upgrade_blueprint.md)
+- [AAC V3 Multi-Developer Collaboration & Swarm Blueprint](file://../plans/aac_v3_collaboration_and_swarm_blueprint.md)
+
