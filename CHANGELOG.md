@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.194.0] - 2026-07-09
+
+### 🚀 Features
+- implement MCP isolation, upgrade backup, safe merges, and offline bootstrap
+- Harden agent workspace, upgrade logic, base merge checks, and MCP isolation (ISSUE-215)
+
+
 ## [2.193.0] - 2026-07-09
 
 ### 🚀 Features

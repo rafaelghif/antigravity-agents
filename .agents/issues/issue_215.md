@@ -1,7 +1,7 @@
 ---
 id: issue-215
 title: "Harden agent workspace, upgrade logic, base merge checks, and MCP isolation"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---

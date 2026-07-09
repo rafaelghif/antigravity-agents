@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Harden agent workspace, upgrade logic, base merge checks, and MCP isolation (feat/issue-215) <!-- id: issue-215 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Harden agent workspace, upgrade logic, base merge checks, and MCP isolation (feat/issue-215) <!-- id: issue-215 -->
 - [x] Implement installer and bootstrap version checking in validate.py (feat/issue-214) <!-- id: issue-214 -->
 - [x] Enforce dependency mapping and installer validation rules in core files (feat/issue-213) <!-- id: issue-213 -->
 - [x] Integrate interactive setup wizard launch into bootstrap scripts (feat/issue-212) <!-- id: issue-212 -->
