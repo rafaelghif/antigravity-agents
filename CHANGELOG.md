@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.2.0] - 2026-07-09
+
+### 🚀 Features
+- correct V3/V4 label inconsistencies in CHANGELOG.md
+- fix: correct V3/V4 label inconsistencies in CHANGELOG.md (ISSUE-230)
+
+
 ## [3.1.0] - 2026-07-09 (Antigravity Agent Core V3 Release)
 
 ### 🚀 Features

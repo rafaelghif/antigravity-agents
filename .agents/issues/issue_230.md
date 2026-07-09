@@ -1,7 +1,7 @@
 ---
 id: issue-230
 title: "fix: correct V3/V4 label inconsistencies in CHANGELOG.md"
-status: open
+status: closed
 assignee: corporate-work
 created_at: 2026-07-09
 ---
