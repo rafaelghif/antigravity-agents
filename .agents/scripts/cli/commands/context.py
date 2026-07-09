@@ -220,8 +220,9 @@ def optimize_context() -> None:
 - **NEVER** edit files outside this scope unless explicitly requested by the USER.
 """
     
-    context_file = ".agents/active_context.md"
+    context_file = ".agents/state/active_context.md"
     try:
+        os.makedirs(os.path.dirname(context_file), exist_ok=True)
         with open(context_file, 'w', encoding='utf-8') as f:
             f.write(context_content)
         print_ok(f"Context manifest successfully optimized and written to '{context_file}'.")

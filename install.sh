@@ -140,6 +140,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
       ! -path ".agents/tests/*" \
       ! -path ".agents/archive/*" \
       ! -path ".agents/logs/*" \
+      ! -path ".agents/state/*" \
       ! -name "active_context.md" \
       ! -name "token_budget.json" \
       ! -name "sync_cache.json" \
