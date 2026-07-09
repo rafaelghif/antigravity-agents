@@ -3,6 +3,9 @@
 ## 1. Stack Details
 - **Language/Platform**: {{STACK}}
 - **Pattern**: {{ARCH}} Architecture
+- **Framework/Library**: {{FRAMEWORK}}
+- **Database**: {{DATABASE}}
+- **Infrastructure**: {{INFRASTRUCTURE}}
 
 ## 2. Directory Layout
 - `src/`: Core codebase.

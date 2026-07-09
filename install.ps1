@@ -93,16 +93,9 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
     Write-Host "Verifying network connection to GitHub..."
     
     $Connected = $false
-    try {
-        $CheckConn = Invoke-WebRequest -Uri "https://github.com" -Method Head -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
+    & git ls-remote "https://github.com/rafaelghif/antigravity-agents.git" HEAD 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
         $Connected = $true
-    } catch {
-        try {
-            $CheckConn = Invoke-WebRequest -Uri "https://github.com" -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
-            $Connected = $true
-        } catch {
-            $Connected = $false
-        }
     }
     
     if (-not $Connected) {
@@ -119,34 +112,24 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
 
     $TempDir = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
     New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
-    $ZipPath = Join-Path $TempDir "repo.zip"
+    $RepoUrl = "https://github.com/rafaelghif/antigravity-agents.git"
+    $RepoPath = Join-Path $TempDir "repo"
     
-    $RepoUrl = "https://github.com/rafaelghif/antigravity-agents/archive/refs/heads/main.zip"
-    Write-Host "Downloading repository ZIP..."
-    try {
-        Invoke-WebRequest -Uri $RepoUrl -OutFile $ZipPath -UseBasicParsing -ErrorAction Stop
-    } catch {
-        Write-Host "Error: Failed to download repository ZIP from GitHub: $_" -ForegroundColor Red
+    Write-Host "Cloning Antigravity Agent Core repository from Git..."
+    & git clone --depth 1 $RepoUrl $RepoPath 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "==========================================================" -ForegroundColor Red
+        Write-Host "   [ERROR] Git Clone Failed!" -ForegroundColor Red
+        Write-Host "==========================================================" -ForegroundColor Red
+        Write-Host "Failed to clone from $RepoUrl."
+        Write-Host "Please check your network connection and try again."
+        Write-Host "Installation aborted."
+        Write-Host "==========================================================" -ForegroundColor Red
         Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
         Exit 1
     }
     
-    Write-Host "Extracting repository ZIP..."
-    try {
-        Expand-Archive -Path $ZipPath -DestinationPath $TempDir -Force
-    } catch {
-        Write-Host "Error: Failed to extract repository ZIP: $_" -ForegroundColor Red
-        Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-        Exit 1
-    }
-    
-    $ExtractedDirs = @(Get-ChildItem -Path $TempDir -Directory -Filter "antigravity-agents-*")
-    if ($ExtractedDirs.Count -eq 0) {
-        Write-Host "Error: Extracted repository folder not found." -ForegroundColor Red
-        Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-        Exit 1
-    }
-    $ExtractedDir = $ExtractedDirs[0].FullName
+    $ExtractedDir = $RepoPath
     
     if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
         Write-Host "Error: Extracted repository folder does not contain .agents directory." -ForegroundColor Red

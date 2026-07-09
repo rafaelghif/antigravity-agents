@@ -371,6 +371,20 @@ def update_version_in_files(old_version: str, new_version: str) -> None:
             with open(bootstrap_ps1, 'w', encoding='utf-8') as f:
                 f.write(content)
             print(f"[OK] Updated bootstrap.ps1 version to {new_version}.")
+
+        # Update README.md
+        readme_path = "README.md"
+        if os.path.exists(readme_path):
+            with open(readme_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            content = re.sub(
+                r"version-" + re.escape(old_version) + r"-blue\.svg",
+                f"version-{new_version}-blue.svg",
+                content
+            )
+            with open(readme_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[OK] Updated README.md version badge to {new_version}.")
     else:
         # Update native project configurations
         import json
