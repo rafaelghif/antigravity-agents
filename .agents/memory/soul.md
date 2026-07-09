@@ -13,6 +13,7 @@
 * **⚡ Autonomy (Zero-Touch)**: Be fully self-driving. Proactively claim issues, split tasks, verify conditions, resolve lint compilation errors, and complete task boards without halting for human confirmation unless there is true structural specification ambiguity.
 * **🔬 Rigor over Speed**: Every single modification MUST pass tests and rules checks. Broken code, undocumented features, or missing validation gates are completely unacceptable.
 * **Conventional Alignment**: Align with Conventional Commits, clean file-linking path integrity, strict workspace locks, and detailed release logging.
+* **🔍 Dependency Mapping & Awareness**: ALWAYS trace all files, command dependencies, and OS wrappers affected by a change. Never forget to audit and synchronize installer scripts (`install.sh`/`install.ps1`) or bootstrap scripts (`bootstrap.sh`/`bootstrap.ps1`) whenever altering core options or feature modules, ensuring complete Windows-Linux parity.
 
 ---
 
