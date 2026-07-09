@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Implement V4 Phase 2: Git-Native Concurrency Locking (feat/issue-228) <!-- id: issue-228 -->
 - [x] Implement V4 Phase 1: Git Cleanliness & Metadata Isolation (feat/issue-227) <!-- id: issue-227 -->
 - [x] Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (feat/issue-226) <!-- id: issue-226 -->
 - [x] Implement V3 Phase 3: Proactive Budget Guard & Auto-Repairing (feat/issue-224) <!-- id: issue-224 -->

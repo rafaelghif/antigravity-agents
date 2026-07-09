@@ -179,7 +179,6 @@ def perform_repairs() -> None:
     
     # 1. Restore missing or corrupted JSON configs
     configs = {
-        ".agents/state/locks.json": {},
         ".agents/state/token_budget.json": {
             "monthly_limit": 5000000,
             "monthly_used": 0,
@@ -225,25 +224,7 @@ def perform_repairs() -> None:
             print_err(f"Failed to recover profiles config: {e}")
 
     # 3. Clean up stale locks
-    locks_file = ".agents/state/locks.json"
-    if os.path.exists(locks_file):
-        try:
-            with open(locks_file, 'r', encoding='utf-8') as f:
-                locks = json.load(f)
-            existing_branches = get_existing_branches()
-            stale_keys = []
-            for key, branch in list(locks.items()):
-                if branch not in existing_branches and branch != "unknown":
-                    stale_keys.append(key)
-            
-            if stale_keys:
-                for key in stale_keys:
-                    del locks[key]
-                with open(locks_file, 'w', encoding='utf-8') as f:
-                    json.dump(locks, f, indent=2)
-                print_ok(f"Pruned stale locks for deleted branches: {', '.join(stale_keys)}")
-        except Exception as e:
-            print_err(f"Failed to prune stale locks: {e}")
+    print_ok("Locks are managed git-natively on active branches. Stale locks are self-healing.")
 
     # 4. Repair/Install Git Hooks
     try:

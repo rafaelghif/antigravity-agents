@@ -134,16 +134,14 @@ def main():
     
     # 4. Security Audit Compliance check
     print("[4/4] Verifying security compliance & lock registry...")
-    locks_file = os.path.join(workspace_root, ".agents/state/locks.json")
     locks_count = 0
-    if os.path.exists(locks_file):
-        try:
-            import json
-            with open(locks_file, 'r', encoding='utf-8') as lf:
-                locks = json.load(lf)
-                locks_count = len(locks)
-        except:
-            pass
+    try:
+        sys.path.insert(0, os.path.join(workspace_root, ".agents/scripts/cli"))
+        from commands.lock import load_locks
+        locks = load_locks()
+        locks_count = len(locks)
+    except:
+        pass
             
     # Measure active prompt context overhead
     rules_file = os.path.join(workspace_root, ".agents/rules.md")
