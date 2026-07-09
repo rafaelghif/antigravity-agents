@@ -211,7 +211,11 @@ def copy_core_files(src_root, force=False):
         if any(p in exclude_parts for p in parts):
             return True
         base = os.path.basename(rel)
-        exclude_files = {'git_profiles.json', 'locks.json', '.DS_Store', 'Thumbs.db'}
+        exclude_files = {
+            'git_profiles.json', 'locks.json', '.DS_Store', 'Thumbs.db',
+            'token_budget.json', 'active_context.md', 'sync_cache.json',
+            'cooldowns.json', 'upgrade_state.json', 'projects.json'
+        }
         if base in exclude_files:
             return True
         if base.endswith(('.pyc', '.pyo')):
@@ -452,7 +456,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.183.0"
+    AAC_VERSION = "2.184.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.184.0] - 2026-07-09
+
+### 🚀 Features
+- Enhance plug-and-play adaptability, zero leakage boundaries, and local workspace memory support (ISSUE-205)
+
+
 ## [2.183.0] - 2026-07-09
 
 ### 🚀 Features
