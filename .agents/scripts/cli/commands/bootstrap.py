@@ -331,22 +331,36 @@ def run(args):
     print("==========================================================")
     
     force_update = False
+    db = "None"
+    infra = "None"
+    framework = "None"
+    
     clean_args = []
-    for arg in args:
+    i = 0
+    while i < len(args):
+        arg = args[i]
         if arg.lower() in ('--force', '-f', '--update'):
             force_update = True
+        elif arg.lower() == '--db' and i + 1 < len(args):
+            db = args[i+1]
+            i += 1
+        elif arg.lower() == '--infra' and i + 1 < len(args):
+            infra = args[i+1]
+            i += 1
+        elif arg.lower() == '--framework' and i + 1 < len(args):
+            framework = args[i+1]
+            i += 1
         else:
             clean_args.append(arg)
+        i += 1
     args = clean_args
     
     # Auto-detect stack
     detected_stack = detect_project_stack(".")
     
     # Prompt for project details
-    # To keep it friendly for automation, we support command-line arguments:
-    # helper.py bootstrap <name> <stack> <architecture> [options]
     if len(args) < 3:
-        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc>)")
+        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc> [--db <db>] [--infra <infra>] [--framework <fw>])")
         default_name = os.path.basename(os.path.abspath(".")).strip()
         name = input(f"Project Name (default: {default_name}): ").strip()
         if not name:
@@ -362,6 +376,18 @@ def run(args):
             stack = detected_stack
             
         arch = input("Architecture Pattern (clean/layered/mvc): ").strip().lower()
+        
+        db_input = input("Database (SQLite/PostgreSQL/MySQL/MongoDB/none, default: none): ").strip()
+        if db_input:
+            db = db_input
+            
+        infra_input = input("Infrastructure/Deployment (Docker/Kubernetes/AWS/GCP/none, default: none): ").strip()
+        if infra_input:
+            infra = infra_input
+            
+        fw_input = input("Framework/Library (Django/Express/Laravel/none, default: none): ").strip()
+        if fw_input:
+            framework = fw_input
     else:
         name = args[0]
         stack = args[1].lower()
@@ -371,7 +397,7 @@ def run(args):
         print("Error: Invalid inputs. Stack cannot be empty. Architecture must be 'clean', 'layered', or 'mvc'.")
         sys.exit(1)
 
-    print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture...")
+    print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture (DB: {db}, Infra: {infra}, Framework: {framework})...")
 
     import tempfile
     import shutil
@@ -448,15 +474,20 @@ def run(args):
             print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
 
     # 4. Generate .agents/schema.md
-    schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n")
-    schema_content = schema_content.replace("{{NAME}}", name).replace("{{STACK}}", stack.capitalize()).replace("{{ARCH}}", arch.upper())
+    schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
+    schema_content = schema_content.replace("{{NAME}}", name)\
+                                   .replace("{{STACK}}", stack.capitalize())\
+                                   .replace("{{ARCH}}", arch.upper())\
+                                   .replace("{{FRAMEWORK}}", framework)\
+                                   .replace("{{DATABASE}}", db)\
+                                   .replace("{{INFRASTRUCTURE}}", infra)
     with open(".agents/schema.md", 'w', encoding='utf-8') as f:
         f.write(schema_content)
     print("Generated '.agents/schema.md' architecture blueprint.")
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.185.0"
+    AAC_VERSION = "2.186.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")
