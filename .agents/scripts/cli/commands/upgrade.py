@@ -27,7 +27,7 @@ def run(args: List[str]) -> None:
         sys.exit(0)
 
     print("="*60)
-    print("      Antigravity Agent Core (AAC) V2 Auto-Upgrader")
+    print("      Antigravity Agent Core (AAC) V3 Auto-Upgrader")
     print("="*60)
     
     git_check = subprocess.run(

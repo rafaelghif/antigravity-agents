@@ -911,7 +911,7 @@ def run(args):
         url = f"http://127.0.0.1:{port}/ (accessible externally at your LAN IP)"
 
     print(f"\033[92m==========================================================\033[0m")
-    print(f"\033[92m🚀 AAC V2 Local Dashboard Server started at: {url}\033[0m")
+    print(f"\033[92m🚀 AAC V3 Local Dashboard Server started at: {url}\033[0m")
     if allow_external:
         print(f"\033[93m⚠️  [WARNING] External access is enabled! Make sure your network is secure.\033[0m")
     print(f"\033[92m==========================================================\033[0m")

@@ -1,4 +1,4 @@
-# Windows PowerShell Installer for Antigravity Agent Core (AAC) V2
+# Windows PowerShell Installer for Antigravity Agent Core (AAC) V3
 param(
     [string]$TargetDir = "."
 )
@@ -62,7 +62,7 @@ if (-not $PythonExec) {
             Write-Host "==========================================================" -ForegroundColor Red
             Write-Host "   [ERROR] Python version $VersionString is too old!" -ForegroundColor Red
             Write-Host "==========================================================" -ForegroundColor Red
-            Write-Host "AAC V2 requires Python 3.8 or newer. Found Python $VersionString."
+            Write-Host "AAC V3 requires Python 3.8 or newer. Found Python $VersionString."
             Write-Host "Please upgrade Python and run the installer again."
             Write-Host "Installation aborted."
             Write-Host "==========================================================" -ForegroundColor Red
@@ -74,7 +74,7 @@ if (-not $PythonExec) {
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   Installing Antigravity Agent Core V2..." -ForegroundColor Cyan
+Write-Host "   Installing Antigravity Agent Core V3..." -ForegroundColor Cyan
 Write-Host "   Target Directory: $TargetAbs" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
@@ -308,6 +308,6 @@ if ($Timestamp) {
 }
 
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "   AAC V2 Installation Completed Successfully!            " -ForegroundColor Green
+Write-Host "   AAC V3 Installation Completed Successfully!            " -ForegroundColor Green
 Write-Host "   Run './helper.ps1 validate' in the target folder to test." -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green

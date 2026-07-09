@@ -132,7 +132,7 @@ def record_lesson(lesson: str, category: str = None):
     if not os.path.exists(lessons_path):
         # Bootstrap lessons-learned.md if missing
         with open(lessons_path, 'w', encoding='utf-8') as f:
-            f.write("# AAC V2 Lessons Learned\n\nThis file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.\n\n## Lessons Learned\n")
+            f.write("# AAC V3 Lessons Learned\n\nThis file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.\n\n## Lessons Learned\n")
             
     # Read the current content
     with open(lessons_path, 'r', encoding='utf-8') as f:

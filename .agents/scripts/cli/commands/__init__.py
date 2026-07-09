@@ -1,1 +1,1 @@
-# AAC V2 CLI subcommands package init
+# AAC V3 CLI subcommands package init

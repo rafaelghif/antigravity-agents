@@ -1,18 +1,18 @@
-# Antigravity Agent Core (AAC) V2 🚀
+# Antigravity Agent Core (AAC) V3 🚀
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.208.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
 
-**AAC V2** is an open-source, local-first guardrail and workspace customization framework built for the **Antigravity CLI (agy)**. It enforces strict boundaries, directory structures, and code patterns on autonomous agents to align repository workflows with professional engineering practices.
+**AAC V3** is an open-source, local-first guardrail and workspace customization framework built for the **Antigravity CLI (agy)**. It enforces strict boundaries, directory structures, and code patterns on autonomous agents to align repository workflows with professional engineering practices.
 
 > [!IMPORTANT]
-> **AAC V2** acts as a local security sandbox and quality gate. All configurations, credentials, tasks, and plans are stored strictly at the workspace level under `.agents/` to maintain team consistency without relying on global states.
+> **AAC V3** acts as a local security sandbox and quality gate. All configurations, credentials, tasks, and plans are stored strictly at the workspace level under `.agents/` to maintain team consistency without relying on global states.
 
-By placing a strict insulation layer around your workspace, AAC V2 prevents AI tools from:
+By placing a strict insulation layer around your workspace, AAC V3 prevents AI tools from:
 - 🔓 Leaking local credentials, API keys, or private `.env` files.
 - 🔀 Mutating critical base branches (`main`/`master`) directly.
 - 🏚️ Violating architectural specifications or database migration templates.
@@ -22,7 +22,7 @@ By placing a strict insulation layer around your workspace, AAC V2 prevents AI t
 
 ## 🗺️ Reusable Development Cycle
 
-AAC V2 forces AI agents to run inside a repeatable, secure lifecycle loop:
+AAC V3 forces AI agents to run inside a repeatable, secure lifecycle loop:
 
 ```mermaid
 flowchart TD

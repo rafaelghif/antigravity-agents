@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Environment bootstrap script for Antigravity Agent Core (AAC) V2
+# Environment bootstrap script for Antigravity Agent Core (AAC) V3
 set -euo pipefail
 
 echo "=========================================================="
-echo "   Bootstrapping Antigravity Agent Core (AAC) V2...   "
+echo "   Bootstrapping Antigravity Agent Core (AAC) V3...   "
 echo "=========================================================="
 
 # 1. Create directories
@@ -37,9 +37,9 @@ import re, os
 with open("AGENTS.md", "r", encoding="utf-8") as f:
     content = f.read()
 if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 2.208.0", content)
+    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 3.0.0", content)
 else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 2.208.0", content)
+    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 3.0.0", content)
 with open("AGENTS.md", "w", encoding="utf-8") as f:
     f.write(content)
 '
@@ -76,5 +76,5 @@ if [ -n "$PYTHON_EXEC" ] && [ -f ".agents/scripts/cli/helper.py" ]; then
 fi
 
 echo "=========================================================="
-echo "   AAC V2 Bootstrap Completed Successfully!             "
+echo "   AAC V3 Bootstrap Completed Successfully!             "
 echo "=========================================================="

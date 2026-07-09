@@ -93,7 +93,7 @@ def analyze_tests(tests_dir):
 
 def main():
     print("==========================================================")
-    print("   Running AAC V2 Performance & Codebase Benchmarking...  ")
+    print("   Running AAC V3 Performance & Codebase Benchmarking...  ")
     print("==========================================================")
     
     workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -151,15 +151,15 @@ def main():
             rules_loc = len(rf.readlines())
             
     # Generate the Markdown report content
-    report_md = f"""# Antigravity Agent Core (AAC) V2 — Performance & Codebase Benchmark Report
+    report_md = f"""# Antigravity Agent Core (AAC) V3 — Performance & Codebase Benchmark Report
 
-This document presents a comprehensive, data-driven benchmark analysis of the **Antigravity Agent Core (AAC) V2** framework, detailing codebase architecture, execution efficiency, and token-saving optimizations.
+This document presents a comprehensive, data-driven benchmark analysis of the **Antigravity Agent Core (AAC) V3** framework, detailing codebase architecture, execution efficiency, and token-saving optimizations.
 
 ---
 
 ## 1. Executive Summary
 
-Antigravity Agent Core (AAC) V2 is an enterprise-grade, project-agnostic operational workspace layout and developer protocol. It enforces strict Git practices, local validation gates, parallel module locks, and automated self-learning to maximize developer productivity and prevent code conflicts in multi-agent environments.
+Antigravity Agent Core (AAC) V3 is an enterprise-grade, project-agnostic operational workspace layout and developer protocol. It enforces strict Git practices, local validation gates, parallel module locks, and automated self-learning to maximize developer productivity and prevent code conflicts in multi-agent environments.
 
 ---
 
@@ -184,7 +184,7 @@ The codebase is highly streamlined, prioritizing minimal external dependencies a
 
 ## 3. Test Quality & Coverage
 
-AAC V2 maintains a strict testing regime to prevent regressions on core CLI helpers and validator audits.
+AAC V3 maintains a strict testing regime to prevent regressions on core CLI helpers and validator audits.
 
 ### Quality Metrics Table
 
@@ -213,7 +213,7 @@ Execution benchmarks were run on Python 3.14.4 (Linux x86_64) using a multi-run 
 
 ## 5. Architectural Isolation & Safety Features
 
-AAC V2 implements a zero-trust development architecture where agents are restricted to isolated work scopes to prevent code regression, secret leakage, and merge conflicts.
+AAC V3 implements a zero-trust development architecture where agents are restricted to isolated work scopes to prevent code regression, secret leakage, and merge conflicts.
 
 ### Key Security & Protection Pillars:
 1. **Module Lock Compliance**: Active locks registry counts **{locks_count}** active lock(s). Prevents concurrent editing conflicts.
