@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.186.0] - 2026-07-09
+
+### 🚀 Features
+- Harden Git-based installation, interactive setup interview, zero-touch execution loop, and comprehensive README documentation (ISSUE-207)
+
+
 ## [2.185.0] - 2026-07-09
 
 ### 🚀 Features

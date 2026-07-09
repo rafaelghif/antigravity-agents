@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.181.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-2.186.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -41,17 +41,14 @@ flowchart TD
 
 ## 🌟 Key Features
 
+* **📦 Native Git-Based Installer**: Downloads files using `git clone --depth 1` natively, preserving version tags, release logs, and checking network availability dynamically via `git ls-remote`.
+* **🎤 Setup Questionnaire Interview**: Guides users through a database, framework, and deployment infrastructure questionnaire at the start of `./helper.sh bootstrap`, immediately injecting parameters into `.agents/schema.md`.
+* **🔁 Lookahead Loop & Zero-Touch Chaining**: Rules enforce that the agent performs self-correcting test/lint validation loops and chains commands internally, reducing user interactions to a minimum and preventing hallucinations.
 * **⚡ Offline Validation Guard**: Run 10 compliance audits (securing files, secrets, links, task boards, branch names, and unit tests) in **under 100ms** to block bad commits.
-* **👤 Zero-Trust Git Profiles**: Rotate commits metadata and GPG/SSH keys dynamically, preventing corporate credential leaks.
-* **🔒 Collaborative Module Locks**: Restrict parallel edits on directories to prevent agents from clashing.
-* **📦 Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, keeping agent index files tiny and saving up to **80% in LLM token budgets**.
-* **🧠 Prompt Caching & Token Optimization**: Enforces reuse of retrieved information across turns to maximize prompt cache hits and prevent redundant file reads.
-* **🎯 Strict Workspace Spec Reads**: Guarantees that the agent reads `active_context.md` and `schema.md` at session startup to prevent hallucinated designs or schemas.
-* **🪙 Token Budget Tracker (Beta)**: Local token tracking, logging, and synchronization with platform usage (Note: platform quota synchronization is a beta feature currently undergoing active improvement and validation).
+* **👤 Zero-Trust Git Profiles**: Rotate author metadata and local developer credentials dynamically, preventing leakage.
+* **🔒 Collaborative Module Locks**: Restrict parallel edits on directories using directory-level filesystem mutexes.
+* **Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, saving up to **80% in LLM token budgets**.
 * **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
-* **⏩ Human Validation Bypass**: Skip strict validation audits during quick human hotfixes via `--bypass` flags or `AAC_BYPASS_COMPLIANCE=1` env variables.
-* **🚀 GitHub Action CI/CD Integration**: Block PR merges automatically in your organization if an agent attempts to push non-compliant code.
-* **💻 Verified OS Support**: Actively developed and tested on **Ubuntu (modern Linux runtimes like Ubuntu 26)** and standard POSIX shells. Exposes host/port overrides for WSL2/containerized compatibility.
 
 ---
 
@@ -61,7 +58,7 @@ flowchart TD
 Run the bootstrap installer script inside your project's root folder:
 
 > [!NOTE]
-> The installer always downloads the verified source files directly from the Git repository to prevent version mismatch or missing local utilities.
+> The installer clones template files directly from the Git repository to verify installation integrity.
 
 **Linux / macOS (Bash):**
 ```bash
@@ -73,8 +70,16 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
 ```
 
-### 2. Auto-Detect Your Stack
-The installer triggers the reconnaissance script (`.agents/scripts/recon.py`), which scans your repository, replaces placeholders in `AGENTS.md` and generates stack-tailored test/build rules in `.agents/rules.md`.
+### 2. Auto-Detect Stack & Run Interactive Interview
+The installer triggers the reconnaissance script (`.agents/scripts/recon.py`), which scans your repository. You will then be prompted to configure your project details:
+- **Project Name**
+- **Programming Stack**
+- **Architecture Pattern** (clean / layered / mvc)
+- **Database** (e.g. SQLite, PostgreSQL, MySQL, MongoDB, none)
+- **Infrastructure/Deployment** (e.g. Docker, Kubernetes, AWS, GCP, none)
+- **Framework/Library** (e.g. Django, Express, Laravel, none)
+
+These details are immediately synchronized and written to [schema.md](file:///.agents/schema.md) and [rules.md](file:///.agents/rules.md).
 
 ### 3. Configure Profiles & Sub-projects (Optional)
 Customize local developer identities or configure monorepo sub-project validation:
@@ -85,37 +90,22 @@ Customize local developer identities or configure monorepo sub-project validatio
 When prompting your agent (e.g. Cline, Aider, Cursor), refer to the master instruction:
 > "Read AGENTS.md and align with our workspace layout, rules, and memory ledger."
 
-> [!TIP]
-> Run `./helper.sh validate` locally before committing your changes. It executes all 10 audits in under 100ms, making it extremely fast and lightweight to run as part of your normal pre-commit flow.
-
----
-
-## 🚀 GitHub Action CI/CD Setup
-
-To enforce these AI guardrails during pull request checks:
-1. Copy the CI template:
-   ```bash
-   mkdir -p .github/workflows
-   cp .agents/templates/github-action.yml .github/workflows/aac-validate.yml
-   ```
-2. Commit and push the workflow file. The action will run automatically on push/PR, failing the status check if validation fails.
-
 ---
 
 ## 🛠️ CLI Commands Reference
 
-Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatcher commands:
+Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands:
 
 | Command | Usage | Description |
 |---|---|---|
-| **`bootstrap`** | `./helper.sh bootstrap` | Scaffolds directories, detects stack, and guides Git profile setup. |
+| **`bootstrap`** | `./helper.sh bootstrap` | Scaffolds directories, detects stack, runs the DB/Infra setup interview, and guides Git profile setup. Can be automated with parameters: `bootstrap <name> <stack> <arch> [--db <db>] [--infra <infra>] [--framework <fw>]`. |
 | **`validate`** | `./helper.sh validate` | Runs 10 compliance audits (files, secrets, links, branch, sync, tests, locks). |
 | **`dashboard`** | `./helper.sh dashboard` | Launches local web-based interactive visual status dashboard. |
 | **`issue`** | `./helper.sh issue <subcommand>` | Local issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
-| **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative koding. Run with `--release` to unlock. |
+| **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative coding. Run with `--release` to unlock. |
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
 | **`context`** | `./helper.sh context optimize` | Rebuilds active context manifest and archives done issues. |
-| **`token` (Beta)** | `./helper.sh token <subcommand>` | Beta - local token budget tracker. Supports `log`, `status`, `sync`, and `reset`. (Note: platform quota synchronization is still in development and undergoing active improvement). |
+| **`token` (Beta)** | `./helper.sh token <subcommand>` | Beta - local token budget tracker. Supports `log`, `status`, `sync`, and `reset`. |
 | **`mcp`** | `./helper.sh mcp <subcommand>` | Model Context Protocol integration. Supports `register` and `start`. |
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
@@ -130,7 +120,7 @@ After bootstrapping, your project will have the following layout:
 - `AGENTS.md` (root): Master rules and directory maps loaded by the agent on every prompt.
 - `.agents/rules.md`: Automatically generated build, test, and style configurations.
 - `.agents/schema.md`: Holds definitions for config schemas and data formats.
-- `.agents/projects.json`: Defines paths and test commands for sub-projects in a monorepo setup.
+- `.agents/projects.json`: Monorepo project references.
 - `.agents/tasks/board.md`: Active markdown task board for tracking progress.
 - `.agents/archive/`: Contains completed tasks, issues, and plans excluded from LLM context.
 - `.agents/memory/`:
