@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.198.0] - 2026-07-09
+
+### 🚀 Features
+- integrate skill evolution rule detection in auto-learning rules engine
+- Integrate skill evolution into lessons-learned extractor rules (ISSUE-219)
+
+
 ## [2.197.0] - 2026-07-09
 
 ### 🚀 Features

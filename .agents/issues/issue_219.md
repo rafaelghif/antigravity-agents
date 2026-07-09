@@ -1,7 +1,7 @@
 ---
 id: issue-219
 title: "Integrate skill evolution into lessons-learned extractor rules"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
