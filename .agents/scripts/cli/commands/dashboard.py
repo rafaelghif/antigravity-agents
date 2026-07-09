@@ -157,7 +157,7 @@ def get_dashboard_data(force=False):
 
     # 2. Module Locks
     locks = []
-    locks_path = ".agents/locks.json"
+    locks_path = ".agents/state/locks.json"
     if os.path.exists(locks_path):
         try:
             with open(locks_path, 'r', encoding='utf-8') as f:
@@ -296,7 +296,7 @@ def get_dashboard_data(force=False):
 
     # 9. Token Budget Data
     token_budget = {}
-    budget_path = ".agents/token_budget.json"
+    budget_path = ".agents/state/token_budget.json"
     if os.path.exists(budget_path):
         try:
             with open(budget_path, 'r', encoding='utf-8') as f:

@@ -210,7 +210,7 @@ def check_token_budget_gate(cmd: str):
     if os.environ.get("AAC_BYPASS_BUDGET") == "1":
         return
         
-    budget_file = ".agents/token_budget.json"
+    budget_file = ".agents/state/token_budget.json"
     if os.path.exists(budget_file):
         try:
             with open(budget_file, 'r', encoding='utf-8') as f:

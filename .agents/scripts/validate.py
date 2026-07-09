@@ -331,7 +331,7 @@ def audit_critical_files() -> bool:
     # Run JSON schema audits on optional config files
     if not validate_json_schema(".agents/projects.json", "projects"):
         failed = True
-    if not validate_json_schema(".agents/locks.json", "locks"):
+    if not validate_json_schema(".agents/state/locks.json", "locks"):
         failed = True
     if not validate_json_schema(".agents/git_profiles.json", "git_profiles"):
         failed = True
@@ -801,7 +801,7 @@ def audit_git_branch_alignment() -> bool:
                 status = line[:2]
                 path = line[3:].strip()
                 # Ignore private untracked/ignored configs
-                if "git_profiles.json" in path or "locks.json" in path:
+                if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path:
                     continue
                 if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
                     dirty = True
@@ -957,7 +957,7 @@ def audit_git_branch_alignment() -> bool:
                     check=True
                 )
                 for line in res_status.stdout.splitlines():
-                    if line.strip() and not ("git_profiles.json" in line or "locks.json" in line):
+                    if line.strip() and not ("git_profiles.json" in line or "locks.json" in line or ".agents/state/" in line):
                         is_clean = False
                         break
             except Exception:
@@ -1605,7 +1605,7 @@ def audit_module_locks() -> bool:
     except Exception:
         pass
 
-    locks_file = ".agents/locks.json"
+    locks_file = ".agents/state/locks.json"
     locks = {}
     if os.path.exists(locks_file):
         try:
@@ -1644,7 +1644,7 @@ def audit_module_locks() -> bool:
     return not failed
 
 def prune_stale_locks() -> None:
-    locks_file = ".agents/locks.json"
+    locks_file = ".agents/state/locks.json"
     if os.path.exists(locks_file):
         try:
             with open(locks_file, 'r', encoding='utf-8') as f:

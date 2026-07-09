@@ -910,7 +910,7 @@ created_at: {current_date}
             print("Warning: Workspace synchronization failed.")
 
         # Release locks held by this branch before staging final commit
-        locks_file = ".agents/locks.json"
+        locks_file = ".agents/state/locks.json"
         if os.path.exists(locks_file):
             try:
                 import json

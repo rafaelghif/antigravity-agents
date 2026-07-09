@@ -62,7 +62,7 @@ def get_issue_details(issue_id: str) -> Dict[str, Any]:
     return details
 
 def get_locked_modules(branch: str) -> List[str]:
-    locks_file = ".agents/locks.json"
+    locks_file = ".agents/state/locks.json"
     if not os.path.exists(locks_file):
         return []
     try:
