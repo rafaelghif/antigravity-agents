@@ -87,6 +87,12 @@ if ($IsGit) {
     }
 }
 
+# 5. Run the python bootstrap setup wizard
+if ($PythonExec -and (Test-Path ".agents/scripts/cli/helper.py")) {
+    Write-Host "Running project setup wizard..."
+    & $PythonExec .agents/scripts/cli/helper.py bootstrap $args
+}
+
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "   AAC V2 Bootstrap Completed Successfully!             " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green

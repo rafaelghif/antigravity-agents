@@ -69,6 +69,12 @@ if git rev-parse --is-inside-work-tree &>/dev/null; then
   fi
 fi
 
+# 5. Run the python bootstrap setup wizard
+if [ -n "$PYTHON_EXEC" ] && [ -f ".agents/scripts/cli/helper.py" ]; then
+  echo "Running project setup wizard..."
+  "$PYTHON_EXEC" .agents/scripts/cli/helper.py bootstrap "$@"
+fi
+
 echo "=========================================================="
 echo "   AAC V2 Bootstrap Completed Successfully!             "
 echo "=========================================================="
