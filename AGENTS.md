@@ -75,6 +75,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
 | `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | On match |
 | `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
+| `.agents/skills/skill-evolution/SKILL.md` | Playbook instructing agents how to dynamically formulate, design, bootstrap, and register new workspace skills when facing skill gaps. | On match |
 | `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | On match |
 | `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | On match |
 | `.agents/workflows/*.md` | Slash-command macros (e.g. `/sync-memory`) | Only when the command is run |
