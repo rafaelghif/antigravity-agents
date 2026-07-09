@@ -1,7 +1,7 @@
 ---
 id: issue-209
 title: "Enforce proactive prompt looping and self-driving zero-touch subtask execution"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
