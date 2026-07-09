@@ -125,6 +125,60 @@ def handle_install(source: str) -> None:
             
     run_sync()
 
+def handle_create(name: str, desc: str) -> None:
+    if not name:
+        print_err("Usage: helper.py skill create <skill_name> \"<description>\"")
+        sys.exit(1)
+    
+    # Validate name format: lowercase letters, numbers, and hyphens only
+    if not re.match(r'^[a-z0-9\-]+$', name):
+        print_err("Invalid skill name. Only lowercase alphanumeric characters and hyphens are allowed.")
+        sys.exit(1)
+        
+    dest_dir = os.path.join(SKILLS_DIR, name)
+    if os.path.exists(dest_dir):
+        print_err(f"Skill '{name}' already exists at {dest_dir}.")
+        sys.exit(1)
+        
+    try:
+        os.makedirs(dest_dir, exist_ok=True)
+        skill_md_path = os.path.join(dest_dir, "SKILL.md")
+        
+        # Format the title nicely (convert kebab-case to title case)
+        title = " ".join(word.capitalize() for word in name.split("-"))
+        
+        content = f"""---
+name: {name}
+description: {desc or "No description provided."}
+---
+
+# {title} Playbook
+
+Provide detailed instructions, rules, and best practices for the {title} skill here.
+
+## 1. Core Principles
+* Principle 1
+* Principle 2
+
+## 2. Operational CLI Commands
+```bash
+# Provide exact command lines
+./helper.sh command-here
+```
+
+## 3. Implementation Checklist & Verification
+* [ ] Task 1
+* [ ] Verify task 1
+"""
+        with open(skill_md_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+            
+        print_ok(f"Scaffolded skill '{name}' at '{dest_dir}' successfully.")
+        run_sync()
+    except Exception as e:
+        print_err(f"Failed to create skill '{name}': {e}")
+        sys.exit(1)
+
 def handle_uninstall(name: str) -> None:
     if not name:
         print_err("Usage: helper.py skill uninstall <skill_name>")
@@ -145,7 +199,7 @@ def handle_uninstall(name: str) -> None:
 
 def run(args: List[str]) -> None:
     if not args:
-        print("Usage: helper.py skill <list|install|uninstall> [args...]")
+        print("Usage: helper.py skill <list|install|uninstall|create> [args...]")
         sys.exit(1)
         
     subcmd = args[0].lower()
@@ -157,6 +211,10 @@ def run(args: List[str]) -> None:
     elif subcmd == "uninstall":
         name = args[1] if len(args) > 1 else ""
         handle_uninstall(name)
+    elif subcmd == "create":
+        name = args[1] if len(args) > 1 else ""
+        desc = args[2] if len(args) > 2 else ""
+        handle_create(name, desc)
     else:
-        print_err(f"Unknown subcommand '{subcmd}'. Available: list, install, uninstall")
+        print_err(f"Unknown subcommand '{subcmd}'. Available: list, install, uninstall, create")
         sys.exit(1)

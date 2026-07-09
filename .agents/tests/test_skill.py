@@ -54,5 +54,20 @@ class TestSkillCommand(unittest.TestCase):
         mock_rm.assert_called_with(os.path.join(".agents/skills", "skill-c"))
         mock_sync.assert_called_once()
 
+    @patch('os.makedirs')
+    @patch('os.path.exists', return_value=False)
+    @patch('builtins.open', new_callable=unittest.mock.mock_open)
+    @patch('commands.skill.run_sync')
+    def test_handle_create_success(self, mock_sync, mock_open_file, mock_exists, mock_makedirs):
+        skill.handle_create("my-new-skill", "A description of my-new-skill")
+        mock_makedirs.assert_called_once_with(os.path.join(".agents/skills", "my-new-skill"), exist_ok=True)
+        mock_open_file.assert_called_once_with(os.path.join(".agents/skills", "my-new-skill", "SKILL.md"), 'w', encoding='utf-8')
+        mock_sync.assert_called_once()
+
+    @patch('os.path.exists')
+    def test_handle_create_invalid_name(self, mock_exists):
+        with self.assertRaises(SystemExit):
+            skill.handle_create("Invalid_Name_123", "Some desc")
+
 if __name__ == '__main__':
     unittest.main()

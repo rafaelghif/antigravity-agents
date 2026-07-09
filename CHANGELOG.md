@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.197.0] - 2026-07-09
+
+### 🚀 Features
+- implement skill create scaffolding command in skill CLI
+- Implement CLI skill create scaffolding command (ISSUE-218)
+
+
 ## [2.196.0] - 2026-07-09
 
 ### 🚀 Features
