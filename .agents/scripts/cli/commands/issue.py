@@ -828,7 +828,7 @@ created_at: {current_date}
                 status = line[:2]
                 path = line[3:].strip()
                 # Ignore transient config files
-                if "git_profiles.json" in path or "locks.json" in path or "upgrade_state.json" in path or "token_budget.json" in path or "active_context.md" in path:
+                if "git_profiles.json" in path or "locks.json" in path or "upgrade_state.json" in path or "token_budget.json" in path or "active_context.md" in path or ".agents/state/" in path or ".agents/issues/" in path:
                     continue
                 # Block on modified, staged, or deleted tracked files
                 if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
@@ -910,7 +910,7 @@ created_at: {current_date}
             print("Warning: Workspace synchronization failed.")
 
         # Release locks held by this branch before staging final commit
-        locks_file = ".agents/locks.json"
+        locks_file = ".agents/state/locks.json"
         if os.path.exists(locks_file):
             try:
                 import json

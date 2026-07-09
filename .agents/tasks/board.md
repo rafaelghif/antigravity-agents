@@ -8,11 +8,12 @@ This board tracks active development tasks.
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
+- [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 
 ## Done
+- [x] Implement V4 Phase 1: Git Cleanliness & Metadata Isolation (feat/issue-227) <!-- id: issue-227 -->
 - [x] Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (feat/issue-226) <!-- id: issue-226 -->
-- [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 - [x] Implement V3 Phase 3: Proactive Budget Guard & Auto-Repairing (feat/issue-224) <!-- id: issue-224 -->
 - [x] Implement V3 Phase 2: Active Skill Contracts & Swarm Handoffs (feat/issue-223) <!-- id: issue-223 -->
 - [x] Formulate AAC V3 Collaboration and Swarm Coordination Blueprint (feat/issue-222) <!-- id: issue-222 -->

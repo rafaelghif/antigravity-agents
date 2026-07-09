@@ -185,6 +185,7 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
             $RelativePath -like ".agents\tests\*" -or $RelativePath -like ".agents/tests/*" -or
             $RelativePath -like ".agents\archive\*" -or $RelativePath -like ".agents/archive/*" -or
             $RelativePath -like ".agents\logs\*" -or $RelativePath -like ".agents/logs/*" -or
+            $RelativePath -like ".agents\state\*" -or $RelativePath -like ".agents/state/*" -or
             $File.Name -eq "active_context.md" -or
             $File.Name -eq "token_budget.json" -or
             $File.Name -eq "sync_cache.json" -or

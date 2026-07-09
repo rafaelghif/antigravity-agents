@@ -7,8 +7,8 @@ import tempfile
 from datetime import datetime
 from typing import List
 
-BUDGET_FILE = ".agents/token_budget.json"
-LOG_FILE = ".agents/logs/token_usage.log"
+BUDGET_FILE = ".agents/state/token_budget.json"
+LOG_FILE = ".agents/state/logs/token_usage.log"
 
 RED = "\033[91m"
 GREEN = "\033[92m"

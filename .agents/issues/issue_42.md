@@ -2,7 +2,7 @@
 id: issue-42
 title: "Test Issue"
 status: open
-assignee: agent-antigravity
+assignee: corporate-work
 created_at: 2026-07-04
 github_url: "url"
 github_number: 42

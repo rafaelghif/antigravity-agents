@@ -134,7 +134,7 @@ def main():
     
     # 4. Security Audit Compliance check
     print("[4/4] Verifying security compliance & lock registry...")
-    locks_file = os.path.join(workspace_root, ".agents/locks.json")
+    locks_file = os.path.join(workspace_root, ".agents/state/locks.json")
     locks_count = 0
     if os.path.exists(locks_file):
         try:

@@ -62,7 +62,7 @@ def get_issue_details(issue_id: str) -> Dict[str, Any]:
     return details
 
 def get_locked_modules(branch: str) -> List[str]:
-    locks_file = ".agents/locks.json"
+    locks_file = ".agents/state/locks.json"
     if not os.path.exists(locks_file):
         return []
     try:
@@ -220,8 +220,9 @@ def optimize_context() -> None:
 - **NEVER** edit files outside this scope unless explicitly requested by the USER.
 """
     
-    context_file = ".agents/active_context.md"
+    context_file = ".agents/state/active_context.md"
     try:
+        os.makedirs(os.path.dirname(context_file), exist_ok=True)
         with open(context_file, 'w', encoding='utf-8') as f:
             f.write(context_content)
         print_ok(f"Context manifest successfully optimized and written to '{context_file}'.")

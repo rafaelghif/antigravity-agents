@@ -4,7 +4,7 @@ import json
 import subprocess
 import tempfile
 
-LOCK_FILE = ".agents/locks.json"
+LOCK_FILE = ".agents/state/locks.json"
 
 def get_existing_branches() -> set:
     """Retrieve all local Git branch names in a single Git call."""
@@ -53,6 +53,7 @@ def prune_stale_locks(locks: dict) -> dict:
 def _save_locks_nolock(locks: dict) -> None:
     try:
         dir_name = os.path.dirname(LOCK_FILE) or "."
+        os.makedirs(dir_name, exist_ok=True)
         with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
             json.dump(locks, tf, indent=2)
             temp_name = tf.name

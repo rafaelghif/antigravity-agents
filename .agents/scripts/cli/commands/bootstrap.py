@@ -207,7 +207,7 @@ def copy_core_files(src_root, force=False):
             p2 = os.path.splitdrive(os.path.abspath(src_root))[1]
             rel = os.path.relpath(p1, p2)
         parts = rel.replace('\\', '/').split('/')
-        exclude_parts = {'__pycache__', '.git', '.pytest_cache', '.next', '.nuxt', 'node_modules', 'vendor'}
+        exclude_parts = {'__pycache__', '.git', '.pytest_cache', '.next', '.nuxt', 'node_modules', 'vendor', 'state'}
         if any(p in exclude_parts for p in parts):
             return True
         base = os.path.basename(rel)
@@ -504,7 +504,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.205.0"
+    AAC_VERSION = "2.207.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")

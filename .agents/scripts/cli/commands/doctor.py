@@ -179,8 +179,8 @@ def perform_repairs() -> None:
     
     # 1. Restore missing or corrupted JSON configs
     configs = {
-        ".agents/locks.json": {},
-        ".agents/token_budget.json": {
+        ".agents/state/locks.json": {},
+        ".agents/state/token_budget.json": {
             "monthly_limit": 5000000,
             "monthly_used": 0,
             "daily_limit": 500000,
@@ -225,7 +225,7 @@ def perform_repairs() -> None:
             print_err(f"Failed to recover profiles config: {e}")
 
     # 3. Clean up stale locks
-    locks_file = ".agents/locks.json"
+    locks_file = ".agents/state/locks.json"
     if os.path.exists(locks_file):
         try:
             with open(locks_file, 'r', encoding='utf-8') as f:
