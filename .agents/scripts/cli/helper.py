@@ -202,6 +202,46 @@ def print_command_help(cmd):
     else:
         print(f"{RED}Error: Help not available for unknown command '{cmd}'.{RESET}")
 
+def check_token_budget_gate(cmd: str):
+    # Allow token commands, doctor commands, and upgrades to bypass the budget gate
+    if cmd in ('token', 'doctor', 'upgrade', 'completion', 'install-global'):
+        return
+        
+    if os.environ.get("AAC_BYPASS_BUDGET") == "1":
+        return
+        
+    budget_file = ".agents/token_budget.json"
+    if os.path.exists(budget_file):
+        try:
+            with open(budget_file, 'r', encoding='utf-8') as f:
+                budget = json.load(f)
+            
+            daily_limit = budget.get("daily_limit", 0)
+            daily_used = budget.get("daily_used", 0)
+            monthly_limit = budget.get("monthly_limit", 0)
+            monthly_used = budget.get("monthly_used", 0)
+            
+            # Check Daily limit
+            if daily_limit > 0 and daily_used >= daily_limit:
+                print(f"\033[91m[FAIL] Active Token Budget Exceeded (Daily Limit)!\033[0m")
+                print(f"Daily Limit: {daily_limit} tokens")
+                print(f"Daily Used : {daily_used} tokens")
+                print(f"Please run './helper.sh token status' to verify, or './helper.sh token reset --daily' to reset.")
+                print(f"To bypass this budget gate (for manual debugging), run: export AAC_BYPASS_BUDGET=1")
+                sys.exit(1)
+                
+            # Check Monthly limit
+            if monthly_limit > 0 and monthly_used >= monthly_limit:
+                print(f"\033[91m[FAIL] Active Token Budget Exceeded (Monthly Limit)!\033[0m")
+                print(f"Monthly Limit: {monthly_limit} tokens")
+                print(f"Monthly Used : {monthly_used} tokens")
+                print(f"Please run './helper.sh token status' to verify, or './helper.sh token reset --monthly' to reset.")
+                print(f"To bypass this budget gate (for manual debugging), run: export AAC_BYPASS_BUDGET=1")
+                sys.exit(1)
+        except Exception:
+            # If the budget file is corrupted or failed to read, do not block (doctor --repair will fix it)
+            pass
+
 def main():
     help_args = {'help', '-h', '--help'}
     
@@ -210,6 +250,9 @@ def main():
         sys.exit(0)
     
     cmd = sys.argv[1].lower()
+    
+    # Active Token Budget Gate Check
+    check_token_budget_gate(cmd)
     
     # Check if an upgrade is available and notify the user
     if cmd not in ('upgrade', 'help', '-h', '--help') and cmd not in help_args:

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.203.0] - 2026-07-09
+
+### 🚀 Features
+- implement V3 Phase 3 proactive budget checking gate and doctor auto-repairs
+- Implement V3 Phase 3: Proactive Budget Guard & Auto-Repairing (ISSUE-224)
+
+
 ## [2.202.0] - 2026-07-09
 
 ### 🚀 Features
