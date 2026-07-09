@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.191.0] - 2026-07-09
+
+### 🚀 Features
+- integrate setup wizard dispatch into shell and powershell scripts
+- Integrate interactive setup wizard launch into bootstrap scripts (ISSUE-212)
+
+
 ## [2.190.0] - 2026-07-09
 
 ### 🚀 Features

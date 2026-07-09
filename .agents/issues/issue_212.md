@@ -1,7 +1,7 @@
 ---
 id: issue-212
 title: "Integrate interactive setup wizard launch into bootstrap scripts"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
