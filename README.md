@@ -111,6 +111,7 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons to `lessons-learned.md`. |
 | **`doctor`** | `./helper.sh doctor` | Diagnostics tool verifying local setup and python dependencies. |
+| **`heartbeat`** | `./helper.sh heartbeat` | Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget). |
 
 ---
 
@@ -127,6 +128,7 @@ After bootstrapping, your project will have the following layout:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
+  - `soul.md`: Core agent values, communication policies, and identity.
   - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
 - `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `self-healing/`, `database-evolution/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
