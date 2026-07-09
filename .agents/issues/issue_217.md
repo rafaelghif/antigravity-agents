@@ -1,7 +1,7 @@
 ---
 id: issue-217
 title: "Implement Self-Evolving Agent Skills and optimize rules context"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---

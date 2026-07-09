@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.196.0] - 2026-07-09
+
+### 🚀 Features
+- implement self-evolving agent skills and prune rules.md duplication
+- Implement Self-Evolving Agent Skills and optimize rules context (ISSUE-217)
+
+
 ## [2.195.0] - 2026-07-09
 
 ### 🚀 Features
