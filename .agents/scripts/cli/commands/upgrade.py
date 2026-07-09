@@ -60,9 +60,6 @@ def run(args: List[str]) -> None:
             print_err(f"Failed to fetch updates from source repository: {res_fetch.stderr.strip()}")
             sys.exit(1)
             
-        print_ok("Successfully fetched latest remote release.")
-        print("Checking out core files...")
-        
         paths_to_update = [
             ".agents/scripts/",
             ".agents/templates/",
@@ -70,6 +67,33 @@ def run(args: List[str]) -> None:
             "helper.sh",
             "helper.ps1"
         ]
+
+        # Check if local working tree is clean for core paths
+        res_status = subprocess.run(
+            ['git', 'status', '--porcelain', '--'] + paths_to_update,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res_status.returncode == 0 and res_status.stdout.strip():
+            import shutil
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            backup_dir = f".agents/backup/upgrade_{timestamp}"
+            print_warn(f"Uncommitted core modifications detected. Backing up to '{backup_dir}' before proceeding...")
+            try:
+                os.makedirs(backup_dir, exist_ok=True)
+                for line in res_status.stdout.splitlines():
+                    if line.strip():
+                        file_path = line[3:].strip()
+                        if os.path.exists(file_path) and os.path.isfile(file_path):
+                            dest_path = os.path.join(backup_dir, file_path)
+                            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                            shutil.copy2(file_path, dest_path)
+                            print(f"  Backed up: {file_path}")
+            except Exception as e:
+                print_warn(f"Failed to perform full upgrade backup: {e}")
+
+        print("Checking out core files...")
         
         res_checkout = subprocess.run(
             ['git', 'checkout', 'FETCH_HEAD', '--'] + paths_to_update,

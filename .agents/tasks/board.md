@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Harden agent workspace, upgrade logic, base merge checks, and MCP isolation (feat/issue-215) <!-- id: issue-215 -->
 - [x] Implement installer and bootstrap version checking in validate.py (feat/issue-214) <!-- id: issue-214 -->
 - [x] Enforce dependency mapping and installer validation rules in core files (feat/issue-213) <!-- id: issue-213 -->
 - [x] Integrate interactive setup wizard launch into bootstrap scripts (feat/issue-212) <!-- id: issue-212 -->
