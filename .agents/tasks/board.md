@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Integrate skill evolution into lessons-learned extractor rules (feat/issue-219) <!-- id: issue-219 -->
 - [x] Implement CLI skill create scaffolding command (feat/issue-218) <!-- id: issue-218 -->
 - [x] Implement Self-Evolving Agent Skills and optimize rules context (feat/issue-217) <!-- id: issue-217 -->
 - [x] Implement remaining audit fixes: install checks, passphraseless SSH, markdown relative link audit (feat/issue-216) <!-- id: issue-216 -->

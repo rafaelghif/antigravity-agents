@@ -46,6 +46,13 @@ DIAGNOSTIC_RULES = [
         "keywords": [r"git_profiles", r"GPG", r"ssh-key", r"signingkey"],
         "file_patterns": [r"profile\.py", r"git_profiles\.json"],
         "suggested_lesson": "Validate GPG key imports and developer identity rotation rules locally to safeguard credentials."
+    },
+    {
+        "id": "skill_evolution",
+        "category": "Skill Evolution / Self-Improvement",
+        "keywords": [r"skill", r"scaffold", r"evolution", r"create", r"SKILL\.md"],
+        "file_patterns": [r"skill\.py", r"SKILL\.md"],
+        "suggested_lesson": "Dynamically scaffold and index custom playbooks using CLI skill tools to extend agent capabilities whenever facing domain-specific task gaps."
     }
 ]
 

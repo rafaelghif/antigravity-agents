@@ -39,6 +39,17 @@ class TestLearnCommand(unittest.TestCase):
         categories = [s[0] for s in suggestions]
         self.assertIn("Testing / Mocking", categories)
 
+    @patch('subprocess.run')
+    def test_analyze_diff_skill_evolution_match(self, mock_run):
+        mock_files = MagicMock(returncode=0, stdout=".agents/skills/my-skill/SKILL.md\n")
+        mock_diff = MagicMock(returncode=0, stdout="diff --git a/SKILL.md b/SKILL.md\n+name: my-skill\n+description: my scaffold description\n")
+        mock_run.side_effect = [mock_diff, mock_files]
+        
+        suggestions = learn.analyze_diff("main")
+        self.assertTrue(len(suggestions) > 0)
+        categories = [s[0] for s in suggestions]
+        self.assertIn("Skill Evolution / Self-Improvement", categories)
+
     @patch('sys.stdin.isatty', return_value=True)
     @patch('builtins.input', side_effect=['1'])
     @patch('learn.analyze_diff', return_value=[("Testing / Mocking", "Ensure mock side effects are isolated.")])
