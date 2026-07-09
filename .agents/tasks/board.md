@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Enforce dependency mapping and installer validation rules in core files (feat/issue-213) <!-- id: issue-213 -->
 - [x] Integrate interactive setup wizard launch into bootstrap scripts (feat/issue-212) <!-- id: issue-212 -->
 - [x] Implement agent soul profile and heartbeat workspace diagnostics (feat/issue-211) <!-- id: issue-211 -->
 - [x] Upgrade AGENTS.md to enterprise-grade master prompt template and execute self-driving execution loop (feat/issue-210) <!-- id: issue-210 -->
