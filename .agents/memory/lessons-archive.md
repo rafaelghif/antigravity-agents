@@ -1,4 +1,4 @@
-# AAC V2 Lessons Learned Archive
+# AAC V3 Lessons Learned Archive
 
 This file stores archived historical lessons learned that have been pruned from the active prompt context to optimize token overhead.
 

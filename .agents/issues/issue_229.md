@@ -1,7 +1,7 @@
 ---
 id: issue-229
 title: "chore: upgrade project version name and SemVer to V3"
-status: open
+status: closed
 assignee: corporate-work
 created_at: 2026-07-09
 ---

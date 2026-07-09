@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] chore: upgrade project version name and SemVer to V3 (feat/issue-229) <!-- id: issue-229 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] chore: upgrade project version name and SemVer to V3 (feat/issue-229) <!-- id: issue-229 -->
 - [x] Implement V4 Phase 2: Git-Native Concurrency Locking (feat/issue-228) <!-- id: issue-228 -->
 - [x] Implement V4 Phase 1: Git Cleanliness & Metadata Isolation (feat/issue-227) <!-- id: issue-227 -->
 - [x] Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (feat/issue-226) <!-- id: issue-226 -->
