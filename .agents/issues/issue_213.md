@@ -1,7 +1,7 @@
 ---
 id: issue-213
 title: "Enforce dependency mapping and installer validation rules in core files"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---

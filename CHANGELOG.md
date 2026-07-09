@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.192.0] - 2026-07-09
+
+### 🚀 Features
+- enforce dependency mapping and installer validation rules
+- Enforce dependency mapping and installer validation rules in core files (ISSUE-213)
+
+
 ## [2.191.0] - 2026-07-09
 
 ### 🚀 Features
