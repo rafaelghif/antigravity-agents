@@ -1,7 +1,7 @@
 ---
 id: issue-218
 title: "Implement CLI skill create scaffolding command"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
