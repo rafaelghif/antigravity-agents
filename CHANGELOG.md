@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
-## [3.1.0] - 2026-07-09
+## [3.2.0] - 2026-07-09
+
+### 🚀 Features
+- correct V3/V4 label inconsistencies in CHANGELOG.md
+- fix: correct V3/V4 label inconsistencies in CHANGELOG.md (ISSUE-230)
+
+
+## [3.1.0] - 2026-07-09 (Antigravity Agent Core V3 Release)
 
 ### 🚀 Features
 - upgrade project version name and SemVer to V3
@@ -19,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - resolve variable shading in issue close and fix load locks unit test
 
 ### ⚙️ Chores
-- Implement V4 Phase 2: Git-Native Concurrency Locking (ISSUE-228)
+- Implement V3 Phase 7: Git-Native Concurrency Locking (ISSUE-228)
 
 
 ## [2.207.0] - 2026-07-09
@@ -28,12 +35,12 @@ All notable changes to this project will be documented in this file.
 - ignore issue directory in git status checks to avoid tracking task lists
 - relocate locks, budget, and logs to state directory
 - relocate active_context.md to state directory
-- ignore state directory and add V4 upgrade blueprint
+- ignore state directory and add V3 upgrade blueprint
 - implement asynchronous multi-agent swarm mailbox protocol
 - implement multi-developer identity isolation, GPG key auto-import, and contributor email validation
 
 ### 📝 Documentation
-- Implement V4 Phase 1: Git Cleanliness & Metadata Isolation (ISSUE-227)
+- Implement V3 Phase 6: Git Cleanliness & Metadata Isolation (ISSUE-227)
 
 ### ⚙️ Chores
 - Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (ISSUE-226)
