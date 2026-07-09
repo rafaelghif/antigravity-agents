@@ -1,5 +1,6 @@
 import os
 import re
+import json
 
 def sync_skills_to_agents_md():
     skills_dir = ".agents/skills"
@@ -243,7 +244,37 @@ This file stores archived historical lessons learned that have been pruned from 
     except Exception as e:
         print(f"Error synchronizing lessons to rules: {e}")
 
+def sync_skill_validation_hooks():
+    skills_dir = ".agents/skills"
+    registry_file = ".agents/skills/registry.json"
+    
+    if not os.path.exists(skills_dir):
+        print("Warning: Skills directory missing.")
+        return
+        
+    registry = {"skills": {}}
+    for skill_name in os.listdir(skills_dir):
+        skill_path = os.path.join(skills_dir, skill_name)
+        if os.path.isdir(skill_path):
+            has_validation = os.path.exists(os.path.join(skill_path, "validate.py"))
+            has_setup = os.path.exists(os.path.join(skill_path, "setup.sh"))
+            registry["skills"][skill_name] = {
+                "path": f".agents/skills/{skill_name}",
+                "has_validation_hook": has_validation,
+                "validation_hook_path": f".agents/skills/{skill_name}/validate.py" if has_validation else None,
+                "has_setup": has_setup,
+                "setup_path": f".agents/skills/{skill_name}/setup.sh" if has_setup else None
+            }
+            
+    try:
+        with open(registry_file, 'w', encoding='utf-8') as f:
+            json.dump(registry, f, indent=2)
+        print("Successfully synchronized skill validation hooks in skills/registry.json.")
+    except Exception as e:
+        print(f"Error writing skills registry: {e}")
+
 if __name__ == '__main__':
     sync_skills_to_agents_md()
     sync_adrs_to_architecture_md()
     sync_lessons_to_rules()
+    sync_skill_validation_hooks()

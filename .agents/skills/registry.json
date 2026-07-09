@@ -1,0 +1,116 @@
+{
+  "skills": {
+    "self-healing": {
+      "path": ".agents/skills/self-healing",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "release-management": {
+      "path": ".agents/skills/release-management",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "ci-cd": {
+      "path": ".agents/skills/ci-cd",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "coding-standards": {
+      "path": ".agents/skills/coding-standards",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "security-audit": {
+      "path": ".agents/skills/security-audit",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "testing": {
+      "path": ".agents/skills/testing",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "debugging": {
+      "path": ".agents/skills/debugging",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "task-management": {
+      "path": ".agents/skills/task-management",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "observability": {
+      "path": ".agents/skills/observability",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "performance-optimization": {
+      "path": ".agents/skills/performance-optimization",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "code-review": {
+      "path": ".agents/skills/code-review",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "conversational-agent": {
+      "path": ".agents/skills/conversational-agent",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "adr": {
+      "path": ".agents/skills/adr",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "contract-synchronization": {
+      "path": ".agents/skills/contract-synchronization",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "skill-evolution": {
+      "path": ".agents/skills/skill-evolution",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "database-evolution": {
+      "path": ".agents/skills/database-evolution",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    }
+  }
+}

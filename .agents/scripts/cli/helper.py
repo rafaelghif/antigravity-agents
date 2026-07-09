@@ -69,6 +69,7 @@ def print_help():
   🪙 {GREEN}{BOLD}token{RESET}           Logs and displays LLM token budget usage statistics.
   🔌 {GREEN}{BOLD}mcp{RESET}             Manages MCP tool integration and server registration.
   💓 {GREEN}{BOLD}heartbeat{RESET}       Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget).
+  📧 {GREEN}{BOLD}message{RESET}         Manages the peer-to-peer asynchronous messaging protocol.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -185,7 +186,15 @@ def print_command_help(cmd):
 💓 Runs workspace heartbeat diagnostic checks to verify locks, hooks, budget status, and git state.
 
 {BOLD}Usage:{RESET}
-  - ./helper.sh heartbeat : Runs the diagnostics check."""
+  - ./helper.sh heartbeat : Runs the diagnostics check.""",
+
+        "message": f"""{CYAN}{BOLD}Command: message{RESET}
+📧 Manages the peer-to-peer asynchronous swarm messaging protocol.
+
+{BOLD}Usage:{RESET}
+  - ./helper.sh message send <recipient> <action> "<payload>"  : Sends a new peer message.
+  - ./helper.sh message list                                    : Lists messages in the mailbox.
+  - ./helper.sh message status <msg_id> <status> [reply_info]   : Updates the status of a message."""
     }
 
     if cmd in command_help:
@@ -222,7 +231,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
