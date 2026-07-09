@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# POSIX-compliant installer for Antigravity Agent Core (AAC) V2
+# POSIX-compliant installer for Antigravity Agent Core (AAC) V3
 set -euo pipefail
 
 TARGET_DIR="${1:-.}"
@@ -48,7 +48,7 @@ else
     echo "=========================================================="
     echo "   [ERROR] Python version $PYTHON_VERSION is too old!"
     echo "=========================================================="
-    echo "AAC V2 requires Python 3.8 or newer. Found Python $PYTHON_VERSION."
+    echo "AAC V3 requires Python 3.8 or newer. Found Python $PYTHON_VERSION."
     echo "Please upgrade Python and run the installer again."
     echo "Installation aborted."
     echo "=========================================================="
@@ -57,7 +57,7 @@ else
 fi
 
 echo "=========================================================="
-echo "   Installing Antigravity Agent Core V2..."
+echo "   Installing Antigravity Agent Core V3..."
 echo "   Target Directory: $TARGET_ABS"
 echo "=========================================================="
 
@@ -222,6 +222,6 @@ if [ -n "${TIMESTAMP:-}" ]; then
 fi
 
 echo "=========================================================="
-echo "   AAC V2 Installation Completed Successfully!            "
+echo "   AAC V3 Installation Completed Successfully!            "
 echo "   Run './helper.sh validate' in the target folder to test."
 echo "=========================================================="

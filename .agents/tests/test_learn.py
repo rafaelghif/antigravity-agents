@@ -10,7 +10,7 @@ import learn
 class TestLearnCommand(unittest.TestCase):
     @patch('os.path.exists')
     @patch('os.makedirs')
-    @patch('builtins.open', new_callable=mock_open, read_data="# AAC V2 Lessons Learned\n\n## Lessons Learned\n")
+    @patch('builtins.open', new_callable=mock_open, read_data="# AAC V3 Lessons Learned\n\n## Lessons Learned\n")
     def test_learn_append(self, mock_file, mock_makedirs, mock_exists):
         mock_exists.return_value = True
         with patch('builtins.print') as mock_print:

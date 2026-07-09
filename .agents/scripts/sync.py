@@ -226,7 +226,7 @@ def sync_lessons_to_rules():
                 if r not in all_archived:
                     all_archived.append(r)
             
-            archive_header = """# AAC V2 Lessons Learned Archive
+            archive_header = """# AAC V3 Lessons Learned Archive
 
 This file stores archived historical lessons learned that have been pruned from the active prompt context to optimize token overhead.
 

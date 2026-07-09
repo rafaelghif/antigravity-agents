@@ -327,7 +327,7 @@ def copy_core_files(src_root, force=False):
 
 def run(args):
     print("==========================================================")
-    print("   Antigravity V2 Project Bootstrapper                    ")
+    print("   Antigravity V3 Project Bootstrapper                    ")
     print("==========================================================")
     
     force_update = False
@@ -504,7 +504,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.208.0"
+    AAC_VERSION = "3.1.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")

@@ -207,7 +207,7 @@ def handle_message(message):
                     "tools": {}
                 },
                 "serverInfo": {
-                    "name": "AAC-V2-MCP",
+                    "name": "AAC-V3-MCP",
                     "version": "2.144.1"
                 }
             }

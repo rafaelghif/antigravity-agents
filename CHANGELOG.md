@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.1.0] - 2026-07-09
+
+### 🚀 Features
+- upgrade project version name and SemVer to V3
+- chore: upgrade project version name and SemVer to V3 (ISSUE-229)
+
+
 ## [2.208.0] - 2026-07-09
 
 ### 🚀 Features

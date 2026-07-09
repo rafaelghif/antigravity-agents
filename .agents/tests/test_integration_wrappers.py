@@ -15,7 +15,7 @@ class TestIntegrationWrappers(unittest.TestCase):
             encoding='utf-8'
         )
         self.assertEqual(res.returncode, 0)
-        self.assertIn("Antigravity Agent Core (AAC) V2 CLI Command Helper", res.stdout)
+        self.assertIn("Antigravity Agent Core (AAC) V3 CLI Command Helper", res.stdout)
 
     def test_helper_sh_unknown_command_fails(self):
         is_windows = os.name == 'nt'
@@ -42,7 +42,7 @@ class TestIntegrationWrappers(unittest.TestCase):
             encoding='utf-8'
         )
         self.assertEqual(res.returncode, 0)
-        self.assertIn("Antigravity Agent Core (AAC) V2 CLI Command Helper", res.stdout)
+        self.assertIn("Antigravity Agent Core (AAC) V3 CLI Command Helper", res.stdout)
 
     @unittest.skipIf(not shutil.which("pwsh"), "PowerShell Core (pwsh) not installed")
     def test_helper_ps1_no_args_prints_help(self):
@@ -53,7 +53,7 @@ class TestIntegrationWrappers(unittest.TestCase):
             encoding='utf-8'
         )
         self.assertEqual(res.returncode, 0)
-        self.assertIn("Antigravity Agent Core (AAC) V2 CLI Command Helper", res.stdout)
+        self.assertIn("Antigravity Agent Core (AAC) V3 CLI Command Helper", res.stdout)
 
 if __name__ == '__main__':
     unittest.main()

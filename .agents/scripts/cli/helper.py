@@ -45,7 +45,7 @@ RESET = "\033[0m"
 
 def print_help():
     banner = f"""{CYAN}{BOLD}==========================================================
-   Antigravity Agent Core (AAC) V2 CLI Command Helper     
+   Antigravity Agent Core (AAC) V3 CLI Command Helper     
 =========================================================={RESET}
 {BOLD}Usage:{RESET} ./helper.sh <command> [args...]
        aac <command> [args...] (if global launcher is installed)

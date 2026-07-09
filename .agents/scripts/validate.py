@@ -1861,7 +1861,7 @@ def run_validations() -> None:
     # Check for bypass flags (human fast-track mode)
     if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true"):
         print("==========================================================")
-        print("   Running AAC V2 Local Validation Guard...              ")
+        print("   Running AAC V3 Local Validation Guard...              ")
         print("==========================================================")
         print(f"{YELLOW}[BYPASS] Human Fast-Track/Bypass enabled. Bypassing validations...{RESET}")
         print("==========================================================")
@@ -1887,7 +1887,7 @@ def run_validations() -> None:
                     print(f"Warning: Failed to auto-generate context manifest: {e}")
     
     print("==========================================================")
-    print("   Running AAC V2 Local Validation Guard...              ")
+    print("   Running AAC V3 Local Validation Guard...              ")
     print("==========================================================")
     
     is_ci = os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true"
@@ -1896,7 +1896,7 @@ def run_validations() -> None:
     if is_ci and sha:
         try:
             import git_api
-            git_api.post_commit_status(sha, "pending", description="Running AAC V2 Validation Guard...")
+            git_api.post_commit_status(sha, "pending", description="Running AAC V3 Validation Guard...")
         except Exception:
             pass
 
@@ -1947,7 +1947,7 @@ def run_validations() -> None:
     
     # Print the Colored Audit Summary Table
     print("\n==========================================================")
-    print("   AAC V2 Local Validation Summary Checklist              ")
+    print("   AAC V3 Local Validation Summary Checklist              ")
     print("----------------------------------------------------------")
     for key, passed in results.items():
         status_text = f"{GREEN}PASS{RESET}" if passed else f"{RED}FAIL{RESET}"
@@ -1966,7 +1966,7 @@ def run_validations() -> None:
         if is_ci and sha:
             try:
                 import git_api
-                git_api.post_commit_status(sha, "failure", description="AAC V2 Validation Guard failed.")
+                git_api.post_commit_status(sha, "failure", description="AAC V3 Validation Guard failed.")
             except Exception:
                 pass
         sys.exit(1)
@@ -1976,7 +1976,7 @@ def run_validations() -> None:
         if is_ci and sha:
             try:
                 import git_api
-                git_api.post_commit_status(sha, "success", description="AAC V2 Validation Guard passed successfully!")
+                git_api.post_commit_status(sha, "success", description="AAC V3 Validation Guard passed successfully!")
             except Exception:
                 pass
         sys.exit(0)

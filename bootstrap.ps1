@@ -1,6 +1,6 @@
-# Bootstrap Antigravity Agent Core (AAC) V2 for Windows PowerShell
+# Bootstrap Antigravity Agent Core (AAC) V3 for Windows PowerShell
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   Bootstrapping Antigravity Agent Core (AAC) V2...   " -ForegroundColor Cyan
+Write-Host "   Bootstrapping Antigravity Agent Core (AAC) V3...   " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Create directories
@@ -51,7 +51,7 @@ $ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if ((Test-Path "AGENTS.md") -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 2.208.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 2.208.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
+    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 3.1.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 3.1.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
     Write-Host "Synchronized AGENTS.md version."
 }
 
@@ -94,5 +94,5 @@ if ($PythonExec -and (Test-Path ".agents/scripts/cli/helper.py")) {
 }
 
 Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "   AAC V2 Bootstrap Completed Successfully!             " -ForegroundColor Green
+Write-Host "   AAC V3 Bootstrap Completed Successfully!             " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green

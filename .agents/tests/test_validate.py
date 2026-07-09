@@ -199,8 +199,8 @@ class TestValidate(unittest.TestCase):
             validate.run_validations()
         
         # Verify post_commit_status was called with success
-        m_post_status.assert_any_call("dummy-sha-12345", "pending", description="Running AAC V2 Validation Guard...")
-        m_post_status.assert_any_call("dummy-sha-12345", "success", description="AAC V2 Validation Guard passed successfully!")
+        m_post_status.assert_any_call("dummy-sha-12345", "pending", description="Running AAC V3 Validation Guard...")
+        m_post_status.assert_any_call("dummy-sha-12345", "success", description="AAC V3 Validation Guard passed successfully!")
 
     @patch('validate.get_current_branch')
     @patch('subprocess.run')

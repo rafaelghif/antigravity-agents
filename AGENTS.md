@@ -1,10 +1,10 @@
-# AGENTS.md — Antigravity Agent Core (AAC) V2
+# AGENTS.md — Antigravity Agent Core (AAC) V3
 
 > Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.208.0
+- **Version:** 3.1.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
