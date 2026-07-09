@@ -826,13 +826,13 @@ created_at: {current_date}
                 if not line.strip():
                     continue
                 status = line[:2]
-                path = line[3:].strip()
+                status_path = line[3:].strip()
                 # Ignore transient config files
-                if "git_profiles.json" in path or "locks.json" in path or "upgrade_state.json" in path or "token_budget.json" in path or "active_context.md" in path or ".agents/state/" in path or ".agents/issues/" in path:
+                if "git_profiles.json" in status_path or "locks.json" in status_path or "upgrade_state.json" in status_path or "token_budget.json" in status_path or "active_context.md" in status_path or ".agents/state/" in status_path or ".agents/issues/" in status_path:
                     continue
                 # Block on modified, staged, or deleted tracked files
                 if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
-                    dirty_files.append(path)
+                    dirty_files.append(status_path)
             if dirty_files:
                 print(f"Error: Uncommitted changes detected in the following files:")
                 for df in dirty_files:

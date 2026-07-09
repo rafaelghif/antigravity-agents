@@ -8,9 +8,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 import lock
 
 class TestLockCommand(unittest.TestCase):
+    @patch('subprocess.run')
     @patch('os.path.exists')
-    def test_load_locks_empty(self, mock_exists):
+    def test_load_locks_empty(self, mock_exists, mock_run):
         mock_exists.return_value = False
+        mock_run.return_value = unittest.mock.Mock(returncode=1, stdout="")
         locks = lock.load_locks()
         self.assertEqual(locks, {})
 
