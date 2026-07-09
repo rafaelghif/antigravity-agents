@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.189.0] - 2026-07-09
+
+### 🚀 Features
+- refactor AGENTS.md system instructions for enterprise prompting
+- Upgrade AGENTS.md to enterprise-grade master prompt template and execute self-driving execution loop (ISSUE-210)
+
+
 ## [2.188.0] - 2026-07-09
 
 ### 🚀 Features

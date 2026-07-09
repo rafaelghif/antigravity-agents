@@ -1,7 +1,7 @@
 ---
 id: issue-210
 title: "Upgrade AGENTS.md to enterprise-grade master prompt template and execute self-driving execution loop"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
