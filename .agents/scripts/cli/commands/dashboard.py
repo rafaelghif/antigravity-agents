@@ -157,19 +157,22 @@ def get_dashboard_data(force=False):
 
     # 2. Module Locks
     locks = []
-    locks_path = ".agents/state/locks.json"
-    if os.path.exists(locks_path):
-        try:
-            with open(locks_path, 'r', encoding='utf-8') as f:
-                lock_data = json.load(f)
-            for module, info in lock_data.items():
-                locks.append({
-                    "module": module,
-                    "branch": info.get("branch", "unknown"),
-                    "timestamp": info.get("timestamp", "unknown")
-                })
-        except Exception:
-            pass
+    try:
+        lock_data = lock_cmd.load_locks()
+        for module, info in lock_data.items():
+            if isinstance(info, dict):
+                b_name = info.get("branch", "unknown")
+                ts = info.get("timestamp", "unknown")
+            else:
+                b_name = str(info)
+                ts = "unknown"
+            locks.append({
+                "module": module,
+                "branch": b_name,
+                "timestamp": ts
+            })
+    except Exception:
+        pass
 
     # 3. Active Issue Details
     active_branch = ""

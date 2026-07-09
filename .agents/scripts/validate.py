@@ -1605,14 +1605,13 @@ def audit_module_locks() -> bool:
     except Exception:
         pass
 
-    locks_file = ".agents/state/locks.json"
     locks = {}
-    if os.path.exists(locks_file):
-        try:
-            with open(locks_file, 'r', encoding='utf-8') as f:
-                locks = json.load(f)
-        except Exception:
-            pass
+    try:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'cli')))
+        from commands.lock import load_locks
+        locks = load_locks()
+    except Exception as e:
+        pass
 
     failed = False
     for path in sorted(modified_files):
@@ -1644,53 +1643,8 @@ def audit_module_locks() -> bool:
     return not failed
 
 def prune_stale_locks() -> None:
-    locks_file = ".agents/state/locks.json"
-    if os.path.exists(locks_file):
-        try:
-            with open(locks_file, 'r', encoding='utf-8') as f:
-                locks = json.load(f)
-            
-            holders = {holder for holder in locks.values() if holder != "unknown"}
-            if not holders:
-                return
-                
-            res = subprocess.run(
-                ['git', 'show-ref', '--heads'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            
-            existing_branches = set()
-            if res.returncode == 0:
-                for line in res.stdout.splitlines():
-                    parts = line.strip().split()
-                    if len(parts) == 2:
-                        ref = parts[1]
-                        if ref.startswith('refs/heads/'):
-                            existing_branches.add(ref[11:])
-            else:
-                # If git show-ref --heads fails (e.g. empty repo or error), skip pruning to prevent data loss
-                return
-                
-            modified = False
-            for mod, holder in list(locks.items()):
-                if holder != "unknown" and holder not in existing_branches:
-                    del locks[mod]
-                    modified = True
-            if modified:
-                import tempfile
-                try:
-                    dir_name = os.path.dirname(locks_file) or "."
-                    with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
-                        json.dump(locks, tf, indent=2)
-                        temp_name = tf.name
-                    os.replace(temp_name, locks_file)
-                    print_ok("Auto-pruned stale module locks in 'locks.json'.")
-                except Exception as e:
-                    print_warn(f"Failed to write pruned locks: {e}")
-        except Exception:
-            pass
+    # No-op under Git-Native branch-bound locking
+    pass
 
 
 # ==========================================================

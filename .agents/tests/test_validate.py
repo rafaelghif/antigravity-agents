@@ -152,10 +152,9 @@ class TestValidate(unittest.TestCase):
         self.assertFalse(validate.audit_git_branch_alignment())
 
     @patch('validate.get_current_branch')
+    @patch('commands.lock.load_locks')
     @patch('subprocess.run')
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    def test_audit_module_locks(self, mock_file_open, mock_exists, mock_run, mock_get_branch):
+    def test_audit_module_locks(self, mock_run, mock_load_locks, mock_get_branch):
         # Scenario 1: On base branch main, skip lock checks
         mock_get_branch.return_value = "main"
         self.assertTrue(validate.audit_module_locks())
@@ -167,16 +166,15 @@ class TestValidate(unittest.TestCase):
         
         # Scenario 3: Staged file not locked
         mock_run.return_value = MagicMock(returncode=0, stdout="src/validate.py\n")
-        mock_exists.return_value = True
-        mock_file_open.return_value.read.return_value = '{}'
+        mock_load_locks.return_value = {}
         self.assertFalse(validate.audit_module_locks())
         
         # Scenario 4: Staged file is locked by different branch
-        mock_file_open.return_value.read.return_value = '{"validate": "feat/issue-abc"}'
+        mock_load_locks.return_value = {"validate": "feat/issue-abc"}
         self.assertFalse(validate.audit_module_locks())
         
         # Scenario 5: Staged file is locked by current branch
-        mock_file_open.return_value.read.return_value = '{"validate": "feat/issue-032"}'
+        mock_load_locks.return_value = {"validate": "feat/issue-032"}
         self.assertTrue(validate.audit_module_locks())
 
     @patch('os.getenv')

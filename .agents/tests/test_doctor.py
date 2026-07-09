@@ -62,7 +62,6 @@ class TestDoctorCommand(unittest.TestCase):
         doctor.perform_repairs()
         
         # Verify it tries to create/write missing config files
-        mock_open_file.assert_any_call(".agents/state/locks.json", "w", encoding="utf-8")
         mock_open_file.assert_any_call(".agents/state/token_budget.json", "w", encoding="utf-8")
         mock_open_file.assert_any_call(".agents/projects.json", "w", encoding="utf-8")
         

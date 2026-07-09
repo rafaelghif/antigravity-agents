@@ -32,13 +32,14 @@ class TestDashboardCommand(unittest.TestCase):
     @patch('validate.audit_unit_tests', return_value=True)
     @patch('validate.audit_module_locks', return_value=True)
     @patch('validate.audit_commit_messages', return_value=True)
-    def test_get_dashboard_data(self, mock_commit, mock_locks, mock_tests, mock_lint, mock_board, mock_sync, mock_git, mock_link, mock_sec, mock_crit, mock_sub, mock_file, mock_exists):
+    @patch('dashboard.lock_cmd.load_locks')
+    def test_get_dashboard_data(self, mock_load_locks, mock_commit, mock_locks, mock_tests, mock_lint, mock_board, mock_sync, mock_git, mock_link, mock_sec, mock_crit, mock_sub, mock_file, mock_exists):
+        mock_load_locks.return_value = {"app/models/user.py": {"branch": "feat/issue-126", "timestamp": "2026-07-02 21:00"}}
         # Configure subprocess for git branch
         mock_sub.return_value = MagicMock(returncode=0, stdout="feat/issue-126")
         
         mock_file.return_value.read.side_effect = [
             "- **Version:** 2.106.0", # AGENTS.md
-            '{"app/models/user.py": {"branch": "feat/issue-126", "timestamp": "2026-07-02 21:00"}}', # locks.json
             "---\nid: issue-126\ntitle: \"Active Task\"\nstatus: open\n---\n- [ ] Subtask 1", # issue_126.md (get_issue_frontmatter)
             "---\nid: issue-126\ntitle: \"Active Task\"\nstatus: open\n---\n- [ ] Subtask 1", # issue_126.md (tasks extraction)
             "# Lessons\n## Lessons Learned\n- My Lesson", # lessons-learned.md
