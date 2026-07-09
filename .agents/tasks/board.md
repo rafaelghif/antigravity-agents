@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Enforce proactive prompt looping and self-driving zero-touch subtask execution (feat/issue-209) <!-- id: issue-209 -->
 - [x] Commit setup hardening, interactive interview, and zero-touch rules (feat/issue-208) <!-- id: issue-208 -->
 - [x] Harden Git-based installation, interactive setup interview, zero-touch execution loop, and comprehensive README documentation (feat/issue-207) <!-- id: issue-207 -->
 - [x] Commit dirty implementation files for mutex lock safety, JSON token sync parsing, and plug-and-play exclusions (feat/issue-206) <!-- id: issue-206 -->

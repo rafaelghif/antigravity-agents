@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.188.0] - 2026-07-09
+
+### 🚀 Features
+- replace lint lookahead with proactive self-driving looping rules
+- Enforce proactive prompt looping and self-driving zero-touch subtask execution (ISSUE-209)
+
+
 ## [2.187.0] - 2026-07-09
 
 ### 🚀 Features
