@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.185.0] - 2026-07-09
+
+### 🚀 Features
+- implement directory-mutex lock safety, JSON token parsing, and transient file exclusions
+- Commit dirty implementation files for mutex lock safety, JSON token sync parsing, and plug-and-play exclusions (ISSUE-206)
+
+
 ## [2.184.0] - 2026-07-09
 
 ### 🚀 Features
