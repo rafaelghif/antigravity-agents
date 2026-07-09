@@ -492,5 +492,23 @@ class TestValidate(unittest.TestCase):
         mock_env_get.side_effect = lambda name, default=None: "1" if name == "AAC_BYPASS_LOCKS" else default
         self.assertTrue(validate.audit_module_locks())
 
+    @patch('os.path.exists')
+    @patch('shutil.copy2')
+    @patch('shutil.copytree')
+    @patch('os.listdir')
+    @patch('venv.create')
+    @patch('tempfile.mkdtemp')
+    def test_sandbox_manager_context(self, mock_mkdtemp, mock_venv_create, mock_listdir, mock_copytree, mock_copy2, mock_exists):
+        mock_mkdtemp.return_value = "/tmp/fake_sandbox"
+        mock_listdir.return_value = ["file1.py"]
+        mock_exists.return_value = True
+        
+        with patch('os.chdir') as mock_chdir:
+            with patch('os.getcwd', return_value="/original/cwd"):
+                with validate.SandboxManager(enabled=True) as sandbox:
+                    self.assertTrue(sandbox.enabled)
+                    mock_venv_create.assert_called_once()
+                    mock_chdir.assert_any_call("/tmp/fake_sandbox")
+
 if __name__ == '__main__':
     unittest.main()

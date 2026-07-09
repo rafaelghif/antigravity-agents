@@ -1,6 +1,106 @@
 import os
 import re
 import sys
+import tempfile
+import builtins
+import threading
+from concurrent.futures import ThreadPoolExecutor
+
+print_lock = threading.Lock()
+_original_print = builtins.print
+
+def locked_print(*args, **kwargs):
+    with print_lock:
+        _original_print(*args, **kwargs)
+
+builtins.print = locked_print
+
+class SandboxManager:
+    """
+    Manages an isolated Python virtualenv sandbox environment for safe command execution.
+    By using --system-site-packages, we inherit installed packages instantly without pip delay.
+    """
+    def __init__(self, enabled: bool = True):
+        if os.environ.get("AAC_DISABLE_SANDBOX", "0").lower() in ("1", "true"):
+            enabled = False
+        self.enabled = enabled
+        self.temp_dir = None
+        self.venv_dir = None
+        self.old_cwd = None
+        self.old_path = None
+        
+    def __enter__(self):
+        if not self.enabled:
+            return self
+            
+        try:
+            self.temp_dir = tempfile.mkdtemp(prefix="aac_sandbox_")
+            self.venv_dir = os.path.join(self.temp_dir, "venv")
+            
+            import venv
+            # Create venv with system site packages to avoid reinstalling dependencies
+            venv.create(self.venv_dir, system_site_packages=True, with_pip=False)
+            
+            self.old_cwd = os.getcwd()
+            
+            # Copy codebase files to sandbox directory (exclude massive dependency folders)
+            for item in os.listdir(self.old_cwd):
+                if item in ('.git', '.lock', 'venv', 'node_modules', '.venv', 'build', 'dist', 'tmp'):
+                    continue
+                src = os.path.join(self.old_cwd, item)
+                dst = os.path.join(self.temp_dir, item)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, symlinks=True, ignore=shutil.ignore_patterns('.git', '.lock'))
+                else:
+                    shutil.copy2(src, dst)
+                    
+            # If Git variables exist, convert them to absolute paths BEFORE changing directory
+            for env_var in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):
+                if env_var in os.environ:
+                    os.environ[env_var] = os.path.abspath(os.environ[env_var])
+
+            os.chdir(self.temp_dir)
+            
+            # Setup Git repository references so git commands resolve cleanly inside the sandbox
+            # By pointing GIT_WORK_TREE to old_cwd, git operations refer to the host filesystem index,
+            # avoiding stat cache mismatches or modification flags on sandbox file copies.
+            if "GIT_DIR" not in os.environ:
+                os.environ["GIT_DIR"] = os.path.abspath(os.path.join(self.old_cwd, ".git"))
+            if "GIT_WORK_TREE" not in os.environ:
+                os.environ["GIT_WORK_TREE"] = self.old_cwd
+            
+            self.old_path = os.environ.get("PATH", "")
+            venv_bin = os.path.join(self.venv_dir, "bin")
+            os.environ["PATH"] = venv_bin + os.pathsep + self.old_path
+            os.environ["VIRTUAL_ENV"] = self.venv_dir
+            
+        except Exception as e:
+            # Avoid thread-lock re-entrancy warnings in fail scenarios
+            _original_print(f"\033[93m[WARN] Failed to initialize sandbox environment: {e}. Falling back to host execution.\033[0m")
+            self.enabled = False
+            
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.enabled:
+            return
+            
+        try:
+            if self.old_cwd:
+                os.chdir(self.old_cwd)
+            if self.old_path is not None:
+                os.environ["PATH"] = self.old_path
+            if "VIRTUAL_ENV" in os.environ:
+                del os.environ["VIRTUAL_ENV"]
+            if "GIT_DIR" in os.environ:
+                del os.environ["GIT_DIR"]
+            if "GIT_WORK_TREE" in os.environ:
+                del os.environ["GIT_WORK_TREE"]
+                
+            if self.temp_dir and os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir, ignore_errors=True)
+        except Exception:
+            pass
 
 # Reconfigure stdout/stderr to support UTF-8 on Windows cp932/etc. terminals
 if hasattr(sys.stdout, 'reconfigure'):
@@ -237,7 +337,11 @@ def audit_critical_files() -> bool:
         failed = True
             
     # Verify and self-heal local Git hooks
-    hooks_dir = ".git/hooks"
+    git_dir = os.environ.get("GIT_DIR")
+    if git_dir and os.path.exists(git_dir):
+        hooks_dir = os.path.join(git_dir, "hooks")
+    else:
+        hooks_dir = ".git/hooks"
     if os.path.exists(hooks_dir):
         hooks = {
             "pre-commit": r"""#!/usr/bin/env bash
@@ -1794,19 +1898,32 @@ def run_validations() -> None:
     prune_stale_locks()
     
 
-    # Run the 10 audits sequentially
+    # Run all audits in parallel wrapped inside SandboxManager
     results = {}
-    results["Critical Files"] = audit_critical_files()
-    results["Secrets & Ignored Files"] = audit_secrets_and_ignored_files()
-    results["Link Integrity"] = audit_link_integrity()
-    results["Git Branch Alignment"] = audit_git_branch_alignment()
-    results["Workspace Sync"] = audit_workspace_sync()
-    results["Task Board Schema"] = audit_task_board_schema()
-    results["Static Code Linting"] = audit_static_linting()
-    results["Local Unit Tests"] = audit_unit_tests()
-    results["Module Lock Compliance"] = audit_module_locks()
-    results["Commit Message Compliance"] = audit_commit_messages()
-    results["Codebase Rule Compliance"] = audit_codebase_rules_compliance()
+    with SandboxManager(enabled=True) as sandbox:
+        audits = {
+            "Critical Files": audit_critical_files,
+            "Secrets & Ignored Files": audit_secrets_and_ignored_files,
+            "Link Integrity": audit_link_integrity,
+            "Git Branch Alignment": audit_git_branch_alignment,
+            "Workspace Sync": audit_workspace_sync,
+            "Task Board Schema": audit_task_board_schema,
+            "Static Code Linting": audit_static_linting,
+            "Local Unit Tests": audit_unit_tests,
+            "Module Lock Compliance": audit_module_locks,
+            "Commit Message Compliance": audit_commit_messages,
+            "Codebase Rule Compliance": audit_codebase_rules_compliance,
+        }
+        
+        with ThreadPoolExecutor() as executor:
+            future_to_key = {executor.submit(func): key for key, func in audits.items()}
+            for future in future_to_key:
+                key = future_to_key[future]
+                try:
+                    results[key] = future.result()
+                except Exception as e:
+                    _original_print(f"{RED}[ERROR] Audit '{key}' crashed: {e}{RESET}")
+                    results[key] = False
     
     # Print the Colored Audit Summary Table
     print("\n==========================================================")
