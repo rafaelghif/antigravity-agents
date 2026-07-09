@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Refine AAC V3 Upgrade Blueprint with Multi-Agent Swarm and Sandboxing (feat/issue-220) <!-- id: issue-220 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Refine AAC V3 Upgrade Blueprint with Multi-Agent Swarm and Sandboxing (feat/issue-220) <!-- id: issue-220 -->
 - [x] Integrate skill evolution into lessons-learned extractor rules (feat/issue-219) <!-- id: issue-219 -->
 - [x] Implement CLI skill create scaffolding command (feat/issue-218) <!-- id: issue-218 -->
 - [x] Implement Self-Evolving Agent Skills and optimize rules context (feat/issue-217) <!-- id: issue-217 -->

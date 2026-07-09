@@ -1,7 +1,7 @@
 ---
 id: issue-220
 title: "Refine AAC V3 Upgrade Blueprint with Multi-Agent Swarm and Sandboxing"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
