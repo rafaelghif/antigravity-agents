@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.195.0] - 2026-07-09
+
+### 🚀 Features
+- implement remaining audit checks, install checks, optional ssh passphrase, and relative markdown links verification
+- Implement remaining audit fixes: install checks, passphraseless SSH, markdown relative link audit (ISSUE-216)
+
+
 ## [2.194.0] - 2026-07-09
 
 ### 🚀 Features
