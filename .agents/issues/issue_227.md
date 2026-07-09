@@ -17,7 +17,7 @@ Implement V4 Phase 1: Git Cleanliness & Metadata Isolation
 - [x] Relocate and update references to `locks.json` to `.agents/state/locks.json` <!-- id: task-locks-relocate -->
 - [x] Relocate and update references to `token_budget.json` to `.agents/state/token_budget.json` <!-- id: task-budget-relocate -->
 - [x] Relocate and update references to CLI and token logs to `.agents/state/logs/` <!-- id: task-logs-relocate -->
-- [ ] Update `sync_issues` in `issue.py` to prevent required task list commits and operate cleanly in git status <!-- id: task-sync-refactor -->
+- [x] Update `sync_issues` in `issue.py` to prevent required task list commits and operate cleanly in git status <!-- id: task-sync-refactor -->
 - [ ] Run full validation suite and verify unit tests pass successfully <!-- id: task-validate-pass -->
 
 ## Acceptance Criteria

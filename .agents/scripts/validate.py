@@ -801,7 +801,7 @@ def audit_git_branch_alignment() -> bool:
                 status = line[:2]
                 path = line[3:].strip()
                 # Ignore private untracked/ignored configs
-                if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path:
+                if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path or ".agents/issues/" in path:
                     continue
                 if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
                     dirty = True
@@ -957,7 +957,7 @@ def audit_git_branch_alignment() -> bool:
                     check=True
                 )
                 for line in res_status.stdout.splitlines():
-                    if line.strip() and not ("git_profiles.json" in line or "locks.json" in line or ".agents/state/" in line):
+                    if line.strip() and not ("git_profiles.json" in line or "locks.json" in line or ".agents/state/" in line or ".agents/issues/" in line):
                         is_clean = False
                         break
             except Exception:
