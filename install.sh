@@ -72,9 +72,10 @@ mkdir -p "$TARGET_ABS/.agents"
 
 echo "Downloading Antigravity Agent Core from GitHub..."
   
-  # Verifying network connection to GitHub
+  # Verifying network connection to GitHub via Git
   echo "Verifying network connection to GitHub..."
-  if ! curl -I -s --max-time 5 https://github.com &>/dev/null && ! wget -q --spider --timeout=5 https://github.com &>/dev/null; then
+  REPO_URL="https://github.com/rafaelghif/antigravity-agents.git"
+  if ! git ls-remote "$REPO_URL" HEAD &>/dev/null; then
     echo "=========================================================="
     echo "   [ERROR] GitHub Connection Failed!"
     echo "=========================================================="
@@ -88,36 +89,21 @@ echo "Downloading Antigravity Agent Core from GitHub..."
 
   # Create a temporary directory
   TEMP_DIR=$(mktemp -d)
-  ZIP_PATH="$TEMP_DIR/repo.zip"
   
-  # Download ZIP
-  REPO_URL="https://github.com/rafaelghif/antigravity-agents/archive/refs/heads/main.zip"
-  if command -v curl &>/dev/null; then
-    curl -L "$REPO_URL" -o "$ZIP_PATH"
-  elif command -v wget &>/dev/null; then
-    wget -O "$ZIP_PATH" "$REPO_URL"
-  else
-    echo "Error: Neither curl nor wget is installed. Cannot download source files." >&2
+  echo "Cloning Antigravity Agent Core repository from Git..."
+  if ! git clone --depth 1 "$REPO_URL" "$TEMP_DIR/repo" &>/dev/null; then
+    echo "=========================================================="
+    echo "   [ERROR] Git Clone Failed!"
+    echo "=========================================================="
+    echo "Failed to clone from $REPO_URL."
+    echo "Please check your network connection and try again."
+    echo "Installation aborted."
+    echo "=========================================================="
     rm -rf "$TEMP_DIR"
     exit 1
   fi
   
-  # Extract ZIP
-  if command -v unzip &>/dev/null; then
-    unzip -q "$ZIP_PATH" -d "$TEMP_DIR"
-  else
-    # Fallback to python for unzipping if unzip is missing
-    python3 -c "import zipfile; zipfile.ZipFile('$ZIP_PATH').extractall('$TEMP_DIR')"
-  fi
-  
-  # Find extracted folder (usually antigravity-agents-main)
-  EXTRACTED_DIR=$(find "$TEMP_DIR" -maxdepth 1 -type d -name "antigravity-agents-*" | head -n 1)
-  
-  if [ -z "$EXTRACTED_DIR" ] || [ ! -d "$EXTRACTED_DIR/.agents" ]; then
-    echo "Error: Extracted repository folder not found or invalid." >&2
-    rm -rf "$TEMP_DIR"
-    exit 1
-  fi
+  EXTRACTED_DIR="$TEMP_DIR/repo"
   
   # Copy files recursively excluding __pycache__, locks.json, git_profiles.json, .DS_Store, *.pyc
   (
