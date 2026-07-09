@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Implement installer and bootstrap version checking in validate.py (feat/issue-214) <!-- id: issue-214 -->
 - [x] Enforce dependency mapping and installer validation rules in core files (feat/issue-213) <!-- id: issue-213 -->
 - [x] Integrate interactive setup wizard launch into bootstrap scripts (feat/issue-212) <!-- id: issue-212 -->
 - [x] Implement agent soul profile and heartbeat workspace diagnostics (feat/issue-211) <!-- id: issue-211 -->
