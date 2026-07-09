@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Elevate token sync robustness and lock transaction safety to world class grade (feat/issue-204) <!-- id: issue-204 -->
 - [x] Update README alignment version and workflow diagram (feat/issue-203) <!-- id: issue-203 -->
 - [x] Add prompt caching optimization rules (feat/issue-202) <!-- id: issue-202 -->
 - [x] Enforce early workspace read of context and schema files (feat/issue-201) <!-- id: issue-201 -->
