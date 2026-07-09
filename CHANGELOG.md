@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.183.0] - 2026-07-09
+
+### 🚀 Features
+- Elevate token sync robustness and lock transaction safety to world class grade (ISSUE-204)
+
+
 ## [2.182.0] - 2026-07-04
 
 ### 🚀 Features
