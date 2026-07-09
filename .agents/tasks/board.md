@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Implement Self-Evolving Agent Skills and optimize rules context (feat/issue-217) <!-- id: issue-217 -->
 - [x] Implement remaining audit fixes: install checks, passphraseless SSH, markdown relative link audit (feat/issue-216) <!-- id: issue-216 -->
 - [x] Harden agent workspace, upgrade logic, base merge checks, and MCP isolation (feat/issue-215) <!-- id: issue-215 -->
 - [x] Implement installer and bootstrap version checking in validate.py (feat/issue-214) <!-- id: issue-214 -->
