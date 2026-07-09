@@ -142,6 +142,33 @@ def recalculate_used_from_log(budget: dict) -> dict:
     budget["monthly_used"] = monthly_sum
     return budget
 
+def _save_budget_nolock(data: dict) -> None:
+    os.makedirs(os.path.dirname(BUDGET_FILE), exist_ok=True)
+    try:
+        dir_name = os.path.dirname(BUDGET_FILE) or "."
+        with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
+            json.dump(data, tf, indent=2)
+            temp_name = tf.name
+        os.replace(temp_name, BUDGET_FILE)
+    except Exception as e:
+        print_err(f"Failed to save token budget: {e}")
+
+def save_budget(data: dict) -> None:
+    try:
+        from helper import FileLockMutex
+    except ImportError:
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from helper import FileLockMutex
+
+    try:
+        with FileLockMutex(BUDGET_FILE):
+            _save_budget_nolock(data)
+    except Exception as e:
+        print_err(f"Concurrency warning saving token budget: {e}")
+        _save_budget_nolock(data)
+
 def load_budget() -> dict:
     default_budget = {
         "monthly_limit": 5000000,
@@ -152,38 +179,45 @@ def load_budget() -> dict:
         "accounts": {},
         "tasks": {}
     }
-    if not os.path.exists(BUDGET_FILE):
-        return recalculate_used_from_log(default_budget)
+    
     try:
-        with open(BUDGET_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Guarantee structure
-            for key in default_budget:
-                if key not in data:
-                    data[key] = default_budget[key]
-            if "accounts" not in data:
-                data["accounts"] = {}
-                
-            # Self-heal corrupted daily/monthly limits
-            if data.get("daily_limit", 0) < 500000:
-                data["daily_limit"] = 500000
-            if data.get("monthly_limit", 0) < 5000000:
-                data["monthly_limit"] = 5000000
-                
-            return recalculate_used_from_log(data)
-    except Exception:
-        return recalculate_used_from_log(default_budget)
+        from helper import FileLockMutex
+    except ImportError:
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from helper import FileLockMutex
 
-def save_budget(data: dict) -> None:
-    os.makedirs(os.path.dirname(BUDGET_FILE), exist_ok=True)
     try:
-        dir_name = os.path.dirname(BUDGET_FILE) or "."
-        with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
-            json.dump(data, tf, indent=2)
-            temp_name = tf.name
-        os.replace(temp_name, BUDGET_FILE)
+        with FileLockMutex(BUDGET_FILE):
+            if not os.path.exists(BUDGET_FILE):
+                return recalculate_used_from_log(default_budget)
+            try:
+                with open(BUDGET_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for key in default_budget:
+                        if key not in data:
+                            data[key] = default_budget[key]
+                    if "accounts" not in data:
+                        data["accounts"] = {}
+                    if data.get("daily_limit", 0) < 500000:
+                        data["daily_limit"] = 500000
+                    if data.get("monthly_limit", 0) < 5000000:
+                        data["monthly_limit"] = 5000000
+                    return recalculate_used_from_log(data)
+            except Exception:
+                return recalculate_used_from_log(default_budget)
     except Exception as e:
-        print_err(f"Failed to save token budget: {e}")
+        print_warn(f"Concurrency warning loading token budget: {e}")
+        if not os.path.exists(BUDGET_FILE):
+            return recalculate_used_from_log(default_budget)
+        try:
+            with open(BUDGET_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return recalculate_used_from_log(data)
+        except Exception:
+            return recalculate_used_from_log(default_budget)
+
 
 def check_date_resets(budget: dict) -> dict:
     """Check if day or month has changed relative to last_reset, and reset budget values if so."""
@@ -414,7 +448,35 @@ def normalize_time_string(raw_time: str) -> str:
 def parse_usage_output(output: str, budget: dict = None) -> dict:
     """Parse output of agy -p '/usage' to extract limits and remaining reset times."""
     stats = {}
+    
+    # Check if the output is a valid JSON string (either direct dict or nested in codeblocks)
+    stripped = output.strip()
+    if stripped.startswith("```json"):
+        stripped = stripped[7:].rstrip("`").strip()
+    elif stripped.startswith("```"):
+        stripped = stripped[3:].rstrip("`").strip()
+        
+    if stripped.startswith("{") and stripped.endswith("}"):
+        try:
+            json_data = json.loads(stripped)
+            for k in ("daily_limit", "daily_used", "monthly_limit", "monthly_used", 
+                      "five_hour_limit", "five_hour_used", "five_hour_remaining", 
+                      "weekly_limit", "weekly_used", "weekly_remaining", "active_account",
+                      "accounts", "tasks", "weekly_pct", "five_hour_pct"):
+                if k in json_data:
+                    stats[k] = json_data[k]
+            if "weekly_pct" in stats and "weekly_remaining_pct" not in stats:
+                stats["weekly_remaining_pct"] = 100.0 - stats["weekly_pct"]
+            if "five_hour_pct" in stats and "five_hour_remaining_pct" not in stats:
+                stats["five_hour_remaining_pct"] = 100.0 - stats["five_hour_pct"]
+            if stats:
+                stats["is_json_format"] = True
+                return stats
+        except Exception:
+            pass
+
     lines = output.split('\n')
+
 
     # 0. Check for new block-percentage format
     has_blocks = any("██" in line or "░░" in line for line in lines)

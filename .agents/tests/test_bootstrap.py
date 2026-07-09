@@ -207,5 +207,29 @@ class TestBootstrapCommand(unittest.TestCase):
         self.assertNotIn("'.agents/plans'", source)
         self.assertNotIn("'.agents/tests'", source)
 
+    @patch('shutil.copy2')
+    @patch('os.makedirs')
+    @patch('os.path.exists')
+    @patch('os.walk')
+    def test_copy_core_files_transient_exclusions(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
+        mock_exists.side_effect = lambda path: False if "memory" in path else True
+        mock_walk.return_value = [
+            ('/src/root/.agents/scripts', [], [
+                'token_budget.json', 'active_context.md', 'sync_cache.json', 
+                'cooldowns.json', 'upgrade_state.json', 'projects.json'
+            ])
+        ]
+        
+        bootstrap.copy_core_files('/src/root', force=True)
+        
+        copied_files = [os.path.basename(call_args[0][0]) for call_args in mock_copy2.call_args_list]
+        transient_files = {
+            'token_budget.json', 'active_context.md', 'sync_cache.json', 
+            'cooldowns.json', 'upgrade_state.json', 'projects.json'
+        }
+        for f in transient_files:
+            self.assertNotIn(f, copied_files)
+
 if __name__ == '__main__':
     unittest.main()
+

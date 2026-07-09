@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] Commit dirty implementation files for mutex lock safety, JSON token sync parsing, and plug-and-play exclusions (feat/issue-206) <!-- id: issue-206 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
