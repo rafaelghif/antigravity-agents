@@ -58,9 +58,26 @@ def generate_ssh_key(name: str, email: str) -> str:
         
     keygen_bin = find_ssh_keygen()
     print(f"Generating secure Ed25519 SSH key pair at '{key_path}'...")
+    passphrase = ""
+    if sys.stdin.isatty() and "unittest" not in sys.modules:
+        try:
+            import getpass
+            print("Note: You can secure your SSH key with a passphrase (press Enter for passphraseless):")
+            p1 = getpass.getpass("Enter passphrase: ")
+            if p1:
+                p2 = getpass.getpass("Enter same passphrase again: ")
+                if p1 == p2:
+                    passphrase = p1
+                else:
+                    print_warn("Passphrases do not match! Defaulting to passphraseless key for automation.")
+        except Exception:
+            pass
+    else:
+        print_warn("Non-interactive terminal detected. Defaulting to passphraseless SSH key generation.")
+
     try:
         res = subprocess.run(
-            [keygen_bin, '-t', 'ed25519', '-C', email, '-f', key_path, '-N', ''],
+            [keygen_bin, '-t', 'ed25519', '-C', email, '-f', key_path, '-N', passphrase],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True

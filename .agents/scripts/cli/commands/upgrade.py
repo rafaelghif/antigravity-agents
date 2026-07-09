@@ -10,7 +10,7 @@ GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
-SOURCE_REPO = "https://github.com/rafaelghif/antigravity-agents.git"
+SOURCE_REPO = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
 
 def print_err(msg: str) -> None:
     print(f"{RED}[FAIL] {msg}{RESET}")

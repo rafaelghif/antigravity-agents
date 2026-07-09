@@ -280,6 +280,56 @@ class TestValidate(unittest.TestCase):
         self.assertTrue(any("user.name p1" in cmd for cmd in sub_calls))
         self.assertTrue(any("commit.gpgsign false" in cmd for cmd in sub_calls))
 
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    @patch('os.listdir', return_value=[])
+    def test_audit_link_integrity(self, mock_listdir, mock_open_file, mock_exists):
+        file_content = """
+        Here is a link: file:///absolute/path/to/valid_file.py
+        Here is another: [relative text](relative/valid.md)
+        And an anchor range: [another relative](relative/valid.md#L5-L10)
+        And a broken one: [broken link](missing.md)
+        """
+        def exists_side_effect(path):
+            if "AGENTS.md" in path or "valid_file.py" in path or "valid.md" in path:
+                return True
+            return False
+        mock_exists.side_effect = exists_side_effect
+
+        mock_f_handle = MagicMock()
+        mock_f_handle.read.return_value = file_content
+        mock_f_handle.__enter__.return_value = mock_f_handle
+
+        mock_ref_handle = MagicMock()
+        mock_ref_handle.__enter__.return_value = mock_ref_handle
+        mock_ref_handle.__iter__.side_effect = lambda: iter(["line"] * 15)
+
+        def open_side_effect(path, *args, **kwargs):
+            if "valid.md" in path:
+                return mock_ref_handle
+            return mock_f_handle
+
+        mock_open_file.side_effect = open_side_effect
+
+        self.assertFalse(validate.audit_link_integrity())
+
+        def exists_side_effect_all(path):
+            return True
+        mock_exists.side_effect = exists_side_effect_all
+
+        self.assertTrue(validate.audit_link_integrity())
+
+        mock_ref_handle_short = MagicMock()
+        mock_ref_handle_short.__enter__.return_value = mock_ref_handle_short
+        mock_ref_handle_short.__iter__.side_effect = lambda: iter(["line"] * 5)
+        def open_side_effect_short(path, *args, **kwargs):
+            if "valid.md" in path:
+                return mock_ref_handle_short
+            return mock_f_handle
+        mock_open_file.side_effect = open_side_effect_short
+
+        self.assertFalse(validate.audit_link_integrity())
+
     @patch('os.path.exists', return_value=True)
     @patch('subprocess.run')
     @patch('builtins.open', new_callable=mock_open, read_data='{"profiles": [{"name": "corporate-work", "email": "developer@company.com", "active": true}]}')

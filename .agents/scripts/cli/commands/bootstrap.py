@@ -403,7 +403,7 @@ def run(args):
     import shutil
     import atexit
     
-    source_repo = "https://github.com/rafaelghif/antigravity-agents.git"
+    source_repo = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
     print(f"Fetching latest source templates and core files from Git: {source_repo}...")
     temp_src_root = tempfile.mkdtemp()
     atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)

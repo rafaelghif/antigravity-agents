@@ -50,6 +50,27 @@ if (-not $PythonExec) {
     Write-Host "Installation aborted."
     Write-Host "==========================================================" -ForegroundColor Red
     Exit 1
+} else {
+    # Verify minimum Python version >= 3.8
+    try {
+        $VersionString = & $PythonExec -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+        $VersionString = $VersionString.Trim()
+        $Parts = $VersionString.Split('.')
+        $Major = [int]$Parts[0]
+        $Minor = [int]$Parts[1]
+        if ($Major -lt 3 -or ($Major -eq 3 -and $Minor -lt 8)) {
+            Write-Host "==========================================================" -ForegroundColor Red
+            Write-Host "   [ERROR] Python version $VersionString is too old!" -ForegroundColor Red
+            Write-Host "==========================================================" -ForegroundColor Red
+            Write-Host "AAC V2 requires Python 3.8 or newer. Found Python $VersionString."
+            Write-Host "Please upgrade Python and run the installer again."
+            Write-Host "Installation aborted."
+            Write-Host "==========================================================" -ForegroundColor Red
+            Exit 1
+        }
+    } catch {
+        Write-Host "Warning: Failed to verify Python version: $_"
+    }
 }
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -90,20 +111,25 @@ $SrcAgents = Join-Path $SrcDir ".agents"
 
 # 2. Copy/Download Agent files
 Write-Host "Downloading Antigravity Agent Core from GitHub..."
-    Write-Host "Verifying network connection to GitHub..."
+    Write-Host "Verifying network connection to source repository..."
     
+    $SourceRepo = "https://github.com/rafaelghif/antigravity-agents.git"
+    if ($env:AAC_SOURCE_REPO) {
+        $SourceRepo = $env:AAC_SOURCE_REPO
+    }
+
     $Connected = $false
-    & git ls-remote "https://github.com/rafaelghif/antigravity-agents.git" HEAD 2>$null | Out-Null
+    & git ls-remote $SourceRepo HEAD 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
         $Connected = $true
     }
     
     if (-not $Connected) {
         Write-Host "==========================================================" -ForegroundColor Red
-        Write-Host "   [ERROR] GitHub Connection Failed!" -ForegroundColor Red
+        Write-Host "   [ERROR] Source Repository Connection Failed!" -ForegroundColor Red
         Write-Host "==========================================================" -ForegroundColor Red
         Write-Host "An active internet connection is required to download the Antigravity Agent Core"
-        Write-Host "source files from GitHub."
+        Write-Host "source files from $SourceRepo."
         Write-Host "Please check your network connection and try again."
         Write-Host "Installation aborted."
         Write-Host "==========================================================" -ForegroundColor Red
@@ -112,7 +138,7 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
 
     $TempDir = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
     New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
-    $RepoUrl = "https://github.com/rafaelghif/antigravity-agents.git"
+    $RepoUrl = $SourceRepo
     $RepoPath = Join-Path $TempDir "repo"
     
     Write-Host "Cloning Antigravity Agent Core repository from Git..."
