@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.187.0] - 2026-07-09
+
+### 🚀 Features
+- harden git installer, setup interview, and lookahead rules
+- Commit setup hardening, interactive interview, and zero-touch rules (ISSUE-208)
+
+
 ## [2.186.0] - 2026-07-09
 
 ### 🚀 Features

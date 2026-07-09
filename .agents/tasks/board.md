@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Commit setup hardening, interactive interview, and zero-touch rules (feat/issue-208) <!-- id: issue-208 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Commit setup hardening, interactive interview, and zero-touch rules (feat/issue-208) <!-- id: issue-208 -->
 - [x] Harden Git-based installation, interactive setup interview, zero-touch execution loop, and comprehensive README documentation (feat/issue-207) <!-- id: issue-207 -->
 - [x] Commit dirty implementation files for mutex lock safety, JSON token sync parsing, and plug-and-play exclusions (feat/issue-206) <!-- id: issue-206 -->
 - [x] Enhance plug-and-play adaptability, zero leakage boundaries, and local workspace memory support (feat/issue-205) <!-- id: issue-205 -->
