@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Formulate AAC V3 Collaboration and Swarm Coordination Blueprint (feat/issue-222) <!-- id: issue-222 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Formulate AAC V3 Collaboration and Swarm Coordination Blueprint (feat/issue-222) <!-- id: issue-222 -->
 - [x] Implement V3 Phase 1: Parallel Validation Engine and Sandboxing (feat/issue-221) <!-- id: issue-221 -->
 - [x] Refine AAC V3 Upgrade Blueprint with Multi-Agent Swarm and Sandboxing (feat/issue-220) <!-- id: issue-220 -->
 - [x] Integrate skill evolution into lessons-learned extractor rules (feat/issue-219) <!-- id: issue-219 -->
