@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.200.0] - 2026-07-09
+
+### 🚀 Features
+- implement parallel validation engine and virtualenv sandbox manager
+- Implement V3 Phase 1: Parallel Validation Engine and Sandboxing (ISSUE-221)
+
+
 ## [2.199.0] - 2026-07-09
 
 ### 🚀 Features
