@@ -1,7 +1,7 @@
 ---
 id: issue-214
 title: "Implement installer and bootstrap version checking in validate.py"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---

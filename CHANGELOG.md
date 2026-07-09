@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.193.0] - 2026-07-09
+
+### 🚀 Features
+- audit version parity for installed projects in validate.py
+- Implement installer and bootstrap version checking in validate.py (ISSUE-214)
+
+
 ## [2.192.0] - 2026-07-09
 
 ### 🚀 Features
