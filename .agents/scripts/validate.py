@@ -201,6 +201,33 @@ def audit_critical_files() -> bool:
         else:
             print_ok(f"Found '{f}'")
             
+    # Parse version from AGENTS.md
+    agents_version = None
+    if os.path.exists("AGENTS.md"):
+        try:
+            with open("AGENTS.md", "r", encoding="utf-8") as f_ref:
+                m = re.search(r"-\s+\*\*Version:\*\*\s*([0-9\.]+)", f_ref.read())
+                if m:
+                    agents_version = m.group(1)
+        except Exception:
+            pass
+
+    # Validate version matching in shell/powershell bootstrap files if they exist in root
+    if agents_version:
+        env_files = ["bootstrap.sh", "bootstrap.ps1"]
+        for env_file in env_files:
+            if os.path.exists(env_file):
+                try:
+                    with open(env_file, "r", encoding="utf-8") as f_ref:
+                        content = f_ref.read()
+                    if agents_version not in content:
+                        print_err(f"Version mismatch: '{env_file}' version does not match version '{agents_version}' in AGENTS.md!")
+                        failed = True
+                    else:
+                        print_ok(f"Verified version sync in '{env_file}' (matches '{agents_version}').")
+                except Exception as e:
+                    print_warn(f"Failed to read '{env_file}' for version check: {e}")
+
     # Run JSON schema audits on optional config files
     if not validate_json_schema(".agents/projects.json", "projects"):
         failed = True

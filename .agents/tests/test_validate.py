@@ -32,9 +32,11 @@ class TestValidate(unittest.TestCase):
 
     @patch('validate.validate_json_schema', return_value=True)
     @patch('os.path.exists')
-    def test_audit_critical_files(self, mock_exists, mock_json_schema):
+    @patch('builtins.open', new_callable=mock_open, read_data="- **Version:** 2.192.0")
+    def test_audit_critical_files(self, mock_file, mock_exists, mock_json_schema):
         # All exist
         mock_exists.return_value = True
+        mock_exists.side_effect = None
         self.assertTrue(validate.audit_critical_files())
         
         # Missing critical file
