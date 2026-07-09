@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.208.0] - 2026-07-09
+
+### 🚀 Features
+- complete git-native branch-bound concurrency locking implementation and tests
+
+### 🐛 Bug Fixes
+- resolve variable shading in issue close and fix load locks unit test
+
+### ⚙️ Chores
+- Implement V4 Phase 2: Git-Native Concurrency Locking (ISSUE-228)
+
+
 ## [2.207.0] - 2026-07-09
 
 ### 🚀 Features

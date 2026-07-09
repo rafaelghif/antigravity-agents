@@ -1,7 +1,7 @@
 ---
 id: issue-228
 title: "Implement V4 Phase 2: Git-Native Concurrency Locking"
-status: open
+status: closed
 assignee: corporate-work
 created_at: 2026-07-09
 ---
