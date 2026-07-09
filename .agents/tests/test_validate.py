@@ -510,5 +510,19 @@ class TestValidate(unittest.TestCase):
                     mock_venv_create.assert_called_once()
                     mock_chdir.assert_any_call("/tmp/fake_sandbox")
 
+    @patch('subprocess.run')
+    def test_make_skill_audit_success(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="Success")
+        audit_func = validate.make_skill_audit("test_skill", "path/to/validate.py")
+        result = audit_func()
+        self.assertTrue(result)
+
+    @patch('subprocess.run')
+    def test_make_skill_audit_failure(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=1, stdout="Failed", stderr="Error log")
+        audit_func = validate.make_skill_audit("test_skill", "path/to/validate.py")
+        result = audit_func()
+        self.assertFalse(result)
+
 if __name__ == '__main__':
     unittest.main()

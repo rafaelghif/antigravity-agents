@@ -16,6 +16,7 @@ def run(args):
         sync_module.sync_skills_to_agents_md()
         sync_module.sync_adrs_to_architecture_md()
         sync_module.sync_lessons_to_rules()
+        sync_module.sync_skill_validation_hooks()
     except Exception as e:
         print(f"Error executing sync: {e}")
         sys.exit(1)

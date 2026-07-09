@@ -1851,6 +1851,29 @@ def get_commit_sha() -> str:
         pass
     return ""
 
+def make_skill_audit(name: str, hook_path: str):
+    def run_skill_hook() -> bool:
+        try:
+            res = subprocess.run(
+                [sys.executable, hook_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if res.returncode == 0:
+                return True
+            else:
+                print_err(f"Skill '{name}' validation hook failed (exit code {res.returncode}):")
+                if res.stdout.strip():
+                    print(res.stdout)
+                if res.stderr.strip():
+                    print(res.stderr, file=sys.stderr)
+                return False
+        except Exception as e:
+            print_err(f"Skill '{name}' validation hook execution crashed: {e}")
+            return False
+    return run_skill_hook
+
 def run_validations() -> None:
     # Check for bypass flags (human fast-track mode)
     if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true"):
@@ -1914,6 +1937,20 @@ def run_validations() -> None:
             "Commit Message Compliance": audit_commit_messages,
             "Codebase Rule Compliance": audit_codebase_rules_compliance,
         }
+        
+        # Load and execute active skill validation hooks from registry.json
+        registry_file = ".agents/skills/registry.json"
+        if os.path.exists(registry_file):
+            try:
+                with open(registry_file, 'r', encoding='utf-8') as f:
+                    registry = json.load(f)
+                skills = registry.get("skills", {})
+                for skill_name, skill_info in skills.items():
+                    if skill_info.get("has_validation_hook") and skill_info.get("validation_hook_path"):
+                        hook_path = skill_info["validation_hook_path"]
+                        audits[f"Skill: {skill_name}"] = make_skill_audit(skill_name, hook_path)
+            except Exception as e:
+                print_warn(f"Failed to load skill validation hooks from registry: {e}")
         
         with ThreadPoolExecutor() as executor:
             future_to_key = {executor.submit(func): key for key, func in audits.items()}

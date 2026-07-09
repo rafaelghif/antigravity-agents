@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.202.0] - 2026-07-09
+
+### 🚀 Features
+- implement V3 Phase 2 active skill validation hooks indexing and peer-to-peer messaging
+- Implement V3 Phase 2: Active Skill Contracts & Swarm Handoffs (ISSUE-223)
+
+
 ## [2.201.0] - 2026-07-09
 
 ### 🚀 Features
