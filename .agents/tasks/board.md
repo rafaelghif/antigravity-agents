@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Implement V3 Phase 5: Asynchronous Multi-Agent Swarm Mailbox Protocol (feat/issue-226) <!-- id: issue-226 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 - [x] Implement V3 Phase 3: Proactive Budget Guard & Auto-Repairing (feat/issue-224) <!-- id: issue-224 -->
 - [x] Implement V3 Phase 2: Active Skill Contracts & Swarm Handoffs (feat/issue-223) <!-- id: issue-223 -->

@@ -101,5 +101,118 @@ class TestMessageCommand(unittest.TestCase):
         self.assertEqual(data["status"], "completed")
         self.assertEqual(data["reply"]["status"], "ok")
 
+    @patch('commands.message.get_sender_identity')
+    @patch('subprocess.run')
+    def test_message_handover(self, mock_sub, mock_sender):
+        mock_sender.return_value = "Alice"
+        
+        # Mock subprocess calls for git commands:
+        # 1. git rev-parse (active branch name) -> feat/issue-226
+        # 2. git status (for changes check) ->  M src/main.py
+        # 3. git add -A
+        # 4. git commit (handover message)
+        # 5. git add (message file)
+        # 6. git commit (add mailbox message)
+        # 7. git push
+        mock_run_res = MagicMock()
+        mock_run_res.stdout = "feat/issue-226\n"
+        mock_sub.return_value = mock_run_res
+        
+        message.run(["handover", "reviewer-agent", "review", '{"task": "verify"}'])
+        
+        # Verify message JSON file was created
+        msg_dir = message.MESSAGES_DIR
+        self.assertTrue(os.path.exists(msg_dir))
+        files = os.listdir(msg_dir)
+        self.assertEqual(len(files), 1)
+        
+        msg_file = os.path.join(msg_dir, files[0])
+        with open(msg_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        self.assertEqual(data["sender"], "Alice")
+        self.assertEqual(data["recipient"], "reviewer-agent")
+        self.assertEqual(data["status"], "pending")
+        self.assertEqual(data["payload"]["action"], "review")
+        self.assertEqual(data["payload"]["task_id"], "issue-226")
+        self.assertEqual(data["payload"]["task"], "verify")
+
+    @patch('subprocess.run')
+    def test_message_process_scaffold(self, mock_sub):
+        # Create a pending message file manually in test dir
+        msg_id = "msg_test123"
+        msg = {
+            "message_id": msg_id,
+            "sender": "Alice",
+            "recipient": "reviewer-agent",
+            "status": "pending",
+            "payload": {
+                "task_id": "issue-226",
+                "action": "scaffold"
+            }
+        }
+        os.makedirs(message.MESSAGES_DIR, exist_ok=True)
+        msg_file = os.path.join(message.MESSAGES_DIR, f"{msg_id}.json")
+        with open(msg_file, 'w', encoding='utf-8') as f:
+            json.dump(msg, f)
+            
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        message.run(["process", msg_id])
+        
+        # Verify status became completed
+        with open(msg_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        self.assertEqual(data["status"], "completed")
+        
+        # Verify scaffold file was written
+        scaffold_file = ".agents/plans/scaffold_result.md"
+        self.assertTrue(os.path.exists(scaffold_file))
+        # clean it up
+        os.remove(scaffold_file)
+
+    @patch('commands.message.get_sender_identity')
+    @patch('subprocess.run')
+    def test_message_receive_filters_and_processes(self, mock_sub, mock_sender):
+        mock_sender.return_value = "reviewer-agent"
+        
+        # Create two pending messages, one for reviewer-agent, one for coder-agent
+        msg_dir = message.MESSAGES_DIR
+        os.makedirs(msg_dir, exist_ok=True)
+        
+        # Message 1 (for reviewer-agent)
+        msg1 = {
+            "message_id": "msg_1",
+            "recipient": "reviewer-agent",
+            "status": "pending",
+            "payload": {"task_id": "issue-226", "action": "review"}
+        }
+        with open(os.path.join(msg_dir, "msg_1.json"), 'w', encoding='utf-8') as f:
+            json.dump(msg1, f)
+            
+        # Message 2 (for coder-agent)
+        msg2 = {
+            "message_id": "msg_2",
+            "recipient": "coder-agent",
+            "status": "pending",
+            "payload": {"task_id": "issue-226", "action": "scaffold"}
+        }
+        with open(os.path.join(msg_dir, "msg_2.json"), 'w', encoding='utf-8') as f:
+            json.dump(msg2, f)
+            
+        mock_sub.return_value = MagicMock(returncode=0)
+        
+        message.run(["receive"])
+        
+        # msg_1 should be completed (processed because recipient matches active_sender_identity)
+        with open(os.path.join(msg_dir, "msg_1.json"), 'r', encoding='utf-8') as f:
+            data1 = json.load(f)
+        self.assertEqual(data1["status"], "completed")
+        
+        # msg_2 should still be pending
+        with open(os.path.join(msg_dir, "msg_2.json"), 'r', encoding='utf-8') as f:
+            data2 = json.load(f)
+        self.assertEqual(data2["status"], "pending")
+
 if __name__ == '__main__':
     unittest.main()
