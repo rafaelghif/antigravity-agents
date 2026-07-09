@@ -1,7 +1,7 @@
 ---
 id: issue-223
 title: "Implement V3 Phase 2: Active Skill Contracts & Swarm Handoffs"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-09
 ---
