@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Implement agent soul profile and heartbeat workspace diagnostics (feat/issue-211) <!-- id: issue-211 -->
 - [x] Upgrade AGENTS.md to enterprise-grade master prompt template and execute self-driving execution loop (feat/issue-210) <!-- id: issue-210 -->
 - [x] Enforce proactive prompt looping and self-driving zero-touch subtask execution (feat/issue-209) <!-- id: issue-209 -->
 - [x] Commit setup hardening, interactive interview, and zero-touch rules (feat/issue-208) <!-- id: issue-208 -->

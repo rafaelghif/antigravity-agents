@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.189.0
+- **Version:** 2.190.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -53,6 +53,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 - `./helper.sh changelog`: Conventional commits parser and SemVer version bump.
 - `./helper.sh sync`: Updates skills and ADR registries.
 - `./helper.sh learn "<lesson>" [--category <name>]`: Appends a lesson to `.agents/memory/lessons-learned.md` after resolving a bug or workflow issue.
+- `./helper.sh heartbeat`: Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget).
 
 ## 4. Context map — what loads when
 
@@ -80,6 +81,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/memory/decisions/` | ADRs — full reasoning | On demand, referenced from architecture.md and the `adr` skill — never auto-loaded |
 | `.agents/memory/glossary.md` | Domain terms | On demand when unfamiliar terms appear |
 | `.agents/memory/tech-debt.md`, `lessons-learned.md` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
+| `.agents/memory/soul.md` | Core agent values, communication policies, and identity. | Always — loaded alongside `AGENTS.md` every prompt |
 | `.agents/tasks/board.md` | Task board | Read at the start of every task, written at every status change |
 
 If you're about to paste a paragraph of explanation into this file, it almost certainly belongs in a skill or memory file instead, pulled in with `@path` only when needed. That's what keeps the per-prompt token cost flat as the project grows.

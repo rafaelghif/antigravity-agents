@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-2.189.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-2.190.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -111,6 +111,7 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons to `lessons-learned.md`. |
 | **`doctor`** | `./helper.sh doctor` | Diagnostics tool verifying local setup and python dependencies. |
+| **`heartbeat`** | `./helper.sh heartbeat` | Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget). |
 
 ---
 
@@ -127,6 +128,7 @@ After bootstrapping, your project will have the following layout:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
+  - `soul.md`: Core agent values, communication policies, and identity.
   - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
 - `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `self-healing/`, `database-evolution/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.

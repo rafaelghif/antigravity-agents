@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [2.190.0] - 2026-07-09
+
+### 🚀 Features
+- implement soul.md agent profile and heartbeat diagnostic command
+- Implement agent soul profile and heartbeat workspace diagnostics (ISSUE-211)
+
+
 ## [2.189.0] - 2026-07-09
 
 ### 🚀 Features
