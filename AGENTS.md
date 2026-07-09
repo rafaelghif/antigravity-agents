@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 2.183.0
+- **Version:** 2.184.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -12,7 +12,7 @@
 *(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*
 
 - **ALWAYS** perform an explicit **Rule & Schema Compliance Audit** in your thought block or response before executing any file modifications. List: (a) target files to edit, (b) active module locks, (c) applicable non-negotiable rules from `AGENTS.md` and `.agents/rules.md` (you MUST explicitly load and read `.agents/rules.md` to verify self-learned guidelines), and (d) verification of conformity with `.agents/schema.md`.
-- **ALWAYS** load and read the workspace's `.agents/active_context.md`, `.agents/schema.md`, and the active issue specification file `.agents/issues/issue_[id].md` at the very beginning of the first conversation turn to align on task checklist, database/API schemas, and scope boundaries before formulating any implementation plan or writing code.
+- **ALWAYS** load and read the workspace's `.agents/active_context.md`, `.agents/schema.md`, the active issue specification file `.agents/issues/issue_[id].md`, and any custom workspace-level memory files (such as `memory.md`, `brain.md`, or custom context files in the root or `.agents/` directory) at the very beginning of the first conversation turn to align on task checklist, database/API schemas, scope boundaries, and local workspace memory before formulating any implementation plan or writing code.
 - **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.
 - **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
 - **ALWAYS** run the project's test command before marking a task `Completed`.
@@ -30,7 +30,7 @@
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
 - **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
 - **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
-- **NEVER** write to or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, or global agent appData/brain directories). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) and tracked in git to ensure multi-developer environment consistency.
+- **NEVER** write to, expose, or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, global agent appData/brain directories, or global databases). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) or project-level files (such as `memory.md`, `brain.md`), and tracked in git to ensure multi-developer environment consistency and absolute isolation without any global data leakage.
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.
 - **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.

@@ -11,6 +11,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Enhance plug-and-play adaptability, zero leakage boundaries, and local workspace memory support (feat/issue-205) <!-- id: issue-205 -->
 - [x] Elevate token sync robustness and lock transaction safety to world class grade (feat/issue-204) <!-- id: issue-204 -->
 - [x] Update README alignment version and workflow diagram (feat/issue-203) <!-- id: issue-203 -->
 - [x] Add prompt caching optimization rules (feat/issue-202) <!-- id: issue-202 -->
