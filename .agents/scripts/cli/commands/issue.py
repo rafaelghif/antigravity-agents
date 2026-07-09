@@ -765,6 +765,36 @@ created_at: {current_date}
             print(f"Please checkout the feature branch first: git checkout {found_branch}")
             sys.exit(1)
 
+        # Check if local working tree has uncommitted tracked changes
+        try:
+            status_res = subprocess.run(
+                ['git', 'status', '--porcelain'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True
+            )
+            dirty_files = []
+            for line in status_res.stdout.splitlines():
+                if not line.strip():
+                    continue
+                status = line[:2]
+                path = line[3:].strip()
+                # Ignore transient config files
+                if "git_profiles.json" in path or "locks.json" in path or "upgrade_state.json" in path or "token_budget.json" in path or "active_context.md" in path:
+                    continue
+                # Block on modified, staged, or deleted tracked files
+                if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
+                    dirty_files.append(path)
+            if dirty_files:
+                print(f"Error: Uncommitted changes detected in the following files:")
+                for df in dirty_files:
+                    print(f"  - {df}")
+                print("Please commit or stash your changes before closing the issue.")
+                sys.exit(1)
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: Failed to run git status check: {e}")
+
         # 1. Run local validation checks before closing
         print("Triggering pre-close validation guard...")
         val_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../validate.py'))
@@ -911,8 +941,9 @@ created_at: {current_date}
             merge_msg = f"chore(git): merge branch {found_branch}"
             merge_res = subprocess.run(['git', 'merge', found_branch, '--no-ff', '-m', merge_msg, '-m', issue_id])
             if merge_res.returncode != 0:
-                print("Error: Git merge failed with conflict! Please resolve manually.")
-                print(f"To abort the merge: git merge --abort && git checkout {found_branch}")
+                print("Error: Git merge failed with conflict! Automatically aborting merge and returning to feature branch...")
+                subprocess.run(['git', 'merge', '--abort'])
+                subprocess.run(['git', 'checkout', found_branch])
                 sys.exit(1)
 
             print(f"Deleting branch '{found_branch}'...")

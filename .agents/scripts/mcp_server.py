@@ -13,7 +13,8 @@ cwd_scripts_dir = os.path.abspath(os.path.join(os.getcwd(), '.agents', 'scripts'
 if os.path.isdir(cwd_scripts_dir):
     target_scripts_dir = cwd_scripts_dir
 else:
-    target_scripts_dir = scripts_dir
+    sys.stderr.write("Error: Current working directory is not a valid AAC workspace. Exiting to prevent cross-workspace contamination.\n")
+    sys.exit(1)
 
 token_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'token.py')
 token_cmd = None

@@ -415,8 +415,25 @@ def run(args):
         text=True
     )
     if res.returncode != 0:
-        print(f"\033[91mError: Failed to fetch templates from Git repository: {res.stderr.strip()}\033[0m")
-        sys.exit(1)
+        local_src = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
+        if os.path.isdir(os.path.join(local_src, ".agents")):
+            print_warn("Failed to reach remote repository. Falling back to local offline templates cache...")
+            try:
+                for item in (".agents", "helper.sh", "helper.ps1", "AGENTS.md"):
+                    src_item = os.path.join(local_src, item)
+                    dest_item = os.path.join(temp_src_root, item)
+                    if os.path.exists(src_item):
+                        if os.path.isdir(src_item):
+                            shutil.copytree(src_item, dest_item, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(src_item, dest_item)
+                print_ok("Successfully resolved templates from local cache.")
+            except Exception as e:
+                print_err(f"Offline cache restoration failed: {e}")
+                sys.exit(1)
+        else:
+            print_err(f"Failed to fetch templates from Git repository and no local cache was found: {res.stderr.strip()}")
+            sys.exit(1)
         
     src_root = temp_src_root
 
