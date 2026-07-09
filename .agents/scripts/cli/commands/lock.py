@@ -50,24 +50,7 @@ def prune_stale_locks(locks: dict) -> dict:
         print(f"[INFO] Auto-released stale locks for module(s): {', '.join(stale_mods)} (associated branch no longer exists).")
     return locks
 
-def load_locks() -> dict:
-    locks = {}
-    if os.path.exists(LOCK_FILE):
-        try:
-            with open(LOCK_FILE, 'r', encoding='utf-8') as f:
-                locks = json.load(f)
-        except Exception:
-            locks = {}
-            
-    if locks:
-        orig_len = len(locks)
-        locks = prune_stale_locks(locks)
-        if len(locks) != orig_len:
-            save_locks(locks)
-            
-    return locks
-
-def save_locks(locks: dict) -> None:
+def _save_locks_nolock(locks: dict) -> None:
     try:
         dir_name = os.path.dirname(LOCK_FILE) or "."
         with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
@@ -76,6 +59,57 @@ def save_locks(locks: dict) -> None:
         os.replace(temp_name, LOCK_FILE)
     except Exception as e:
         print(f"Error saving locks: {e}")
+
+def save_locks(locks: dict) -> None:
+    try:
+        from helper import FileLockMutex
+    except ImportError:
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from helper import FileLockMutex
+
+    try:
+        with FileLockMutex(LOCK_FILE):
+            _save_locks_nolock(locks)
+    except Exception as e:
+        print(f"Concurrency warning saving locks: {e}")
+        # Fallback to direct write
+        _save_locks_nolock(locks)
+
+def load_locks() -> dict:
+    locks = {}
+    try:
+        from helper import FileLockMutex
+    except ImportError:
+        cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
+        from helper import FileLockMutex
+
+    try:
+        with FileLockMutex(LOCK_FILE):
+            if os.path.exists(LOCK_FILE):
+                try:
+                    with open(LOCK_FILE, 'r', encoding='utf-8') as f:
+                        locks = json.load(f)
+                except Exception:
+                    locks = {}
+            if locks:
+                orig_len = len(locks)
+                locks = prune_stale_locks(locks)
+                if len(locks) != orig_len:
+                    _save_locks_nolock(locks)
+    except Exception as e:
+        print(f"Concurrency warning loading locks: {e}")
+        if os.path.exists(LOCK_FILE):
+            try:
+                with open(LOCK_FILE, 'r', encoding='utf-8') as f:
+                    locks = json.load(f)
+            except Exception:
+                locks = {}
+    return locks
+
 
 def run(args: list) -> None:
     cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

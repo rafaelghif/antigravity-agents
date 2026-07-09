@@ -1483,9 +1483,16 @@ def prune_stale_locks() -> None:
                     del locks[mod]
                     modified = True
             if modified:
-                with open(locks_file, 'w', encoding='utf-8') as f:
-                    json.dump(locks, f, indent=2)
-                print_ok("Auto-pruned stale module locks in 'locks.json'.")
+                import tempfile
+                try:
+                    dir_name = os.path.dirname(locks_file) or "."
+                    with tempfile.NamedTemporaryFile('w', dir=dir_name, delete=False, encoding='utf-8') as tf:
+                        json.dump(locks, tf, indent=2)
+                        temp_name = tf.name
+                    os.replace(temp_name, locks_file)
+                    print_ok("Auto-pruned stale module locks in 'locks.json'.")
+                except Exception as e:
+                    print_warn(f"Failed to write pruned locks: {e}")
         except Exception:
             pass
 

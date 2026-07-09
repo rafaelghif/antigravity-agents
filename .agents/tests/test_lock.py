@@ -43,6 +43,25 @@ class TestLockCommand(unittest.TestCase):
         with patch('lock.save_locks') as mock_save:
             lock.run(["module-to-lock"])
             mock_save.assert_called_once()
+
+    def test_file_lock_mutex_success(self):
+        from helper import FileLockMutex
+        mutex = FileLockMutex("test_path_dummy", timeout=0.1)
+        with patch('os.mkdir') as mock_mkdir, patch('os.rmdir') as mock_rmdir:
+            with mutex:
+                self.assertTrue(mutex.acquired)
+            mock_mkdir.assert_called_once_with("test_path_dummy.lock")
+            mock_rmdir.assert_called_once_with("test_path_dummy.lock")
+            self.assertFalse(mutex.acquired)
+
+    def test_file_lock_mutex_timeout(self):
+        from helper import FileLockMutex
+        mutex = FileLockMutex("test_path_dummy", timeout=0.01, delay=0.001)
+        with patch('os.mkdir', side_effect=FileExistsError):
+            with self.assertRaises(TimeoutError):
+                with mutex:
+                    pass
             
 if __name__ == '__main__':
     unittest.main()
+

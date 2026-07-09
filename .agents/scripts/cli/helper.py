@@ -310,5 +310,33 @@ def main():
         except Exception:
             pass
 
+class FileLockMutex:
+    """A cross-platform zero-dependency atomic mutex using filesystem directories."""
+    def __init__(self, filepath: str, timeout: float = 5.0, delay: float = 0.05) -> None:
+        self.lock_dir: str = filepath + ".lock"
+        self.timeout: float = timeout
+        self.delay: float = delay
+        self.acquired: bool = False
+
+    def __enter__(self) -> 'FileLockMutex':
+        start_time: float = time.time()
+        while time.time() - start_time < self.timeout:
+            try:
+                os.mkdir(self.lock_dir)
+                self.acquired = True
+                return self
+            except FileExistsError:
+                time.sleep(self.delay)
+        raise TimeoutError(f"Could not acquire mutex lock on {self.lock_dir} within {self.timeout}s.")
+
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
+        if self.acquired:
+            try:
+                os.rmdir(self.lock_dir)
+            except Exception:
+                pass
+            self.acquired = False
+
 if __name__ == '__main__':
     main()
+

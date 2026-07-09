@@ -16,6 +16,14 @@ def raise_system_exit(code=0):
 
 class TestTokenCommand(unittest.TestCase):
 
+    def setUp(self):
+        self.mutex_patcher = patch('helper.FileLockMutex')
+        self.mock_mutex = self.mutex_patcher.start()
+        self.mock_mutex.return_value.__enter__.return_value = self.mock_mutex.return_value
+
+    def tearDown(self):
+        self.mutex_patcher.stop()
+
     @patch('os.path.exists', return_value=False)
     def test_load_budget_default(self, mock_exists):
         budget = token_cmd.load_budget()
@@ -425,6 +433,20 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(parsed7["tasks"]["issue-182"]["prompt_tokens"], 1000)
         self.assertEqual(parsed7["tasks"]["issue-182"]["completion_tokens"], 100)
         self.assertEqual(parsed7["tasks"]["issue-182"]["total_tokens"], 1100)
+
+        # JSON token budget format
+        json_output = '{"daily_limit": 500000, "daily_used": 15000, "monthly_limit": 5000000, "monthly_used": 150000}'
+        parsed_json = token_cmd.parse_usage_output(json_output)
+        self.assertEqual(parsed_json["daily_limit"], 500000)
+        self.assertEqual(parsed_json["daily_used"], 15000)
+        self.assertTrue(parsed_json["is_json_format"])
+
+        # Markdown wrapped JSON
+        md_json_output = '```json\n{"daily_limit": 500000, "daily_used": 20000}\n```'
+        parsed_md_json = token_cmd.parse_usage_output(md_json_output)
+        self.assertEqual(parsed_md_json["daily_used"], 20000)
+        self.assertTrue(parsed_md_json["is_json_format"])
+
 
 
 
