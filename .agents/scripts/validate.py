@@ -599,12 +599,28 @@ def audit_link_integrity() -> bool:
         try:
             with open(f, 'r', encoding='utf-8') as file:
                 content = file.read()
-                links = re.findall(r'file://([^\s\)]+)', content)
-                for link in links:
-                    if link.startswith('///'):
-                        clean_path = '/' + link[3:]
-                    elif link.startswith('//.'):
-                        clean_path = link[2:]
+                
+                # 1. Match file:// links
+                file_links = re.findall(r'file://([^\s\)]+)', content)
+                # 2. Match standard relative/local markdown links [text](path)
+                # Ignore remote URLs (containing ':') and section anchors starting with '#'
+                md_links = re.findall(r'\[[^\]]*\]\(([^:\s\)]+)\)', content)
+                
+                all_links = []
+                for link in file_links:
+                    all_links.append((link, True))
+                for link in md_links:
+                    if not link.startswith('#') and not link.startswith('mailto:'):
+                        all_links.append((link, False))
+                
+                for link, is_proto in all_links:
+                    if is_proto:
+                        if link.startswith('///'):
+                            clean_path = '/' + link[3:]
+                        elif link.startswith('//.'):
+                            clean_path = link[2:]
+                        else:
+                            clean_path = link
                     else:
                         clean_path = link
                     
@@ -627,6 +643,26 @@ def audit_link_integrity() -> bool:
                     if resolved_path and not os.path.exists(resolved_path):
                         print_err(f"Broken link in '{f}': linked file '{resolved_path}' does not exist.")
                         failed = True
+                    elif resolved_path and os.path.exists(resolved_path):
+                        # Verify anchor line range if specified (e.g. #L10-L20)
+                        anchor = clean_path.split('#')[1] if '#' in clean_path else None
+                        if anchor and anchor.startswith('L'):
+                            line_part = anchor[1:]
+                            try:
+                                if '-' in line_part:
+                                    parts = line_part.split('-')
+                                    start_line = int(parts[0].lstrip('L'))
+                                    end_line = int(parts[1].lstrip('L'))
+                                else:
+                                    start_line = end_line = int(line_part)
+                                
+                                with open(resolved_path, 'r', encoding='utf-8', errors='ignore') as ref_file:
+                                    lines_count = sum(1 for _ in ref_file)
+                                if end_line > lines_count:
+                                    print_err(f"Broken anchor range in '{f}': linked path '{resolved_path}#{anchor}' points to line {end_line}, but file only has {lines_count} lines.")
+                                    failed = True
+                            except ValueError:
+                                pass
         except Exception as e:
             print_warn(f"Failed to scan links in '{f}': {e}")
             

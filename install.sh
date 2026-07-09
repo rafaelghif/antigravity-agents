@@ -39,6 +39,21 @@ if [ -z "$PYTHON_EXEC" ]; then
   echo "Installation aborted."
   echo "=========================================================="
   exit 1
+else
+  # Verify minimum Python version >= 3.8
+  PYTHON_VERSION=$("$PYTHON_EXEC" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+  MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+  MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+  if [ "$MAJOR" -lt 3 ] || { [ "$MAJOR" -eq 3 ] && [ "$MINOR" -lt 8 ]; }; then
+    echo "=========================================================="
+    echo "   [ERROR] Python version $PYTHON_VERSION is too old!"
+    echo "=========================================================="
+    echo "AAC V2 requires Python 3.8 or newer. Found Python $PYTHON_VERSION."
+    echo "Please upgrade Python and run the installer again."
+    echo "Installation aborted."
+    echo "=========================================================="
+    exit 1
+  fi
 fi
 
 echo "=========================================================="
@@ -74,7 +89,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
   
   # Verifying network connection to GitHub via Git
   echo "Verifying network connection to GitHub..."
-  REPO_URL="https://github.com/rafaelghif/antigravity-agents.git"
+  REPO_URL="${AAC_SOURCE_REPO:-https://github.com/rafaelghif/antigravity-agents.git}"
   if ! git ls-remote "$REPO_URL" HEAD &>/dev/null; then
     echo "=========================================================="
     echo "   [ERROR] GitHub Connection Failed!"

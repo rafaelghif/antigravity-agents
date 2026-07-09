@@ -403,7 +403,7 @@ def run(args):
     import shutil
     import atexit
     
-    source_repo = "https://github.com/rafaelghif/antigravity-agents.git"
+    source_repo = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
     print(f"Fetching latest source templates and core files from Git: {source_repo}...")
     temp_src_root = tempfile.mkdtemp()
     atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
@@ -504,7 +504,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "2.194.0"
+    AAC_VERSION = "2.195.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")
