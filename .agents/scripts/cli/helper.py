@@ -289,9 +289,22 @@ def main():
     status = "success"
     error_msg = None
     
+    # Static list of approved CLI command modules
+    ALLOWED_COMMANDS = {
+        'bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard',
+        'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock',
+        'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate'
+    }
+    
     try:
         # Resolve command file path dynamically (hyphens mapped to underscores)
         module_name = cmd.replace('-', '_')
+        if module_name not in ALLOWED_COMMANDS:
+            print(f"{RED}Error: Command '{cmd}' is not whitelisted for execution.{RESET}")
+            status = "failed"
+            error_msg = f"Command '{cmd}' is not whitelisted for execution"
+            sys.exit(1)
+            
         cmd_file = os.path.abspath(os.path.join(os.path.dirname(__file__), f"commands/{module_name}.py"))
         if not os.path.exists(cmd_file):
             print(f"{RED}Error: Command module file '{cmd_file}' not found.{RESET}")
