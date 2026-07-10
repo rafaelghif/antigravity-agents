@@ -20,11 +20,25 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Tests must use standard `unittest` or `pytest` frameworks.
 - Mock all filesystem or external command calls to ensure tests remain deterministic and fast.
 
-## 4. Plug-and-Play Adaptation & Self-Learning
+## 4. Enterprise-Grade Standards
+- **Clean Code & Patterns:** Follow SOLID design principles, write highly modular code, and use standard architectural design patterns (like Clean Architecture or Layered/MVC where appropriate).
+- **Scalability:** Design APIs and systems to handle concurrency, avoid locking contentions, optimize memory and thread pool sizes, and avoid N+1 query patterns.
+- **Security:** Avoid OWASP Top 10 vulnerabilities (SQL Injection, XSS, CSRF, insecure command execution). Always sanitize inputs. Keep secrets strictly in environment variables.
+- **Performance:** Cache hot paths, optimize database queries with indexing, use non-blocking operations where appropriate, and keep CPU/memory footprint low.
+- **Maintainability:** Document everything clearly with type hints/docstrings, write robust error handling (avoid bare print statements, use structured logging), and maintain strict DRY compliance.
+
+## 5. Plug-and-Play Adaptation & Self-Learning
 - **Stack Adaptiveness**: The agent layout is project-agnostic. `./helper.sh bootstrap` (a thin wrapper around `bootstrap.py` — all detection logic lives in the Python script, not duplicated in the shell wrapper, per the no-duplicate-templates rule in `AGENTS.md`) auto-detects and supports any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) for the *target* project, without strict folder structure constraints.
 - **Continuous Self-Learning**: After resolving any bug, workflow issue, or optimization, the agent MUST run `./helper.sh learn "<lesson>"` (optionally with `--category <name>`) to append the lesson in `.agents/memory/lessons-learned.md`. Always review this file at the start of work. (Also listed in `AGENTS.md` §3 CLI reference.)
 - **Token & Context Efficiency**: The agent MUST record found filepaths in its thinking block and is prohibited from calling search tools (`grep_search`, `list_dir`) for the same files or directories more than once per conversation session. The agent MUST use the narrowest possible line range when using the `view_file` tool to read files.
 - **Prompt Caching**: To preserve prompt cache state and save context tokens, reuse retrieved file content and search results from previous turns instead of making repetitive tool calls.
+
+## 6. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Shell Scripting]** Maintain parity between Bash (.sh) and PowerShell (.ps1) helper scripts for consistent developer experience across platforms.
+- **[Learning: Workspace Optimization]** Optimized scan_conversations_for_usage to read JSONL transcripts first and enforced a strict 5-minute age validation for both transcript and DB steps. Prevented dynamic limits overrides when limits are parsed directly from Markdown tables, saved direct used overrides, and implemented dynamic freshness check in run_status to trigger async background sync when budget is older than 2 minutes.; Fixed platform usage parser to correctly parse limits and used tokens from Markdown table column format and support bullet lists (*) and bold tags (**) in account/task breakdowns.
+- **[Learning: Database Schema]** Strictly align API and database models with the project schemas to maintain interface integrity.
+- **[Learning: documentation]** Fixed installer repository raw.githubusercontent.com URLs in README.md from rafaelghifari to rafaelghif
+- **[Learning: installation]** Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
 
 ## 5. Synthesized Rules (Self-Learning Memory)
 - **[Learning: Shell Scripting]** Maintain parity between Bash (.sh) and PowerShell (.ps1) helper scripts for consistent developer experience across platforms.
