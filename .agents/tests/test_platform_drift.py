@@ -67,5 +67,24 @@ class TestPlatformDrift(unittest.TestCase):
             ps_content = f.read()
         self.assertIn(".agents/scripts/cli/helper.py", ps_content, "helper.ps1 does not target cli/helper.py")
 
+    def test_installer_copy_parity(self):
+        """Verify that install.sh and install.ps1 both copy the same core files during install/upgrade."""
+        with open("install.sh", "r", encoding="utf-8") as f:
+            sh_content = f.read()
+        
+        # Extract files copied in install.sh (e.g. cp "$EXTRACTED_DIR/file" ...)
+        sh_copies = set(re.findall(r'cp\s+["\']\$EXTRACTED_DIR/([^"\']+)["\']', sh_content))
+        expected = {"helper.sh", "helper.ps1", "Dockerfile"}
+        for item in expected:
+            self.assertIn(item, sh_copies, f"install.sh is missing copying of '{item}'")
+
+        with open("install.ps1", "r", encoding="utf-8") as f:
+            ps_content = f.read()
+        
+        # Extract files copied in install.ps1 (e.g. Join-Path $ExtractedDir "file")
+        ps_copies = set(re.findall(r'Join-Path\s+\$ExtractedDir\s+["\']([^"\']+)["\']', ps_content))
+        for item in expected:
+            self.assertIn(item, ps_copies, f"install.ps1 is missing copying of '{item}'")
+
 if __name__ == "__main__":
     unittest.main()
