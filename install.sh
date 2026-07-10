@@ -182,12 +182,6 @@ echo "Downloading Antigravity Agent Core from GitHub..."
   cp "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
   cp "$EXTRACTED_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
   
-  if [ ! -f "$TARGET_ABS/AGENTS.md" ]; then
-    cp "$EXTRACTED_DIR/AGENTS.md" "$TARGET_ABS/AGENTS.md"
-    echo "Created AGENTS.md."
-  else
-    echo "AGENTS.md already exists. Skipping overwrite."
-  fi
   
   # Run bootstrap.sh from extracted folder inside target folder context
   (cd "$TARGET_ABS" && bash "$EXTRACTED_DIR/bootstrap.sh")

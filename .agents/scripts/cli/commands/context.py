@@ -62,22 +62,15 @@ def get_issue_details(issue_id: str) -> Dict[str, Any]:
     return details
 
 def get_locked_modules(branch: str) -> List[str]:
-    locks_file = ".agents/state/locks.json"
-    if not os.path.exists(locks_file):
-        return []
     try:
-        with open(locks_file, 'r', encoding='utf-8') as f:
-            locks = json.load(f)
-        ret = []
-        for module, info in locks.items():
-            if isinstance(info, dict):
-                if info.get("branch") == branch:
-                    ret.append(module)
-            elif isinstance(info, str):
-                if info == branch:
-                    ret.append(module)
-        return ret
-    except Exception:
+        try:
+            from lock import load_locks
+        except ImportError:
+            from commands.lock import load_locks
+        locks = load_locks()
+        return [mod for mod, b in locks.items() if b == branch]
+    except Exception as e:
+        print(f"Error loading locks: {e}")
         return []
 
 def get_git_changes() -> List[str]:

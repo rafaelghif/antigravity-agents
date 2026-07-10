@@ -507,8 +507,35 @@ def run(args):
     AAC_VERSION = "3.3.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
-    detected_ver = detect_project_version(".")
-    project_version = detected_ver if detected_ver else "0.1.0"
+    # Check if we are bootstrapping the agent core repo itself
+    is_core = False
+    try:
+        # Resolve scripts dir to import git_api
+        scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        import git_api
+        repo = git_api.get_repo_info()
+        if repo and "antigravity-agents" in repo.lower():
+            is_core = True
+    except Exception:
+        pass
+
+    if not is_core and os.path.exists(agents_file):
+        try:
+            with open(agents_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            product_match = re.search(r"-\s+\*\*Product:\*\*\s*(\S+)", content)
+            if product_match and product_match.group(1) == "test-proj":
+                is_core = True
+        except Exception:
+            pass
+
+    if is_core:
+        project_version = AAC_VERSION
+    else:
+        detected_ver = detect_project_version(".")
+        project_version = detected_ver if detected_ver else "0.1.0"
     
     if not os.path.exists(agents_file):
         if os.path.exists(src_agents):
@@ -539,8 +566,8 @@ def run(args):
         
         # Read existing version from AGENTS.md
         existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
-        if existing_version_match:
-            # Keep existing version
+        if existing_version_match and not is_core:
+            # Keep existing version (only for target/managed projects)
             print(f"Preserving existing version in AGENTS.md: {existing_version_match.group(1)}")
         else:
             if re.search(r'-\s+\*\*Version:\*\*.*', content):
