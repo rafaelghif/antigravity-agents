@@ -179,6 +179,12 @@ echo "Downloading Antigravity Agent Core from GitHub..."
 
   cp "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
   cp "$EXTRACTED_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
+  if [ -f "$EXTRACTED_DIR/bootstrap.sh" ]; then
+    cp "$EXTRACTED_DIR/bootstrap.sh" "$TARGET_ABS/bootstrap.sh" || true
+  fi
+  if [ -f "$EXTRACTED_DIR/bootstrap.ps1" ]; then
+    cp "$EXTRACTED_DIR/bootstrap.ps1" "$TARGET_ABS/bootstrap.ps1" || true
+  fi
   if [ -f "$EXTRACTED_DIR/Dockerfile" ]; then
     cp "$EXTRACTED_DIR/Dockerfile" "$TARGET_ABS/Dockerfile" || true
   fi

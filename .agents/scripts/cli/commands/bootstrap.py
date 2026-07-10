@@ -271,7 +271,7 @@ def copy_core_files(src_root, force=False):
                     pass
                 
     # Root helper wrappers
-    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example", ".agents/projects.example", "Dockerfile"]
+    helpers = ["helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/git_profiles.example", ".agents/projects.example", "Dockerfile"]
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)
@@ -506,7 +506,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.16.2"
+    AAC_VERSION = "3.16.3"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

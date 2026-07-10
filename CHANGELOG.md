@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.3] - 2026-07-10
+
+### 🐛 Bug Fixes
+- copy bootstrap shell scripts in install and bootstrap commands
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+
 ## [3.16.2] - 2026-07-10
 
 ### 🐛 Bug Fixes

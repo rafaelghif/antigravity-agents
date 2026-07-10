@@ -273,6 +273,18 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
         Copy-Item -Path $SrcHelperPs -Destination $DestHelperPs -Force | Out-Null
     }
 
+    $SrcBootstrapSh = Join-Path $ExtractedDir "bootstrap.sh"
+    $DestBootstrapSh = Join-Path $TargetAbs "bootstrap.sh"
+    if (Test-Path $SrcBootstrapSh) {
+        Copy-Item -Path $SrcBootstrapSh -Destination $DestBootstrapSh -Force | Out-Null
+    }
+
+    $SrcBootstrapPs = Join-Path $ExtractedDir "bootstrap.ps1"
+    $DestBootstrapPs = Join-Path $TargetAbs "bootstrap.ps1"
+    if (Test-Path $SrcBootstrapPs) {
+        Copy-Item -Path $SrcBootstrapPs -Destination $DestBootstrapPs -Force | Out-Null
+    }
+
     $SrcDockerfile = Join-Path $ExtractedDir "Dockerfile"
     $DestDockerfile = Join-Path $TargetAbs "Dockerfile"
     if (Test-Path $SrcDockerfile) {
