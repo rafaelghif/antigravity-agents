@@ -10,10 +10,10 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Fix Windows installations failing (feat/issue-231) <!-- id: 231 -->
-
+- [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] Fix Windows installations failing (feat/issue-231) <!-- id: issue-231 -->
 - [x] fix: correct V3/V4 label inconsistencies in CHANGELOG.md (feat/issue-230) <!-- id: issue-230 -->
 - [x] chore: upgrade project version name and SemVer to V3 (feat/issue-229) <!-- id: issue-229 -->
 - [x] Implement V4 Phase 2: Git-Native Concurrency Locking (feat/issue-228) <!-- id: issue-228 -->

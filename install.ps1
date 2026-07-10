@@ -222,9 +222,7 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
         if (-not (Test-Path $DestDir)) {
             New-Item -ItemType Directory -Force -Path $DestDir | Out-Null
         }
-        if (-not (Test-Path $DestFile)) {
-            Copy-Item -Path $File.FullName -Destination $DestFile -Force | Out-Null
-        }
+        Copy-Item -Path $File.FullName -Destination $DestFile -Force | Out-Null
     }
     
     # Initialize clean memory folder in target
@@ -265,13 +263,13 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
 
     $SrcHelperSh = Join-Path $ExtractedDir "helper.sh"
     $DestHelperSh = Join-Path $TargetAbs "helper.sh"
-    if ((Test-Path $SrcHelperSh) -and -not (Test-Path $DestHelperSh)) {
+    if (Test-Path $SrcHelperSh) {
         Copy-Item -Path $SrcHelperSh -Destination $DestHelperSh -Force | Out-Null
     }
 
     $SrcHelperPs = Join-Path $ExtractedDir "helper.ps1"
     $DestHelperPs = Join-Path $TargetAbs "helper.ps1"
-    if ((Test-Path $SrcHelperPs) -and -not (Test-Path $DestHelperPs)) {
+    if (Test-Path $SrcHelperPs) {
         Copy-Item -Path $SrcHelperPs -Destination $DestHelperPs -Force | Out-Null
     }
     
