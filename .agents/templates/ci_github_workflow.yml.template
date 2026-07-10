@@ -1,4 +1,4 @@
-name: AAC V2 Local Validation Guard
+name: AAC V3 Local Validation Guard
 
 on:
   push:
