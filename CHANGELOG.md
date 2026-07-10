@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.4.0] - 2026-07-10
+
+### 🚀 Features
+- dynamically isolate version sync and prevent target projects starting at V3
+
+### 📝 Documentation
+- chore: unify V3 changelog entries and align version to 3.0.1 (ISSUE-231)
+- lock context module and add context.py to target files
+
+
 ## [3.3.0] - 2026-07-10
 
 ### 🚀 Features

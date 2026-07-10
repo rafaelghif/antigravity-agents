@@ -1,7 +1,7 @@
 ---
 id: issue-231
 title: "chore: unify V3 changelog entries and align version to 3.0.1"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-09
 ---
