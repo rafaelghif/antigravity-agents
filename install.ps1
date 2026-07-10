@@ -273,14 +273,7 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
         Copy-Item -Path $SrcHelperPs -Destination $DestHelperPs -Force | Out-Null
     }
     
-    $SrcAgentsMd = Join-Path $ExtractedDir "AGENTS.md"
-    $DestAgentsMd = Join-Path $TargetAbs "AGENTS.md"
-    if (-not (Test-Path $DestAgentsMd)) {
-        Copy-Item -Path $SrcAgentsMd -Destination $DestAgentsMd -Force | Out-Null
-        Write-Host "Created AGENTS.md."
-    } else {
-        Write-Host "AGENTS.md already exists. Skipping overwrite."
-    }
+
 
     # Run bootstrap.ps1 from extracted folder inside target folder context
     $OriginalLocation = Get-Location

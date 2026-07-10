@@ -33,17 +33,36 @@ fi
 # 2. Synchronize Version if AGENTS.md exists
 if [ -f "AGENTS.md" ] && [ -n "$PYTHON_EXEC" ]; then
   "$PYTHON_EXEC" -c '
-import re, os
-with open("AGENTS.md", "r", encoding="utf-8") as f:
-    content = f.read()
-if "- **Version:**" in content:
-    content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 3.3.0", content)
-else:
-    content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 3.3.0", content)
-with open("AGENTS.md", "w", encoding="utf-8") as f:
-    f.write(content)
+import re, os, subprocess
+def is_agent_core_repo():
+    try:
+        res = subprocess.run(["git", "config", "--get", "remote.origin.url"], capture_output=True, text=True)
+        if "antigravity-agents" in res.stdout.lower():
+            return True
+    except Exception:
+        pass
+    if os.path.exists("AGENTS.md"):
+        try:
+            with open("AGENTS.md", "r", encoding="utf-8") as f:
+                content = f.read()
+            product_match = re.search(r"-\s+\*\*Product:\*\*\s*(\S+)", content)
+            if product_match and product_match.group(1) == "test-proj":
+                return True
+        except Exception:
+            pass
+    return False
+
+if is_agent_core_repo():
+    with open("AGENTS.md", "r", encoding="utf-8") as f:
+        content = f.read()
+    if "- **Version:**" in content:
+        content = re.sub(r"-\s+\*\*Version:\*\*.*", "- **Version:** 3.4.0", content)
+    else:
+        content = re.sub(r"(-\s+\*\*Product:\*\*.*)", r"\1\n- **Version:** 3.4.0", content)
+    with open("AGENTS.md", "w", encoding="utf-8") as f:
+        f.write(content)
+    print("Synchronized AGENTS.md version.")
 '
-  echo "Synchronized AGENTS.md version."
 fi
 
 # 3. Trigger auto-reconnaissance if recon.py exists

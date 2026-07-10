@@ -51,8 +51,40 @@ $ErrorActionPreference = $OldPreference
 
 # 2. Synchronize Version if AGENTS.md exists
 if ((Test-Path "AGENTS.md") -and $PythonExec) {
-    & $PythonExec -c "import re, os; f=open('AGENTS.md', 'r', encoding='utf-8'); content=f.read(); f.close(); content=re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 3.3.0', content) if '- **Version:**' in content else re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 3.3.0', content); f=open('AGENTS.md', 'w', encoding='utf-8'); f.write(content); f.close()" | Out-Null
-    Write-Host "Synchronized AGENTS.md version."
+    $Output = & $PythonExec -c @"
+import re, os, subprocess
+def is_agent_core_repo():
+    try:
+        res = subprocess.run(['git', 'config', '--get', 'remote.origin.url'], capture_output=True, text=True)
+        if 'antigravity-agents' in res.stdout.lower():
+            return True
+    except Exception:
+        pass
+    if os.path.exists('AGENTS.md'):
+        try:
+            with open('AGENTS.md', 'r', encoding='utf-8') as f:
+                content = f.read()
+            product_match = re.search(r'-\s+\*\*Product:\*\*\s*(\S+)', content)
+            if product_match and product_match.group(1) == 'test-proj':
+                return True
+        except Exception:
+            pass
+    return False
+
+if is_agent_core_repo():
+    with open('AGENTS.md', 'r', encoding='utf-8') as f:
+        content = f.read()
+    if '- **Version:**' in content:
+        content = re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 3.4.0', content)
+    else:
+        content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 3.4.0', content)
+    with open('AGENTS.md', 'w', encoding='utf-8') as f:
+        f.write(content)
+    print('Synchronized AGENTS.md version.')
+"@
+    if ($Output -like "*Synchronized*") {
+        Write-Host "Synchronized AGENTS.md version."
+    }
 }
 
 # 3. Trigger auto-reconnaissance

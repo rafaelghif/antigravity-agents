@@ -13,7 +13,8 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
-- [x] Fix Windows installations failing (feat/issue-231) <!-- id: issue-231 -->
+- [x] chore: unify V3 changelog entries and align version to 3.0.1 (feat/issue-231) <!-- id: issue-231 -->
+- [x] Fix Windows installations failing (feat/issue-231) <!-- id: issue-231-old -->
 - [x] fix: correct V3/V4 label inconsistencies in CHANGELOG.md (feat/issue-230) <!-- id: issue-230 -->
 - [x] chore: upgrade project version name and SemVer to V3 (feat/issue-229) <!-- id: issue-229 -->
 - [x] Implement V4 Phase 2: Git-Native Concurrency Locking (feat/issue-228) <!-- id: issue-228 -->
