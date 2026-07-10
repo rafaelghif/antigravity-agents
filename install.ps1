@@ -110,7 +110,14 @@ $LocalDev = $env:ANTIGRAVITY_LOCAL_DEV -eq "1"
 $SrcAgents = Join-Path $SrcDir ".agents"
 
 # 2. Copy/Download Agent files
-Write-Host "Downloading Antigravity Agent Core from GitHub..."
+$ExtractedDir = ""
+$TempDir = ""
+
+if ($LocalDev) {
+    Write-Host "Local Development mode active. Using local source files from $SrcDir..."
+    $ExtractedDir = $SrcDir
+} else {
+    Write-Host "Downloading Antigravity Agent Core from GitHub..."
     Write-Host "Verifying network connection to source repository..."
     
     $SourceRepo = "https://github.com/rafaelghif/antigravity-agents.git"
@@ -119,10 +126,13 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
     }
 
     $Connected = $false
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     & git ls-remote $SourceRepo HEAD 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
         $Connected = $true
     }
+    $ErrorActionPreference = $OldPref
     
     if (-not $Connected) {
         Write-Host "==========================================================" -ForegroundColor Red
@@ -142,8 +152,13 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
     $RepoPath = Join-Path $TempDir "repo"
     
     Write-Host "Cloning Antigravity Agent Core repository from Git..."
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     & git clone --depth 1 $RepoUrl $RepoPath 2>$null | Out-Null
-    if ($LASTEXITCODE -ne 0) {
+    $CloneExit = $LASTEXITCODE
+    $ErrorActionPreference = $OldPref
+
+    if ($CloneExit -ne 0) {
         Write-Host "==========================================================" -ForegroundColor Red
         Write-Host "   [ERROR] Git Clone Failed!" -ForegroundColor Red
         Write-Host "==========================================================" -ForegroundColor Red
@@ -156,12 +171,15 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
     }
     
     $ExtractedDir = $RepoPath
-    
-    if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
-        Write-Host "Error: Extracted repository folder does not contain .agents directory." -ForegroundColor Red
+}
+
+if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
+    Write-Host "Error: Source/Extracted folder does not contain .agents directory." -ForegroundColor Red
+    if ($TempDir) {
         Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-        Exit 1
     }
+    Exit 1
+}
     
     Write-Host "Copying files to target directory..."
     $SrcAgents = Join-Path $ExtractedDir ".agents"
@@ -269,26 +287,35 @@ Write-Host "Downloading Antigravity Agent Core from GitHub..."
     # Run bootstrap.ps1 from extracted folder inside target folder context
     $OriginalLocation = Get-Location
     Set-Location -Path $TargetAbs
+    $BootstrapArgs = @((Split-Path $TargetAbs -Leaf)) + $args
     try {
-        & (Join-Path $ExtractedDir "bootstrap.ps1")
+        & (Join-Path $ExtractedDir "bootstrap.ps1") @BootstrapArgs
     } finally {
         Set-Location -Path $OriginalLocation
     }
     
     # Cleanup
-    Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    if ($TempDir) {
+        Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    }
 
 # 3. Initialize Git if not present in target
 if (-not (Test-Path (Join-Path $TargetAbs ".git"))) {
     Write-Host "Initializing empty Git repository in target directory..."
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     git -C $TargetAbs init | Out-Null
+    $ErrorActionPreference = $OldPref
 }
 
 # 4. Execute final synchronization in target directory
 $OriginalLocation = Get-Location
 Set-Location -Path $TargetAbs
 try {
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     & .\helper.ps1 sync
+    $ErrorActionPreference = $OldPref
 } finally {
     Set-Location -Path $OriginalLocation
 }

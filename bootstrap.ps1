@@ -70,8 +70,11 @@ if (Test-Path ".agents/scripts/recon.py") {
 # 4. Set up local Git hooks via validate.py
 $IsGit = $false
 try {
-    $GitCheck = git rev-parse --is-inside-work-tree 2>&1
-    if ($LastExitCode -eq 0 -and $GitCheck -eq "true") {
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    $GitCheck = & git rev-parse --is-inside-work-tree 2>&1
+    $ErrorActionPreference = $OldPref
+    if ($LASTEXITCODE -eq 0 -and $GitCheck -eq "true") {
         $IsGit = $true
     }
 } catch {}
@@ -80,7 +83,10 @@ if ($IsGit) {
     if ($PythonExec) {
         Write-Host "Installing and validating local Git hooks..."
         $HelperScript = ".agents/scripts/validate.py"
-        & $PythonExec $HelperScript > $null 2>&1
+        $OldPref = $ErrorActionPreference
+        $ErrorActionPreference = "SilentlyContinue"
+        & $PythonExec $HelperScript 2>$null | Out-Null
+        $ErrorActionPreference = $OldPref
         Write-Host "Installed local Git hooks."
     } else {
         Write-Host "Warning: Python 3 not found. Skipping Git hooks auto-installation." -ForegroundColor Yellow
@@ -90,7 +96,10 @@ if ($IsGit) {
 # 5. Run the python bootstrap setup wizard
 if ($PythonExec -and (Test-Path ".agents/scripts/cli/helper.py")) {
     Write-Host "Running project setup wizard..."
-    & $PythonExec .agents/scripts/cli/helper.py bootstrap $args
+    $OldPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & $PythonExec .agents/scripts/cli/helper.py bootstrap @args
+    $ErrorActionPreference = $OldPref
 }
 
 Write-Host "==========================================================" -ForegroundColor Green
