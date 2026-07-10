@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.24.0] - 2026-07-11
+
+### 🚀 Features
+- implement solo workflow mode and commit diff preview
+- feat: implement solo workflow mode and commit diff preview (ISSUE-250)
+
+
 ## [3.23.0] - 2026-07-11
 
 ### 🚀 Features
