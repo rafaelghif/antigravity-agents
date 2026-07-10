@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.4] - 2026-07-10
+
+### 🐛 Bug Fixes
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### 📝 Documentation
+- update comprehensive audit report to V3
+
+### ⚙️ Chores
+- deduplicate rules.md section 4 guidelines
+
+
 ## [3.16.3] - 2026-07-10
 
 ### 🐛 Bug Fixes
