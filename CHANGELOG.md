@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.17.0] - 2026-07-11
+
+### 🚀 Features
+- bypass git hook compliance checks for non-agent commits
+
+### 📝 Documentation
+- feat: bypass git hooks for non-agent commits (ISSUE-243)
+
+
 ## [3.16.7] - 2026-07-10
 
 ### 🐛 Bug Fixes

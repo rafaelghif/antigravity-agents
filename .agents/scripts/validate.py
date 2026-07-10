@@ -387,6 +387,9 @@ def audit_critical_files() -> bool:
     if os.path.exists(hooks_dir):
         hooks = {
             "pre-commit": r"""#!/usr/bin/env bash
+if [ -z "${ANTIGRAVITY_AGENT}" ]; then
+  exit 0
+fi
 if command -v python3 &>/dev/null && python3 --version &>/dev/null; then
   python3 .agents/scripts/validate.py
 elif command -v python &>/dev/null && python --version &>/dev/null; then
@@ -396,6 +399,9 @@ else
 fi
 """,
             "commit-msg": r"""#!/usr/bin/env bash
+if [ -z "${ANTIGRAVITY_AGENT}" ]; then
+  exit 0
+fi
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
@@ -438,6 +444,9 @@ if [[ ! "$COMMIT_MSG" =~ $COMPLIANCE_REGEX ]]; then
 fi
 """,
             "prepare-commit-msg": r"""#!/usr/bin/env bash
+if [ -z "${ANTIGRAVITY_AGENT}" ]; then
+  exit 0
+fi
 COMMIT_MSG_FILE="$1"
 COMMIT_SOURCE="${2:-}"
 

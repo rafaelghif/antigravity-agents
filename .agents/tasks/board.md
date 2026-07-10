@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: bypass git hooks for non-agent commits (feat/issue-243) <!-- id: issue-243 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->
 - [x] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 - [x] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
