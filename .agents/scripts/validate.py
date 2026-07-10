@@ -839,37 +839,51 @@ def audit_git_branch_alignment() -> bool:
         print_warn("Not inside a git repository or git command failed.")
         return True
         
-    if branch in ('main', 'master', 'HEAD'):
-        # Check if there are staged changes or modified files (excluding untracked git_profiles/locks configs)
+    # Check if workflow_mode is 'solo' in .agents/config.json
+    workflow_mode = "team"
+    config_path = ".agents/config.json"
+    if os.path.exists(config_path):
         try:
-            status_res = subprocess.run(
-                ['git', 'status', '--porcelain'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                check=True
-            )
-            dirty = False
-            for line in status_res.stdout.splitlines():
-                if not line.strip():
-                    continue
-                status = line[:2]
-                path = line[3:].strip()
-                # Ignore private untracked/ignored configs
-                if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path or ".agents/issues/" in path:
-                    continue
-                if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
-                    dirty = True
-                    break
-            if dirty:
-                print_err(f"Direct edits or commits on base branch '{branch}' are prohibited! "
-                          f"Please checkout a feature branch (e.g., './helper.sh issue checkout issue-028') before editing.")
-                return False
-        except Exception as e:
-            print_warn(f"Failed to check git status on base branch: {e}")
-            
-        print_ok(f"On base branch '{branch}' (clean, no active modifications).")
-        return True
+            with open(config_path, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+                workflow_mode = cfg.get("workflow_mode", "team")
+        except Exception:
+            pass
+
+    if branch in ('main', 'master', 'HEAD'):
+        if workflow_mode == "solo":
+            print_ok(f"On base branch '{branch}' (solo mode active, allowing direct edits).")
+        else:
+            # Check if there are staged changes or modified files (excluding untracked git_profiles/locks configs)
+            try:
+                status_res = subprocess.run(
+                    ['git', 'status', '--porcelain'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=True
+                )
+                dirty = False
+                for line in status_res.stdout.splitlines():
+                    if not line.strip():
+                        continue
+                    status = line[:2]
+                    path = line[3:].strip()
+                    # Ignore private untracked/ignored configs
+                    if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path or ".agents/issues/" in path:
+                        continue
+                    if status[0] in ('M', 'A', 'D', 'R', 'C') or status[1] in ('M', 'D'):
+                        dirty = True
+                        break
+                if dirty:
+                    print_err(f"Direct edits or commits on base branch '{branch}' are prohibited! "
+                              f"Please checkout a feature branch (e.g., './helper.sh issue checkout issue-028') before editing.")
+                    return False
+            except Exception as e:
+                print_warn(f"Failed to check git status on base branch: {e}")
+                
+            print_ok(f"On base branch '{branch}' (clean, no active modifications).")
+            return True
         
     match = re.search(r'(task-\d+|issue-\d+)', branch.lower())
     if not match:

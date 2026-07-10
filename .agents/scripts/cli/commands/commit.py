@@ -38,6 +38,23 @@ def run_interactive_commit():
     print("   Antigravity Conventional Commit Helper                 ")
     print("==========================================================\n")
 
+    # Show diff of staged changes
+    try:
+        diff_res = subprocess.run(['git', 'diff', '--cached', '--color=always'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if diff_res.returncode == 0 and diff_res.stdout.strip():
+            print("Staged changes for this commit:")
+            print("----------------------------------------------------------")
+            lines = diff_res.stdout.splitlines()
+            for line in lines[:30]:
+                print(line)
+            if len(lines) > 30:
+                print(f"... and {len(lines) - 30} more lines.")
+            print("----------------------------------------------------------\n")
+        else:
+            print("No staged changes found. Use 'git add' to stage files before committing.\n")
+    except Exception:
+        pass
+
     types = [
         {"name": "feat", "desc": "A new feature"},
         {"name": "fix", "desc": "A bug fix"},
