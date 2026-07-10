@@ -318,8 +318,14 @@ def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> Non
         else:
             subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
             
+        profile_env_suffix = name.upper().replace("-", "_").replace(".", "_")
+        profile_env_var = f"AAC_GITHUB_TOKEN_{profile_env_suffix}"
+        has_env_token = os.getenv(profile_env_var) is not None
+        
         git_token = profile.get("git_token")
-        if git_token and not git_token.startswith("ghp_corporateToken") and not git_token.startswith("ghp_personalToken"):
+        is_dummy = git_token and (git_token.startswith("ghp_corporateToken") or git_token.startswith("ghp_personalToken"))
+        
+        if (git_token and not is_dummy) or has_env_token:
             helper_py = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
             python_exe = sys.executable
             subprocess.run(['git', 'config', '--local', 'credential.helper', f'!"{python_exe}" "{helper_py}" profile credential-helper'], check=True)
@@ -529,6 +535,8 @@ def run_interactive_wizard() -> Dict[str, Any]:
                 
         # 4. GitHub PAT
         print("\n4. Authentication Token:")
+        print("   (Tip: To avoid plain-text storage, press Enter to skip and instead set the environment")
+        print(f"   variable 'AAC_GITHUB_TOKEN_{name.upper().replace('-', '_').replace('.', '_')}' inside your shell)")
         git_token = input("   Enter GitHub Personal Access Token (PAT) [press Enter to skip]: ").strip()
         if not git_token:
             git_token = None
@@ -668,7 +676,11 @@ def handle_credential_helper(args: List[str]) -> None:
         active_profile = next((p for p in profiles if p.get("active")), None)
         
         if active_profile:
-            token = active_profile.get("git_token")
+            profile_env_suffix = active_profile.get("name", "").upper().replace("-", "_").replace(".", "_")
+            profile_env_var = f"AAC_GITHUB_TOKEN_{profile_env_suffix}"
+            env_token = os.getenv(profile_env_var)
+            
+            token = env_token or active_profile.get("git_token")
             if token and token.startswith("env:"):
                 token = os.getenv(token[4:])
                 
