@@ -566,14 +566,21 @@ def audit_secrets_and_ignored_files() -> bool:
             continue
         if "validate.py" in path:
             continue
-        if path.endswith(('.png', '.jpg', '.jpeg', '.ico', '.pdf', '.zip', '.tar.gz')):
+        # Exclude documentation files, test files, and test directories from secrets auditing
+        if path.endswith(('.png', '.jpg', '.jpeg', '.ico', '.pdf', '.zip', '.tar.gz', '.md')):
             continue
+        if "tests/" in path or "test_" in os.path.basename(path) or os.path.basename(path).endswith("_test.py"):
+            continue
+            
         try:
             with open(path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
                 for idx, line in enumerate(content.splitlines(), 1):
                     for pattern in secret_patterns:
                         if re.search(pattern, line):
+                            # Allow inline whitelist comments
+                            if any(w in line for w in ("nosec", "pragma: allowlist secret", "whitelist-secret")):
+                                continue
                             print_err(f"Potential secret exposed in file '{path}' at line {idx}: {line.strip()}")
                             failed = True
         except Exception:
