@@ -1,7 +1,7 @@
 ---
 id: issue-239
 title: "chore: implement MCP registry version upgrade and remaining audit hardening"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
