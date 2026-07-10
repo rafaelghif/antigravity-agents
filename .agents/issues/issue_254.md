@@ -1,7 +1,7 @@
 ---
 id: issue-254
 title: "feat: implement modular schema grouping and strict on-demand loading checks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
@@ -27,6 +27,7 @@ feat: implement modular schema grouping and strict on-demand loading checks
 - Active module locks:
   - [ ] validate <!-- id: lock-validate -->
   - [ ] bootstrap <!-- id: lock-bootstrap -->
+  - [ ] .agents/schemas/.gitkeep <!-- id: lock-_gitkeep -->
 - Non-negotiable rules checked:
   - [ ] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [ ] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

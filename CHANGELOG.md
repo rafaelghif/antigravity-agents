@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.28.0] - 2026-07-11
+
+### 🚀 Features
+- implement modular database schema grouping and strict on-demand loading checks
+- feat: implement modular schema grouping and strict on-demand loading checks (ISSUE-254)
+
+
 ## [3.27.0] - 2026-07-11
 
 ### 🚀 Features
