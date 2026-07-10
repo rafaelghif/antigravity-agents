@@ -274,7 +274,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message', 'pause', 'resume'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
@@ -283,6 +283,13 @@ def main():
     if cmd not in allowed_commands:
         print(f"{RED}Error: Unknown command '{cmd}'.{RESET}")
         print_help()
+        sys.exit(1)
+
+    # Check if agent is paused by the programmer
+    paused_flag = ".agents/state/paused.flag"
+    if os.path.exists(paused_flag) and os.environ.get("ANTIGRAVITY_AGENT") == "1" and cmd != "resume":
+        print(f"{RED}Error: Agent execution is paused by the programmer.{RESET}")
+        print(f"{YELLOW}Please run './helper.sh resume' to unpause first.{RESET}")
         sys.exit(1)
         
     start_time = time.perf_counter()
@@ -293,7 +300,8 @@ def main():
     ALLOWED_COMMANDS = {
         'bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard',
         'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock',
-        'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate'
+        'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate',
+        'pause', 'resume'
     }
     
     try:

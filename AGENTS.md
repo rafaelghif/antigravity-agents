@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.19.0
+- **Version:** 3.20.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -41,7 +41,7 @@
 - **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.
 - **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.
 - **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.
-- **ALWAYS** chain consecutive commands or prompt loops internally (e.g. running syntax compilation, unit tests, and validation checks sequentially) to minimize user interactions, achieving zero-touch verification whenever performing changes.
+- **NEVER** run destructive Git commands such as `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git checkout .`, or `git push --force`. If you need to revert changes, discard files, or clean untracked assets, you MUST do it selectively or ask the programmer first.
 - **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.
 
 ## 3. CLI Helper Commands Reference
