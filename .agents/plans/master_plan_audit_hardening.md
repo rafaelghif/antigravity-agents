@@ -57,9 +57,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 1. Task 1: Optimize Validation Sandbox I/O (Performance & Scalability)
 
 - **Audit Findings:** Recursive workspace folder copying in `SandboxManager` introduces heavy I/O overhead on large codebases.
-- **Proposed Solution:** 
-  - **Unix Symlink Layer:** Create a shadow directory where all files are symlinked to the original files, except for modified files (from `git status`) which are copied to support clean compilation testing. This drops isolation startup time from $500\text{ms}$ to under $15\text{ms}$.
-  - **Windows Fallback:** Fallback to copying files (or selectively copying git-tracked files) if symlinks are unsupported or fail.
+- **Option A (Symlinking/Overlay Layer):**
+  - Create a shadow folder where all directory indices and read-only source files are symlinked to the host workspace, except for files modified in the active Git index (which are copied to support clean compilation/mutation testing).
+  - **Pros:** Drops sandbox preparation time from $500\text{ms}$ to under $15\text{ms}$ ($97\%$ reduction).
+  - **Cons:** On Windows, symlink creation requires admin privileges or Developer Mode.
+- **Option B (Selective Git-Tracked Copier):**
+  - Query Git for tracked files and only copy the source files tracked by Git (plus modified files), rather than blindly copying untracked `node_modules` or local assets.
+  - **Pros:** Platform-agnostic, works on all Windows and Unix setups natively.
+  - **Cons:** Still requires file system writing, which is slower than symlinking ($150\text{ms}$ - $250\text{ms}$).
+- **Decision:** Implement **Option A** as the primary mode for Unix/macOS/Developer-Mode platforms, and auto-fallback to **Option B** on Windows systems when symlink commands fail.
 - **Target Files:** `.agents/scripts/validate.py`
 
 ---
@@ -67,9 +73,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 2. Task 2: Whitelist CLI Commands Resolution (Security - Dynamic Imports)
 
 - **Audit Findings:** Dynamic module loading based on user command string argument in `helper.py` could execute arbitrary Python files.
-- **Proposed Solution:**
-  - Implement a static command whitelist mapping of approved command modules: `['bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard', 'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock', 'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate']`.
-  - Abort execution immediately if the command is not explicitly whitelisted.
+- **Option A (Static Whitelist Mapping):**
+  - Maintain a hardcoded Python list of approved command modules: `['bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard', 'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock', 'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate']`. Check the input string against this list.
+  - **Pros:** Simple, extremely fast, zero-dependency security guard.
+  - **Cons:** Requires updating the whitelist list when adding new CLI commands.
+- **Option B (Cryptographic Signature Verification):**
+  - Generate SHA-256 hashes of all command python files during release, sign the manifest, and verify the hash of the target command file at runtime before import.
+  - **Pros:** Highly secure, protects against repository/commands modifications.
+  - **Cons:** Significant runtime verification delay and GPG dependency overhead on every CLI invocation.
+- **Decision:** **Option A** is selected. The development protocol requires registering commands via `helper.sh sync` anyway, making a static whitelist clean, safe, and efficient.
 - **Target Files:** `.agents/scripts/cli/helper.py`
 
 ---
@@ -77,9 +89,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 3. Task 3: Secure Profile Credentials with Environment Variables (Security - SEC-03)
 
 - **Audit Findings:** Developer GitHub tokens are stored in clear text inside the git-ignored `git_profiles.json` file.
-- **Proposed Solution:**
-  - Modify `profile.py` to allow reading personal access tokens from environment variables (e.g. `AAC_GITHUB_TOKEN_[PROFILE]`) dynamically at runtime.
-  - Suggest environment variable configuration in wizard instructions.
+- **Option A (In-Memory Environment Resolver):**
+  - Allow developer profiles to fetch access tokens from local environment variables (e.g. `AAC_GITHUB_TOKEN_[PROFILE]`) dynamically at runtime.
+  - **Pros:** Integrates with standard CI/CD and secure developer shells. Prevents plain-text storage.
+  - **Cons:** Developers must manage local shell profiles or environment variables.
+- **Option B (Encrypted Profiles File):**
+  - Encrypt the `git_profiles.json` file using GPG/AES-256 and prompt the user for a decryption passphrase on every command invocation.
+  - **Pros:** Keeps local configurations encrypted at rest.
+  - **Cons:** Disrupts developer flows by prompting for passwords continuously on background validations.
+- **Decision:** **Option A** is selected to support automated agent handovers and CI/CD pipelines without user-intervention blocks.
 - **Target Files:** `.agents/scripts/cli/commands/profile.py`
 
 ---
@@ -87,9 +105,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 4. Task 4: Cryptographic Swarm Mailbox Signing (Security - SEC-04)
 
 - **Audit Findings:** The multi-agent Git mailbox protocol processes JSON files without verifying the sender, allowing potential message forgery.
-- **Proposed Solution:**
-  - Add envelope signature validation. When sending, sign the message payload using GPG or SSH keys configured in the profile, or using a workspace-wide HMAC-SHA256 secret (`.agents/state/swarm_secret.key`, ignored from Git).
-  - Verify the signature when listing or processing mailbox messages. Warn/fail if signature is mismatch or missing.
+- **Option A (Cryptographic GPG/SSH Key Signatures):**
+  - Sign message envelopes using GPG or SSH private keys configured in the active developer profile when sending, and verify them using GPG/SSH keyring checks when reading.
+  - **Pros:** Strong non-repudiation, matches active commit verification.
+  - **Cons:** Fails if GPG/SSH keyring is unconfigured or key is missing.
+- **Option B (Workspace Shared HMAC-SHA256 Secret):**
+  - Generate a workspace-wide secret key file (`.agents/state/swarm_secret.key`, ignored in `.gitignore`) on bootstrap, and sign all messages using HMAC-SHA256.
+  - **Pros:** Works natively without any GPG/SSH requirements.
+  - **Cons:** Shared key is vulnerable to local reading if workspace files are compromised.
+- **Decision:** Implement **Option A** as the primary trust verification mechanism, and auto-fallback to **Option B** (Shared HMAC) to ensure cross-platform ease of use when profile keys are missing.
 - **Target Files:** `.agents/scripts/cli/commands/message.py`, `.agents/tests/test_message.py`
 
 ---
@@ -97,9 +121,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 5. Task 5: Refactor Instruction Footprints (AI Context Optimization)
 
 - **Audit Findings:** The `AGENTS.md` and `rules.md` files are large (~7,100 tokens), using 40% of their size for formatting rules and command descriptions that could reside in documentation.
-- **Proposed Solution:**
-  - Prune descriptive guidelines from `AGENTS.md` and `rules.md`, converting formatting details to standard skill documents in `.agents/skills/`.
-  - Retain only strict non-negotiable assertions and schema checks inside `AGENTS.md` to optimize context footprint.
+- **Option A (Static Description Pruning & Relocation):**
+  - Prune descriptive guidelines, command reference tables, and workflow guidelines from `AGENTS.md` and `rules.md`. Relocate these references to `.agents/docs/` or `.agents/skills/` (loaded on demand), leaving only strict, non-negotiable rules.
+  - **Pros:** Drops context overhead by up to 3,000 tokens ($40\%$) on every single turn, improving prompt cache hits.
+  - **Cons:** Developers/agents must explicitly read the doc files to get CLI reference commands.
+- **Option B (Dynamic Context Optimizer Pruning):**
+  - Programmatically parse and strip description blocks in `context.py` when optimizing the active context, leaving source files intact.
+  - **Pros:** Keeps reference files human-friendly for developers.
+  - **Cons:** High execution parsing overhead, risks breaking validation checks, and adds complex state logic.
+- **Decision:** **Option A** is selected. Pruning the source files directly ensures absolute, zero-overhead context efficiency and avoids dynamic parsing bugs.
 - **Target Files:** `AGENTS.md`, `.agents/rules.md`
 
 ---
@@ -107,9 +137,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 6. Task 6: System Dependency Diagnostics Wizard (DX & Dependency Audit)
 
 - **Audit Findings:** Code relies on binaries like `gpg`, `eslint`, `black`, and `flake8` system-wide without verifying if they are installed, leading to runtime failures.
-- **Proposed Solution:**
-  - Implement environment diagnostics check inside `doctor.py` using `shutil.which` to report missing binaries and versions.
-  - Automatically output warnings during the validation run.
+- **Option A (Startup Environment Checks):**
+  - Scan the host environment for critical CLI dependencies using `shutil.which` during the validation run and output warnings.
+  - **Pros:** Simple, prevents unexpected process execution errors.
+  - **Cons:** Only prints warnings, does not install missing tools.
+- **Option B (Self-Healing Tool Provisioning):**
+  - Automatically install missing dependencies (like lint tools) in a project virtual environment when missing.
+  - **Pros:** Zero-touch user experience.
+  - **Cons:** High I/O overhead and potential permission issues when pulling remote packages.
+- **Decision:** **Option A** is selected to preserve standard security controls and avoid pulling unverified dependencies.
 - **Target Files:** `.agents/scripts/cli/commands/doctor.py`
 
 ---
@@ -117,8 +153,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 7. Task 7: Dockerfile Sandbox Containerization (Infrastructure)
 
 - **Audit Findings:** Sandbox execution runs natively on host environment binaries, risking environment skew and dependency mismatches.
-- **Proposed Solution:**
-  - Create a standard, minimal `Dockerfile` located in `.agents/templates/` or project root to allow containerized execution of sandbox validation routines.
+- **Option A (Static Dockerfile Template):**
+  - Provide a standard, minimal `Dockerfile` inside `.agents/templates/` or project root to allow containerized execution of sandbox validation routines.
+  - **Pros:** Standardizes execution environments.
+  - **Cons:** Requires the host to have Docker installed.
+- **Option B (In-Place Namespace Isolation):**
+  - Use Linux kernel namespaces/cgroups to isolate validations.
+  - **Pros:** Lightweight, zero dependencies.
+  - **Cons:** Not compatible with macOS or Windows hosts.
+- **Decision:** **Option A** is selected to ensure cross-platform container support.
 - **Target Files:** `Dockerfile`, `.agents/scripts/validate.py`
 
 ---
@@ -126,8 +169,15 @@ The following recommendations have been successfully implemented, tested, and me
 ### 8. Task 8: Bash/PowerShell Installer Drift Guard (Reliability & Platform Drift)
 
 - **Audit Findings:** Shell installer scripts (`install.sh`/`install.ps1`, `bootstrap.sh`/`bootstrap.ps1`) require manual sync, leading to drift.
-- **Proposed Solution:**
+- **Option A (Integrity Parity Tests):**
   - Add validation tests in the test suite to parse and assert that command options, env setups, and versions remain structurally identical between Windows and Unix shell wrappers.
+  - **Pros:** High reliability, catches script regressions in CI.
+  - **Cons:** Requires writing custom regex parsers for shell scripts in Python.
+- **Option B (Unified Python Installer Wrapper):**
+  - Replace shell wrappers entirely with a unified Python installer.
+  - **Pros:** Eliminates shell script duplication completely.
+  - **Cons:** Bootstrapping Python itself on fresh developer environments still requires a shell entry script.
+- **Decision:** **Option A** is selected to maintain simple, native OS entry scripts while ensuring structural alignment.
 - **Target Files:** `.agents/tests/test_platform_drift.py`
 
 ---

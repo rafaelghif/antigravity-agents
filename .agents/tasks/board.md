@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
