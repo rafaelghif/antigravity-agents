@@ -1,7 +1,7 @@
 ---
 id: issue-242
 title: "fix: installer missing AGENTS.md root file copying"
-status: closed
+status: open
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
@@ -17,11 +17,19 @@ fix: installer missing AGENTS.md root file copying
 - [x] Add parity tests in test_platform_drift.py <!-- id: task-parity-test -->
 - [x] Update bootstrap.py to copy missing core directories and files <!-- id: task-bootstrap-dirs-files -->
 - [x] Update test_bootstrap.py to mock copying and assert existence <!-- id: task-test-bootstrap -->
+- [x] Update install.sh to copy bootstrap.sh and bootstrap.ps1 <!-- id: task-install-sh-bootstrap -->
+- [x] Update install.ps1 to copy bootstrap.sh and bootstrap.ps1 <!-- id: task-install-ps1-bootstrap -->
+- [x] Update bootstrap.py to copy bootstrap.sh and bootstrap.ps1 <!-- id: task-bootstrap-py-bootstrap -->
+- [x] Update test_platform_drift.py expected files list <!-- id: task-drift-expected -->
+- [x] Update test_bootstrap.py expected files list and assertions <!-- id: task-test-bootstrap-expected -->
 
 ## Acceptance Criteria
 - [x] install.sh successfully copies AGENTS.md during installation <!-- id: criteria-sh-copies -->
 - [x] install.ps1 successfully copies AGENTS.md during installation <!-- id: criteria-ps1-copies -->
 - [x] bootstrap.py successfully copies docs, dashboard, Dockerfile, and projects.example <!-- id: criteria-bootstrap-copies -->
+- [x] install.sh copies bootstrap.sh and bootstrap.ps1 <!-- id: criteria-sh-bootstrap -->
+- [x] install.ps1 copies bootstrap.sh and bootstrap.ps1 <!-- id: criteria-ps1-bootstrap -->
+- [x] bootstrap.py copies bootstrap.sh and bootstrap.ps1 <!-- id: criteria-bootstrap-py-bootstrap -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
