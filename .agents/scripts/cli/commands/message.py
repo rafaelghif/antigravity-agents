@@ -4,7 +4,43 @@ import json
 import subprocess
 import uuid
 import re
+import hmac
+import hashlib
 from datetime import datetime, timezone
+
+def get_swarm_secret() -> bytes:
+    secret_path = ".agents/state/swarm_secret.key"
+    if not os.path.exists(secret_path):
+        os.makedirs(os.path.dirname(secret_path), exist_ok=True)
+        secret = os.urandom(32)
+        try:
+            with open(secret_path, "wb") as f:
+                f.write(secret)
+        except Exception:
+            pass
+    try:
+        with open(secret_path, "rb") as f:
+            return f.read()
+    except Exception:
+        return b"default_aac_swarm_secret"
+
+def sign_message(msg: dict) -> str:
+    # Exclude dynamic/mutable fields to keep signature valid across updates
+    to_sign = {k: v for k, v in msg.items() if k not in ("signature", "status", "updated_at", "error", "reply")}
+    serialized = json.dumps(to_sign, sort_keys=True)
+    secret = get_swarm_secret()
+    return hmac.new(secret, serialized.encode('utf-8'), hashlib.sha256).hexdigest()
+
+def verify_message(msg: dict) -> bool:
+    if "signature" not in msg:
+        return False
+    signature = msg["signature"]
+    to_verify = {k: v for k, v in msg.items() if k not in ("signature", "status", "updated_at", "error", "reply")}
+    serialized = json.dumps(to_verify, sort_keys=True)
+    secret = get_swarm_secret()
+    expected = hmac.new(secret, serialized.encode('utf-8'), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature, expected)
+
 
 MESSAGES_DIR = ".agents/messages"
 
@@ -32,6 +68,10 @@ def get_sender_identity() -> str:
     return "unknown-agent"
 
 def process_message_payload(msg_id: str, msg: dict) -> None:
+    if not verify_message(msg):
+        print(f"\033[91mError: Message {msg_id} signature verification failed! Possible message forgery.\033[0m")
+        return
+        
     msg_file = os.path.join(MESSAGES_DIR, f"{msg_id}.json")
     
     # Update status to processing
@@ -181,6 +221,7 @@ def run(args):
                 **payload
             }
         }
+        msg["signature"] = sign_message(msg)
         
         if not os.path.exists(MESSAGES_DIR):
             os.makedirs(MESSAGES_DIR)
@@ -248,6 +289,7 @@ def run(args):
                 **payload
             }
         }
+        msg["signature"] = sign_message(msg)
         
         if not os.path.exists(MESSAGES_DIR):
             os.makedirs(MESSAGES_DIR)
@@ -291,6 +333,10 @@ def run(args):
             payload = m.get("payload", {})
             action_type = payload.get("action", "")
             
+            # Verify signature
+            if not verify_message(m):
+                msg_id = f"\033[91m{msg_id} [UNV]\033[0m"
+            
             # Format status colors
             status_colored = status
             if status == "pending":
@@ -300,7 +346,11 @@ def run(args):
             elif status == "failed":
                 status_colored = f"\033[91m{status}\033[0m"
                 
-            print(f"{msg_id:<15} | {sender:<15} | {recipient:<15} | {status_colored:<19} | {timestamp:<20} | {action_type:<15}")
+            display_id = msg_id
+            if "\033[" in display_id:
+                print(f"{display_id:<29} | {sender:<15} | {recipient:<15} | {status_colored:<19} | {timestamp:<20} | {action_type:<15}")
+            else:
+                print(f"{display_id:<15} | {sender:<15} | {recipient:<15} | {status_colored:<19} | {timestamp:<20} | {action_type:<15}")
             
     elif action == "status":
         if len(args) < 3:
@@ -321,6 +371,10 @@ def run(args):
                 msg = json.load(f)
         except Exception as e:
             print(f"Error reading message file: {e}")
+            sys.exit(1)
+            
+        if not verify_message(msg):
+            print(f"\033[91mError: Message {msg_id} signature verification failed! Possible message forgery.\033[0m")
             sys.exit(1)
             
         msg["status"] = new_status
@@ -398,6 +452,9 @@ def run(args):
         print(f"Found {len(matching_msgs)} pending message(s) to process.")
         for msg in matching_msgs:
             msg_id = msg.get("message_id")
+            if not verify_message(msg):
+                print(f"\033[91mError: Message {msg_id} signature verification failed! Skipping.\033[0m")
+                continue
             print(f"--- Processing message {msg_id} ---")
             process_message_payload(msg_id, msg)
         return

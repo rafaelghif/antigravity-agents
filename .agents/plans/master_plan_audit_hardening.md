@@ -187,7 +187,7 @@ The following recommendations have been successfully implemented, tested, and me
 - [x] **Step 1:** Implement Sandbox I/O Optimization in `validate.py` <!-- id: step-sandbox-opt -->
 - [x] **Step 2:** Implement Command Whitelist in `helper.py` <!-- id: step-cmd-whitelist -->
 - [x] **Step 3:** Implement Env-based Profile Tokens in `profile.py` <!-- id: step-profile-env -->
-- [ ] **Step 4:** Implement Cryptographic Message Envelope Signing in `message.py` and tests <!-- id: step-message-signing -->
+- [x] **Step 4:** Implement Cryptographic Message Envelope Signing in `message.py` and tests <!-- id: step-message-signing -->
 - [ ] **Step 5:** Optimize Instruction Footprints in `AGENTS.md` and `rules.md` <!-- id: step-instruction-optimize -->
 - [ ] **Step 6:** Implement Dependency Diagnostic Wizard in `doctor.py` <!-- id: step-dependency-wizard -->
 - [ ] **Step 7:** Implement Containerized Sandbox Dockerfile <!-- id: step-docker-sandbox -->
