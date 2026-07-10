@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.12.0] - 2026-07-10
+
+### 🚀 Features
+- upgrade MCP name registration from v2 to v3 and sync board
+- chore: implement MCP registry version upgrade and remaining audit hardening (ISSUE-239)
+
+
 ## [3.11.0] - 2026-07-10
 
 ### 🚀 Features
