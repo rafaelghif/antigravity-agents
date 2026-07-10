@@ -28,7 +28,7 @@ class TestBootstrapCommand(unittest.TestCase):
                 dest = cmd[-1]
                 import shutil
                 shutil.copytree(os.path.join(src, ".agents"), os.path.join(dest, ".agents"), dirs_exist_ok=True)
-                for f in ["AGENTS.md", "helper.sh", "helper.ps1"]:
+                for f in ["AGENTS.md", "helper.sh", "helper.ps1", "Dockerfile"]:
                     src_f = os.path.join(src, f)
                     if os.path.exists(src_f):
                         shutil.copy2(src_f, os.path.join(dest, f))
@@ -82,6 +82,12 @@ class TestBootstrapCommand(unittest.TestCase):
         with open("AGENTS.md", 'r', encoding='utf-8') as f:
             agents = f.read()
             self.assertIn("TestPythonClean", agents)
+
+        # Verify new synchronized files
+        self.assertTrue(os.path.exists("Dockerfile"))
+        self.assertTrue(os.path.exists(".agents/projects.example"))
+        self.assertTrue(os.path.exists(".agents/docs/context_map.md"))
+        self.assertTrue(os.path.exists(".agents/dashboard/index.html"))
 
     def test_bootstrap_layered_node(self, mock_input):
         bootstrap.run(["TestNodeLayered", "node", "layered"])

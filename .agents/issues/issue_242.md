@@ -15,14 +15,17 @@ fix: installer missing AGENTS.md root file copying
 - [x] Update install.sh to copy AGENTS.md <!-- id: task-install-sh -->
 - [x] Update install.ps1 to copy AGENTS.md <!-- id: task-install-ps1 -->
 - [x] Add parity tests in test_platform_drift.py <!-- id: task-parity-test -->
+- [x] Update bootstrap.py to copy missing core directories and files <!-- id: task-bootstrap-dirs-files -->
+- [x] Update test_bootstrap.py to mock copying and assert existence <!-- id: task-test-bootstrap -->
 
 ## Acceptance Criteria
 - [x] install.sh successfully copies AGENTS.md during installation <!-- id: criteria-sh-copies -->
 - [x] install.ps1 successfully copies AGENTS.md during installation <!-- id: criteria-ps1-copies -->
+- [x] bootstrap.py successfully copies docs, dashboard, Dockerfile, and projects.example <!-- id: criteria-bootstrap-copies -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
-  - [x] install.sh, install.ps1, .agents/tests/test_platform_drift.py <!-- id: audit-target-files -->
+  - [x] install.sh, install.ps1, .agents/tests/test_platform_drift.py, .agents/scripts/cli/commands/bootstrap.py, .agents/tests/test_bootstrap.py <!-- id: audit-target-files -->
 - Active module locks:
   - [x] install.sh, <!-- id: lock-install_sh, -->
   - [x] install.sh <!-- id: lock-install_sh -->
