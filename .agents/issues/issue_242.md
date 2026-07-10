@@ -24,6 +24,8 @@ fix: installer missing AGENTS.md root file copying
 - [x] Update test_bootstrap.py expected files list and assertions <!-- id: task-test-bootstrap-expected -->
 - [x] Deduplicate .agents/rules.md to optimize AI Agent prompt footprint and focus <!-- id: task-dedup-rules -->
 - [x] Lock rules.md for verification and audit compliance <!-- id: task-lock-rules -->
+- [x] Deduplicate .agents/templates/rules.md.template to match the clean rules <!-- id: task-dedup-template -->
+- [x] Lock rules.md.template for verification and compliance <!-- id: task-lock-template -->
 
 ## Acceptance Criteria
 - [x] install.sh successfully copies AGENTS.md during installation <!-- id: criteria-sh-copies -->
@@ -35,7 +37,7 @@ fix: installer missing AGENTS.md root file copying
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
-  - [x] install.sh, install.ps1, .agents/tests/test_platform_drift.py, .agents/scripts/cli/commands/bootstrap.py, .agents/tests/test_bootstrap.py, .agents/rules.md <!-- id: audit-target-files -->
+  - [x] install.sh, install.ps1, .agents/tests/test_platform_drift.py, .agents/scripts/cli/commands/bootstrap.py, .agents/tests/test_bootstrap.py, .agents/rules.md, .agents/templates/rules.md.template <!-- id: audit-target-files -->
 - Active module locks:
   - [x] install.sh, <!-- id: lock-install_sh, -->
   - [x] install.sh <!-- id: lock-install_sh -->
@@ -43,6 +45,7 @@ fix: installer missing AGENTS.md root file copying
   - [x] .agents/tests/test_platform_drift.py <!-- id: lock-test_platform_drift_py -->
   - [x] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
   - [x] .agents/rules.md <!-- id: lock-rules_md -->
+  - [x] .agents/templates/rules.md.template <!-- id: lock-rules_template -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
