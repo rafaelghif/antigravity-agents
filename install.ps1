@@ -106,72 +106,64 @@ if ($MyInvocation.MyCommand.Path) {
     $SrcDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 }
 
-$SrcAgents = Join-Path $SrcDir ".agents"
-$LocalDev = ($env:ANTIGRAVITY_LOCAL_DEV -eq "1") -and (Test-Path $SrcAgents)
-
 # 2. Copy/Download Agent files
 $ExtractedDir = ""
 $TempDir = ""
 
-if ($LocalDev) {
-    Write-Host "Local Development mode active. Using local source files from $SrcDir..."
-    $ExtractedDir = $SrcDir
-} else {
-    Write-Host "Downloading Antigravity Agent Core from GitHub..."
-    Write-Host "Verifying network connection to source repository..."
-    
-    $SourceRepo = "https://github.com/rafaelghif/antigravity-agents.git"
-    if ($env:AAC_SOURCE_REPO) {
-        $SourceRepo = $env:AAC_SOURCE_REPO
-    }
+Write-Host "Downloading Antigravity Agent Core from GitHub..."
+Write-Host "Verifying network connection to source repository..."
 
-    $Connected = $false
-    $OldPref = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    & git ls-remote $SourceRepo HEAD 2>$null | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-        $Connected = $true
-    }
-    $ErrorActionPreference = $OldPref
-    
-    if (-not $Connected) {
-        Write-Host "==========================================================" -ForegroundColor Red
-        Write-Host "   [ERROR] Source Repository Connection Failed!" -ForegroundColor Red
-        Write-Host "==========================================================" -ForegroundColor Red
-        Write-Host "An active internet connection is required to download the Antigravity Agent Core"
-        Write-Host "source files from $SourceRepo."
-        Write-Host "Please check your network connection and try again."
-        Write-Host "Installation aborted."
-        Write-Host "==========================================================" -ForegroundColor Red
-        Exit 1
-    }
-
-    $TempDir = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
-    New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
-    $RepoUrl = $SourceRepo
-    $RepoPath = Join-Path $TempDir "repo"
-    
-    Write-Host "Cloning Antigravity Agent Core repository from Git..."
-    $OldPref = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    & git clone --depth 1 $RepoUrl $RepoPath 2>$null | Out-Null
-    $CloneExit = $LASTEXITCODE
-    $ErrorActionPreference = $OldPref
-
-    if ($CloneExit -ne 0) {
-        Write-Host "==========================================================" -ForegroundColor Red
-        Write-Host "   [ERROR] Git Clone Failed!" -ForegroundColor Red
-        Write-Host "==========================================================" -ForegroundColor Red
-        Write-Host "Failed to clone from $RepoUrl."
-        Write-Host "Please check your network connection and try again."
-        Write-Host "Installation aborted."
-        Write-Host "==========================================================" -ForegroundColor Red
-        Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-        Exit 1
-    }
-    
-    $ExtractedDir = $RepoPath
+$SourceRepo = "https://github.com/rafaelghif/antigravity-agents.git"
+if ($env:AAC_SOURCE_REPO) {
+    $SourceRepo = $env:AAC_SOURCE_REPO
 }
+
+$Connected = $false
+$OldPref = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& git ls-remote $SourceRepo HEAD 2>$null | Out-Null
+if ($LASTEXITCODE -eq 0) {
+    $Connected = $true
+}
+$ErrorActionPreference = $OldPref
+
+if (-not $Connected) {
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "   [ERROR] Source Repository Connection Failed!" -ForegroundColor Red
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "An active internet connection is required to download the Antigravity Agent Core"
+    Write-Host "source files from $SourceRepo."
+    Write-Host "Please check your network connection and try again."
+    Write-Host "Installation aborted."
+    Write-Host "==========================================================" -ForegroundColor Red
+    Exit 1
+}
+
+$TempDir = Join-Path $env:TEMP ([Guid]::NewGuid().ToString())
+New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+$RepoUrl = $SourceRepo
+$RepoPath = Join-Path $TempDir "repo"
+
+Write-Host "Cloning Antigravity Agent Core repository from Git..."
+$OldPref = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& git clone --depth 1 $RepoUrl $RepoPath 2>$null | Out-Null
+$CloneExit = $LASTEXITCODE
+$ErrorActionPreference = $OldPref
+
+if ($CloneExit -ne 0) {
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "   [ERROR] Git Clone Failed!" -ForegroundColor Red
+    Write-Host "==========================================================" -ForegroundColor Red
+    Write-Host "Failed to clone from $RepoUrl."
+    Write-Host "Please check your network connection and try again."
+    Write-Host "Installation aborted."
+    Write-Host "==========================================================" -ForegroundColor Red
+    Remove-Item -Path $TempDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+    Exit 1
+}
+
+$ExtractedDir = $RepoPath
 
 if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
     Write-Host "Error: Source/Extracted folder does not contain .agents directory." -ForegroundColor Red
