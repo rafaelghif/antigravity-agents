@@ -228,6 +228,8 @@ def copy_core_files(src_root, force=False):
         ".agents/skills",
         ".agents/workflows",
         ".agents/templates",
+        ".agents/docs",
+        ".agents/dashboard",
     ]
     
     for d in core_dirs:
@@ -269,7 +271,7 @@ def copy_core_files(src_root, force=False):
                     pass
                 
     # Root helper wrappers
-    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example"]
+    helpers = ["helper.sh", "helper.ps1", ".agents/git_profiles.example", ".agents/projects.example", "Dockerfile"]
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)
