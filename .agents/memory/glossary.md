@@ -1,4 +1,4 @@
-# AAC V2 Glossary
+# AAC V3 Glossary
 
 - **AAC**: Antigravity Agent Core.
 - **AGY / agy**: The outer-wrapper Command Line Interface tool for managing workspace automation.

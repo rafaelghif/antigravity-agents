@@ -1,6 +1,6 @@
-# AAC V2 System Architecture
+# AAC V3 System Architecture
 
-This document summarizes the layout and design philosophy of the Antigravity Agent Core V2 system.
+This document summarizes the layout and design philosophy of the Antigravity Agent Core V3 system.
 
 ## 1. System Topology
 
