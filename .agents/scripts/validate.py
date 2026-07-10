@@ -1898,8 +1898,42 @@ def audit_codebase_rules_compliance() -> bool:
                         if "NamedTemporaryFile" not in content:
                             print_err(f"Python script '{filepath}' violates 'atomic file writing' guidelines by using raw open write mode on critical JSON files!")
                             failed = True
+
+                    # 1b. Check if script references global appData/home directories for writing project configurations
+                    if any(term in content for term in [".gemini", "expanduser"]) and "token.py" not in filepath and "mcp_server.py" not in filepath and "doctor.py" not in filepath and "install_global.py" not in filepath:
+                        if any(write_op in content for write_op in ["open(", "write(", "to_file", "save("]):
+                            print_warn(f"Warning: Script '{filepath}' references global system directories or home folder. Ensure it does not leak project-specific data to global scope.")
     except Exception as e:
         print_warn(f"Failed to scan codebase rule compliance: {e}")
+
+    # 1c. Check for database/schema modifications without updating .agents/schema.md
+    try:
+        modified_files = set()
+        # Staged changes
+        res_staged = subprocess.run(['git', 'diff', '--cached', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res_staged.returncode == 0:
+            modified_files.update(f.strip() for f in res_staged.stdout.splitlines() if f.strip())
+        # Unstaged changes
+        res_unstaged = subprocess.run(['git', 'diff', '--name-only'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if res_unstaged.returncode == 0:
+            modified_files.update(f.strip() for f in res_unstaged.stdout.splitlines() if f.strip())
+
+        db_keywords = ['model', 'schema', 'database']
+        has_db_change = False
+        db_file = None
+        for f in modified_files:
+            if f == '.agents/schema.md':
+                continue
+            filename = os.path.basename(f).lower()
+            if any(kw in filename for kw in db_keywords) and filename.endswith(('.py', '.json', '.prisma', '.sql', '.ts', '.js', '.go', '.java', '.cs', '.php', '.graphql')):
+                has_db_change = True
+                db_file = f
+                break
+        
+        if has_db_change and '.agents/schema.md' not in modified_files:
+            print_warn(f"Warning: Database/schema related file '{db_file}' was modified, but '.agents/schema.md' was not updated. Please document database schema updates there.")
+    except Exception as e:
+        print_warn(f"Failed to audit schema documentation compliance: {e}")
 
     # 2. Check Clean Architecture imports in domain/ modules
     try:

@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.26.0
+- **Version:** 3.27.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -28,9 +28,9 @@
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
-- **ALWAYS** strictly conform to the schemas defined in `.agents/schema.md` when modifying database models or API contracts.
+- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts.
 - **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
-- **NEVER** write to, expose, or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, global agent appData/brain directories, or global databases). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) or project-level files (such as `memory.md`, `brain.md`), and tracked in git to ensure multi-developer environment consistency and absolute isolation without any global data leakage.
+- **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as user home directory, global agent appData/brain directories, or global databases). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.
 - **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST load the corresponding skill's playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) **ONLY** if the current task directly matches the skill's purpose (e.g. `debugging` for failures, `ci-cd` for pipelines, `security-audit` for security/credentials edits, `testing` for writing tests). Do NOT load skills speculatively or keep them in memory if they are not active.
@@ -84,7 +84,7 @@ For the complete description of workspace metadata, ADRs, playbooks, memory stru
 When aligning on technical details, features, or database specifications:
 1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.
 2. **Alignment Storage (Workspace Level)**:
-   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md`.
+   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md`. Whenever database structures, tables, or fields are discussed, updated, or created, the agent MUST immediately record them here to preserve data layout visibility.
    * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.
    * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.
    * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.
