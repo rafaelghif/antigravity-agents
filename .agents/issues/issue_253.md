@@ -13,7 +13,7 @@ feat: enforce strict workspace isolation and automated database schema memory do
 
 ## Tasks
 - [x] Update AGENTS.md to enforce strict database/table schema tracking and prohibit leakage of configs/plans to global directories <!-- id: task-update-agents-rules -->
-- [ ] Update .agents/rules.md to synchronize the database schema and workspace isolation rules <!-- id: task-update-rules-md -->
+- [x] Update .agents/rules.md to synchronize the database schema and workspace isolation rules <!-- id: task-update-rules-md -->
 - [ ] Run verification tests and validation checks to verify workspace compliance <!-- id: task-verify-compliance -->
 
 ## Acceptance Criteria
