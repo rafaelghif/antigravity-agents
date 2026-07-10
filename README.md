@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-3.24.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.25.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -98,20 +98,37 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands
 
 | Command | Usage | Description |
 |---|---|---|
-| **`bootstrap`** | `./helper.sh bootstrap` | Scaffolds directories, detects stack, runs the DB/Infra setup interview, and guides Git profile setup. Can be automated with parameters: `bootstrap <name> <stack> <arch> [--db <db>] [--infra <infra>] [--framework <fw>]`. |
-| **`validate`** | `./helper.sh validate` | Runs 10 compliance audits (files, secrets, links, branch, sync, tests, locks). |
+| **`bootstrap`** | `./helper.sh bootstrap [-q \| --quick]` | Scaffolds directories, detects stack, and guides setup. Can be run in zero-config mode with `-q` / `--quick` to immediately bootstrap using detected defaults. |
+| **`validate`** | `./helper.sh validate [-q \| --quiet]` | Runs 11 compliance audits. Use `-q` / `--quiet` to run validation silently, only printing errors and final summary checklist. |
+| **`commit`** | `./helper.sh commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` / `--interactive` to launch Conventional Commit helper with staged changes diff preview. |
 | **`dashboard`** | `./helper.sh dashboard` | Launches local web-based interactive visual status dashboard. |
 | **`issue`** | `./helper.sh issue <subcommand>` | Local issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
-| **`lock`** | `./helper.sh lock <module>` | Local locks for collaborative coding. Run with `--release` to unlock. |
+| **`lock`** | `./helper.sh lock [<module> \| --release <module> \| --clear-all \| --prune]` | Local locks to prevent concurrent modifications. Use `--clear-all` to wipe locks, and `--prune` to clear locks of deleted branches. |
 | **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
 | **`context`** | `./helper.sh context optimize` | Rebuilds active context manifest and archives done issues. |
-| **`token` (Beta)** | `./helper.sh token <subcommand>` | Beta - local token budget tracker. Supports `log`, `status`, `sync`, and `reset`. |
+| **`token`** | `./helper.sh token [<subcommand>]` | Local token budget tracker. Defaults to `status` status dashboard if subcommand is omitted. |
+| **`pause`** | `./helper.sh pause` | Developer hand-off tool. Pauses and locks agent execution completely. |
+| **`resume`** | `./helper.sh resume` | Unpauses agent execution. |
 | **`mcp`** | `./helper.sh mcp <subcommand>` | Model Context Protocol integration. Supports `register` and `start`. |
 | **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer. |
 | **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
 | **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons to `lessons-learned.md`. |
 | **`doctor`** | `./helper.sh doctor` | Diagnostics tool verifying local setup and python dependencies. |
 | **`heartbeat`** | `./helper.sh heartbeat` | Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget). |
+
+---
+
+## ⚙️ Advanced Workspace Settings
+
+You can customize AAC V3 behavior by creating a `.agents/config.json` configuration file:
+
+```json
+{
+  "workflow_mode": "solo"
+}
+```
+
+* **`workflow_mode`** (`"team"` | `"solo"`): By default (`"team"`), AAC blocks direct edits and commits on base branches like `main` or `master`. Setting this to `"solo"` bypasses base branch checks, allowing solo developers to commit directly to the primary branch.
 
 ---
 
