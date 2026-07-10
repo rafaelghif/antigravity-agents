@@ -13,6 +13,7 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] chore: upgrade lingering V2 references to V3 in memory and dashboard (feat/issue-236) <!-- id: issue-236 -->
 - [x] chore: synchronize installer templates with V3 specifications (feat/issue-235) <!-- id: issue-235 -->
 - [x] chore: sync rules.md and templates (feat/issue-234) <!-- id: issue-234 -->
 - [x] chore: align V3 changelog entries to 3.0.x (feat/issue-233) <!-- id: issue-233 -->

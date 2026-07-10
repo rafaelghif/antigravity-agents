@@ -1,4 +1,4 @@
-// AAC V2 Dashboard Client Logic
+// AAC V3 Dashboard Client Logic
 
 // Global function to switch tabs
 window.switchTab = function(btn, tabId) {

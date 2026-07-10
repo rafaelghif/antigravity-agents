@@ -1,4 +1,4 @@
-# AAC V2 Lessons Learned
+# AAC V3 Lessons Learned
 
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
