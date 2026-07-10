@@ -1,4 +1,4 @@
-# AAC V2 Project Rules
+# AAC V3 Project Rules
 
 These rules extend the core guidelines in `AGENTS.md` with project-specific language and tool specifications.
 
