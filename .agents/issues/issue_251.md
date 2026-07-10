@@ -1,7 +1,7 @@
 ---
 id: issue-251
 title: "docs: update README.md with new CLI command flags and config settings"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

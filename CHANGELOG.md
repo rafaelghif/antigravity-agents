@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.25.0] - 2026-07-11
+
+### 🚀 Features
+- update README.md with new CLI command flags and config settings
+- docs: update README.md with new CLI command flags and config settings (ISSUE-251)
+
+
 ## [3.24.0] - 2026-07-11
 
 ### 🚀 Features
