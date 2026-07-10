@@ -76,11 +76,7 @@ if [ -d "$TARGET_ABS/.agents" ]; then
   fi
 fi
 
-# Get source path
-SRC_DIR=""
-if [ -n "${BASH_SOURCE[0]:-}" ]; then
-  SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-fi
+
 
 # 2. Safely acquire and copy agent directory structure
 mkdir -p "$TARGET_ABS/.agents"
@@ -170,7 +166,9 @@ echo "Downloading Antigravity Agent Core from GitHub..."
     for t in "$EXTRACTED_DIR/.agents/memory/templates/"*.template; do
       [ -f "$t" ] || continue
       filename_t=$(basename "$t" .template)
-      cp -n "$t" "$TARGET_ABS/.agents/memory/$filename_t"
+      if [ ! -f "$TARGET_ABS/.agents/memory/$filename_t" ]; then
+        cp "$t" "$TARGET_ABS/.agents/memory/$filename_t"
+      fi
     done
   fi
 
