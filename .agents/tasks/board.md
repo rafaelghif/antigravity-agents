@@ -13,6 +13,7 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] chore: align V3 changelog entries to 3.0.x (feat/issue-233) <!-- id: issue-233 -->
 - [x] chore: unify V3 changelog entries and align version to 3.0.1 (feat/issue-231) <!-- id: issue-231 -->
 - [x] Fix Windows installations failing (feat/issue-231) <!-- id: issue-231-old -->
 - [x] fix: correct V3/V4 label inconsistencies in CHANGELOG.md (feat/issue-230) <!-- id: issue-230 -->
