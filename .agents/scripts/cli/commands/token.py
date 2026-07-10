@@ -121,7 +121,7 @@ def recalculate_used_from_log(budget: dict) -> dict:
         try:
             with open(log_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
-            for line in lines:
+            for line in reversed(lines):
                 line = line.strip()
                 if not line:
                     continue
@@ -131,6 +131,10 @@ def recalculate_used_from_log(budget: dict) -> dict:
                     ts = datetime.strptime(ts_str, "%Y-%m-%d %H:%M:%S UTC").replace(tzinfo=timezone.utc)
                     total = int(m.group(2))
                     
+                    # Stop scanning if we hit an entry from a previous month
+                    if ts.year < this_month_utc[0] or (ts.year == this_month_utc[0] and ts.month < this_month_utc[1]):
+                        break
+                        
                     if ts.date() == today_utc:
                         daily_sum += total
                     if ts.year == this_month_utc[0] and ts.month == this_month_utc[1]:

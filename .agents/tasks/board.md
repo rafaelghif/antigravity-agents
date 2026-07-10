@@ -14,6 +14,7 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] feat: implement remaining architectural and security recommendations from comprehensive audit (feat/issue-238) <!-- id: issue-238 -->
 - [x] feat: secure visual dashboard with token auth and host validation (feat/issue-237) <!-- id: issue-237 -->
 - [x] chore: upgrade lingering V2 references to V3 in memory and dashboard (feat/issue-236) <!-- id: issue-236 -->
 - [x] chore: synchronize installer templates with V3 specifications (feat/issue-235) <!-- id: issue-235 -->

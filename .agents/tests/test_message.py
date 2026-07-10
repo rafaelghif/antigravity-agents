@@ -114,9 +114,17 @@ class TestMessageCommand(unittest.TestCase):
         # 5. git add (message file)
         # 6. git commit (add mailbox message)
         # 7. git push
-        mock_run_res = MagicMock()
-        mock_run_res.stdout = "feat/issue-226\n"
-        mock_sub.return_value = mock_run_res
+        def mock_run(args, **kwargs):
+            res = MagicMock()
+            res.returncode = 0
+            if 'rev-parse' in args:
+                res.stdout = "feat/issue-226\n"
+            elif 'status' in args:
+                res.stdout = ""  # Clean workspace
+            else:
+                res.stdout = ""
+            return res
+        mock_sub.side_effect = mock_run
         
         message.run(["handover", "reviewer-agent", "review", '{"task": "verify"}'])
         

@@ -124,8 +124,44 @@ def ensure_profiles_file() -> None:
             print_err(f"Failed to create empty git profiles JSON: {e}")
             sys.exit(1)
 
+def heal_credential_helper_path() -> None:
+    """Automatically detect and fix absolute path mismatches in git credential.helper config."""
+    try:
+        git_check = subprocess.run(
+            ['git', 'rev-parse', '--is-inside-work-tree'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if git_check.returncode != 0:
+            return
+            
+        res = subprocess.run(
+            ['git', 'config', '--local', 'credential.helper'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode != 0 or not res.stdout.strip():
+            return
+            
+        current_helper = res.stdout.strip()
+        if "profile credential-helper" not in current_helper:
+            return
+            
+        current_helper_py = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
+        current_python_exe = sys.executable
+        
+        expected_helper = f'!"{current_python_exe}" "{current_helper_py}" profile credential-helper'
+        if current_helper != expected_helper:
+            print("Self-Healing: Git credential.helper path drift detected. Updating path configuration.")
+            subprocess.run(['git', 'config', '--local', 'credential.helper', expected_helper], check=True)
+    except Exception:
+        pass
+
 def load_profiles() -> Dict[str, Any]:
     """Load git profiles from file, ignoring comments starting with '#'."""
+    heal_credential_helper_path()
     ensure_profiles_file()
     try:
         with open(PROFILES_FILE, 'r', encoding='utf-8') as f:

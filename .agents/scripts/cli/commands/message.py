@@ -145,25 +145,23 @@ def run(args):
         except Exception:
             pass
             
-        # Check git status for local modifications
+        # Check git status for local modifications (excluding messages/profiles/locks/state configs)
         status_res = subprocess.run(['git', 'status', '--porcelain'], stdout=subprocess.PIPE, text=True)
-        has_changes = len(status_res.stdout.strip()) > 0
-        
-        if has_changes:
-            print("Staging all changes...")
-            subprocess.run(['git', 'add', '-A'], check=True)
+        dirty_files = []
+        for line in status_res.stdout.splitlines():
+            if not line.strip():
+                continue
+            path = line[3:].strip()
+            if "git_profiles.json" in path or "locks.json" in path or ".agents/state/" in path or ".agents/messages/" in path:
+                continue
+            dirty_files.append(line)
             
-            commit_type = "chore"
-            if branch.startswith("feat/"):
-                commit_type = "feat"
-            elif branch.startswith("fix/"):
-                commit_type = "fix"
-                
-            commit_msg = f"{commit_type}: handover action '{msg_action}' to {recipient}\n\nCompliance-Audit: passed\nRefs: {task_id}"
-            print(f"Committing changes with message: {commit_type}: handover action '{msg_action}' to {recipient}")
-            subprocess.run(['git', 'commit', '-m', commit_msg], check=True)
-        else:
-            print("No local modifications to commit.")
+        if dirty_files:
+            print("\033[91mError: Cannot perform handover on a dirty workspace.\033[0m")
+            print("Please commit, stash, or discard your local modifications before executing handover:")
+            for f in dirty_files:
+                print(f"  {f}")
+            sys.exit(1)
             
         # Create pending message JSON
         sender = get_sender_identity()

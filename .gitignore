@@ -27,3 +27,4 @@ __pycache__/
 .agents/upgrade_state.json
 .agents/token_budget.json
 .agents/state/
+.agents/backup/

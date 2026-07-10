@@ -58,4 +58,8 @@ jobs:
 
       - name: Run Workspace Validation Scripts
         run: |
-          echo "Workspace structure is valid."
+          python3 .agents/scripts/validate.py
+
+      - name: Run Unit Tests
+        run: |
+          python3 -m unittest discover -s .agents/tests
