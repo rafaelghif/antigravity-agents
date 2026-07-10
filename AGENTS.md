@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.22.0
+- **Version:** 3.23.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -33,6 +33,8 @@
 - **NEVER** write to, expose, or rely on global configurations, specifications, plans, designs, or artifacts outside the project directory (such as user home directory, global agent appData/brain directories, or global databases). Everything must be stored strictly within the workspace level under `.agents/` (e.g., `.agents/issues/`, `.agents/plans/`) or project-level files (such as `memory.md`, `brain.md`), and tracked in git to ensure multi-developer environment consistency and absolute isolation without any global data leakage.
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.
+- **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST load the corresponding skill's playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) **ONLY** if the current task directly matches the skill's purpose (e.g. `debugging` for failures, `ci-cd` for pipelines, `security-audit` for security/credentials edits, `testing` for writing tests). Do NOT load skills speculatively or keep them in memory if they are not active.
+- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task. Cache the results in your thinking block to maximize prompt caching effectiveness and minimize token usage.
 - **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.
 - **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.
 - **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.
@@ -67,7 +69,7 @@ For the complete description of workspace metadata, ADRs, playbooks, memory stru
 6. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.
 7. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.
 8. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
-9. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch.
+9. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch. When a task matches a skill's description, load that skill's `SKILL.md` using `view_file` to align on execution steps, ensuring the skill is used efficiently.
 10. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.
 11. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
 
