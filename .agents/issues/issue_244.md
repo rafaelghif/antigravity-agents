@@ -1,7 +1,7 @@
 ---
 id: issue-244
 title: "feat: improve DX by bypassing strict rules for human programmer and adding agent safety limits"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
