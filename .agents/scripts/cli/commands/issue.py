@@ -981,6 +981,34 @@ created_at: {current_date}
             if res_master.returncode == 0:
                 base_branch = "master"
 
+            # Check budget limits before doing auto-merge/delete
+            try:
+                import token as token_cmd
+                budget = token_cmd.load_budget()
+                daily_used = budget.get("daily_used", 0)
+                daily_limit = budget.get("daily_limit", 5000000)
+                monthly_used = budget.get("monthly_used", 0)
+                monthly_limit = budget.get("monthly_limit", 100000000)
+                
+                daily_near_limit = daily_used >= (daily_limit * 0.9)
+                monthly_near_limit = monthly_used >= (monthly_limit * 0.9)
+                
+                if daily_near_limit or monthly_near_limit:
+                    print("\n==========================================================")
+                    print("[WARN] Token budget limit is near or exceeded!")
+                    print(f"  Daily: {daily_used}/{daily_limit} ({daily_used/daily_limit:.1%})")
+                    print(f"  Monthly: {monthly_used}/{monthly_limit} ({monthly_used/monthly_limit:.1%})")
+                    print("==========================================================")
+                    print("Bypassing automatic Git merge and branch deletion to prevent budget overruns.")
+                    print(f"You can merge and delete the branch '{found_branch}' manually:")
+                    print(f"  git checkout {base_branch}")
+                    print(f"  git merge {found_branch} --no-ff -m \"chore(git): merge branch {found_branch}\" -m \"{issue_id}\"")
+                    print(f"  git branch -d {found_branch}")
+                    print("==========================================================\n")
+                    sys.exit(0)
+            except Exception as e:
+                print(f"Warning: Could not check token budget safety: {e}")
+
             print(f"Switching to base branch '{base_branch}'...")
             subprocess.run(['git', 'checkout', base_branch], check=True)
 

@@ -1912,11 +1912,11 @@ def make_skill_audit(name: str, hook_path: str):
 
 def run_validations() -> None:
     # Check for bypass flags (human fast-track mode)
-    if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true"):
+    if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true") or os.environ.get("ANTIGRAVITY_AGENT") != "1":
         print("==========================================================")
         print("   Running AAC V3 Local Validation Guard...              ")
         print("==========================================================")
-        print(f"{YELLOW}[BYPASS] Human Fast-Track/Bypass enabled. Bypassing validations...{RESET}")
+        print(f"{YELLOW}[BYPASS] Programmer mode detected. Validation checks bypassed.{RESET}")
         print("==========================================================")
         sys.exit(0)
 

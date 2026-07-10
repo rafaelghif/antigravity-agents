@@ -44,6 +44,7 @@ Desktop.ini
 .git/
 .agents/locks/
 .agents/locks.json
+.lock/
 
 # Media & Binary Assets
 *.png

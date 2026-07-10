@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.18.0] - 2026-07-11
+
+### 🚀 Features
+- relax validation rules for programmers and add token budget safety checks for agent merges
+- feat: improve DX by bypassing strict rules for human programmer and adding agent safety limits (ISSUE-244)
+
+
 ## [3.17.0] - 2026-07-11
 
 ### 🚀 Features
