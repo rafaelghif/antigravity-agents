@@ -289,7 +289,7 @@ def register_server():
         
     script_path = os.path.abspath(__file__)
     python_cmd = "python" if platform.system() == "Windows" else "python3"
-    settings["mcpServers"]["aac-v2-tools"] = {
+    settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
         "args": [script_path],
         "disabled": False,
@@ -300,7 +300,7 @@ def register_server():
         os.makedirs(config_dir, exist_ok=True)
         with open(config_file, 'w', encoding='utf-8') as f:
             json.dump(settings, f, indent=2)
-        print(f"[OK] Successfully registered MCP server 'aac-v2-tools' in Cline settings:")
+        print(f"[OK] Successfully registered MCP server 'aac-v3-tools' in Cline settings:")
         print(f"     File: {config_file}")
     except Exception as e:
         print(f"[FAIL] Failed to write Cline settings file: {e}")
@@ -319,7 +319,7 @@ def register_server():
     if "mcpServers" not in workspace_settings:
         workspace_settings["mcpServers"] = {}
     project_root = os.path.dirname(workspace_dir)
-    workspace_settings["mcpServers"]["aac-v2-tools"] = {
+    workspace_settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
         "args": [os.path.relpath(script_path, project_root)]
     }
@@ -343,7 +343,7 @@ def register_server():
             pass
     if "mcpServers" not in global_settings:
         global_settings["mcpServers"] = {}
-    global_settings["mcpServers"]["aac-v2-tools"] = {
+    global_settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
         "args": [script_path]
     }
