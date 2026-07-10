@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.6.0] - 2026-07-10
+
+### 🚀 Features
+- align V3 history entries from version 2.199.0 to 2.208.0 as V3 (3.0.x)
+- chore: align V3 changelog entries to 3.0.x (ISSUE-233)
+
+
 ## [3.5.0] - 2026-07-10
 
 ### 🚀 Features
