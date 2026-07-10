@@ -155,7 +155,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
           mkdir -p "$(dirname "$dest_file")"
-          cp -n "$file" "$dest_file" 2>/dev/null || true
+          cp "$file" "$dest_file" 2>/dev/null || true
         done
       ' _ {} +
   )
@@ -179,8 +179,8 @@ echo "Downloading Antigravity Agent Core from GitHub..."
     cp "$EXTRACTED_DIR/.agents/projects.example" "$TARGET_ABS/.agents/projects.json" || true
   fi
 
-  cp -n "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
-  cp -n "$EXTRACTED_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
+  cp "$EXTRACTED_DIR/helper.sh" "$TARGET_ABS/helper.sh" || true
+  cp "$EXTRACTED_DIR/helper.ps1" "$TARGET_ABS/helper.ps1" || true
   
   if [ ! -f "$TARGET_ABS/AGENTS.md" ]; then
     cp "$EXTRACTED_DIR/AGENTS.md" "$TARGET_ABS/AGENTS.md"
