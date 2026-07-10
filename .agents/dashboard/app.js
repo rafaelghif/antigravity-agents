@@ -1,5 +1,27 @@
 // AAC V3 Dashboard Client Logic
 
+// Intercept all fetch requests to dynamically inject X-Session-Token
+(function() {
+  let token = new URLSearchParams(window.location.search).get('token');
+  if (token) {
+    sessionStorage.setItem('aac_session_token', token);
+    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+  } else {
+    token = sessionStorage.getItem('aac_session_token');
+  }
+
+  const originalFetch = window.fetch;
+  window.fetch = function(url, options) {
+    options = options || {};
+    options.headers = options.headers || {};
+    if (token) {
+      options.headers['X-Session-Token'] = token;
+    }
+    return originalFetch(url, options);
+  };
+})();
+
 // Global function to switch tabs
 window.switchTab = function(btn, tabId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));

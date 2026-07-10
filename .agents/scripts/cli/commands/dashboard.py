@@ -14,6 +14,7 @@ mimetypes.init()
 from urllib.parse import urlparse, parse_qs
 from socketserver import ThreadingMixIn
 import importlib.util
+import secrets
 
 # Thread-safe compliance status cache
 LATEST_DATA = {}
@@ -21,6 +22,9 @@ data_lock = threading.Lock()
 initial_data_loaded = threading.Event()
 audit_in_progress = False
 audit_thread_lock = threading.Lock()
+
+# Generate a cryptographically secure token for dashboard authentication
+SESSION_TOKEN = secrets.token_hex(16)
 
 DEFAULT_COMPLIANCE = {
     "Critical Files": True,
@@ -585,6 +589,14 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 
 class DashboardHandler(BaseHTTPRequestHandler):
     def is_client_allowed(self) -> bool:
+        # Verify Host header to prevent DNS Rebinding
+        host_header = self.headers.get('Host', '')
+        if host_header:
+            host_name = host_header.split(':', 1)[0]
+            if os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL") != "true":
+                if host_name not in ('localhost', '127.0.0.1', '::1', '[::1]'):
+                    return False
+
         if os.environ.get("AAC_DASHBOARD_ALLOW_EXTERNAL") == "true":
             return True
         
@@ -615,11 +627,39 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"Forbidden: External connections are not allowed.")
 
+    def is_token_valid(self) -> bool:
+        global SESSION_TOKEN
+        if not SESSION_TOKEN:
+            return True
+            
+        token = self.headers.get('X-Session-Token')
+        if token == SESSION_TOKEN:
+            return True
+            
+        parsed_url = urlparse(self.path)
+        query = parse_qs(parsed_url.query)
+        q_token = query.get('token', [None])[0]
+        if q_token == SESSION_TOKEN:
+            return True
+            
+        return False
+
+    def reject_unauthorized(self):
+        self.send_response(401)
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(b"Unauthorized: Missing or invalid session token.")
+
     def do_GET(self):
         if not self.is_client_allowed():
             self.reject_request()
             return
+            
         parsed_url = urlparse(self.path)
+        if parsed_url.path.startswith('/api/'):
+            if not self.is_token_valid():
+                self.reject_unauthorized()
+                return
         if parsed_url.path == '/api/status':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -671,7 +711,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if not self.is_client_allowed():
             self.reject_request()
             return
+            
         parsed_url = urlparse(self.path)
+        if parsed_url.path.startswith('/api/'):
+            if not self.is_token_valid():
+                self.reject_unauthorized()
+                return
         if parsed_url.path == '/api/task/toggle':
             content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
@@ -907,8 +952,10 @@ def run(args):
         sys.exit(1)
         
     url = f"http://{host}:{port}/"
+    if SESSION_TOKEN:
+        url += f"?token={SESSION_TOKEN}"
     if host == '0.0.0.0':
-        url = f"http://127.0.0.1:{port}/ (accessible externally at your LAN IP)"
+        url = f"http://127.0.0.1:{port}/?token={SESSION_TOKEN} (accessible externally at your LAN IP)"
 
     print(f"\033[92m==========================================================\033[0m")
     print(f"\033[92m🚀 AAC V3 Local Dashboard Server started at: {url}\033[0m")
@@ -920,7 +967,7 @@ def run(args):
     # Auto-open browser tab if not external-only/headless
     if host in ('127.0.0.1', '::1', 'localhost'):
         try:
-            webbrowser.open_new_tab(f"http://127.0.0.1:{port}/")
+            webbrowser.open_new_tab(f"http://127.0.0.1:{port}/?token={SESSION_TOKEN}")
         except Exception:
             pass
         

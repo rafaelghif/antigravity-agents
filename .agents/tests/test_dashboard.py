@@ -266,7 +266,9 @@ class TestDashboardCommand(unittest.TestCase):
             with patch('sys.exit', side_effect=SystemExit) as mock_exit:
                 dashboard.run([])
                 mock_server.assert_called_with(('127.0.0.1', 8000), dashboard.DashboardHandler)
-                mock_open_tab.assert_called_with('http://127.0.0.1:8000/')
+                called_url = mock_open_tab.call_args[0][0]
+                self.assertTrue(called_url.startswith('http://127.0.0.1:8000/'))
+                self.assertIn('token=', called_url)
                 
             # Test 2: Custom host and port
             mock_server.reset_mock()
