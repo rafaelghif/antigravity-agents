@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.14.0] - 2026-07-10
+
+### 🚀 Features
+- chore: write comprehensive audit hardening master plan (ISSUE-240)
+
+
 ## [3.13.0] - 2026-07-10
 
 ### 🚀 Features

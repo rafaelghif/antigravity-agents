@@ -1,7 +1,7 @@
 ---
 id: issue-240
 title: "chore: write comprehensive audit hardening master plan"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---

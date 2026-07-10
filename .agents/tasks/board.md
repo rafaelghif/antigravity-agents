@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
@@ -15,6 +14,7 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
 - [x] chore: implement MCP registry version upgrade and remaining audit hardening (feat/issue-239) <!-- id: issue-239 -->
 - [x] feat: implement remaining architectural and security recommendations from comprehensive audit (feat/issue-238) <!-- id: issue-238 -->
 - [x] feat: secure visual dashboard with token auth and host validation (feat/issue-237) <!-- id: issue-237 -->
