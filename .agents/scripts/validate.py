@@ -10,6 +10,10 @@ print_lock = threading.Lock()
 _original_print = builtins.print
 
 def locked_print(*args, **kwargs):
+    if os.environ.get("AAC_QUIET") == "1" or "--quiet" in sys.argv or "-q" in sys.argv:
+        text = " ".join(str(a) for a in args)
+        if not any(x in text for x in ("[FAIL]", "FAILED", "PASSED", "Summary Checklist", "====")):
+            return
     with print_lock:
         _original_print(*args, **kwargs)
 

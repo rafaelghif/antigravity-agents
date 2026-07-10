@@ -337,11 +337,14 @@ def run(args):
     infra = "None"
     framework = "None"
     
+    quick_mode = False
     clean_args = []
     i = 0
     while i < len(args):
         arg = args[i]
-        if arg.lower() in ('--force', '-f', '--update'):
+        if arg.lower() in ('--quick', '-q'):
+            quick_mode = True
+        elif arg.lower() in ('--force', '-f', '--update'):
             force_update = True
         elif arg.lower() == '--db' and i + 1 < len(args):
             db = args[i+1]
@@ -360,8 +363,15 @@ def run(args):
     # Auto-detect stack
     detected_stack = detect_project_stack(".")
     
+    if quick_mode:
+        name = os.path.basename(os.path.abspath(".")).strip()
+        stack = detected_stack if detected_stack else "python"
+        arch = "mvc" if stack in ("php", "node") else "clean"
+        print(f"[QUICK SETUP] Auto-configured Project Name: '{name}'")
+        print(f"[QUICK SETUP] Auto-detected Stack: '{stack}'")
+        print(f"[QUICK SETUP] Default Architecture: '{arch}'")
     # Prompt for project details
-    if len(args) < 3:
+    elif len(args) < 3:
         print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc> [--db <db>] [--infra <infra>] [--framework <fw>])")
         default_name = os.path.basename(os.path.abspath(".")).strip()
         name = input(f"Project Name (default: {default_name}): ").strip()
