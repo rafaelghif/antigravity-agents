@@ -31,9 +31,12 @@ chore: unify V3 changelog entries and align version to 3.0.1
   - [ ] bootstrap.sh <!-- id: audit-target-files-3 -->
   - [ ] bootstrap.ps1 <!-- id: audit-target-files-4 -->
   - [ ] .agents/scripts/cli/commands/bootstrap.py <!-- id: audit-target-files-5 -->
+  - [ ] .agents/scripts/cli/commands/context.py <!-- id: audit-target-files-6 -->
 - Active module locks:
   - [ ] install <!-- id: lock-install -->
   - [ ] bootstrap <!-- id: lock-bootstrap -->
+  - [ ] context <!-- id: lock-context -->
+  - [ ] list <!-- id: lock-list -->
 - Non-negotiable rules checked:
   - [ ] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [ ] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
