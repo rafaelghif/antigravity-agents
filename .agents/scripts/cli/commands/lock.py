@@ -258,6 +258,22 @@ def run(args: list) -> None:
 
     locks = load_locks()
 
+    if args and args[0] in ("--clear-all", "--clear"):
+        save_locks({})
+        if os.path.exists(LOCK_FILE):
+            try:
+                os.remove(LOCK_FILE)
+            except Exception:
+                pass
+        print("Successfully cleared all local module locks.")
+        return
+
+    if args and args[0] in ("--prune", "-p"):
+        pruned = prune_stale_locks(locks)
+        save_locks(pruned)
+        print("Successfully pruned stale module locks.")
+        return
+
     if is_release:
         if len(args) < 1:
             if not locks:

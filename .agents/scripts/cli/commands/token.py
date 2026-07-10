@@ -1479,8 +1479,8 @@ def run_reset(args: List[str]) -> None:
 
 def run(args: List[str]) -> None:
     if not args:
-        print("Usage: helper.py token <log | status | sync | reset> [args...]")
-        sys.exit(1)
+        run_status([])
+        return
 
     subcommand = args[0].lower()
     if subcommand == "log":

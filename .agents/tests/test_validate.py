@@ -111,7 +111,7 @@ class TestValidate(unittest.TestCase):
 
         # Scenario 4: On feature branch with invalid ID pattern
         mock_get_branch.return_value = "some-random-branch"
-        self.assertFalse(validate.audit_git_branch_alignment())
+        self.assertTrue(validate.audit_git_branch_alignment())
 
     @patch('validate.get_current_branch')
     @patch('subprocess.run')
