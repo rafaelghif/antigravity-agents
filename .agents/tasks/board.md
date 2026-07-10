@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (feat/issue-255) <!-- id: issue-255 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
