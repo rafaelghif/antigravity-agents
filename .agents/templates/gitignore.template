@@ -19,3 +19,4 @@ vendor/
 .agents/archive/
 .agents/upgrade_state.json
 .agents/token_budget.json
+.agents/state/

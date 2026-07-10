@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.8.0] - 2026-07-10
+
+### 🚀 Features
+- synchronize V3 release ignores and workflow action names
+- chore: synchronize installer templates with V3 specifications (ISSUE-235)
+
+
 ## [3.7.0] - 2026-07-10
 
 ### 🚀 Features

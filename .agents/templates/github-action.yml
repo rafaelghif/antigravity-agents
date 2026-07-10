@@ -1,4 +1,4 @@
-name: AAC V2 Validation Guard
+name: AAC V3 Validation Guard
 
 on:
   push:
