@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: implement modular schema grouping and strict on-demand loading checks (feat/issue-254) <!-- id: issue-254 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
