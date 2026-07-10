@@ -28,6 +28,7 @@ fix: installer missing AGENTS.md root file copying
   - [x] install.sh <!-- id: lock-install_sh -->
   - [x] install.ps1 <!-- id: lock-install_ps1 -->
   - [x] .agents/tests/test_platform_drift.py <!-- id: lock-test_platform_drift_py -->
+  - [x] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
