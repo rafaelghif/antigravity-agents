@@ -182,6 +182,9 @@ echo "Downloading Antigravity Agent Core from GitHub..."
   if [ -f "$EXTRACTED_DIR/Dockerfile" ]; then
     cp "$EXTRACTED_DIR/Dockerfile" "$TARGET_ABS/Dockerfile" || true
   fi
+  if [ -f "$EXTRACTED_DIR/AGENTS.md" ]; then
+    cp "$EXTRACTED_DIR/AGENTS.md" "$TARGET_ABS/AGENTS.md" || true
+  fi
   
   
   # Run bootstrap.sh from extracted folder inside target folder context

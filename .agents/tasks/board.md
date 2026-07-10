@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
@@ -12,9 +13,10 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->
+- [x] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 - [x] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
 - [x] chore: implement MCP registry version upgrade and remaining audit hardening (feat/issue-239) <!-- id: issue-239 -->
 - [x] feat: implement remaining architectural and security recommendations from comprehensive audit (feat/issue-238) <!-- id: issue-238 -->
@@ -229,3 +231,4 @@ This board tracks active development tasks.
 - [x] Set up automated compliance validation suite (feat/issue-011) <!-- id: issue-011 -->
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
 - [x] Fix upgrade.py to exclude AGENTS.md and rules.md from auto-checkout (feat/issue-195) <!-- id: issue-195 -->
+- [x] chore: sync installation scripts to copy Dockerfile (feat/issue-241) <!-- id: issue-241 -->

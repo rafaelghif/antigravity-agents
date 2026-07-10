@@ -74,7 +74,7 @@ class TestPlatformDrift(unittest.TestCase):
         
         # Extract files copied in install.sh (e.g. cp "$EXTRACTED_DIR/file" ...)
         sh_copies = set(re.findall(r'cp\s+["\']\$EXTRACTED_DIR/([^"\']+)["\']', sh_content))
-        expected = {"helper.sh", "helper.ps1", "Dockerfile"}
+        expected = {"helper.sh", "helper.ps1", "Dockerfile", "AGENTS.md"}
         for item in expected:
             self.assertIn(item, sh_copies, f"install.sh is missing copying of '{item}'")
 

@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.1] - 2026-07-10
+
+### 🐛 Bug Fixes
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### ⚙️ Chores
+- synchronize issue 242 specs and archive issue 241
+
+
+## [3.16.0] - 2026-07-10
+
+### 🚀 Features
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### 🐛 Bug Fixes
+- copy AGENTS.md to target installation directory in install.ps1
+- copy AGENTS.md to target installation directory in install.sh
+
+### 🧪 Tests
+- add parity checks verifying AGENTS.md copying in install.sh and install.ps1
+
+
 ## [3.15.0] - 2026-07-10
 
 ### 🚀 Features
