@@ -1,7 +1,7 @@
 ---
 id: issue-245
 title: "feat: implement interactive commit helper, clear-all locks, default token status, and flexible branch validation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
