@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.1] - 2026-07-10
+
+### 🐛 Bug Fixes
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### ⚙️ Chores
+- synchronize issue 242 specs and archive issue 241
+
+
 ## [3.16.0] - 2026-07-10
 
 ### 🚀 Features

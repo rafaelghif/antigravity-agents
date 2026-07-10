@@ -12,10 +12,10 @@ This board tracks active development tasks.
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
-- [ ] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->
 ## Doing
 
 ## Done
+- [x] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->
 - [x] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 - [x] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
 - [x] chore: implement MCP registry version upgrade and remaining audit hardening (feat/issue-239) <!-- id: issue-239 -->
