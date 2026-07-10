@@ -191,5 +191,5 @@ The following recommendations have been successfully implemented, tested, and me
 - [x] **Step 5:** Optimize Instruction Footprints in `AGENTS.md` and `rules.md` <!-- id: step-instruction-optimize -->
 - [x] **Step 6:** Implement Dependency Diagnostic Wizard in `doctor.py` <!-- id: step-dependency-wizard -->
 - [x] **Step 7:** Implement Containerized Sandbox Dockerfile <!-- id: step-docker-sandbox -->
-- [ ] **Step 8:** Implement Bash/PowerShell Platform Drift Guard tests <!-- id: step-platform-drift -->
+- [x] **Step 8:** Implement Bash/PowerShell Platform Drift Guard tests <!-- id: step-platform-drift -->
 - [ ] **Step 9:** Execute full validation test suite and verify compliance <!-- id: step-final-verification -->
