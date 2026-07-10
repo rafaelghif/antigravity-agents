@@ -1,7 +1,7 @@
 ---
 id: issue-242
 title: "fix: installer missing AGENTS.md root file copying"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
