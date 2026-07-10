@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] docs: update core rules to enforce enterprise-grade code standards and self-learning (feat/issue-247) <!-- id: issue-247 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] docs: update core rules to enforce enterprise-grade code standards and self-learning (feat/issue-247) <!-- id: issue-247 -->
 - [x] feat: zero-config bootstrap, pause/resume agent hand-off, and safe agent commands (feat/issue-246) <!-- id: issue-246 -->
 - [x] feat: implement interactive commit helper, clear-all locks, default token status, and flexible branch validation (feat/issue-245) <!-- id: issue-245 -->
 - [x] feat: improve DX by bypassing strict rules for human programmer and adding agent safety limits (feat/issue-244) <!-- id: issue-244 -->

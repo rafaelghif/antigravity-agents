@@ -1,7 +1,7 @@
 ---
 id: issue-247
 title: "docs: update core rules to enforce enterprise-grade code standards and self-learning"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

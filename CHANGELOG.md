@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.21.0] - 2026-07-11
+
+### 🚀 Features
+- add core rules to enforce enterprise-grade code standards and self-learning
+- docs: update core rules to enforce enterprise-grade code standards and self-learning (ISSUE-247)
+
+
 ## [3.20.0] - 2026-07-11
 
 ### 🚀 Features

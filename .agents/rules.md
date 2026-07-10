@@ -39,3 +39,10 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **[Learning: Database Schema]** Strictly align API and database models with the project schemas to maintain interface integrity.
 - **[Learning: documentation]** Fixed installer repository raw.githubusercontent.com URLs in README.md from rafaelghifari to rafaelghif
 - **[Learning: installation]** Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
+
+## 5. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Shell Scripting]** Maintain parity between Bash (.sh) and PowerShell (.ps1) helper scripts for consistent developer experience across platforms.
+- **[Learning: Workspace Optimization]** Optimized scan_conversations_for_usage to read JSONL transcripts first and enforced a strict 5-minute age validation for both transcript and DB steps. Prevented dynamic limits overrides when limits are parsed directly from Markdown tables, saved direct used overrides, and implemented dynamic freshness check in run_status to trigger async background sync when budget is older than 2 minutes.; Fixed platform usage parser to correctly parse limits and used tokens from Markdown table column format and support bullet lists (*) and bold tags (**) in account/task breakdowns.
+- **[Learning: Database Schema]** Strictly align API and database models with the project schemas to maintain interface integrity.
+- **[Learning: documentation]** Fixed installer repository raw.githubusercontent.com URLs in README.md from rafaelghifari to rafaelghif
+- **[Learning: installation]** Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
