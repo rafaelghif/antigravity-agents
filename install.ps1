@@ -106,8 +106,8 @@ if ($MyInvocation.MyCommand.Path) {
     $SrcDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 }
 
-$LocalDev = $env:ANTIGRAVITY_LOCAL_DEV -eq "1"
 $SrcAgents = Join-Path $SrcDir ".agents"
+$LocalDev = ($env:ANTIGRAVITY_LOCAL_DEV -eq "1") -and (Test-Path $SrcAgents)
 
 # 2. Copy/Download Agent files
 $ExtractedDir = ""

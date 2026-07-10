@@ -1,8 +1,8 @@
 ---
 id: 232
 title: "Fix Ubuntu installation and ensure full Git source updates"
-status: closed
-assignee: agent-antigravity
+status: open
+assignee: rafaelghif
 created_at: 2026-07-10
 ---
 
@@ -14,11 +14,13 @@ Fix Ubuntu installation and ensure full Git source updates
 ## Tasks
 - [x] Update install.sh to overwrite existing core files during installation/upgrade <!-- id: task-install-sh -->
 - [x] Update install.ps1 to overwrite existing core files during installation/upgrade <!-- id: task-install-ps1 -->
+- [x] Verify installer git-only source behavior on blank project installs <!-- id: task-git-source-only -->
 - [x] Run workspace validation and test installation <!-- id: task-validate -->
 
 ## Acceptance Criteria
 - [x] install.sh overwrites existing files with latest Git source <!-- id: criteria-sh-overwrite -->
 - [x] install.ps1 overwrites existing files with latest Git source <!-- id: criteria-ps1-overwrite -->
+- [x] Installer functions properly on clean projects without local code dependency <!-- id: criteria-clean-install -->
 - [x] Validation checks pass successfully <!-- id: criteria-validation -->
 
 ## Rule & Schema Compliance Audit
