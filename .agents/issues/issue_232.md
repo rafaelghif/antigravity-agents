@@ -1,7 +1,7 @@
 ---
 id: 232
 title: "Fix Ubuntu installation and ensure full Git source updates"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-10
 ---

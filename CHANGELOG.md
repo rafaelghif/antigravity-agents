@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.3.0] - 2026-07-10
+
+### 🚀 Features
+- overwrite existing core files during installation and upgrade
+- Fix Ubuntu installation and ensure full Git source updates (ISSUE-232)
+
+
 ## [3.2.1] - 2026-07-10
 
 ### 🐛 Bug Fixes
