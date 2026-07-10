@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (feat/issue-255) <!-- id: issue-255 -->
 - [x] feat: implement modular schema grouping and strict on-demand loading checks (feat/issue-254) <!-- id: issue-254 -->
 - [x] feat: enforce strict workspace isolation and automated database schema memory documentation (feat/issue-253) <!-- id: issue-253 -->
 - [x] feat: implement pid-based locking, secrets whitelisting, and update monorepo and git profiles documentation (feat/issue-252) <!-- id: issue-252 -->

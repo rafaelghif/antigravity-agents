@@ -750,8 +750,8 @@ def audit_link_integrity() -> bool:
     print("\n[3/9] Auditing File Links inside Memory Registers...")
     link_files = ["AGENTS.md", ".agents/rules.md", ".agents/schema.md", ".agents/memory/architecture.md"]
     
-    # Dynamically scan issues and memory folders
-    for folder in (".agents/issues", ".agents/memory"):
+    # Dynamically scan issues, memory, and schemas folders
+    for folder in (".agents/issues", ".agents/memory", ".agents/schemas"):
         if os.path.exists(folder):
             for f in os.listdir(folder):
                 if f.endswith(".md"):

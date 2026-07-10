@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.28.0
+- **Version:** 3.29.0
 - **Stack:** Python (CLEAN)
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -28,7 +28,7 @@
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
-- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand.
+- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.
 - **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
 - **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as user home directory, global agent appData/brain directories, or global databases). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
@@ -48,6 +48,7 @@
   - *Security:* Perform strict input validation and sanitization. Use parameterized queries or ORMs. NEVER hardcode secrets or credentials. Prevent OWASP Top 10 vulnerabilities.
   - *Performance & Scale:* Avoid blocking I/O on primary threads, design for thread-safety, avoid N+1 database queries, and optimize memory/resource usage.
   - *Maintainability:* Structure code modularly (SOLID principles, Clean Architecture), write comprehensive error handling (with tracebacks/structured logging), and document public APIs with type annotations and docstrings.
+  - *10-Year Foresight:* Evaluate long-term maintainability, API forward-compatibility, partition growth (10-100x volume), cascading delete risks, soft delete strategies, lock contention, and failover resilience before committing database or core engine designs.
 - **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.
 - **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.
 

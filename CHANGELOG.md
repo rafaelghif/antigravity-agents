@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.29.0] - 2026-07-11
+
+### 🚀 Features
+- implement cross-module schema dependencies and 10-year critical architectural guidelines
+- feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (ISSUE-255)
+
+
 ## [3.28.0] - 2026-07-11
 
 ### 🚀 Features
