@@ -4,15 +4,19 @@ This document maps workspace files and details the CLI helper commands.
 
 ## 1. CLI Helper Commands Reference
 All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows):
-- `./helper.sh bootstrap`: Scaffolds dirs, stack detect, AGENTS.md, profile wizard.
-- `./helper.sh validate`: Runs 10 audits (critical files, secrets, links, branch, sync, task board, lint, tests, locks, commits).
+- `./helper.sh bootstrap [-q | --quick]`: Scaffolds dirs, stack detect, AGENTS.md, profile wizard. `--quick` runs zero-config setup using defaults.
+- `./helper.sh validate [-q | --quiet]`: Runs 11 audits (critical files, secrets, links, branch, sync, task board, lint, tests, locks, commits). `--quiet` suppresses status outputs.
 - `./helper.sh issue <create|list|checkout|close|sync>`: Subtask and issue lifecycle tracking.
-- `./helper.sh lock <module-name>`: Acquires local locks. Unlock with `--release <module-name>`.
+- `./helper.sh lock [<module> | --release <module> | --clear-all | --prune]`: Acquires module locks. Use `--clear-all` to clear all locks, and `--prune` to remove stale locks.
+- `./helper.sh commit [-i | --interactive]`: Fires safe git commit command gated by validation guard. `-i` starts the interactive Conventional Commit helper.
 - `./helper.sh profile <add|switch|list|apply>`: Credentials rotation and auto-sync config.
 - `./helper.sh changelog`: Conventional commits parser and SemVer version bump.
 - `./helper.sh sync`: Updates skills and ADR registries.
-- `./helper.sh learn "<lesson>" [--category <name>]`: Appends a lesson to `.agents/memory/lessons-learned.md` after resolving a bug or workflow issue.
-- `./helper.sh heartbeat`: Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget).
+- `./helper.sh learn "<lesson>" [--category <name>]`: Appends a lesson to `.agents/memory/lessons-learned.md`.
+- `./helper.sh token [<log | status | sync | reset>]`: Logs/displays token budget statistics. Defaults to status if subcommand is omitted.
+- `./helper.sh heartbeat`: Runs workspace heartbeat diagnostic checks.
+- `./helper.sh pause`: Halts agent execution (blocks any tool/command runs by the agent).
+- `./helper.sh resume`: Reactivates agent execution after being paused.
 
 ## 2. Context map — what loads when
 
