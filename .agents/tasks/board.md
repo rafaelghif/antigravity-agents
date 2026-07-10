@@ -10,6 +10,8 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Fix Windows installations failing (feat/issue-231) <!-- id: 231 -->
+
 
 ## Done
 - [x] fix: correct V3/V4 label inconsistencies in CHANGELOG.md (feat/issue-230) <!-- id: issue-230 -->
@@ -56,10 +58,10 @@ This board tracks active development tasks.
 - [x] Fix subtask deadlock and staging locks in CLI (feat/issue-187) <!-- id: issue-187 -->
 - [x] Fix lessons-archive.md staging in issue close (feat/issue-186) <!-- id: issue-186 -->
 - [x] Fix audit vulnerabilities and bugs (feat/issue-185) <!-- id: issue-185 -->
-- [x] Optimize token sync reliability and freshness guards (feat/issue-184) <!-- id: 184 -->
-- [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: 183 -->
-- [x] Optimize token sync to run asynchronously in background (feat/issue-182) <!-- id: 182 -->
-- [x] Fix token usage sync and remaining display (feat/issue-181) <!-- id: 181 -->
+- [x] Optimize token sync reliability and freshness guards (feat/issue-184) <!-- id: issue-184 -->
+- [x] Fix platform usage parser for table and markdown account breakdowns (feat/issue-183) <!-- id: issue-183 -->
+- [x] Optimize token sync to run asynchronously in background (feat/issue-182) <!-- id: issue-182 -->
+- [x] Fix token usage sync and remaining display (feat/issue-181) <!-- id: issue-181 -->
 - [x] Add beta notice for token tracking features in README (feat/issue-180) <!-- id: issue-180 -->
 - [x] Fix platform token sync loop by scanning conversation databases (feat/issue-179) <!-- id: issue-179 -->
 - [x] Dynamically learn weekly and five hour limits from platform percentage (feat/issue-178) <!-- id: issue-178 -->

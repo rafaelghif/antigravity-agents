@@ -504,7 +504,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.2.0"
+    AAC_VERSION = "3.2.1"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     detected_ver = detect_project_version(".")

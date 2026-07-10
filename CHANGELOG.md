@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.2.1] - 2026-07-10
+
+### 🐛 Bug Fixes
+- prevent PowerShell NativeCommandError on Windows and support local dev mode
+
+### 📝 Documentation
+- Fix Windows installations failing (ISSUE-231)
+
+
 ## [3.2.0] - 2026-07-09
 
 ### 🚀 Features
