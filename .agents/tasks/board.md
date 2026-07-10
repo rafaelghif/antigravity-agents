@@ -13,6 +13,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] feat: improve DX by bypassing strict rules for human programmer and adding agent safety limits (feat/issue-244) <!-- id: issue-244 -->
 
 ## Done
 - [x] feat: bypass git hooks for non-agent commits (feat/issue-243) <!-- id: issue-243 -->
