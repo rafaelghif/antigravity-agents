@@ -1,7 +1,7 @@
 ---
 id: issue-234
 title: "chore: sync rules.md and templates"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
