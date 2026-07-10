@@ -14,13 +14,13 @@ The current local git hooks (pre-commit, commit-msg, prepare-commit-msg) enforce
 ## Tasks
 - [x] Update git hook template definitions in `.agents/scripts/validate.py` to bypass execution if `ANTIGRAVITY_AGENT` is not set. <!-- id: task-validate-py-hooks -->
 - [x] Update git hook template definitions in `.agents/scripts/cli/commands/doctor.py` to bypass execution if `ANTIGRAVITY_AGENT` is not set. <!-- id: task-doctor-py-hooks -->
-- [ ] Run validation or doctor to repair hooks and verify that `ANTIGRAVITY_AGENT` environment variable checks are present in actual hooks. <!-- id: task-repair-hooks -->
-- [ ] Run unit tests and run project validate to verify all changes. <!-- id: task-run-tests-validation -->
+- [x] Run validation or doctor to repair hooks and verify that `ANTIGRAVITY_AGENT` environment variable checks are present in actual hooks. <!-- id: task-repair-hooks -->
+- [x] Run unit tests and run project validate to verify all changes. <!-- id: task-run-tests-validation -->
 
 ## Acceptance Criteria
-- [ ] Local git hooks bypass validation and exit with 0 immediately when `ANTIGRAVITY_AGENT` is not set. <!-- id: criteria-bypass-non-agent -->
-- [ ] Local git hooks still enforce all validation checks when `ANTIGRAVITY_AGENT` is set. <!-- id: criteria-enforce-agent -->
-- [ ] Diagnostics run successfully and unit tests pass. <!-- id: criteria-diagnostics-pass -->
+- [x] Local git hooks bypass validation and exit with 0 immediately when `ANTIGRAVITY_AGENT` is not set. <!-- id: criteria-bypass-non-agent -->
+- [x] Local git hooks still enforce all validation checks when `ANTIGRAVITY_AGENT` is set. <!-- id: criteria-enforce-agent -->
+- [x] Diagnostics run successfully and unit tests pass. <!-- id: criteria-diagnostics-pass -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
