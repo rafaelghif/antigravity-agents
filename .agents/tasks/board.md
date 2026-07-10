@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement pid-based locking, secrets whitelisting, and update monorepo and git profiles documentation (feat/issue-252) <!-- id: issue-252 -->
 - [x] docs: update README.md with new CLI command flags and config settings (feat/issue-251) <!-- id: issue-251 -->
 - [x] feat: implement solo workflow mode and commit diff preview (feat/issue-250) <!-- id: issue-250 -->
 - [x] feat: refine rule guidelines for skill loading, token efficiency, and working protocol flow (feat/issue-249) <!-- id: issue-249 -->

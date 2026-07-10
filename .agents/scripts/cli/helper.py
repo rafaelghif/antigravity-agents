@@ -390,6 +390,22 @@ def main():
         except Exception:
             pass
 
+def is_pid_running(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    if os.name == 'nt':
+        try:
+            res = subprocess.run(['tasklist', '/FI', f'PID eq {pid}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            return str(pid) in res.stdout
+        except Exception:
+            return True
+    else:
+        try:
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+
 class FileLockMutex:
     """A cross-platform zero-dependency atomic mutex using filesystem directories."""
     def __init__(self, filepath: str, timeout: float = 5.0, delay: float = 0.05) -> None:
@@ -400,18 +416,43 @@ class FileLockMutex:
 
     def __enter__(self) -> 'FileLockMutex':
         start_time: float = time.time()
+        pid_file = os.path.join(self.lock_dir, "pid")
         while time.time() - start_time < self.timeout:
             try:
                 os.mkdir(self.lock_dir)
+                try:
+                    with open(pid_file, 'w', encoding='utf-8') as f:
+                        f.write(str(os.getpid()))
+                except Exception:
+                    pass
                 self.acquired = True
                 return self
             except FileExistsError:
+                if os.path.exists(pid_file):
+                    try:
+                        with open(pid_file, 'r', encoding='utf-8') as f:
+                            pid_str = f.read().strip()
+                            if pid_str.isdigit():
+                                pid = int(pid_str)
+                                if not is_pid_running(pid):
+                                    # Stale lock! Force remove and retry.
+                                    try:
+                                        os.remove(pid_file)
+                                        os.rmdir(self.lock_dir)
+                                        continue
+                                    except Exception:
+                                        pass
+                    except Exception:
+                        pass
                 time.sleep(self.delay)
         raise TimeoutError(f"Could not acquire mutex lock on {self.lock_dir} within {self.timeout}s.")
 
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         if self.acquired:
             try:
+                pid_file = os.path.join(self.lock_dir, "pid")
+                if os.path.exists(pid_file):
+                    os.remove(pid_file)
                 os.rmdir(self.lock_dir)
             except Exception:
                 pass

@@ -47,3 +47,6 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/memory/tech-debt.md`, `lessons-learned.md` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
 | `.agents/memory/soul.md` | Core agent values, communication policies, and identity. | Always — loaded alongside `AGENTS.md` every prompt |
 | `.agents/tasks/board.md` | Task board | Read at the start of every task, written at every status change |
+| `.agents/config.json` | Advanced workspace-level runtime and workflow settings (e.g. solo mode) | Read dynamically during commands/validations |
+| `.agents/git_profiles.json` | Developer Git profiles, author emails, signing keys, and push credentials | Applied dynamically when switching profiles or committing |
+| `.agents/projects.json` | Monorepo component paths, stacks, local test commands, and contract schemas | Audited dynamically during monorepo validations |

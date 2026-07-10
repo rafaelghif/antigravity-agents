@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-3.25.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.26.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -120,15 +120,66 @@ Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands
 
 ## ⚙️ Advanced Workspace Settings
 
-You can customize AAC V3 behavior by creating a `.agents/config.json` configuration file:
+You can customize AAC V3 behavior, developer profiles, and monorepo component testing using workspace-level settings files.
 
+### 1. General Settings (`.agents/config.json`)
+Create `.agents/config.json` to customize the agent's operating mode:
 ```json
 {
   "workflow_mode": "solo"
 }
 ```
-
 * **`workflow_mode`** (`"team"` | `"solo"`): By default (`"team"`), AAC blocks direct edits and commits on base branches like `main` or `master`. Setting this to `"solo"` bypasses base branch checks, allowing solo developers to commit directly to the primary branch.
+
+### 2. Developer Profiles (`.agents/git_profiles.json`)
+Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.example` to `.agents/git_profiles.json`:
+```json
+{
+  "profiles": [
+    {
+      "name": "corporate-work",
+      "email": "developer@company.com",
+      "signing_key": "ssh-ed25519 AAAAC3N...",
+      "ssh_key_path": "~/.ssh/id_ed25519_corp",
+      "git_token": "ghp_corporateTokenExample",
+      "active": true
+    }
+  ]
+}
+```
+* **`name`**: Descriptive identifier of the profile.
+* **`email`**: Git author email configuration.
+* **`signing_key`**: GPG or SSH signing key for signing commits.
+* **`ssh_key_path`**: Path to the SSH private key used to push commits.
+* **`git_token`**: Access token for authenticating GitHub/GitLab CLI commands.
+* **`active`**: Set `true` to apply this profile's configuration to Git during development.
+
+### 3. Monorepos & Components (`.agents/projects.json`)
+Define sub-projects, testing commands, and API contract sync rules in a monorepo. Copy `.agents/projects.example` to `.agents/projects.json`:
+```json
+{
+  "projects": [
+    {
+      "name": "backend-api",
+      "path": "app/backend",
+      "stack": "python",
+      "test_command": "pytest",
+      "sync_contracts": [
+        {
+          "source": "openapi.yaml",
+          "target": "../frontend/src/api/client.ts",
+          "generator": "npx openapi-typescript"
+        }
+      ]
+    }
+  ]
+}
+```
+* **`name`**: Unique identifier for the sub-project.
+* **`path`**: Directory path relative to workspace root.
+* **`stack`**: Stack/language of the component (e.g. `python`, `node`, `php`).
+* **`test_command`**: Local test execution command (run inside the sub-project directory).
+* **`sync_contracts`**: (Optional) Open API/GraphQL contract synchronization rules to generate frontend client bindings.
 
 ---
 
