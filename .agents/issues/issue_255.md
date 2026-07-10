@@ -1,7 +1,7 @@
 ---
 id: issue-255
 title: "feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
