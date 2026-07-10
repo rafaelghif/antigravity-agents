@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.2] - 2026-07-10
+
+### 🐛 Bug Fixes
+- copy missing core folders and root wrappers in bootstrap.py copy_core_files
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+
 ## [3.16.1] - 2026-07-10
 
 ### 🐛 Bug Fixes
