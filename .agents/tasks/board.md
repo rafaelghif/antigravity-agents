@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement interactive commit helper, clear-all locks, default token status, and flexible branch validation (feat/issue-245) <!-- id: issue-245 -->
 - [x] feat: improve DX by bypassing strict rules for human programmer and adding agent safety limits (feat/issue-244) <!-- id: issue-244 -->
 - [x] feat: bypass git hooks for non-agent commits (feat/issue-243) <!-- id: issue-243 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->

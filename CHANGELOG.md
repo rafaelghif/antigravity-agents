@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.19.0] - 2026-07-11
+
+### 🚀 Features
+- implement programmer DX enhancements: commit helper, lock clear/prune, default token status, and flexible branch validation
+- feat: implement interactive commit helper, clear-all locks, default token status, and flexible branch validation (ISSUE-245)
+
+
 ## [3.18.0] - 2026-07-11
 
 ### 🚀 Features
