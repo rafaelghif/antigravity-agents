@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.5.0] - 2026-07-10
+
+### 🚀 Features
+- ensure clean Git source updates and prevent local fallback failures
+- Fix Ubuntu installation and ensure full Git source updates (ISSUE-232)
+
+
 ## [3.4.0] - 2026-07-10
 
 ### 🚀 Features
