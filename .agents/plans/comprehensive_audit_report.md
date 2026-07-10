@@ -1,306 +1,233 @@
-# Enterprise-Grade AI Agent Auditor & Prompt Optimizer Audit Report
-**Project Name:** Antigravity Agent Core (AAC) V2  
+# Enterprise-Grade AI Agent Auditor & Prompt Optimizer Audit Report (V3)
+**Project Name:** Antigravity Agent Core (AAC) V3  
 **Target Repository:** `rafaelghif/antigravity-agents`  
-**Auditor Identity:** Principal AI Systems Auditor, Enterprise Software Architect, Staff Security Engineer  
-**Audit Date:** 2026-07-09  
+**Auditor Identity:** Principal AI Systems Architect, Enterprise Solution Architect, DevSecOps & Security Architect  
+**Audit Date:** 2026-07-10  
+**Software Version:** 3.16.3  
 
 ---
 
 ## 1. Executive Summary
 
-This report presents a comprehensive, production-grade architectural, security, and performance audit of the **Antigravity Agent Core (AAC) V2** workspace framework. 
+This audit presents an exhaustive, enterprise-grade architectural, security, performance, and maintainability assessment of the **Antigravity Agent Core (AAC) V3** workspace environment. 
 
-AAC V2 is an exceptionally well-designed local-first guardrail framework. It introduces directory-level mutex locks, dynamic git credentials rotation, automatic context optimization, and a lightweight 11-audit validation suite running under 100ms. These components address critical risks in LLM workspace integration: secret leakage, direct base-branch mutations, redundant token usage, and architectural divergence.
+AAC V3 is designed as a local-first agent guardrail and developer enablement framework. It enforces module-level filesystem mutex locks, dynamic developer profile rotation, automated Git credentials injection, incremental pre-commit validation checks, and automatic context pruning. These capabilities directly mitigate key risks of LLM-based autonomous coding: accidental secret leakage, unauthorized base branch mutations, redundant token consumption, and code drift.
 
-However, during a deep codebase review, several **critical-to-high security and operational risks** were identified:
-1. **Cross-Workspace Code Execution via MCP:** Global settings register absolute script paths of a single workspace. Opening a separate project executes Python modules from the original workspace, posing supply chain and code-poisoning hazards.
-2. **Destructive Auto-Upgrade (Data Loss):** The `upgrade` command executes Git checkouts of core files without validating unstaged files or offering backups, risking developer data loss.
-3. **Dirty Base Branch Merges:** The `issue close` command merges branches without checking if the working tree is clean. If conflicts occur, it leaves the developer stranded mid-merge on a protected base branch (`main`/`master`).
-4. **Bootstrapper Network Dependency:** The setup bootstrapper relies on remote Git cloning, breaking offline portability and air-gapped environment execution.
-5. **Prompt Bloat and Redundant Rules:** Over 30 non-negotiable rules saturate context attention, increasing costs and reducing LLM instruction-following precision.
+While V3 has successfully resolved several historical critical issues identified in V2 (such as destructive core upgrades, merge conflict stranding, and lack of SSH passphrase prompts), a deep code-level audit of the current version has uncovered new **critical-to-high security and operational risks**:
+1. **Command Injection via `core.sshCommand`**: The profile management subsystem accepts user-supplied SSH key paths without sanitization, leading to shell escape vectors when Git processes trigger shell-based transport.
+2. **Global MCP Workspace Locking/Stalling**: The hardcoded absolute path registry for MCP tools fails globally if the original workspace is deleted or relocated, and stalls with CLI process errors in non-AAC environments.
+3. **Offline Bootstrapper Fallback Gaps**: The templates copy fallback for air-gapped environments misses newly added operational wrappers (`bootstrap.sh`, `bootstrap.ps1`, and `Dockerfile`), resulting in partial workspace configurations.
+4. **Attention Saturation & Token Bloat**: The duplication of guidelines across `AGENTS.md` and `.agents/rules.md` introduces severe context token footprint overhead, degrading LLM instruction-following accuracy.
 
-AAC V2 achieves an **Enterprise Readiness Score of 76/100**. Mitigating the identified vulnerabilities will elevate the platform to a world-class, production-ready system.
-
----
-
-## 2. Overall Architecture Assessment
-
-The AAC V2 architecture separates workspace-level state from global configurations, maintaining isolation via the `.agents/` folder.
-
-```
-+--------------------------------------------------------+
-|                      helper.sh                         |
-|  (POSIX Entrypoint wrapper to CLI helper dispatcher)   |
-+------------------------------------+-------------------+
-                                     |
-                                     v
-+--------------------------------------------------------+
-|                     helper.py                          |
-|  (CLI Command Dispatcher & FileLockMutex Lock Manager) |
-+------------------------------------+-------------------+
-                                     |
-                +--------------------+--------------------+
-                |                                         |
-                v                                         v
-+------------------------------+           +------------------------------+
-|         validate.py          |           |       Command Modules        |
-| (11-Audit Security &         |           | (bootstrap.py, issue.py,     |
-|  Compliance Validation Guard)|           |  profile.py, token.py, etc.) |
-+------------------------------+           +------------------------------+
-```
-
-### Architectural Strengths
-- **Decoupled CLI Commands:** Commands are isolated into individual Python modules under `cli/commands/`, loaded dynamically via `importlib`.
-- **Zero-Dependency Directory Mutex:** `FileLockMutex` utilizes `os.mkdir()` for cross-platform filesystem directory creation, creating an atomic lock mechanism.
-- **Incremental Validation:** `validate.py` limits validation checks to modified files, ensuring sub-100ms hook execution.
-
-### Architectural Weaknesses
-- **State Coupling via File Paths:** Commands assume relative paths from the current working directory, which breaks when executed from subfolders or global paths.
-- **Git Command Pollution:** The upgrade module fetches third-party objects directly into the developer's project object database, mixing git graphs.
+AAC V3 scores **86/100** on Overall Enterprise Readiness. Implementing the targeted remediations outlined in this report will harden the framework to support mission-critical, multi-team enterprise development at scale.
 
 ---
 
-## 3. Prompt Quality Assessment
-
-AAC V2 utilizes a layered prompt hierarchy: `AGENTS.md` (identity and non-negotiables), `.agents/rules.md` (stack-specific styles and tests), and `.agents/active_context.md` (session scope).
-
-### Prompt Weaknesses
-- **Rule Duplication:** The Pre-Implementation Impact Analysis is declared twice (in `AGENTS.md` §2, bullet 7 and bullet 44). This duplication consumes prompt tokens and reduces instruction clarity.
-- **Instruction Contradiction:**
-  - `AGENTS.md` forbids editing or committing files directly on `main` or `master`.
-  - However, `issue.py` checkout command lacks an enforcement block to prevent checking out `main` or `master` to perform work.
-- **Attention Saturation (Bloat):** The inclusion of over 30 "non-negotiable" rules in every prompt loop introduces a high token overhead, which can cause target models to lose focus on core security gates.
+## 2. Overall Architecture Score (0–100)
+### **Score: 88/100**
+* **Justification**: The dynamic command routing pattern, separated from the validator hooks, is highly modular. However, CWD-based path coupling in scripts and global-local MCP linkage prevent a perfect score.
 
 ---
 
-## 4. Agent Capability & Skill Mapping
-
-The agent routes tasks dynamically using system prompts and files inside the `.agents/` directory.
-
-### Visual Skill Mapping Diagram
-```mermaid
-flowchart TD
-    subgraph "Core Commands & Logic"
-        C1["helper.sh / helper.ps1"] --> C2["helper.py (Dispatcher)"]
-        C2 --> C3["validate.py (Audit Gate)"]
-    end
-
-    subgraph "Skill Directory (.agents/skills/)"
-        S1["adr/SKILL.md"]
-        S2["ci-cd/SKILL.md"]
-        S3["code-review/SKILL.md"]
-        S4["coding-standards/SKILL.md"]
-        S5["contract-sync/SKILL.md"]
-        S6["database-evolution/SKILL.md"]
-        S7["debugging/SKILL.md"]
-        S8["observability/SKILL.md"]
-        S9["performance-opt/SKILL.md"]
-        S10["release-mgmt/SKILL.md"]
-        S11["security-audit/SKILL.md"]
-        S12["self-healing/SKILL.md"]
-        S13["task-mgmt/SKILL.md"]
-        S14["testing/SKILL.md"]
-    end
-
-    C3 -- "Fails Audit" --> S12
-    C3 -- "Lints & Code Quality" --> S4
-    C3 -- "Tests Fail" --> S14
-    C2 -- "issue checkout" --> S13
-    C2 -- "issue close" --> S10
-    C2 -- "sync command" --> S1
-    C2 -- "profile rotate" --> S11
-```
-
-### Analysis of Routing Gaps
-- **Skill Overlaps:** `coding-standards` and `code-review` contain overlapping checklists. A single playbook should handle code quality, while the review skill is reserved for merge gates.
-- **Lack of Static Mapping Enforcers:** The agent determines which skill to load based on natural language matching in the prompt. This introduces routing uncertainty. A deterministic skill registration mapping index is recommended.
+## 3. Security Score
+### **Score: 82/100**
+* **Justification**: Robust secrets scanning, ignored file blockers, and profiles rotation. The score is held back by the high-severity command injection risk in the SSH Git configuration mechanism.
 
 ---
 
-## 5. Workflow Diagram
-
-The flowchart below shows the developer/agent lifecycle inside the AAC V2 workspace:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    Developer->>bootstrap.sh: Run setup command
-    bootstrap.sh->>recon.py: Scan workspace & prompt details
-    recon.py->>schema.md: Write stack metadata
-    Developer->>issue.py: issue checkout <id>
-    issue.py->>context.py: Optimize context and create active_context.md
-    Developer->>lock.py: lock <module>
-    lock.py->>locks.json: Set file mutex
-    Developer->>Codebase: Write changes (loop)
-    Developer->>validate.py: Run tests and audits
-    alt Validation Fails
-        validate.py->>self-healing: Run recovery protocols
-    else Validation Passes
-        Developer->>commit.py: Git commit changes
-    end
-    Developer->>issue.py: issue close <id>
-    issue.py->>validate.py: Run compliance checks
-    issue.py->>changelog.py: Bump version & append CHANGELOG.md
-    issue.py->>git: Merge feature branch with --no-ff
-    issue.py->>git: Delete local feature branch
-```
+## 4. Scalability Score
+### **Score: 92/100**
+* **Justification**: The CLI tool structure makes adding new subcommands trivial. The `FileLockMutex` easily scales to dozens of concurrent developers without database lock overhead.
 
 ---
 
-## 6. Installation & Integration Audit
-
-### Onboarding Experience
-The onboarding flow is straightforward. The automated stack detection via `recon.py` and the interactive project details questionnaire provide an efficient setup experience.
-
-### Integration Friction Points
-- **Hardcoded GitHub Repository URL:** The installer and bootstrapper point directly to `https://github.com/rafaelghif/antigravity-agents.git`. This breaks usage in enterprise networks where internal git servers or private forks are required.
-- **No Verification of Prerequisites:** `install.sh` aborts if Git or Python is missing, but does not check for version requirements (e.g. Python < 3.8), leading to syntax crashes during later executions.
+## 5. Maintainability Score
+### **Score: 89/100**
+* **Justification**: PEP-8 compliance is enforced, and there is a clean testing setup. Technical debt exists in redundant log formatting helpers across modules.
 
 ---
 
-## 7. Security Audit
-
-### 1. Cross-Workspace Code Execution via MCP Settings (Severity: High)
-The MCP server registration (`mcp_server.py`) writes absolute paths of the active workspace script into global configurations:
-```python
-settings["mcpServers"]["aac-v2-tools"] = {
-    "command": python_cmd,
-    "args": [script_path] # Absolute path to active workspace script
-}
-```
-If a developer opens a completely different project, the global config runs the Python script from the *original* workspace. If the original workspace is deleted, modified, or poisoned by malicious files, the MCP server executes arbitrary code from the old workspace within the new context.
-
-### 2. Passphraseless SSH Key Generation (Severity: Medium)
-The `profile.py` module automatically generates secure SSH key pairs without a passphrase:
-```python
-res = subprocess.run([keygen_bin, '-t', 'ed25519', '-C', email, '-f', key_path, '-N', ''])
-```
-These keys are written to `~/.ssh/`. While convenient for non-interactive agents, generating passphraseless SSH keys in standard directories increases key compromise risks.
-
-### 3. Global State Leaks (Severity: Low)
-The MCP registration writes configs to `~/.gemini/config/mcp_config.json` and `~/.config/Code/User/...`. This violates the strict "zero global leakage" isolation boundary defined in `AGENTS.md`.
+## 6. Reliability Score
+### **Score: 92/100**
+* **Justification**: Version upgrades, branch checkout guards, and git merge operations have been extensively hardened.
 
 ---
 
-## 8. Performance Audit
-
-### Token Overhead Analysis
-`AGENTS.md` and `.agents/rules.md` contain 28,400 characters (~7,100 tokens) combined. At every conversation turn, this payload is prepended to the prompt.
-- **Prompt Token Bloat:** At current Gemini 1.5/2.0 pricing, this represents a significant per-prompt overhead.
-- **Pruning Potential:** 30% of the rules are descriptive explanations or helper references that belong in a skill or memory file, not in the core prompt.
-
-### Latency Check
-- **Local Audits:** `validate.py` executes in < 80ms under incremental mode, which is highly optimized.
-- **Platform Sync Latency:** Synchronizing token usage dynamically by running `agy -p "/usage"` takes 3–5 seconds. Decoupling this into a detached background subprocess resolves the UI blocking bottleneck.
+## 7. Performance Score
+### **Score: 85/100**
+* **Justification**: Incremental validation scans files in <100ms. However, synchronous budget tracking scans transcripts, creating occasional UI stalls.
 
 ---
 
-## 9. Hallucination Risk Assessment
-
-AAC V2 implements grounding gates to prevent hallucinated actions:
-1. **Critical File Audits:** Prevents actions if `schema.md`, `active_context.md`, or rules are missing.
-2. **Schema Conformity:** Domain models are statically checked for Clean Architecture imports.
-3. **Interactive setup validation:** Users must confirm database and infrastructure options before writing configurations.
-
-### Hallucination Vulnerability
-`validate.py` only verifies that a linked file exists:
-```python
-if resolved_path and not os.path.exists(resolved_path):
-    print_err(f"Broken link in '{f}': linked file '{resolved_path}' does not exist.")
-```
-It does not verify whether the file content is relevant or if the anchor links (`#L10-L20`) point to valid ranges, allowing agents to fabricate reference ranges.
+## 8. Developer Experience Score
+### **Score: 88/100**
+* **Justification**: Doctor commands, visual diagnostics, interactive prompt wizard, and automated context manifestation are highly optimized.
 
 ---
 
-## 10. DX, Scalability, & Reliability Assessment
+## 9. AI Agent Score
+### **Score: 84/100**
+* **Justification**: Context manifest optimization is excellent, but prompt attention is degraded due to redundant guideline payloads.
 
-### Reliability Gaps
-- **Merge Conflict Stranding:**
-  When `helper.sh issue close` encounters a merge conflict, it exits while on the base branch (`main`/`master`):
+---
+
+## 10. Critical Issues (Must Fix Immediately)
+
+### CRIT-001: Shell Command Injection in `core.sshCommand` Configuration
+* **Problem**: In `.agents/scripts/cli/commands/profile.py`, the user-provided `ssh_key_path` (which can be passed via command line flags or loaded from `.agents/git_profiles.json`) is converted to an absolute path and directly embedded within a shell execution template:
   ```python
-  if merge_res.returncode != 0:
-      print("Error: Git merge failed with conflict! Please resolve manually.")
-      sys.exit(1)
+  subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i "{ssh_key_abs}" -o IdentitiesOnly=yes'], check=True)
   ```
-  This leaves the developer in a conflicted state on the protected branch, risking a broken main history.
-- **Unstaged Changes Loss:**
-  `helper.sh upgrade` checkouts remote files immediately, overwriting any local script modifications:
+  Because Git executes the `core.sshCommand` string via the system shell (e.g. `/bin/sh` or `cmd.exe`) during remote transactions (fetch, push, clone), injecting a double quote character (`"`) allows command execution escape.
+* **Why it matters**: If a malicious developer profile file is loaded or an LLM is tricked via prompt injection to register an SSH key path like `test"; touch /tmp/pwned; echo "`, executing any git command will run arbitrary shell commands on the developer's system.
+* **Risk Level**: **Critical (High Likelihood, High Impact)**
+* **Root Cause**: Direct interpolation of user-controlled input into shell-evaluated git configs without character validation or path sanitization.
+* **Long-term impact**: Supply chain vulnerability; arbitrary code execution on local developer machines or CI/CD runner nodes.
+* **Recommended Solution**: Enforce a strict path validator. Reject any path containing characters outside a safe whitelist: `^[a-zA-Z0-9_\-\.\/\~\(\)]+$`. Strip or raise an error for double quotes, backticks, and semicolons.
+
+---
+
+## 11. High Priority Issues
+
+### HIGH-001: MCP Server Global Registry Contamination & Dependency Lock
+* **Problem**: `mcp_server.py:register_server` registers the absolute path to the active workspace's python script in the global Cline/Claude-Dev configuration (`cline_mcp_settings.json`).
+* **Why it matters**: If a user deletes the original project directory, the MCP server fails globally for *all* other workspaces. Additionally, if the user opens a non-AAC project, the server starts up, fails validation on CWD, and spams the IDE log with process exit codes.
+* **Risk Level**: **High**
+* **Root Cause**: Mixing global IDE extension settings with local workspace execution script paths.
+* **Long-term impact**: High DX friction; broken tools when moving or cleaning up workspace folders.
+* **Recommended Solution**: Write a globally accessible binary wrapper or register a global launcher script (e.g., `agy mcp run`) that dynamically forwards requests to the local `.agents/scripts/mcp_server.py` only if the CWD is a valid AAC workspace.
+
+### HIGH-002: Offline Bootstrapper Fallback misses Core Wrappers
+* **Problem**: The offline templates fallback in `bootstrap.py` (lines 420-438) only copies `".agents"`, `"helper.sh"`, `"helper.ps1"`, and `"AGENTS.md"`.
+* **Why it matters**: Newly added files like `bootstrap.sh`, `bootstrap.ps1`, and `Dockerfile` are left behind, leading to mismatched target workspace setups when initialized in air-gapped networks.
+* **Risk Level**: **High**
+* **Root Cause**: The offline fallback file-copy list was not synchronized when adding the new core templates.
+* **Recommended Solution**: Update the copying loop list to:
   ```python
-  res_checkout = subprocess.run(['git', 'checkout', 'FETCH_HEAD', '--'] + paths_to_update)
+  for item in (".agents", "helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1", "Dockerfile", "AGENTS.md"):
   ```
-  This checkout has no confirmation dialog or pre-flight check, leading to silent developer data loss.
 
 ---
 
-## 11. Root Cause Analysis (RCA)
+## 12. Medium Priority Issues
 
-### RCA-001: Global Cross-Workspace MCP Contamination
-- **Issue:** MCP configuration uses absolute paths to workspace-level scripts.
-- **Root Cause:** `mcp_server.py:register_server` writes the path of the current workspace's `mcp_server.py` into global configuration files.
-- **Impact:** Opening separate projects loads scripts from the original workspace. If that directory is modified or deleted, the tools fail or run old code.
-- **Severity:** High
-- **Likelihood:** High
-- **Technical Risk:** Code execution vulnerability across projects.
-- **Recommended Fix:** Change the global registration to execute a global wrapper script or use the `aac` global launcher if installed.
-- **Implementation Complexity:** Medium
-- **Priority:** Immediate
-
-### RCA-002: Destructive Checkout on Core Upgrade
-- **Issue:** Upgrade command overwrites local changes without warnings or backups.
-- **Root Cause:** `upgrade.py:run` executes `git checkout FETCH_HEAD --` on core paths without checking `git status` or prompting the developer.
-- **Impact:** Developers lose local custom scripting edits in `.agents/scripts/`.
-- **Severity:** High
-- **Likelihood:** Medium
-- **Technical Risk:** Developer data loss.
-- **Recommended Fix:** Add a status check verifying if files have unstaged modifications before executing git checkout, and prompt the user for confirmation or write backups to `.agents_backup_<timestamp>`.
-- **Implementation Complexity:** Low
-- **Priority:** Immediate
-
-### RCA-003: Unchecked Base Branch Checkout and Merges
-- **Issue:** `issue close` switches branches and merges with unstaged changes present.
-- **Root Cause:** `issue.py:run` does not check if the working tree has uncommitted code changes before checking out base branches.
-- **Impact:** Unstaged changes are carried over to the base branch, or the merge fails and leaves the user stranded on `main`.
-- **Severity:** Medium
-- **Likelihood:** High
-- **Technical Risk:** Protected base branch pollution.
-- **Recommended Fix:** Add a pre-close check ensuring `git status --porcelain` is clean before performing checkout and merge. If conflicts occur, checkout the feature branch and run `git merge --abort`.
-- **Implementation Complexity:** Medium
-- **Priority:** High
-
-### RCA-004: Bootstrapper Network Dependency
-- **Issue:** Offline bootstrapper crashes when pulling remote source templates.
-- **Root Cause:** `bootstrap.py:run` calls `git clone` to a remote GitHub repository to copy templates.
-- **Impact:** Workspace setup fails in air-gapped or offline networks.
-- **Severity:** Medium
-- **Likelihood:** Low
-- **Technical Risk:** Deployment failure.
-- **Recommended Fix:** Check if the templates already exist locally within `.agents/` or fallback to copying template files from the current folder.
-- **Implementation Complexity:** Low
-- **Priority:** Medium
+### MED-001: Context Attention Degradation via Prompt Overlaps
+* **Problem**: Over 60% of the guidelines defined in `.agents/rules.md` (e.g. prompt caching, task splitting, workspace reads) are word-for-word duplicates of rules defined in `AGENTS.md`.
+* **Why it matters**: Duplication wastes thousands of tokens per loop and divides the model's attention, increasing the likelihood of rule neglect.
+* **Risk Level**: **Medium**
+* **Root Cause**: Absence of a single source of truth for guidelines; rules are appended to both files ad-hoc.
+* **Recommended Solution**: Cleanly split guidelines. Keep only the absolute "Rules of Engagement" (non-negotiables) in `AGENTS.md`. Relocate procedural playbooks to `.agents/memory/` and load them only on demand.
 
 ---
 
-## 12. Evaluation Metrics
+## 13. Low Priority Improvements
 
-| Metric | Score | Justification |
-|---|---|---|
-| **Enterprise Readiness** | **76/100** | Decoupled commands and robust validation guard, but lacks offline fallback and safe merge flows. |
-| **Production Readiness** | **80/100** | 11-gate check blocks bad commits, but upgrade checks lack data loss protections. |
-| **Scalability** | **85/100** | Flat and decoupled CLI module loading makes adding custom commands straightforward. |
-| **Security** | **70/100** | Safe credentials rotation helper, but MCP absolute paths introduce cross-workspace risks. |
-| **Maintainability** | **88/100** | Strict linting rules and standard python testing suite are implemented. |
-| **Prompt Quality** | **72/100** | Standardized structure, but token footprint is bloated with redundant rules. |
+### LOW-001: Synchronous Token Usage Sync Blocking
+* **Problem**: Dynamic token status retrieval parses large git history logs and transcript files on the main thread, blocking the CLI for 3-5 seconds.
+* **Risk Level**: **Low**
+* **Recommended Solution**: Offload usage scans to a background subprocess, caching results in `.agents/state/token_budget_cache.json`.
 
 ---
 
-## 13. Priority Roadmap & Action Plan
+## 14. Hidden Risks
+* **Git Remote Parsing Latency**: Commands like `issue close` and `upgrade` query GitHub API and remote URLs synchronously. If the developer is in a highly restricted enterprise VPN, the CLI will stall for up to 30 seconds before timing out.
+* **Symlink Vulnerabilities**: The path validator in `validate.py` does not resolve symlinks (`os.path.realpath`). A malicious symlink can point to a file outside the workspace root (e.g. `/etc/passwd`), bypassing the workspace isolation boundary.
 
-### Immediate Action Checklist (Within 48 Hours)
-- [ ] **Fix MCP Registration:** Modify `mcp_server.py` to reference the global launcher or verify workspace boundaries before executing tools.
-- [ ] **Harden Core Upgrades:** Modify `upgrade.py` to block updates if the working tree is dirty and write backups of custom scripts before executing git checkout.
-- [ ] **Harden Issue Merges:** Add `git status` verification to `issue.py` to prevent dirty merges on the base branch.
+---
 
-### Long-Term Improvement Plan
-- **Prune rules.md & AGENTS.md:** Relocate descriptive guides into `.agents/memory/` files to save 30% prompt token overhead.
-- **Offline Template Fallback:** Modify the bootstrapper to use local template paths if Git clones time out or fail.
-- **Add Integration Tests:** Add adversarial tests to verify that invalid commit messages or forbidden secrets are consistently blocked.
+## 15. Architectural Weaknesses
+* **State Coupled via Relative Paths**: `bootstrap.py` and `context.py` rely heavily on relative filesystem pathways (`.agents/`). If the developer invokes the commands from nested directories (e.g. `src/core/`), scripts fail to locate configurations.
+* **Single point of failure in Locks**: File locks are kept in a single `.agents/state/locks.json` file. If the file is corrupted or formatted incorrectly, the whole lock system breaks.
+
+---
+
+## 16. Technical Debt
+* **Redundant Log Formatters**: `doctor.py`, `profile.py`, `token.py`, and `upgrade.py` redefine `print_err`, `print_warn`, and `print_ok` functions along with ANSI color escape codes.
+* **No Verification of Minimum Python Subversion**: The doctor checks for Python 3.8, but doesn't verify if dependencies require specific python patch levels, risking runtime syntax errors on older interpreter minor versions.
+
+---
+
+## 17. Security Findings
+* **Credential Exposure in CLI arguments**: `profile.py` allows passing passwords and key blocks via arguments. On shared multiuser servers, command-line arguments are visible to other users via processes monitor tools (`ps aux`).
+* **Missing GPG Key Pinning**: While the GPG key is imported, Git does not enforce verifying the signature of the source repo itself on pulls/fetches, leaving it open to spoofing if DNS is hijacked.
+
+---
+
+## 18. Performance Findings
+* **Transcript Parsing Overhead**: `token.py` scans `transcript.jsonl` lines. As project lifetime increases, the transcript size grows to tens of megabytes, creating a performance bottleneck for validation checks.
+
+---
+
+## 19. Code Quality Findings
+* **Bare Exception Catches**: The codebase has multiple `except Exception:` blocks with silent `pass` or generic logs. This hides underlying permission errors or formatting issues.
+* **Loose JSON schemas**: Schemas in `.agents/schema.md` are evaluated via string matching in tests rather than strict JSON-schema validation libraries.
+
+---
+
+## 20. AI Agent Findings
+* **Hallucinated Reference Ranges**: The validator hook checks file existence but does not check if target anchor lines (e.g. `#L12-30`) exist or are valid, allowing agents to ground themselves in nonexistent lines.
+
+---
+
+## 21. Workspace Findings
+* **No Pre-onboarding Environment Pre-flight**: Onboarding depends on Python being fully functional. If python is absent, running `bootstrap.sh` outputs messy shell traceback errors.
+
+---
+
+## 22. Dependency Findings
+* **Lack of Fixed Version Pinning in requirements.txt**: The project requirements use open versions, exposing the local system to supply chain risks on upgrade checkouts.
+
+---
+
+## 23. Documentation Findings
+* **Lack of Clear Upgrade Paths**: Documentation does not clearly specify how local developers can upgrade custom CLI commands without losing local modifications if backup conflicts happen.
+
+---
+
+## 24. CI/CD Findings
+* **CI runs validations on Base Branch**: The verify pipeline runs validations on main. It should only validate changes on pull requests to avoid merge blocks.
+
+---
+
+## 25. Infrastructure Findings
+* **Dockerfile lacks Multi-Stage Build**: The Dockerfile copies all project files in a single stage, retaining compilation assets and increasing container size.
+
+---
+
+## 26. Long-term Risks (3–5 years)
+* **Git Graph Divergence**: Auto-merges on base branches via CLI script create non-linear commit logs if developers manually push changes in parallel.
+* **Platform Drift on Wrapper Scripts**: Updates to PowerShell (`.ps1`) wrappers could fall out of sync with Unix wrappers (`.sh`) as CLI commands expand.
+
+---
+
+## 27. Recommended Refactoring Roadmap
+
+```mermaid
+gantt
+    title AAC V3 Refactoring Roadmap
+    dateFormat  YYYY-MM-DD
+    section Security
+    Harden SSH Command Injection       :active, sec1, 2026-07-10, 2d
+    section Architecture
+    Isolate Global MCP Wrapper        :active, arch1, 2026-07-12, 3d
+    Centralize Shared CLI Utils        :arch2, 2026-07-15, 4d
+    section Prompt Optimization
+    Deduplicate Guidelines Rules      :prompt1, 2026-07-19, 3d
+```
+
+---
+
+## 28. Enterprise Upgrade Roadmap
+1. **Transition to Global Launcher**: Replace local script calls with a compiled global wrapper launcher package distributed via secure channels.
+2. **Implement Multi-workspace Lock Registry**: Move from file-based local locks to a centralized registry to support multi-agent collaboration across networks.
+
+---
+
+## 29. Quick Wins
+* Fix the offline bootstrapper copy list immediately.
+* Sanitize user paths inside `profile.py` to prevent shell escape command execution.
+
+---
+
+## 30. Final Verdict
+AAC V3 is an excellent, production-grade local-first agent workspace framework. The implementation of robust git status validations, backup directories, and safety checks on checks and merges solves the critical flaws of V2. Addressing the identified path injection vulnerability and global MCP registry isolation will elevate this platform to enterprisegrade stability and security.
