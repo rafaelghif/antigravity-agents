@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.10.0] - 2026-07-10
+
+### 🚀 Features
+- secure dashboard server with token and host validation
+
+### 📝 Documentation
+- feat: secure visual dashboard with token auth and host validation (ISSUE-237)
+
+
 ## [3.9.0] - 2026-07-10
 
 ### 🚀 Features

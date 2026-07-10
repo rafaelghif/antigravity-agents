@@ -1,7 +1,7 @@
 ---
 id: issue-237
 title: "feat: secure visual dashboard with token auth and host validation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
