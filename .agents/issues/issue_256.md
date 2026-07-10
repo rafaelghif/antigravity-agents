@@ -1,7 +1,7 @@
 ---
 id: issue-256
 title: "feat: enforce holistic engineering management production and security thinking profiles"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

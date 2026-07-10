@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.30.0] - 2026-07-11
+
+### 🚀 Features
+- enforce holistic engineering, management, production, and security thinking profiles
+- feat: enforce holistic engineering management production and security thinking profiles (ISSUE-256)
+
+
 ## [3.29.0] - 2026-07-11
 
 ### 🚀 Features
