@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -13,6 +14,7 @@ This board tracks active development tasks.
 - [ ] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 
 ## Done
+- [x] feat: secure visual dashboard with token auth and host validation (feat/issue-237) <!-- id: issue-237 -->
 - [x] chore: upgrade lingering V2 references to V3 in memory and dashboard (feat/issue-236) <!-- id: issue-236 -->
 - [x] chore: synchronize installer templates with V3 specifications (feat/issue-235) <!-- id: issue-235 -->
 - [x] chore: sync rules.md and templates (feat/issue-234) <!-- id: issue-234 -->
