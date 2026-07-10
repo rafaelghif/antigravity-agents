@@ -272,6 +272,12 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
     if (Test-Path $SrcHelperPs) {
         Copy-Item -Path $SrcHelperPs -Destination $DestHelperPs -Force | Out-Null
     }
+
+    $SrcDockerfile = Join-Path $ExtractedDir "Dockerfile"
+    $DestDockerfile = Join-Path $TargetAbs "Dockerfile"
+    if (Test-Path $SrcDockerfile) {
+        Copy-Item -Path $SrcDockerfile -Destination $DestDockerfile -Force | Out-Null
+    }
     
 
 
