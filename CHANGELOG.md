@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.23.0] - 2026-07-11
+
+### 🚀 Features
+- add rules for skill loading, token efficiency, and protocol flow
+- feat: refine rule guidelines for skill loading, token efficiency, and working protocol flow (ISSUE-249)
+
+
 ## [3.22.0] - 2026-07-11
 
 ### 🚀 Features

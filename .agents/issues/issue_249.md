@@ -1,7 +1,7 @@
 ---
 id: issue-249
 title: "feat: refine rule guidelines for skill loading, token efficiency, and working protocol flow"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
