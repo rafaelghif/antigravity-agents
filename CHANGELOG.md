@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.7.0] - 2026-07-10
+
+### 🚀 Features
+- synchronize V3 template rules and workspace configuration rules
+- chore: sync rules.md and templates (ISSUE-234)
+
+
 ## [3.6.0] - 2026-07-10
 
 ### 🚀 Features
