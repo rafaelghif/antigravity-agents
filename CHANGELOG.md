@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.22.0] - 2026-07-11
+
+### 🚀 Features
+- update context_map.md with new CLI command parameters and subcommands
+- docs: update context_map.md command documentation for new DX features (ISSUE-248)
+
+
 ## [3.21.0] - 2026-07-11
 
 ### 🚀 Features

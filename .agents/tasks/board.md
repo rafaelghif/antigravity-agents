@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] docs: update context_map.md command documentation for new DX features (feat/issue-248) <!-- id: issue-248 -->
 - [x] docs: update core rules to enforce enterprise-grade code standards and self-learning (feat/issue-247) <!-- id: issue-247 -->
 - [x] feat: zero-config bootstrap, pause/resume agent hand-off, and safe agent commands (feat/issue-246) <!-- id: issue-246 -->
 - [x] feat: implement interactive commit helper, clear-all locks, default token status, and flexible branch validation (feat/issue-245) <!-- id: issue-245 -->
