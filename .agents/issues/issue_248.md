@@ -1,7 +1,7 @@
 ---
 id: issue-248
 title: "docs: update context_map.md command documentation for new DX features"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
