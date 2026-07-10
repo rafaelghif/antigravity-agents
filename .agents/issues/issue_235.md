@@ -1,7 +1,7 @@
 ---
 id: issue-235
 title: "chore: synchronize installer templates with V3 specifications"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
