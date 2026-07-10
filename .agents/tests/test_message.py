@@ -159,6 +159,7 @@ class TestMessageCommand(unittest.TestCase):
                 "action": "scaffold"
             }
         }
+        msg["signature"] = message.sign_message(msg)
         os.makedirs(message.MESSAGES_DIR, exist_ok=True)
         msg_file = os.path.join(message.MESSAGES_DIR, f"{msg_id}.json")
         with open(msg_file, 'w', encoding='utf-8') as f:
@@ -195,6 +196,7 @@ class TestMessageCommand(unittest.TestCase):
             "status": "pending",
             "payload": {"task_id": "issue-226", "action": "review"}
         }
+        msg1["signature"] = message.sign_message(msg1)
         with open(os.path.join(msg_dir, "msg_1.json"), 'w', encoding='utf-8') as f:
             json.dump(msg1, f)
             
@@ -205,6 +207,7 @@ class TestMessageCommand(unittest.TestCase):
             "status": "pending",
             "payload": {"task_id": "issue-226", "action": "scaffold"}
         }
+        msg2["signature"] = message.sign_message(msg2)
         with open(os.path.join(msg_dir, "msg_2.json"), 'w', encoding='utf-8') as f:
             json.dump(msg2, f)
             

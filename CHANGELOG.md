@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.14.0] - 2026-07-10
+
+### 🚀 Features
+- chore: write comprehensive audit hardening master plan (ISSUE-240)
+
+
+## [3.13.0] - 2026-07-10
+
+### 🚀 Features
+- add Dockerfile sandbox containerization
+- implement system external dependencies check in doctor diagnostics
+- optimize prompt footprints by pruning description blocks to docs/context_map.md
+- implement cryptographic swarm mailbox message signing
+- implement environment variable git token loading in profile switch and wizard
+- implement CLI command whitelisting security guard
+- chore: write comprehensive audit hardening master plan (ISSUE-240)
+
+### 📝 Documentation
+- check off Step 1 (Sandbox I/O optimization) in master plan
+- expand master plan with explicit Option A and Option B analysis
+- add comprehensive workspace hardening master plan
+
+### 🧪 Tests
+- add platform drift tests for Bash and PowerShell wrapper scripts
+
+
 ## [3.12.0] - 2026-07-10
 
 ### 🚀 Features

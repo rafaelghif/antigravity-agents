@@ -43,17 +43,59 @@ class SandboxManager:
             
             self.old_cwd = os.getcwd()
             
-            # Copy codebase files to sandbox directory (exclude massive dependency folders)
-            for item in os.listdir(self.old_cwd):
-                if item in ('.git', '.lock', 'venv', 'node_modules', '.venv', 'build', 'dist', 'tmp'):
-                    continue
-                src = os.path.join(self.old_cwd, item)
-                dst = os.path.join(self.temp_dir, item)
-                if os.path.isdir(src):
-                    shutil.copytree(src, dst, symlinks=True, ignore=shutil.ignore_patterns('.git', '.lock'))
-                else:
-                    shutil.copy2(src, dst)
+            # Query Git status to identify modified/untracked files
+            modified_files = set()
+            try:
+                res = subprocess.run(['git', 'status', '--porcelain'], stdout=subprocess.PIPE, text=True, cwd=self.old_cwd)
+                if res.returncode == 0:
+                    for line in res.stdout.splitlines():
+                        if len(line) > 3:
+                            filepath = line[3:].strip()
+                            modified_files.add(os.path.normpath(filepath))
+            except Exception:
+                pass
+
+            # Walk and recreate directory tree in sandbox, symlinking clean files and copying modified/agent files
+            for root, dirs, files in os.walk(self.old_cwd):
+                # Exclude massive dependency and build folders from walking
+                dirs_to_remove = []
+                for d in dirs:
+                    if d in ('.git', '.lock', 'venv', 'node_modules', '.venv', 'build', 'dist', 'tmp', '__pycache__'):
+                        dirs_to_remove.append(d)
+                for d in dirs_to_remove:
+                    dirs.remove(d)
                     
+                rel_path = os.path.relpath(root, self.old_cwd)
+                if rel_path != '.':
+                    sandbox_dir = os.path.join(self.temp_dir, rel_path)
+                    os.makedirs(sandbox_dir, exist_ok=True)
+                    
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    rel_file = os.path.relpath(src_file, self.old_cwd)
+                    dst_file = os.path.join(self.temp_dir, rel_file)
+                    
+                    norm_rel_file = os.path.normpath(rel_file)
+                    is_modified = norm_rel_file in modified_files
+                    
+                    # Force copy for files under .agents directory to avoid local state write-back
+                    if norm_rel_file.startswith('.agents') or '\\.agents' in norm_rel_file or '/.agents' in norm_rel_file:
+                        is_modified = True
+                        
+                    symlinked = False
+                    if not is_modified:
+                        try:
+                            os.symlink(src_file, dst_file)
+                            symlinked = True
+                        except Exception:
+                            pass # Fallback to copy
+                            
+                    if not symlinked:
+                        try:
+                            shutil.copy2(src_file, dst_file)
+                        except Exception:
+                            pass
+                            
             # If Git variables exist, convert them to absolute paths BEFORE changing directory
             for env_var in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"):
                 if env_var in os.environ:
@@ -1006,7 +1048,9 @@ def audit_workspace_sync() -> bool:
         print_warn(f"Auto-synchronization failed: {e}")
 
     skills_dir = ".agents/skills"
-    agents_file = "AGENTS.md"
+    agents_file = ".agents/docs/context_map.md"
+    if not os.path.exists(agents_file):
+        agents_file = "AGENTS.md"
     failed = False
     if os.path.exists(skills_dir) and os.path.exists(agents_file):
         with open(agents_file, 'r', encoding='utf-8') as af:
@@ -1019,7 +1063,7 @@ def audit_workspace_sync() -> bool:
                     failed = True
                     
     if not failed:
-        print_ok("Workspace AGENTS.md is in perfect sync with local skills.")
+        print_ok(f"Workspace {os.path.basename(agents_file)} is in perfect sync with local skills.")
     return not failed
 
 # ==========================================================

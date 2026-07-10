@@ -4,10 +4,10 @@ import json
 
 def sync_skills_to_agents_md():
     skills_dir = ".agents/skills"
-    agents_file = "AGENTS.md"
+    agents_file = ".agents/docs/context_map.md"
     
     if not os.path.exists(skills_dir) or not os.path.exists(agents_file):
-        print("Warning: Skills directory or AGENTS.md missing.")
+        print("Warning: Skills directory or context_map.md missing.")
         return
         
     skills = []
@@ -50,7 +50,7 @@ def sync_skills_to_agents_md():
         
     with open(agents_file, 'w', encoding='utf-8') as af:
         af.write(content)
-    print("Successfully synchronized skills index in AGENTS.md.")
+    print("Successfully synchronized skills index in context_map.md.")
 
 def sync_adrs_to_architecture_md():
     adrs_dir = ".agents/memory/decisions"
@@ -181,7 +181,8 @@ def sync_lessons_to_rules():
         archived_rules = []
         
         for idx, cat in enumerate(sorted_categories):
-            descs = clustered[cat]["descriptions"]
+            # Keep only the top 2 most recent lessons per category to keep context compact
+            descs = clustered[cat]["descriptions"][:2]
             combined_desc = "; ".join(descs)
             rule_str = f"- **[Learning: {cat}]** {combined_desc}"
             if idx < 5:
