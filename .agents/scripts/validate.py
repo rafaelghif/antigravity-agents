@@ -1922,7 +1922,7 @@ def audit_codebase_rules_compliance() -> bool:
         has_db_change = False
         db_file = None
         for f in modified_files:
-            if f == '.agents/schema.md':
+            if f == '.agents/schema.md' or f.startswith('.agents/schemas/'):
                 continue
             filename = os.path.basename(f).lower()
             if any(kw in filename for kw in db_keywords) and filename.endswith(('.py', '.json', '.prisma', '.sql', '.ts', '.js', '.go', '.java', '.cs', '.php', '.graphql')):
@@ -1930,8 +1930,32 @@ def audit_codebase_rules_compliance() -> bool:
                 db_file = f
                 break
         
-        if has_db_change and '.agents/schema.md' not in modified_files:
-            print_warn(f"Warning: Database/schema related file '{db_file}' was modified, but '.agents/schema.md' was not updated. Please document database schema updates there.")
+        if has_db_change:
+            has_schema_update = ('.agents/schema.md' in modified_files) or any(f.startswith('.agents/schemas/') and f.endswith('.md') for f in modified_files)
+            if not has_schema_update:
+                print_warn(f"Warning: Database/schema related file '{db_file}' was modified, but neither '.agents/schema.md' nor any modular schema file under '.agents/schemas/' was updated. Please document database schema updates.")
+            else:
+                path_parts = [p.lower() for p in db_file.split(os.sep)]
+                schemas_dir = '.agents/schemas'
+                if os.path.exists(schemas_dir):
+                    schemas = [f.lower().replace('.md', '') for f in os.listdir(schemas_dir) if f.endswith('.md')]
+                    matched_schema = None
+                    for part in path_parts:
+                        if part in schemas:
+                            matched_schema = part
+                            break
+                    if not matched_schema:
+                        base = os.path.splitext(os.path.basename(db_file))[0].lower()
+                        for schema in schemas:
+                            if schema in base:
+                                matched_schema = schema
+                                break
+                    
+                    if matched_schema:
+                        expected_schema_file = f".agents/schemas/{matched_schema}.md"
+                        has_matched_update = any(f.lower() == expected_schema_file.lower() for f in modified_files)
+                        if not has_matched_update:
+                            print_warn(f"Warning: Database file '{db_file}' was modified, but its corresponding modular schema file '{expected_schema_file}' was not updated. Please document schema updates there.")
     except Exception as e:
         print_warn(f"Failed to audit schema documentation compliance: {e}")
 

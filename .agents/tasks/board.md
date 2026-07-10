@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement modular schema grouping and strict on-demand loading checks (feat/issue-254) <!-- id: issue-254 -->
 - [x] feat: enforce strict workspace isolation and automated database schema memory documentation (feat/issue-253) <!-- id: issue-253 -->
 - [x] feat: implement pid-based locking, secrets whitelisting, and update monorepo and git profiles documentation (feat/issue-252) <!-- id: issue-252 -->
 - [x] docs: update README.md with new CLI command flags and config settings (feat/issue-251) <!-- id: issue-251 -->
