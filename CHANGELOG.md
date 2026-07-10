@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.26.0] - 2026-07-11
+
+### 🚀 Features
+- implement pid-based locking, secrets whitelisting, and document config files
+- feat: implement pid-based locking, secrets whitelisting, and update monorepo and git profiles documentation (ISSUE-252)
+
+
 ## [3.25.0] - 2026-07-11
 
 ### 🚀 Features

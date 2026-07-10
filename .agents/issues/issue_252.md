@@ -1,7 +1,7 @@
 ---
 id: issue-252
 title: "feat: implement pid-based locking, secrets whitelisting, and update monorepo and git profiles documentation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
