@@ -278,6 +278,12 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
     if (Test-Path $SrcDockerfile) {
         Copy-Item -Path $SrcDockerfile -Destination $DestDockerfile -Force | Out-Null
     }
+
+    $SrcAgentsMd = Join-Path $ExtractedDir "AGENTS.md"
+    $DestAgentsMd = Join-Path $TargetAbs "AGENTS.md"
+    if (Test-Path $SrcAgentsMd) {
+        Copy-Item -Path $SrcAgentsMd -Destination $DestAgentsMd -Force | Out-Null
+    }
     
 
 

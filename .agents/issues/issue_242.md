@@ -13,7 +13,7 @@ fix: installer missing AGENTS.md root file copying
 
 ## Tasks
 - [x] Update install.sh to copy AGENTS.md <!-- id: task-install-sh -->
-- [ ] Update install.ps1 to copy AGENTS.md <!-- id: task-install-ps1 -->
+- [x] Update install.ps1 to copy AGENTS.md <!-- id: task-install-ps1 -->
 - [ ] Add parity tests in test_platform_drift.py <!-- id: task-parity-test -->
 
 ## Acceptance Criteria
