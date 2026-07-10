@@ -1,7 +1,7 @@
 ---
 id: issue-236
 title: "chore: upgrade lingering V2 references to V3 in memory and dashboard"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---

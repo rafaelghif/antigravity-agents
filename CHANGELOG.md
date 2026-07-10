@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.9.0] - 2026-07-10
+
+### 🚀 Features
+- upgrade remaining active V2 references to V3 in memory registers and dashboard
+- chore: upgrade lingering V2 references to V3 in memory and dashboard (ISSUE-236)
+
+
 ## [3.8.0] - 2026-07-10
 
 ### 🚀 Features
