@@ -417,25 +417,14 @@ def run(args):
         text=True
     )
     if res.returncode != 0:
-        local_src = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
-        if os.path.isdir(os.path.join(local_src, ".agents")):
-            print_warn("Failed to reach remote repository. Falling back to local offline templates cache...")
-            try:
-                for item in (".agents", "helper.sh", "helper.ps1", "AGENTS.md"):
-                    src_item = os.path.join(local_src, item)
-                    dest_item = os.path.join(temp_src_root, item)
-                    if os.path.exists(src_item):
-                        if os.path.isdir(src_item):
-                            shutil.copytree(src_item, dest_item, dirs_exist_ok=True)
-                        else:
-                            shutil.copy2(src_item, dest_item)
-                print_ok("Successfully resolved templates from local cache.")
-            except Exception as e:
-                print_err(f"Offline cache restoration failed: {e}")
-                sys.exit(1)
-        else:
-            print_err(f"Failed to fetch templates from Git repository and no local cache was found: {res.stderr.strip()}")
-            sys.exit(1)
+        print_err(f"==========================================================")
+        print_err(f"   [ERROR] Git Clone Failed!")
+        print_err(f"==========================================================")
+        print_err(f"Failed to clone templates from source repository: {source_repo}")
+        print_err(f"Please check your network connection and try again.")
+        print_err(f"Reason: {res.stderr.strip()}")
+        print_err(f"==========================================================")
+        sys.exit(1)
         
     src_root = temp_src_root
 
@@ -506,7 +495,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.16.6"
+    AAC_VERSION = "3.16.7"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

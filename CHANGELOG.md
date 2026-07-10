@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.7] - 2026-07-10
+
+### 🐛 Bug Fixes
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### ⚙️ Chores
+- enforce strict online git templates download in bootstrap.py
+
+
 ## [3.16.6] - 2026-07-10
 
 ### 🐛 Bug Fixes
