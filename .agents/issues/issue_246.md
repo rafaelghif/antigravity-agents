@@ -1,7 +1,7 @@
 ---
 id: issue-246
 title: "feat: zero-config bootstrap, pause/resume agent hand-off, and safe agent commands"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

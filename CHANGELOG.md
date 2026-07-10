@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.20.0] - 2026-07-11
+
+### 🚀 Features
+- implement zero-config bootstrap, agent pause/resume hand-off, and quiet validation
+- feat: zero-config bootstrap, pause/resume agent hand-off, and safe agent commands (ISSUE-246)
+
+
 ## [3.19.0] - 2026-07-11
 
 ### 🚀 Features
