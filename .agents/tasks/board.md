@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: enforce holistic engineering management production and security thinking profiles (feat/issue-256) <!-- id: issue-256 -->
 - [x] feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (feat/issue-255) <!-- id: issue-255 -->
 - [x] feat: implement modular schema grouping and strict on-demand loading checks (feat/issue-254) <!-- id: issue-254 -->
 - [x] feat: enforce strict workspace isolation and automated database schema memory documentation (feat/issue-253) <!-- id: issue-253 -->
