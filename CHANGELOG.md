@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.16.6] - 2026-07-10
+
+### 🐛 Bug Fixes
+- fix: installer missing AGENTS.md root file copying (ISSUE-242)
+
+### ⚙️ Chores
+- enforce strict online git-native installation in install.ps1
+
+
 ## [3.16.5] - 2026-07-10
 
 ### 🐛 Bug Fixes
