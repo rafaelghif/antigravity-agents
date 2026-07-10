@@ -1,7 +1,7 @@
 ---
 id: 231
 title: "Fix Windows installations failing"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-10
 ---
