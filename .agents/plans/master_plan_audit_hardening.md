@@ -189,7 +189,7 @@ The following recommendations have been successfully implemented, tested, and me
 - [x] **Step 3:** Implement Env-based Profile Tokens in `profile.py` <!-- id: step-profile-env -->
 - [x] **Step 4:** Implement Cryptographic Message Envelope Signing in `message.py` and tests <!-- id: step-message-signing -->
 - [x] **Step 5:** Optimize Instruction Footprints in `AGENTS.md` and `rules.md` <!-- id: step-instruction-optimize -->
-- [ ] **Step 6:** Implement Dependency Diagnostic Wizard in `doctor.py` <!-- id: step-dependency-wizard -->
+- [x] **Step 6:** Implement Dependency Diagnostic Wizard in `doctor.py` <!-- id: step-dependency-wizard -->
 - [ ] **Step 7:** Implement Containerized Sandbox Dockerfile <!-- id: step-docker-sandbox -->
 - [ ] **Step 8:** Implement Bash/PowerShell Platform Drift Guard tests <!-- id: step-platform-drift -->
 - [ ] **Step 9:** Execute full validation test suite and verify compliance <!-- id: step-final-verification -->

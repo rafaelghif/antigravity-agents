@@ -3,6 +3,8 @@ import os
 import subprocess
 import socket
 import json
+import re
+import shutil
 from typing import List
 
 RED = "\033[91m"
@@ -151,6 +153,46 @@ def check_network() -> bool:
     except Exception as e:
         print_warn(f"Domain github.com is unreachable (offline mode active): {e}")
         return False
+
+def check_dependencies() -> bool:
+    print("Checking external CLI dependencies...")
+    
+    dependencies = {
+        "gpg": {"required": False, "desc": "GnuPG tool (needed for GPG commit signing)"},
+        "eslint": {"required": False, "desc": "JavaScript linter (used by validation checks for JS projects)"},
+        "black": {"required": False, "desc": "Python code formatter (used by static syntax checks)"},
+        "flake8": {"required": False, "desc": "Python linter (used by static style validation checks)"}
+    }
+    
+    success = True
+    for binary, info in dependencies.items():
+        path = shutil.which(binary)
+        if path:
+            version = "unknown version"
+            try:
+                if binary == "gpg":
+                    res = subprocess.run(['gpg', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    first_line = res.stdout.splitlines()[0] if res.stdout else ""
+                    m = re.search(r'GnuPG\)?\s+([0-9.]+)', first_line)
+                    if m:
+                        version = m.group(1)
+                elif binary in ("black", "flake8", "eslint"):
+                    res = subprocess.run([binary, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    output = res.stdout.strip() or res.stderr.strip()
+                    m = re.search(r'([0-9]+\.[0-9]+\.[0-9]+)', output)
+                    if m:
+                        version = m.group(1)
+            except Exception:
+                pass
+            print_ok(f"Binary '{binary}' detected at '{path}' (version: {version}).")
+        else:
+            if info["required"]:
+                print_err(f"CRITICAL: Required binary '{binary}' ({info['desc']}) not found in PATH!")
+                success = False
+            else:
+                print_warn(f"Binary '{binary}' ({info['desc']}) is missing from PATH (optional).")
+                
+    return success
 
 def get_existing_branches() -> set:
     """Retrieve all local Git branch names in a single Git call."""
@@ -329,6 +371,8 @@ def run(args: List[str]) -> None:
     passed &= check_identity()
     print("-"*60)
     passed &= check_profiles()
+    print("-"*60)
+    passed &= check_dependencies()
     print("-"*60)
     check_network()
     print("="*60)
