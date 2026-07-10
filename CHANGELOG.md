@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.27.0] - 2026-07-11
+
+### 🚀 Features
+- feat: enforce strict workspace isolation and automated database schema memory documentation (ISSUE-253)
+- implement database schema sync rules and home directory data leakage warning in validate.py
+
+### 📝 Documentation
+- enforce database schema tracking and strict workspace isolation in AGENTS.md
+
+
 ## [3.26.0] - 2026-07-11
 
 ### 🚀 Features

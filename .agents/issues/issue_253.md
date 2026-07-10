@@ -1,7 +1,7 @@
 ---
 id: issue-253
 title: "feat: enforce strict workspace isolation and automated database schema memory documentation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
