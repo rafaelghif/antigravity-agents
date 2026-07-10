@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.15.0] - 2026-07-10
+
+### 🚀 Features
+- sync installation scripts to copy Dockerfile and add parity tests
+- chore: sync installation scripts to copy Dockerfile (ISSUE-241)
+
+
 ## [3.14.0] - 2026-07-10
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-241
 title: "chore: sync installation scripts to copy Dockerfile"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
 ---
