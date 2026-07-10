@@ -1,7 +1,7 @@
 ---
 id: issue-243
 title: "feat: bypass git hooks for non-agent commits"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

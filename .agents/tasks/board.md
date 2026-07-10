@@ -13,9 +13,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] feat: bypass git hooks for non-agent commits (feat/issue-243) <!-- id: issue-243 -->
 
 ## Done
+- [x] feat: bypass git hooks for non-agent commits (feat/issue-243) <!-- id: issue-243 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/issue-242) <!-- id: issue-242 -->
 - [x] Fix Ubuntu installation and ensure full Git source updates (feat/issue-232) <!-- id: 232 -->
 - [x] chore: write comprehensive audit hardening master plan (feat/issue-240) <!-- id: issue-240 -->
