@@ -1,7 +1,7 @@
 ---
 id: issue-282
 title: "chore: audit MCP configurations and test active server tools"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
