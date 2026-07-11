@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.49.0] - 2026-07-11
+
+### 🚀 Features
+- chore: audit MCP configurations and test active server tools (ISSUE-282)
+
+
 ## [3.48.1] - 2026-07-11
 
 ### 🛠️ Refactors
