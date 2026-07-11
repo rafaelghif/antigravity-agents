@@ -1,0 +1,28 @@
+# 🚀 ROADMAP & MILESTONES TRACKER
+### *Release Milestones and Future Features Roadmap in AAC V3*
+
+## 1. Active Milestone: V3.4x Core Enhancements & Security Refinements
+Focuses on strengthening security parameters, enhancing platform compatibility, and stabilizing the core developer interface.
+* **Target Version**: `3.45.0` (Active)
+* **Deliverables Completed**:
+  * [ ] Lock compliance checks and automated lock registry synchronization.
+  * [ ] Visual dashboard telemetry and shell command injection fixes.
+  * [ ] Core upgrade path alignment including bootstrap files and soul persona.
+  * [ ] Persona refinement with architectural and engineering philosophies.
+
+## 2. Upcoming Milestone: Phase 5 - Visual Telemetry & Dashboard Telemetry Control
+Focuses on the visual web dashboard features, securing data feeds, and providing live developer diagnostics.
+* **Target Version**: `3.50.0`
+* **Key Targets**:
+  * [ ] Secure visual dashboard hosting via restricted token authorization.
+  * [ ] Host validation checks to block unauthorized telemetry scraping.
+  * [ ] Live rolling window token quotas display on dashboard.
+  * [ ] Historical logs visualization panel.
+
+## 3. Future Milestone: Phase 6 - Multi-Agent Team Orchestration
+Focuses on allowing multiple autonomous subagents to coordinate work on complex workspace issue tasks.
+* **Target Version**: `3.60.0`
+* **Key Targets**:
+  * [ ] Team preview workflows and task distribution mechanisms.
+  * [ ] Cross-subagent module lock negotiation.
+  * [ ] Auto-synchronization of workspace issues board state across active agent nodes.
