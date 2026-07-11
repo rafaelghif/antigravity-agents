@@ -2035,11 +2035,12 @@ def make_skill_audit(name: str, hook_path: str):
 
 def run_validations() -> None:
     # Check for bypass flags (human fast-track mode)
-    if "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true") or os.environ.get("ANTIGRAVITY_AGENT") != "1":
+    bypass_requested = "--bypass" in sys.argv or os.environ.get("AAC_BYPASS_COMPLIANCE", "0").lower() in ("1", "true")
+    if bypass_requested:
         print("==========================================================")
         print("   Running AAC V3 Local Validation Guard...              ")
         print("==========================================================")
-        print(f"{YELLOW}[BYPASS] Programmer mode detected. Validation checks bypassed.{RESET}")
+        print(f"{YELLOW}[BYPASS] Validation checks bypassed by user request.{RESET}")
         print("==========================================================")
         sys.exit(0)
 
@@ -2122,17 +2123,36 @@ def run_validations() -> None:
                     results[key] = False
     
     # Print the Colored Audit Summary Table
+    agent_mode = (os.environ.get("ANTIGRAVITY_AGENT") == "1")
+    bureaucratic_audits = {
+        "Git Branch Alignment",
+        "Workspace Sync",
+        "Task Board Schema",
+        "Module Lock Compliance",
+        "Commit Message Compliance",
+        "Codebase Rule Compliance",
+        "Link Integrity"
+    }
+
     print("\n==========================================================")
     print("   AAC V3 Local Validation Summary Checklist              ")
+    if not agent_mode:
+        print("   [Mode: Human/Programmer - Bureaucratic Checks Warn Only]")
+    else:
+        print("   [Mode: AI Agent - Strict Compliance Enforced]           ")
     print("----------------------------------------------------------")
     for key, passed in results.items():
-        status_text = f"{GREEN}PASS{RESET}" if passed else f"{RED}FAIL{RESET}"
+        is_bureaucratic = (key in bureaucratic_audits) or key.startswith("Skill:")
+        if passed:
+            status_text = f"{GREEN}PASS{RESET}"
+        else:
+            if not agent_mode and is_bureaucratic:
+                status_text = f"{YELLOW}WARN (Bypassed){RESET}"
+            else:
+                status_text = f"{RED}FAIL{RESET}"
+                failed = True
         print(f"  - {key:<35}: [{status_text}]")
     print("==========================================================")
-    
-    for passed in results.values():
-        if not passed:
-            failed = True
             
     if failed:
         print(f"{RED}   Validation FAILED! Please fix the errors above. {RESET}")

@@ -412,7 +412,7 @@ def handle_switch(args: List[str]) -> None:
             )
             if gpg_check.returncode != 0:
                 print_warn(f"GPG signing key '{signing_key}' is not found or is invalid on this machine.")
-                is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
+                is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1" and 'unittest' not in sys.modules and 'pytest' not in sys.modules and os.getenv("CI") != "true"
                 if is_interactive:
                     disable_choice = input("Disable local Git commit signing for this session to prevent commit failures? (Y/n) [y]: ").strip().lower() or "y"
                     if disable_choice == "y":
