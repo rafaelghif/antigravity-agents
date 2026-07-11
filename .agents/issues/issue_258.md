@@ -1,7 +1,7 @@
 ---
 id: issue-258
 title: "feat: implement AI pre-flight re-prompting protocol to prevent hallucinations"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.32.0] - 2026-07-11
+
+### 🚀 Features
+- implement AI pre-flight re-prompting protocol to ground context parameters and prevent hallucinations
+- feat: implement AI pre-flight re-prompting protocol to prevent hallucinations (ISSUE-258)
+
+
 ## [3.31.0] - 2026-07-11
 
 ### 🚀 Features
