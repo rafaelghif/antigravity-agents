@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.31.0] - 2026-07-11
+
+### 🚀 Features
+- implement flexible validation mode and interactive prompt fixes for human developer experience
+- feat: implement flexible validation mode to optimize human developer experience (ISSUE-257)
+
+
 ## [3.30.0] - 2026-07-11
 
 ### 🚀 Features

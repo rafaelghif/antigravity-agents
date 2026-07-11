@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: implement flexible validation mode to optimize human developer experience (feat/issue-257) <!-- id: issue-257 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement flexible validation mode to optimize human developer experience (feat/issue-257) <!-- id: issue-257 -->
 - [x] feat: enforce holistic engineering management production and security thinking profiles (feat/issue-256) <!-- id: issue-256 -->
 - [x] feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (feat/issue-255) <!-- id: issue-255 -->
 - [x] feat: implement modular schema grouping and strict on-demand loading checks (feat/issue-254) <!-- id: issue-254 -->

@@ -1,7 +1,7 @@
 ---
 id: issue-257
 title: "feat: implement flexible validation mode to optimize human developer experience"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
