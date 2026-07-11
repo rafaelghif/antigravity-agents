@@ -45,6 +45,19 @@ class TestValidate(unittest.TestCase):
         mock_exists.side_effect = lambda path: "rules.md" not in path
         self.assertFalse(validate.audit_critical_files())
 
+    @patch('validate.validate_json_schema', return_value=True)
+    @patch('os.path.exists', return_value=True)
+    def test_audit_critical_files_version_mismatch(self, mock_exists, mock_json_schema):
+        def mock_open_side_effect(path, *args, **kwargs):
+            if "AGENTS.md" in path:
+                return mock_open(read_data="- **Version:** 2.192.0")()
+            elif "bootstrap.py" in path:
+                return mock_open(read_data="AAC_VERSION = \"1.0.0\"")()
+            else:
+                return mock_open(read_data="- **Version:** 2.192.0")()
+        with patch('builtins.open', side_effect=mock_open_side_effect):
+            self.assertFalse(validate.audit_critical_files())
+
     @patch('os.path.exists')
     @patch('subprocess.run')
     @patch('validate.is_git_ignored')
