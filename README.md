@@ -1,7 +1,7 @@
-# Antigravity Agent Core (AAC) V3 🚀
+# Antigravity Agent Core (AAC) V3
 ### *Enterprise Guardrails, Workspace Insulation, and Local Quality Gates for Autonomous AI Agents*
 
-[![Version](https://img.shields.io/badge/version-3.80.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.81.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)
@@ -15,7 +15,7 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 
 ---
 
-## 💡 The Core Problem & The AAC Solution
+## The Core Problem & The AAC Solution
 
 | The AI Coding Agent Risk | The AAC V3 Solution |
 | :--- | :--- |
@@ -48,14 +48,14 @@ flowchart TD
 
 ---
 
-## 🌟 Key Features
+## Key Architectural Components
 
-* **📦 Python-Powered Unified Installer**: Consolidates system discovery, project setups, backups, and exclusions in a single Python core `install.py`. Wrappers are kept extremely thin, avoiding Windows/macOS/Linux drift.
-* **🎤 Setup Interview & Reconnaissance**: `./helper.sh bootstrap` automatically runs an offline stack reconnaissance scan and launches an interactive setup interview to establish database schemas, frameworks, and architecture patterns instantly inside `.agents/schema.md`.
-* **🔁 Chained Lookahead & Self-Correction**: Enforces rules requiring the agent to run local test suites, check linter rules, and self-heal from errors using local playbooks before requesting user approval.
-* **⚡ Automated Validation Guard**: Evaluates 11 security and rule audits (detecting private files, broken anchors, mismatched author profiles, missing locks, and test failures) automatically before commits.
-* **👤 Zero-Trust Git Profiles**: Dynamically configures local author information and signs commits using workspace-isolated credentials from `.agents/git_profiles.json`.
-* **📊 Visual Local Dashboard**: Hosts a dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically by running `./helper.sh dashboard`.
+* **Unified Installer Engine**: Centralizes system discovery, version-controlled file copy, backup routines, and environment exclusions in a single Python engine (`install.py`), keeping shell scripts as lightweight system delegates.
+* **Interactive Stack Reconnaissance**: Performs automated stack detection to generate rules, context mappings, and folder layouts inside `.agents/rules.md` and `.agents/schema.md` to align agent behavior.
+* **Automated Verification Loop**: Enforces quality gates requiring agents to compile files, run local test suites, check styles, and recover from failures using sandboxed playbooks before marking tasks completed.
+* **Pre-Commit Compliance Engine**: Audits 11 distinct repository security rules (blocking secret exposures, broken references, mismatched git authorship, and lock bypasses) automatically on git hooks.
+* **Isolated Developer Profile Rotation**: Configures workspace-level authorship, GPG/SSH keys, and tokens locally in `.agents/git_profiles.json` to sign commits while preventing global profile leakage.
+* **Local Observability Panel**: Serves a local monitoring dashboard to visualize task workflows, active directory locks, self-learning ledgers, and compilation statuses.
 
 ---
 

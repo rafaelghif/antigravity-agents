@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.81.0] - 2026-07-11
+
+### 🚀 Features
+- refactor readme to use professional engineering terminology and highlight concrete mechanisms
+- docs: refactor readme to use professional engineering terminology and highlight concrete mechanisms (ISSUE-318)
+
+
 ## [3.80.0] - 2026-07-11
 
 ### 🚀 Features
