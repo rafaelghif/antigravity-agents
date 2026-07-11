@@ -1,7 +1,7 @@
 ---
 id: issue-287
 title: "Fix branch naming friction and flexible issue closing resolution"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

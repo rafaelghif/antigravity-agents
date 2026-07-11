@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.52.0] - 2026-07-11
+
+### 🚀 Features
+- implement flexible branch naming and resolution
+
+### 📝 Documentation
+- Fix branch naming friction and flexible issue closing resolution (ISSUE-287)
+
+
 ## [3.51.0] - 2026-07-11
 
 ### 🚀 Features
