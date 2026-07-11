@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
