@@ -1,7 +1,7 @@
 ---
 id: issue-308
 title: "Enhance solo workflow mode to bypass lock and branch alignment checks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
