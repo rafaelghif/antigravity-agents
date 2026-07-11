@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.79.0] - 2026-07-11
+
+### 🚀 Features
+- harden mcp server json-rpc compliance, path imports, and tool execution error capturing
+- feat(mcp): harden mcp server json-rpc compliance, path imports, and tool execution error capturing (ISSUE-316)
+
+
 ## [3.78.0] - 2026-07-11
 
 ### 🚀 Features

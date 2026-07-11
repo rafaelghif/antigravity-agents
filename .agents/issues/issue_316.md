@@ -1,7 +1,7 @@
 ---
 id: issue-316
 title: "feat(mcp): harden mcp server json-rpc compliance, path imports, and tool execution error capturing"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
