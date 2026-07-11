@@ -4,6 +4,7 @@ set -euo pipefail
 
 TARGET_DIR="${1:-.}"
 TARGET_ABS=$(realpath "$TARGET_DIR")
+shift 2>/dev/null || true
 
 # 0. Check for Git presence
 if ! command -v git &>/dev/null; then
@@ -195,7 +196,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
   
   
   # Run bootstrap.sh from extracted folder inside target folder context
-  (cd "$TARGET_ABS" && bash "$EXTRACTED_DIR/bootstrap.sh")
+  (cd "$TARGET_ABS" && bash "$EXTRACTED_DIR/bootstrap.sh" "$(basename "$TARGET_ABS")" "$@")
   
   # Cleanup
   rm -rf "$TEMP_DIR"
