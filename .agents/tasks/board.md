@@ -13,9 +13,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] enhance readme with comprehensive onboarding and setup details (feat/issue-273) <!-- id: issue-273 -->
 
 ## Done
+- [x] enhance readme with comprehensive onboarding and setup details (feat/issue-273) <!-- id: issue-273 -->
 - [x] integrate gitea mcp server configuration into workspace (feat/issue-272) <!-- id: issue-272 -->
 - [x] integrate github mcp server config and update template parity mappings (feat/issue-271) <!-- id: issue-271 -->
 - [x] resolve codebase audit findings and implement template mapping documentation (feat/issue-270) <!-- id: issue-270 -->

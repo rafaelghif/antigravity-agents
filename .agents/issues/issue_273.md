@@ -1,7 +1,7 @@
 ---
 id: issue-273
 title: "enhance readme with comprehensive onboarding and setup details"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
