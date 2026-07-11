@@ -154,6 +154,12 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
 * **`git_token`**: Access token for authenticating GitHub/GitLab CLI commands.
 * **`active`**: Set `true` to apply this profile's configuration to Git during development.
 
+**CLI Profile Utilities:**
+- **Add Profile**: `./helper.sh profile add` (launches interactive setup wizard)
+- **List Profiles**: `./helper.sh profile list`
+- **Switch Active Profile**: `./helper.sh profile switch <profile_name>`
+- **Apply Current Profile**: `./helper.sh profile apply` (injects current active credentials directly into Git config)
+
 ### 3. Monorepos & Components (`.agents/projects.json`)
 Define sub-projects, testing commands, and API contract sync rules in a monorepo. Copy `.agents/projects.example` to `.agents/projects.json`:
 ```json
@@ -180,6 +186,80 @@ Define sub-projects, testing commands, and API contract sync rules in a monorepo
 * **`stack`**: Stack/language of the component (e.g. `python`, `node`, `php`).
 * **`test_command`**: Local test execution command (run inside the sub-project directory).
 * **`sync_contracts`**: (Optional) Open API/GraphQL contract synchronization rules to generate frontend client bindings.
+
+AAC's validation guard will automatically parse this JSON to run tests and linters for each component inside monorepos.
+
+### 4. Model Context Protocol (`.agents/mcp_config.json`)
+Define model context servers and token inputs. Local workspace-level MCP configurations allow secure integrations without exposing credentials globally. Copy `.agents/mcp_config.json` templates to enable external tool capabilities:
+
+```json
+{
+  "mcpServers": {
+    "aac-v3-tools": {
+      "command": "python3",
+      "args": [
+        ".agents/scripts/mcp_server.py"
+      ]
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:github_mcp_pat}"
+      }
+    },
+    "gitea": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITEA_ACCESS_TOKEN",
+        "-e",
+        "GITEA_HOST",
+        "docker.gitea.com/gitea-mcp-server"
+      ],
+      "env": {
+        "GITEA_ACCESS_TOKEN": "${input:gitea_token}",
+        "GITEA_HOST": "${input:gitea_host}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "gitea_token",
+      "description": "Gitea Personal Access Token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "gitea_host",
+      "description": "Gitea Host URL (e.g. https://gitea.com or local Gitea domain)",
+      "password": false
+    }
+  ]
+}
+```
+* **`github`**: Integrates GitHub Copilot MCP tools for remote repositories, issues, and workflow runs.
+* **`gitea`**: Integrates Gitea MCP tools for internal company repositories and code collaboration.
+
+**CLI MCP Utilities:**
+- **Register MCP locally**: `./helper.sh mcp register` (registers workspace servers inside local agent configurations)
+- **Register MCP globally**: `./helper.sh mcp register --global` (opt-in to write configuration to user home directory configuration)
+
+### 5. Setup Diagnostics
+Ensure your workspace, python environment, and permissions are fully set up by running diagnostic audits:
+- **Run doctor diagnostic**: `./helper.sh doctor` (verifies python version, dependencies, system commands, and active configuration files)
+- **Run validation heartbeat**: `./helper.sh heartbeat` (verifies active module locks, git identity profiles, hooks, and token budget quotas)
+
 
 ---
 

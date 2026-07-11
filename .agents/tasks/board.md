@@ -13,6 +13,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] enhance readme with comprehensive onboarding and setup details (feat/issue-273) <!-- id: issue-273 -->
 
 ## Done
 - [x] integrate gitea mcp server configuration into workspace (feat/issue-272) <!-- id: issue-272 -->
