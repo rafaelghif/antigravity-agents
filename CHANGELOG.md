@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.34.4] - 2026-07-11
+
+### 🐛 Bug Fixes
+- pin package versions in Dockerfile to prevent supply chain risks
+- pin dependencies in Dockerfile to prevent supply chain vulnerabilities (ISSUE-264)
+
+
 ## [3.34.3] - 2026-07-11
 
 ### 🐛 Bug Fixes

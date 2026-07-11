@@ -21,7 +21,8 @@ pin dependencies in Dockerfile to prevent supply chain vulnerabilities
 - Target files to edit:
   - [x] Dockerfile <!-- id: audit-target-files -->
 - Active module locks:
-  - [x] Dockerfile <!-- id: audit-module-locks -->
+  - [ ] Dockerfile <!-- id: lock-Dockerfile -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
