@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-3.48.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.48.1-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -141,7 +141,7 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
       "email": "developer@company.com",
       "signing_key": "ssh-ed25519 AAAAC3N...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
-      "git_token": "ghp_corporateTokenExample",
+      "git_pat": "ghp_corporateTokenExample",
       "active": true
     }
   ]
@@ -151,7 +151,7 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
 * **`email`**: Git author email configuration.
 * **`signing_key`**: GPG or SSH signing key for signing commits.
 * **`ssh_key_path`**: Path to the SSH private key used to push commits.
-* **`git_token`**: Access token for authenticating GitHub/GitLab CLI commands.
+* **`git_pat`**: Personal Access Token (PAT) for authenticating GitHub/Gitea API commands.
 * **`active`**: Set `true` to apply this profile's configuration to Git during development.
 
 **CLI Profile Utilities:**

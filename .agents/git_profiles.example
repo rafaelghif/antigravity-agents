@@ -5,7 +5,7 @@
       "email": "developer@company.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
-      "git_token": "ghp_corporateTokenExample12345",
+      "git_pat": "ghp_corporateTokenExample12345",
       "active": true
     },
     {
@@ -13,7 +13,7 @@
       "email": "dev.personal@gmail.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAJ...",
       "ssh_key_path": "~/.ssh/id_ed25519_personal",
-      "git_token": "ghp_personalTokenExample12345",
+      "git_pat": "ghp_personalTokenExample12345",
       "active": false
     }
   ]

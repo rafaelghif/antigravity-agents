@@ -15,6 +15,8 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor: rename git_token to git_pat for clarity and standardization (feat/issue-283) <!-- id: issue-283 -->
+- [x] chore: audit MCP configurations and test active server tools (feat/issue-282) <!-- id: issue-282 -->
 - [x] chore: update task-management skill to map tasks to milestones (feat/issue-281) <!-- id: issue-281 -->
 - [x] docs: map milestones, security policy, and collaboration protocol in workspace read flow (feat/issue-280) <!-- id: issue-280 -->
 - [x] fix: synchronize installation templates for milestones and security policy (feat/issue-279) <!-- id: issue-279 -->

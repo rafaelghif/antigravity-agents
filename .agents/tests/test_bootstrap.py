@@ -90,6 +90,7 @@ class TestBootstrapCommand(unittest.TestCase):
         self.assertTrue(os.path.exists(".agents/projects.example"))
         self.assertTrue(os.path.exists(".agents/docs/context_map.md"))
         self.assertTrue(os.path.exists(".agents/dashboard/index.html"))
+        self.assertTrue(os.path.exists(".agents/mcp_config.json"))
 
     def test_bootstrap_layered_node(self, mock_input):
         bootstrap.run(["TestNodeLayered", "node", "layered"])

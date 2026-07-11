@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.48.1] - 2026-07-11
+
+### 🛠️ Refactors
+- refactor: rename git_token to git_pat for clarity and standardization (ISSUE-283)
+- rename git_token to git_pat for clarity and standardization
+
+### ⚙️ Chores
+- audit configurations and copy mcp_config during bootstrap
+
+
 ## [3.48.0] - 2026-07-11
 
 ### 🚀 Features

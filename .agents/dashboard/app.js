@@ -642,7 +642,7 @@ window.handleCreateProfile = async function(event) {
   const email = document.getElementById('prof-email').value.trim();
   const signingKey = document.getElementById('prof-gpg').value.trim() || null;
   const sshKeyPath = document.getElementById('prof-ssh-path').value.trim() || null;
-  const gitToken = document.getElementById('prof-token').value.trim() || null;
+  const gitPat = document.getElementById('prof-token').value.trim() || null;
   const generateSsh = document.getElementById('prof-gen-ssh').checked;
   const switchAfter = document.getElementById('prof-switch-after').checked;
 
@@ -659,7 +659,7 @@ window.handleCreateProfile = async function(event) {
         email: email,
         signing_key: signingKey,
         ssh_key_path: sshKeyPath,
-        git_token: gitToken,
+        git_pat: gitPat,
         generate_ssh: generateSsh,
         switch_after: switchAfter
       })
@@ -718,7 +718,7 @@ window.loadProfiles = async function() {
             <div class="val">${active.email}</div>
             ${keyRowHtml}
             <div class="label">GitHub PAT:</div>
-            <div class="val">${active.git_token ? '•••••••••••• (Configured)' : 'None'}</div>
+            <div class="val">${active.git_pat ? '•••••••••••• (Configured)' : 'None'}</div>
           </div>
           <div id="ssh-pubkey-display" style="display:none;"></div>
         `;

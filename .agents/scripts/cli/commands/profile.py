@@ -334,10 +334,10 @@ def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> Non
         profile_env_var = f"AAC_GITHUB_TOKEN_{profile_env_suffix}"
         has_env_token = os.getenv(profile_env_var) is not None
         
-        git_token = profile.get("git_token")
-        is_dummy = git_token and (git_token.startswith("ghp_corporateToken") or git_token.startswith("ghp_personalToken"))
+        git_pat = profile.get("git_pat") or profile.get("git_token")
+        is_dummy = git_pat and (git_pat.startswith("ghp_corporateToken") or git_pat.startswith("ghp_personalToken"))
         
-        if (git_token and not is_dummy) or has_env_token:
+        if (git_pat and not is_dummy) or has_env_token:
             helper_py = os.path.abspath(os.path.join(os.path.dirname(__file__), "../helper.py"))
             python_exe = sys.executable
             subprocess.run(['git', 'config', '--local', 'credential.helper', f'!"{python_exe}" "{helper_py}" profile credential-helper'], check=True)
@@ -549,9 +549,9 @@ def run_interactive_wizard() -> Dict[str, Any]:
         print("\n4. Authentication Token:")
         print("   (Tip: To avoid plain-text storage, press Enter to skip and instead set the environment")
         print(f"   variable 'AAC_GITHUB_TOKEN_{name.upper().replace('-', '_').replace('.', '_')}' inside your shell)")
-        git_token = input("   Enter GitHub Personal Access Token (PAT) [press Enter to skip]: ").strip()
-        if not git_token:
-            git_token = None
+        git_pat = input("   Enter GitHub Personal Access Token (PAT) [press Enter to skip]: ").strip()
+        if not git_pat:
+            git_pat = None
             
         # 5. Switch Immediately
         switch_choice = input("\n5. Switch to this new profile immediately? (Y/n) [y]: ").strip().lower() or "y"
@@ -562,7 +562,7 @@ def run_interactive_wizard() -> Dict[str, Any]:
             "email": email,
             "signing_key": signing_key,
             "ssh_key_path": ssh_key_path,
-            "git_token": git_token,
+            "git_pat": git_pat,
             "switch_after": switch_after
         }
         
@@ -578,12 +578,12 @@ def handle_add(args: List[str]) -> None:
         email = wizard_data["email"]
         signing_key = wizard_data["signing_key"]
         ssh_key_path = wizard_data["ssh_key_path"]
-        git_token = wizard_data["git_token"]
+        git_pat = wizard_data["git_pat"]
         switch_after = wizard_data["switch_after"]
         generate_ssh = False
     else:
         if len(args) < 2:
-            print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-token <token>] [--generate-ssh] [--switch|-s]")
+            print_err("Usage: helper.py profile add <name> <email> [signing_key] [--ssh-key <path>] [--git-pat <pat>] [--generate-ssh] [--switch|-s]")
             sys.exit(1)
             
         name = args[0]
@@ -591,7 +591,7 @@ def handle_add(args: List[str]) -> None:
         
         signing_key = None
         ssh_key_path = None
-        git_token = None
+        git_pat = None
         generate_ssh = False
         switch_after = False
         
@@ -608,12 +608,12 @@ def handle_add(args: List[str]) -> None:
                 else:
                     print_err("Error: --ssh-key requires a path argument.")
                     sys.exit(1)
-            elif arg == '--git-token':
+            elif arg in ('--git-pat', '--git-token'):
                 if i + 1 < len(args):
-                    git_token = args[i+1]
+                    git_pat = args[i+1]
                     i += 2
                 else:
-                    print_err("Error: --git-token requires a token argument.")
+                    print_err(f"Error: {arg} requires a PAT argument.")
                     sys.exit(1)
             elif arg == '--generate-ssh':
                 generate_ssh = True
@@ -661,8 +661,8 @@ def handle_add(args: List[str]) -> None:
         new_profile["signing_key"] = signing_key
     if ssh_key_path:
         new_profile["ssh_key_path"] = ssh_key_path
-    if git_token:
-        new_profile["git_token"] = git_token
+    if git_pat:
+        new_profile["git_pat"] = git_pat
         
     profiles.append(new_profile)
     data["profiles"] = profiles
@@ -697,7 +697,7 @@ def handle_credential_helper(args: List[str]) -> None:
             profile_env_var = f"AAC_GITHUB_TOKEN_{profile_env_suffix}"
             env_token = os.getenv(profile_env_var)
             
-            token = env_token or active_profile.get("git_token")
+            token = env_token or active_profile.get("git_pat") or active_profile.get("git_token")
             if token and token.startswith("env:"):
                 token = os.getenv(token[4:])
                 

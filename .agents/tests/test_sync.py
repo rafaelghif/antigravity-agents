@@ -31,7 +31,7 @@ class TestSync(unittest.TestCase):
         
         mock_json_content = json.dumps({
             "profiles": [
-                {"name": "p1", "email": "p1@test.com", "active": True, "git_token": "profile-token"}
+                {"name": "p1", "email": "p1@test.com", "active": True, "git_pat": "profile-token"}
             ]
         })
         with patch('builtins.open', mock_open(read_data=mock_json_content)):
