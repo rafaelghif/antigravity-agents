@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.49.1] - 2026-07-11
+
+### 🐛 Bug Fixes
+- resolve mcp_config template and target relative registration during bootstrap
+- Fix MCP config bootstrapping registration and template drift issues (ISSUE-284)
+
+
 ## [3.49.0] - 2026-07-11
 
 ### 🚀 Features

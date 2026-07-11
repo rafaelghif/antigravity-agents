@@ -277,7 +277,7 @@ def copy_core_files(src_root, force=False):
     helpers = [
         "helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1",
         ".agents/git_profiles.example", ".agents/projects.example",
-        "Dockerfile", ".agents/soul.md", ".agents/mcp_config.json"
+        "Dockerfile", ".agents/soul.md"
     ]
     for h in helpers:
         src_file = os.path.join(src_root, h)
@@ -518,9 +518,18 @@ def run(args):
         f.write(schema_content)
     print("Generated '.agents/schema.md' architecture blueprint.")
 
+    # 4.5. Generate .agents/mcp_config.json if not exists
+    mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
+    if not os.path.exists(mcp_config_path):
+        mcp_config_content = read_template(src_root, "mcp_config.json.template", "")
+        if mcp_config_content:
+            with open(mcp_config_path, 'w', encoding='utf-8') as f:
+                f.write(mcp_config_content)
+            print("Generated '.agents/mcp_config.json' from template.")
+
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.49.0"
+    AAC_VERSION = "3.49.1"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
@@ -702,18 +711,16 @@ This board tracks active development tasks.
     print("   Setting up Model Context Protocol (MCP) Tools...      ")
     print("==========================================================")
     try:
-        # Resolve mcp_server.py path (which is inside .agents/scripts/)
-        cmd_dir = os.path.dirname(os.path.abspath(__file__)) # .agents/scripts/cli/commands
-        script_dir = os.path.dirname(os.path.dirname(cmd_dir)) # .agents/scripts
-        mcp_script = os.path.join(script_dir, "mcp_server.py")
-        if os.path.exists(mcp_script):
+        # Resolve target mcp_server.py path (in the target workspace)
+        target_mcp_script = os.path.abspath(os.path.join(".", ".agents", "scripts", "mcp_server.py"))
+        if os.path.exists(target_mcp_script):
             import importlib.util
-            spec = importlib.util.spec_from_file_location("mcp_server", mcp_script)
+            spec = importlib.util.spec_from_file_location("mcp_server", target_mcp_script)
             mcp_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mcp_module)
             mcp_module.register_server()
         else:
-            print(f"[WARN] mcp_server.py not found at '{mcp_script}', skipping registration.")
+            print(f"[WARN] target mcp_server.py not found at '{target_mcp_script}', skipping registration.")
     except Exception as e:
         print(f"[WARN] Failed to automatically register MCP server: {e}")
     print("==========================================================")
