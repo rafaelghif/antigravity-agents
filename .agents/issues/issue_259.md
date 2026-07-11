@@ -1,7 +1,7 @@
 ---
 id: issue-259
 title: "feat: synchronize rules template with latest workspace rules changes to prevent template drift"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
