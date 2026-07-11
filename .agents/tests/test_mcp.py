@@ -49,5 +49,19 @@ class TestMcpServer(unittest.TestCase):
         res = mcp_server.call_tool("invalid_tool_name", {})
         self.assertTrue(res.get("isError"))
 
+    def test_list_tools_invalid_workspace(self):
+        # Temporarily mock is_valid_workspace to False
+        original_status = mcp_server.is_valid_workspace
+        mcp_server.is_valid_workspace = False
+        try:
+            tools_list = mcp_server.list_tools()
+            self.assertEqual(tools_list["tools"], [])
+            
+            res = mcp_server.call_tool("log_token_usage", {})
+            self.assertTrue(res.get("isError"))
+            self.assertIn("Not running inside a valid AAC workspace", res["content"][0]["text"])
+        finally:
+            mcp_server.is_valid_workspace = original_status
+
 if __name__ == '__main__':
     unittest.main()

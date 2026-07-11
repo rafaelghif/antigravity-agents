@@ -236,6 +236,12 @@ def extract_gpg_key_id(key_block: str) -> str:
         pass
     return None
 
+def validate_safe_path(path: str) -> bool:
+    """Validate that the path does not contain shell command injection characters."""
+    # Permitted characters: alphanumeric, dots, hyphens, underscores, slashes, backslashes, colons, tildes, and spaces.
+    pattern = r"^[a-zA-Z0-9_\-\.\/\~\:\s\\]+$"
+    return bool(re.match(pattern, path))
+
 def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> None:
     """Immediately configure the local Git repository settings."""
     # Check if we are inside a Git repository
@@ -313,7 +319,13 @@ def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> Non
             
         ssh_key = profile.get("ssh_key_path")
         if ssh_key:
+            if not validate_safe_path(ssh_key):
+                print_err(f"Security Alert: SSH key path contains dangerous shell characters: {ssh_key}")
+                sys.exit(1)
             ssh_key_abs = os.path.abspath(os.path.expanduser(ssh_key))
+            if not validate_safe_path(ssh_key_abs):
+                print_err(f"Security Alert: Absolute SSH key path contains dangerous shell characters: {ssh_key_abs}")
+                sys.exit(1)
             subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i "{ssh_key_abs}" -o IdentitiesOnly=yes'], check=True)
         else:
             subprocess.run(['git', 'config', '--local', '--unset', 'core.sshCommand'], stderr=subprocess.DEVNULL)
@@ -623,6 +635,11 @@ def handle_add(args: List[str]) -> None:
     if ssh_key_path and generate_ssh:
         print_err("Error: --ssh-key and --generate-ssh options are mutually exclusive.")
         sys.exit(1)
+        
+    if ssh_key_path:
+        if not validate_safe_path(ssh_key_path):
+            print_err(f"Invalid SSH key path '{ssh_key_path}'. Dangerous characters are not allowed.")
+            sys.exit(1)
         
     data = load_profiles()
     profiles = data.get("profiles", [])

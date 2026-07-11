@@ -4,6 +4,9 @@ import re
 import json
 import subprocess
 
+def print_err(msg: str) -> None:
+    print(f"\033[91m[FAIL] {msg}\033[0m", file=sys.stderr)
+
 def detect_project_stack(root=".") -> str:
     """Detect the programming stack from the files present in the root directory."""
     if os.path.exists(os.path.join(root, "go.mod")):
@@ -427,16 +430,24 @@ def run(args):
         text=True
     )
     if res.returncode != 0:
-        print_err(f"==========================================================")
-        print_err(f"   [ERROR] Git Clone Failed!")
-        print_err(f"==========================================================")
-        print_err(f"Failed to clone templates from source repository: {source_repo}")
-        print_err(f"Please check your network connection and try again.")
-        print_err(f"Reason: {res.stderr.strip()}")
-        print_err(f"==========================================================")
-        sys.exit(1)
-        
-    src_root = temp_src_root
+        # Check if local fallback is available
+        cmd_dir = os.path.dirname(os.path.abspath(__file__))
+        scripts_dir = os.path.dirname(os.path.dirname(cmd_dir))
+        local_src_root = os.path.dirname(os.path.dirname(scripts_dir))
+        if os.path.exists(os.path.join(local_src_root, ".agents", "templates")):
+            print(f"\033[93m[WARN] Git clone failed. Falling back to local offline templates registry at '{local_src_root}'...\033[0m")
+            src_root = local_src_root
+        else:
+            print_err(f"==========================================================")
+            print_err(f"   [ERROR] Git Clone Failed!")
+            print_err(f"==========================================================")
+            print_err(f"Failed to clone templates from source repository: {source_repo}")
+            print_err(f"Please check your network connection and try again.")
+            print_err(f"Reason: {res.stderr.strip()}")
+            print_err(f"==========================================================")
+            sys.exit(1)
+    else:
+        src_root = temp_src_root
 
     # 1. Generate Folder Structure
     if arch == "clean":
@@ -505,7 +516,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.41.0"
+    AAC_VERSION = "3.42.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

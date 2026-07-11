@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: secure profile command against shell command injections and mcp server workspace coupling (feat/issue-275) <!-- id: issue-275 -->
 - [x] feat: relocate soul.md to .agents root (feat/issue-274) <!-- id: issue-274 -->
 - [x] enhance readme with comprehensive onboarding and setup details (feat/issue-273) <!-- id: issue-273 -->
 - [x] integrate gitea mcp server configuration into workspace (feat/issue-272) <!-- id: issue-272 -->

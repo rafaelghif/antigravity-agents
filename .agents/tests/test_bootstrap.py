@@ -152,6 +152,14 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertIn("FallbackProject", content)
             self.assertIn("Python (CLEAN)", content)
 
+    def test_bootstrap_clone_failure_fallback(self, mock_input):
+        from unittest.mock import MagicMock
+        self.mock_run.side_effect = None
+        self.mock_run.return_value = MagicMock(returncode=1, stderr="Mock Git Clone Failed")
+        
+        bootstrap.run(["FallbackClone", "python", "clean"])
+        self.assertTrue(os.path.exists("AGENTS.md"))
+
     def test_read_template(self, mock_input):
         src_root = os.path.abspath(os.path.join(os.path.dirname(bootstrap.__file__), "../../../../"))
         

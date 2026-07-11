@@ -386,5 +386,27 @@ class TestProfileCommand(unittest.TestCase):
         signingkey_call = any("user.signingkey" in cmd and "3AA5C34371567BD2" in cmd for cmd in [call[0][0] for call in mock_run.call_args_list if isinstance(call[0][0], list)])
         self.assertTrue(signingkey_call)
 
+    def test_validate_safe_path(self):
+        self.assertTrue(profile.validate_safe_path("~/.ssh/id_rsa"))
+        self.assertTrue(profile.validate_safe_path("C:\\Users\\User\\.ssh\\id_rsa"))
+        self.assertTrue(profile.validate_safe_path("path/with spaces/key"))
+        
+        # Test dangerous characters
+        self.assertFalse(profile.validate_safe_path("~/.ssh/id_rsa; touch /tmp/pwned"))
+        self.assertFalse(profile.validate_safe_path("~/.ssh/id_rsa\" -o ProxyCommand=\"somecmd"))
+        self.assertFalse(profile.validate_safe_path("~/.ssh/id_rsa`somecmd`"))
+        self.assertFalse(profile.validate_safe_path("~/.ssh/id_rsa$(somecmd)"))
+
+    @patch('subprocess.run')
+    def test_apply_git_config_malicious_ssh_key_path(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0)
+        prof = {
+            "name": "p1",
+            "email": "p1@test.com",
+            "ssh_key_path": "~/.ssh/id_rsa\"; touch /tmp/pwned; echo \""
+        }
+        with self.assertRaises(SystemExit):
+            profile.apply_git_config(prof)
+
 if __name__ == '__main__':
     unittest.main()

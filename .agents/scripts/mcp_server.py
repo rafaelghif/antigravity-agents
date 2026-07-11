@@ -10,11 +10,13 @@ scripts_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Resolve scripts directory dynamically to target/workspace if available
 cwd_scripts_dir = os.path.abspath(os.path.join(os.getcwd(), '.agents', 'scripts'))
-if os.path.isdir(cwd_scripts_dir):
+is_valid_workspace = os.path.isdir(cwd_scripts_dir)
+if is_valid_workspace:
     target_scripts_dir = cwd_scripts_dir
 else:
-    sys.stderr.write("Error: Current working directory is not a valid AAC workspace. Exiting to prevent cross-workspace contamination.\n")
-    sys.exit(1)
+    target_scripts_dir = scripts_dir
+    sys.stderr.write("[INFO] Current working directory is not a valid AAC workspace. Running in idle mode.\n")
+    sys.stderr.flush()
 
 token_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'token.py')
 token_cmd = None
@@ -49,6 +51,8 @@ if os.path.exists(validate_file):
         sys.stderr.write(f"Error loading validate module from {validate_file}: {e}\n")
 
 def list_tools():
+    if not is_valid_workspace:
+        return {"tools": []}
     return {
         "tools": [
             {
@@ -106,6 +110,8 @@ def list_tools():
     }
 
 def call_tool(name, arguments):
+    if not is_valid_workspace:
+        return {"content": [{"type": "text", "text": "Error: Not running inside a valid AAC workspace."}], "isError": True}
     if name == "log_token_usage":
         if not token_cmd:
             return {"content": [{"type": "text", "text": "Error: token command module not loaded."}], "isError": True}
