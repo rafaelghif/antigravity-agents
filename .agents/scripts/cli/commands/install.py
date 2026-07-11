@@ -64,8 +64,8 @@ def should_exclude(rel_path: str) -> bool:
         if sub_dir in ("tasks", "issues", "plans", "tests", "archive", "logs", "state"):
             return True
         if sub_dir == "memory":
-            # Exclude everything in memory except templates/ and blueprints/
-            if len(parts) >= 3 and parts[2] not in ("blueprints", "templates"):
+            # Exclude everything in memory except templates/
+            if len(parts) >= 3 and parts[2] not in ("templates",):
                 return True
                 
     return False
@@ -130,21 +130,6 @@ def run(args: List[str]) -> None:
             except Exception as e:
                 print_warn(f"Failed to copy file '{rel_path}': {e}")
 
-    # 6. Copy blueprints and templates folders explicitly
-    blueprints_src = os.path.join(source_root, ".agents", "memory", "blueprints")
-    blueprints_dest = os.path.join(target_abs, ".agents", "memory", "blueprints")
-    if os.path.exists(blueprints_src):
-        try:
-            os.makedirs(blueprints_dest, exist_ok=True)
-            for item in os.listdir(blueprints_src):
-                s = os.path.join(blueprints_src, item)
-                d = os.path.join(blueprints_dest, item)
-                if os.path.isdir(s):
-                    shutil.copytree(s, d, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(s, d)
-        except Exception as e:
-            print_warn(f"Failed to copy blueprints folder: {e}")
 
     # 6.5. Restore user configurations and workspace state from backup if upgrading
     if 'backup_agents' in locals() and os.path.exists(backup_agents):

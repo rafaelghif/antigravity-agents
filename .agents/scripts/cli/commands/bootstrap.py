@@ -297,14 +297,14 @@ def copy_core_files(src_root, force=False):
     # Initialize clean memory, tasks, and issues folders
     target_mem = os.path.join(target_root, ".agents/memory")
     os.makedirs(os.path.join(target_mem, "decisions"), exist_ok=True)
-    os.makedirs(os.path.join(target_mem, "blueprints"), exist_ok=True)
+    os.makedirs(os.path.join(target_root, ".agents/blueprints"), exist_ok=True)
     os.makedirs(os.path.join(target_root, ".agents/tasks"), exist_ok=True)
     os.makedirs(os.path.join(target_root, ".agents/issues"), exist_ok=True)
     
     # Copy blueprints
-    src_blueprints = os.path.join(src_root, ".agents/memory/blueprints")
+    src_blueprints = os.path.join(src_root, ".agents/blueprints")
     if os.path.exists(src_blueprints):
-        target_blueprints = os.path.join(target_mem, "blueprints")
+        target_blueprints = os.path.join(target_root, ".agents/blueprints")
         for file in os.listdir(src_blueprints):
             src_file = os.path.join(src_blueprints, file)
             dest_file = os.path.join(target_blueprints, file)
@@ -474,7 +474,7 @@ def run(args):
     os.makedirs(".agents/tasks", exist_ok=True)
     os.makedirs(".agents/issues", exist_ok=True)
     os.makedirs(".agents/memory/decisions", exist_ok=True)
-    os.makedirs(".agents/memory/blueprints", exist_ok=True)
+    os.makedirs(".agents/blueprints", exist_ok=True)
 
     copy_core_files(src_root, force=force_update)
 
@@ -573,7 +573,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.75.0"
+    AAC_VERSION = "3.76.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

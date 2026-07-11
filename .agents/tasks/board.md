@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands (feat/issue-313) <!-- id: issue-313 -->
 - [x] Fix installer config file overwriting and correct template map verify.yml workflow path (feat/issue-312) <!-- id: issue-312 -->
 - [x] Relax Clean Architecture and SOLID rules for simple/custom projects (feat/issue-311) <!-- id: issue-311 -->
 - [x] Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas (feat/issue-310) <!-- id: issue-310 -->
