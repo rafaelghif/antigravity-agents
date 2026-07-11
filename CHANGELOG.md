@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.45.0] - 2026-07-11
+
+### 🚀 Features
+- docs: implement collaboration protocol, security policy, and milestones (ISSUE-278)
+
+### 📝 Documentation
+- create collaboration protocol, security runbook, and milestones
+
+
 ## [3.44.0] - 2026-07-11
 
 ### 🚀 Features
