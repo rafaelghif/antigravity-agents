@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.77.0] - 2026-07-11
+
+### 🚀 Features
+- document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule
+- feat(blueprints): document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule (ISSUE-314)
+
+
 ## [3.76.0] - 2026-07-11
 
 ### 🚀 Features

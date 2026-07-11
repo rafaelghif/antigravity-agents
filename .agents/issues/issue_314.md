@@ -1,7 +1,7 @@
 ---
 id: issue-314
 title: "feat(blueprints): document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
