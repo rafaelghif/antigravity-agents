@@ -234,6 +234,7 @@ def copy_core_files(src_root, force=False):
         ".agents/templates",
         ".agents/docs",
         ".agents/dashboard",
+        ".agents/schemas",
     ]
     
     for d in core_dirs:
@@ -371,6 +372,10 @@ def run(args):
     # Auto-detect stack
     detected_stack = detect_project_stack(".")
     
+    is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
+    if not is_interactive and len(args) < 3:
+        quick_mode = True
+        
     if quick_mode:
         name = os.path.basename(os.path.abspath(".")).strip()
         stack = detected_stack if detected_stack else "python"
@@ -532,7 +537,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.55.0"
+    AAC_VERSION = "3.56.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
