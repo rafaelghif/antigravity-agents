@@ -122,7 +122,22 @@ class TestValidate(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=0, stdout="")
         self.assertTrue(validate.audit_git_branch_alignment())
 
-        # Scenario 4: On feature branch with invalid ID pattern
+        # Scenario 4: On feature branch with pure number ID
+        mock_get_branch.return_value = "feat/028"
+        mock_exists.return_value = True
+        mock_file_open.return_value.read.return_value = "id: issue-028\ntasks:\n- [x] Done\n"
+        mock_run.return_value = MagicMock(returncode=0, stdout="")
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+        # Scenario 5: On feature branch with concatenated prefix and number
+        mock_get_branch.return_value = "feat/issue028"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+        # Scenario 6: On feature branch with suffix description
+        mock_get_branch.return_value = "feat/issue-028-some-description"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+        # Scenario 7: On feature branch with invalid ID pattern
         mock_get_branch.return_value = "some-random-branch"
         self.assertTrue(validate.audit_git_branch_alignment())
 
