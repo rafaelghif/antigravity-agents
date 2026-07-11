@@ -22,8 +22,9 @@ fix unit test failures in CI due to missing archive issues folder
   - [x] .agents/scripts/validate.py <!-- id: audit-target-files -->
   - [x] .agents/scripts/cli/commands/issue.py
 - Active module locks:
-  - [x] validate <!-- id: audit-module-locks -->
-  - [x] .agents/scripts/cli/commands/issue <!-- id: lock-issue -->
+  - [ ] validate <!-- id: lock-validate -->
+  - [ ] .agents/scripts/cli/commands/issue <!-- id: lock-issue -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
