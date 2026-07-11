@@ -234,6 +234,7 @@ def copy_core_files(src_root, force=False):
         ".agents/templates",
         ".agents/docs",
         ".agents/dashboard",
+        ".agents/schemas",
     ]
     
     for d in core_dirs:
