@@ -1,7 +1,7 @@
 ---
 id: issue-294
 title: "Generate workspace audit report"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

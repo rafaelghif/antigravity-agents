@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.58.0] - 2026-07-11
+
+### 🚀 Features
+- generate workspace audit and scorecard report
+- Generate workspace audit report (ISSUE-294)
+
+
 ## [3.57.1] - 2026-07-11
 
 ### 🐛 Bug Fixes
