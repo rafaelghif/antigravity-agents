@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.64.0] - 2026-07-11
+
+### 🚀 Features
+- update README with prerequisites and verify installer on clean target
+- Test Unified Installer on Clean Target and Update README (ISSUE-300)
+
+### ⚙️ Chores
+- check off final verification task in issue 300 spec
+
+
 ## [3.63.0] - 2026-07-11
 
 ### 🚀 Features

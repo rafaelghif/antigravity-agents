@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-3.63.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.64.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
@@ -41,7 +41,7 @@ flowchart TD
 
 ## 🌟 Key Features
 
-* **📦 Native Git-Based Installer**: Downloads files using `git clone --depth 1` natively, preserving version tags, release logs, and checking network availability dynamically via `git ls-remote`.
+* **📦 Unified Core Installer**: Consolidates backups, file copy rules, and stack reconnaissance inside the Python core `install` command. Shell wrapper scripts act as thin delegates, preventing platform drift.
 * **🎤 Setup Questionnaire Interview**: Guides users through a database, framework, and deployment infrastructure questionnaire at the start of `./helper.sh bootstrap`, immediately injecting parameters into `.agents/schema.md`.
 * **🔁 Lookahead Loop & Zero-Touch Chaining**: Rules enforce that the agent performs self-correcting test/lint validation loops and chains commands internally, reducing user interactions to a minimum and preventing hallucinations.
 * **⚡ Offline Validation Guard**: Run 10 compliance audits (securing files, secrets, links, task boards, branch names, and unit tests) in **under 100ms** to block bad commits.
@@ -49,6 +49,15 @@ flowchart TD
 * **🔒 Collaborative Module Locks**: Restrict parallel edits on directories using directory-level filesystem mutexes.
 * **Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, saving up to **80% in LLM token budgets**.
 * **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
+
+---
+
+## 📋 System Prerequisites
+
+Before installation, verify your environment meets the minimum requirements:
+* **Git**: Installed and available in your environment (`git`).
+* **Python**: Version **3.8 or newer** (`python3` or `python`).
+* **Shell**: Standard terminal environment (`bash`, `zsh` or PowerShell).
 
 ---
 
