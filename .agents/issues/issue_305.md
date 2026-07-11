@@ -13,18 +13,18 @@ We need to explicitly document the prompt expansion (re-prompting) and human-in-
 
 ## Tasks
 - [x] Clean up duplicate task board line in board.md <!-- id: task-cleanup-board -->
-- [ ] Update AGENTS.md to explicitly document the prompt expansion and human command approval flow <!-- id: task-update-agents-md -->
+- [x] Update AGENTS.md to explicitly document the prompt expansion and human command approval flow <!-- id: task-update-agents-md -->
 - [ ] Run validation tests and verify workspace compliance <!-- id: task-run-validation -->
 
 ## Acceptance Criteria
 - [x] `board.md` has no duplicate entries for this issue. <!-- id: ac-board-clean -->
-- [ ] `AGENTS.md` contains an explicit non-negotiable rule defining prompt expansion and human-in-the-loop command approvals. <!-- id: ac-agents-md-updated -->
+- [x] `AGENTS.md` contains an explicit non-negotiable rule defining prompt expansion and human-in-the-loop command approvals. <!-- id: ac-agents-md-updated -->
 - [ ] `./helper.sh validate` runs and passes cleanly. <!-- id: ac-validation-passes -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
   - [x] .agents/tasks/board.md <!-- id: audit-target-board -->
-  - [ ] AGENTS.md <!-- id: audit-target-agents -->
+  - [x] AGENTS.md <!-- id: audit-target-agents -->
   - [ ] .agents/issues/issue_305.md <!-- id: audit-target-issue -->
 - Active module locks:
   - [ ] None <!-- id: audit-module-locks -->
