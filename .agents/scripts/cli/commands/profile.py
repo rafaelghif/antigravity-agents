@@ -43,7 +43,7 @@ def find_ssh_keygen() -> str:
 
 def generate_ssh_key(name: str, email: str) -> str:
     """Generate a secure Ed25519 SSH key pair for the profile."""
-    ssh_dir = os.path.abspath(os.path.expanduser("~/.ssh"))
+    ssh_dir = os.path.abspath(os.environ.get("AAC_SSH_DIR") or os.path.expanduser("~/.ssh"))
     try:
         os.makedirs(ssh_dir, mode=0o700, exist_ok=True)
     except Exception as e:

@@ -10,6 +10,8 @@ from typing import List
 BUDGET_FILE = ".agents/state/token_budget.json"
 LOG_FILE = ".agents/state/logs/token_usage.log"
 
+GLOBAL_GEMINI_DIR = os.environ.get("AAC_HOME") or os.path.expanduser("~/.gemini")
+
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
@@ -68,7 +70,7 @@ def get_active_api_account() -> str:
 
     # 4. Check global google_accounts.json for active account
     try:
-        acc_file = os.path.expanduser("~/.gemini/google_accounts.json")
+        acc_file = os.path.join(GLOBAL_GEMINI_DIR, "google_accounts.json")
         if os.path.exists(acc_file):
             with open(acc_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -80,7 +82,7 @@ def get_active_api_account() -> str:
 
     # 5. Scan global Antigravity CLI log files
     try:
-        log_dir = os.path.expanduser("~/.gemini/antigravity-cli/log")
+        log_dir = os.path.join(GLOBAL_GEMINI_DIR, "antigravity-cli/log")
         if os.path.exists(log_dir):
             log_files = [
                 os.path.join(log_dir, f)
@@ -293,7 +295,7 @@ def get_transcript_tokens_fallback() -> tuple:
     """
     conversation_id = os.environ.get("ANTIGRAVITY_CONVERSATION_ID")
     if not conversation_id:
-        brain_dir = os.path.expanduser("~/.gemini/antigravity-cli/brain")
+        brain_dir = os.path.join(GLOBAL_GEMINI_DIR, "antigravity-cli/brain")
         if os.path.exists(brain_dir):
             try:
                 dirs = [d for d in os.listdir(brain_dir) if os.path.isdir(os.path.join(brain_dir, d)) and not d.startswith(".")]
@@ -306,7 +308,7 @@ def get_transcript_tokens_fallback() -> tuple:
     if not conversation_id:
         return 15000, 1000
 
-    transcript_path = os.path.expanduser(f"~/.gemini/antigravity-cli/brain/{conversation_id}/.system_generated/logs/transcript.jsonl")
+    transcript_path = os.path.join(GLOBAL_GEMINI_DIR, "antigravity-cli/brain", conversation_id, ".system_generated/logs/transcript.jsonl")
     if not os.path.exists(transcript_path):
         return 15000, 1000
 
@@ -837,7 +839,7 @@ def scan_conversations_for_usage() -> str:
     from datetime import datetime, timezone
     
     # 1. Scan transcript.jsonl files first (clean, no binary corruption)
-    brain_dir = os.path.expanduser("~/.gemini/antigravity-cli/brain")
+    brain_dir = os.path.join(GLOBAL_GEMINI_DIR, "antigravity-cli/brain")
     if os.path.exists(brain_dir):
         try:
             conversation_ids = [
@@ -886,7 +888,7 @@ def scan_conversations_for_usage() -> str:
             pass
 
     # 2. Fallback to scanning SQLite databases (check modification time first)
-    db_dir = os.path.expanduser("~/.gemini/antigravity-cli/conversations")
+    db_dir = os.path.join(GLOBAL_GEMINI_DIR, "antigravity-cli/conversations")
     if not os.path.exists(db_dir):
         return None
         

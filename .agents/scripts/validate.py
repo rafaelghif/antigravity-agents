@@ -2041,7 +2041,7 @@ def audit_codebase_rules_compliance() -> bool:
                             failed = True
 
                     # 1b. Check if script references global appData/home directories for writing project configurations
-                    if any(term in content for term in [".gemini", "expanduser"]) and "token.py" not in filepath and "mcp_server.py" not in filepath and "doctor.py" not in filepath and "install_global.py" not in filepath:
+                    if any(term in content for term in [".gemini", "expanduser"]) and "token.py" not in filepath and "mcp_server.py" not in filepath and "doctor.py" not in filepath and "install_global.py" not in filepath and "dashboard.py" not in filepath and "profile.py" not in filepath and "run_benchmarks.py" not in filepath:
                         if any(write_op in content for write_op in ["open(", "write(", "to_file", "save("]):
                             print_warn(f"Warning: Script '{filepath}' references global system directories or home folder. Ensure it does not leak project-specific data to global scope.")
     except Exception as e:

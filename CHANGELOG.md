@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.62.0] - 2026-07-11
+
+### 🚀 Features
+- implement customizable home and ssh env var overrides
+- Fix Global Folder Directory Couplings (ISSUE-298)
+
+
 ## [3.61.0] - 2026-07-11
 
 ### 🚀 Features

@@ -19,6 +19,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Fix Global Folder Directory Couplings (feat/issue-298) <!-- id: issue-298 -->
 - [x] Perform Enterprise AI Agent Audit (feat/issue-297) <!-- id: issue-297 -->
 - [x] Relocate mcp_config to .agents root folder and update bootstrap (feat/issue-290) <!-- id: issue-290 -->
 - [x] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
