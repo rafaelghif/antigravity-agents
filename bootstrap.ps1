@@ -75,9 +75,9 @@ if is_agent_core_repo():
     with open('AGENTS.md', 'r', encoding='utf-8') as f:
         content = f.read()
     if '- **Version:**' in content:
-        content = re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 3.61.0', content)
+        content = re.sub(r'-\s+\*\*Version:\*\*.*', '- **Version:** 3.62.0', content)
     else:
-        content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 3.61.0', content)
+        content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** 3.62.0', content)
     with open('AGENTS.md', 'w', encoding='utf-8') as f:
         f.write(content)
     print('Synchronized AGENTS.md version.')

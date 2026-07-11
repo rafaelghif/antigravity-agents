@@ -1,7 +1,7 @@
 ---
 id: issue-298
 title: "Fix Global Folder Directory Couplings"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
