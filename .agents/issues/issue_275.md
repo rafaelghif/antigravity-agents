@@ -1,7 +1,7 @@
 ---
 id: issue-275
 title: "feat: secure profile command against shell command injections and mcp server workspace coupling"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

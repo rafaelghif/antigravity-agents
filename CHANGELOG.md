@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.42.0] - 2026-07-11
+
+### 🚀 Features
+- sanitize ssh key path in profile config and decouple mcp server
+- feat: secure profile command against shell command injections and mcp server workspace coupling (ISSUE-275)
+
+
 ## [3.41.0] - 2026-07-11
 
 ### 🚀 Features
