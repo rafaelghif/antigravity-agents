@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Create comprehensive Agent Rating & Evaluation Report (feat/issue-286) <!-- id: issue-286 -->
 - [x] Map mcp_config in template_map.md and enforce programmatical template parity checks (feat/issue-285) <!-- id: issue-285 -->
 - [x] Fix MCP config bootstrapping registration and template drift issues (feat/issue-284) <!-- id: issue-284 -->
 - [x] chore: audit MCP configurations and test active server tools (feat/issue-282) <!-- id: issue-282 -->
