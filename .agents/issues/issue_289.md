@@ -1,7 +1,7 @@
 ---
 id: issue-289
 title: "Synchronize completed installer tasks on task board"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

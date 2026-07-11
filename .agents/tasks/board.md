@@ -11,9 +11,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
 
 ## Done
+- [x] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [x] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [x] Update Agent Evaluation Report to reflect resolved branch naming friction (feat/issue-288) <!-- id: issue-288 -->
