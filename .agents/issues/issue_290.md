@@ -1,7 +1,7 @@
 ---
 id: issue-290
 title: "Relocate mcp_config to .agents root folder and update bootstrap"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
