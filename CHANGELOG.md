@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.38.0] - 2026-07-11
+
+### 🚀 Features
+- integrate github mcp server config and extend template map mapping table
+- integrate github mcp server config and update template parity mappings (ISSUE-271)
+
+
 ## [3.37.0] - 2026-07-11
 
 ### 🚀 Features

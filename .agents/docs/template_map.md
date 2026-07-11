@@ -17,6 +17,11 @@ Whenever any of the following target files are modified, their source template u
 | `.agents/templates/gitignore.template` | `.gitignore` | Git version control exclusions. |
 | `.agents/templates/antigravityignore.template` | `.antigravityignore` | Agent workspace parsing exclusions. |
 | `.agents/templates/ci_github_workflow.yml.template` | `.github/workflows/ci.yml` | GitHub actions CI/CD definition. |
+| `.agents/git_profiles.example` | `.agents/git_profiles.json` | Local Git profiles rotation configuration. |
+| `.agents/projects.example` | `.agents/projects.json` | Local monorepo project configurations. |
+| `.agents/templates/node_package.json.template` | `package.json` | Default Node project initializer package manifest. |
+| `.agents/templates/php_composer.json.template` | `composer.json` | Default PHP project initializer composer manifest. |
+| `.agents/templates/python_requirements.txt.template` | `requirements.txt` | Default Python project initializer requirements list. |
 
 ---
 
