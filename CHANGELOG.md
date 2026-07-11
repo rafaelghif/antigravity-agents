@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.48.0] - 2026-07-11
+
+### 🚀 Features
+- chore: update task-management skill to map tasks to milestones (ISSUE-281)
+
+### ⚙️ Chores
+- map tasks and issue templates to milestones in task-management skill
+
+
 ## [3.47.0] - 2026-07-11
 
 ### 🚀 Features

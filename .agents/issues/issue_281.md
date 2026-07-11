@@ -1,7 +1,7 @@
 ---
 id: issue-281
 title: "chore: update task-management skill to map tasks to milestones"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
