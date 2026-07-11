@@ -27,7 +27,7 @@ The MCP configuration (`.agents/mcp_config.json`) is currently copied as a stati
 - Target files to edit:
   - [x] .agents/scripts/cli/commands/bootstrap.py <!-- id: audit-target-files -->
 - Active module locks:
-  - [ ] bootstrap <!-- id: lock-bootstrap -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
