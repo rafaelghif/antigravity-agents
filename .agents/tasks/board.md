@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] Perform Enterprise AI Agent Audit (feat/issue-297) <!-- id: issue-297 -->
 - [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
@@ -17,9 +18,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Relocate mcp_config to .agents root folder and update bootstrap (feat/issue-290) <!-- id: issue-290 -->
 
 ## Done
+- [x] Relocate mcp_config to .agents root folder and update bootstrap (feat/issue-290) <!-- id: issue-290 -->
 - [x] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [x] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
@@ -282,3 +283,9 @@ This board tracks active development tasks.
 - [x] Execute DX/UX enhancements, fallback lookups for archived tasks, and git performance optimizations (feat/issue-120) <!-- id: issue-120 -->
 - [x] Fix upgrade.py to exclude AGENTS.md and rules.md from auto-checkout (feat/issue-195) <!-- id: issue-195 -->
 - [x] chore: sync installation scripts to copy Dockerfile (feat/issue-241) <!-- id: issue-241 -->
+- [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-296) <!-- id: issue-296 -->
+- [x] Fix weaknesses in framework release warning and commit amending (feat/issue-295) <!-- id: issue-295 -->
+- [x] Clean up archived issue files from active tracking directory (feat/issue-293) <!-- id: issue-293 -->
+- [x] Verify and harden dummy installation plug and play consistency (feat/issue-291) <!-- id: issue-291 -->
+- [x] Synchronize CLI commands in context map documentation (feat/issue-292) <!-- id: issue-292 -->
+- [x] Generate workspace audit report (feat/issue-294) <!-- id: issue-294 -->
