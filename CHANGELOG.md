@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.57.0] - 2026-07-11
+
+### 🚀 Features
+- Synchronize CLI commands in context map documentation (ISSUE-292)
+
+### 📝 Documentation
+- synchronize dashboard, doctor, and mcp commands in context map
+
+
 ## [3.56.0] - 2026-07-11
 
 ### 🚀 Features
