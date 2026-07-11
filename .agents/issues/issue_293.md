@@ -1,7 +1,7 @@
 ---
 id: issue-293
 title: "Clean up archived issue files from active tracking directory"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

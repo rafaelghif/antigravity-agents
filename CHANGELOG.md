@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.57.1] - 2026-07-11
+
+### 🐛 Bug Fixes
+- Clean up archived issue files from active tracking directory (ISSUE-293)
+
+### ⚙️ Chores
+- clean up 23 archived issue specification files from active repository
+
+
 ## [3.57.0] - 2026-07-11
 
 ### 🚀 Features
