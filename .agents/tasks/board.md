@@ -13,9 +13,10 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Fix MCP config bootstrapping registration and template drift issues (feat/issue-284) <!-- id: issue-284 -->
 
 ## Done
+- [x] Map mcp_config in template_map.md and enforce programmatical template parity checks (feat/issue-285) <!-- id: issue-285 -->
+- [x] Fix MCP config bootstrapping registration and template drift issues (feat/issue-284) <!-- id: issue-284 -->
 - [x] chore: audit MCP configurations and test active server tools (feat/issue-282) <!-- id: issue-282 -->
 - [x] refactor: rename git_token to git_pat for clarity and standardization (feat/issue-283) <!-- id: issue-283 -->
 - [x] chore: update task-management skill to map tasks to milestones (feat/issue-281) <!-- id: issue-281 -->

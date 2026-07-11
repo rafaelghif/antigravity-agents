@@ -1125,6 +1125,75 @@ def audit_workspace_sync() -> bool:
     except Exception as e:
         print_warn(f"Auto-synchronization failed: {e}")
 
+    # Auditing template synchronization parity to prevent configuration-drift
+    template_map_file = ".agents/docs/template_map.md"
+    if os.path.exists(template_map_file):
+        try:
+            # Parse template mappings
+            mappings = []
+            with open(template_map_file, 'r', encoding='utf-8') as tf:
+                for line in tf:
+                    # Look for table rows: e.g. | `src` | `dest` | ...
+                    if line.strip().startswith('|') and line.count('|') >= 3:
+                        parts = [p.strip() for p in line.split('|')]
+                        # Filter out header and separator rows
+                        if len(parts) > 3 and not parts[1].startswith('---') and not parts[1].startswith(':---') and parts[1].lower() != "source template":
+                            src_template = parts[1].replace('`', '').strip()
+                            target_file = parts[2].replace('`', '').strip()
+                            if src_template and target_file:
+                                mappings.append((src_template, target_file))
+                                
+            # Find git modified files
+            modified_files = set()
+            try:
+                res = subprocess.run(
+                    ['git', 'diff', '--cached', '--name-only'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                if res.returncode == 0:
+                    for line in res.stdout.splitlines():
+                        if line.strip():
+                            modified_files.add(line.strip().replace('\\', '/'))
+                res_unstaged = subprocess.run(
+                    ['git', 'diff', '--name-only'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                if res_unstaged.returncode == 0:
+                    for line in res_unstaged.stdout.splitlines():
+                        if line.strip():
+                            modified_files.add(line.strip().replace('\\', '/'))
+            except Exception:
+                pass
+
+            # Verify mappings parity
+            for src_template, target_file in mappings:
+                # Normalize paths (force forward slash)
+                src_norm = src_template.replace('\\', '/')
+                tgt_norm = target_file.replace('\\', '/')
+                
+                # If target is modified, verify if template is also modified
+                if tgt_norm in modified_files and src_norm not in modified_files:
+                    # Ignore if target file is in .gitignore
+                    is_ignored = False
+                    try:
+                        check_ignore = subprocess.run(
+                            ['git', 'check-ignore', tgt_norm],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE
+                        )
+                        is_ignored = (check_ignore.returncode == 0)
+                    except Exception:
+                        pass
+                        
+                    if not is_ignored:
+                        print_warn(f"Target workspace file '{target_file}' was modified, but its template '{src_template}' has not been updated! Please ensure parity to prevent configuration-drift.")
+        except Exception as e:
+            print_warn(f"Failed to audit template parity mappings: {e}")
+
     skills_dir = ".agents/skills"
     agents_file = ".agents/docs/context_map.md"
     if not os.path.exists(agents_file):
