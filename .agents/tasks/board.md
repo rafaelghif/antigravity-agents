@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
 - [ ] --assignee (feat/clean up archived issue files from active tracking directory) <!-- id: Clean up archived issue files from active tracking directory -->
@@ -19,6 +18,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
 - [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->
 - [x] Add Task vs Discussion Distinction Rule (feat/issue-302) <!-- id: issue-302 -->
