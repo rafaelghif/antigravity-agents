@@ -207,7 +207,7 @@ class TestProfileCommand(unittest.TestCase):
         mock_load.return_value = {
             "profiles": [
                 {"name": "p1", "email": "p1@test.com", "active": True},
-                {"name": "p2", "email": "p2@test.com", "active": False, "git_token": "ghp_realSecretToken123"}
+                {"name": "p2", "email": "p2@test.com", "active": False, "git_pat": "ghp_realSecretToken123"}
             ]
         }
         mock_sub.return_value = MagicMock(returncode=0)
@@ -223,7 +223,7 @@ class TestProfileCommand(unittest.TestCase):
     def test_handle_credential_helper_get(self, mock_load, mock_stdin, mock_exit):
         mock_load.return_value = {
             "profiles": [
-                {"name": "p1", "email": "p1@test.com", "active": True, "git_token": "ghp_realSecretToken123"}
+                {"name": "p1", "email": "p1@test.com", "active": True, "git_pat": "ghp_realSecretToken123"}
             ]
         }
         mock_stdin.__iter__.return_value = ["protocol=https\n", "host=github.com\n", "\n"]
@@ -315,7 +315,7 @@ class TestProfileCommand(unittest.TestCase):
         self.assertEqual(prof["email"], "wizard@test.com")
         self.assertEqual(prof["signing_key"], "ssh-ed25519 AAA-mock-pub-key")
         self.assertEqual(prof["ssh_key_path"], "/fake/path")
-        self.assertEqual(prof["git_token"], "ghp_token123")
+        self.assertEqual(prof["git_pat"], "ghp_token123")
 
     @patch('builtins.input', return_value="2")
     @patch('subprocess.run')

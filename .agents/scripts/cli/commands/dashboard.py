@@ -482,8 +482,8 @@ def add_new_profile(profile_data):
             new_profile["signing_key"] = signing_key
         if ssh_key_path:
             new_profile["ssh_key_path"] = ssh_key_path
-        if profile_data.get("git_token"):
-            new_profile["git_token"] = profile_data["git_token"]
+        if profile_data.get("git_pat"):
+            new_profile["git_pat"] = profile_data["git_pat"]
             
         profiles.append(new_profile)
         data["profiles"] = profiles

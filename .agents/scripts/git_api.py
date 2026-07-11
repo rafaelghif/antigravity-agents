@@ -19,7 +19,7 @@ def get_pat(silent: bool = False) -> Optional[str]:
                 profiles = data.get("profiles", [])
                 active = next((p for p in profiles if p.get("active")), None)
                 if active:
-                    token = active.get("git_token")
+                    token = active.get("git_pat") or active.get("git_token")
                     if token:
                         if token.startswith("env:"):
                             pat = os.getenv(token[4:])

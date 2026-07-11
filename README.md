@@ -141,7 +141,7 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
       "email": "developer@company.com",
       "signing_key": "ssh-ed25519 AAAAC3N...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
-      "git_token": "ghp_corporateTokenExample",
+      "git_pat": "ghp_corporateTokenExample",
       "active": true
     }
   ]
@@ -151,7 +151,7 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
 * **`email`**: Git author email configuration.
 * **`signing_key`**: GPG or SSH signing key for signing commits.
 * **`ssh_key_path`**: Path to the SSH private key used to push commits.
-* **`git_token`**: Access token for authenticating GitHub/GitLab CLI commands.
+* **`git_pat`**: Personal Access Token (PAT) for authenticating GitHub/Gitea API commands.
 * **`active`**: Set `true` to apply this profile's configuration to Git during development.
 
 **CLI Profile Utilities:**
