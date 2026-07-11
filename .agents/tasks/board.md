@@ -13,6 +13,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Update Agent Evaluation Report to reflect resolved branch naming friction (feat/issue-288) <!-- id: issue-288 -->
 
 ## Done
 - [x] Fix branch naming friction and flexible issue closing resolution (feat/issue-287) <!-- id: issue-287 -->

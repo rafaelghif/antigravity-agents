@@ -8,7 +8,7 @@ This report evaluates the engineering quality, safety, collaborative capabilitie
 
 AAC V3 is a localized, Git-native autonomous agent framework designed to manage software projects through strict validation gates, automated task management, multi-agent lock synchronization, and token budget enforcement. 
 
-- **Overall Rating**: **9.2 / 10** (Enterprise-Grade)
+- **Overall Rating**: **9.4 / 10** (Enterprise-Grade)
 - **Primary Strength**: Unmatched codebase safety checks and Git profile identity rotation.
 - **Primary Area for Improvement**: Platform-drift complexity between Bash (`.sh`) and PowerShell (`.ps1`) script wrappers.
 
@@ -39,7 +39,7 @@ AAC V3 is a localized, Git-native autonomous agent framework designed to manage 
 - **Secrets Scanning**: Scans working trees for staged private keys, `.env` files, and credentials before allowing commits.
 - **Workspace Isolation**: Operating strictly at the workspace level, it does not leak configuration details to global storage paths (e.g., `~/.config` or home directories), maintaining complete environment sandbox boundaries.
 
-### C. Developer Experience (DX) (Rating: 8.8/10)
+### C. Developer Experience (DX) (Rating: 9.2/10)
 - **Interactive Wizards**: Highly responsive onboarding profile wizard and task-selection helpers.
 - **Platform Parity Mismatches**: Script twin-maintenance (e.g., `helper.sh` and `helper.ps1`) requires rigorous checks. Windows backslashes (`\`) vs. Linux forward slashes (`/`) sometimes introduce minor path resolution mismatches in validation regex, which has been hardened in recent releases.
 
@@ -51,10 +51,10 @@ AAC V3 is a localized, Git-native autonomous agent framework designed to manage 
 1. **Zero-Touch Compliance Gates**: Prevents low-quality, untested, or improperly signed code from hitting base branches.
 2. **Prompt Caching Focus**: By caching found filepaths and skipping redundant recursive directory searches, the core keeps LLM prompt caches warm, leading to **30-50% token cost savings**.
 3. **Programmatic Template Audit**: The newly added template mapping check dynamically reads `template_map.md` and detects when target configs have drifted from source templates, preventing deployment errors.
+4. **Flexible Branch & Issue Resolution**: Accepts all standard branch formats (e.g. `feat/287`, `feat/issue287`, `feat/issue-287-friction`) and dynamically resolves local active git branches, removing workspace checkout friction.
 
 ### Cons (Weaknesses)
-1. **Branch Naming Friction**: Strict branch-to-issue matching (e.g. enforcing `feat/issue-123` instead of just `feat/123`) can sometimes create minor friction when managing quick branches manually.
-2. **Commit-after-Close Catch-22**: Closing an issue modifies status to `closed` in frontmatter, which automatically disables lock parsing for that issue. Final commits containing codebase modifications must therefore be performed immediately prior to close or run with `--no-verify`.
+1. **Commit-after-Close Catch-22**: Closing an issue modifies status to `closed` in frontmatter, which automatically disables lock parsing for that issue. Final commits containing codebase modifications must therefore be performed immediately prior to close or run with `--no-verify`.
 
 ---
 
