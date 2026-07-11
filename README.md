@@ -1,39 +1,48 @@
 # Antigravity Agent Core (AAC) V3 🚀
-### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
-*(Also universally compatible with Cursor, Aider, Cline, and Claude)*
+### *Enterprise Guardrails, Workspace Insulation, and Local Quality Gates for Autonomous AI Agents*
 
-[![Version](https://img.shields.io/badge/version-3.66.1-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.67.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)
 
-**AAC V3** is an open-source, local-first guardrail and workspace customization framework built for the **Antigravity CLI (agy)**. It enforces strict boundaries, directory structures, and code patterns on autonomous agents to align repository workflows with professional engineering practices.
+Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly powerful, but running them in unstructured workspaces introduces severe risks: leaked credentials, broken architecture styles, messy branch commits, and skyrocketing token budgets.
+
+**Antigravity Agent Core (AAC) V3** is a local-first, stack-agnostic workspace insulation and guardrail framework built for the **Antigravity CLI (agy)**. It wraps a strict security, quality, and workflow loop around your repository, ensuring that AI-driven coding conforms exactly to professional, enterprise-grade engineering standards.
 
 > [!IMPORTANT]
-> **AAC V3** acts as a local security sandbox and quality gate. All configurations, credentials, tasks, and plans are stored strictly at the workspace level under `.agents/` to maintain team consistency without relying on global states.
+> **AAC V3** operates entirely locally at the workspace level. All configurations, task details, developer profiles, and execution logs are isolated under `.agents/` inside the repository. This guarantees team alignment and security without relying on global states or cloud dependencies.
 
-By placing a strict insulation layer around your workspace, AAC V3 prevents AI tools from:
-- 🔓 Leaking local credentials, API keys, or private `.env` files.
-- 🔀 Mutating critical base branches (`main`/`master`) directly.
-- 🏚️ Violating architectural specifications or database migration templates.
-- 💸 Bloating token budgets with stale, completed task/issue logs.
+---
+
+## 💡 The Core Problem & The AAC Solution
+
+| The AI Coding Agent Risk | The AAC V3 Solution |
+| :--- | :--- |
+| **Credential & Secret Leaks** | Offline hooks block staging/committing `.env`, private keys, and local credentials. |
+| **Messy Branch Commits** | Commits to base branches (`main`/`master`) are blocked. Enforces Conventional Commits with task ID references. |
+| **Context & Token Bloat** | Old task details, logs, and finished specifications are auto-archived, saving up to **80% in token budgets**. |
+| **Parallel Coding Conflicts** | Filesystem-level mutex locks prevent agents from conflict-editing the same directories in parallel. |
+| **Platform / Installer Drift** | Core logic is centralized in Python scripts, with wrapper scripts acting as thin OS delegates. |
 
 ---
 
 ## 🗺️ Reusable Development Cycle
 
-AAC V3 forces AI agents to run inside a repeatable, secure lifecycle loop:
+AAC V3 enforces a structured, step-by-step engineering cycle on the agent to prevent speculative coding:
 
 ```mermaid
 flowchart TD
     A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & issue_[id].md</code>"]
     B --> C["3. Claim & Checkout Branch<br><code>./helper.sh issue checkout &lt;id&gt;</code>"]
+    B --> C_Fix["3. Claim & Checkout Fix Branch<br><code>git checkout -b fix/issue-&lt;id&gt;</code>"]
     C --> D["4. Read Schema & Context<br><code>schema.md & active_context.md</code>"]
+    C_Fix --> D
     D --> E["5. Lock Active Module<br><code>./helper.sh lock &lt;module&gt;</code>"]
     E --> F["6. Code, Lint, &amp; Test<br><code>validate.py</code>"]
-    F -- "Fail Audit" --> G["7. Self-Heal Workspace<br><code>self-healing/SKILL.md</code>"]
+    F -- "Audit Fails" --> G["7. Self-Heal Workspace<br><code>self-healing/SKILL.md</code>"]
     G --> F
-    F -- "Pass Audit" --> H["8. Commit with Task ID<br><code>Conventional Commits</code>"]
+    F -- "Audit Passes" --> H["8. Commit with Task ID<br><code>Conventional Commits</code>"]
     H --> I["9. Close Task &amp; Merge<br><code>./helper.sh issue close &lt;id&gt;</code>"]
 ```
 
@@ -41,33 +50,28 @@ flowchart TD
 
 ## 🌟 Key Features
 
-* **📦 Unified Core Installer**: Consolidates backups, file copy rules, and stack reconnaissance inside the Python core `install` command. Shell wrapper scripts act as thin delegates, preventing platform drift.
-* **🎤 Setup Questionnaire Interview**: Guides users through a database, framework, and deployment infrastructure questionnaire at the start of `./helper.sh bootstrap`, immediately injecting parameters into `.agents/schema.md`.
-* **🔁 Lookahead Loop & Zero-Touch Chaining**: Rules enforce that the agent performs self-correcting test/lint validation loops and chains commands internally, reducing user interactions to a minimum and preventing hallucinations.
-* **⚡ Offline Validation Guard**: Run 10 compliance audits (securing files, secrets, links, task boards, branch names, and unit tests) in **under 100ms** to block bad commits.
-* **👤 Zero-Trust Git Profiles**: Rotate author metadata and local developer credentials dynamically, preventing leakage.
-* **🔒 Collaborative Module Locks**: Restrict parallel edits on directories using directory-level filesystem mutexes.
-* **Active Context Archiver**: Auto-relocates completed task specifications and plans to `.agents/archive/` when optimizing context, saving up to **80% in LLM token budgets**.
-* **📊 Visual Status Dashboard**: Run `./helper.sh dashboard` to host a premium local dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically.
+* **📦 Python-Powered Unified Installer**: Consolidates system discovery, project setups, backups, and exclusions in a single Python core `install.py`. Wrappers are kept extremely thin, avoiding Windows/macOS/Linux drift.
+* **🎤 Setup Interview & Reconnaissance**: `./helper.sh bootstrap` automatically runs an offline stack reconnaissance scan and launches an interactive setup interview to establish database schemas, frameworks, and architecture patterns instantly inside `.agents/schema.md`.
+* **🔁 Chained Lookahead & Self-Correction**: Enforces rules requiring the agent to run local test suites, check linter rules, and self-heal from errors using local playbooks before requesting user approval.
+* **⚡ Ultra-Fast Validation Guard**: Evaluates 11 security and rule audits (detecting private files, broken anchors, mismatched author profiles, missing locks, and test failures) in **under 100ms** to prevent bad commits.
+* **👤 Zero-Trust Git Profiles**: Dynamically configures local author information and signs commits using workspace-isolated credentials from `.agents/git_profiles.json`.
+* **📊 Visual Local Dashboard**: Host a premium, dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically by running `./helper.sh dashboard`.
 
 ---
 
-## 📋 System Prerequisites
+## 📋 Prerequisites
 
-Before installation, verify your environment meets the minimum requirements:
-* **Git**: Installed and available in your environment (`git`).
+Verify your environment meets these basic requirements before installing:
+* **Git**: Installed and available in the user path.
 * **Python**: Version **3.8 or newer** (`python3` or `python`).
-* **Shell**: Standard terminal environment (`bash`, `zsh` or PowerShell).
+* **Shell**: Terminal access (`bash`, `zsh`, or PowerShell).
 
 ---
 
-## 🚀 Getting Started (4-Step Setup)
+## 🚀 Quick Start Setup (4 Steps)
 
-### 1. Run the Installer
-Run the bootstrap installer script inside your project's root folder:
-
-> [!NOTE]
-> The installer clones template files directly from the Git repository to verify installation integrity.
+### 1. Install AAC V3 in Your Repository
+Run the bootstrap installer script inside your target project's root folder:
 
 **Linux / macOS (Bash):**
 ```bash
@@ -79,51 +83,48 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
 ```
 
-### 2. Auto-Detect Stack & Run Interactive Interview
-The installer triggers the reconnaissance script (`.agents/scripts/recon.py`), which scans your repository. You will then be prompted to configure your project details:
-- **Project Name**
-- **Programming Stack**
-- **Architecture Pattern** (clean / layered / mvc)
-- **Database** (e.g. SQLite, PostgreSQL, MySQL, MongoDB, none)
-- **Infrastructure/Deployment** (e.g. Docker, Kubernetes, AWS, GCP, none)
-- **Framework/Library** (e.g. Django, Express, Laravel, none)
+### 2. Auto-Detect Stack & Bootstrap
+The installer scans your project structure and prompts you to configure:
+- **Project Name** & **Language Stack**
+- **Architecture Pattern** (`clean`, `layered`, or `mvc`)
+- **Database** & **Framework** details
 
-These details are immediately synchronized and written to [schema.md](file:///.agents/schema.md) and [rules.md](file:///.agents/rules.md).
+These configuration parameters are immediately written to your workspace's [rules.md](file:///.agents/rules.md) and [schema.md](file:///.agents/schema.md).
 
-### 3. Configure Profiles & Sub-projects (Optional)
-Customize local developer identities or configure monorepo sub-project validation:
-- **Developer Identities**: Edit `.agents/git_profiles.json` (created from `git_profiles.example`) to rotate author credentials, or run `./helper.sh profile add`.
-- **Monorepos**: Copy `.agents/projects.example` to `.agents/projects.json` and configure relative paths and test commands for each component directory.
+### 3. Customize Developer Profiles (Optional)
+Run the profiles command to rotate developer git credentials or register key rotation:
+```bash
+./helper.sh profile add
+```
+This updates `.agents/git_profiles.json` (GPG/SSH commit signature keys and Git PAT tokens) to rotate developer profiles and prevent leakage.
 
-### 4. Start Coding with the Agent
-When prompting your agent (e.g. Cline, Aider, Cursor), refer to the master instruction:
-> "Read AGENTS.md and align with our workspace layout, rules, and memory ledger."
+### 4. Direct Your Coding Agent
+When triggering your agent (Aider, Cursor, Cline, or Claude), simply start the prompt with:
+> "Read AGENTS.md and align with our workspace layout, rules, and memory ledger before starting."
 
 ---
 
 ## 🛠️ CLI Commands Reference
 
-Use `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows) to dispatch commands:
+Use `./helper.sh` (POSIX) or `./helper.ps1` (Windows) to dispatch workspace commands:
 
 | Command | Usage | Description |
-|---|---|---|
-| **`bootstrap`** | `./helper.sh bootstrap [-q \| --quick]` | Scaffolds directories, detects stack, and guides setup. Can be run in zero-config mode with `-q` / `--quick` to immediately bootstrap using detected defaults. |
-| **`validate`** | `./helper.sh validate [-q \| --quiet]` | Runs 11 compliance audits. Use `-q` / `--quiet` to run validation silently, only printing errors and final summary checklist. |
-| **`commit`** | `./helper.sh commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` / `--interactive` to launch Conventional Commit helper with staged changes diff preview. |
-| **`dashboard`** | `./helper.sh dashboard` | Launches local web-based interactive visual status dashboard. |
-| **`issue`** | `./helper.sh issue <subcommand>` | Local issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
-| **`lock`** | `./helper.sh lock [<module> \| --release <module> \| --clear-all \| --prune]` | Local locks to prevent concurrent modifications. Use `--clear-all` to wipe locks, and `--prune` to clear locks of deleted branches. |
-| **`profile`** | `./helper.sh profile <subcommand>` | Credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
-| **`context`** | `./helper.sh context optimize` | Rebuilds active context manifest and archives done issues. |
-| **`token`** | `./helper.sh token [<subcommand>]` | Local token budget tracker. Defaults to `status` status dashboard if subcommand is omitted. |
-| **`pause`** | `./helper.sh pause` | Developer hand-off tool. Pauses and locks agent execution completely. |
-| **`resume`** | `./helper.sh resume` | Unpauses agent execution. |
-| **`mcp`** | `./helper.sh mcp <subcommand>` | Model Context Protocol integration. Supports `register` and `start`. |
-| **`changelog`** | `./helper.sh changelog` | Auto-changelog generator. Parses conventional commits and bumps SemVer. |
-| **`sync`** | `./helper.sh sync` | Synchronizes custom skills index in `AGENTS.md` and ADR registries. |
-| **`learn`** | `./helper.sh learn "Lesson..."` | Records developer/agent lessons to `lessons-learned.md`. |
-| **`doctor`** | `./helper.sh doctor` | Diagnostics tool verifying local setup and python dependencies. |
-| **`heartbeat`** | `./helper.sh heartbeat` | Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget). |
+| :--- | :--- | :--- |
+| **`bootstrap`** | `./helper.sh bootstrap [-q \| --quick]` | Re-initializes stack parameters and templates. Use `-q` to bypass the interview and bootstrap immediately with defaults. |
+| **`validate`** | `./helper.sh validate [-q \| --quiet]` | Runs 11 workspace audits. Use `-q` to output only failed tests and validation summaries. |
+| **`commit`** | `./helper.sh commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
+| **`dashboard`** | `./helper.sh dashboard` | Spawns a local visual monitoring dashboard on your browser. |
+| **`issue`** | `./helper.sh issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
+| **`lock`** | `./helper.sh lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
+| **`profile`** | `./helper.sh profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
+| **`context`** | `./helper.sh context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
+| **`token`** | `./helper.sh token [<subcommand>]` | Tracks LLM token usage and budgets. Defaults to the `status` panel if subcommand is omitted. |
+| **`pause`** / **`resume`** | `./helper.sh pause` / `./helper.sh resume` | Halts or resumes agent workspace execution locks. |
+| **`mcp`** | `./helper.sh mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
+| **`changelog`** | `./helper.sh changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
+| **`learn`** | `./helper.sh learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
+| **`doctor`** | `./helper.sh doctor` | Checks python environment, dependencies, and command accessibility. |
+| **`heartbeat`** | `./helper.sh heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
 
 ---
 
@@ -138,7 +139,7 @@ Create `.agents/config.json` to customize the agent's operating mode:
   "workflow_mode": "solo"
 }
 ```
-* **`workflow_mode`** (`"team"` | `"solo"`): By default (`"team"`), AAC blocks direct edits and commits on base branches like `main` or `master`. Setting this to `"solo"` bypasses base branch checks, allowing solo developers to commit directly to the primary branch.
+* **`workflow_mode`** (`"team"` | `"solo"`): In `"team"` mode, AAC blocks direct edits and commits on base branches like `main` or `master`. Setting this to `"solo"` bypasses base branch checks, allowing solo developers to commit directly to the primary branch.
 
 ### 2. Developer Profiles (`.agents/git_profiles.json`)
 Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.example` to `.agents/git_profiles.json`:
@@ -263,12 +264,6 @@ Define model context servers and token inputs. Local workspace-level MCP configu
 **CLI MCP Utilities:**
 - **Register MCP locally**: `./helper.sh mcp register` (registers workspace servers inside local agent configurations)
 - **Register MCP globally**: `./helper.sh mcp register --global` (opt-in to write configuration to user home directory configuration)
-
-### 5. Setup Diagnostics
-Ensure your workspace, python environment, and permissions are fully set up by running diagnostic audits:
-- **Run doctor diagnostic**: `./helper.sh doctor` (verifies python version, dependencies, system commands, and active configuration files)
-- **Run validation heartbeat**: `./helper.sh heartbeat` (verifies active module locks, git identity profiles, hooks, and token budget quotas)
-
 
 ---
 

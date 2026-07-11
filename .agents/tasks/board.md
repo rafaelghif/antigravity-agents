@@ -19,6 +19,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->
 - [x] Add Task vs Discussion Distinction Rule (feat/issue-302) <!-- id: issue-302 -->
 - [x] Fix Changelog Versioning and Issue Naming Skew (feat/issue-301) <!-- id: issue-301 -->
