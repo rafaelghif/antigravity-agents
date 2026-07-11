@@ -594,5 +594,32 @@ class TestValidate(unittest.TestCase):
         
         self.assertTrue(validate.audit_git_branch_alignment())
 
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_get_workflow_mode(self, mock_open_file, mock_exists):
+        mock_exists.return_value = True
+        mock_open_file.return_value = io.StringIO('{"workflow_mode": "solo"}')
+        self.assertEqual(validate.get_workflow_mode(), "solo")
+
+        mock_open_file.return_value = io.StringIO('{"workflow_mode": "team"}')
+        self.assertEqual(validate.get_workflow_mode(), "team")
+
+        mock_exists.return_value = False
+        self.assertEqual(validate.get_workflow_mode(), "team")
+
+    @patch('validate.get_workflow_mode')
+    @patch('validate.get_current_branch')
+    def test_audit_git_branch_alignment_solo(self, mock_get_branch, mock_get_mode):
+        mock_get_mode.return_value = "solo"
+        mock_get_branch.return_value = "feat/some-arbitrary-branch"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_workflow_mode')
+    @patch('validate.get_current_branch')
+    def test_audit_module_locks_solo(self, mock_get_branch, mock_get_mode):
+        mock_get_mode.return_value = "solo"
+        mock_get_branch.return_value = "feat/some-arbitrary-branch"
+        self.assertTrue(validate.audit_module_locks())
+
 if __name__ == '__main__':
     unittest.main()

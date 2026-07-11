@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.71.0] - 2026-07-11
+
+### 🚀 Features
+- bypass lock and branch alignment audits in solo workflow mode
+- Enhance solo workflow mode to bypass lock and branch alignment checks (ISSUE-308)
+
+
 ## [3.70.0] - 2026-07-11
 
 ### 🚀 Features

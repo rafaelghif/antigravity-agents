@@ -836,6 +836,18 @@ def audit_link_integrity() -> bool:
         print_ok("All file-link path integrity checks passed.")
     return not failed
 
+def get_workflow_mode() -> str:
+    """Retrieve the workspace workflow mode ('solo' or 'team') from .agents/config.json."""
+    config_path = ".agents/config.json"
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+                return cfg.get("workflow_mode", "team")
+        except Exception:
+            pass
+    return "team"
+
 # ==========================================================
 # 4. Git Branch & Issue Alignment Audit
 # ==========================================================
@@ -846,16 +858,10 @@ def audit_git_branch_alignment() -> bool:
         print_warn("Not inside a git repository or git command failed.")
         return True
         
-    # Check if workflow_mode is 'solo' in .agents/config.json
-    workflow_mode = "team"
-    config_path = ".agents/config.json"
-    if os.path.exists(config_path):
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                cfg = json.load(f)
-                workflow_mode = cfg.get("workflow_mode", "team")
-        except Exception:
-            pass
+    workflow_mode = get_workflow_mode()
+    if workflow_mode == "solo":
+        print_ok("Workflow mode is 'solo' (skipping git branch to local issue alignment check).")
+        return True
 
     if branch in ('main', 'master', 'HEAD'):
         is_real_ci = (os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true") and 'unittest' not in sys.modules and 'pytest' not in sys.modules
@@ -1834,6 +1840,11 @@ def audit_module_locks() -> bool:
         print_warn("Not inside a git repository or git command failed.")
         return True
         
+    workflow_mode = get_workflow_mode()
+    if workflow_mode == "solo":
+        print_ok("Workflow mode is 'solo' (skipping module lock compliance check).")
+        return True
+
     if branch in ('main', 'master', 'HEAD'):
         print_ok(f"On base branch '{branch}' (skipping lock compliance check).")
         return True

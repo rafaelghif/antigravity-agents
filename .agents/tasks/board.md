@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Enhance solo workflow mode to bypass lock and branch alignment checks (feat/issue-308) <!-- id: issue-308 -->
 - [x] Enforce agent soul profile in AGENTS.md and enhance soul personality strictness (feat/issue-307) <!-- id: issue-307 -->
 - [x] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->
 - [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
