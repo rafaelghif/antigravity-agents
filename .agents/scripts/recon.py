@@ -43,6 +43,12 @@ def detect_dotnet(file_names: Set[str], file_paths: List[str], file_contents: Di
     elif "mstest" in csproj_contents.lower() or "visualstudio.testtools" in csproj_contents.lower():
         test_framework = "MSTest"
         
+    # Architectural Recommendation
+    if any(f in ("WPF", "WinForms") for f in sub_frameworks) and not any(f in ("ASP.NET Core", "ASP.NET MVC") for f in sub_frameworks):
+        arch = "Desktop layered architecture (MVVM/MVP)"
+    else:
+        arch = "Clean Architecture / Domain-Driven Design (DDD)"
+        
     if is_framework:
         name = ".NET Framework (C#)"
         if sub_frameworks:
@@ -52,7 +58,8 @@ def detect_dotnet(file_names: Set[str], file_paths: List[str], file_contents: Di
             "main_stack": "dotnet",
             "test_command": "vstest.console.exe",
             "build_command": "nuget restore && msbuild",
-            "lint_command": "dotnet format --verify-no-changes"
+            "lint_command": "dotnet format --verify-no-changes",
+            "recommended_architecture": arch
         }
     else:
         name = ".NET Core (C#)"
@@ -63,7 +70,8 @@ def detect_dotnet(file_names: Set[str], file_paths: List[str], file_contents: Di
             "main_stack": "dotnet",
             "test_command": "dotnet test",
             "build_command": "dotnet build",
-            "lint_command": "dotnet format --verify-no-changes"
+            "lint_command": "dotnet format --verify-no-changes",
+            "recommended_architecture": arch
         }
 
 def detect_php(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -90,12 +98,16 @@ def detect_php(file_names: Set[str], file_paths: List[str], file_contents: Dict[
         is_symfony = True
         
     framework = ""
+    arch = "MVC (Model-View-Controller)"
     if is_laravel:
         framework = "Laravel"
+        arch = "MVC (Model-View-Controller) / Clean Architecture"
     elif is_symfony:
         framework = "Symfony"
+        arch = "MVC (Model-View-Controller) / Clean Architecture"
     elif is_wordpress:
         framework = "WordPress"
+        arch = "Hooks-based Plugin/Theme Architecture"
         
     has_pest = "pestphp/pest" in composer_content
     has_phpunit = "phpunit/phpunit" in composer_content or any(f in ('phpunit.xml', 'phpunit.xml.dist') for f in file_names)
@@ -118,7 +130,8 @@ def detect_php(file_names: Set[str], file_paths: List[str], file_contents: Dict[
         "main_stack": "php",
         "test_command": test_cmd,
         "build_command": "composer install",
-        "lint_command": "./vendor/bin/phpcs" if 'phpcs' in composer_content else "php -l"
+        "lint_command": "./vendor/bin/phpcs" if 'phpcs' in composer_content else "php -l",
+        "recommended_architecture": arch
     }
 
 def detect_js_ts(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -157,20 +170,28 @@ def detect_js_ts(file_names: Set[str], file_paths: List[str], file_contents: Dic
         lint_cmd = "bun run lint"
         
     frameworks: List[str] = []
+    arch = "Layered (Controller-Service-Repository) / MVC"
+    
     if "next" in pkg_content:
         frameworks.append("Next.js")
+        arch = "Component-driven / App Router Layered"
     if "nuxt" in pkg_content:
         frameworks.append("Nuxt")
+        arch = "Component-driven / App Router Layered"
     if "express" in pkg_content:
         frameworks.append("Express")
     if "@nestjs/core" in pkg_content:
         frameworks.append("NestJS")
+        arch = "Clean Architecture / Domain-Driven Design (DDD) / Modular"
     if "react" in pkg_content and "next" not in pkg_content:
         frameworks.append("React")
+        arch = "Atomic Design / Component-driven"
     if "vue" in pkg_content and "nuxt" not in pkg_content:
         frameworks.append("Vue")
+        arch = "Atomic Design / Component-driven"
     if "@angular/core" in pkg_content:
         frameworks.append("Angular")
+        arch = "Component-driven Layered Architecture"
         
     is_ts = "typescript" in pkg_content or any(f.endswith(('.ts', '.tsx')) for f in file_names)
     
@@ -184,7 +205,8 @@ def detect_js_ts(file_names: Set[str], file_paths: List[str], file_contents: Dic
         "build_tool": build_tool,
         "test_command": test_cmd,
         "build_command": f"{build_tool} install" if not has_js_ts_files else build_cmd,
-        "lint_command": lint_cmd
+        "lint_command": lint_cmd,
+        "recommended_architecture": arch
     }
 
 def detect_python(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -213,12 +235,16 @@ def detect_python(file_names: Set[str], file_paths: List[str], file_contents: Di
         is_fastapi = True
         
     framework = ""
+    arch = "Layered Architecture"
     if is_django:
         framework = "Django"
+        arch = "MVC (Model-View-Template)"
     elif is_flask:
         framework = "Flask"
+        arch = "Layered (Controller-Service-Repository) / Hexagonal (Ports & Adapters)"
     elif is_fastapi:
         framework = "FastAPI"
+        arch = "Layered (Controller-Service-Repository) / Hexagonal (Ports & Adapters)"
         
     has_pytest = "pytest" in reqs_content.lower() or any('test' in f and 'py' in f for f in file_names)
     
@@ -234,7 +260,8 @@ def detect_python(file_names: Set[str], file_paths: List[str], file_contents: Di
         "main_stack": "python",
         "test_command": test_cmd,
         "build_command": build_cmd,
-        "lint_command": "flake8 ."
+        "lint_command": "flake8 .",
+        "recommended_architecture": arch
     }
 
 def detect_go(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -270,7 +297,8 @@ def detect_go(file_names: Set[str], file_paths: List[str], file_contents: Dict[s
         "main_stack": "go",
         "test_command": "go test ./...",
         "build_command": "go build",
-        "lint_command": "golangci-lint run"
+        "lint_command": "golangci-lint run",
+        "recommended_architecture": "Layered (Controller-Service-Repository) / Hexagonal"
     }
 
 def detect_rust(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -304,7 +332,8 @@ def detect_rust(file_names: Set[str], file_paths: List[str], file_contents: Dict
         "main_stack": "rust",
         "test_command": "cargo test",
         "build_command": "cargo build",
-        "lint_command": "cargo clippy"
+        "lint_command": "cargo clippy",
+        "recommended_architecture": "Layered Architecture (Hexagonal / Clean)"
     }
 
 def detect_java_kotlin(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -323,12 +352,16 @@ def detect_java_kotlin(file_names: Set[str], file_paths: List[str], file_content
             build_content += "\n" + content
             
     frameworks: List[str] = []
+    arch = "Layered Architecture"
     if "spring-boot" in build_content or "springboot" in build_content:
         frameworks.append("Spring Boot")
+        arch = "Clean Architecture / Domain-Driven Design (DDD) / Hexagonal"
     if "quarkus" in build_content:
         frameworks.append("Quarkus")
+        arch = "Clean Architecture / Domain-Driven Design (DDD) / Hexagonal"
     if "micronaut" in build_content:
         frameworks.append("Micronaut")
+        arch = "Clean Architecture / Domain-Driven Design (DDD) / Hexagonal"
         
     lang = "Java"
     if has_kt and not has_java:
@@ -346,7 +379,8 @@ def detect_java_kotlin(file_names: Set[str], file_paths: List[str], file_content
             "main_stack": "java",
             "test_command": "mvn test",
             "build_command": "mvn clean package",
-            "lint_command": "mvn checkstyle:check"
+            "lint_command": "mvn checkstyle:check",
+            "recommended_architecture": arch
         }
     else:
         gradlew = "./gradlew" if any('gradlew' in f for f in file_names) else "gradle"
@@ -355,7 +389,8 @@ def detect_java_kotlin(file_names: Set[str], file_paths: List[str], file_content
             "main_stack": "java",
             "test_command": f"{gradlew} test",
             "build_command": f"{gradlew} build",
-            "lint_command": f"{gradlew} check"
+            "lint_command": f"{gradlew} check",
+            "recommended_architecture": arch
         }
 
 def detect_ruby(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -376,8 +411,10 @@ def detect_ruby(file_names: Set[str], file_paths: List[str], file_contents: Dict
     is_sinatra = 'sinatra' in gemfile_content
     
     framework = ""
+    arch = "Modular / Layered Architecture"
     if is_rails:
         framework = "Ruby on Rails"
+        arch = "MVC (Model-View-Controller)"
     elif is_sinatra:
         framework = "Sinatra"
         
@@ -397,7 +434,8 @@ def detect_ruby(file_names: Set[str], file_paths: List[str], file_contents: Dict
         "main_stack": "ruby",
         "test_command": test_cmd,
         "build_command": "bundle install",
-        "lint_command": "bundle exec rubocop"
+        "lint_command": "bundle exec rubocop",
+        "recommended_architecture": arch
     }
 
 def detect_dart(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -419,13 +457,15 @@ def detect_dart(file_names: Set[str], file_paths: List[str], file_contents: Dict
     name = "Dart (Flutter)" if is_flutter else "Dart"
     test_cmd = "flutter test" if is_flutter else "dart test"
     build_cmd = "flutter build apk" if is_flutter else "dart pub get"
+    arch = "BLoC / Feature-First Layered Architecture" if is_flutter else "Layered Architecture"
     
     return {
         "name": name,
         "main_stack": "dart",
         "test_command": test_cmd,
         "build_command": build_cmd,
-        "lint_command": "flutter analyze" if is_flutter else "dart analyze"
+        "lint_command": "flutter analyze" if is_flutter else "dart analyze",
+        "recommended_architecture": arch
     }
 
 def detect_elixir(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -445,13 +485,15 @@ def detect_elixir(file_names: Set[str], file_paths: List[str], file_contents: Di
     is_phoenix = "phoenix" in mix_content
     
     name = "Elixir (Phoenix)" if is_phoenix else "Elixir"
+    arch = "MVC (Model-View-Controller) / Context-driven" if is_phoenix else "Functional/Modular Architecture"
     
     return {
         "name": name,
         "main_stack": "elixir",
         "test_command": "mix test",
         "build_command": "mix deps.get",
-        "lint_command": "mix format --check-formatted"
+        "lint_command": "mix format --check-formatted",
+        "recommended_architecture": arch
     }
 
 def detect_swift(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -471,13 +513,15 @@ def detect_swift(file_names: Set[str], file_paths: List[str], file_contents: Dic
     is_vapor = "vapor" in pkg_content.lower()
     
     name = "Swift (Vapor)" if is_vapor else "Swift"
+    arch = "MVC (Model-View-Controller)" if is_vapor else "MVVM (Model-View-ViewModel)"
     
     return {
         "name": name,
         "main_stack": "swift",
         "test_command": "swift test",
         "build_command": "swift build",
-        "lint_command": "swiftlint"
+        "lint_command": "swiftlint",
+        "recommended_architecture": arch
     }
 
 def detect_cpp(file_names: Set[str], file_paths: List[str], file_contents: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -497,7 +541,8 @@ def detect_cpp(file_names: Set[str], file_paths: List[str], file_contents: Dict[
             "main_stack": "cpp",
             "test_command": "ctest",
             "build_command": "cmake -B build && cmake --build build",
-            "lint_command": "clang-tidy"
+            "lint_command": "clang-tidy",
+            "recommended_architecture": "Modular Library / Layered Architecture"
         }
     else:
         return {
@@ -505,7 +550,8 @@ def detect_cpp(file_names: Set[str], file_paths: List[str], file_contents: Dict[
             "main_stack": "cpp",
             "test_command": "make test",
             "build_command": "make",
-            "lint_command": "cppcheck ."
+            "lint_command": "cppcheck .",
+            "recommended_architecture": "Modular Architecture"
         }
 
 def scan_workspace() -> Dict[str, Any]:
@@ -621,12 +667,14 @@ def scan_workspace() -> Dict[str, Any]:
         test_command = primary_detection["test_command"]
         lint_command = primary_detection["lint_command"]
         build_command = primary_detection["build_command"]
+        recommended_architecture = primary_detection["recommended_architecture"]
     else:
         main_stack = None
         build_tool = None
         test_command = "N/A"
         lint_command = "N/A"
         build_command = "N/A"
+        recommended_architecture = "Layered Architecture"
 
     return {
         "stack": ", ".join(detected_stack),
@@ -634,7 +682,8 @@ def scan_workspace() -> Dict[str, Any]:
         "build_tool": build_tool,
         "test_command": test_command,
         "lint_command": lint_command,
-        "build_command": build_command
+        "build_command": build_command,
+        "recommended_architecture": recommended_architecture
     }
 
 def update_agents_md(scan_results: Dict[str, Any]) -> None:
@@ -816,6 +865,7 @@ This report is automatically generated by `recon.py`. It lists recommended struc
 
 ## 1. Detected Stack
 - **Primary Stack**: {scan_results.get("stack", "General Project")}
+- **Recommended Architecture**: {scan_results.get("recommended_architecture", "N/A")}
 
 """
     if missing_dirs:
@@ -898,6 +948,7 @@ if __name__ == '__main__':
     results = scan_workspace()
     print(f"Detected Stack: {results['stack']}")
     print(f"Recommended Test: {results['test_command']}")
+    print(f"Recommended Architecture: {results['recommended_architecture']}")
     
     update_agents_md(results)
     update_rules_md(results)

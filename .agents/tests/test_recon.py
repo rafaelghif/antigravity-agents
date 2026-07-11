@@ -114,6 +114,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertIn("WPF", results["stack"])
         self.assertIn("ASP.NET Core", results["stack"])
         self.assertEqual(results["test_command"], "dotnet test")
+        self.assertEqual(results["recommended_architecture"], "Clean Architecture / Domain-Driven Design (DDD)")
 
     def test_scan_workspace_php_laravel_pest(self):
         # Artisan file + composer.json referencing pest
@@ -125,6 +126,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "php")
         self.assertIn("PHP (Laravel)", results["stack"])
         self.assertEqual(results["test_command"], "php artisan test")
+        self.assertEqual(results["recommended_architecture"], "MVC (Model-View-Controller) / Clean Architecture")
 
     def test_scan_workspace_php_phpunit(self):
         # PHPUnit file
@@ -134,6 +136,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "php")
         self.assertIn("PHP", results["stack"])
         self.assertEqual(results["test_command"], "./vendor/bin/phpunit")
+        self.assertEqual(results["recommended_architecture"], "MVC (Model-View-Controller)")
 
     def test_scan_workspace_ruby_rspec(self):
         # Gemfile + spec dir
@@ -144,6 +147,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "ruby")
         self.assertIn("Ruby (Ruby on Rails)", results["stack"])
         self.assertEqual(results["test_command"], "bundle exec rspec")
+        self.assertEqual(results["recommended_architecture"], "MVC (Model-View-Controller)")
 
     def test_scan_workspace_go_gin(self):
         with open("go.mod", 'w', encoding='utf-8') as f:
@@ -152,6 +156,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "go")
         self.assertIn("Go (Golang) (Gin)", results["stack"])
         self.assertEqual(results["test_command"], "go test ./...")
+        self.assertEqual(results["recommended_architecture"], "Layered (Controller-Service-Repository) / Hexagonal")
 
     def test_scan_workspace_rust_axum(self):
         with open("Cargo.toml", 'w', encoding='utf-8') as f:
@@ -160,6 +165,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "rust")
         self.assertIn("Rust (Axum)", results["stack"])
         self.assertEqual(results["test_command"], "cargo test")
+        self.assertEqual(results["recommended_architecture"], "Layered Architecture (Hexagonal / Clean)")
 
     def test_scan_workspace_java_gradle(self):
         with open("build.gradle", 'w', encoding='utf-8') as f:
@@ -168,6 +174,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "java")
         self.assertIn("Java (Spring Boot)", results["stack"])
         self.assertEqual(results["test_command"], "gradle test")
+        self.assertEqual(results["recommended_architecture"], "Clean Architecture / Domain-Driven Design (DDD) / Hexagonal")
 
     def test_scan_workspace_dart_flutter(self):
         with open("pubspec.yaml", 'w', encoding='utf-8') as f:
@@ -176,6 +183,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "dart")
         self.assertIn("Dart (Flutter)", results["stack"])
         self.assertEqual(results["test_command"], "flutter test")
+        self.assertEqual(results["recommended_architecture"], "BLoC / Feature-First Layered Architecture")
 
     def test_scan_workspace_elixir_phoenix(self):
         with open("mix.exs", 'w', encoding='utf-8') as f:
@@ -184,6 +192,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "elixir")
         self.assertIn("Elixir (Phoenix)", results["stack"])
         self.assertEqual(results["test_command"], "mix test")
+        self.assertEqual(results["recommended_architecture"], "MVC (Model-View-Controller) / Context-driven")
 
     def test_scan_workspace_swift_vapor(self):
         with open("Package.swift", 'w', encoding='utf-8') as f:
@@ -192,6 +201,7 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "swift")
         self.assertIn("Swift (Vapor)", results["stack"])
         self.assertEqual(results["test_command"], "swift test")
+        self.assertEqual(results["recommended_architecture"], "MVC (Model-View-Controller)")
 
     def test_scan_workspace_cpp_cmake(self):
         with open("CMakeLists.txt", 'w', encoding='utf-8') as f:
@@ -200,6 +210,16 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(results["main_stack"], "cpp")
         self.assertIn("C++", results["stack"])
         self.assertEqual(results["test_command"], "ctest")
+        self.assertEqual(results["recommended_architecture"], "Modular Library / Layered Architecture")
+
+    def test_scan_workspace_react_frontend(self):
+        # Package.json referencing react
+        with open("package.json", 'w', encoding='utf-8') as f:
+            f.write('{"dependencies": {"react": "^18.2.0"}}')
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "node")
+        self.assertIn("React", results["stack"])
+        self.assertEqual(results["recommended_architecture"], "Atomic Design / Component-driven")
 
 if __name__ == '__main__':
     unittest.main()
