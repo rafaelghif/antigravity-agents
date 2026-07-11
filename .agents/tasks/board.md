@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->
 - [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
 - [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->

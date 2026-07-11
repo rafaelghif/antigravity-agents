@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.69.0] - 2026-07-11
+
+### 🚀 Features
+- introduce config.json template, bootstrap setup, and install exclusions
+
+### 🐛 Bug Fixes
+- Initialize and bootstrap config.json template and fix global copy installer issues (ISSUE-306)
+
+### 📝 Documentation
+- Document prompt expansion and human approval flow in AGENTS.md (ISSUE-305)
+
+### ⚙️ Chores
+- clean up duplicate already-completed tasks from todo list
+
+
 ## [3.68.0] - 2026-07-11
 
 ### 🚀 Features

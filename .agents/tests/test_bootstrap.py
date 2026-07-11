@@ -91,6 +91,10 @@ class TestBootstrapCommand(unittest.TestCase):
         self.assertTrue(os.path.exists(".agents/docs/context_map.md"))
         self.assertTrue(os.path.exists(".agents/dashboard/index.html"))
         self.assertTrue(os.path.exists(".agents/mcp_config.json"))
+        self.assertTrue(os.path.exists(".agents/config.json"))
+        with open(".agents/config.json", 'r', encoding='utf-8') as f:
+            cfg = f.read()
+            self.assertIn("workflow_mode", cfg)
 
     def test_bootstrap_layered_node(self, mock_input):
         bootstrap.run(["TestNodeLayered", "node", "layered"])
