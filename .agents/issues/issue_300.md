@@ -15,7 +15,7 @@ Test the refactored installation wrapper scripts and Python logic on a clean tar
 - [x] Task 1: Execute installer in a clean sandbox folder targeting the local repository <!-- id: task-run-installer -->
 - [x] Task 2: Perform a one-on-one file comparison check between source and installed target <!-- id: task-compare-files -->
 - [x] Task 3: Update README.md with revised requirements, features, and setup instructions <!-- id: task-update-readme -->
-- [ ] Task 4: Run validation suite and verify compliance <!-- id: task-validate-compliance -->
+- [x] Task 4: Run validation suite and verify compliance <!-- id: task-validate-compliance -->
 
 ## Acceptance Criteria
 - [x] Refactored installer functions correctly on clean project target. <!-- id: ac-installer-success -->
