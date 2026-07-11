@@ -1,6 +1,6 @@
 ---
-id: issue-262
-title: "fix unit test failures in CI due to missing archive issues folder"
+id: issue-264
+title: "pin dependencies in Dockerfile to prevent supply chain vulnerabilities"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
@@ -9,21 +9,19 @@ created_at: 2026-07-11
 # Issue Details
 
 ## Problem Statement
-fix unit test failures in CI due to missing archive issues folder
+pin dependencies in Dockerfile to prevent supply chain vulnerabilities
 
 ## Tasks
-- [x] defensively wrap os.listdir calls with try-except to fix GHA unit test failures <!-- id: task-1 -->
+- [x] pin python (black, flake8) and node (eslint) packages in Dockerfile <!-- id: task-1 -->
 
 ## Acceptance Criteria
-- [x] tests pass successfully locally and in mocked tests without crashing on missing archive directories <!-- id: criteria-1 -->
+- [x] validation passes and Dockerfile contains pinned dependencies <!-- id: criteria-1 -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
-  - [x] .agents/scripts/validate.py <!-- id: audit-target-files -->
-  - [x] .agents/scripts/cli/commands/issue.py
+  - [x] Dockerfile <!-- id: audit-target-files -->
 - Active module locks:
-  - [ ] validate <!-- id: lock-validate -->
-  - [ ] .agents/scripts/cli/commands/issue <!-- id: lock-issue -->
+  - [ ] Dockerfile <!-- id: lock-Dockerfile -->
   - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->

@@ -11,11 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install python formatting/linting dependencies globally
 RUN pip install --no-cache-dir \
-    black \
-    flake8
+    black==24.4.2 \
+    flake8==7.0.0
 
 # Install eslint globally for JS verification
-RUN npm install -g eslint
+RUN npm install -g eslint@8.57.0
 
 # Set up working directory
 WORKDIR /workspace
