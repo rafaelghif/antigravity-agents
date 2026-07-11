@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.66.1] - 2026-07-11
+
+### 🐛 Bug Fixes
+- resolve changelog commit classification bugs
+- Fix changelog classification bugs (ISSUE-303)
+
+
 ## [3.66.0] - 2026-07-11
 
 ### 🚀 Features
