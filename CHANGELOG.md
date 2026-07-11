@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.60.0] - 2026-07-11
+
+### 🚀 Features
+- document prompt expansion and human approval rules in AGENTS.md
+- Document prompt expansion and human approval flow in AGENTS.md (ISSUE-296)
+
+
 ## [3.59.0] - 2026-07-11
 
 ### 🚀 Features

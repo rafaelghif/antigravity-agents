@@ -1,7 +1,7 @@
 ---
 id: issue-296
 title: "Document prompt expansion and human approval flow in AGENTS.md"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
