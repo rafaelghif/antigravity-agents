@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix git CI/CD validation job on main branch (feat/issue-260) <!-- id: issue-260 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix git CI/CD validation job on main branch (feat/issue-260) <!-- id: issue-260 -->
 - [x] feat: synchronize rules template with latest workspace rules changes to prevent template drift (feat/issue-259) <!-- id: issue-259 -->
 - [x] feat: implement AI pre-flight re-prompting protocol to prevent hallucinations (feat/issue-258) <!-- id: issue-258 -->
 - [x] feat: implement flexible validation mode to optimize human developer experience (feat/issue-257) <!-- id: issue-257 -->

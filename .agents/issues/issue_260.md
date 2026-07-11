@@ -1,7 +1,7 @@
 ---
 id: issue-260
 title: "fix git CI/CD validation job on main branch"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
