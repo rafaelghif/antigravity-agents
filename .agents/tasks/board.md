@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Test Unified Installer on Clean Target and Update README (feat/issue-300) <!-- id: issue-300 -->
 - [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
@@ -20,6 +19,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Test Unified Installer on Clean Target and Update README (feat/issue-300) <!-- id: issue-300 -->
 - [x] Unify Shell Wrapper Parsing and Setup Logic within Python Core (feat/issue-299) <!-- id: issue-299 -->
 - [x] Fix Global Folder Directory Couplings (feat/issue-298) <!-- id: issue-298 -->
 - [x] Perform Enterprise AI Agent Audit (feat/issue-297) <!-- id: issue-297 -->

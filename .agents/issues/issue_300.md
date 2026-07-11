@@ -1,7 +1,7 @@
 ---
 id: issue-300
 title: "Test Unified Installer on Clean Target and Update README"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
