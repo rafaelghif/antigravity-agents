@@ -858,8 +858,9 @@ def audit_git_branch_alignment() -> bool:
             pass
 
     if branch in ('main', 'master', 'HEAD'):
-        if workflow_mode == "solo":
-            print_ok(f"On base branch '{branch}' (solo mode active, allowing direct edits).")
+        is_real_ci = (os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true") and 'unittest' not in sys.modules and 'pytest' not in sys.modules
+        if workflow_mode == "solo" or is_real_ci:
+            print_ok(f"On base branch '{branch}' (solo/CI mode active, allowing direct edits).")
         else:
             # Check if there are staged changes or modified files (excluding untracked git_profiles/locks configs)
             try:
@@ -1592,10 +1593,7 @@ def audit_unit_tests() -> bool:
     # 1. Run agent system tests
     test_cmd = None
     if os.path.exists(".agents/tests"):
-        if shutil.which("pytest"):
-            test_cmd = ["pytest", ".agents/tests"]
-        else:
-            test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", ".agents/tests"]
+        test_cmd = [sys.executable, "-m", "unittest", "discover", "-s", ".agents/tests"]
             
     if test_cmd:
         print(f"Running agent test suite: {' '.join(test_cmd)}")

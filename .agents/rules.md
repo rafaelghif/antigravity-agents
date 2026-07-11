@@ -5,7 +5,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 > **Scope note:** Section 1–3 below govern **AAC's own source code** (the CLI tool itself, which is built in Python). They do **not** apply to whatever stack a *managed/target* project uses — that's handled by the stack-agnostic detection described in Section 4.
 
 ## 1. Programming Language & Tools (AAC's own codebase)
-- Use **Python** for the main product stack.
+- Use **Python 3, CSS3, Docker** for the main product stack.
 - Rely on the standard library where possible to minimize external dependencies.
 - Use **Bash** for lightweight POSIX-compatible wrapper scripts. Ensure path-separators and directory check logic are safe for multi-platform execution (e.g. using `python3` wrappers on Windows).
 
