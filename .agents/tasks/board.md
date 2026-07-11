@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
 - [ ] --assignee (feat/clean up archived issue files from active tracking directory) <!-- id: Clean up archived issue files from active tracking directory -->
 - [ ] --assignee (feat/synchronize cli commands in context map documentation) <!-- id: Synchronize CLI commands in context map documentation -->
 - [ ] --assignee (feat/verify and harden dummy installation plug and play consistency) <!-- id: Verify and harden dummy installation plug and play consistency -->
