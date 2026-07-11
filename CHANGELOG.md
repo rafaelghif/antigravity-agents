@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.47.0] - 2026-07-11
+
+### 🚀 Features
+- docs: map milestones, security policy, and collaboration protocol in workspace read flow (ISSUE-280)
+
+### 📝 Documentation
+- map milestones, security policy, and collaboration protocol
+
+
 ## [3.46.0] - 2026-07-11
 
 ### 🚀 Features
