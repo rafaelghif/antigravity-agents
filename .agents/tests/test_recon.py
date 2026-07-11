@@ -104,5 +104,102 @@ class TestReconCommand(unittest.TestCase):
         self.assertEqual(projects[0]["stack"], "dotnet")
         self.assertEqual(projects[0]["test_command"], "dotnet test")
 
+    def test_scan_workspace_dotnet_sub_frameworks(self):
+        # Create a csproj that includes WPF and ASP.NET Core Web Sdk
+        with open("project.csproj", 'w', encoding='utf-8') as f:
+            f.write('<Project Sdk="Microsoft.NET.Sdk.Web">\n<PropertyGroup>\n<TargetFramework>net8.0</TargetFramework>\n<UseWPF>true</UseWPF>\n</PropertyGroup>\n</Project>')
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "dotnet")
+        self.assertIn(".NET Core (C#)", results["stack"])
+        self.assertIn("WPF", results["stack"])
+        self.assertIn("ASP.NET Core", results["stack"])
+        self.assertEqual(results["test_command"], "dotnet test")
+
+    def test_scan_workspace_php_laravel_pest(self):
+        # Artisan file + composer.json referencing pest
+        with open("composer.json", 'w', encoding='utf-8') as f:
+            f.write('{"require-dev": {"pestphp/pest": "^2.0"}}')
+        with open("artisan", 'w', encoding='utf-8') as f:
+            f.write('')
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "php")
+        self.assertIn("PHP (Laravel)", results["stack"])
+        self.assertEqual(results["test_command"], "php artisan test")
+
+    def test_scan_workspace_php_phpunit(self):
+        # PHPUnit file
+        with open("composer.json", 'w', encoding='utf-8') as f:
+            f.write('{"require-dev": {"phpunit/phpunit": "^10.0"}}')
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "php")
+        self.assertIn("PHP", results["stack"])
+        self.assertEqual(results["test_command"], "./vendor/bin/phpunit")
+
+    def test_scan_workspace_ruby_rspec(self):
+        # Gemfile + spec dir
+        with open("Gemfile", 'w', encoding='utf-8') as f:
+            f.write("gem 'rails'\ngem 'rspec-rails'")
+        os.makedirs("spec", exist_ok=True)
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "ruby")
+        self.assertIn("Ruby (Ruby on Rails)", results["stack"])
+        self.assertEqual(results["test_command"], "bundle exec rspec")
+
+    def test_scan_workspace_go_gin(self):
+        with open("go.mod", 'w', encoding='utf-8') as f:
+            f.write("module test\nrequire github.com/gin-gonic/gin v1.9.0")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "go")
+        self.assertIn("Go (Golang) (Gin)", results["stack"])
+        self.assertEqual(results["test_command"], "go test ./...")
+
+    def test_scan_workspace_rust_axum(self):
+        with open("Cargo.toml", 'w', encoding='utf-8') as f:
+            f.write("[dependencies]\naxum = \"0.6\"")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "rust")
+        self.assertIn("Rust (Axum)", results["stack"])
+        self.assertEqual(results["test_command"], "cargo test")
+
+    def test_scan_workspace_java_gradle(self):
+        with open("build.gradle", 'w', encoding='utf-8') as f:
+            f.write("dependencies {\nimplementation 'org.springframework.boot:spring-boot-starter'\n}")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "java")
+        self.assertIn("Java (Spring Boot)", results["stack"])
+        self.assertEqual(results["test_command"], "gradle test")
+
+    def test_scan_workspace_dart_flutter(self):
+        with open("pubspec.yaml", 'w', encoding='utf-8') as f:
+            f.write("dependencies:\n  flutter:\n    sdk: flutter")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "dart")
+        self.assertIn("Dart (Flutter)", results["stack"])
+        self.assertEqual(results["test_command"], "flutter test")
+
+    def test_scan_workspace_elixir_phoenix(self):
+        with open("mix.exs", 'w', encoding='utf-8') as f:
+            f.write("defp deps do\n[{:phoenix, \"~> 1.7\"}]\nend")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "elixir")
+        self.assertIn("Elixir (Phoenix)", results["stack"])
+        self.assertEqual(results["test_command"], "mix test")
+
+    def test_scan_workspace_swift_vapor(self):
+        with open("Package.swift", 'w', encoding='utf-8') as f:
+            f.write(".package(url: \"https://github.com/vapor/vapor.git\", from: \"4.0.0\")")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "swift")
+        self.assertIn("Swift (Vapor)", results["stack"])
+        self.assertEqual(results["test_command"], "swift test")
+
+    def test_scan_workspace_cpp_cmake(self):
+        with open("CMakeLists.txt", 'w', encoding='utf-8') as f:
+            f.write("cmake_minimum_required(VERSION 3.10)")
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "cpp")
+        self.assertIn("C++", results["stack"])
+        self.assertEqual(results["test_command"], "ctest")
+
 if __name__ == '__main__':
     unittest.main()

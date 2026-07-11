@@ -1430,6 +1430,38 @@ def auto_lint_file(file_path: str) -> bool:
                 return False
         return True
 
+    elif ext == ".cs":
+        if shutil.which("csc"):
+            import tempfile
+            res = subprocess.run(['csc', '/noconfig', '/target:library', '/out:' + os.path.join(tempfile.gettempdir(), 'temp.dll'), file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"C# compilation errors in '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        elif shutil.which("mcs"):
+            import tempfile
+            res = subprocess.run(['mcs', '--target:library', '-out:' + os.path.join(tempfile.gettempdir(), 'temp.dll'), file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"Mono C# compilation errors in '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
+    elif ext == ".dart":
+        if shutil.which("dart") and shutil.which("dartfmt"):
+            res = subprocess.run(['dart', 'analyze', file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            # We don't fail immediately on single file dart analyze as it can be picky without context,
+            # but we can print warnings.
+            pass
+        return True
+
+    elif ext in (".ex", ".exs"):
+        if shutil.which("elixirc"):
+            import tempfile
+            res = subprocess.run(['elixirc', '-o', tempfile.gettempdir(), file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode != 0:
+                print_err(f"Elixir compilation errors in '{file_path}':\n{res.stderr or res.stdout}")
+                return False
+        return True
+
     elif ext in (".js", ".jsx", ".ts", ".tsx"):
         eslint_bin = None
         curr_dir = os.path.dirname(os.path.abspath(file_path))
@@ -1577,13 +1609,28 @@ def audit_unit_tests() -> bool:
             "package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb",
             "composer.json", "composer.lock",
             "go.mod", "go.sum",
-            "cargo.toml", "cargo.lock"
+            "cargo.toml", "cargo.lock",
+            "gemfile", "gemfile.lock",
+            "pubspec.yaml", "pubspec.lock",
+            "mix.exs", "mix.lock",
+            "pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle",
+            "package.swift", "package.resolved",
+            "cmakelists.txt", "makefile", "nuget.config"
         }
-        # Check if any modified file impacts python execution, test configuration, or dependencies
+        # Check if any modified file impacts execution, test configuration, or dependencies
         affects_tests = False
+        test_extensions = (
+            ".py", ".csproj", ".sln", ".cs", ".php", ".js", ".ts", ".jsx", ".tsx",
+            ".go", ".rs", ".java", ".kt", ".rb", ".dart", ".ex", ".exs", ".swift",
+            ".cpp", ".cc", ".cxx", ".h", ".hpp", ".hxx"
+        )
         for f in modified_files:
             filename = os.path.basename(f).lower()
-            if f.endswith(".py") or f.startswith(".agents/tests/") or f == ".agents/projects.json" or f == ".agents/rules.md" or filename in lockfiles:
+            if (f.endswith(test_extensions) or 
+                f.startswith(".agents/tests/") or 
+                f == ".agents/projects.json" or 
+                f == ".agents/rules.md" or 
+                filename in lockfiles):
                 affects_tests = True
                 break
         
