@@ -1,7 +1,7 @@
 ---
 id: issue-276
 title: "feat: audit file relationships and sync upgrade paths and version verification"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
