@@ -182,7 +182,7 @@ class TestBootstrapCommand(unittest.TestCase):
     @patch('os.walk')
     def test_copy_core_files_exclusions(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
         # Setup mock for os.walk
-        mock_exists.side_effect = lambda path: False if "valid.py" in path or "git_profiles" in path or "locks.json" in path or "cached.pyc" in path or "memory" in path or "projects.example" in path else True
+        mock_exists.side_effect = lambda path: False if "valid.py" in path or "git_profiles" in path or "locks.json" in path or "cached.pyc" in path or "memory" in path or "blueprints" in path or "projects.example" in path else True
         mock_walk.return_value = [
             ('/src/root/.agents/scripts', ['__pycache__', 'valid_dir'], ['git_profiles.json', 'locks.json', 'valid.py', 'cached.pyc'])
         ]
@@ -205,7 +205,7 @@ class TestBootstrapCommand(unittest.TestCase):
     @patch('os.path.exists')
     @patch('os.walk')
     def test_copy_core_files_force_update(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
-        mock_exists.side_effect = lambda path: False if "memory" in path or "projects.example" in path else True
+        mock_exists.side_effect = lambda path: False if "memory" in path or "blueprints" in path or "projects.example" in path else True
         mock_walk.return_value = [
             ('/src/root/.agents/scripts', [], ['valid.py'])
         ]
@@ -233,7 +233,7 @@ class TestBootstrapCommand(unittest.TestCase):
     @patch('os.path.exists')
     @patch('os.walk')
     def test_copy_core_files_transient_exclusions(self, mock_walk, mock_exists, mock_makedirs, mock_copy2, mock_input):
-        mock_exists.side_effect = lambda path: False if "memory" in path else True
+        mock_exists.side_effect = lambda path: False if "memory" in path or "blueprints" in path else True
         mock_walk.return_value = [
             ('/src/root/.agents/scripts', [], [
                 'token_budget.json', 'active_context.md', 'sync_cache.json', 
