@@ -1,7 +1,7 @@
 ---
 id: issue-262
 title: "fix unit test failures in CI due to missing archive issues folder"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
