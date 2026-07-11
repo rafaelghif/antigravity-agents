@@ -177,10 +177,10 @@ def optimize_context() -> None:
         try:
             with open(rules_file, 'r', encoding='utf-8') as rf:
                 rules_content = rf.read()
-            match = re.search(r'## 5\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$', rules_content)
+            match = re.search(r'## 6\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$', rules_content)
             if match:
                 # Get the content of this section, stripping empty lines
-                section_content = match.group(0).replace('## 5. Synthesized Rules (Self-Learning Memory)', '').strip()
+                section_content = match.group(0).replace('## 6. Synthesized Rules (Self-Learning Memory)', '').strip()
                 if section_content:
                     synthesized_rules_str = section_content
         except Exception:

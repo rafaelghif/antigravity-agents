@@ -261,10 +261,45 @@ def start_server():
             sys.stderr.write(f"Error handling MCP line: {e}\n")
             sys.stderr.flush()
 
-def register_server():
+def register_server(force_global: bool = False) -> None:
     home = os.path.expanduser("~")
     system = platform.system()
+    script_path = os.path.abspath(__file__)
+    python_cmd = "python" if platform.system() == "Windows" else "python3"
     
+    # 1. Workspace-level config: .agents/mcp_config.json
+    workspace_dir = os.path.dirname(os.path.dirname(script_path))
+    workspace_config_file = os.path.join(workspace_dir, "mcp_config.json")
+    workspace_settings = {}
+    if os.path.exists(workspace_config_file):
+        try:
+            with open(workspace_config_file, 'r', encoding='utf-8') as f:
+                workspace_settings = json.load(f)
+        except Exception:
+            pass
+    if "mcpServers" not in workspace_settings:
+        workspace_settings["mcpServers"] = {}
+    project_root = os.path.dirname(workspace_dir)
+    workspace_settings["mcpServers"]["aac-v3-tools"] = {
+        "command": python_cmd,
+        "args": [os.path.relpath(script_path, project_root)]
+    }
+    try:
+        os.makedirs(os.path.dirname(workspace_config_file), exist_ok=True)
+        with open(workspace_config_file, 'w', encoding='utf-8') as f:
+            json.dump(workspace_settings, f, indent=2)
+        print(f"[OK] Successfully registered MCP server in workspace config:")
+        print(f"     File: {workspace_config_file}")
+    except Exception as e:
+        print(f"[WARN] Failed to write workspace mcp_config.json: {e}")
+
+    if not force_global:
+        print("[INFO] Global registration was bypassed to prevent cross-workspace path leakage.")
+        print("       To register globally (Cline settings and global config), please run:")
+        print("       ./helper.sh mcp register --global")
+        return
+
+    # 2. Cline global settings: cline_mcp_settings.json
     if system == "Darwin":
         config_dir = os.path.join(home, "Library", "Application Support", "Code", "User", "globalStorage", "saoudrizwan.claude-dev", "settings")
     elif system == "Windows":
@@ -287,8 +322,6 @@ def register_server():
     if "mcpServers" not in settings:
         settings["mcpServers"] = {}
         
-    script_path = os.path.abspath(__file__)
-    python_cmd = "python" if platform.system() == "Windows" else "python3"
     settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
         "args": [script_path],
@@ -305,31 +338,6 @@ def register_server():
     except Exception as e:
         print(f"[FAIL] Failed to write Cline settings file: {e}")
         sys.exit(1)
-
-    # 2. Workspace-level config: .agents/mcp_config.json
-    workspace_dir = os.path.dirname(os.path.dirname(script_path))
-    workspace_config_file = os.path.join(workspace_dir, "mcp_config.json")
-    workspace_settings = {}
-    if os.path.exists(workspace_config_file):
-        try:
-            with open(workspace_config_file, 'r', encoding='utf-8') as f:
-                workspace_settings = json.load(f)
-        except Exception:
-            pass
-    if "mcpServers" not in workspace_settings:
-        workspace_settings["mcpServers"] = {}
-    project_root = os.path.dirname(workspace_dir)
-    workspace_settings["mcpServers"]["aac-v3-tools"] = {
-        "command": python_cmd,
-        "args": [os.path.relpath(script_path, project_root)]
-    }
-    try:
-        with open(workspace_config_file, 'w', encoding='utf-8') as f:
-            json.dump(workspace_settings, f, indent=2)
-        print(f"[OK] Successfully registered MCP server in workspace config:")
-        print(f"     File: {workspace_config_file}")
-    except Exception as e:
-        print(f"[WARN] Failed to write workspace mcp_config.json: {e}")
 
     # 3. Global Antigravity config: ~/.gemini/config/mcp_config.json
     global_config_dir = os.path.join(home, ".gemini", "config")
@@ -358,6 +366,7 @@ def register_server():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ("--register", "register"):
-        register_server()
+        force_global = "--global" in sys.argv or "-g" in sys.argv
+        register_server(force_global=force_global)
     else:
         start_server()

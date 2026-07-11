@@ -43,7 +43,7 @@ class TestDashboardCommand(unittest.TestCase):
             "---\nid: issue-126\ntitle: \"Active Task\"\nstatus: open\n---\n- [ ] Subtask 1", # issue_126.md (get_issue_frontmatter)
             "---\nid: issue-126\ntitle: \"Active Task\"\nstatus: open\n---\n- [ ] Subtask 1", # issue_126.md (tasks extraction)
             "# Lessons\n## Lessons Learned\n- My Lesson", # lessons-learned.md
-            "## 5. Synthesized Rules (Self-Learning Memory)\n- My Synthesized Rule", # rules.md
+            "## 6. Synthesized Rules (Self-Learning Memory)\n- My Synthesized Rule", # rules.md
             "## [2.106.0] - 2026-07-02" # CHANGELOG.md
         ]
         

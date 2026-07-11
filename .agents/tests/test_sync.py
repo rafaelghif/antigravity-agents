@@ -159,7 +159,7 @@ Problem status: open
         archive_written_key = next((k for k in written_data if "lessons-archive.md" in k), None)
         
         self.assertIsNotNone(rules_written_key)
-        self.assertIn("## 5. Synthesized Rules", written_data[rules_written_key])
+        self.assertIn("## 6. Synthesized Rules", written_data[rules_written_key])
         
         # Testing / Mocking and Python Mock Leaks should be clustered together
         self.assertIn("Testing / Mocking", written_data[rules_written_key])

@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.36.0
+- **Version:** 3.37.0
 - **Stack:** Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -92,7 +92,7 @@ When aligning on technical details, features, or database specifications:
    * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.
    * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.
    * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.
-3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist), and `@.agents/memory/architecture.md` (for architectural boundaries). To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.
+3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist), `.agents/docs/template_map.md` (for template-to-target and installer/bootstrap platform parity mappings), and `@.agents/memory/architecture.md` (for architectural boundaries). To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.
 4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill's description. They are strictly prohibited from being auto-loaded globally to optimize context size.
 
 ## 8. Tool permissions

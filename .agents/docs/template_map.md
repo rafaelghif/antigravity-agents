@@ -1,0 +1,38 @@
+# AAC V3 Template & Command Parity Map
+
+This map defines the relationship between template configurations and their generated target files, as well as the platform parity required between wrapper scripts. 
+
+Always check and update these relationships to prevent configuration-drift or platform-drift.
+
+---
+
+## 1. Template-to-Target File Mappings
+
+Whenever any of the following target files are modified, their source template under `.agents/templates/` **MUST** be updated to match the changes.
+
+| Source Template | Target Workspace File | Description |
+| :--- | :--- | :--- |
+| `.agents/templates/rules.md.template` | `.agents/rules.md` | Workspace rule declarations. |
+| `.agents/templates/schema.md.template` | `.agents/schema.md` | Master architecture & database blueprint. |
+| `.agents/templates/gitignore.template` | `.gitignore` | Git version control exclusions. |
+| `.agents/templates/antigravityignore.template` | `.antigravityignore` | Agent workspace parsing exclusions. |
+| `.agents/templates/ci_github_workflow.yml.template` | `.github/workflows/ci.yml` | GitHub actions CI/CD definition. |
+
+---
+
+## 2. Command Script Platform Parity
+
+To ensure seamless execution on both Linux/macOS and Windows platforms, the shell wrappers **MUST** maintain exact functional parity. 
+
+Whenever any command, command argument, flag, or option is added/modified on one script, the corresponding script on the other platform **MUST** be synchronized.
+
+* **Helper Commands**: `helper.sh` (Bash) <--> `helper.ps1` (PowerShell)
+* **Bootstrap Wrappers**: `bootstrap.sh` (Bash) <--> `bootstrap.ps1` (PowerShell)
+* **Installer Wrappers**: `install.sh` (Bash) <--> `install.ps1` (PowerShell)
+
+---
+
+## 3. Operational Policy for Autonomous Agents
+
+1. **Pre-flight Check**: Before saving edits to a config or shell script, look up this map to determine if a template or a twin platform script also requires updates.
+2. **Synchronization**: Always execute `./helper.sh sync` after making template updates to rebuild registries and rule catalogs cleanly.

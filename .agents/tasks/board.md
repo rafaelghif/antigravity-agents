@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] resolve codebase audit findings and implement template mapping documentation (feat/issue-270) <!-- id: issue-270 -->
 - [x] recommend stack-compatible architecture designs during auto-reconnaissance (feat/issue-269) <!-- id: issue-269 -->
 - [x] extend stack auto-reconnaissance to support ruby elixir cpp and swift (feat/issue-268) <!-- id: issue-268 -->
 - [x] fix target stack auto-detection and C# .NET core framework classification (feat/issue-266) <!-- id: issue-266 -->
