@@ -1,7 +1,7 @@
 ---
 id: issue-266
 title: "fix target stack auto-detection and C# .NET core framework classification"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

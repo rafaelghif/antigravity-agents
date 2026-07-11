@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.34.7] - 2026-07-11
+
+### 🐛 Bug Fixes
+- fix target stack auto-detection and C# .NET core framework classification (ISSUE-266)
+
+
 ## [3.34.6] - 2026-07-11
 
 ### 🐛 Bug Fixes
