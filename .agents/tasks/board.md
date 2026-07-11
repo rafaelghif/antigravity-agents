@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] integrate gitea mcp server configuration into workspace (feat/issue-272) <!-- id: issue-272 -->
 - [x] integrate github mcp server config and update template parity mappings (feat/issue-271) <!-- id: issue-271 -->
 - [x] resolve codebase audit findings and implement template mapping documentation (feat/issue-270) <!-- id: issue-270 -->
 - [x] recommend stack-compatible architecture designs during auto-reconnaissance (feat/issue-269) <!-- id: issue-269 -->

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.39.0] - 2026-07-11
+
+### 🚀 Features
+- integrate gitea mcp server configuration into workspace
+- integrate gitea mcp server configuration into workspace (ISSUE-272)
+
+
 ## [3.38.0] - 2026-07-11
 
 ### 🚀 Features
