@@ -22,7 +22,8 @@ fix target stack auto-detection and C# .NET core framework classification
   - [x] .agents/scripts/recon.py <!-- id: audit-target-files -->
   - [x] .agents/tests/test_recon.py
 - Active module locks:
-  - [x] .agents/scripts/recon <!-- id: audit-module-locks -->
+  - [ ] .agents/scripts/recon <!-- id: lock-recon -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
