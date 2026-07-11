@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Relax Clean Architecture and SOLID rules for simple/custom projects (feat/issue-311) <!-- id: issue-311 -->
 - [x] Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas (feat/issue-310) <!-- id: issue-310 -->
 - [x] Optimize context optimizer for solo workflow mode and improve token efficiency ratings (feat/issue-309) <!-- id: issue-309 -->
 - [x] Enhance solo workflow mode to bypass lock and branch alignment checks (feat/issue-308) <!-- id: issue-308 -->

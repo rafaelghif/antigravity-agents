@@ -269,6 +269,15 @@ class TestBootstrapCommand(unittest.TestCase):
         with open(board_path, 'r', encoding='utf-8') as f:
             self.assertEqual(f.read(), "My custom board layout")
 
+    def test_bootstrap_none_architecture(self, mock_input):
+        bootstrap.run(["TestCustomProject", "python", "none"])
+        
+        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, "src")))
+        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, "tests")))
+        
+        self.assertTrue(os.path.exists(".agents/schema.md"))
+        self.assertTrue(os.path.exists("AGENTS.md"))
+
 if __name__ == '__main__':
     unittest.main()
 
