@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.36.0] - 2026-07-11
+
+### 🚀 Features
+- implement stack-compatible architecture recommendations in auto-reconnaissance
+- recommend stack-compatible architecture designs during auto-reconnaissance (ISSUE-269)
+
+
 ## [3.35.0] - 2026-07-11
 
 ### 🚀 Features
