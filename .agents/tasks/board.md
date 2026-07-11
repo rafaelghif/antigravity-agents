@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement AI pre-flight re-prompting protocol to prevent hallucinations (feat/issue-258) <!-- id: issue-258 -->
 - [x] feat: implement flexible validation mode to optimize human developer experience (feat/issue-257) <!-- id: issue-257 -->
 - [x] feat: enforce holistic engineering management production and security thinking profiles (feat/issue-256) <!-- id: issue-256 -->
 - [x] feat: implement cross-module schema dependency mapping and 10-year critical thinking guidelines (feat/issue-255) <!-- id: issue-255 -->
