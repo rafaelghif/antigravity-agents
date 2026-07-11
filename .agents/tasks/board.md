@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: synchronize rules template with latest workspace rules changes to prevent template drift (feat/issue-259) <!-- id: issue-259 -->
 - [x] feat: implement AI pre-flight re-prompting protocol to prevent hallucinations (feat/issue-258) <!-- id: issue-258 -->
 - [x] feat: implement flexible validation mode to optimize human developer experience (feat/issue-257) <!-- id: issue-257 -->
 - [x] feat: enforce holistic engineering management production and security thinking profiles (feat/issue-256) <!-- id: issue-256 -->

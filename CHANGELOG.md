@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.33.0] - 2026-07-11
+
+### 🚀 Features
+- synchronize rules.md.template with latest workspace rules configurations
+- feat: synchronize rules template with latest workspace rules changes to prevent template drift (ISSUE-259)
+
+
 ## [3.32.0] - 2026-07-11
 
 ### 🚀 Features
