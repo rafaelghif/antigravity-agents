@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.59.0] - 2026-07-11
+
+### 🚀 Features
+- resolve framework weaknesses in release warnings and commit amends
+- Fix weaknesses in framework release warning and commit amending (ISSUE-295)
+
+### 🧪 Tests
+- patch os.environ in branch alignment unit tests
+
+
 ## [3.58.0] - 2026-07-11
 
 ### 🚀 Features

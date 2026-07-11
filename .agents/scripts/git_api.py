@@ -215,6 +215,11 @@ def create_github_release(tag_name: str, name: str, body: str, draft: bool = Tru
         with urllib.request.urlopen(req, timeout=10.0) as res:
             res_data = json.loads(res.read().decode('utf-8'))
             return res_data.get("html_url")
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            print(f"[WARN] Remote GitHub release creation skipped: Unauthorized/Forbidden (check your token).", file=sys.stderr)
+        else:
+            print(f"[FAIL] Failed to create GitHub release: {e}", file=sys.stderr)
     except Exception as e:
         print(f"[FAIL] Failed to create GitHub release: {e}", file=sys.stderr)
     return None
