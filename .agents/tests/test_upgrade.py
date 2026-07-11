@@ -24,6 +24,9 @@ class TestUpgradeCommand(unittest.TestCase):
         self.assertIsNotNone(checkout_call)
         cmd_args = checkout_call[0][0]
         self.assertIn(".agents/skills/", cmd_args)
+        self.assertIn("bootstrap.sh", cmd_args)
+        self.assertIn("bootstrap.ps1", cmd_args)
+        self.assertIn(".agents/soul.md", cmd_args)
         self.assertNotIn(".agents/rules.md", cmd_args)
         self.assertNotIn("AGENTS.md", cmd_args)
         

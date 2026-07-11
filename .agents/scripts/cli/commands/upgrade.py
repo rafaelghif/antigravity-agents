@@ -65,7 +65,10 @@ def run(args: List[str]) -> None:
             ".agents/templates/",
             ".agents/skills/",
             "helper.sh",
-            "helper.ps1"
+            "helper.ps1",
+            "bootstrap.sh",
+            "bootstrap.ps1",
+            ".agents/soul.md"
         ]
 
         # Check if local working tree is clean for core paths
@@ -164,7 +167,10 @@ def check_and_run_auto_upgrade() -> None:
         ".agents/templates/",
         ".agents/skills/",
         "helper.sh",
-        "helper.ps1"
+        "helper.ps1",
+        "bootstrap.sh",
+        "bootstrap.ps1",
+        ".agents/soul.md"
     ]
     res_status = subprocess.run(
         ['git', 'status', '--porcelain', '--'] + paths_to_update,

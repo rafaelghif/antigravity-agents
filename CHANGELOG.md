@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.43.0] - 2026-07-11
+
+### 🚀 Features
+- verify file relationships and sync upgrade paths and validation
+- feat: audit file relationships and sync upgrade paths and version verification (ISSUE-276)
+
+
 ## [3.42.0] - 2026-07-11
 
 ### 🚀 Features
