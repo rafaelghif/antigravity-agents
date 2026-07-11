@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] --assignee (feat/synchronize cli commands in context map documentation) <!-- id: Synchronize CLI commands in context map documentation -->
 - [ ] --assignee (feat/verify and harden dummy installation plug and play consistency) <!-- id: Verify and harden dummy installation plug and play consistency -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->

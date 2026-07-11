@@ -17,6 +17,9 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 - `./helper.sh heartbeat`: Runs workspace heartbeat diagnostic checks.
 - `./helper.sh pause`: Halts agent execution (blocks any tool/command runs by the agent).
 - `./helper.sh resume`: Reactivates agent execution after being paused.
+- `./helper.sh dashboard`: Launches local web-based interactive visual status dashboard.
+- `./helper.sh doctor`: Diagnostics tool verifying local setup and python dependencies.
+- `./helper.sh mcp <register|start>`: Model Context Protocol integration. Supports local/global registration and server execution.
 
 ## 2. Context map — what loads when
 
