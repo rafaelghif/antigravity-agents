@@ -45,7 +45,11 @@ def should_exclude(rel_path: str) -> bool:
         "mcp_config.json",
         "config.json",
         "CHANGELOG.md",
-        "AGENTS.md"
+        "AGENTS.md",
+        ".gitignore",
+        ".antigravityignore",
+        "Dockerfile",
+        "README.md"
     }
     
     if filename in excluded_filenames:

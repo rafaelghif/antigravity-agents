@@ -33,12 +33,15 @@ class TestInstallCommand(unittest.TestCase):
         self.assertTrue(install.should_exclude("AGENTS.md"))
         self.assertTrue(install.should_exclude("__pycache__/file.pyc"))
         self.assertTrue(install.should_exclude(".git/config"))
+        self.assertTrue(install.should_exclude("Dockerfile"))
+        self.assertTrue(install.should_exclude(".gitignore"))
+        self.assertTrue(install.should_exclude(".antigravityignore"))
+        self.assertTrue(install.should_exclude("README.md"))
         
         # Included items
         self.assertFalse(install.should_exclude(".agents/scripts/validate.py"))
         self.assertFalse(install.should_exclude(".agents/memory/templates/rules.md.template"))
         self.assertFalse(install.should_exclude("helper.sh"))
-        self.assertFalse(install.should_exclude("Dockerfile"))
 
     @patch('os.path.exists', return_value=True)
     def test_run_install_backup(self, mock_exists):

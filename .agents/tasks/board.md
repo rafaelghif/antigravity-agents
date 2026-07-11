@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Fix installer config file overwriting and correct template map verify.yml workflow path (feat/issue-312) <!-- id: issue-312 -->
 
 ## Done
 - [x] Relax Clean Architecture and SOLID rules for simple/custom projects (feat/issue-311) <!-- id: issue-311 -->
