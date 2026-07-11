@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.34.0] - 2026-07-11
+
+### 🚀 Features
+- fix git CI/CD validation job on main branch (ISSUE-260)
+
+### 🐛 Bug Fixes
+- skip dirty base branch check in CI and use unittest runner
+
+
 ## [3.33.0] - 2026-07-11
 
 ### 🚀 Features
