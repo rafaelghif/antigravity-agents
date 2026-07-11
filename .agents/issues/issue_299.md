@@ -1,7 +1,7 @@
 ---
 id: issue-299
 title: "Unify Shell Wrapper Parsing and Setup Logic within Python Core"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

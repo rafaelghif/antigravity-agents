@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.63.0] - 2026-07-11
+
+### 🚀 Features
+- refactor shell wrappers to thin delegators and add install tests
+- migrate hook installations and auto-recon triggers to bootstrap.py
+- implement unified install command script and register in helper
+- Unify Shell Wrapper Parsing and Setup Logic within Python Core (ISSUE-299)
+
+### ⚙️ Chores
+- check off completed tasks and criteria in issue 299 spec
+- remove outdated audit and improvement documentation files
+
+
 ## [3.62.0] - 2026-07-11
 
 ### 🚀 Features
