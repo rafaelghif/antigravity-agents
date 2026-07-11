@@ -1,7 +1,7 @@
 ---
 id: issue-319
 title: "docs: add prominent disclaimer of liability to readme to protect author liability"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

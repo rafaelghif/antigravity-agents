@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.82.0] - 2026-07-11
+
+### 🚀 Features
+- add prominent disclaimer of liability to readme to protect author liability
+- docs: add prominent disclaimer of liability to readme to protect author liability (ISSUE-319)
+
+
 ## [3.81.0] - 2026-07-11
 
 ### 🚀 Features
