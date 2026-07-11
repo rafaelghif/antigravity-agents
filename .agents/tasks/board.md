@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas (feat/issue-310) <!-- id: issue-310 -->
 
 ## Done
 - [x] Optimize context optimizer for solo workflow mode and improve token efficiency ratings (feat/issue-309) <!-- id: issue-309 -->
