@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: synchronize installation templates for milestones and security policy (feat/issue-279) <!-- id: issue-279 -->
 - [x] docs: implement collaboration protocol, security policy, and milestones (feat/issue-278) <!-- id: issue-278 -->
 - [x] feat: refine agent persona with expert engineering philosophy (feat/issue-277) <!-- id: issue-277 -->
 - [x] feat: audit file relationships and sync upgrade paths and version verification (feat/issue-276) <!-- id: issue-276 -->

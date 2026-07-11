@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.46.0] - 2026-07-11
+
+### 🚀 Features
+- fix: synchronize installation templates for milestones and security policy (ISSUE-279)
+
+### 🐛 Bug Fixes
+- synchronize installer and bootstrap templates for memory docs
+
+
 ## [3.45.0] - 2026-07-11
 
 ### 🚀 Features

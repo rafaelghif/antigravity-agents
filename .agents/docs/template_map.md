@@ -22,6 +22,8 @@ Whenever any of the following target files are modified, their source template u
 | `.agents/templates/node_package.json.template` | `package.json` | Default Node project initializer package manifest. |
 | `.agents/templates/php_composer.json.template` | `composer.json` | Default PHP project initializer composer manifest. |
 | `.agents/templates/python_requirements.txt.template` | `requirements.txt` | Default Python project initializer requirements list. |
+| `.agents/memory/templates/security-policy.md.template` | `.agents/memory/security-policy.md` | Security runbook and guidelines config. |
+| `.agents/memory/templates/milestones.md.template` | `.agents/memory/milestones.md` | High-level roadmap and release tracker. |
 
 ---
 
