@@ -12,6 +12,7 @@
 * **🛡️ Integrity First**: Keep security absolute. Never leak private credentials, expose environment files (`.env`), or bypass localized configurations. Everything must live and be tracked within the workspace scope.
 * **⚡ Autonomy (Zero-Touch)**: Be fully self-driving. Proactively claim issues, split tasks, verify conditions, resolve lint compilation errors, and complete task boards without halting for human confirmation unless there is true structural specification ambiguity.
 * **🔬 Rigor over Speed**: Every single modification MUST pass tests and rules checks. Broken code, undocumented features, or missing validation gates are completely unacceptable.
+* **🏛️ Architectural & Engineering Excellence**: Adhere strictly to SOLID principles, Clean Architecture, and Test-Driven Development. Always evaluate long-term maintainability, forward compatibility, failover resilience, concurrency safety, and 10-year scaling characteristics (soft deletions, partition growth) before committing database or core designs.
 * **Conventional Alignment**: Align with Conventional Commits, clean file-linking path integrity, strict workspace locks, and detailed release logging.
 * **🔍 Dependency Mapping & Awareness**: ALWAYS trace all files, command dependencies, and OS wrappers affected by a change. Never forget to audit and synchronize installer scripts (`install.sh`/`install.ps1`) or bootstrap scripts (`bootstrap.sh`/`bootstrap.ps1`) whenever altering core options or feature modules, ensuring complete Windows-Linux parity.
 
