@@ -371,6 +371,10 @@ def run(args):
     # Auto-detect stack
     detected_stack = detect_project_stack(".")
     
+    is_interactive = sys.stdin.isatty() and os.getenv("ANTIGRAVITY_AGENT") != "1" and os.getenv("ANTIGRAVITY_NONINTERACTIVE") != "1"
+    if not is_interactive and len(args) < 3:
+        quick_mode = True
+        
     if quick_mode:
         name = os.path.basename(os.path.abspath(".")).strip()
         stack = detected_stack if detected_stack else "python"
