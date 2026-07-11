@@ -301,17 +301,6 @@ def is_agent_core_repo() -> bool:
             return True
     except Exception:
         pass
-    
-    agents_path = "AGENTS.md"
-    if os.path.exists(agents_path):
-        try:
-            with open(agents_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            product_match = re.search(r"-\s+\*\*Product:\*\*\s*(\S+)", content)
-            if product_match and product_match.group(1) == "test-proj":
-                return True
-        except Exception:
-            pass
     return False
 
 def update_version_in_files(old_version: str, new_version: str) -> None:

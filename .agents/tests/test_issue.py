@@ -54,5 +54,18 @@ class TestIssueCommand(unittest.TestCase):
         written_content = writes[0][1]
         self.assertIn("assignee: dev-alice", written_content)
 
+    def test_get_issue_path_suffix(self):
+        # Case 1: standard numeric issue
+        p1 = issue.get_issue_path("issue-300")
+        self.assertEqual(os.path.basename(p1), "issue_300.md")
+
+        # Case 2: task issue with description
+        p2 = issue.get_issue_path("task-auth-fix")
+        self.assertEqual(os.path.basename(p2), "issue_auth_fix.md")
+
+        # Case 3: custom name
+        p3 = issue.get_issue_path("custom-test-slug")
+        self.assertEqual(os.path.basename(p3), "issue_custom_test_slug.md")
+
 if __name__ == '__main__':
     unittest.main()

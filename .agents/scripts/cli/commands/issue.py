@@ -456,7 +456,11 @@ def get_issue_path(issue_id):
         except Exception:
             pass
     # 3. Fallback path if not found anywhere
-    suffix = normalized.split('_')[-1]
+    suffix = normalized
+    if suffix.startswith("issue_"):
+        suffix = suffix[6:]
+    elif suffix.startswith("task_"):
+        suffix = suffix[5:]
     return os.path.join(ISSUE_DIR, f"issue_{suffix}.md")
 
 def run(args):
