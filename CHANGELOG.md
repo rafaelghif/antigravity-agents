@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.76.0] - 2026-07-11
+
+### 🚀 Features
+- relocate blueprints to agents root and update install and bootstrap commands
+- refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands (ISSUE-313)
+
+
 ## [3.75.0] - 2026-07-11
 
 ### 🚀 Features

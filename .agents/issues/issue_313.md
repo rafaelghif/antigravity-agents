@@ -1,7 +1,7 @@
 ---
 id: issue-313
 title: "refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
