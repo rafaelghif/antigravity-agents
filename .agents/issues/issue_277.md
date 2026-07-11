@@ -1,7 +1,7 @@
 ---
 id: issue-277
 title: "feat: refine agent persona with expert engineering philosophy"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

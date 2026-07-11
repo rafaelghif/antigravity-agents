@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.44.0] - 2026-07-11
+
+### 🚀 Features
+- refine agent persona with expert engineering philosophy
+- feat: refine agent persona with expert engineering philosophy (ISSUE-277)
+
+
 ## [3.43.0] - 2026-07-11
 
 ### 🚀 Features
