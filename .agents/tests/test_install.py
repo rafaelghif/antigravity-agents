@@ -41,6 +41,8 @@ class TestInstallCommand(unittest.TestCase):
         # Included items
         self.assertFalse(install.should_exclude(".agents/scripts/validate.py"))
         self.assertFalse(install.should_exclude(".agents/memory/templates/rules.md.template"))
+        self.assertFalse(install.should_exclude(".agents/blueprints/clean-architecture.md"))
+        self.assertFalse(install.should_exclude(".agents/workflows/sync-memory.md"))
         self.assertFalse(install.should_exclude("helper.sh"))
 
     @patch('os.path.exists', return_value=True)
