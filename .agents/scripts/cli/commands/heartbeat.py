@@ -15,11 +15,11 @@ def run(args):
     pulse_passed = True
 
     # 1. Soul & Identity Alignment Check
-    soul_file = ".agents/memory/soul.md"
+    soul_file = ".agents/soul.md"
     if os.path.exists(soul_file):
         print("[OK] Agent soul profile exists and is integrated.")
     else:
-        print("[WARN] Agent soul profile (soul.md) is missing from memory register.")
+        print("[WARN] Agent soul profile (soul.md) is missing from .agents root.")
         pulse_passed = False
 
     # 2. Lock Compliance Check
