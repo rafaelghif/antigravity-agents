@@ -1,7 +1,7 @@
 ---
 id: issue-268
 title: "extend stack auto-reconnaissance to support ruby elixir cpp and swift"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
@@ -28,9 +28,7 @@ extend stack auto-reconnaissance to support ruby elixir cpp and swift, ensuring 
   - [x] .agents/scripts/validate.py
   - [x] .agents/tests/test_recon.py
 - Active module locks:
-  - [x] .agents/scripts/recon <!-- id: audit-module-locks -->
-  - [x] .agents/scripts/validate
-  - [x] .agents/tests/test_recon
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

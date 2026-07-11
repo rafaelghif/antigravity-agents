@@ -13,9 +13,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] extend stack auto-reconnaissance to support ruby elixir cpp and swift (feat/issue-268) <!-- id: issue-268 -->
 
 ## Done
+- [x] extend stack auto-reconnaissance to support ruby elixir cpp and swift (feat/issue-268) <!-- id: issue-268 -->
 - [x] fix target stack auto-detection and C# .NET core framework classification (feat/issue-266) <!-- id: issue-266 -->
 - [x] pin dependencies in Dockerfile to prevent supply chain vulnerabilities (feat/issue-264) <!-- id: issue-264 -->
 - [x] fix unit test failures in CI due to missing archive issues folder (feat/issue-262) <!-- id: issue-262 -->
