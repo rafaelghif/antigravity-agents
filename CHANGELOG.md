@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.74.0] - 2026-07-11
+
+### 🚀 Features
+- relax Clean Architecture and SOLID rules for simple/custom projects and support none architecture in bootstrap
+- Relax Clean Architecture and SOLID rules for simple/custom projects (ISSUE-311)
+
+
 ## [3.73.0] - 2026-07-11
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-311
 title: "Relax Clean Architecture and SOLID rules for simple/custom projects"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
