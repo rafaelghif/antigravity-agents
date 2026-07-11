@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Optimize context optimizer for solo workflow mode and improve token efficiency ratings (feat/issue-309) <!-- id: issue-309 -->
 - [x] Enhance solo workflow mode to bypass lock and branch alignment checks (feat/issue-308) <!-- id: issue-308 -->
 - [x] Enforce agent soul profile in AGENTS.md and enhance soul personality strictness (feat/issue-307) <!-- id: issue-307 -->
 - [x] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->

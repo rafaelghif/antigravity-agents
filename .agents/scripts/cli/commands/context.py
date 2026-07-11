@@ -148,21 +148,44 @@ def archive_completed_tasks_and_plans() -> None:
     if archived_count > 0:
         print_ok(f"Successfully archived {archived_count} completed task/plan files to '.agents/archive/'.")
 
+def get_workflow_mode() -> str:
+    """Retrieve the workspace workflow mode ('solo' or 'team') from .agents/config.json."""
+    config_path = ".agents/config.json"
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+                return cfg.get("workflow_mode", "team")
+        except Exception:
+            pass
+    return "team"
+
 def optimize_context() -> None:
     # First, archive completed tasks and plans to keep LLM context clean
     archive_completed_tasks_and_plans()
 
     branch = get_current_branch()
-    if not branch or branch in ('main', 'master'):
-        print_err("Cannot optimize context on base branch main/master. Checkout a feature branch first.")
-        sys.exit(1)
-        
-    issue_id = get_issue_id(branch)
-    if not issue_id:
-        print_err(f"Branch '{branch}' does not contain a valid issue ID pattern (e.g. feat/issue-123).")
-        sys.exit(1)
+    workflow_mode = get_workflow_mode()
+    
+    if workflow_mode == "solo":
+        # Allow main/master branch, and allow arbitrary branches
+        if not branch:
+            branch = "main"
+        issue_id = get_issue_id(branch) or "solo-workflow"
+    else:
+        if not branch or branch in ('main', 'master'):
+            print_err("Cannot optimize context on base branch main/master. Checkout a feature branch first.")
+            sys.exit(1)
+            
+        issue_id = get_issue_id(branch)
+        if not issue_id:
+            print_err(f"Branch '{branch}' does not contain a valid issue ID pattern (e.g. feat/issue-123).")
+            sys.exit(1)
         
     details = get_issue_details(issue_id)
+    if issue_id == "solo-workflow" and details.get("title") == "Unknown Title":
+        details["title"] = "Solo Development Workflow"
+        details["description"] = "Running in solo mode (locks and branch alignment audits bypassed)."
     locks = get_locked_modules(branch)
     changes = get_git_changes()
     
