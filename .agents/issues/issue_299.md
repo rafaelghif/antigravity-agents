@@ -22,18 +22,18 @@ Consolidate platform-specific installer and bootstrapper shell script wrapper lo
 *Recommendation*: Proceed with Option A.
 
 ## Tasks
-- [ ] Task 1: Map the new 'install' command in helper.py and create the install.py skeleton <!-- id: task-install-skeleton -->
-- [ ] Task 2: Implement target directory verification, automated backups, and recursive file copies in install.py <!-- id: task-install-copy-logic -->
-- [ ] Task 3: Migrate directory creation, templates copying, version syncing, and hooks setup into bootstrap.py <!-- id: task-bootstrap-setup -->
-- [ ] Task 4: Refactor install.sh/install.ps1 to perform only minimum checks and call install.py <!-- id: task-install-wrappers -->
-- [ ] Task 5: Refactor bootstrap.sh/bootstrap.ps1 to thin-delegate to bootstrap.py <!-- id: task-bootstrap-wrappers -->
-- [ ] Task 6: Add unit tests for the new install command and bootstrap setups <!-- id: task-unit-tests -->
-- [ ] Task 7: Run validation guard checks and finalize merge <!-- id: task-validation-final -->
+- [x] Task 1: Map the new 'install' command in helper.py and create the install.py skeleton <!-- id: task-install-skeleton -->
+- [x] Task 2: Implement target directory verification, automated backups, and recursive file copies in install.py <!-- id: task-install-copy-logic -->
+- [x] Task 3: Migrate directory creation, templates copying, version syncing, and hooks setup into bootstrap.py <!-- id: task-bootstrap-setup -->
+- [x] Task 4: Refactor install.sh/install.ps1 to perform only minimum checks and call install.py <!-- id: task-install-wrappers -->
+- [x] Task 5: Refactor bootstrap.sh/bootstrap.ps1 to thin-delegate to bootstrap.py <!-- id: task-bootstrap-wrappers -->
+- [x] Task 6: Add unit tests for the new install command and bootstrap setups <!-- id: task-unit-tests -->
+- [x] Task 7: Run validation guard checks and finalize merge <!-- id: task-validation-final -->
 
 ## Acceptance Criteria
-- [ ] Subprocess installers check python/git prerequisites and delegate copying to Python. <!-- id: ac-thin-wrappers -->
-- [ ] Exclusions matches template-map/git-ignores and installs cleanly on both Unix and Windows. <!-- id: ac-clean-copy -->
-- [ ] All 218+ unit tests pass. <!-- id: ac-unit-tests-pass -->
+- [x] Subprocess installers check python/git prerequisites and delegate copying to Python. <!-- id: ac-thin-wrappers -->
+- [x] Exclusions matches template-map/git-ignores and installs cleanly on both Unix and Windows. <!-- id: ac-clean-copy -->
+- [x] All 218+ unit tests pass. <!-- id: ac-unit-tests-pass -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
@@ -46,12 +46,12 @@ Consolidate platform-specific installer and bootstrapper shell script wrapper lo
   - [x] bootstrap.ps1 <!-- id: audit-target-files-7 -->
   - [x] .agents/scripts/validate.py <!-- id: audit-target-files-8 -->
 - Active module locks:
-  - [ ] .agents/scripts/cli/helper <!-- id: lock-helper -->
-  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
-  - [ ] .agents/scripts/validate <!-- id: lock-validate -->
-  - [ ] .agents/scripts/cli/commands/install <!-- id: lock-install -->
-  - [ ] .agents/tests/test_platform_drift <!-- id: lock-test_platform_drift -->
-  - [ ] .agents/tests/test_install <!-- id: lock-test_install -->
+  - [x] .agents/scripts/cli/helper <!-- id: lock-helper -->
+  - [x] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
+  - [x] .agents/scripts/validate <!-- id: lock-validate -->
+  - [x] .agents/scripts/cli/commands/install <!-- id: lock-install -->
+  - [x] .agents/tests/test_platform_drift <!-- id: lock-test_platform_drift -->
+  - [x] .agents/tests/test_install <!-- id: lock-test_install -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
