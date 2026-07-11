@@ -20,12 +20,12 @@ The user reported inconsistencies during dummy installation and requested that t
 - [x] Align extra arguments passing between `install.sh` and `install.ps1` for bootstrap wrapping <!-- id: task-align-installers -->
 - [x] Run dummy installation and compare files one-by-one to check consistency <!-- id: task-compare-install -->
 - [x] Fix any found file discrepancies or configuration mismatches <!-- id: task-fix-mismatches -->
-- [ ] Verify validation passes cleanly and close the issue <!-- id: task-validate-close -->
+- [x] Verify validation passes cleanly and close the issue <!-- id: task-validate-close -->
 
 ## Acceptance Criteria
 - [x] Installation succeeds without blocking on interactive prompts in non-interactive shell. <!-- id: ac-noninteractive-success -->
 - [x] File-by-file comparison shows absolute parity and consistency between source templates/core and installed targets. <!-- id: ac-install-parity -->
-- [ ] Unit tests and validations pass. <!-- id: ac-tests-pass -->
+- [x] Unit tests and validations pass. <!-- id: ac-tests-pass -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
