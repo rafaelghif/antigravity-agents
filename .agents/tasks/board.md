@@ -3,12 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
-- [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
-- [ ] --assignee (feat/clean up archived issue files from active tracking directory) <!-- id: Clean up archived issue files from active tracking directory -->
-- [ ] --assignee (feat/synchronize cli commands in context map documentation) <!-- id: Synchronize CLI commands in context map documentation -->
-- [ ] --assignee (feat/verify and harden dummy installation plug and play consistency) <!-- id: Verify and harden dummy installation plug and play consistency -->
-- [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
