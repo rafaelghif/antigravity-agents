@@ -505,7 +505,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.34.4"
+    AAC_VERSION = "3.34.5"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

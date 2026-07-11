@@ -1,7 +1,7 @@
 ---
 id: issue-264
 title: "pin dependencies in Dockerfile to prevent supply chain vulnerabilities"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

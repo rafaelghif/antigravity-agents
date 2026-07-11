@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] pin dependencies in Dockerfile to prevent supply chain vulnerabilities (feat/issue-264) <!-- id: issue-264 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] pin dependencies in Dockerfile to prevent supply chain vulnerabilities (feat/issue-264) <!-- id: issue-264 -->
 - [x] fix unit test failures in CI due to missing archive issues folder (feat/issue-262) <!-- id: issue-262 -->
 - [x] fix git CI/CD validation job on main branch (feat/issue-260) <!-- id: issue-260 -->
 - [x] feat: synchronize rules template with latest workspace rules changes to prevent template drift (feat/issue-259) <!-- id: issue-259 -->
