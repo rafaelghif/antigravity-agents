@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.56.0] - 2026-07-11
+
+### 🚀 Features
+- copy .agents/schemas directory during project bootstrap
+- align installer argument forwarding and enable non-interactive bootstrap fallback
+- auto-enable quick setup in bootstrap.py if stdin is non-interactive
+- Verify and harden dummy installation plug and play consistency (ISSUE-291)
+
+### ⚙️ Chores
+- mark all tasks as completed for installation hardening in issue_291.md
+
+
 ## [3.55.0] - 2026-07-11
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-291
 title: "Verify and harden dummy installation plug and play consistency"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
