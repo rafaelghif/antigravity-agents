@@ -13,6 +13,9 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 > [!IMPORTANT]
 > **AAC V3** operates entirely locally at the workspace level. All configurations, task details, developer profiles, and execution logs are isolated under `.agents/` inside the repository. This guarantees team alignment and security without relying on global states or cloud dependencies.
 
+> [!WARNING]
+> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind, express or implied. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V3 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors and contributors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
+
 ---
 
 ## The Core Problem & The AAC Solution
