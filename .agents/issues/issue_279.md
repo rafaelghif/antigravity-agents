@@ -1,7 +1,7 @@
 ---
 id: issue-279
 title: "fix: synchronize installation templates for milestones and security policy"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
