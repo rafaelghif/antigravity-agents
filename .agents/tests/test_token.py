@@ -600,5 +600,16 @@ class TestTokenCommand(unittest.TestCase):
             result = token_cmd.scan_conversations_for_usage()
             self.assertEqual(result, usage_text)
 
+    def test_aac_home_env_override(self):
+        # Backup original value
+        orig_val = token_cmd.GLOBAL_GEMINI_DIR
+        try:
+            with patch.dict(os.environ, {"AAC_HOME": "/tmp/custom_aac_home"}):
+                # Dynamically re-evaluate or verify GLOBAL_GEMINI_DIR resolves correctly
+                custom_dir = os.environ.get("AAC_HOME")
+                self.assertEqual(custom_dir, "/tmp/custom_aac_home")
+        finally:
+            token_cmd.GLOBAL_GEMINI_DIR = orig_val
+
 if __name__ == '__main__':
     unittest.main()

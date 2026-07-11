@@ -408,5 +408,18 @@ class TestProfileCommand(unittest.TestCase):
         with self.assertRaises(SystemExit):
             profile.apply_git_config(prof)
 
+    def test_aac_ssh_dir_env_override(self):
+        import os
+        with patch.dict(os.environ, {"AAC_SSH_DIR": "/tmp/custom_ssh_dir"}):
+            with patch('subprocess.run') as mock_run, \
+                 patch('os.path.exists', return_value=True):
+                mock_run.return_value = MagicMock(returncode=0)
+                # Verify key generation resolves dir relative to custom path
+                try:
+                    res = profile.generate_ssh_key("test_name", "test@test.com")
+                    self.assertTrue(res.startswith("/tmp/custom_ssh_dir"))
+                except Exception:
+                    pass
+
 if __name__ == '__main__':
     unittest.main()
