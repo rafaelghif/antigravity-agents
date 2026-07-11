@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] feat(mcp): harden mcp server json-rpc compliance, path imports, and tool execution error capturing (feat/issue-316) <!-- id: issue-316 -->
 
 ## Done
 - [x] feat(upgrade): prioritize local templates in bootstrap and add blueprints and workflows to auto-upgrade paths (feat/issue-315) <!-- id: issue-315 -->
