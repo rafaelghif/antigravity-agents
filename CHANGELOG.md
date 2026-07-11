@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.35.0] - 2026-07-11
+
+### 🚀 Features
+- extend stack auto-reconnaissance to support multi-language framework and unit testing adaptation
+- extend stack auto-reconnaissance to support ruby elixir cpp and swift (ISSUE-268)
+
+
 ## [3.34.7] - 2026-07-11
 
 ### 🐛 Bug Fixes

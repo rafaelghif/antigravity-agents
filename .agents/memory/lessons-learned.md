@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-11]** **reconnaissance**: Decoupled modular stack detectors in recon.py to dynamically adapt test/build commands and frameworks (e.g., C# WinForms/WPF/Web, PHP Pest/PHPUnit, Ruby RSpec) across all major programming ecosystems.
 - **[2026-07-04]** **Shell Scripting**: Maintain parity between Bash (.sh) and PowerShell (.ps1) helper scripts for consistent developer experience across platforms.
 - **[2026-07-04]** **token-budget**: Optimized scan_conversations_for_usage to read JSONL transcripts first and enforced a strict 5-minute age validation for both transcript and DB steps. Prevented dynamic limits overrides when limits are parsed directly from Markdown tables, saved direct used overrides, and implemented dynamic freshness check in run_status to trigger async background sync when budget is older than 2 minutes.
 - **[2026-07-04]** **token-budget**: Fixed platform usage parser to correctly parse limits and used tokens from Markdown table column format and support bullet lists (*) and bold tags (**) in account/task breakdowns.
