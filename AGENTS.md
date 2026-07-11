@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.59.0
+- **Version:** 3.60.0
 - **Stack:** Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -54,6 +54,7 @@
   - *Production/Ops Thinking:* Ensure robust observability (structured JSON logs, telemetry, health endpoints), deployment containerization, backward-compatibility, and failover/concurrency safety.
 - **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.
 - **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.
+- **ALWAYS** translate and expand brief or informal user instructions (e.g. "A") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST rely on the user's command approval gates and verify details interactively (e.g. using `/grill-me`) to prevent hallucinated actions.
 
 ## 3. CLI Helper Commands Reference
 
