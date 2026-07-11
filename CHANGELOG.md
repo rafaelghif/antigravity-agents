@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.75.0] - 2026-07-11
+
+### 🚀 Features
+- prevent configuration overwriting in target projects and correct verify.yml template mapping path
+- Fix installer config file overwriting and correct template map verify.yml workflow path (ISSUE-312)
+
+
 ## [3.74.0] - 2026-07-11
 
 ### 🚀 Features

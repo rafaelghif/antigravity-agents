@@ -1,7 +1,7 @@
 ---
 id: issue-312
 title: "Fix installer config file overwriting and correct template map verify.yml workflow path"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
