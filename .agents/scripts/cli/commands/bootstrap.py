@@ -572,15 +572,8 @@ def run(args):
     except Exception:
         pass
 
-    if not is_core and os.path.exists(agents_file):
-        try:
-            with open(agents_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            product_match = re.search(r"-\s+\*\*Product:\*\*\s*(\S+)", content)
-            if product_match and product_match.group(1) == "test-proj":
-                is_core = True
-        except Exception:
-            pass
+    # Core repository check is based strictly on the git repository remote/name
+    # to avoid treating target workspaces as the core repository itself.
 
     if is_core:
         project_version = AAC_VERSION
@@ -612,14 +605,19 @@ def run(args):
     else:
         with open(agents_file, 'r', encoding='utf-8') as f:
             content = f.read()
+            
+        # Read existing product and version parameters BEFORE modifying content
+        existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
+        existing_product_match = re.search(r'-\s+\*\*Product:\*\*\s*(\S+)', content)
+        is_template_agents_md = (existing_product_match and existing_product_match.group(1) == "test-proj")
+
         content = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', content)
         content = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', content)
         
-        # Read existing version from AGENTS.md
-        existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
-        if existing_version_match and not is_core:
+        if existing_version_match and not is_core and not is_template_agents_md:
             # Keep existing version (only for target/managed projects)
             print(f"Preserving existing version in AGENTS.md: {existing_version_match.group(1)}")
+            project_version = existing_version_match.group(1)
         else:
             if re.search(r'-\s+\*\*Version:\*\*.*', content):
                 content = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', content)

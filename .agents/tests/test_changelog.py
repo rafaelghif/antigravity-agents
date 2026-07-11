@@ -170,11 +170,11 @@ class TestChangelog(unittest.TestCase):
         mock_exists.return_value = False
         self.assertTrue(changelog.is_agent_core_repo())
 
-        # Case 2: git_api does not return it, but AGENTS.md product is test-proj
+        # Case 2: git_api does not return it (and AGENTS.md product is ignored)
         mock_repo_info.return_value = None
         mock_exists.return_value = True
         with patch('builtins.open', new_callable=mock_open, read_data="- **Product:** test-proj\n"):
-            self.assertTrue(changelog.is_agent_core_repo())
+            self.assertFalse(changelog.is_agent_core_repo())
             
         # Case 3: neither matches
         mock_exists.return_value = True
