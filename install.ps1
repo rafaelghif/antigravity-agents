@@ -205,7 +205,8 @@ if (-not (Test-Path (Join-Path $ExtractedDir ".agents"))) {
             $File.Name -eq "api_keys" -or
             $File.Name -eq "active_api_keys" -or
             $File.Name -eq "active_api_keys.ps1" -or
-            $File.Name -eq "active_api_profile_name") {
+            $File.Name -eq "active_api_profile_name" -or
+            $File.Name -eq "mcp_config.json") {
             continue
         }
         
