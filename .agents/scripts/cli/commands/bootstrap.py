@@ -428,26 +428,27 @@ def run(args):
     import shutil
     import atexit
     
-    source_repo = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
-    print(f"Fetching latest source templates and core files from Git: {source_repo}...")
-    temp_src_root = tempfile.mkdtemp()
-    atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
+    # Prioritize local templates if present (e.g. during local installation or upgrade)
+    cmd_dir = os.path.dirname(os.path.abspath(__file__))
+    scripts_dir = os.path.dirname(os.path.dirname(cmd_dir))
+    local_src_root = os.path.dirname(os.path.dirname(scripts_dir))
     
-    res = subprocess.run(
-        ['git', 'clone', '--depth', '1', source_repo, temp_src_root],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    if res.returncode != 0:
-        # Check if local fallback is available
-        cmd_dir = os.path.dirname(os.path.abspath(__file__))
-        scripts_dir = os.path.dirname(os.path.dirname(cmd_dir))
-        local_src_root = os.path.dirname(os.path.dirname(scripts_dir))
-        if os.path.exists(os.path.join(local_src_root, ".agents", "templates")):
-            print(f"\033[93m[WARN] Git clone failed. Falling back to local offline templates registry at '{local_src_root}'...\033[0m")
-            src_root = local_src_root
-        else:
+    if os.path.exists(os.path.join(local_src_root, ".agents", "templates")):
+        print(f"Using local templates registry at '{local_src_root}'...")
+        src_root = local_src_root
+    else:
+        source_repo = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
+        print(f"Fetching latest source templates and core files from Git: {source_repo}...")
+        temp_src_root = tempfile.mkdtemp()
+        atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
+        
+        res = subprocess.run(
+            ['git', 'clone', '--depth', '1', source_repo, temp_src_root],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if res.returncode != 0:
             print_err(f"==========================================================")
             print_err(f"   [ERROR] Git Clone Failed!")
             print_err(f"==========================================================")
@@ -456,8 +457,8 @@ def run(args):
             print_err(f"Reason: {res.stderr.strip()}")
             print_err(f"==========================================================")
             sys.exit(1)
-    else:
-        src_root = temp_src_root
+        else:
+            src_root = temp_src_root
 
     # 1. Generate Folder Structure
     if arch == "clean":
