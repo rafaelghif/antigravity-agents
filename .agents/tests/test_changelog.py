@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, mock_open, MagicMock
 import sys
 import os
+import io
 
 # Inject scripts folders
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts')))
@@ -126,6 +127,21 @@ class TestChangelog(unittest.TestCase):
         mock_listdir.return_value = ["issue_022.md"]
         cat = changelog.classify_from_local_issue("issue-022")
         self.assertEqual(cat, "fix")
+
+    @patch('os.path.exists')
+    @patch('os.listdir')
+    @patch('builtins.open', new_callable=mock_open, read_data="---\ntitle: \"Resolve versioning bug in installer\"\n---\n")
+    def test_parse_commits_issue_override(self, mock_file, mock_listdir, mock_exists):
+        mock_exists.return_value = True
+        mock_listdir.return_value = ["issue_022.md"]
+        
+        # The commit message uses 'feat:', but since the issue is a bug fix, it should classify it as 'fix'
+        commits = [("hash123", "feat: implement test features (Refs: issue-022)")]
+        categories = changelog.parse_conventional_commits(commits)
+        
+        self.assertEqual(len(categories["fix"]), 1)
+        self.assertEqual(len(categories["feat"]), 0)
+        self.assertIn("Resolve versioning bug in installer", categories["fix"][0])
 
     @patch('subprocess.run')
     def test_get_boundary_commit_tags(self, mock_run):

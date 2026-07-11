@@ -154,10 +154,10 @@ def classify_from_local_issue(issue_id: str) -> Optional[str]:
             if title:
                 if "breaking" in title or "major" in title or "!" in title:
                     return "breaking"
-                if any(w in title for w in ("feat", "feature", "implement", "add", "support")):
-                    return "feat"
                 if any(w in title for w in ("fix", "bug", "remediate", "error", "prevent", "leak", "resolve")):
                     return "fix"
+                if any(w in title for w in ("feat", "feature", "implement", "add", "support")):
+                    return "feat"
                 if "docs" in title or "document" in title:
                     return "docs"
                 if "refactor" in title:
@@ -225,6 +225,10 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
                 ctype = "chore"
                 
             cat = "breaking" if is_breaking else ctype
+            if issue_id and cat != "breaking":
+                issue_cat = classify_from_local_issue(issue_id)
+                if issue_cat:
+                    cat = issue_cat
             priority = type_priority.get(cat, 1)
             
             entry = desc
