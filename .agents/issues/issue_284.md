@@ -1,7 +1,7 @@
 ---
 id: issue-284
 title: "Fix MCP config bootstrapping registration and template drift issues"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
