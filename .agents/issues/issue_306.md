@@ -17,7 +17,7 @@ We need to introduce a workspace setting file `.agents/config.json` default conf
 - [x] Update bootstrap.py to generate config.json from template during bootstrap <!-- id: task-update-bootstrap -->
 - [x] Update install.py to exclude config.json from recursive copying <!-- id: task-update-install -->
 - [x] Add unit tests in test_bootstrap.py verifying config.json generation <!-- id: task-unit-tests -->
-- [ ] Run validation tests and verify workspace compliance <!-- id: task-run-validation -->
+- [x] Run validation tests and verify workspace compliance <!-- id: task-run-validation -->
 
 ## Acceptance Criteria
 - [x] `.agents/templates/config.json.template` exists and defines the default `"workflow_mode": "team"`. <!-- id: ac-template-exists -->
