@@ -141,6 +141,7 @@ class TestValidate(unittest.TestCase):
         mock_get_branch.return_value = "some-random-branch"
         self.assertTrue(validate.audit_git_branch_alignment())
 
+    @patch.dict('os.environ', {}, clear=True)
     @patch('validate.get_current_branch')
     @patch('subprocess.run')
     @patch('os.path.exists')
@@ -161,6 +162,7 @@ class TestValidate(unittest.TestCase):
         ]
         self.assertFalse(validate.audit_git_branch_alignment())
 
+    @patch.dict('os.environ', {}, clear=True)
     @patch('validate.get_current_branch')
     @patch('subprocess.run')
     @patch('os.path.exists')
