@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.41.0] - 2026-07-11
+
+### 🚀 Features
+- relocate soul.md to the root of .agents directory
+- feat: relocate soul.md to .agents root (ISSUE-274)
+
+
 ## [3.40.0] - 2026-07-11
 
 ### 🚀 Features

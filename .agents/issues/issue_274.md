@@ -1,7 +1,7 @@
 ---
 id: issue-274
 title: "feat: relocate soul.md to .agents root"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

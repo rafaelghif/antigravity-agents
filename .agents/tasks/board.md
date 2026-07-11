@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: relocate soul.md to .agents root (feat/issue-274) <!-- id: issue-274 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: relocate soul.md to .agents root (feat/issue-274) <!-- id: issue-274 -->
 - [x] enhance readme with comprehensive onboarding and setup details (feat/issue-273) <!-- id: issue-273 -->
 - [x] integrate gitea mcp server configuration into workspace (feat/issue-272) <!-- id: issue-272 -->
 - [x] integrate github mcp server config and update template parity mappings (feat/issue-271) <!-- id: issue-271 -->
