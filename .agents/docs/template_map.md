@@ -17,7 +17,7 @@ Whenever any of the following target files are modified, their source template u
 | `.agents/templates/schema.md.template` | `.agents/schema.md` | Master architecture & database blueprint. |
 | `.agents/templates/gitignore.template` | `.gitignore` | Git version control exclusions. |
 | `.agents/templates/antigravityignore.template` | `.antigravityignore` | Agent workspace parsing exclusions. |
-| `.agents/templates/ci_github_workflow.yml.template` | `.github/workflows/ci.yml` | GitHub actions CI/CD definition. |
+| `.agents/templates/ci_github_workflow.yml.template` | `.github/workflows/verify.yml` | GitHub actions CI/CD definition. |
 | `.agents/git_profiles.example` | `.agents/git_profiles.json` | Local Git profiles rotation configuration. |
 | `.agents/projects.example` | `.agents/projects.json` | Local monorepo project configurations. |
 | `.agents/templates/node_package.json.template` | `package.json` | Default Node project initializer package manifest. |
