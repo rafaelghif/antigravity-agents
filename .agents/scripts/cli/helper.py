@@ -64,6 +64,7 @@ def print_help():
   ⬆️ {GREEN}{BOLD}upgrade{RESET}         Upgrades Antigravity Agent Core core scripts & wrappers.
   ⌨️ {GREEN}{BOLD}completion{RESET}      Generates terminal tab-completion scripts (Bash/Zsh).
   🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
+  📥 {GREEN}{BOLD}install{RESET}         Installs the Antigravity Agent Core into a target directory.
   🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
   📊 {GREEN}{BOLD}dashboard{RESET}       Launches the local interactive web-based dashboard dashboard.
   🪙 {GREEN}{BOLD}token{RESET}           Logs and displays LLM token budget usage statistics.
@@ -274,7 +275,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message', 'pause', 'resume'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message', 'pause', 'resume', 'install'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
@@ -301,7 +302,7 @@ def main():
         'bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard',
         'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock',
         'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate',
-        'pause', 'resume'
+        'pause', 'resume', 'install'
     }
     
     try:

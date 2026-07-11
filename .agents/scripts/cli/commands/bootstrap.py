@@ -471,8 +471,26 @@ def run(args):
     os.makedirs(".agents", exist_ok=True)
     os.makedirs(".agents/tasks", exist_ok=True)
     os.makedirs(".agents/issues", exist_ok=True)
+    os.makedirs(".agents/memory/decisions", exist_ok=True)
+    os.makedirs(".agents/memory/blueprints", exist_ok=True)
 
     copy_core_files(src_root, force=force_update)
+
+    # Copy memory templates if present
+    src_templates_dir = os.path.join(src_root, ".agents/memory/templates")
+    if os.path.exists(src_templates_dir):
+        os.makedirs(".agents/memory", exist_ok=True)
+        import shutil
+        for item in os.listdir(src_templates_dir):
+            if item.endswith(".template"):
+                src_template_path = os.path.join(src_templates_dir, item)
+                dest_name = item[:-9]  # strip ".template"
+                dest_path = os.path.join(".agents/memory", dest_name)
+                if not os.path.exists(dest_path):
+                    try:
+                        shutil.copy2(src_template_path, dest_path)
+                    except Exception:
+                        pass
     
     if stack == "python":
         req_content = read_template(src_root, "python_requirements.txt.template", "# Project dependencies\npytest\nflake8\n")
@@ -537,7 +555,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.62.0"
+    AAC_VERSION = "3.63.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
@@ -732,6 +750,34 @@ This board tracks active development tasks.
     except Exception as e:
         print(f"[WARN] Failed to automatically register MCP server: {e}")
     print("==========================================================")
+
+    # 8.6. Automatic Reconnaissance and Git Hooks Setup
+    recon_script = ".agents/scripts/recon.py"
+    if os.path.exists(recon_script):
+        print("\n==========================================================")
+        print("   Running Auto-Reconnaissance Scan...                    ")
+        print("==========================================================")
+        try:
+            subprocess.run([sys.executable, recon_script], check=False)
+        except Exception as e:
+            print(f"[WARN] Failed to run reconnaissance scan: {e}")
+        print("==========================================================")
+
+    # Check if Git repository is active
+    res_git = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    is_git = res_git.returncode == 0 and res_git.stdout.strip() == "true"
+    if is_git:
+        validate_script = ".agents/scripts/validate.py"
+        if os.path.exists(validate_script):
+            print("\n==========================================================")
+            print("   Installing Local Git Hooks...                          ")
+            print("==========================================================")
+            try:
+                subprocess.run([sys.executable, validate_script], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                print("[OK] Successfully installed local Git hooks.")
+            except Exception as e:
+                print(f"[WARN] Failed to install Git hooks: {e}")
+            print("==========================================================")
 
     # 9. Next Steps Configuration Guide
     print("\n==========================================================")
