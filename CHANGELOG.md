@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.65.0] - 2026-07-11
+
+### 🚀 Features
+- resolve changelog file leak and versioning skew and prevent filename suffix truncation
+- Fix Changelog Versioning and Issue Naming Skew (ISSUE-301)
+
+
 ## [3.64.0] - 2026-07-11
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-301
 title: "Fix Changelog Versioning and Issue Naming Skew"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
