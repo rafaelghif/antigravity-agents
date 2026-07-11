@@ -1,7 +1,7 @@
 ---
 id: issue-306
 title: "Initialize and bootstrap config.json template and fix global copy installer issues"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

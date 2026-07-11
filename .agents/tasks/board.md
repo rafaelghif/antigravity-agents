@@ -10,9 +10,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->
 
 ## Done
+- [x] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->
 - [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
 - [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->
