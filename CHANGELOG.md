@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.51.0] - 2026-07-11
+
+### 🚀 Features
+- Create comprehensive Agent Rating & Evaluation Report (ISSUE-286)
+
+### 📝 Documentation
+- add comprehensive agent performance and rating report
+
+
 ## [3.50.0] - 2026-07-11
 
 ### 🚀 Features
