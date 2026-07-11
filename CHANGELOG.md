@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.70.0] - 2026-07-11
+
+### 🚀 Features
+- enforce soul.md core persona in AGENTS.md and enhance tone rules
+
+### ⚙️ Chores
+- Enforce agent soul profile in AGENTS.md and enhance soul personality strictness (ISSUE-307)
+
+
 ## [3.69.0] - 2026-07-11
 
 ### 🚀 Features

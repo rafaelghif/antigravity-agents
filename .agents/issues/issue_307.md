@@ -1,7 +1,7 @@
 ---
 id: issue-307
 title: "Enforce agent soul profile in AGENTS.md and enhance soul personality strictness"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
