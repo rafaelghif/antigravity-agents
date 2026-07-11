@@ -800,15 +800,45 @@ created_at: {current_date}
         res_curr = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
         current_branch = res_curr.stdout.strip()
         
-        slug = issue_id.lower().replace('_', '-')
-        possible_branches = [f"feat/{slug}", f"fix/{slug}"]
-        
+        # Resolve branch automatically by querying local branches to avoid strict naming friction
         found_branch = None
-        for b in possible_branches:
-            res_ref = subprocess.run(['git', 'show-ref', f'refs/heads/{b}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if res_ref.returncode == 0:
-                found_branch = b
-                break
+        try:
+            res_branches = subprocess.run(
+                ['git', 'branch', '--format=%(refname:short)'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if res_branches.returncode == 0:
+                normalized_id = issue_id.lower().replace('_', '-')
+                for b in res_branches.stdout.splitlines():
+                    b = b.strip()
+                    if not b:
+                        continue
+                    # Check if the branch contains the issue ID
+                    b_match = re.search(r'(task[-_]?\d+|issue[-_]?\d+|(?:\b|_|/)\d+(?:\b|_|$))', b.lower())
+                    if b_match:
+                        b_id = b_match.group(1).lower().replace('_', '-')
+                        if b_id.isdigit():
+                            b_id = f"issue-{b_id}"
+                        if b_id == normalized_id:
+                            found_branch = b
+                            break
+                        # Support pure number match
+                        if normalized_id.isdigit() and b_id == f"issue-{normalized_id}":
+                            found_branch = b
+                            break
+        except Exception:
+            pass
+
+        if not found_branch:
+            slug = issue_id.lower().replace('_', '-')
+            possible_branches = [f"feat/{slug}", f"fix/{slug}"]
+            for b in possible_branches:
+                res_ref = subprocess.run(['git', 'show-ref', f'refs/heads/{b}'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if res_ref.returncode == 0:
+                    found_branch = b
+                    break
 
         if found_branch and current_branch != found_branch:
             print(f"Error: You are currently on branch '{current_branch}', but this issue is associated with branch '{found_branch}'.")

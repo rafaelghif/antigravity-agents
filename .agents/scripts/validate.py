@@ -893,14 +893,34 @@ def audit_git_branch_alignment() -> bool:
             print_ok(f"On base branch '{branch}' (clean, no active modifications).")
             return True
         
-    match = re.search(r'(task-\d+|issue-\d+)', branch.lower())
+    match = re.search(r'(task[-_]?\d+|issue[-_]?\d+|(?:\b|_|/)\d+(?:\b|_|$))', branch.lower())
     if not match:
         # Prepend task- and sanitize branch name to form a valid temporary task ID
         safe_branch_name = re.sub(r'[^a-zA-Z0-9]', '-', branch.lower()).strip('-')
         issue_id = f"task-{safe_branch_name}"
         print_warn(f"Branch name '{branch}' does not contain an issue ID. Auto-generating temporary ID: '{issue_id}'")
     else:
-        issue_id = match.group(1)
+        matched_str = match.group(1).lstrip('/_').rstrip('/_')
+        if matched_str.isdigit():
+            num = matched_str
+            issue_id = f"issue-{num}"
+            task_id = f"task-{num}"
+            task_board_path = ".agents/tasks/board.md"
+            if os.path.exists(task_board_path):
+                try:
+                    with open(task_board_path, 'r', encoding='utf-8') as tb:
+                        tb_content = tb.read()
+                        if task_id in tb_content and issue_id not in tb_content:
+                            issue_id = task_id
+                except Exception:
+                    pass
+        else:
+            issue_id = matched_str.lower().replace('_', '-')
+            if not (issue_id.startswith('issue-') or issue_id.startswith('task-')):
+                if 'issue' in issue_id:
+                    issue_id = 'issue-' + issue_id.replace('issue', '').strip('-')
+                elif 'task' in issue_id:
+                    issue_id = 'task-' + issue_id.replace('task', '').strip('-')
         
     task_board_path = ".agents/tasks/board.md"
     in_board = False

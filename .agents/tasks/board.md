@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Fix branch naming friction and flexible issue closing resolution (feat/issue-287) <!-- id: issue-287 -->
 - [x] Create comprehensive Agent Rating & Evaluation Report (feat/issue-286) <!-- id: issue-286 -->
 - [x] Map mcp_config in template_map.md and enforce programmatical template parity checks (feat/issue-285) <!-- id: issue-285 -->
 - [x] Fix MCP config bootstrapping registration and template drift issues (feat/issue-284) <!-- id: issue-284 -->
