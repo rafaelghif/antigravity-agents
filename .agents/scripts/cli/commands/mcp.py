@@ -24,7 +24,8 @@ def run(args: List[str]) -> None:
         sys.exit(1)
         
     if subcommand == "register":
-        mcp_server.register_server()
+        force_global = "--global" in args or "-g" in args
+        mcp_server.register_server(force_global=force_global)
     elif subcommand == "start":
         mcp_server.start_server()
     else:

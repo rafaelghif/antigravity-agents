@@ -252,7 +252,7 @@ def get_dashboard_data(force=False):
         try:
             with open(rules_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            m = re.search(r'## 5\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$', content)
+            m = re.search(r'## 6\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$', content)
             if m:
                 for line in m.group(0).splitlines():
                     if line.strip().startswith('- '):

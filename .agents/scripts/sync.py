@@ -193,10 +193,10 @@ def sync_lessons_to_rules():
         with open(rules_file, 'r', encoding='utf-8') as f:
             rules_content = f.read()
             
-        synthesized_block = "\n## 5. Synthesized Rules (Self-Learning Memory)\n" + "\n".join(active_rules) + "\n"
+        synthesized_block = "\n## 6. Synthesized Rules (Self-Learning Memory)\n" + "\n".join(active_rules) + "\n"
         
-        if "## 5. Synthesized Rules" in rules_content:
-            pattern = r'## 5\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$'
+        if "## 6. Synthesized Rules" in rules_content:
+            pattern = r'## 6\. Synthesized Rules \(Self-Learning Memory\)[\s\S]*$'
             new_rules_content = re.sub(pattern, synthesized_block.strip() + "\n", rules_content)
         else:
             new_rules_content = rules_content.rstrip() + "\n" + synthesized_block
