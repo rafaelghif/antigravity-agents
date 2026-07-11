@@ -218,7 +218,7 @@ def copy_core_files(src_root, force=False):
             'git_profiles.json', 'locks.json', '.DS_Store', 'Thumbs.db',
             'token_budget.json', 'active_context.md', 'sync_cache.json',
             'cooldowns.json', 'upgrade_state.json', 'projects.json',
-            'mcp_config.json'
+            'mcp_config.json', 'config.json'
         }
         if base in exclude_files:
             return True
@@ -552,6 +552,18 @@ def run(args):
                 print("Generated '.agents/mcp_config.json' from core config.")
             except Exception as e:
                 print(f"Warning: Failed to copy mcp_config.json: {e}")
+
+    # 4.6. Generate .agents/config.json if not exists
+    config_path = os.path.join(".", ".agents", "config.json")
+    if not os.path.exists(config_path):
+        config_content = read_template(src_root, "config.json.template", '{\n  "workflow_mode": "team"\n}\n')
+        if config_content:
+            try:
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    f.write(config_content)
+                print("Generated '.agents/config.json' from template.")
+            except Exception as e:
+                print(f"Warning: Failed to create config.json: {e}")
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"

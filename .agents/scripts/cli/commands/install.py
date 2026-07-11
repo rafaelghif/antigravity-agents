@@ -43,6 +43,7 @@ def should_exclude(rel_path: str) -> bool:
         "active_api_keys.ps1",
         "active_api_profile_name",
         "mcp_config.json",
+        "config.json",
         "CHANGELOG.md"
     }
     

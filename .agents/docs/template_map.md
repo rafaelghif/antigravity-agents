@@ -13,6 +13,7 @@ Whenever any of the following target files are modified, their source template u
 | Source Template | Target Workspace File | Description |
 | :--- | :--- | :--- |
 | `.agents/templates/rules.md.template` | `.agents/rules.md` | Workspace rule declarations. |
+| `.agents/templates/config.json.template` | `.agents/config.json` | Advanced workspace-level runtime and workflow settings (e.g. solo mode). |
 | `.agents/templates/schema.md.template` | `.agents/schema.md` | Master architecture & database blueprint. |
 | `.agents/templates/gitignore.template` | `.gitignore` | Git version control exclusions. |
 | `.agents/templates/antigravityignore.template` | `.antigravityignore` | Agent workspace parsing exclusions. |
