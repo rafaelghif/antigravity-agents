@@ -15,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix target stack auto-detection and C# .NET core framework classification (feat/issue-266) <!-- id: issue-266 -->
 - [x] pin dependencies in Dockerfile to prevent supply chain vulnerabilities (feat/issue-264) <!-- id: issue-264 -->
 - [x] fix unit test failures in CI due to missing archive issues folder (feat/issue-262) <!-- id: issue-262 -->
 - [x] fix git CI/CD validation job on main branch (feat/issue-260) <!-- id: issue-260 -->

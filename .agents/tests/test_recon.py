@@ -62,5 +62,47 @@ class TestReconCommand(unittest.TestCase):
             self.assertIn("pytest` is not installed", content)
             self.assertIn("flake8` is not installed", content)
 
+    def test_scan_workspace_dotnet_core(self):
+        # Create dummy .csproj for .NET Core
+        with open("project.csproj", 'w', encoding='utf-8') as f:
+            f.write('<Project Sdk="Microsoft.NET.Sdk">\n<PropertyGroup>\n<TargetFramework>net8.0</TargetFramework>\n</PropertyGroup>\n</Project>')
+            
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "dotnet")
+        self.assertIn(".NET Core (C#)", results["stack"])
+        self.assertEqual(results["test_command"], "dotnet test")
+        self.assertEqual(results["build_command"], "dotnet build")
+
+    def test_scan_workspace_dotnet_framework(self):
+        # Create dummy .csproj for .NET Framework
+        with open("project.csproj", 'w', encoding='utf-8') as f:
+            f.write('<Project>\n<PropertyGroup>\n<TargetFrameworkVersion>v4.8</PropertyGroup>\n</Project>')
+            
+        results = recon.scan_workspace()
+        self.assertEqual(results["main_stack"], "dotnet")
+        self.assertIn(".NET Framework (C#)", results["stack"])
+        self.assertEqual(results["test_command"], "vstest.console.exe")
+        self.assertEqual(results["build_command"], "nuget restore && msbuild")
+
+    def test_setup_projects_json(self):
+        scan_results = {
+            "stack": ".NET Core (C#)",
+            "main_stack": "dotnet",
+            "test_command": "dotnet test"
+        }
+        recon.setup_projects_json(scan_results)
+        projects_file = ".agents/projects.json"
+        self.assertTrue(os.path.exists(projects_file))
+        
+        import json
+        with open(projects_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        projects = data.get("projects", [])
+        self.assertEqual(len(projects), 1)
+        self.assertEqual(projects[0]["name"], "main-project")
+        self.assertEqual(projects[0]["path"], ".")
+        self.assertEqual(projects[0]["stack"], "dotnet")
+        self.assertEqual(projects[0]["test_command"], "dotnet test")
+
 if __name__ == '__main__':
     unittest.main()
