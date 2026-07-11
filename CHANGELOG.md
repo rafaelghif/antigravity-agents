@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.73.0] - 2026-07-11
+
+### 🚀 Features
+- prevent workspace configuration data loss during installation upgrades
+- Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas (ISSUE-310)
+
+
 ## [3.72.0] - 2026-07-11
 
 ### 🚀 Features

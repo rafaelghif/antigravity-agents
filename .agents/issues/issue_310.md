@@ -1,7 +1,7 @@
 ---
 id: issue-310
 title: "Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
