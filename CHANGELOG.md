@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.61.0] - 2026-07-11
+
+### 🚀 Features
+- generate comprehensive workspace audit reports
+- Perform Enterprise AI Agent Audit (ISSUE-297)
+
+### ⚙️ Chores
+- remove outdated audit and agent rating reports
+
+
 ## [3.60.0] - 2026-07-11
 
 ### 🚀 Features

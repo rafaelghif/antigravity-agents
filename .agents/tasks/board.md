@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Perform Enterprise AI Agent Audit (feat/issue-297) <!-- id: issue-297 -->
 - [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
@@ -20,6 +19,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Perform Enterprise AI Agent Audit (feat/issue-297) <!-- id: issue-297 -->
 - [x] Relocate mcp_config to .agents root folder and update bootstrap (feat/issue-290) <!-- id: issue-290 -->
 - [x] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
 - [x] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
