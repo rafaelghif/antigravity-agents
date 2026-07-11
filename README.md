@@ -1,7 +1,7 @@
 # Antigravity Agent Core (AAC) V3 🚀
 ### *Enterprise Guardrails, Workspace Insulation, and Local Quality Gates for Autonomous AI Agents*
 
-[![Version](https://img.shields.io/badge/version-3.79.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.80.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)
@@ -21,7 +21,7 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 | :--- | :--- |
 | **Credential & Secret Leaks** | Offline hooks block staging/committing `.env`, private keys, and local credentials. |
 | **Messy Branch Commits** | Commits to base branches (`main`/`master`) are blocked. Enforces Conventional Commits with task ID references. |
-| **Context & Token Bloat** | Old task details, logs, and finished specifications are auto-archived, saving up to **80% in token budgets**. |
+| **Context & Token Bloat** | Old task details, logs, and finished specifications are auto-archived, keeping the active context token-efficient. |
 | **Parallel Coding Conflicts** | Filesystem-level mutex locks prevent agents from conflict-editing the same directories in parallel. |
 | **Platform / Installer Drift** | Core logic is centralized in Python scripts, with wrapper scripts acting as thin OS delegates. |
 
@@ -53,9 +53,9 @@ flowchart TD
 * **📦 Python-Powered Unified Installer**: Consolidates system discovery, project setups, backups, and exclusions in a single Python core `install.py`. Wrappers are kept extremely thin, avoiding Windows/macOS/Linux drift.
 * **🎤 Setup Interview & Reconnaissance**: `./helper.sh bootstrap` automatically runs an offline stack reconnaissance scan and launches an interactive setup interview to establish database schemas, frameworks, and architecture patterns instantly inside `.agents/schema.md`.
 * **🔁 Chained Lookahead & Self-Correction**: Enforces rules requiring the agent to run local test suites, check linter rules, and self-heal from errors using local playbooks before requesting user approval.
-* **⚡ Ultra-Fast Validation Guard**: Evaluates 11 security and rule audits (detecting private files, broken anchors, mismatched author profiles, missing locks, and test failures) in **under 100ms** to prevent bad commits.
+* **⚡ Automated Validation Guard**: Evaluates 11 security and rule audits (detecting private files, broken anchors, mismatched author profiles, missing locks, and test failures) automatically before commits.
 * **👤 Zero-Trust Git Profiles**: Dynamically configures local author information and signs commits using workspace-isolated credentials from `.agents/git_profiles.json`.
-* **📊 Visual Local Dashboard**: Host a premium, dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically by running `./helper.sh dashboard`.
+* **📊 Visual Local Dashboard**: Hosts a dark-themed visual status panel tracking issue progress, file locks, compile errors, and self-learning lessons dynamically by running `./helper.sh dashboard`.
 
 ---
 
