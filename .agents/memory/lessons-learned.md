@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-11]** **configuration**: Configured and integrated Gitea Docker-based MCP server configuration supporting custom local domains and tokens into mcp_config.json.
 - **[2026-07-11]** **configuration**: Integrated GitHub API MCP server configuration inside mcp_config.json and appended .agents/git_profiles.json rotation and monorepo project configurations mapping to template_map.md.
 - **[2026-07-11]** **configuration**: Documented config template-to-target file relationships and Linux/Windows CLI wrapper parity to prevent drift, resolved rules sync duplication bugs, and secured mcp_server path registry.
 - **[2026-07-11]** **reconnaissance**: Decoupled modular stack detectors in recon.py to dynamically adapt test/build commands and frameworks (e.g., C# WinForms/WPF/Web, PHP Pest/PHPUnit, Ruby RSpec) across all major programming ecosystems.
