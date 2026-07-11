@@ -16,14 +16,14 @@ The V3 system currently enforces strict regex matches for branch names containin
 We need to make this matching logic extremely flexible.
 
 ## Tasks
-- [ ] Implement flexible ID extraction (supporting pure numbers and various formats) in `.agents/scripts/validate.py` <!-- id: task-update-validate -->
-- [ ] Implement branch discovery in `.agents/scripts/cli/commands/issue.py` by querying git branches to find any branch containing the target issue ID <!-- id: task-update-issue -->
-- [ ] Run validation tests and verify code compliance <!-- id: task-run-tests -->
+- [x] Implement flexible ID extraction (supporting pure numbers and various formats) in `.agents/scripts/validate.py` <!-- id: task-update-validate -->
+- [x] Implement branch discovery in `.agents/scripts/cli/commands/issue.py` by querying git branches to find any branch containing the target issue ID <!-- id: task-update-issue -->
+- [x] Run validation tests and verify code compliance <!-- id: task-run-tests -->
 
 ## Acceptance Criteria
-- [ ] Validation guard accepts branch name formats like `feat/287`, `feat/issue287`, or `feat/issue-287`. <!-- id: ac-validate-formats -->
-- [ ] `issue close` correctly matches branches containing descriptions (e.g. `feat/issue-287-friction`). <!-- id: ac-close-matches -->
-- [ ] All unit tests pass successfully. <!-- id: ac-tests-pass -->
+- [x] Validation guard accepts branch name formats like `feat/287`, `feat/issue287`, or `feat/issue-287`. <!-- id: ac-validate-formats -->
+- [x] `issue close` correctly matches branches containing descriptions (e.g. `feat/issue-287-friction`). <!-- id: ac-close-matches -->
+- [x] All unit tests pass successfully. <!-- id: ac-tests-pass -->
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
