@@ -400,7 +400,7 @@ def run(args):
         if not stack and detected_stack:
             stack = detected_stack
             
-        arch = input("Architecture Pattern (clean/layered/mvc): ").strip().lower()
+        arch = input("Architecture Pattern (clean/layered/mvc/none): ").strip().lower()
         
         db_input = input("Database (SQLite/PostgreSQL/MySQL/MongoDB/none, default: none): ").strip()
         if db_input:
@@ -418,8 +418,8 @@ def run(args):
         stack = args[1].lower()
         arch = args[2].lower()
 
-    if not name or not stack or arch not in ("clean", "layered", "mvc"):
-        print("Error: Invalid inputs. Stack cannot be empty. Architecture must be 'clean', 'layered', or 'mvc'.")
+    if not name or not stack or arch not in ("clean", "layered", "mvc", "none", "custom"):
+        print("Error: Invalid inputs. Stack cannot be empty. Architecture must be 'clean', 'layered', 'mvc', or 'none'.")
         sys.exit(1)
 
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture (DB: {db}, Infra: {infra}, Framework: {framework})...")
@@ -466,6 +466,8 @@ def run(args):
         create_layered_architecture(".")
     elif arch == "mvc":
         create_mvc_architecture(".")
+    elif arch in ("none", "custom"):
+        print("Skipping directory scaffolding generation (using custom layout).")
 
     # Ensure .agents and subdirectories exist
     os.makedirs(".agents", exist_ok=True)

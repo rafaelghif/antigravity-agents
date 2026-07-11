@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Relax Clean Architecture and SOLID rules for simple/custom projects (feat/issue-311) <!-- id: issue-311 -->
 
 ## Done
 - [x] Prevent workspace data loss during installation upgrades by preserving AGENTS.md, task board, and schemas (feat/issue-310) <!-- id: issue-310 -->
