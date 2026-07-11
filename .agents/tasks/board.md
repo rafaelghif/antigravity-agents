@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Enforce agent soul profile in AGENTS.md and enhance soul personality strictness (feat/issue-307) <!-- id: issue-307 -->
 
 ## Done
 - [x] Initialize and bootstrap config.json template and fix global copy installer issues (feat/issue-306) <!-- id: issue-306 -->
