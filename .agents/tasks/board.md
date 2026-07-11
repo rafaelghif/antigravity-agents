@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] docs: add prominent disclaimer of liability to readme to protect author liability (feat/issue-319) <!-- id: issue-319 -->
 - [x] docs: refactor readme to use professional engineering terminology and highlight concrete mechanisms (feat/issue-318) <!-- id: issue-318 -->
 - [x] docs: update readme to remove unverified claims and use professional phrasing (feat/issue-317) <!-- id: issue-317 -->
 - [x] feat(mcp): harden mcp server json-rpc compliance, path imports, and tool execution error capturing (feat/issue-316) <!-- id: issue-316 -->
