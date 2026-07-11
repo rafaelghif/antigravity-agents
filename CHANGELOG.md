@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.67.0] - 2026-07-11
+
+### 🚀 Features
+- revamp README.md layout and styling for clarity and professionalism
+- Revamp README.md with professional styling (ISSUE-304)
+
+
 ## [3.66.1] - 2026-07-11
 
 ### 🐛 Bug Fixes

@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [ ] --assignee (feat/document prompt expansion and human approval flow in agents.md) <!-- id: Document prompt expansion and human approval flow in AGENTS.md -->
 - [ ] --assignee (feat/fix weaknesses in framework release warning and commit amending) <!-- id: Fix weaknesses in framework release warning and commit amending -->
 - [ ] --assignee (feat/generate workspace audit report) <!-- id: Generate workspace audit report -->
@@ -20,6 +19,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->
 - [x] Add Task vs Discussion Distinction Rule (feat/issue-302) <!-- id: issue-302 -->
 - [x] Fix Changelog Versioning and Issue Naming Skew (feat/issue-301) <!-- id: issue-301 -->

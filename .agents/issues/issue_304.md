@@ -1,7 +1,7 @@
 ---
 id: issue-304
 title: "Revamp README.md with professional styling"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
