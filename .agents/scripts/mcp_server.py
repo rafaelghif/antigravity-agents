@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import io
 import platform
 import importlib.util
 from datetime import datetime
@@ -17,6 +18,11 @@ else:
     target_scripts_dir = scripts_dir
     sys.stderr.write("[INFO] Current working directory is not a valid AAC workspace. Running in idle mode.\n")
     sys.stderr.flush()
+
+# Add target scripts dir to sys.path to ensure dynamic imports find local dependencies
+if target_scripts_dir not in sys.path:
+    sys.path.insert(0, target_scripts_dir)
+
 
 token_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'token.py')
 token_cmd = None
@@ -112,97 +118,106 @@ def list_tools():
 def call_tool(name, arguments):
     if not is_valid_workspace:
         return {"content": [{"type": "text", "text": "Error: Not running inside a valid AAC workspace."}], "isError": True}
-    if name == "log_token_usage":
-        if not token_cmd:
-            return {"content": [{"type": "text", "text": "Error: token command module not loaded."}], "isError": True}
-        prompt = arguments.get("prompt_tokens")
-        completion = arguments.get("completion_tokens")
-        task_id = arguments.get("task_id")
         
-        args = [str(prompt), str(completion)]
-        if task_id:
-            args.extend(["--task", task_id])
+    import io
+    import traceback
+    
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout = io.StringIO()
+    sys.stderr = io.StringIO()
+    
+    try:
+        if name == "log_token_usage":
+            if not token_cmd:
+                return {"content": [{"type": "text", "text": "Error: token command module not loaded."}], "isError": True}
+            prompt = arguments.get("prompt_tokens")
+            completion = arguments.get("completion_tokens")
+            task_id = arguments.get("task_id")
             
-        # Capture stdout redirecting prints
-        import io
-        old_stdout = sys.stdout
-        sys.stdout = io.StringIO()
-        try:
+            args = [str(prompt), str(completion)]
+            if task_id:
+                args.extend(["--task", task_id])
             token_cmd.run_log(args)
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}]}
-        except SystemExit as se:
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}], "isError": se.code != 0}
-        finally:
-            sys.stdout = old_stdout
-
-    elif name == "get_token_status":
-        if not token_cmd:
-            return {"content": [{"type": "text", "text": "Error: token command module not loaded."}], "isError": True}
-        import io
-        old_stdout = sys.stdout
-        sys.stdout = io.StringIO()
-        try:
+            
+        elif name == "get_token_status":
+            if not token_cmd:
+                return {"content": [{"type": "text", "text": "Error: token command module not loaded."}], "isError": True}
             token_cmd.run_status([])
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}]}
-        finally:
-            sys.stdout = old_stdout
-
-    elif name == "acquire_module_lock":
-        if not lock_cmd:
-            return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
-        module_name = arguments.get("module_name")
-        import io
-        old_stdout = sys.stdout
-        sys.stdout = io.StringIO()
-        try:
+            
+        elif name == "acquire_module_lock":
+            if not lock_cmd:
+                return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
+            module_name = arguments.get("module_name")
             lock_cmd.run([module_name])
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}]}
-        except SystemExit as se:
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}], "isError": se.code != 0}
-        finally:
-            sys.stdout = old_stdout
-
-    elif name == "release_module_lock":
-        if not lock_cmd:
-            return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
-        module_name = arguments.get("module_name")
-        import io
-        old_stdout = sys.stdout
-        sys.stdout = io.StringIO()
-        try:
+            
+        elif name == "release_module_lock":
+            if not lock_cmd:
+                return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
+            module_name = arguments.get("module_name")
             lock_cmd.run(["--release", module_name])
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}]}
-        except SystemExit as se:
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}], "isError": se.code != 0}
-        finally:
-            sys.stdout = old_stdout
-
-    elif name == "run_validation":
-        if not validate_module:
-            return {"content": [{"type": "text", "text": "Error: validation module not loaded."}], "isError": True}
-        import io
-        old_stdout = sys.stdout
-        sys.stdout = io.StringIO()
-        try:
+            
+        elif name == "run_validation":
+            if not validate_module:
+                return {"content": [{"type": "text", "text": "Error: validation module not loaded."}], "isError": True}
             success = validate_module.run_guard()
-            output = sys.stdout.getvalue()
-            return {"content": [{"type": "text", "text": output.strip()}], "isError": not success}
-        finally:
-            sys.stdout = old_stdout
-
-    return {"content": [{"type": "text", "text": f"Error: unknown tool {name}"}], "isError": True}
+            output = (sys.stdout.getvalue() + "\n" + sys.stderr.getvalue()).strip()
+            return {"content": [{"type": "text", "text": output}], "isError": not success}
+            
+        else:
+            return {"content": [{"type": "text", "text": f"Error: unknown tool {name}"}], "isError": True}
+            
+        output = (sys.stdout.getvalue() + "\n" + sys.stderr.getvalue()).strip()
+        return {"content": [{"type": "text", "text": output}]}
+        
+    except SystemExit as se:
+        output = (sys.stdout.getvalue() + "\n" + sys.stderr.getvalue()).strip()
+        return {"content": [{"type": "text", "text": output}], "isError": se.code != 0}
+    except Exception as e:
+        output = (sys.stdout.getvalue() + "\n" + sys.stderr.getvalue()).strip()
+        tb = traceback.format_exc()
+        err_msg = f"Unhandled Exception: {e}\n{tb}"
+        combined = (output + "\n" + err_msg).strip()
+        return {"content": [{"type": "text", "text": combined}], "isError": True}
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
 
 def handle_message(message):
-    method = message.get("method")
+    if not isinstance(message, dict):
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {
+                "code": -32600,
+                "message": "Invalid Request: message must be a JSON object"
+            }
+        }
+        
     msg_id = message.get("id")
+    method = message.get("method")
     
+    # Check JSON-RPC version
+    if message.get("jsonrpc") != "2.0":
+        return {
+            "jsonrpc": "2.0",
+            "id": msg_id,
+            "error": {
+                "code": -32600,
+                "message": "Invalid Request: missing or invalid jsonrpc version"
+            }
+        }
+        
+    if not method:
+        return {
+            "jsonrpc": "2.0",
+            "id": msg_id,
+            "error": {
+                "code": -32600,
+                "message": "Invalid Request: missing method name"
+            }
+        }
+        
     if method == "initialize":
         return {
             "jsonrpc": "2.0",
@@ -226,8 +241,26 @@ def handle_message(message):
         }
     elif method == "tools/call":
         params = message.get("params", {})
+        if not isinstance(params, dict):
+            return {
+                "jsonrpc": "2.0",
+                "id": msg_id,
+                "error": {
+                    "code": -32602,
+                    "message": "Invalid Params: params must be a JSON object"
+                }
+            }
         name = params.get("name")
         arguments = params.get("arguments", {})
+        if not name:
+            return {
+                "jsonrpc": "2.0",
+                "id": msg_id,
+                "error": {
+                    "code": -32602,
+                    "message": "Invalid Params: missing tool name"
+                }
+            }
         res = call_tool(name, arguments)
         return {
             "jsonrpc": "2.0",
@@ -248,15 +281,34 @@ def handle_message(message):
 
 def start_server():
     # Set stdin/stdout binary or line-buffered, preventing custom prints to stdout
-    sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1, encoding='utf-8')
-    sys.stdin = open(sys.stdin.fileno(), mode='r', buffering=1, encoding='utf-8')
+    try:
+        sys.stdout = open(sys.stdout.fileno(), mode='w', buffering=1, encoding='utf-8')
+        sys.stdin = open(sys.stdin.fileno(), mode='r', buffering=1, encoding='utf-8')
+    except (io.UnsupportedOperation, AttributeError, OSError):
+        # Fall back to standard streams directly if they are already file-like but don't support fileno (e.g. in tests)
+        pass
     
     while True:
         try:
             line = sys.stdin.readline()
             if not line:
                 break
-            message = json.loads(line)
+            
+            try:
+                message = json.loads(line)
+            except json.JSONDecodeError as jde:
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {
+                        "code": -32700,
+                        "message": f"Parse error: {str(jde)}"
+                    }
+                }
+                sys.stdout.write(json.dumps(response) + "\n")
+                sys.stdout.flush()
+                continue
+                
             response = handle_message(message)
             if response is not None:
                 sys.stdout.write(json.dumps(response) + "\n")

@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat(mcp): harden mcp server json-rpc compliance, path imports, and tool execution error capturing (feat/issue-316) <!-- id: issue-316 -->
 - [x] feat(upgrade): prioritize local templates in bootstrap and add blueprints and workflows to auto-upgrade paths (feat/issue-315) <!-- id: issue-315 -->
 - [x] feat(blueprints): document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule (feat/issue-314) <!-- id: issue-314 -->
 - [x] refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands (feat/issue-313) <!-- id: issue-313 -->
