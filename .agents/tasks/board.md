@@ -13,9 +13,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] integrate github mcp server config and update template parity mappings (feat/issue-271) <!-- id: issue-271 -->
 
 ## Done
+- [x] integrate github mcp server config and update template parity mappings (feat/issue-271) <!-- id: issue-271 -->
 - [x] resolve codebase audit findings and implement template mapping documentation (feat/issue-270) <!-- id: issue-270 -->
 - [x] recommend stack-compatible architecture designs during auto-reconnaissance (feat/issue-269) <!-- id: issue-269 -->
 - [x] extend stack auto-reconnaissance to support ruby elixir cpp and swift (feat/issue-268) <!-- id: issue-268 -->

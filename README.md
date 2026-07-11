@@ -2,7 +2,7 @@
 ### *Enterprise Guardrails & Workspace Customizations for the Antigravity CLI (agy)*
 *(Also universally compatible with Cursor, Aider, Cline, and Claude)*
 
-[![Version](https://img.shields.io/badge/version-3.37.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.38.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](.agents/rules.md)

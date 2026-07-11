@@ -1,7 +1,7 @@
 ---
 id: issue-271
 title: "integrate github mcp server config and update template parity mappings"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
