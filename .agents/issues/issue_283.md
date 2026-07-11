@@ -27,6 +27,11 @@ refactor: rename git_token to git_pat for clarity and standardization
 - Active module locks:
   - [ ] .agents/git_profiles.json, <!-- id: lock-git_profiles_json, -->
   - [ ] README.md <!-- id: lock-README_md -->
+  - [ ] .agents/dashboard/app <!-- id: lock-app -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
+  - [ ] .agents/scripts/cli/commands/dashboard <!-- id: lock-dashboard -->
+  - [ ] .agents/scripts/cli/commands/profile <!-- id: lock-profile -->
+  - [ ] .agents/scripts/git_api <!-- id: lock-git_api -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
