@@ -45,6 +45,9 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/memory/decisions/` | ADRs — full reasoning | On demand |
 | `.agents/memory/glossary.md` | Domain terms | On demand when unfamiliar terms appear |
 | `.agents/memory/tech-debt.md`, `lessons-learned.md` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
+| `.agents/memory/milestones.md` | Release milestones and roadmap tracker | On demand, read when scoping upcoming versions or cross-feature milestones |
+| `.agents/memory/security-policy.md` | Security runbook and network safelist | On demand, read when performing security audits or changing credentials/profiles |
+| `.agents/docs/collaboration.md` | Agent-Human collaboration protocol | On demand, read when resolving workspace/lock conflicts or coordinating tasks |
 | `.agents/soul.md` | Core agent values, communication policies, and identity. | Always — loaded alongside `AGENTS.md` every prompt |
 | `.agents/tasks/board.md` | Task board | Read at the start of every task, written at every status change |
 | `.agents/config.json` | Advanced workspace-level runtime and workflow settings (e.g. solo mode) | Read dynamically during commands/validations |
