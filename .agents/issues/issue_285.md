@@ -1,7 +1,7 @@
 ---
 id: issue-285
 title: "Map mcp_config in template_map.md and enforce programmatical template parity checks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

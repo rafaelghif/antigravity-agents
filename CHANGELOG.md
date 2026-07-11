@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.50.0] - 2026-07-11
+
+### 🚀 Features
+- map mcp_config template and implement validation parity check
+- Map mcp_config in template_map.md and enforce programmatical template parity checks (ISSUE-285)
+
+### ⚙️ Chores
+- Fix MCP config bootstrapping registration and template drift issues (ISSUE-284)
+
+
 ## [3.49.1] - 2026-07-11
 
 ### 🐛 Bug Fixes
