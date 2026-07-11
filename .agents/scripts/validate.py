@@ -360,7 +360,7 @@ def audit_critical_files() -> bool:
 
     # Validate version matching in shell/powershell bootstrap files if they exist in root
     if agents_version:
-        env_files = ["bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/bootstrap.py"]
+        env_files = [".agents/scripts/cli/commands/bootstrap.py"]
         for env_file in env_files:
             if os.path.exists(env_file):
                 try:

@@ -50,6 +50,8 @@ Consolidate platform-specific installer and bootstrapper shell script wrapper lo
   - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
   - [ ] .agents/scripts/validate <!-- id: lock-validate -->
   - [ ] .agents/scripts/cli/commands/install <!-- id: lock-install -->
+  - [ ] .agents/tests/test_platform_drift <!-- id: lock-test_platform_drift -->
+  - [ ] .agents/tests/test_install <!-- id: lock-test_install -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
