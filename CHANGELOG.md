@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.66.0] - 2026-07-11
+
+### 🚀 Features
+- add rule and guidelines distinguishing discussions from tasks
+- Add Task vs Discussion Distinction Rule (ISSUE-302)
+
+
 ## [3.65.0] - 2026-07-11
 
 ### 🚀 Features
