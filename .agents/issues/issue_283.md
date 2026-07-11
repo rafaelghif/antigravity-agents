@@ -1,7 +1,7 @@
 ---
 id: issue-283
 title: "refactor: rename git_token to git_pat for clarity and standardization"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
