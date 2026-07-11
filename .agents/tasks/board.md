@@ -3,8 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
-- [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
@@ -13,8 +11,11 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->
 
 ## Done
+- [x] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
+- [x] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [x] Update Agent Evaluation Report to reflect resolved branch naming friction (feat/issue-288) <!-- id: issue-288 -->
 - [x] Fix branch naming friction and flexible issue closing resolution (feat/issue-287) <!-- id: issue-287 -->
 - [x] Create comprehensive Agent Rating & Evaluation Report (feat/issue-286) <!-- id: issue-286 -->
