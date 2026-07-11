@@ -1,7 +1,7 @@
 ---
 id: issue-295
 title: "Fix weaknesses in framework release warning and commit amending"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
