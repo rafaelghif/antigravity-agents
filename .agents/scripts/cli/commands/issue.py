@@ -449,9 +449,12 @@ def get_issue_path(issue_id):
     # 2. Search in archive issues dir as fallback
     archive_dir = ".agents/archive/issues"
     if os.path.exists(archive_dir):
-        for f in os.listdir(archive_dir):
-            if normalized in f.lower().replace('-', '_') or issue_id.lower() in f.lower():
-                return os.path.join(archive_dir, f)
+        try:
+            for f in os.listdir(archive_dir):
+                if normalized in f.lower().replace('-', '_') or issue_id.lower() in f.lower():
+                    return os.path.join(archive_dir, f)
+        except Exception:
+            pass
     # 3. Fallback path if not found anywhere
     suffix = normalized.split('_')[-1]
     return os.path.join(ISSUE_DIR, f"issue_{suffix}.md")

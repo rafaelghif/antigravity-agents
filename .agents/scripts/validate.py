@@ -915,11 +915,14 @@ def audit_git_branch_alignment() -> bool:
     normalized_id = issue_id.replace('-', '_')
     for issue_dir in search_dirs:
         if os.path.exists(issue_dir):
-            for f_name in os.listdir(issue_dir):
-                if normalized_id in f_name.lower().replace('-', '_') or issue_id in f_name.lower():
-                    file_exists = True
-                    matched_path = os.path.join(issue_dir, f_name)
-                    break
+            try:
+                for f_name in os.listdir(issue_dir):
+                    if normalized_id in f_name.lower().replace('-', '_') or issue_id in f_name.lower():
+                        file_exists = True
+                        matched_path = os.path.join(issue_dir, f_name)
+                        break
+            except Exception:
+                pass
             if file_exists:
                 break
                 

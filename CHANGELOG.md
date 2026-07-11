@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.34.3] - 2026-07-11
+
+### 🐛 Bug Fixes
+- fix unit test failures in CI due to missing archive issues folder (ISSUE-262)
+
+
+## [3.34.2] - 2026-07-11
+
+### 🐛 Bug Fixes
+- wrap os.listdir in try-except to prevent GHA test crashes
+- fix unit test failures in CI due to missing archive issues folder (ISSUE-262)
+
+
 ## [3.34.1] - 2026-07-11
 
 ### 🐛 Bug Fixes
