@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.78.0] - 2026-07-11
+
+### 🚀 Features
+- prioritize local templates in bootstrap and add blueprints/workflows to auto-upgrade paths
+- feat(upgrade): prioritize local templates in bootstrap and add blueprints and workflows to auto-upgrade paths (ISSUE-315)
+
+
 ## [3.77.0] - 2026-07-11
 
 ### 🚀 Features

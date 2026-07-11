@@ -1,7 +1,7 @@
 ---
 id: issue-315
 title: "feat(upgrade): prioritize local templates in bootstrap and add blueprints and workflows to auto-upgrade paths"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
