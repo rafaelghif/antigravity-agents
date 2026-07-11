@@ -16,9 +16,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
 
 ## Done
+- [x] Document prompt expansion and human approval flow in AGENTS.md (feat/issue-305) <!-- id: issue-305 -->
 - [x] Revamp README.md with professional styling (feat/issue-304) <!-- id: issue-304 -->
 - [x] Fix changelog classification bugs (feat/issue-303) <!-- id: issue-303 -->
 - [x] Add Task vs Discussion Distinction Rule (feat/issue-302) <!-- id: issue-302 -->

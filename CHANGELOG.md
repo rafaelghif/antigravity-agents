@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.68.0] - 2026-07-11
+
+### 🚀 Features
+- explicitly document prompt expansion and human approval flows in AGENTS.md
+- Document prompt expansion and human approval flow in AGENTS.md (ISSUE-305)
+
+### ⚙️ Chores
+- clean up duplicate task board line and update issue spec
+
+
 ## [3.67.0] - 2026-07-11
 
 ### 🚀 Features
