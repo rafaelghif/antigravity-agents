@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] Relocate mcp_config to .agents root folder and update bootstrap (feat/issue-290) <!-- id: issue-290 -->
 
 ## Done
 - [x] Synchronize completed installer tasks on task board (chore/issue-289) <!-- id: issue-289 -->

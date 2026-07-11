@@ -217,7 +217,8 @@ def copy_core_files(src_root, force=False):
         exclude_files = {
             'git_profiles.json', 'locks.json', '.DS_Store', 'Thumbs.db',
             'token_budget.json', 'active_context.md', 'sync_cache.json',
-            'cooldowns.json', 'upgrade_state.json', 'projects.json'
+            'cooldowns.json', 'upgrade_state.json', 'projects.json',
+            'mcp_config.json'
         }
         if base in exclude_files:
             return True
@@ -521,15 +522,17 @@ def run(args):
     # 4.5. Generate .agents/mcp_config.json if not exists
     mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
     if not os.path.exists(mcp_config_path):
-        mcp_config_content = read_template(src_root, "mcp_config.json.template", "")
-        if mcp_config_content:
-            with open(mcp_config_path, 'w', encoding='utf-8') as f:
-                f.write(mcp_config_content)
-            print("Generated '.agents/mcp_config.json' from template.")
+        src_mcp_config = os.path.join(src_root, ".agents", "mcp_config.json")
+        if os.path.exists(src_mcp_config):
+            try:
+                shutil.copy2(src_mcp_config, mcp_config_path)
+                print("Generated '.agents/mcp_config.json' from core config.")
+            except Exception as e:
+                print(f"Warning: Failed to copy mcp_config.json: {e}")
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.53.1"
+    AAC_VERSION = "3.55.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

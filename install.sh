@@ -147,6 +147,7 @@ echo "Downloading Antigravity Agent Core from GitHub..."
       ! -name "active_api_keys" \
       ! -name "active_api_keys.ps1" \
       ! -name "active_api_profile_name" \
+      ! -name "mcp_config.json" \
       -exec sh -c '
         for file; do
           dest_file="'"$TARGET_ABS"'/$file"
