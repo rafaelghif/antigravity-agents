@@ -10,6 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+- [ ] feat(blueprints): document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule (feat/issue-314) <!-- id: issue-314 -->
 
 ## Done
 - [x] refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands (feat/issue-313) <!-- id: issue-313 -->
