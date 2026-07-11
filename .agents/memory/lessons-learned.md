@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-11]** **Skill Evolution / Self-Improvement**: Dynamically scaffold and index custom playbooks using CLI skill tools to extend agent capabilities whenever facing domain-specific task gaps.
 - **[2026-07-11]** **security**: Hardened CLI profile keys and bootstrap process by sanitizing user-provided SSH key path via validation regex against shell command injections and implementing offline bootstrapper templates fallback directory checks.
 - **[2026-07-11]** **documentation**: Documented comprehensive setup steps for Git profiles, monorepo configuration projects.json, and MCP servers (local and remote/Gitea) in README.md.
 - **[2026-07-11]** **configuration**: Configured and integrated Gitea Docker-based MCP server configuration supporting custom local domains and tokens into mcp_config.json.
