@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat(blueprints): document blueprints in context map, add MVC and Atomic Design blueprints, and enforce reading rule (feat/issue-314) <!-- id: issue-314 -->
 - [x] refactor(core): relocate blueprints from memory to agents root and update install and bootstrap commands (feat/issue-313) <!-- id: issue-313 -->
 - [x] Fix installer config file overwriting and correct template map verify.yml workflow path (feat/issue-312) <!-- id: issue-312 -->
 - [x] Relax Clean Architecture and SOLID rules for simple/custom projects (feat/issue-311) <!-- id: issue-311 -->
