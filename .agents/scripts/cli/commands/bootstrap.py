@@ -271,7 +271,7 @@ def copy_core_files(src_root, force=False):
                     pass
                 
     # Root helper wrappers
-    helpers = ["helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/git_profiles.example", ".agents/projects.example", "Dockerfile"]
+    helpers = ["helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/git_profiles.example", ".agents/projects.example", "Dockerfile", ".agents/soul.md"]
     for h in helpers:
         src_file = os.path.join(src_root, h)
         dest_file = os.path.join(target_root, h)

@@ -31,6 +31,7 @@ All major architectural changes must be registered as ADRs:
 - [ADR 0001: Initialization of V2 Layout](file://./decisions/0001-v2-initialization.md)
 - [ADR 0002: Strict Workspace-Level Tasking & Commit Validation Gates](file://./decisions/0002-strict-validation-gates.md)
 - [ADR 0003: AAC V3 Aligned Specifications](file://./decisions/0003-v3-upgrade-specifications.md)
+- [ADR 0004: Relocate soul.md to .agents Root](file://./decisions/0004-relocate-soul-to-agents-root.md)
 
 ## 4. Upgrade Blueprints
 All active architecture evolution proposals:
