@@ -251,6 +251,24 @@ class TestBootstrapCommand(unittest.TestCase):
         for f in transient_files:
             self.assertNotIn(f, copied_files)
 
+    @patch('bootstrap.read_template', return_value="Template Content")
+    def test_bootstrap_preserves_schema_and_board(self, mock_read_template, mock_input):
+        schema_path = ".agents/schema.md"
+        board_path = ".agents/tasks/board.md"
+        
+        os.makedirs(".agents/tasks", exist_ok=True)
+        with open(schema_path, 'w', encoding='utf-8') as f:
+            f.write("My custom schema blueprint")
+        with open(board_path, 'w', encoding='utf-8') as f:
+            f.write("My custom board layout")
+            
+        bootstrap.run(["MyExistingProject", "python", "clean"])
+        
+        with open(schema_path, 'r', encoding='utf-8') as f:
+            self.assertEqual(f.read(), "My custom schema blueprint")
+        with open(board_path, 'r', encoding='utf-8') as f:
+            self.assertEqual(f.read(), "My custom board layout")
+
 if __name__ == '__main__':
     unittest.main()
 

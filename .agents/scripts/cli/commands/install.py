@@ -44,7 +44,8 @@ def should_exclude(rel_path: str) -> bool:
         "active_api_profile_name",
         "mcp_config.json",
         "config.json",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "AGENTS.md"
     }
     
     if filename in excluded_filenames:
@@ -140,6 +141,23 @@ def run(args: List[str]) -> None:
                     shutil.copy2(s, d)
         except Exception as e:
             print_warn(f"Failed to copy blueprints folder: {e}")
+
+    # 6.5. Restore user configurations and workspace state from backup if upgrading
+    if 'backup_agents' in locals() and os.path.exists(backup_agents):
+        print("Restoring user configurations and workspace state from backup...")
+        for root, dirs, files in os.walk(backup_agents):
+            for f in files:
+                backup_file = os.path.join(root, f)
+                rel_path = os.path.relpath(backup_file, backup_agents)
+                target_rel_path = os.path.join(".agents", rel_path)
+                
+                if should_exclude(target_rel_path):
+                    dest_file = os.path.join(target_abs, target_rel_path)
+                    try:
+                        os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+                        shutil.copy2(backup_file, dest_file)
+                    except Exception as e:
+                        print_warn(f"Failed to restore file '{target_rel_path}' from backup: {e}")
 
     # 7. Initialize Git repo in target if not present
     target_git = os.path.join(target_abs, ".git")

@@ -30,6 +30,7 @@ class TestInstallCommand(unittest.TestCase):
         self.assertTrue(install.should_exclude(".agents/tasks/board.md"))
         self.assertTrue(install.should_exclude(".agents/issues/issue_12.md"))
         self.assertTrue(install.should_exclude(".agents/git_profiles.json"))
+        self.assertTrue(install.should_exclude("AGENTS.md"))
         self.assertTrue(install.should_exclude("__pycache__/file.pyc"))
         self.assertTrue(install.should_exclude(".git/config"))
         
@@ -64,6 +65,45 @@ class TestInstallCommand(unittest.TestCase):
             # Verify backup triggers
             mock_move.assert_called()
             mock_copy.assert_called()
+
+    @patch('shutil.move')
+    @patch('shutil.copy2')
+    @patch('os.walk')
+    @patch('os.path.exists')
+    @patch('importlib.util.spec_from_file_location')
+    def test_run_install_restores_backup(self, mock_spec, mock_exists, mock_walk, mock_copy2, mock_move):
+        # Setup paths: mock_exists returns True for everything to trigger backup and restore paths
+        mock_exists.side_effect = lambda path: True
+        
+        # Mock os.walk: First walk is for source files, second walk is for backup files
+        def mock_walk_side_effect(top, *args, **kwargs):
+            if "dest" in top and "backup" in top:
+                # backup_agents walk
+                return [
+                    (top, [], ['git_profiles.json', 'rules.md'])
+                ]
+            else:
+                # source_root walk
+                return [
+                    ('/src', [], ['helper.sh', 'AGENTS.md'])
+                ]
+        mock_walk.side_effect = mock_walk_side_effect
+        mock_spec.return_value = MagicMock(loader=MagicMock())
+        
+        try:
+            dest_path = os.path.join(self.temp_dir, "dest")
+            install.run([dest_path])
+        except SystemExit:
+            pass
+            
+        # Verify restore copy2 calls (should restore rules.md and git_profiles.json)
+        restore_called = False
+        for args, kwargs in mock_copy2.call_args_list:
+            if args:
+                src = args[0]
+                if "git_profiles.json" in src or "rules.md" in src:
+                    restore_called = True
+        self.assertTrue(restore_called)
 
 if __name__ == '__main__':
     unittest.main()

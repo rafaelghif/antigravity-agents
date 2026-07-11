@@ -531,16 +531,20 @@ def run(args):
             print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
 
     # 4. Generate .agents/schema.md
-    schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
-    schema_content = schema_content.replace("{{NAME}}", name)\
-                                   .replace("{{STACK}}", stack.capitalize())\
-                                   .replace("{{ARCH}}", arch.upper())\
-                                   .replace("{{FRAMEWORK}}", framework)\
-                                   .replace("{{DATABASE}}", db)\
-                                   .replace("{{INFRASTRUCTURE}}", infra)
-    with open(".agents/schema.md", 'w', encoding='utf-8') as f:
-        f.write(schema_content)
-    print("Generated '.agents/schema.md' architecture blueprint.")
+    schema_file = ".agents/schema.md"
+    if not os.path.exists(schema_file) or force_update:
+        schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
+        schema_content = schema_content.replace("{{NAME}}", name)\
+                                       .replace("{{STACK}}", stack.capitalize())\
+                                       .replace("{{ARCH}}", arch.upper())\
+                                       .replace("{{FRAMEWORK}}", framework)\
+                                       .replace("{{DATABASE}}", db)\
+                                       .replace("{{INFRASTRUCTURE}}", infra)
+        with open(schema_file, 'w', encoding='utf-8') as f:
+            f.write(schema_content)
+        print("Generated '.agents/schema.md' architecture blueprint.")
+    else:
+        print("Preserved existing '.agents/schema.md' architecture blueprint.")
 
     # 4.5. Generate .agents/mcp_config.json if not exists
     mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
@@ -567,7 +571,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.72.0"
+    AAC_VERSION = "3.73.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
@@ -675,8 +679,10 @@ def run(args):
 
     # 7. Initialize Task Board
     board_file = ".agents/tasks/board.md"
-    with open(board_file, 'w', encoding='utf-8') as f:
-        f.write(f"""# Task Board: {name}
+    if not os.path.exists(board_file) or force_update:
+        os.makedirs(os.path.dirname(board_file), exist_ok=True)
+        with open(board_file, 'w', encoding='utf-8') as f:
+            f.write(f"""# Task Board: {name}
 
 This board tracks active development tasks.
 
@@ -687,7 +693,9 @@ This board tracks active development tasks.
 
 ## Done
 """)
-    print("Initialized task board at '.agents/tasks/board.md'.")
+        print("Initialized task board at '.agents/tasks/board.md'.")
+    else:
+        print("Preserved existing task board at '.agents/tasks/board.md'.")
     print("\nProject bootstrapping completed successfully! Run './helper.sh validate' to verify.")
 
     # 8. Git Profile Onboarding Wizard
