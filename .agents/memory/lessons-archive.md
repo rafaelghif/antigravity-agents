@@ -12,3 +12,4 @@ This file stores archived historical lessons learned that have been pruned from 
 - **[Learning: Git & Security]** Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.; Prevent applying placeholder Git profiles to local Git config when user-defined profiles are unconfigured, avoiding pollution of local Git author config
 - **[Learning: installation]** Enforce Git source repository downloading for all installations, bootstrapping, and upgrades, and mock git clone in tests to preserve offline compatibility.
 - **[Learning: documentation]** Fixed installer repository raw.githubusercontent.com URLs in README.md from rafaelghifari to rafaelghif
+- **[Learning: Database Schema]** Strictly align API and database models with the project schemas to maintain interface integrity.
