@@ -1,7 +1,7 @@
 ---
 id: issue-317
 title: "docs: update readme to remove unverified claims and use professional phrasing"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---

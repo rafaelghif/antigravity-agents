@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.80.0] - 2026-07-11
+
+### 🚀 Features
+- update readme to remove unverified claims and use professional phrasing
+- docs: update readme to remove unverified claims and use professional phrasing (ISSUE-317)
+
+
 ## [3.79.0] - 2026-07-11
 
 ### 🚀 Features
