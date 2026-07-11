@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.72.0] - 2026-07-11
+
+### 🚀 Features
+- enhance context optimizer command for solo workflow mode
+- Optimize context optimizer for solo workflow mode and improve token efficiency ratings (ISSUE-309)
+
+
 ## [3.71.0] - 2026-07-11
 
 ### 🚀 Features

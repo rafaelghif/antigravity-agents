@@ -1,7 +1,7 @@
 ---
 id: issue-309
 title: "Optimize context optimizer for solo workflow mode and improve token efficiency ratings"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
