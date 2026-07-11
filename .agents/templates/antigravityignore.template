@@ -94,6 +94,7 @@ id_ed25519
 .agents/active_api_keys.ps1
 .agents/active_api_profile_name
 .agents/active_context.md
+.agents/config.json
 .agents/cooldowns.json
 .agents/sync_cache.json
 .agents/logs/
