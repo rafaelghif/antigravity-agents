@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.55.0] - 2026-07-11
+
+### 🚀 Features
+- Relocate mcp_config to .agents root folder and update bootstrap (ISSUE-290)
+
+
 ## [3.54.0] - 2026-07-11
 
 ### 🚀 Features
