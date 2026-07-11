@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.37.0] - 2026-07-11
+
+### 🚀 Features
+- resolve security and rules sync duplication findings and add template parity map
+- resolve codebase audit findings and implement template mapping documentation (ISSUE-270)
+
+
 ## [3.36.0] - 2026-07-11
 
 ### 🚀 Features

@@ -1,7 +1,7 @@
 ---
 id: issue-270
 title: "resolve codebase audit findings and implement template mapping documentation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-11
 ---
@@ -37,11 +37,7 @@ Resolve critical security, architecture, and parity findings discovered in codeb
   - [x] .agents/tests/test_dashboard.py
   - [x] .agents/tests/test_sync.py
 - Active module locks:
-  - [ ] .agents/scripts/cli/commands/context <!-- id: lock-context -->
-  - [ ] .agents/scripts/cli/commands/dashboard <!-- id: lock-dashboard -->
-  - [ ] .agents/scripts/cli/commands/mcp <!-- id: lock-mcp -->
-  - [ ] .agents/scripts/mcp_server <!-- id: lock-mcp_server -->
-  - [ ] .agents/scripts/sync <!-- id: lock-sync -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
