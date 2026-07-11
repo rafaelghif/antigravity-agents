@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] docs: implement collaboration protocol, security policy, and milestones (feat/issue-278) <!-- id: issue-278 -->
 - [ ] fix: installer missing AGENTS.md root file copying (feat/242) <!-- id: 242 -->
 - [ ] chore: sync installation scripts to copy Dockerfile (feat/241) <!-- id: 241 -->
 - [ ] feat: secure visual dashboard with token auth and host validation (feat/237) <!-- id: 237 -->
@@ -16,6 +15,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] docs: implement collaboration protocol, security policy, and milestones (feat/issue-278) <!-- id: issue-278 -->
 - [x] feat: refine agent persona with expert engineering philosophy (feat/issue-277) <!-- id: issue-277 -->
 - [x] feat: audit file relationships and sync upgrade paths and version verification (feat/issue-276) <!-- id: issue-276 -->
 - [x] feat: secure profile command against shell command injections and mcp server workspace coupling (feat/issue-275) <!-- id: issue-275 -->
