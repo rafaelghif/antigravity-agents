@@ -293,6 +293,42 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertTrue(os.path.exists(".agents/schema.md"))
             self.assertTrue(os.path.exists("AGENTS.md"))
 
+    def test_ensure_gitignore_entries(self, mock_input):
+        src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        
+        # Test Case 1: .gitignore does not exist. Should create it with full template.
+        target_dir = tempfile.mkdtemp(dir=self.temp_dir)
+        bootstrap.ensure_gitignore_entries(src_root, target_dir)
+        target_gitignore = os.path.join(target_dir, ".gitignore")
+        self.assertTrue(os.path.exists(target_gitignore))
+        with open(target_gitignore, 'r', encoding='utf-8') as f:
+            content = f.read()
+            self.assertIn("# <<< ANTIGRAVITY AGENT START >>>", content)
+            self.assertIn(".agents/locks/", content)
+            self.assertIn(".env", content)
+            
+        # Test Case 2: .gitignore exists without markers. Should append the agent block.
+        with open(target_gitignore, 'w', encoding='utf-8') as f:
+            f.write("my-custom-file\n")
+        bootstrap.ensure_gitignore_entries(src_root, target_dir)
+        with open(target_gitignore, 'r', encoding='utf-8') as f:
+            content = f.read()
+            self.assertTrue(content.startswith("my-custom-file\n"))
+            self.assertIn("# <<< ANTIGRAVITY AGENT START >>>", content)
+            self.assertIn(".agents/locks/", content)
+            
+        # Test Case 3: .gitignore exists with markers. Should update the agent block in-place.
+        with open(target_gitignore, 'w', encoding='utf-8') as f:
+            f.write("my-custom-file\n\n# <<< ANTIGRAVITY AGENT START >>>\nold-stale-rule\n# <<< ANTIGRAVITY AGENT END >>>\nother-file")
+        bootstrap.ensure_gitignore_entries(src_root, target_dir)
+        with open(target_gitignore, 'r', encoding='utf-8') as f:
+            content = f.read()
+            self.assertTrue(content.startswith("my-custom-file\n"))
+            self.assertIn("# <<< ANTIGRAVITY AGENT START >>>", content)
+            self.assertNotIn("old-stale-rule", content)
+            self.assertIn(".agents/locks/", content)
+            self.assertTrue(content.endswith("\nother-file"))
+
 if __name__ == '__main__':
     unittest.main()
 

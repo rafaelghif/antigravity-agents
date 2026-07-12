@@ -4,9 +4,11 @@ node_modules/
 vendor/
 .pytest_cache/
 
+# <<< ANTIGRAVITY AGENT START >>>
 # Ignore agent transient locks and workspace states
 .agents/locks/
 .agents/locks.json
+.lock/
 .agents/git_profiles.json
 .agents/api_keys
 .agents/active_api_keys
@@ -22,3 +24,4 @@ vendor/
 .agents/token_budget.json
 .agents/state/
 .agents/backup/
+# <<< ANTIGRAVITY AGENT END >>>
