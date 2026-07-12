@@ -438,13 +438,13 @@ def run(args):
     if quick_mode:
         name = os.path.basename(os.path.abspath(".")).strip()
         stack = detected_stack if detected_stack else "python"
-        arch = "mvc" if stack in ("php", "node") else "clean"
+        arch = "none"
         print(f"[QUICK SETUP] Auto-configured Project Name: '{name}'")
         print(f"[QUICK SETUP] Auto-detected Stack: '{stack}'")
         print(f"[QUICK SETUP] Default Architecture: '{arch}'")
     # Prompt for project details
     elif len(args) < 3:
-        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc> [--db <db>] [--infra <infra>] [--framework <fw>])")
+        print("Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc|none> [--db <db>] [--infra <infra>] [--framework <fw>])")
         default_name = os.path.basename(os.path.abspath(".")).strip()
         name = input(f"Project Name (default: {default_name}): ").strip()
         if not name:
@@ -459,8 +459,8 @@ def run(args):
         if not stack:
             stack = detected_stack if detected_stack else "python"
             
-        arch_input = input("Architecture Pattern (clean/layered/mvc/none, default: clean): ").strip().lower()
-        arch = arch_input if arch_input in ("clean", "layered", "mvc", "none", "custom") else "clean"
+        arch_input = input("Architecture Pattern (clean/layered/mvc/none, default: none): ").strip().lower()
+        arch = arch_input if arch_input in ("clean", "layered", "mvc", "none", "custom") else "none"
         
         db_input = input("Database (SQLite/PostgreSQL/MySQL/MongoDB/none, default: none): ").strip()
         if db_input:
@@ -476,7 +476,7 @@ def run(args):
     else:
         name = args[0] if len(args) > 0 else os.path.basename(os.path.abspath(".")).strip()
         stack = args[1].lower() if len(args) > 1 else detected_stack if detected_stack else "python"
-        arch = args[2].lower() if len(args) > 2 else "clean"
+        arch = args[2].lower() if len(args) > 2 else "none"
 
     # Sanitize and apply default values if empty or invalid
     if not name:
@@ -484,7 +484,10 @@ def run(args):
     if not stack:
         stack = detected_stack if detected_stack else "python"
     if arch not in ("clean", "layered", "mvc", "none", "custom"):
-        arch = "clean"
+        arch = "none"
+
+    # Scaffold is True if a scaffolding pattern is selected and --no-scaffold is not passed
+    scaffold = (arch in ("clean", "layered", "mvc")) and scaffold
 
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture (DB: {db}, Infra: {infra}, Framework: {framework})...")
 
@@ -602,19 +605,20 @@ def run(args):
                 print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
 
     # 4. Generate .agents/schema.md
-    if scaffold:
-        schema_file = ".agents/schema.md"
-        if not os.path.exists(schema_file) or force_update:
-            schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
-            schema_content = schema_content.replace("{{NAME}}", name)\
-                                           .replace("{{STACK}}", stack.capitalize())\
-                                           .replace("{{ARCH}}", arch.upper())\
-                                           .replace("{{FRAMEWORK}}", framework)\
-                                           .replace("{{DATABASE}}", db)\
-                                           .replace("{{INFRASTRUCTURE}}", infra)
-            with open(schema_file, 'w', encoding='utf-8') as f:
-                f.write(schema_content)
-            print("Generated '.agents/schema.md' architecture blueprint.")
+    schema_file = ".agents/schema.md"
+    if not os.path.exists(schema_file) or force_update:
+        schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
+        schema_content = schema_content.replace("{{NAME}}", name)\
+                                       .replace("{{STACK}}", stack.capitalize())\
+                                       .replace("{{ARCH}}", arch.upper())\
+                                       .replace("{{FRAMEWORK}}", framework)\
+                                       .replace("{{DATABASE}}", db)\
+                                       .replace("{{INFRASTRUCTURE}}", infra)
+        with open(schema_file, 'w', encoding='utf-8') as f:
+            f.write(schema_content)
+        print("Generated '.agents/schema.md' architecture blueprint.")
+    else:
+        print("Preserved existing '.agents/schema.md' architecture blueprint.")
 
     # 4.5. Generate .agents/mcp_config.json if not exists
     mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
