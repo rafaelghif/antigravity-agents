@@ -17,7 +17,8 @@ def print_ok(msg: str) -> None:
 
 def should_exclude(rel_path: str) -> bool:
     """Determine if a file path should be excluded from installation copying."""
-    parts = rel_path.split(os.sep)
+    normalized_path = rel_path.replace("/", os.sep).replace("\\", os.sep)
+    parts = normalized_path.split(os.sep)
     
     # Exclude basic development directories
     if any(p in ("__pycache__", ".git") for p in parts):

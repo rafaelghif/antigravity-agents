@@ -54,9 +54,17 @@ class TestInstallCommand(unittest.TestCase):
              patch('os.walk') as mock_walk, \
              patch('importlib.util.spec_from_file_location') as mock_spec:
              
-            mock_walk.return_value = [
-                ('/src', [], ['helper.sh', 'AGENTS.md', 'dummy.pyc'])
-            ]
+            source_root = os.path.abspath(os.path.join(os.path.dirname(install.__file__), "../../../.."))
+            def mock_walk_side_effect(top, *args, **kwargs):
+                if "dest" in top and "backup" in top:
+                    return [
+                        (top, [], ['helper.sh', 'AGENTS.md', 'dummy.pyc'])
+                    ]
+                else:
+                    return [
+                        (source_root, [], ['helper.sh', 'AGENTS.md', 'dummy.pyc'])
+                    ]
+            mock_walk.side_effect = mock_walk_side_effect
             
             # Mock spec loading for bootstrap
             mock_spec.return_value = MagicMock(loader=MagicMock())
@@ -80,6 +88,7 @@ class TestInstallCommand(unittest.TestCase):
         # Setup paths: mock_exists returns True for everything to trigger backup and restore paths
         mock_exists.side_effect = lambda path: True
         
+        source_root = os.path.abspath(os.path.join(os.path.dirname(install.__file__), "../../../.."))
         # Mock os.walk: First walk is for source files, second walk is for backup files
         def mock_walk_side_effect(top, *args, **kwargs):
             if "dest" in top and "backup" in top:
@@ -90,7 +99,7 @@ class TestInstallCommand(unittest.TestCase):
             else:
                 # source_root walk
                 return [
-                    ('/src', [], ['helper.sh', 'AGENTS.md'])
+                    (source_root, [], ['helper.sh', 'AGENTS.md'])
                 ]
         mock_walk.side_effect = mock_walk_side_effect
         mock_spec.return_value = MagicMock(loader=MagicMock())

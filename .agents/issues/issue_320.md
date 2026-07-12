@@ -24,7 +24,13 @@ The Windows installer script `install.ps1` fails when cloning the remote reposit
 - Target files to edit:
   - [x] [install.ps1](file:///D:/Muhammad%20Rafael%20Ghifari/Project/Agent/antigravity-agents/install.ps1) <!-- id: audit-target-files -->
 - Active module locks:
-  - [x] 'install.ps1' <!-- id: audit-module-locks -->
+  - [ ] 'install.ps1' <!-- id: lock-'install_ps1' -->
+  - [ ] bootstrap.py <!-- id: lock-bootstrap_py -->
+  - [ ] install.py <!-- id: lock-install_py -->
+  - [ ] test_token.py <!-- id: lock-test_token_py -->
+  - [ ] test_install.py <!-- id: lock-test_install_py -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
+  - [ ] .agents/scripts/cli/commands/install <!-- id: lock-install -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
