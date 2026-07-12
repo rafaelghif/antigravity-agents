@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.85.0] - 2026-07-12
+
+### 🚀 Features
+- enforce strict online git protocols in all setups
+- Enforce strict online Git protocols across installer, bootstrapper, and upgrader (ISSUE-323)
+
+
 ## [3.84.0] - 2026-07-12
 
 ### 🚀 Features

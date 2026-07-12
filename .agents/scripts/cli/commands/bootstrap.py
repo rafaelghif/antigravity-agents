@@ -443,6 +443,8 @@ def run(args):
         src_root = local_src_root
     else:
         source_repo = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
+        if not any(source_repo.startswith(p) for p in ("http://", "https://", "git@", "ssh://")):
+            source_repo = "https://github.com/rafaelghif/antigravity-agents.git"
         print(f"Fetching latest source templates and core files from Git: {source_repo}...")
         temp_src_root = tempfile.mkdtemp()
         atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
@@ -579,7 +581,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.84.0"
+    AAC_VERSION = "3.85.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
