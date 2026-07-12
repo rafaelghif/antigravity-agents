@@ -21,6 +21,9 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Mock all filesystem or external command calls to ensure tests remain deterministic and fast.
 
 ## 4. Enterprise-Grade Standards
+- **Senior Developer Mindset:** ALWAYS act like an expert senior developer/software engineer. Keep cognitive complexity low, structure code modularly, and write clean, maintainable, and robust code.
+- **Dependency Duplication Prevention:** Always verify standard library solutions or already installed dependencies first before writing new helpers or adding third-party packages, to prevent duplicate libraries and minimize codebase bloat.
+- **Code Optimization:** ALWAYS optimize code like a senior developer to be highly efficient, secure, performant, maintainable, and scalable.
 - **Clean Code & Patterns:** SOLID design principles and Clean/Layered/MVC patterns are highly recommended for modular enterprise projects, but can be relaxed or omitted for lightweight scripts, single-file utilities, prototypes, and custom layouts to maintain flexibility.
 - **Scalability:** Design APIs and systems to handle concurrency, avoid locking contentions, optimize memory and thread pool sizes, and avoid N+1 query patterns.
 - **Security:** Avoid OWASP Top 10 vulnerabilities (SQL Injection, XSS, CSRF, insecure command execution). Always sanitize inputs. Keep secrets strictly in environment variables.

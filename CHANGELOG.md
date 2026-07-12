@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.86.0] - 2026-07-12
+
+### 🚀 Features
+- enhance rules to enforce expert senior developer practices and avoid duplicates
+- feat: enhance rules to enforce expert senior developer practices and avoid duplicates (ISSUE-324)
+
+
 ## [3.85.0] - 2026-07-12
 
 ### 🚀 Features
