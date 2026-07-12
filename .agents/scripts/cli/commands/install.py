@@ -116,15 +116,33 @@ def run(args: List[str]) -> None:
 
     # 5. Copy files recursively with exclusions
     print("Copying core files recursively...")
+    copy_if_missing_filenames = {
+        "rules.md",
+        "schema.md",
+        "AGENTS.md",
+        ".gitignore",
+        ".antigravityignore",
+        "Dockerfile",
+        "README.md",
+        "CHANGELOG.md",
+        "mcp_config.json",
+        "config.json"
+    }
+
     for root, dirs, files in os.walk(source_root):
         for f in files:
             source_file = os.path.join(root, f)
             rel_path = os.path.relpath(source_file, source_root)
+            dest_file = os.path.join(target_abs, rel_path)
             
             if should_exclude(rel_path):
-                continue
+                filename = os.path.basename(rel_path)
+                if filename in copy_if_missing_filenames and not os.path.exists(dest_file):
+                    # Proceed with copying since it is safe and missing in target
+                    pass
+                else:
+                    continue
                 
-            dest_file = os.path.join(target_abs, rel_path)
             try:
                 os.makedirs(os.path.dirname(dest_file), exist_ok=True)
                 shutil.copy2(source_file, dest_file)

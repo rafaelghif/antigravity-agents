@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.83.0] - 2026-07-12
+
+### 🚀 Features
+- copy critical repository files if they are missing in target
+- Fix missing core files during installation (ISSUE-321)
+
+
 ## [3.82.2] - 2026-07-12
 
 ### 🐛 Bug Fixes

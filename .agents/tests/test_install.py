@@ -119,5 +119,33 @@ class TestInstallCommand(unittest.TestCase):
                     restore_called = True
         self.assertTrue(restore_called)
 
+    @patch('shutil.copy2')
+    @patch('os.walk')
+    @patch('os.path.exists', return_value=False)
+    @patch('importlib.util.spec_from_file_location')
+    def test_run_install_copies_missing_critical_files(self, mock_spec, mock_exists, mock_walk, mock_copy2):
+        source_root = os.path.abspath(os.path.join(os.path.dirname(install.__file__), "../../../.."))
+        mock_walk.return_value = [
+            (source_root, [], ['AGENTS.md', 'rules.md', 'some_other_file.py'])
+        ]
+        mock_spec.return_value = MagicMock(loader=MagicMock())
+        
+        try:
+            dest_path = os.path.join(self.temp_dir, "dest")
+            install.run([dest_path])
+        except SystemExit:
+            pass
+            
+        copied_files = []
+        for args, kwargs in mock_copy2.call_args_list:
+            if args:
+                copied_files.append(os.path.basename(args[0]))
+                
+        # AGENTS.md and rules.md are critical and missing, they should be copied
+        self.assertIn('AGENTS.md', copied_files)
+        self.assertIn('rules.md', copied_files)
+        # some_other_file.py is not excluded, it should be copied
+        self.assertIn('some_other_file.py', copied_files)
+
 if __name__ == '__main__':
     unittest.main()
