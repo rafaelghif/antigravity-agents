@@ -37,6 +37,17 @@ fi
 
 # 3. Clone source repository to a temp directory
 REPO_URL="${AAC_SOURCE_REPO:-https://github.com/rafaelghif/antigravity-agents.git}"
+IS_ONLINE=0
+for PROTO in "http://" "https://" "git@" "ssh://"; do
+  if [[ "$REPO_URL" == "$PROTO"* ]]; then
+    IS_ONLINE=1
+    break
+  fi
+done
+if [ "$IS_ONLINE" -eq 0 ]; then
+  REPO_URL="https://github.com/rafaelghif/antigravity-agents.git"
+fi
+
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 

@@ -124,5 +124,38 @@ class TestUpgradeCommand(unittest.TestCase):
         checkout_call = any('checkout' in call[0][0] for call in mock_sub.call_args_list)
         self.assertFalse(checkout_call)
 
+    @patch('os.environ.get', return_value="false")
+    @patch('os.path.exists', return_value=False)
+    @patch('time.time', return_value=1000.0)
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('subprocess.run')
+    def test_auto_upgrade_local_remote_fallback(self, mock_sub, mock_file_open, mock_time, mock_exists, mock_env):
+        def side_effect(cmd, **kwargs):
+            if 'rev-parse' in cmd:
+                if '--is-inside-work-tree' in cmd:
+                    return MagicMock(returncode=0)
+                if '--abbrev-ref' in cmd:
+                    return MagicMock(returncode=0, stdout="main\n")
+            if 'status' in cmd:
+                return MagicMock(returncode=0, stdout="")
+            if 'remote' in cmd:
+                return MagicMock(returncode=0, stdout="D:\\my\\local\\repo\n")
+            if 'fetch' in cmd:
+                return MagicMock(returncode=0)
+            if 'merge-base' in cmd:
+                return MagicMock(returncode=0)
+            if 'diff' in cmd:
+                return MagicMock(returncode=1)
+            return MagicMock(returncode=0)
+        mock_sub.side_effect = side_effect
+        
+        upgrade.check_and_run_auto_upgrade()
+        
+        fetch_call = next((call for call in mock_sub.call_args_list if 'fetch' in call[0][0]), None)
+        self.assertIsNotNone(fetch_call)
+        cmd_args = fetch_call[0][0]
+        self.assertIn("https://github.com/rafaelghif/antigravity-agents.git", cmd_args)
+        self.assertNotIn("D:\\my\\local\\repo", cmd_args)
+
 if __name__ == '__main__':
     unittest.main()

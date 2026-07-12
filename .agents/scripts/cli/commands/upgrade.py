@@ -11,6 +11,8 @@ YELLOW = "\033[93m"
 RESET = "\033[0m"
 
 SOURCE_REPO = os.environ.get("AAC_SOURCE_REPO", "https://github.com/rafaelghif/antigravity-agents.git")
+if not any(SOURCE_REPO.startswith(p) for p in ("http://", "https://", "git@", "ssh://")):
+    SOURCE_REPO = "https://github.com/rafaelghif/antigravity-agents.git"
 
 def print_err(msg: str) -> None:
     print(f"{RED}[FAIL] {msg}{RESET}")
@@ -185,7 +187,6 @@ def check_and_run_auto_upgrade() -> None:
     if res_status.returncode != 0 or res_status.stdout.strip():
         return
 
-    # 6. Determine remote URL from origin, falling back to SOURCE_REPO
     remote_url = SOURCE_REPO
     res_remote = subprocess.run(
         ['git', 'remote', 'get-url', 'origin'],
@@ -195,6 +196,10 @@ def check_and_run_auto_upgrade() -> None:
     )
     if res_remote.returncode == 0 and res_remote.stdout.strip():
         remote_url = res_remote.stdout.strip()
+
+    # Enforce online protocol check
+    if not any(remote_url.startswith(p) for p in ("http://", "https://", "git@", "ssh://")):
+        remote_url = SOURCE_REPO
 
     # 7. Fetch remote tracking branch
     res_fetch = subprocess.run(

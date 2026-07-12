@@ -46,6 +46,18 @@ if (-not $RepoUrl) {
     $RepoUrl = "https://github.com/rafaelghif/antigravity-agents.git"
 }
 
+# Enforce online protocol check
+$IsOnline = $false
+foreach ($Proto in @("http://", "https://", "git@", "ssh://")) {
+    if ($RepoUrl.StartsWith($Proto)) {
+        $IsOnline = $true
+        break
+    }
+}
+if (-not $IsOnline) {
+    $RepoUrl = "https://github.com/rafaelghif/antigravity-agents.git"
+}
+
 $TempPath = [System.IO.Path]::GetTempFileName()
 Remove-Item $TempPath
 New-Item -ItemType Directory -Path $TempPath | Out-Null
