@@ -14,11 +14,11 @@ The Windows installer script `install.ps1` fails when cloning the remote reposit
 ## Tasks
 - [x] Implement Pre-Implementation Impact Analysis and Compliance Audit <!-- id: task-analysis -->
 - [x] Update `install.ps1` to temporarily set ErrorActionPreference and use `--quiet` flag in `git clone` <!-- id: task-update-install-ps1 -->
-- [ ] Verify installer execution by running a local dry run <!-- id: task-verify-installer -->
+- [x] Verify installer execution by running a local dry run <!-- id: task-verify-installer -->
 
 ## Acceptance Criteria
-- [ ] `install.ps1` runs successfully without raising `NativeCommandError` during git clone.
-- [ ] `install.ps1` detects clone failures and prints an appropriate error.
+- [x] `install.ps1` runs successfully without raising `NativeCommandError` during git clone.
+- [x] `install.ps1` detects clone failures and prints an appropriate error.
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
