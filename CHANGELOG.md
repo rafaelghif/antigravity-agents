@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.91.0] - 2026-07-12
+
+### 🚀 Features
+- relax codebase search and file retrieval redundancy constraints to allow deeper analysis
+- feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (ISSUE-329)
+
+
 ## [3.90.0] - 2026-07-12
 
 ### 🚀 Features
