@@ -1,7 +1,7 @@
 ---
 id: issue-320
 title: "fix: suppress git clone stderr NativeCommandError in install.ps1"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
