@@ -401,6 +401,7 @@ def run(args):
     db = "None"
     infra = "None"
     framework = "None"
+    scaffold = True
     
     quick_mode = False
     clean_args = []
@@ -411,6 +412,8 @@ def run(args):
             quick_mode = True
         elif arg.lower() in ('--force', '-f', '--update'):
             force_update = True
+        elif arg.lower() == '--no-scaffold':
+            scaffold = False
         elif arg.lower() == '--db' and i + 1 < len(args):
             db = args[i+1]
             i += 1
@@ -524,14 +527,17 @@ def run(args):
             src_root = temp_src_root
 
     # 1. Generate Folder Structure
-    if arch == "clean":
-        create_clean_architecture(".")
-    elif arch == "layered":
-        create_layered_architecture(".")
-    elif arch == "mvc":
-        create_mvc_architecture(".")
-    elif arch in ("none", "custom"):
-        print("Skipping directory scaffolding generation (using custom layout).")
+    if scaffold:
+        if arch == "clean":
+            create_clean_architecture(".")
+        elif arch == "layered":
+            create_layered_architecture(".")
+        elif arch == "mvc":
+            create_mvc_architecture(".")
+        elif arch in ("none", "custom"):
+            print("Skipping directory scaffolding generation (using custom layout).")
+    else:
+        print("Skipping directory scaffolding generation due to --no-scaffold.")
 
     # Ensure .agents and subdirectories exist
     os.makedirs(".agents", exist_ok=True)
@@ -558,20 +564,21 @@ def run(args):
                     except Exception:
                         pass
     
-    if stack == "python":
-        req_content = read_template(src_root, "python_requirements.txt.template", "# Project dependencies\npytest\nflake8\n")
-        with open("requirements.txt", 'w', encoding='utf-8') as f:
-            f.write(req_content)
-    elif stack == "node":
-        pkg_content = read_template(src_root, "node_package.json.template", '{\n  "name": "{{NAME}}",\n  "version": "1.0.0",\n  "scripts": {\n    "test": "jest",\n    "lint": "eslint ."\n  }\n}')
-        pkg_content = pkg_content.replace("{{NAME}}", name.lower())
-        with open("package.json", 'w', encoding='utf-8') as f:
-            f.write(pkg_content)
-    elif stack == "php":
-        comp_content = read_template(src_root, "php_composer.json.template", '{\n  "name": "dev/{{NAME}}",\n  "require": {},\n  "require-dev": {\n    "phpunit/phpunit": "^9.0"\n  }\n}')
-        comp_content = comp_content.replace("{{NAME}}", name.lower())
-        with open("composer.json", 'w', encoding='utf-8') as f:
-            f.write(comp_content)
+    if scaffold:
+        if stack == "python":
+            req_content = read_template(src_root, "python_requirements.txt.template", "# Project dependencies\npytest\nflake8\n")
+            with open("requirements.txt", 'w', encoding='utf-8') as f:
+                f.write(req_content)
+        elif stack == "node":
+            pkg_content = read_template(src_root, "node_package.json.template", '{\n  "name": "{{NAME}}",\n  "version": "1.0.0",\n  "scripts": {\n    "test": "jest",\n    "lint": "eslint ."\n  }\n}')
+            pkg_content = pkg_content.replace("{{NAME}}", name.lower())
+            with open("package.json", 'w', encoding='utf-8') as f:
+                f.write(pkg_content)
+        elif stack == "php":
+            comp_content = read_template(src_root, "php_composer.json.template", '{\n  "name": "dev/{{NAME}}",\n  "require": {},\n  "require-dev": {\n    "phpunit/phpunit": "^9.0"\n  }\n}')
+            comp_content = comp_content.replace("{{NAME}}", name.lower())
+            with open("composer.json", 'w', encoding='utf-8') as f:
+                f.write(comp_content)
 
     # 3. Create or update .gitignore and .antigravityignore
     ensure_gitignore_entries(src_root, ".")
@@ -583,31 +590,31 @@ def run(args):
                 f.write(anti_ignore_content)
 
     # 3.1 Create GitHub CI workflow
-    github_workflow_dir = ".github/workflows"
-    github_workflow_file = os.path.join(github_workflow_dir, "verify.yml")
-    if not os.path.exists(github_workflow_file):
-        os.makedirs(github_workflow_dir, exist_ok=True)
-        ci_content = read_template(src_root, "ci_github_workflow.yml.template", "")
-        if ci_content:
-            with open(github_workflow_file, 'w', encoding='utf-8') as f:
-                f.write(ci_content)
-            print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
+    if scaffold:
+        github_workflow_dir = ".github/workflows"
+        github_workflow_file = os.path.join(github_workflow_dir, "verify.yml")
+        if not os.path.exists(github_workflow_file):
+            os.makedirs(github_workflow_dir, exist_ok=True)
+            ci_content = read_template(src_root, "ci_github_workflow.yml.template", "")
+            if ci_content:
+                with open(github_workflow_file, 'w', encoding='utf-8') as f:
+                    f.write(ci_content)
+                print("Generated '.github/workflows/verify.yml' CI pipeline configuration.")
 
     # 4. Generate .agents/schema.md
-    schema_file = ".agents/schema.md"
-    if not os.path.exists(schema_file) or force_update:
-        schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
-        schema_content = schema_content.replace("{{NAME}}", name)\
-                                       .replace("{{STACK}}", stack.capitalize())\
-                                       .replace("{{ARCH}}", arch.upper())\
-                                       .replace("{{FRAMEWORK}}", framework)\
-                                       .replace("{{DATABASE}}", db)\
-                                       .replace("{{INFRASTRUCTURE}}", infra)
-        with open(schema_file, 'w', encoding='utf-8') as f:
-            f.write(schema_content)
-        print("Generated '.agents/schema.md' architecture blueprint.")
-    else:
-        print("Preserved existing '.agents/schema.md' architecture blueprint.")
+    if scaffold:
+        schema_file = ".agents/schema.md"
+        if not os.path.exists(schema_file) or force_update:
+            schema_content = read_template(src_root, "schema.md.template", "# Project Architecture Blueprint: {{NAME}}\n\n## 1. Stack Details\n- **Language/Platform**: {{STACK}}\n- **Pattern**: {{ARCH}} Architecture\n- **Framework/Library**: {{FRAMEWORK}}\n- **Database**: {{DATABASE}}\n- **Infrastructure**: {{INFRASTRUCTURE}}\n")
+            schema_content = schema_content.replace("{{NAME}}", name)\
+                                           .replace("{{STACK}}", stack.capitalize())\
+                                           .replace("{{ARCH}}", arch.upper())\
+                                           .replace("{{FRAMEWORK}}", framework)\
+                                           .replace("{{DATABASE}}", db)\
+                                           .replace("{{INFRASTRUCTURE}}", infra)
+            with open(schema_file, 'w', encoding='utf-8') as f:
+                f.write(schema_content)
+            print("Generated '.agents/schema.md' architecture blueprint.")
 
     # 4.5. Generate .agents/mcp_config.json if not exists
     mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
