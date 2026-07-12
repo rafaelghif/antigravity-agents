@@ -11,6 +11,14 @@ except ImportError:
 
 LOCK_FILE = ".agents/state/locks.json"
 
+try:
+    import portalocker
+except ImportError:
+    try:
+        from . import portalocker
+    except ImportError:
+        import portalocker
+
 def get_issue_id_from_branch(branch_name: str) -> str:
     m = re.search(r'(issue|task)[-_]?\d+', branch_name, re.IGNORECASE)
     if m:
@@ -93,7 +101,27 @@ def prune_stale_locks(locks: dict) -> dict:
         return locks
     return {mod: holder for mod, holder in locks.items() if holder == "unknown" or holder in existing_branches}
 
+def read_locks() -> dict:
+    if not os.path.exists(LOCK_FILE):
+        return {}
+    try:
+        with portalocker.Lock(LOCK_FILE, 'r', flags=portalocker.LOCK_SH, timeout=5.0) as f:
+            content = f.read()
+            if not content.strip():
+                return {}
+            return json.loads(content)
+    except Exception:
+        return {}
+
 def load_locks() -> dict:
+    locks = read_locks()
+    if locks:
+        # Prune stale locks immediately
+        pruned = prune_stale_locks(locks)
+        if pruned != locks:
+            save_locks(pruned)
+        return pruned
+
     locks = {}
     
     # Get all branches (local and remote)
@@ -180,9 +208,18 @@ def load_locks() -> dict:
                 if mod not in locks or "origin/" in raw_branch:
                     locks[mod] = branch
 
+    if locks:
+        save_locks(locks)
     return locks
 
 def save_locks(locks: dict) -> None:
+    # Write locks to LOCK_FILE under exclusive lock
+    try:
+        with portalocker.Lock(LOCK_FILE, 'w', flags=portalocker.LOCK_EX, timeout=5.0) as f:
+            json.dump(locks, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to write lock file: {e}")
+
     branch = "unknown"
     try:
         res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
