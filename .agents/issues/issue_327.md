@@ -1,7 +1,7 @@
 ---
 id: issue-327
 title: "fix: prevent install from scaffolding directory structures and project files"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
