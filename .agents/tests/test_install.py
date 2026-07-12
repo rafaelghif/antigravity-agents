@@ -126,7 +126,7 @@ class TestInstallCommand(unittest.TestCase):
     def test_run_install_copies_missing_critical_files(self, mock_spec, mock_exists, mock_walk, mock_copy2):
         source_root = os.path.abspath(os.path.join(os.path.dirname(install.__file__), "../../../.."))
         mock_walk.return_value = [
-            (source_root, [], ['AGENTS.md', 'rules.md', 'some_other_file.py'])
+            (source_root, [], ['AGENTS.md', 'rules.md', 'milestones.md', 'security-policy.md', 'some_other_file.py'])
         ]
         mock_spec.return_value = MagicMock(loader=MagicMock())
         
@@ -144,6 +144,8 @@ class TestInstallCommand(unittest.TestCase):
         # AGENTS.md and rules.md are critical and missing, they should be copied
         self.assertIn('AGENTS.md', copied_files)
         self.assertIn('rules.md', copied_files)
+        self.assertIn('milestones.md', copied_files)
+        self.assertIn('security-policy.md', copied_files)
         # some_other_file.py is not excluded, it should be copied
         self.assertIn('some_other_file.py', copied_files)
 

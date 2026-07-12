@@ -126,7 +126,14 @@ def run(args: List[str]) -> None:
         "README.md",
         "CHANGELOG.md",
         "mcp_config.json",
-        "config.json"
+        "config.json",
+        "architecture.md",
+        "glossary.md",
+        "lessons-archive.md",
+        "lessons-learned.md",
+        "milestones.md",
+        "security-policy.md",
+        "tech-debt.md"
     }
 
     for root, dirs, files in os.walk(source_root):
