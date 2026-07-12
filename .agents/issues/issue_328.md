@@ -1,7 +1,7 @@
 ---
 id: issue-328
 title: "feat: default bootstrap architecture to none to prevent accidental scaffolding"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
