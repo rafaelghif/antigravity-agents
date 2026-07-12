@@ -1,7 +1,7 @@
 ---
 id: issue-322
 title: "Default installer bootstrap inputs and copy all missing memory files"
-status: open
+status: closed
 assignee: agent-antigravity
 milestone: "v3.83.x"
 created_at: 2026-07-12
