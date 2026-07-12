@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.88.0] - 2026-07-12
+
+### 🚀 Features
+- append and update instead of overwrite existing gitignore during bootstrap
+- feat: append instead of overwrite existing gitignore during installation and bootstrap (ISSUE-326)
+
+
 ## [3.87.0] - 2026-07-12
 
 ### 🚀 Features

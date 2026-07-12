@@ -1,7 +1,7 @@
 ---
 id: issue-326
 title: "feat: append instead of overwrite existing gitignore during installation and bootstrap"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
