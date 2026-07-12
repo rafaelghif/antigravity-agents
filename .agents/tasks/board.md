@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: enhance rules to enforce expert senior developer practices and avoid duplicates (feat/issue-324) <!-- id: issue-324 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
