@@ -30,19 +30,23 @@ class TestIntegrationWrappers(unittest.TestCase):
         self.assertIn("Error: Unknown command 'invalidcommandxyz'", res.stdout)
 
     def test_helper_sh_relative_subdirectory_execution(self):
-        temp_subdir = "src/presentation"
+        temp_subdir = ".agents/state/test_subdir"
         os.makedirs(temp_subdir, exist_ok=True)
-        is_windows = os.name == 'nt'
-        cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', '../../helper.ps1'] if is_windows else ['../../helper.sh']
-        res = subprocess.run(
-            cmd,
-            cwd=temp_subdir,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            encoding='utf-8'
-        )
-        self.assertEqual(res.returncode, 0)
-        self.assertIn("Antigravity Agent Core (AAC) V3 CLI Command Helper", res.stdout)
+        try:
+            is_windows = os.name == 'nt'
+            cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', '../../../helper.ps1'] if is_windows else ['../../../helper.sh']
+            res = subprocess.run(
+                cmd,
+                cwd=temp_subdir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding='utf-8'
+            )
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("Antigravity Agent Core (AAC) V3 CLI Command Helper", res.stdout)
+        finally:
+            if os.path.exists(temp_subdir):
+                shutil.rmtree(temp_subdir)
 
     @unittest.skipIf(not shutil.which("pwsh"), "PowerShell Core (pwsh) not installed")
     def test_helper_ps1_no_args_prints_help(self):
