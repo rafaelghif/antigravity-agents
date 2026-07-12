@@ -189,6 +189,62 @@ def read_template(src_root, filename, fallbacks=None):
         return fallbacks
     return ""
 
+def ensure_gitignore_entries(src_root, target_dir):
+    """Ensure Antigravity Agent ignore rules are in target's .gitignore."""
+    template_content = read_template(src_root, "gitignore.template", None)
+    if not template_content:
+        return
+        
+    start_marker = "# <<< ANTIGRAVITY AGENT START >>>"
+    end_marker = "# <<< ANTIGRAVITY AGENT END >>>"
+    
+    start_idx = template_content.find(start_marker)
+    end_idx = template_content.find(end_marker)
+    
+    if start_idx != -1 and end_idx != -1:
+        agent_block = template_content[start_idx:end_idx + len(end_marker)]
+    else:
+        agent_block = template_content
+        
+    target_gitignore = os.path.join(target_dir, ".gitignore")
+    
+    if not os.path.exists(target_gitignore):
+        try:
+            with open(target_gitignore, 'w', encoding='utf-8') as f:
+                f.write(template_content)
+        except Exception:
+            pass
+    else:
+        try:
+            with open(target_gitignore, 'r', encoding='utf-8') as f:
+                target_content = f.read()
+        except Exception:
+            return
+            
+        target_start = target_content.find(start_marker)
+        target_end = target_content.find(end_marker)
+        
+        if target_start != -1 and target_end != -1:
+            new_content = (
+                target_content[:target_start] +
+                agent_block +
+                target_content[target_end + len(end_marker):]
+            )
+            if target_content != new_content:
+                try:
+                    with open(target_gitignore, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                except Exception:
+                    pass
+        else:
+            prefix = "" if target_content.endswith("\n") else "\n"
+            new_content = target_content + prefix + agent_block + "\n"
+            try:
+                with open(target_gitignore, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+            except Exception:
+                pass
+
 def copy_core_files(src_root, force=False):
     """Copy all core agent files and skills from the Git source directory
     to the target project workspace."""
@@ -517,11 +573,8 @@ def run(args):
         with open("composer.json", 'w', encoding='utf-8') as f:
             f.write(comp_content)
 
-    # 3. Create .gitignore and .antigravityignore
-    if not os.path.exists(".gitignore"):
-        git_ignore_content = read_template(src_root, "gitignore.template", ".env\n__pycache__/\nnode_modules/\nvendor/\n.pytest_cache/\n.agents/locks.json\n")
-        with open(".gitignore", 'w', encoding='utf-8') as f:
-            f.write(git_ignore_content)
+    # 3. Create or update .gitignore and .antigravityignore
+    ensure_gitignore_entries(src_root, ".")
             
     if not os.path.exists(".antigravityignore"):
         anti_ignore_content = read_template(src_root, "antigravityignore.template", "")
@@ -581,7 +634,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.87.0"
+    AAC_VERSION = "3.88.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself
