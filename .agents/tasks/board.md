@@ -10,8 +10,8 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Enforce strict online Git protocols across installer, bootstrapper, and upgrader (fix/issue-323) <!-- id: issue-323 -->
 ## Done
+- [x] Enforce strict online Git protocols across installer, bootstrapper, and upgrader (fix/issue-323) <!-- id: issue-323 -->
 - [x] Default installer bootstrap inputs and copy all missing memory files (fix/issue-322) <!-- id: issue-322 -->
 - [x] Fix missing core files during installation (fix/issue-321) <!-- id: issue-321 -->
 - [x] fix: suppress git clone stderr NativeCommandError in install.ps1 (feat/issue-320) <!-- id: issue-320 -->

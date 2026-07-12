@@ -1,7 +1,7 @@
 ---
 id: issue-323
 title: "Enforce strict online Git protocols across installer, bootstrapper, and upgrader"
-status: open
+status: closed
 assignee: agent-antigravity
 milestone: "v3.84.x"
 created_at: 2026-07-12
