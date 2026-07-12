@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.90.0
+- **Version:** 3.92.0
 - **Stack:** Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -36,7 +36,7 @@
 - **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
 - **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `debugging` skill; if still unresolved, halt and prompt the USER for manual intervention.
 - **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST load the corresponding skill's playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) **ONLY** if the current task directly matches the skill's purpose (e.g. `debugging` for failures, `ci-cd` for pipelines, `security-audit` for security/credentials edits, `testing` for writing tests). Do NOT load skills speculatively or keep them in memory if they are not active.
-- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task. Cache the results in your thinking block to maximize prompt caching effectiveness and minimize token usage.
+- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task unless it is necessary to perform a deeper analysis, verify workspace state, or confirm modifications. Caching the results in your thinking block is still highly recommended to maximize prompt caching effectiveness and minimize token usage.
 - **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.
 - **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.
 - **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.
