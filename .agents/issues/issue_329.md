@@ -1,7 +1,7 @@
 ---
 id: 329
 title: "feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-12
 ---
@@ -37,9 +37,12 @@ The current rules in `AGENTS.md` and `.agents/rules.md` strictly prohibit retrie
   - [x] .agents/rules.md
   - [x] .agents/templates/rules.md.template
 - Active module locks:
-  - [x] AGENTS.md <!-- id: lock-AGENTS_md -->
-  - [x] .agents/rules.md <!-- id: lock-rules_md -->
-  - [x] .agents/templates/rules.md.template <!-- id: lock-rules_md_template -->
+  - [ ] AGENTS.md <!-- id: lock-AGENTS_md -->
+  - [ ] .agents/rules.md <!-- id: lock-rules_md -->
+  - [ ] .agents/templates/rules.md.template <!-- id: lock-rules_md_template -->
+  - [ ] .agents/scripts/cli/commands/bootstrap <!-- id: lock-bootstrap -->
+  - [ ] CHANGELOG.md <!-- id: lock-CHANGELOG_md -->
+  - [ ] README.md <!-- id: lock-README_md -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (feat/329) <!-- id: 329 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (feat/329) <!-- id: 329 -->
 - [x] feat: default bootstrap architecture to none to prevent accidental scaffolding (feat/issue-328) <!-- id: issue-328 -->
 - [x] fix: prevent install from scaffolding directory structures and project files (feat/issue-327) <!-- id: issue-327 -->
 - [x] feat: append instead of overwrite existing gitignore during installation and bootstrap (feat/issue-326) <!-- id: issue-326 -->
