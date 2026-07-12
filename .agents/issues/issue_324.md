@@ -1,7 +1,7 @@
 ---
 id: issue-324
 title: "feat: enhance rules to enforce expert senior developer practices and avoid duplicates"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
