@@ -395,12 +395,13 @@ def run(args):
         if detected_stack:
             stack_prompt += f" (Auto-detected: '{detected_stack}', press enter to accept): "
         else:
-            stack_prompt += " (python/node/php/go/rust/etc.): "
+            stack_prompt += " (python/node/php/go/rust/etc., default: python): "
         stack = input(stack_prompt).strip().lower()
-        if not stack and detected_stack:
-            stack = detected_stack
+        if not stack:
+            stack = detected_stack if detected_stack else "python"
             
-        arch = input("Architecture Pattern (clean/layered/mvc/none): ").strip().lower()
+        arch_input = input("Architecture Pattern (clean/layered/mvc/none, default: clean): ").strip().lower()
+        arch = arch_input if arch_input in ("clean", "layered", "mvc", "none", "custom") else "clean"
         
         db_input = input("Database (SQLite/PostgreSQL/MySQL/MongoDB/none, default: none): ").strip()
         if db_input:
@@ -414,13 +415,17 @@ def run(args):
         if fw_input:
             framework = fw_input
     else:
-        name = args[0]
-        stack = args[1].lower()
-        arch = args[2].lower()
+        name = args[0] if len(args) > 0 else os.path.basename(os.path.abspath(".")).strip()
+        stack = args[1].lower() if len(args) > 1 else detected_stack if detected_stack else "python"
+        arch = args[2].lower() if len(args) > 2 else "clean"
 
-    if not name or not stack or arch not in ("clean", "layered", "mvc", "none", "custom"):
-        print("Error: Invalid inputs. Stack cannot be empty. Architecture must be 'clean', 'layered', 'mvc', or 'none'.")
-        sys.exit(1)
+    # Sanitize and apply default values if empty or invalid
+    if not name:
+        name = os.path.basename(os.path.abspath(".")).strip()
+    if not stack:
+        stack = detected_stack if detected_stack else "python"
+    if arch not in ("clean", "layered", "mvc", "none", "custom"):
+        arch = "clean"
 
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture (DB: {db}, Infra: {infra}, Framework: {framework})...")
 
@@ -574,7 +579,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.83.0"
+    AAC_VERSION = "3.84.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Check if we are bootstrapping the agent core repo itself

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.84.0] - 2026-07-12
+
+### 🚀 Features
+- default bootstrap inputs and whitelist all memory files
+- Default installer bootstrap inputs and copy all missing memory files (ISSUE-322)
+
+
 ## [3.83.0] - 2026-07-12
 
 ### 🚀 Features

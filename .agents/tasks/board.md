@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] Default installer bootstrap inputs and copy all missing memory files (fix/issue-322) <!-- id: issue-322 -->
 - [x] Fix missing core files during installation (fix/issue-321) <!-- id: issue-321 -->
 - [x] fix: suppress git clone stderr NativeCommandError in install.ps1 (feat/issue-320) <!-- id: issue-320 -->
 - [x] docs: add prominent disclaimer of liability to readme to protect author liability (feat/issue-319) <!-- id: issue-319 -->

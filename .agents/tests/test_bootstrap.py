@@ -136,13 +136,17 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertIn("phpunit", content)
 
     def test_bootstrap_invalid_args(self, mock_input):
-        # Empty stack name
-        with self.assertRaises(SystemExit):
+        # Empty stack name should fallback to default 'python' and not raise SystemExit
+        try:
             bootstrap.run(["TestInvalid", "", "clean"])
+        except SystemExit:
+            self.fail("bootstrap.run raised SystemExit on empty stack name")
 
-        # Invalid architecture
-        with self.assertRaises(SystemExit):
-            bootstrap.run(["TestInvalid", "python", "monolith"])
+        # Invalid architecture should fallback to default 'clean' and not raise SystemExit
+        try:
+            bootstrap.run(["TestInvalid2", "python", "monolith"])
+        except SystemExit:
+            self.fail("bootstrap.run raised SystemExit on invalid architecture")
 
     @patch('os.path.exists')
     def test_bootstrap_agents_md_fallback(self, mock_exists, mock_input):
@@ -277,6 +281,17 @@ class TestBootstrapCommand(unittest.TestCase):
         
         self.assertTrue(os.path.exists(".agents/schema.md"))
         self.assertTrue(os.path.exists("AGENTS.md"))
+
+    def test_bootstrap_empty_inputs_defaults(self, mock_input):
+        mock_input.return_value = ""
+        with patch('sys.stdin.isatty', return_value=True), \
+             patch.dict('os.environ', {'ANTIGRAVITY_AGENT': '', 'ANTIGRAVITY_NONINTERACTIVE': ''}):
+            
+            bootstrap.run([])
+            
+            self.assertTrue(os.path.exists("requirements.txt"))
+            self.assertTrue(os.path.exists(".agents/schema.md"))
+            self.assertTrue(os.path.exists("AGENTS.md"))
 
 if __name__ == '__main__':
     unittest.main()
