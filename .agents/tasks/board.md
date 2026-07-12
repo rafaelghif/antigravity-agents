@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix: prevent test pollution of src directory and exclude src from installer (feat/issue-325) <!-- id: issue-325 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] fix: prevent test pollution of src directory and exclude src from installer (feat/issue-325) <!-- id: issue-325 -->
 - [x] feat: enhance rules to enforce expert senior developer practices and avoid duplicates (feat/issue-324) <!-- id: issue-324 -->
 - [x] Enforce strict online Git protocols across installer, bootstrapper, and upgrader (fix/issue-323) <!-- id: issue-323 -->
 - [x] Default installer bootstrap inputs and copy all missing memory files (fix/issue-322) <!-- id: issue-322 -->

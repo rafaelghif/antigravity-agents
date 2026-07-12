@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.87.0] - 2026-07-12
+
+### 🚀 Features
+- prevent test pollution of src folder and exclude it from installer
+- fix: prevent test pollution of src directory and exclude src from installer (ISSUE-325)
+
+
 ## [3.86.0] - 2026-07-12
 
 ### 🚀 Features

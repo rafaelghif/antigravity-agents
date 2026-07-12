@@ -1,7 +1,7 @@
 ---
 id: issue-325
 title: "fix: prevent test pollution of src directory and exclude src from installer"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-12
 ---
