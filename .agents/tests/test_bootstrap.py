@@ -289,7 +289,7 @@ class TestBootstrapCommand(unittest.TestCase):
             
             bootstrap.run([])
             
-            self.assertTrue(os.path.exists("requirements.txt"))
+            self.assertFalse(os.path.exists("requirements.txt"))
             self.assertTrue(os.path.exists(".agents/schema.md"))
             self.assertTrue(os.path.exists("AGENTS.md"))
 
@@ -343,8 +343,8 @@ class TestBootstrapCommand(unittest.TestCase):
         # Verify no verify.yml was created
         self.assertFalse(os.path.exists(".github/workflows/verify.yml"))
         
-        # Verify no schema.md was created
-        self.assertFalse(os.path.exists(".agents/schema.md"))
+        # Verify schema.md was created
+        self.assertTrue(os.path.exists(".agents/schema.md"))
         
         # Verify core files and configs are still initialized (like .agents/config.json)
         self.assertTrue(os.path.exists(".agents/config.json"))

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.90.0] - 2026-07-12
+
+### 🚀 Features
+- default architecture to none to avoid accidental folder scaffolding
+- feat: default bootstrap architecture to none to prevent accidental scaffolding (ISSUE-328)
+
+
 ## [3.89.0] - 2026-07-12
 
 ### 🚀 Features
