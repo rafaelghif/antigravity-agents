@@ -10,7 +10,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-
+- [ ] Fix missing core files during installation (fix/issue-321) <!-- id: issue-321 -->
 ## Done
 - [x] fix: suppress git clone stderr NativeCommandError in install.ps1 (feat/issue-320) <!-- id: issue-320 -->
 - [x] docs: add prominent disclaimer of liability to readme to protect author liability (feat/issue-319) <!-- id: issue-319 -->
