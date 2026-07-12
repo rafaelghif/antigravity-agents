@@ -326,6 +326,10 @@ def main():
         if root_path not in sys.path:
             sys.path.insert(0, root_path)
             
+        commands_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
+        if commands_dir not in sys.path:
+            sys.path.append(commands_dir)
+            
         import importlib.util
         spec = importlib.util.spec_from_file_location(f"cmd_{module_name}", cmd_file)
         if spec is None or spec.loader is None:

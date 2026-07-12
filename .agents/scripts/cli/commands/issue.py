@@ -2,6 +2,11 @@ import sys
 import os
 import re
 
+try:
+    from . import validation
+except ImportError:
+    import validation
+
 # Inject parent directory containing git_api
 scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 if scripts_dir not in sys.path:
@@ -501,6 +506,10 @@ def run(args):
             if not title:
                 print("\033[91mError: Issue title is required.\033[0m")
                 sys.exit(1)
+        if not validation.validate_safe_identifier(issue_id):
+            print(f"Error: Invalid issue ID '{issue_id}'.")
+            sys.exit(1)
+            
         if not os.path.exists(ISSUE_DIR):
             os.makedirs(ISSUE_DIR)
             
@@ -657,6 +666,9 @@ created_at: {current_date}
             issue_id = args[1]
             
         path = get_issue_path(issue_id)
+        if not validation.validate_safe_identifier(issue_id):
+            print(f"Error: Invalid issue ID '{issue_id}'.")
+            sys.exit(1)
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'. Please run 'create' first.")
             sys.exit(1)
@@ -711,6 +723,9 @@ created_at: {current_date}
         # Determine branch name
         slug = issue_id.lower().replace('_', '-')
         branch_name = f"feat/{slug}"
+        if not validation.validate_safe_branch(branch_name):
+            print(f"Error: Invalid branch name '{branch_name}'.")
+            sys.exit(1)
         print(f"Checking out Git branch '{branch_name}'...")
         
         # Check if branch exists
@@ -796,6 +811,9 @@ created_at: {current_date}
             issue_id = args[1]
             
         path = get_issue_path(issue_id)
+        if not validation.validate_safe_identifier(issue_id):
+            print(f"Error: Invalid issue ID '{issue_id}'.")
+            sys.exit(1)
         if not os.path.exists(path):
             print(f"Error: Issue file not found for '{issue_id}'.")
             sys.exit(1)

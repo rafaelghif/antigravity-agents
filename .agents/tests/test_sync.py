@@ -118,7 +118,14 @@ Problem status: open
 
     @patch('os.path.exists', return_value=True)
     def test_sync_lessons_to_rules(self, mock_exists):
-        import sync
+        old_path = sys.path[:]
+        sys.path = [p for p in sys.path if not p.endswith('commands')]
+        if 'sync' in sys.modules:
+            del sys.modules['sync']
+        try:
+            import sync
+        finally:
+            sys.path = old_path
         
         lessons_content = """## Lessons Learned
 - **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated

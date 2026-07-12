@@ -4,6 +4,11 @@ import json
 import subprocess
 import re
 
+try:
+    from . import validation
+except ImportError:
+    import validation
+
 LOCK_FILE = ".agents/state/locks.json"
 
 def get_issue_id_from_branch(branch_name: str) -> str:
@@ -288,6 +293,9 @@ def run(args: list) -> None:
             mod_name = sel["name"]
         else:
             mod_name = args[0]
+            if not validation.validate_safe_path(mod_name):
+                print(f"Error: Invalid module or path name '{mod_name}'.")
+                sys.exit(1)
 
         if mod_name in locks:
             del locks[mod_name]
@@ -341,6 +349,9 @@ def run(args: list) -> None:
             mod_name = sel["name"]
     else:
         mod_name = args[0]
+        if not validation.validate_safe_path(mod_name):
+            print(f"Error: Invalid module or path name '{mod_name}'.")
+            sys.exit(1)
 
     branch = "unknown"
     try:

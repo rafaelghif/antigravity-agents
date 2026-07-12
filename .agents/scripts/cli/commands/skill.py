@@ -5,6 +5,11 @@ import subprocess
 import re
 from typing import List
 
+try:
+    from . import validation
+except ImportError:
+    import validation
+
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
@@ -68,6 +73,10 @@ def handle_install(source: str) -> None:
         print_err("Usage: helper.py skill install <source_path|git_url>")
         sys.exit(1)
         
+    if not validation.validate_safe_path(source):
+        print_err(f"Security Alert: Git URL or source path contains dangerous characters: {source}")
+        sys.exit(1)
+        
     os.makedirs(SKILLS_DIR, exist_ok=True)
     
     is_git = source.startswith("http://") or source.startswith("https://") or source.startswith("git@") or source.endswith(".git")
@@ -129,6 +138,10 @@ def handle_create(name: str, desc: str) -> None:
     if not name:
         print_err("Usage: helper.py skill create <skill_name> \"<description>\"")
         sys.exit(1)
+        
+    if not validation.validate_safe_identifier(name):
+        print_err(f"Invalid skill name '{name}'. Only safe characters are allowed.")
+        sys.exit(1)
     
     # Validate name format: lowercase letters, numbers, and hyphens only
     if not re.match(r'^[a-z0-9\-]+$', name):
@@ -182,6 +195,10 @@ Provide detailed instructions, rules, and best practices for the {title} skill h
 def handle_uninstall(name: str) -> None:
     if not name:
         print_err("Usage: helper.py skill uninstall <skill_name>")
+        sys.exit(1)
+        
+    if not validation.validate_safe_identifier(name):
+        print_err(f"Invalid skill name '{name}'. Only safe characters are allowed.")
         sys.exit(1)
         
     dest_p = os.path.join(SKILLS_DIR, name)

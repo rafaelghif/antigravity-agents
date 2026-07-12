@@ -4,6 +4,11 @@ import json
 import subprocess
 import uuid
 import re
+
+try:
+    from . import validation
+except ImportError:
+    import validation
 import hmac
 import hashlib
 from datetime import datetime, timezone
@@ -254,6 +259,13 @@ def run(args):
         msg_action = args[2]
         payload_raw = args[3]
         
+        if not validation.validate_safe_identifier(recipient):
+            print(f"Error: Invalid recipient identifier '{recipient}'.")
+            sys.exit(1)
+        if not validation.validate_safe_identifier(msg_action):
+            print(f"Error: Invalid action identifier '{msg_action}'.")
+            sys.exit(1)
+        
         # Parse payload as JSON if possible, otherwise store as string
         try:
             payload = json.loads(payload_raw)
@@ -358,6 +370,9 @@ def run(args):
             sys.exit(1)
             
         msg_id = args[1]
+        if not validation.validate_safe_identifier(msg_id):
+            print(f"Error: Invalid message ID '{msg_id}'.")
+            sys.exit(1)
         new_status = args[2].lower()
         reply_raw = args[3] if len(args) >= 4 else None
         
@@ -401,6 +416,9 @@ def run(args):
             sys.exit(1)
             
         msg_id = args[1]
+        if not validation.validate_safe_identifier(msg_id):
+            print(f"Error: Invalid message ID '{msg_id}'.")
+            sys.exit(1)
         msg_file = os.path.join(MESSAGES_DIR, f"{msg_id}.json")
         if not os.path.exists(msg_file):
             print(f"Error: Message file '{msg_file}' not found.")

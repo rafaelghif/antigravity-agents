@@ -4,6 +4,11 @@ import json
 import re
 import subprocess
 import tempfile
+
+try:
+    from . import validation
+except ImportError:
+    import validation
 from datetime import datetime
 from typing import List
 
@@ -1082,6 +1087,10 @@ def run_log(args: List[str]) -> None:
 
     if not task_id:
         task_id = get_current_task_id()
+
+    if task_id and not validation.validate_safe_identifier(task_id):
+        print_err(f"Error: Invalid task ID '{task_id}'.")
+        sys.exit(1)
 
     budget = load_budget()
     budget = check_date_resets(budget)
