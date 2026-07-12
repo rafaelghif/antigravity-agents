@@ -1,7 +1,7 @@
 ---
 id: issue-321
 title: "Fix missing core files during installation"
-status: open
+status: closed
 assignee: agent-antigravity
 milestone: "v3.82.x"
 created_at: 2026-07-12
