@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] fix: prevent install from scaffolding directory structures and project files (feat/issue-327) <!-- id: issue-327 -->
 - [x] feat: append instead of overwrite existing gitignore during installation and bootstrap (feat/issue-326) <!-- id: issue-326 -->
 - [x] fix: prevent test pollution of src directory and exclude src from installer (feat/issue-325) <!-- id: issue-325 -->
 - [x] feat: enhance rules to enforce expert senior developer practices and avoid duplicates (feat/issue-324) <!-- id: issue-324 -->

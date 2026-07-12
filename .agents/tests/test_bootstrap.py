@@ -329,6 +329,26 @@ class TestBootstrapCommand(unittest.TestCase):
             self.assertIn(".agents/locks/", content)
             self.assertTrue(content.endswith("\nother-file"))
 
+    def test_bootstrap_no_scaffold(self, mock_input):
+        # Run bootstrap with --no-scaffold flag
+        bootstrap.run(["TestNoScaffold", "python", "clean", "--no-scaffold"])
+        
+        # Verify no src or tests directory was created
+        self.assertFalse(os.path.exists("src"))
+        self.assertFalse(os.path.exists("tests"))
+        
+        # Verify no requirements.txt was created
+        self.assertFalse(os.path.exists("requirements.txt"))
+        
+        # Verify no verify.yml was created
+        self.assertFalse(os.path.exists(".github/workflows/verify.yml"))
+        
+        # Verify no schema.md was created
+        self.assertFalse(os.path.exists(".agents/schema.md"))
+        
+        # Verify core files and configs are still initialized (like .agents/config.json)
+        self.assertTrue(os.path.exists(".agents/config.json"))
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.89.0] - 2026-07-12
+
+### 🚀 Features
+- prevent installer from scaffolding project directory structure
+- fix: prevent install from scaffolding directory structures and project files (ISSUE-327)
+
+
 ## [3.88.0] - 2026-07-12
 
 ### 🚀 Features

@@ -211,7 +211,7 @@ def run(args: List[str]) -> None:
                 
                 # Pass the project name (basename of target dir) and forwarded arguments to bootstrap
                 project_name = os.path.basename(target_abs)
-                bootstrap_args = [project_name] + args[1:]
+                bootstrap_args = [project_name] + args[1:] + ["--no-scaffold"]
                 bootstrap_module.run(bootstrap_args)
                 print_ok("Bootstrap executed successfully.")
             else:
