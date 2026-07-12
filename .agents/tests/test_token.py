@@ -559,7 +559,9 @@ class TestTokenCommand(unittest.TestCase):
         
         result = token_cmd.scan_conversations_for_usage()
         self.assertEqual(result, usage_text)
-        mock_connect.assert_called_with(os.path.expanduser("~/.gemini/antigravity-cli/conversations/conv2.db"))
+        gemini_dir = os.path.expanduser("~/.gemini")
+        expected_path = os.path.join(gemini_dir, "antigravity-cli/conversations", "conv2.db")
+        mock_connect.assert_called_with(expected_path)
 
     @patch('os.path.isdir')
     @patch('os.path.exists')
