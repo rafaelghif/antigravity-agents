@@ -51,7 +51,10 @@ Remove-Item $TempPath
 New-Item -ItemType Directory -Path $TempPath | Out-Null
 
 Write-Host "Fetching latest source core files..."
-& git clone --depth 1 $RepoUrl "$TempPath\repo" 2>$null | Out-Null
+$OriginalEAP = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& git clone --quiet --depth 1 $RepoUrl "$TempPath\repo" 2>$null
+$ErrorActionPreference = $OriginalEAP
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Error: Failed to clone source repository from $RepoUrl."
     Exit 1
