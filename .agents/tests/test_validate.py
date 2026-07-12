@@ -597,15 +597,19 @@ class TestValidate(unittest.TestCase):
     @patch('os.path.exists')
     @patch('builtins.open')
     def test_get_workflow_mode(self, mock_open_file, mock_exists):
-        mock_exists.return_value = True
-        mock_open_file.return_value = io.StringIO('{"workflow_mode": "solo"}')
-        self.assertEqual(validate.get_workflow_mode(), "solo")
+        os.environ["ALLOW_SOLO_IN_TESTS"] = "true"
+        try:
+            mock_exists.return_value = True
+            mock_open_file.return_value = io.StringIO('{"workflow_mode": "solo"}')
+            self.assertEqual(validate.get_workflow_mode(), "solo")
 
-        mock_open_file.return_value = io.StringIO('{"workflow_mode": "team"}')
-        self.assertEqual(validate.get_workflow_mode(), "team")
+            mock_open_file.return_value = io.StringIO('{"workflow_mode": "team"}')
+            self.assertEqual(validate.get_workflow_mode(), "team")
 
-        mock_exists.return_value = False
-        self.assertEqual(validate.get_workflow_mode(), "team")
+            mock_exists.return_value = False
+            self.assertEqual(validate.get_workflow_mode(), "team")
+        finally:
+            del os.environ["ALLOW_SOLO_IN_TESTS"]
 
     @patch('validate.get_workflow_mode')
     @patch('validate.get_current_branch')

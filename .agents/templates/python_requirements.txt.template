@@ -1,3 +1,6 @@
 # Project dependencies
 pytest
 flake8
+cryptography>=42.0.5
+keyring>=24.3.1
+portalocker>=2.8.2

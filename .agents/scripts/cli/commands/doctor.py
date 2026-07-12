@@ -91,8 +91,8 @@ def check_profiles() -> bool:
         return False
         
     try:
-        with open(profiles_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        from . import profile
+        data = profile.load_profiles()
         profiles = data.get("profiles", [])
         if not profiles:
             print_warn("No profiles registered in git_profiles.json.")
