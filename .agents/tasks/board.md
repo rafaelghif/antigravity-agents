@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (feat/329) <!-- id: 329 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -10,6 +11,7 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
+
 ## Done
 - [x] feat: default bootstrap architecture to none to prevent accidental scaffolding (feat/issue-328) <!-- id: issue-328 -->
 - [x] fix: prevent install from scaffolding directory structures and project files (feat/issue-327) <!-- id: issue-327 -->
