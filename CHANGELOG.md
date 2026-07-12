@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.82.2] - 2026-07-12
+
+### 🐛 Bug Fixes
+- fix: suppress git clone stderr NativeCommandError in install.ps1 (ISSUE-320)
+
+### 🧪 Tests
+- fix path compatibility bugs on Windows in unit tests
+
+
 ## [3.82.1] - 2026-07-12
 
 ### 🐛 Bug Fixes
