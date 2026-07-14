@@ -22,8 +22,8 @@ The current rules in `AGENTS.md` and `.agents/rules.md` strictly prohibit retrie
 *Decision*: Proceed with Option 2.
 
 ## Tasks
-- [x] Relax file retrieval and search constraints in [AGENTS.md](file:///home/rafaelghifari/Muraghi/Project/antigravity-agent/AGENTS.md) <!-- id: task-relax-agents -->
-- [x] Relax context efficiency and prompt caching rules in [.agents/rules.md](file:///home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/rules.md) <!-- id: task-relax-rules -->
+- [x] Relax file retrieval and search constraints in [AGENTS.md](file://../../AGENTS.md) <!-- id: task-relax-agents -->
+- [x] Relax context efficiency and prompt caching rules in [.agents/rules.md](file://../rules.md) <!-- id: task-relax-rules -->
 - [x] Run validation suite `./helper.sh validate` to verify overall compliance <!-- id: task-validate -->
 
 ## Acceptance Criteria
