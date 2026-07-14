@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.95.0] - 2026-07-14
+
+### 🚀 Features
+- fix: install cryptography dependency in verify workflow (ISSUE-331)
+
+
+## [3.94.0] - 2026-07-14
+
+### 🚀 Features
+- fix: install cryptography dependency in verify workflow (ISSUE-331)
+
+### 🐛 Bug Fixes
+- install cryptography dependency in verify workflow
+- change absolute local file links to relative in issue_329.md
+- clear git env variables from installer subprocess to prevent sandbox leakage
+- fix unbound project_version variable in target project bootstrap
+
+### 🧪 Tests
+- add debug repo print to bootstrap.py
+- print env in installer test
+- resolve namespace mocks in test_token.py and add installer debug prints
+- align installation and parity tests with isolation rules
+- add TestInstallParity compliance unit test
+
+
 ## [3.93.0] - 2026-07-14
 
 ### 🚀 Features
