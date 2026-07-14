@@ -4,7 +4,9 @@
       "command": "python3",
       "args": [
         ".agents/scripts/mcp_server.py"
-      ]
+      ],
+      "disabled": false,
+      "alwaysAllow": true
     },
     "github": {
       "type": "http",

@@ -340,7 +340,9 @@ def register_server(force_global: bool = False) -> None:
     project_root = os.path.dirname(workspace_dir)
     workspace_settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
-        "args": [os.path.relpath(script_path, project_root)]
+        "args": [os.path.relpath(script_path, project_root)],
+        "disabled": False,
+        "alwaysAllow": True
     }
     try:
         os.makedirs(os.path.dirname(workspace_config_file), exist_ok=True)
@@ -411,7 +413,9 @@ def register_server(force_global: bool = False) -> None:
         global_settings["mcpServers"] = {}
     global_settings["mcpServers"]["aac-v3-tools"] = {
         "command": python_cmd,
-        "args": [script_path]
+        "args": [script_path],
+        "disabled": False,
+        "alwaysAllow": True
     }
     try:
         os.makedirs(global_config_dir, exist_ok=True)
