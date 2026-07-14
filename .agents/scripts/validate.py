@@ -218,6 +218,20 @@ def get_base_branch() -> str:
             pass
     return _base_branch_cache
 
+def check_is_core() -> bool:
+    """Check if the current workspace is the core agent repository itself."""
+    try:
+        scripts_dir = os.path.dirname(os.path.abspath(__file__))
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        import git_api
+        repo = git_api.get_repo_info()
+        if repo and "antigravity-agents" in repo.lower():
+            return True
+    except Exception:
+        pass
+    return False
+
 def parse_antigravity_ignore() -> List[re.Pattern]:
     """Parse .antigravityignore and compile glob patterns to regex patterns."""
     patterns = []
@@ -265,7 +279,8 @@ def validate_json_schema(file_path: str, schema_type: str) -> bool:
         return True # File doesn't exist yet, which is fine for optional configs
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+            lines = [line for line in f if not line.strip().startswith(("#", "//"))]
+            data = json.loads("".join(lines))
     except json.JSONDecodeError as jde:
         print_err(f"JSON Syntax Error in '{file_path}': {jde}")
         return False
@@ -359,7 +374,7 @@ def audit_critical_files() -> bool:
             pass
 
     # Validate version matching in shell/powershell bootstrap files if they exist in root
-    if agents_version:
+    if agents_version and check_is_core():
         env_files = [".agents/scripts/cli/commands/bootstrap.py"]
         for env_file in env_files:
             if os.path.exists(env_file):
@@ -808,6 +823,16 @@ def audit_link_integrity() -> bool:
                         resolved_path = os.path.join(os.path.dirname(f), base_path)
                     
                     if resolved_path and not os.path.exists(resolved_path):
+                        # Skip checks for paths in excluded folders if we are in target repo
+                        is_excluded_folder = False
+                        if not check_is_core():
+                            normalized_resolved = os.path.normpath(resolved_path).replace("\\", "/")
+                            for folder in (".agents/plans", ".agents/issues", ".agents/tests", ".agents/workflows"):
+                                if folder in normalized_resolved:
+                                    is_excluded_folder = True
+                                    break
+                        if is_excluded_folder:
+                            continue
                         print_err(f"Broken link in '{f}': linked file '{resolved_path}' does not exist.")
                         failed = True
                     elif resolved_path and os.path.exists(resolved_path):
@@ -2027,39 +2052,40 @@ def audit_codebase_rules_compliance() -> bool:
     raw_write_pattern = re.compile(r'open\s*\(\s*[^)]*(?:locks\.json|token_budget\.json|LOCK_FILE|BUDGET_FILE)[^)]*,\s*[\'"](?:w|a|r\+)')
     
     # 1. Scan for inline file creation templates in scripts (*.sh, *.ps1)
-    try:
-        res = subprocess.run(['git', 'ls-files'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if res.returncode == 0:
-            tracked_files = [f.strip() for f in res.stdout.splitlines() if f.strip()]
-            for filepath in tracked_files:
-                if filepath.endswith(('.sh', '.ps1')):
-                    if not os.path.exists(filepath):
-                        continue
-                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
-                    # Check for inline file output content using redirection or here-docs
-                    if "cat << 'EOF'" in content or "cat <<EOF" in content:
-                        print_err(f"Script file '{filepath}' violates 'no duplicate/inline templates' rule by writing files inline!")
-                        failed = True
-                        
-                elif filepath.endswith('.py') and "validate.py" not in filepath and "test_" not in filepath:
-                    if not os.path.exists(filepath):
-                        continue
-                    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
-                    # Look for raw writes to locks.json or token_budget.json
-                    if raw_write_pattern.search(content):
-                        # Verify if tempfile is imported or used in the same file to confirm atomic usage
-                        if "NamedTemporaryFile" not in content:
-                            print_err(f"Python script '{filepath}' violates 'atomic file writing' guidelines by using raw open write mode on critical JSON files!")
+    if check_is_core():
+        try:
+            res = subprocess.run(['git', 'ls-files'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode == 0:
+                tracked_files = [f.strip() for f in res.stdout.splitlines() if f.strip()]
+                for filepath in tracked_files:
+                    if filepath.endswith(('.sh', '.ps1')):
+                        if not os.path.exists(filepath):
+                            continue
+                        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+                        # Check for inline file output content using redirection or here-docs
+                        if "cat << 'EOF'" in content or "cat <<EOF" in content:
+                            print_err(f"Script file '{filepath}' violates 'no duplicate/inline templates' rule by writing files inline!")
                             failed = True
+                            
+                    elif filepath.endswith('.py') and "validate.py" not in filepath and "test_" not in filepath:
+                        if not os.path.exists(filepath):
+                            continue
+                        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+                        # Look for raw writes to locks.json or token_budget.json
+                        if raw_write_pattern.search(content):
+                            # Verify if tempfile is imported or used in the same file to confirm atomic usage
+                            if "NamedTemporaryFile" not in content:
+                                print_err(f"Python script '{filepath}' violates 'atomic file writing' guidelines by using raw open write mode on critical JSON files!")
+                                failed = True
 
-                    # 1b. Check if script references global appData/home directories for writing project configurations
-                    if any(term in content for term in [".gemini", "expanduser"]) and "token.py" not in filepath and "mcp_server.py" not in filepath and "doctor.py" not in filepath and "install_global.py" not in filepath and "dashboard.py" not in filepath and "profile.py" not in filepath and "run_benchmarks.py" not in filepath:
-                        if any(write_op in content for write_op in ["open(", "write(", "to_file", "save("]):
-                            print_warn(f"Warning: Script '{filepath}' references global system directories or home folder. Ensure it does not leak project-specific data to global scope.")
-    except Exception as e:
-        print_warn(f"Failed to scan codebase rule compliance: {e}")
+                        # 1b. Check if script references global appData/home directories for writing project configurations
+                        if any(term in content for term in [".gemini", "expanduser"]) and "token.py" not in filepath and "mcp_server.py" not in filepath and "doctor.py" not in filepath and "install_global.py" not in filepath and "dashboard.py" not in filepath and "profile.py" not in filepath and "run_benchmarks.py" not in filepath:
+                            if any(write_op in content for write_op in ["open(", "write(", "to_file", "save("]):
+                                print_warn(f"Warning: Script '{filepath}' references global system directories or home folder. Ensure it does not leak project-specific data to global scope.")
+        except Exception as e:
+            print_warn(f"Failed to scan codebase rule compliance: {e}")
 
     # 1c. Check for database/schema modifications without updating .agents/schema.md
     try:

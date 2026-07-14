@@ -681,6 +681,17 @@ def run(args):
                 template = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', template)
                 template = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', template)
                 template = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', template)
+                if not is_core:
+                    template = re.sub(
+                        r'-\s+\*\*Repo layout:\*\*.*',
+                        f'- **Repo layout:** Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.',
+                        template
+                    )
+                    template = re.sub(
+                        r'.*When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files.*?\n',
+                        '',
+                        template
+                    )
                 with open(agents_file, 'w', encoding='utf-8') as f:
                     f.write(template)
                 print(f"Created AGENTS.md from source repository template (version: {project_version}).")
@@ -703,6 +714,17 @@ def run(args):
 
         content = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', content)
         content = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', content)
+        if not is_core:
+            content = re.sub(
+                r'-\s+\*\*Repo layout:\*\*.*',
+                f'- **Repo layout:** Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.',
+                content
+            )
+            content = re.sub(
+                r'.*When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files.*?\n',
+                '',
+                content
+            )
         
         if existing_version_match and not is_core and not is_template_agents_md:
             # Keep existing version (only for target/managed projects)
@@ -739,6 +761,12 @@ def run(args):
             rules_content = rules_content.replace("{{NAME}}", name)
             rules_content = rules_content.replace("{{STACK}}", stack.capitalize())
             rules_content = rules_content.replace("{{TEST_CMD}}", test_cmd)
+            if not is_core:
+                rules_content = re.sub(
+                    r'.*Template & Wrapper Parity.*?\n',
+                    '',
+                    rules_content
+                )
             with open(rules_file, 'w', encoding='utf-8') as f:
                 f.write(rules_content)
             print("Generated '.agents/rules.md' from template.")
@@ -747,6 +775,12 @@ def run(args):
             rules_content = f.read()
         rules_content = re.sub(r'Use \*\*.*?\*\* for the main product stack\.', f'Use **{stack.capitalize()}** for the main product stack.', rules_content)
         rules_content = re.sub(r'test command is: `.*?`\.', f'test command is: `{test_cmd}`.', rules_content)
+        if not is_core:
+            rules_content = re.sub(
+                r'.*Template & Wrapper Parity.*?\n',
+                '',
+                rules_content
+            )
         with open(rules_file, 'w', encoding='utf-8') as f:
             f.write(rules_content)
         print("Updated '.agents/rules.md' style and test command configuration.")

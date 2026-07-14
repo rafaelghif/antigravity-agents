@@ -12,18 +12,27 @@ created_at: 2026-07-12
 fix: harden core and verify installation manifest
 
 ## Tasks
-- [ ] Task 1
+- [ ] Exclude wrapper/installer/dev files (`bootstrap.sh`, `bootstrap.ps1`, `install.sh`, `install.ps1`, `requirements.txt`, `pyproject.toml`, `.github` folder) from copying in `install.py`.
+- [ ] Customize target project `AGENTS.md` and `.agents/rules.md` in `bootstrap.py` when `is_core` is False.
+- [ ] Disable core-only validation checks (bootstrap.py version check, here-doc script audit, locks/budget raw write audit) in `validate.py` when `is_core` is False.
 
 ## Acceptance Criteria
-- [ ] Criteria 1
+- [ ] Installation to target project does not copy `bootstrap.sh/ps1`, `install.sh/ps1`, `requirements.txt`, `pyproject.toml`, or `.github`.
+- [ ] Target project `AGENTS.md` has generic repo layout and no installer/bootstrap sync rule.
+- [ ] Target project `.agents/rules.md` has no template/wrapper parity rule.
+- [ ] Validation guard checks for target projects bypass core-specific version and compliance checks.
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
-  - [ ] None <!-- id: audit-target-files -->
+  - [x] `.agents/scripts/cli/commands/install.py` <!-- id: audit-install-py -->
+  - [x] `.agents/scripts/cli/commands/bootstrap.py` <!-- id: audit-bootstrap-py -->
+  - [x] `.agents/scripts/validate.py` <!-- id: audit-validate-py -->
 - Active module locks:
-  - [ ] None <!-- id: audit-module-locks -->
+  - [x] `.agents/scripts/cli/commands/install.py` <!-- id: lock-install -->
+  - [x] `.agents/scripts/cli/commands/bootstrap.py` <!-- id: lock-bootstrap -->
+  - [x] `.agents/scripts/validate.py` <!-- id: lock-validate -->
 - Non-negotiable rules checked:
-  - [ ] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
-  - [ ] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
+  - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
+  - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
 - Schema compliance check:
-  - [ ] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->
+  - [x] Conformity with .agents/schema.md verified <!-- id: audit-schema-conformity -->

@@ -21,7 +21,7 @@ def should_exclude(rel_path: str) -> bool:
     parts = normalized_path.split(os.sep)
     
     # Exclude basic development directories
-    if any(p in ("__pycache__", ".git") for p in parts):
+    if any(p in ("__pycache__", ".git", ".github") for p in parts):
         return True
         
     # Exclude src directory to protect existing project code
@@ -54,7 +54,13 @@ def should_exclude(rel_path: str) -> bool:
         ".gitignore",
         ".antigravityignore",
         "Dockerfile",
-        "README.md"
+        "README.md",
+        "bootstrap.sh",
+        "bootstrap.ps1",
+        "install.sh",
+        "install.ps1",
+        "requirements.txt",
+        "pyproject.toml"
     }
     
     if filename in excluded_filenames:

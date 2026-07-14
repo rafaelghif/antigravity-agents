@@ -1,6 +1,6 @@
-# Note: Secrets (git_pat, gpg_private_key) are encrypted at rest using a master key.
-# Alternatively, you can use environment variables like AAC_GITHUB_TOKEN_<PROFILENAME> (in uppercase, replacing hyphens with underscores) or GITHUB_TOKEN/GIT_PAT.
 {
+  "_note1": "Secrets (git_pat, gpg_private_key) are encrypted at rest using a master key.",
+  "_note2": "Alternatively, you can use environment variables like AAC_GITHUB_TOKEN_<PROFILENAME> (in uppercase, replacing hyphens with underscores) or GITHUB_TOKEN/GIT_PAT.",
   "profiles": [
     {
       "name": "corporate-work",
