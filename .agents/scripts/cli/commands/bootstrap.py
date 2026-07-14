@@ -623,13 +623,14 @@ def run(args):
     # 4.5. Generate .agents/mcp_config.json if not exists
     mcp_config_path = os.path.join(".", ".agents", "mcp_config.json")
     if not os.path.exists(mcp_config_path):
-        src_mcp_config = os.path.join(src_root, ".agents", "mcp_config.json")
-        if os.path.exists(src_mcp_config):
+        mcp_config_content = read_template(src_root, "mcp_config.json.template", None)
+        if mcp_config_content:
             try:
-                shutil.copy2(src_mcp_config, mcp_config_path)
-                print("Generated '.agents/mcp_config.json' from core config.")
+                with open(mcp_config_path, 'w', encoding='utf-8') as f:
+                    f.write(mcp_config_content)
+                print("Generated '.agents/mcp_config.json' from core config template.")
             except Exception as e:
-                print(f"Warning: Failed to copy mcp_config.json: {e}")
+                print(f"Warning: Failed to generate mcp_config.json: {e}")
 
     # 4.6. Generate .agents/config.json if not exists
     config_path = os.path.join(".", ".agents", "config.json")

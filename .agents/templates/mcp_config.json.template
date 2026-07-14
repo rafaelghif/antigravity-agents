@@ -1,0 +1,56 @@
+{
+  "mcpServers": {
+    "aac-v3-tools": {
+      "command": "python3",
+      "args": [
+        ".agents/scripts/mcp_server.py"
+      ],
+      "disabled": false,
+      "alwaysAllow": true
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:github_mcp_pat}"
+      }
+    },
+    "gitea": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITEA_ACCESS_TOKEN",
+        "-e",
+        "GITEA_HOST",
+        "docker.gitea.com/gitea-mcp-server"
+      ],
+      "env": {
+        "GITEA_ACCESS_TOKEN": "${input:gitea_token}",
+        "GITEA_HOST": "${input:gitea_host}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github_mcp_pat",
+      "description": "GitHub Personal Access Token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "gitea_token",
+      "description": "Gitea Personal Access Token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "gitea_host",
+      "description": "Gitea Host URL (e.g. https://gitea.com or local Gitea domain)",
+      "password": false
+    }
+  ]
+}
