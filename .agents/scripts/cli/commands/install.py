@@ -127,7 +127,6 @@ def run(args: List[str]) -> None:
     # 5. Copy files recursively with exclusions
     print("Copying core files recursively...")
     copy_if_missing_filenames = {
-        "rules.md",
         "schema.md",
         "AGENTS.md",
         ".gitignore",

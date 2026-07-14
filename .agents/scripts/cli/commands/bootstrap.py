@@ -732,6 +732,8 @@ def run(args):
                 rules_content = rules_content.replace("{{NAME}}", name)\
                                              .replace("{{STACK}}", stack.capitalize())\
                                              .replace("{{TEST_CMD}}", test_cmd)
+                if not is_core:
+                    rules_content = re.sub(r'-\s+\*\*Template & Wrapper Parity\*\*.*?(?:\r?\n|$)', '', rules_content)
                 with open(rules_file, 'w', encoding='utf-8') as f:
                     f.write(rules_content)
                 print("Generated '.agents/rules.md' from template.")
