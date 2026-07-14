@@ -10,9 +10,9 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] fix: install cryptography dependency in verify workflow (feat/issue-331) <!-- id: issue-331 -->
 - [ ] fix: harden core and verify installation manifest (fix/harden-core) <!-- id: 330 -->
 ## Done
+- [x] fix: install cryptography dependency in verify workflow (feat/issue-331) <!-- id: issue-331 -->
 - [x] feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (feat/329) <!-- id: 329 -->
 - [x] feat: default bootstrap architecture to none to prevent accidental scaffolding (feat/issue-328) <!-- id: issue-328 -->
 - [x] fix: prevent install from scaffolding directory structures and project files (feat/issue-327) <!-- id: issue-327 -->

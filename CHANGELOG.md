@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.95.0] - 2026-07-14
+
+### 🚀 Features
+- fix: install cryptography dependency in verify workflow (ISSUE-331)
+
+
 ## [3.94.0] - 2026-07-14
 
 ### 🚀 Features

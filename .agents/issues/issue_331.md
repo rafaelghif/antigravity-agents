@@ -1,7 +1,7 @@
 ---
 id: issue-331
 title: "fix: install cryptography dependency in verify workflow"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-14
 ---
