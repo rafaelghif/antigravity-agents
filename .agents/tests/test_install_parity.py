@@ -14,11 +14,11 @@ class TestInstallParity(unittest.TestCase):
         os.makedirs(temp_target, exist_ok=True)
 
         try:
-            # 1. Run installer using the local source repository
+            # 1. Run installer using the local source repository helper.py directly
+            import sys
             env = os.environ.copy()
-            env["AAC_SOURCE_REPO"] = core_dir
             res = subprocess.run(
-                ["bash", os.path.join(core_dir, "install.sh"), temp_target],
+                [sys.executable, os.path.join(core_dir, ".agents/scripts/cli/helper.py"), "install", temp_target],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,

@@ -141,9 +141,9 @@ class TestInstallCommand(unittest.TestCase):
             if args:
                 copied_files.append(os.path.basename(args[0]))
                 
-        # AGENTS.md and rules.md are critical and missing, they should be copied
+        # AGENTS.md is critical and missing, it should be copied (rules.md is excluded and generated via bootstrap)
         self.assertIn('AGENTS.md', copied_files)
-        self.assertIn('rules.md', copied_files)
+        self.assertNotIn('rules.md', copied_files)
         self.assertIn('milestones.md', copied_files)
         self.assertIn('security-policy.md', copied_files)
         # some_other_file.py is not excluded, it should be copied
