@@ -10,11 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli/commands')))
 
-# Dynamically load the custom token command module to avoid built-in token module namespace conflict
-cmd_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli/commands/token.py'))
-spec = importlib.util.spec_from_file_location("custom_token_cmd", cmd_file)
-token_cmd = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(token_cmd)
+import cli.commands.token as token_cmd
 
 def raise_system_exit(code=0):
     raise SystemExit(code)
@@ -452,15 +448,13 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(parsed_md_json["daily_used"], 20000)
         self.assertTrue(parsed_md_json["is_json_format"])
 
-
-
-
     @patch('subprocess.run')
-    @patch.object(token_cmd, 'load_budget')
-    @patch.object(token_cmd, 'save_budget')
-    @patch.object(token_cmd, 'get_rolling_window_stats')
-    @patch.object(token_cmd, 'scan_conversations_for_usage', return_value=None)
+    @patch('cli.commands.services.token_service.load_budget')
+    @patch('cli.commands.services.token_service.save_budget')
+    @patch('cli.commands.services.token_service.get_rolling_window_stats')
+    @patch('cli.commands.services.token_service.scan_conversations_for_usage')
     def test_sync_from_platform_usage(self, mock_scan, mock_rolling, mock_save, mock_load, mock_run):
+        mock_scan.return_value = None
         mock_load.return_value = {
             "daily_limit": 500000,
             "daily_used": 0,
@@ -493,10 +487,10 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(saved_budget["five_hour_limit"], 99058)
 
     @patch('subprocess.run')
-    @patch.object(token_cmd, 'load_budget')
-    @patch.object(token_cmd, 'save_budget')
-    @patch.object(token_cmd, 'get_rolling_window_stats')
-    @patch.object(token_cmd, 'scan_conversations_for_usage')
+    @patch('cli.commands.services.token_service.load_budget')
+    @patch('cli.commands.services.token_service.save_budget')
+    @patch('cli.commands.services.token_service.get_rolling_window_stats')
+    @patch('cli.commands.services.token_service.scan_conversations_for_usage')
     def test_sync_from_platform_usage_db(self, mock_scan, mock_rolling, mock_save, mock_load, mock_run):
         mock_load.return_value = {
             "daily_limit": 500000,

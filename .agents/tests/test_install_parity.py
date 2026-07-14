@@ -24,6 +24,7 @@ class TestInstallParity(unittest.TestCase):
                 text=True,
                 env=env
             )
+            print(f"DEBUG INSTALL STDOUT:\n{res.stdout}\nDEBUG INSTALL STDERR:\n{res.stderr}")
             self.assertEqual(res.returncode, 0, f"Installation failed: {res.stderr}")
 
             # 2. Check exclusions
