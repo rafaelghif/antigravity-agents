@@ -658,11 +658,9 @@ def run(args):
             sys.path.insert(0, scripts_dir)
         import git_api
         repo = git_api.get_repo_info()
-        print(f"DEBUG BOOTSTRAP REPO: {repo}")
         if repo and "antigravity-agents" in repo.lower():
             is_core = True
-    except Exception as e:
-        print(f"DEBUG BOOTSTRAP REPO EXCEPTION: {e}")
+    except Exception:
         pass
 
     # Core repository check is based strictly on the git repository remote/name

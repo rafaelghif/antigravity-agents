@@ -17,7 +17,8 @@ class TestInstallParity(unittest.TestCase):
             # 1. Run installer using the local source repository helper.py directly
             import sys
             env = os.environ.copy()
-            print(f"DEBUG INSTALL ENV: {env}")
+            for key in ["GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY"]:
+                env.pop(key, None)
             res = subprocess.run(
                 [sys.executable, os.path.join(core_dir, ".agents/scripts/cli/helper.py"), "install", temp_target],
                 stdout=subprocess.PIPE,
@@ -25,7 +26,6 @@ class TestInstallParity(unittest.TestCase):
                 text=True,
                 env=env
             )
-            print(f"DEBUG INSTALL STDOUT:\n{res.stdout}\nDEBUG INSTALL STDERR:\n{res.stderr}")
             self.assertEqual(res.returncode, 0, f"Installation failed: {res.stderr}")
 
             # 2. Check exclusions
