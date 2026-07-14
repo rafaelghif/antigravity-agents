@@ -5,7 +5,7 @@
 ## 1. What this project is
 - **Product:** test-proj
 - **Version:** 3.93.0
-- **Stack:** Docker
+- **Stack:** Python 3, Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
 ## 2. Non-negotiable rules

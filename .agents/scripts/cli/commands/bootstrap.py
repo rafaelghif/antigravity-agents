@@ -687,6 +687,8 @@ def run(args):
                 print(f"Warning: Failed to update core AGENTS.md: {e}")
     else:
         # For target/managed projects: use template
+        detected_ver = detect_project_version(".")
+        project_version = detected_ver if detected_ver else "0.1.0"
         if os.path.exists(agents_file):
             try:
                 with open(agents_file, 'r', encoding='utf-8') as f:

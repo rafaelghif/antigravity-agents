@@ -1,3 +1,11 @@
 {
-  "projects": []
+  "projects": [
+    {
+      "name": "main-project",
+      "path": ".",
+      "stack": "python",
+      "test_command": "python -m unittest",
+      "description": "Auto-detected Python 3, Docker project."
+    }
+  ]
 }
