@@ -17,6 +17,7 @@ class TestInstallParity(unittest.TestCase):
             # 1. Run installer using the local source repository helper.py directly
             import sys
             env = os.environ.copy()
+            print(f"DEBUG INSTALL ENV: {env}")
             res = subprocess.run(
                 [sys.executable, os.path.join(core_dir, ".agents/scripts/cli/helper.py"), "install", temp_target],
                 stdout=subprocess.PIPE,
