@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.93.0] - 2026-07-14
+
+### 🚀 Features
+- implement advisory file locking for concurrency safety
+- encrypt sensitive fields in developer profiles
+
+### 🐛 Bug Fixes
+- synchronize config template format with installed MCP server schema
+- isolate target workspace and customize rule templates to prevent self-repair leaks
+- sanitize shell inputs in CLI commands
+
+
 ## [3.92.0] - 2026-07-12
 
 ### 🚀 Features
