@@ -110,7 +110,7 @@ Problem status: open
             self.assertIn("Problem status: open", written_data)
 
     @patch('git_api.fetch_github_issues', return_value=None)
-    @patch('commands.issue.sync_board_with_issues')
+    @patch('commands.services.issue_service.sync_board_with_issues')
     def test_sync_issues_offline_mode(self, mock_sync_board, mock_fetch):
         # When remote_issues is None, it should skip execution cleanly
         issue.sync_issues()

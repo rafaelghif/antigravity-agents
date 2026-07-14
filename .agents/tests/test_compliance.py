@@ -8,29 +8,26 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts/cli')))
 import validate
-import commands.lock as lock
+import commands.services.lock_service as lock_service
 
 class TestCompliance(unittest.TestCase):
 
     @patch('subprocess.run')
     def test_get_existing_branches(self, mock_run):
-        # Multiple branches returned
         mock_run.return_value = MagicMock(
             returncode=0,
             stdout="sha1 refs/heads/feat/issue-023\nsha2 refs/heads/main\n"
         )
-        self.assertEqual(lock.get_existing_branches(), {"feat/issue-023", "main"})
+        self.assertEqual(lock_service.get_existing_branches(), {"feat/issue-023", "main"})
 
-        # Git fails (non-zero code)
         mock_run.return_value = MagicMock(returncode=1)
-        self.assertEqual(lock.get_existing_branches(), set())
+        self.assertEqual(lock_service.get_existing_branches(), set())
 
-    @patch('commands.lock.get_existing_branches')
+    @patch('commands.services.lock_service.get_existing_branches')
     def test_prune_stale_locks(self, mock_get_branches):
-        # Setup: lock module 'm1' by b1 (exists) and 'm2' by b2 (stale)
         mock_get_branches.return_value = {"b1"}
         locks = {"m1": "b1", "m2": "b2"}
-        pruned = lock.prune_stale_locks(locks)
+        pruned = lock_service.prune_stale_locks(locks)
         self.assertIn("m1", pruned)
         self.assertNotIn("m2", pruned)
 

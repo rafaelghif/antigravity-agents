@@ -11,7 +11,6 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 - [ ] fix: harden core and verify installation manifest (fix/harden-core) <!-- id: 330 -->
-
 ## Done
 - [x] feat: relax codebase search and file retrieval redundancy constraints to allow deeper analysis (feat/329) <!-- id: 329 -->
 - [x] feat: default bootstrap architecture to none to prevent accidental scaffolding (feat/issue-328) <!-- id: issue-328 -->
