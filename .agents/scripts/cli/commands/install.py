@@ -24,6 +24,10 @@ def should_exclude(rel_path: str) -> bool:
     if any(p in ("__pycache__", ".git", ".github") for p in parts):
         return True
         
+    # Exclude git repository directory
+    if ".git" in parts:
+        return True
+        
     # Exclude src directory to protect existing project code
     if len(parts) > 0 and parts[0] == "src":
         return True
