@@ -668,80 +668,49 @@ def run(args):
 
     if is_core:
         project_version = AAC_VERSION
-    else:
-        detected_ver = detect_project_version(".")
-        project_version = detected_ver if detected_ver else "0.1.0"
-    
-    if not os.path.exists(agents_file):
-        if os.path.exists(src_agents):
+        if not os.path.exists(agents_file):
+            if os.path.exists(src_agents):
+                try:
+                    shutil.copy2(src_agents, agents_file)
+                    print(f"Created core AGENTS.md (version: {project_version}).")
+                except Exception as e:
+                    print(f"Warning: Could not copy AGENTS.md: {e}")
+        else:
             try:
-                with open(src_agents, 'r', encoding='utf-8') as f:
-                    template = f.read()
-                # Personalize template
-                template = re.sub(r'# AGENTS.md — .*', f'# AGENTS.md — {name}', template)
-                template = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', template)
-                template = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', template)
-                template = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', template)
-                if not is_core:
-                    template = re.sub(
-                        r'-\s+\*\*Repo layout:\*\*.*',
-                        f'- **Repo layout:** Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.',
-                        template
-                    )
-                    template = re.sub(
-                        r'.*When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files.*?\n',
-                        '',
-                        template
-                    )
-                with open(agents_file, 'w', encoding='utf-8') as f:
-                    f.write(template)
-                print(f"Created AGENTS.md from source repository template (version: {project_version}).")
-            except Exception as e:
-                print(f"Warning: Could not create AGENTS.md from source template: {e}")
-        else:
-            # Fallback to minimal header if source doesn't exist
-            fallback = f"# AGENTS.md — {name}\n\n- **Product:** {name}\n- **Version:** {project_version}\n- **Stack:** {stack.capitalize()} ({arch.upper()})\n"
-            with open(agents_file, 'w', encoding='utf-8') as f:
-                f.write(fallback)
-            print(f"Created fallback minimal AGENTS.md (version: {project_version}).")
-    else:
-        with open(agents_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        # Read existing product and version parameters BEFORE modifying content
-        existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
-        existing_product_match = re.search(r'-\s+\*\*Product:\*\*\s*(\S+)', content)
-        is_template_agents_md = (existing_product_match and existing_product_match.group(1) == "test-proj")
-
-        content = re.sub(r'-\s+\*\*Stack:\*\*.*', f'- **Stack:** {stack.capitalize()} ({arch.upper()})', content)
-        content = re.sub(r'-\s+\*\*Product:\*\*.*', f'- **Product:** {name}', content)
-        if not is_core:
-            content = re.sub(
-                r'-\s+\*\*Repo layout:\*\*.*',
-                f'- **Repo layout:** Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.',
-                content
-            )
-            content = re.sub(
-                r'.*When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files.*?\n',
-                '',
-                content
-            )
-        
-        if existing_version_match and not is_core and not is_template_agents_md:
-            # Keep existing version (only for target/managed projects)
-            print(f"Preserving existing version in AGENTS.md: {existing_version_match.group(1)}")
-            project_version = existing_version_match.group(1)
-        else:
-            if re.search(r'-\s+\*\*Version:\*\*.*', content):
+                with open(agents_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
                 content = re.sub(r'-\s+\*\*Version:\*\*.*', f'- **Version:** {project_version}', content)
-            else:
-                # Insert after the Product line
-                content = re.sub(r'(-\s+\*\*Product:\*\*.*)', r'\1\n- **Version:** ' + project_version, content)
-            print(f"Set project version in AGENTS.md: {project_version}")
-            
-        with open(agents_file, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print("Updated AGENTS.md with new stack and product.")
+                with open(agents_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                print(f"Updated core AGENTS.md version to {project_version}.")
+            except Exception as e:
+                print(f"Warning: Failed to update core AGENTS.md: {e}")
+    else:
+        # For target/managed projects: use template
+        if os.path.exists(agents_file):
+            try:
+                with open(agents_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                existing_version_match = re.search(r'-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)', content)
+                if existing_version_match:
+                    project_version = existing_version_match.group(1)
+                    print(f"Preserving existing version in AGENTS.md: {project_version}")
+            except Exception:
+                pass
+
+        agents_content = read_template(src_root, "AGENTS.md.template", None)
+        if agents_content:
+            try:
+                agents_content = agents_content.replace("{{NAME}}", name)\
+                                               .replace("{{PRODUCT}}", name)\
+                                               .replace("{{STACK}}", f"{stack.capitalize()} ({arch.upper()})")\
+                                               .replace("{{VERSION}}", project_version)\
+                                               .replace("{{LAYOUT}}", f"Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.")
+                with open(agents_file, 'w', encoding='utf-8') as f:
+                    f.write(agents_content)
+                print(f"Generated target AGENTS.md from template (version: {project_version}).")
+            except Exception as e:
+                print(f"Warning: Failed to generate AGENTS.md from template: {e}")
 
     # 6. Update or Create .agents/rules.md
     rules_file = ".agents/rules.md"
@@ -759,32 +728,17 @@ def run(args):
     if not os.path.exists(rules_file) or force_update:
         rules_content = read_template(src_root, "rules.md.template")
         if rules_content:
-            rules_content = rules_content.replace("{{NAME}}", name)
-            rules_content = rules_content.replace("{{STACK}}", stack.capitalize())
-            rules_content = rules_content.replace("{{TEST_CMD}}", test_cmd)
-            if not is_core:
-                rules_content = re.sub(
-                    r'.*Template & Wrapper Parity.*?\n',
-                    '',
-                    rules_content
-                )
-            with open(rules_file, 'w', encoding='utf-8') as f:
-                f.write(rules_content)
-            print("Generated '.agents/rules.md' from template.")
+            try:
+                rules_content = rules_content.replace("{{NAME}}", name)\
+                                             .replace("{{STACK}}", stack.capitalize())\
+                                             .replace("{{TEST_CMD}}", test_cmd)
+                with open(rules_file, 'w', encoding='utf-8') as f:
+                    f.write(rules_content)
+                print("Generated '.agents/rules.md' from template.")
+            except Exception as e:
+                print(f"Warning: Failed to generate rules.md from template: {e}")
     else:
-        with open(rules_file, 'r', encoding='utf-8') as f:
-            rules_content = f.read()
-        rules_content = re.sub(r'Use \*\*.*?\*\* for the main product stack\.', f'Use **{stack.capitalize()}** for the main product stack.', rules_content)
-        rules_content = re.sub(r'test command is: `.*?`\.', f'test command is: `{test_cmd}`.', rules_content)
-        if not is_core:
-            rules_content = re.sub(
-                r'.*Template & Wrapper Parity.*?\n',
-                '',
-                rules_content
-            )
-        with open(rules_file, 'w', encoding='utf-8') as f:
-            f.write(rules_content)
-        print("Updated '.agents/rules.md' style and test command configuration.")
+        print("Preserved existing '.agents/rules.md' project rules.")
 
     # 7. Initialize Task Board
     board_file = ".agents/tasks/board.md"

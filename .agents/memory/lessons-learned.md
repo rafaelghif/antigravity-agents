@@ -3,6 +3,7 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-14]** **bootstrap**: Established AGENTS.md.template and replaced brittle regex code replacements in bootstrap.py with static template placeholder substitution to ensure cleaner, maintainable, and reliable workspace generation.
 - **[2026-07-14]** **mcp**: Created mcp_config.json.template and mapped it in template_map.md to enforce parity verification and prevent MCP configuration drift during project bootsrapping.
 - **[2026-07-14]** **mcp**: Synchronized target workspace and global registration formats for MCP servers (adding disabled and alwaysAllow fields) to maintain schema alignment.
 - **[2026-07-14]** **installation**: Isolated target installations by excluding wrapper scripts (bootstrap/install) and customized AGENTS.md rules in target projects to avoid agent self-repair leaks.
