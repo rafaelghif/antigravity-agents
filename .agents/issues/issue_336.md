@@ -1,7 +1,7 @@
 ---
 id: 336
 title: "feat: remove github copilot mcp reference and configs"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---

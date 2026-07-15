@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: remove github copilot mcp reference and configs (feat/336) <!-- id: 336 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] feat: remove github copilot mcp reference and configs (feat/336) <!-- id: 336 -->
 - [x] feat: enable local github mcp by default and document local gitea host (feat/335) <!-- id: 335 -->
 - [x] docs: reference official antigravity mcp docs in skill playbooks (feat/334) <!-- id: 334 -->
 - [x] feat: adjust mcp config templates and create github/gitea mcp skills (feat/333) <!-- id: 333 -->

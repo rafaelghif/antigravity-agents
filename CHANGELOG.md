@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.99.0] - 2026-07-15
+
+### 🚀 Features
+- remove github copilot mcp reference and config
+
+
 ## [3.98.0] - 2026-07-15
 
 ### 🚀 Features
