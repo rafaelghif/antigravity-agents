@@ -1,7 +1,7 @@
 ---
 id: 330
 title: "fix: harden core and verify installation manifest"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-12
 ---

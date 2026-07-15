@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.95.1] - 2026-07-15
+
+### 🐛 Bug Fixes
+- fix git_api imports in sync and customize target project rules
+
+
 ## [3.95.0] - 2026-07-14
 
 ### 🚀 Features

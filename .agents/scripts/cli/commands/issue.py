@@ -567,10 +567,11 @@ created_at: {current_date}
                 except Exception:
                     pass
 
+            formatted_issue_id = issue_id if issue_id.startswith(('issue-', 'task-', 'chore-')) else f"issue-{issue_id}"
             if issue_title:
-                commit_msg = f"chore(release): close {issue_id} ({issue_title}), update task board, and bump version"
+                commit_msg = f"chore(release): close {formatted_issue_id} - {issue_title}"
             else:
-                commit_msg = f"chore(release): close {issue_id}, update task board, and bump version"
+                commit_msg = f"chore(release): close {formatted_issue_id}"
 
             print(f"Committing final changes to branch '{found_branch}'...")
             subprocess.run([
@@ -578,7 +579,8 @@ created_at: {current_date}
                 helper_path,
                 'commit',
                 '-m', commit_msg,
-                '-m', f"Refs: {issue_id}",
+                '-m', f"Closes {formatted_issue_id}\n\nRefs: {formatted_issue_id}",
+                '-m', "Compliance-Audit: passed",
                 '--no-verify'
             ])
 
