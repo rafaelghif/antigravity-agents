@@ -36,7 +36,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | On match |
 | `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | On match |
 | `.agents/skills/gitea-mcp/SKILL.md` | Playbook for configuring and executing Gitea Model Context Protocol (MCP) server commands, supporting repository, branch, release, tag, issue, and wiki management. | On match |
-| `.agents/skills/github-mcp/SKILL.md` | Playbook for setting up and managing the GitHub Model Context Protocol (MCP) server, supporting both local containerized transport and remote Copilot endpoint configurations. | On match |
+| `.agents/skills/github-mcp/SKILL.md` | Playbook for setting up and managing the local GitHub Model Context Protocol (MCP) server for repository, issue, and pull request integration. | On match |
 | `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | On match |
 | `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | On match |
 | `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
