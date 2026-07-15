@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.97.0] - 2026-07-15
+
+### 🚀 Features
+- support local/remote github mcp config and add mcp playbooks
+
+
 ## [3.96.0] - 2026-07-15
 
 ### 🚀 Features
