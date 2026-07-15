@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.101.0] - 2026-07-15
+
+### 🚀 Features
+- enforce strict database schema non-negotiables in agents.md
+
+
 ## [3.100.0] - 2026-07-15
 
 ### 🚀 Features
