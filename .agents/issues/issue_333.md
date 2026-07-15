@@ -1,7 +1,7 @@
 ---
 id: 333
 title: "feat: adjust mcp config templates and create github/gitea mcp skills"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
