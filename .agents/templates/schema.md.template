@@ -1,8 +1,11 @@
-# Project Architecture Blueprint: test-proj
+# Project Architecture Blueprint: {{NAME}}
 
 ## 1. Stack Details
-- **Language/Platform**: Python
-- **Pattern**: CLEAN Architecture
+- **Language/Platform**: {{STACK}}
+- **Pattern**: {{ARCH}} Architecture
+- **Framework/Library**: {{FRAMEWORK}}
+- **Database**: {{DATABASE}}
+- **Infrastructure**: {{INFRASTRUCTURE}}
 
 ## 2. Directory Layout
 - `src/`: Core codebase.
