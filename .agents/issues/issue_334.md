@@ -1,7 +1,7 @@
 ---
 id: 334
 title: "docs: reference official antigravity mcp docs in skill playbooks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
