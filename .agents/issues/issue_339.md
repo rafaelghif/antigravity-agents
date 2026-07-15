@@ -1,7 +1,7 @@
 ---
 id: 339
 title: "fix: restore dynamic placeholders in schema template to fix bootstrap test"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
