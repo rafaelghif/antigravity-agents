@@ -1,11 +1,11 @@
 ---
 name: github-mcp
-description: Playbook for setting up and managing the GitHub Model Context Protocol (MCP) server, supporting both local containerized transport and remote Copilot endpoint configurations.
+description: Playbook for setting up and managing the local GitHub Model Context Protocol (MCP) server for repository, issue, and pull request integration.
 ---
 
 # GitHub MCP Skill Playbook
 
-This playbook provides standard guidelines, configuration references, and operational commands for integrating the official GitHub MCP Server within client environments.
+This playbook provides standard guidelines, configuration references, and operational commands for integrating the official local containerized GitHub MCP Server.
 
 ## 1. Core Principles
 * **Authentication priority**: Environment variables (such as GITHUB_PERSONAL_ACCESS_TOKEN) take precedence over dynamic OAuth browser sessions.
@@ -14,8 +14,9 @@ This playbook provides standard guidelines, configuration references, and operat
 
 ## 2. Configuration & Commands Reference
 
-### Option A: Local Containerized Server (Docker-based) [Default & Recommended]
+### Local Containerized Server (Docker-based)
 Connects directly to the GitHub platform API (`api.github.com`) to manage repositories, issues, pull requests, and projects.
+
 Run the local MCP server inside a Docker container:
 ```bash
 docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN=<YOUR_GITHUB_TOKEN> ghcr.io/github/github-mcp-server
@@ -36,20 +37,6 @@ IDE configuration for the local container:
     ],
     "env": {
       "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_TOKEN>"
-    }
-  }
-}
-```
-
-### Option B: Remote GitHub Copilot Endpoint (Disabled by default)
-Connects to the remote Copilot HTTP backend:
-```json
-{
-  "github-copilot": {
-    "type": "http",
-    "url": "https://api.githubcopilot.com/mcp/",
-    "headers": {
-      "Authorization": "Bearer <YOUR_GITHUB_TOKEN>"
     }
   }
 }

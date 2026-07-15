@@ -23,14 +23,6 @@
       },
       "disabled": false
     },
-    "github-copilot": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${input:github_mcp_pat}"
-      },
-      "disabled": true
-    },
     "gitea": {
       "command": "docker",
       "args": [
