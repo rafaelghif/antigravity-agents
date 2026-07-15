@@ -1,7 +1,7 @@
 ---
 id: 335
 title: "feat: enable local github mcp by default and document local gitea host"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
