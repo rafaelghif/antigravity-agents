@@ -1,7 +1,7 @@
 ---
 id: 332
 title: "feat: integrate github and gitea mcp settings into git profiles"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
