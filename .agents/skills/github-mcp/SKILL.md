@@ -14,21 +14,8 @@ This playbook provides standard guidelines, configuration references, and operat
 
 ## 2. Configuration & Commands Reference
 
-### Option A: Remote GitHub Copilot Endpoint (Recommended for VS Code)
-Register the remote server using the following JSON definition:
-```json
-{
-  "github-copilot": {
-    "type": "http",
-    "url": "https://api.githubcopilot.com/mcp/",
-    "headers": {
-      "Authorization": "Bearer <YOUR_GITHUB_TOKEN>"
-    }
-  }
-}
-```
-
-### Option B: Local Containerized Server (Docker-based)
+### Option A: Local Containerized Server (Docker-based) [Default & Recommended]
+Connects directly to the GitHub platform API (`api.github.com`) to manage repositories, issues, pull requests, and projects.
 Run the local MCP server inside a Docker container:
 ```bash
 docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN=<YOUR_GITHUB_TOKEN> ghcr.io/github/github-mcp-server
@@ -37,7 +24,7 @@ docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN=<YOUR_GITHUB_TOKEN> ghcr.io/g
 IDE configuration for the local container:
 ```json
 {
-  "github-local": {
+  "github": {
     "command": "docker",
     "args": [
       "run",
@@ -49,6 +36,20 @@ IDE configuration for the local container:
     ],
     "env": {
       "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_TOKEN>"
+    }
+  }
+}
+```
+
+### Option B: Remote GitHub Copilot Endpoint (Disabled by default)
+Connects to the remote Copilot HTTP backend:
+```json
+{
+  "github-copilot": {
+    "type": "http",
+    "url": "https://api.githubcopilot.com/mcp/",
+    "headers": {
+      "Authorization": "Bearer <YOUR_GITHUB_TOKEN>"
     }
   }
 }

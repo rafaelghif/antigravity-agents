@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.98.0] - 2026-07-15
+
+### 🚀 Features
+- set local github mcp as default and update local gitea host playbooks
+
+
 ## [3.97.1] - 2026-07-15
 
 ### 📝 Documentation
