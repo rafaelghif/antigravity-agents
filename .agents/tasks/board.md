@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] feat: standardize database schema registry and documentation protocol (feat/337) <!-- id: 337 -->
 - [x] feat: remove github copilot mcp reference and configs (feat/336) <!-- id: 336 -->
 - [x] feat: enable local github mcp by default and document local gitea host (feat/335) <!-- id: 335 -->
 - [x] docs: reference official antigravity mcp docs in skill playbooks (feat/334) <!-- id: 334 -->

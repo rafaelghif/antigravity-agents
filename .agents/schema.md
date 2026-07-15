@@ -11,3 +11,28 @@
 ## 3. Structural Rules
 - Modules must communicate only through defined APIs.
 - Domain entities must have zero external dependencies.
+
+## 4. Database Schema Registry
+
+All active databases, their engines, tables, fields, indexes, and relationships must be documented here.
+
+### Database: `[database_name]`
+* **Engine**: [SQLite | PostgreSQL | MySQL | Redis | etc.]
+* **Scope**: [Local | Containerized | Managed RDS | etc.]
+
+#### Table: `[table_name]`
+*Description of table purpose.*
+
+| Field Name | Type | Key | Nullable | Default | Description |
+|---|---|---|---|---|---|
+| `id` | UUID/INT | PK | No | - | Primary Key |
+| `field_name` | VARCHAR(255) | - | Yes | NULL | Field description |
+
+**Indexes:**
+* `idx_table_field`: [Type, e.g., BTREE] on `(field_name)`
+
+**Foreign Keys / Relationships:**
+* `target_field` -> `other_table.other_field` (Cascade / Restrict)
+
+**Cross-Module References:**
+* Link to other schema module files: e.g., Billing Schema (`.agents/schemas/billing.md`)

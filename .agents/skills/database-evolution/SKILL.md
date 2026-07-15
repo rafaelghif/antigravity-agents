@@ -43,3 +43,26 @@ On large enterprise databases (tables with millions of rows), adding columns or 
   - In PostgreSQL, always use `CREATE INDEX CONCURRENTLY` to avoid locking writes on the table.
   - In MySQL, leverage online DDL algorithms: `ALGORITHM=INPLACE, LOCK=NONE`.
 - **Foreign Key Constraints**: Adding a foreign key constraint can lock both target tables. Validate foreign keys using `NOT VALID` in PostgreSQL, then validate them in the background via `VALIDATE CONSTRAINT`.
+
+---
+
+## 4. Documentation & Schema Synchronization Protocol
+
+To prevent context drift and hallucinated data structures across agent sessions, the agent MUST strictly conform to the following schema documentation protocol:
+
+### A. Documenting New Structures
+Whenever a new database, table, or field is discussed, proposed, or implemented, the agent MUST immediately update `.agents/schema.md` (or a modular schema file under `.agents/schemas/` indexed in `.agents/schema.md`) BEFORE proceeding with code changes.
+
+### B. Schema Documentation Format
+Every table entry MUST include:
+1. **Engine and Scope**: The database engine (e.g. SQLite, PostgreSQL) and hosting environment.
+2. **Schema Table**: A Markdown table with fields: `Field Name`, `Type`, `Key` (PK/FK), `Nullable` (Yes/No), `Default`, and a detailed `Description`.
+3. **Indexes**: Clear list of indices with their types and columns.
+4. **Foreign Keys & Cascades**: Explicit relationship mapping.
+5. **Cross-Module References**: Hyperlinks to other related schema markdown files.
+
+### C. Modifying Existing Schemas
+If a field is renamed, added, or deleted, or if a table type/index is adjusted:
+1. Update the schema table in `.agents/schema.md` or the corresponding `.agents/schemas/*.md` file.
+2. Link the modification to the corresponding issue/ticket (e.g., `Refs: issue-XXX`).
+3. Commit the schema updates alongside or before the migration scripts.
