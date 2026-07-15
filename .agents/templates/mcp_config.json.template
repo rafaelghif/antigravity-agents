@@ -8,12 +8,28 @@
       "disabled": false,
       "alwaysAllow": true
     },
-    "github": {
+    "github-copilot": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
         "Authorization": "Bearer ${input:github_mcp_pat}"
-      }
+      },
+      "disabled": false
+    },
+    "github-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_mcp_pat}"
+      },
+      "disabled": true
     },
     "gitea": {
       "command": "docker",
@@ -30,7 +46,8 @@
       "env": {
         "GITEA_ACCESS_TOKEN": "${input:gitea_token}",
         "GITEA_HOST": "${input:gitea_host}"
-      }
+      },
+      "disabled": false
     }
   },
   "inputs": [

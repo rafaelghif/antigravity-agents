@@ -21,6 +21,13 @@
       "has_setup": false,
       "setup_path": null
     },
+    "gitea-mcp": {
+      "path": ".agents/skills/gitea-mcp",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
     "coding-standards": {
       "path": ".agents/skills/coding-standards",
       "has_validation_hook": false,
@@ -44,6 +51,13 @@
     },
     "debugging": {
       "path": ".agents/skills/debugging",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "github-mcp": {
+      "path": ".agents/skills/github-mcp",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
