@@ -1,7 +1,7 @@
 ---
 id: 340
 title: "fix: increase agent unit tests validation timeout to prevent CI pipeline hangs"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
