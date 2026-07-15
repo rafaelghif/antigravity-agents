@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.96.0] - 2026-07-15
+
+### 🚀 Features
+- integrate github and gitea mcp settings into git profiles
+
+
 ## [3.95.1] - 2026-07-15
 
 ### 🐛 Bug Fixes

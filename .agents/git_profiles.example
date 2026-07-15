@@ -8,6 +8,9 @@
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
       "git_pat": "encrypted:gAAAAAB...",
+      "github_mcp_pat": "encrypted:gAAAAAB...",
+      "gitea_token": "encrypted:gAAAAAB...",
+      "gitea_host": "https://gitea.com",
       "active": true
     },
     {
@@ -16,6 +19,9 @@
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAJ...",
       "ssh_key_path": "~/.ssh/id_ed25519_personal",
       "git_pat": "encrypted:gAAAAAB...",
+      "github_mcp_pat": "encrypted:gAAAAAB...",
+      "gitea_token": "encrypted:gAAAAAB...",
+      "gitea_host": "https://gitea.com",
       "active": false
     }
   ]
