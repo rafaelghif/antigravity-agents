@@ -1,7 +1,7 @@
 ---
 id: 338
 title: "feat: enforce strict database schemas non-negotiable rule in agents.md"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---
