@@ -58,3 +58,7 @@ IDE configuration for the local container:
 * [ ] Verify that GITHUB_PERSONAL_ACCESS_TOKEN or `github_mcp_pat` has valid API permissions.
 * [ ] Confirm that CLI tool searches (`tool-search`) run successfully from the container.
 * [ ] Test query in chat: `list issues in this repository` to verify connectivity.
+
+## 4. References & Documentation
+* [Google Antigravity MCP Guide](https://antigravity.google/docs/mcp)
+* [GitHub MCP Server Repository](https://github.com/github/github-mcp-server)
