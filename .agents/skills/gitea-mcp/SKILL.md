@@ -65,3 +65,7 @@ If running Gitea MCP natively:
 * [ ] Confirm that Gitea host URL (`GITEA_HOST`) is fully accessible and includes correct schema (`https://`).
 * [ ] Verify that `GITEA_ACCESS_TOKEN` is generated with appropriate permissions.
 * [ ] Test query in chat: `list all my repositories` or `list repository commits` to verify integration.
+
+## 4. References & Documentation
+* [Google Antigravity MCP Guide](https://antigravity.google/docs/mcp)
+* [Gitea MCP Server Repository](https://gitea.com/gitea/gitea-mcp)

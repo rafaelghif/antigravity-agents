@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] docs: reference official antigravity mcp docs in skill playbooks (feat/334) <!-- id: 334 -->
 - [x] feat: adjust mcp config templates and create github/gitea mcp skills (feat/333) <!-- id: 333 -->
 - [x] feat: integrate github and gitea mcp settings into git profiles (feat/332) <!-- id: 332 -->
 - [x] fix: harden core and verify installation manifest (fix/harden-core) <!-- id: 330 -->

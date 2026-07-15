@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.97.1] - 2026-07-15
+
+### 📝 Documentation
+- add official antigravity mcp reference links in playbooks
+
+
 ## [3.97.0] - 2026-07-15
 
 ### 🚀 Features
