@@ -1,7 +1,7 @@
 ---
 id: 330
 title: "fix: harden core and verify installation manifest"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-12
 ---
@@ -12,15 +12,15 @@ created_at: 2026-07-12
 fix: harden core and verify installation manifest
 
 ## Tasks
-- [ ] Exclude wrapper/installer/dev files (`bootstrap.sh`, `bootstrap.ps1`, `install.sh`, `install.ps1`, `requirements.txt`, `pyproject.toml`, `.github` folder) from copying in `install.py`.
-- [ ] Customize target project `AGENTS.md` and `.agents/rules.md` in `bootstrap.py` when `is_core` is False.
-- [ ] Disable core-only validation checks (bootstrap.py version check, here-doc script audit, locks/budget raw write audit) in `validate.py` when `is_core` is False.
+- [x] Exclude wrapper/installer/dev files (`bootstrap.sh`, `bootstrap.ps1`, `install.sh`, `install.ps1`, `requirements.txt`, `pyproject.toml`, `.github` folder) from copying in `install.py`. <!-- id: task-exclude-installer-files -->
+- [x] Customize target project `AGENTS.md` and `.agents/rules.md` in `bootstrap.py` when `is_core` is False. <!-- id: task-customize-target-agents-rules -->
+- [x] Disable core-only validation checks (bootstrap.py version check, here-doc script audit, locks/budget raw write audit) in `validate.py` when `is_core` is False. <!-- id: task-disable-core-validation-checks -->
 
 ## Acceptance Criteria
-- [ ] Installation to target project does not copy `bootstrap.sh/ps1`, `install.sh/ps1`, `requirements.txt`, `pyproject.toml`, or `.github`.
-- [ ] Target project `AGENTS.md` has generic repo layout and no installer/bootstrap sync rule.
-- [ ] Target project `.agents/rules.md` has no template/wrapper parity rule.
-- [ ] Validation guard checks for target projects bypass core-specific version and compliance checks.
+- [x] Installation to target project does not copy `bootstrap.sh/ps1`, `install.sh/ps1`, `requirements.txt`, `pyproject.toml`, or `.github`.
+- [x] Target project `AGENTS.md` has generic repo layout and no installer/bootstrap sync rule.
+- [x] Target project `.agents/rules.md` has no template/wrapper parity rule.
+- [x] Validation guard checks for target projects bypass core-specific version and compliance checks.
 
 ## Rule & Schema Compliance Audit
 - Target files to edit:
