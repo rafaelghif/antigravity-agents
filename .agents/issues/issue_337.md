@@ -1,7 +1,7 @@
 ---
 id: 337
 title: "feat: standardize database schema registry and documentation protocol"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
 ---

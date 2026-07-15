@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.100.0] - 2026-07-15
+
+### 🚀 Features
+- standardize schema registry and documentation sync rules
+
+
 ## [3.99.0] - 2026-07-15
 
 ### 🚀 Features
