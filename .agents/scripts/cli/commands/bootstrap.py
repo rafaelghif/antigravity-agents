@@ -708,6 +708,18 @@ def run(args):
                                                .replace("{{STACK}}", f"{stack.capitalize()} ({arch.upper()})")\
                                                .replace("{{VERSION}}", project_version)\
                                                .replace("{{LAYOUT}}", f"Standard {stack.capitalize()} ({arch.upper()}) project source and configuration files.")
+                if not is_core:
+                    # Remove duplicate/inline code templates rule
+                    agents_content = re.sub(
+                        r'-\s+\*\*NEVER\*\*\s+write\s+or\s+maintain\s+duplicate\s+code\s+or\s+inline\s+file\s+templates.*?(?:\r?\n|$)',
+                        '',
+                        agents_content
+                    )
+                    # Remove template_map.md reference from Workspace Read Flow
+                    agents_content = agents_content.replace(
+                        ", `.agents/docs/template_map.md` (for template-to-target and installer/bootstrap platform parity mappings),",
+                        ""
+                    )
                 with open(agents_file, 'w', encoding='utf-8') as f:
                     f.write(agents_content)
                 print(f"Generated target AGENTS.md from template (version: {project_version}).")

@@ -4,6 +4,12 @@ import re
 import subprocess
 from datetime import datetime
 
+# Inject parent directory containing git_api
+scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+if scripts_dir not in sys.path:
+    sys.path.insert(0, scripts_dir)
+
+
 ISSUE_DIR = ".agents/issues"
 
 def parse_issue_frontmatter(content):

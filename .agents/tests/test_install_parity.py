@@ -10,7 +10,7 @@ class TestInstallParity(unittest.TestCase):
         temp_target = "/tmp/compare_install_target_test"
 
         if os.path.exists(temp_target):
-            shutil.rmtree(temp_target)
+            shutil.rmtree(temp_target, ignore_errors=True)
         os.makedirs(temp_target, exist_ok=True)
 
         try:
@@ -76,4 +76,4 @@ class TestInstallParity(unittest.TestCase):
 
         finally:
             if os.path.exists(temp_target):
-                shutil.rmtree(temp_target)
+                shutil.rmtree(temp_target, ignore_errors=True)
