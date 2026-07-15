@@ -3,6 +3,9 @@
 ## 1. Stack Details
 - **Language/Platform**: Python
 - **Pattern**: CLEAN Architecture
+- **Framework/Library**: None
+- **Database**: None
+- **Infrastructure**: None
 
 ## 2. Directory Layout
 - `src/`: Core codebase.

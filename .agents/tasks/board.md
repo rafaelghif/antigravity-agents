@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] fix: restore dynamic placeholders in schema template to fix bootstrap test (feat/339) <!-- id: 339 -->
 - [x] feat: enforce strict database schemas non-negotiable rule in agents.md (feat/338) <!-- id: 338 -->
 - [x] feat: standardize database schema registry and documentation protocol (feat/337) <!-- id: 337 -->
 - [x] feat: remove github copilot mcp reference and configs (feat/336) <!-- id: 336 -->
