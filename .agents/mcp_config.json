@@ -8,15 +8,7 @@
       "disabled": false,
       "alwaysAllow": true
     },
-    "github-copilot": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${input:github_mcp_pat}"
-      },
-      "disabled": false
-    },
-    "github-local": {
+    "github": {
       "command": "docker",
       "args": [
         "run",
@@ -28,6 +20,14 @@
       ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_mcp_pat}"
+      },
+      "disabled": false
+    },
+    "github-copilot": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${input:github_mcp_pat}"
       },
       "disabled": true
     },
