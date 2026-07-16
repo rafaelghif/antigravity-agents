@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] harden global leak prevention guidelines in workspace rules (feat/issue-355) <!-- id: issue-355 -->
 - [x] remove global skills caching and enforce workspace isolation (feat/issue-354) <!-- id: issue-354 -->
 - [x] update readme with custom skill management and gitea features (feat/issue-353) <!-- id: issue-353 -->
 - [x] Optimize skill loading rules in agents and rules templates (feat/issue-352) <!-- id: issue-352 -->

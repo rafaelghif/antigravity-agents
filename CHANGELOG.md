@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.118.0] - 2026-07-16
+
+### 🚀 Features
+- harden global leak prevention guidelines in workspace rules
+- harden global leak prevention guidelines in workspace rules (ISSUE-355)
+
+
 ## [3.117.0] - 2026-07-16
 
 ### 🚀 Features
