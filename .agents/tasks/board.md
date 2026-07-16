@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Optimize skill loading rules in agents and rules templates (feat/issue-352) <!-- id: issue-352 -->
 - [x] Consolidate and expand agent skills playbooks (feat/issue-351) <!-- id: issue-351 -->
 - [x] Implement initial model/entity definitions <!-- id: issue-345 -->
 - [x] fix github action test_fetch_github_issues_success failure (feat/issue-350) <!-- id: issue-350 -->
