@@ -1,7 +1,7 @@
 ---
 id: issue-356
 title: "harden local mcp server jsonrpc and path checks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -31,7 +31,7 @@ harden local mcp server jsonrpc and path checks
   - [x] `.agents/scripts/mcp_server.py` <!-- id: target-mcp-server -->
   - [x] `.agents/tests/test_mcp_server.py` <!-- id: target-test-mcp-server -->
 - Active module locks:
-  - [x] `mcp` <!-- id: lock-mcp -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
