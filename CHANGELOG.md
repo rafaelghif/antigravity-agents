@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.119.0] - 2026-07-16
+
+### 🚀 Features
+- harden local mcp server jsonrpc and path checks
+- harden local mcp server jsonrpc and path checks (ISSUE-356)
+
+
 ## [3.118.0] - 2026-07-16
 
 ### 🚀 Features

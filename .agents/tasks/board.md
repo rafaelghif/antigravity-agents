@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] harden local mcp server jsonrpc and path checks (feat/issue-356) <!-- id: issue-356 -->
 - [x] harden global leak prevention guidelines in workspace rules (feat/issue-355) <!-- id: issue-355 -->
 - [x] remove global skills caching and enforce workspace isolation (feat/issue-354) <!-- id: issue-354 -->
 - [x] update readme with custom skill management and gitea features (feat/issue-353) <!-- id: issue-353 -->
