@@ -64,7 +64,14 @@ def should_exclude(rel_path: str) -> bool:
         "install.sh",
         "install.ps1",
         "requirements.txt",
-        "pyproject.toml"
+        "pyproject.toml",
+        "architecture.md",
+        "glossary.md",
+        "lessons-archive.md",
+        "lessons-learned.md",
+        "milestones.md",
+        "security-policy.md",
+        "tech-debt.md"
     }
     
     if filename in excluded_filenames:
@@ -135,18 +142,8 @@ def run(args: List[str]) -> None:
         "AGENTS.md",
         ".gitignore",
         ".antigravityignore",
-        "Dockerfile",
-        "README.md",
-        "CHANGELOG.md",
         "mcp_config.json",
-        "config.json",
-        "architecture.md",
-        "glossary.md",
-        "lessons-archive.md",
-        "lessons-learned.md",
-        "milestones.md",
-        "security-policy.md",
-        "tech-debt.md"
+        "config.json"
     }
 
     for root, dirs, files in os.walk(source_root):

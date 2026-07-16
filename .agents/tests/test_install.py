@@ -144,8 +144,8 @@ class TestInstallCommand(unittest.TestCase):
         # AGENTS.md is critical and missing, it should be copied (rules.md is excluded and generated via bootstrap)
         self.assertIn('AGENTS.md', copied_files)
         self.assertNotIn('rules.md', copied_files)
-        self.assertIn('milestones.md', copied_files)
-        self.assertIn('security-policy.md', copied_files)
+        self.assertNotIn('milestones.md', copied_files)
+        self.assertNotIn('security-policy.md', copied_files)
         # some_other_file.py is not excluded, it should be copied
         self.assertIn('some_other_file.py', copied_files)
 
