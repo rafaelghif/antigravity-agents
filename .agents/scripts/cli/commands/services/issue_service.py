@@ -272,6 +272,8 @@ def sync_board_with_issues():
                 if not updated_doing:
                     output.append("")
             elif line.strip() == "## Done":
+                # Prune completed tasks to keep context token footprint lean (Max 15)
+                updated_done = updated_done[:15]
                 output.extend(updated_done)
                 if not updated_done:
                     output.append("")
