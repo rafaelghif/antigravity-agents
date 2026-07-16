@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.124.0] - 2026-07-16
+
+### 🚀 Features
+- implement pruning for task board done column
+
+
 ## [3.123.0] - 2026-07-16
 
 ### 🚀 Features
