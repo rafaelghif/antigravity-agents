@@ -1,7 +1,7 @@
 ---
 id: issue-352
 title: "Optimize skill loading rules in agents and rules templates"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -31,8 +31,7 @@ Optimize skill loading rules in agents and rules templates
   - [x] `.agents/templates/AGENTS.md.template` <!-- id: target-agents-template -->
   - [x] `.agents/templates/rules.md.template` <!-- id: target-rules-template -->
 - Active module locks:
-  - [x] `rules` <!-- id: lock-rules -->
-  - [x] `agents` <!-- id: lock-agents -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

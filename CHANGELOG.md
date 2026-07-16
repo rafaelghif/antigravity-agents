@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.115.0] - 2026-07-16
+
+### 🚀 Features
+- optimize skill loading enforcer rules to encourage proactive consulting
+
+### ⚙️ Chores
+- Optimize skill loading rules in agents and rules templates (ISSUE-352)
+
+
 ## [3.114.0] - 2026-07-16
 
 ### 🚀 Features
