@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.116.0] - 2026-07-16
+
+### 🚀 Features
+- update readme with custom skill management and gitea features (ISSUE-353)
+
+### 📝 Documentation
+- document skill CLI commands and Gitea native integration
+
+
 ## [3.115.0] - 2026-07-16
 
 ### 🚀 Features

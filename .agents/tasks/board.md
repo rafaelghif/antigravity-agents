@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] update readme with custom skill management and gitea features (feat/issue-353) <!-- id: issue-353 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] update readme with custom skill management and gitea features (feat/issue-353) <!-- id: issue-353 -->
 - [x] Optimize skill loading rules in agents and rules templates (feat/issue-352) <!-- id: issue-352 -->
 - [x] Consolidate and expand agent skills playbooks (feat/issue-351) <!-- id: issue-351 -->
 - [x] Implement initial model/entity definitions <!-- id: issue-345 -->

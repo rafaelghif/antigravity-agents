@@ -1,7 +1,7 @@
 ---
 id: issue-353
 title: "update readme with custom skill management and gitea features"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -28,7 +28,7 @@ update readme with custom skill management and gitea features
 - Target files to edit:
   - [x] `README.md` <!-- id: target-readme -->
 - Active module locks:
-  - [x] `readme` <!-- id: lock-readme -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
