@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] refactor: remove redundant skill playbooks to optimize token footprint (feat/363) <!-- id: 363 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
