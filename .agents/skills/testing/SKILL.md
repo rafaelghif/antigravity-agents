@@ -62,3 +62,10 @@ To keep tests clean and maintainable:
 - **File Naming**: Name files with a `test_` prefix (e.g., `test_auth.py`, `test_utils.py`).
 - **Test Cases**: Name test functions descriptively starting with `test_` followed by the action and expected behavior (e.g., `test_authenticate_with_invalid_credentials_fails`).
 - **Assertive Assertions**: Use specific assertions and descriptive error messages rather than simple `assert True`.
+
+---
+
+## 4. The Test-Driven Development (TDD) Cycle
+- **Red**: Write a failing unit test that describes the desired feature or bugfix *before* writing any production code.
+- **Green**: Write the minimal amount of code necessary to make the test pass.
+- **Refactor**: Clean up the implementation. Remove duplication, improve naming, reduce cognitive complexity, and ensure type safety.
