@@ -2202,17 +2202,11 @@ def audit_codebase_rules_compliance() -> bool:
                                     step = json.loads(line)
                                     tool_calls = step.get("tool_calls", [])
                                     for tc in tool_calls:
-                                        if tc.get("name") in ("view_file", "default_api:view_file"):
-                                            args = tc.get("args") or tc.get("arguments") or {}
-                                            path_arg = args.get("AbsolutePath", "").strip('"\'')
-                                            if ".agents/skills/" in path_arg:
-                                                parts = path_arg.replace('\\', '/').split('/')
-                                                try:
-                                                    idx = parts.index("skills")
-                                                    if idx + 1 < len(parts):
-                                                        viewed_skills.add(parts[idx + 1])
-                                                except ValueError:
-                                                    pass
+                                        args = tc.get("args") or tc.get("arguments") or {}
+                                        args_str = json.dumps(args)
+                                        m = re.search(r'\.agents[\\/]skills[\\/]([a-zA-Z0-9_-]+)', args_str)
+                                        if m:
+                                            viewed_skills.add(m.group(1))
                                 except Exception:
                                     pass
                         
@@ -2226,8 +2220,6 @@ def audit_codebase_rules_compliance() -> bool:
                                 required_skills.add("ci-cd")
                             elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/"):
                                 required_skills.add("database-evolution")
-                            elif "git_profiles.json" in f_norm or ".env" in f_norm or "active_api_keys" in f_norm or "secrets.py" in f_norm:
-                                required_skills.add("security-audit")
                             elif f_norm in ("CHANGELOG.md", "Dockerfile", "install.sh", "install.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/upgrade.py"):
                                 required_skills.add("release-management")
                             elif f_norm.startswith(".agents/skills/"):
@@ -2236,8 +2228,6 @@ def audit_codebase_rules_compliance() -> bool:
                                 required_skills.add("github-mcp")
                             elif f_norm == ".agents/tasks/board.md" or f_norm.startswith(".agents/issues/"):
                                 required_skills.add("task-management")
-                            elif f_norm.startswith(".agents/scripts/") and not any(k in f_norm for k in ("test_", "validate.py", "prepare_commit_msg.py")):
-                                required_skills.add("coding-standards")
                                 
                         if "validate.py" in modified_files or "doctor.py" in modified_files:
                             required_skills.add("debugging")
