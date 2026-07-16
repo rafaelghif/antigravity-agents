@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.126.0] - 2026-07-16
+
+### 🚀 Features
+- add AGENTS.md to mandatory init task
+
+
 ## [3.125.0] - 2026-07-16
 
 ### 🚀 Features
