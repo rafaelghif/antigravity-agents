@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.6] - 2026-07-16
+
+### 🛠️ Refactors
+- consolidate skills and enforce strict UARP XML reasoning protocol
+
+### ⚙️ Chores
+- sync modified core configs to templates
+
+
 ## [3.121.5] - 2026-07-16
 
 ### 🐛 Bug Fixes
