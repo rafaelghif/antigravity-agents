@@ -4,6 +4,18 @@ import re
 import json
 import subprocess
 
+try:
+    from core.executor import executor
+    from core.logger import logger
+except ImportError:
+    try:
+        from ....core.executor import executor
+        from ....core.logger import logger
+    except ImportError:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+        from core.executor import executor
+        from core.logger import logger
+
 def print_err(msg: str) -> None:
     print(f"\033[91m[FAIL] {msg}\033[0m", file=sys.stderr)
 
@@ -526,13 +538,10 @@ def run(args):
         temp_src_root = tempfile.mkdtemp()
         atexit.register(shutil.rmtree, temp_src_root, ignore_errors=True)
         
-        res = subprocess.run(
-            ['git', 'clone', '--depth', '1', source_repo, temp_src_root],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+        res = executor.execute(
+            ['git', 'clone', '--depth', '1', source_repo, temp_src_root]
         )
-        if res.returncode != 0:
+        if not res.success:
             print_err(f"==========================================================")
             print_err(f"   [ERROR] Git Clone Failed!")
             print_err(f"==========================================================")
@@ -679,7 +688,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.111.0"
+    AAC_VERSION = "3.111.1"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Core repository check is based strictly on the git repository remote/name
@@ -838,8 +847,8 @@ This board tracks active development tasks.
                         with open(profiles_file, 'w', encoding='utf-8') as f:
                             json.dump({"profiles": [new_profile]}, f, indent=2)
                         
-                        subprocess.run(['git', 'config', '--local', 'user.name', prof_name])
-                        subprocess.run(['git', 'config', '--local', 'user.email', prof_email])
+                        executor.execute(['git', 'config', '--local', 'user.name', prof_name])
+                        executor.execute(['git', 'config', '--local', 'user.email', prof_email])
                         print(f"[OK] Created active profile '{prof_name}' and updated local Git config.")
             except Exception as e:
                 print(f"Skipping profile wizard: {e}")
@@ -874,14 +883,14 @@ This board tracks active development tasks.
         print("   Running Auto-Reconnaissance Scan...                    ")
         print("==========================================================")
         try:
-            subprocess.run([sys.executable, recon_script], check=False)
+            executor.execute([sys.executable, recon_script])
         except Exception as e:
             print(f"[WARN] Failed to run reconnaissance scan: {e}")
         print("==========================================================")
 
     # Check if Git repository is active
-    res_git = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    is_git = res_git.returncode == 0 and res_git.stdout.strip() == "true"
+    res_git = executor.execute(['git', 'rev-parse', '--is-inside-work-tree'])
+    is_git = res_git.success and res_git.stdout.strip() == "true"
     if is_git:
         validate_script = ".agents/scripts/validate.py"
         if os.path.exists(validate_script):
@@ -889,7 +898,7 @@ This board tracks active development tasks.
             print("   Installing Local Git Hooks...                          ")
             print("==========================================================")
             try:
-                subprocess.run([sys.executable, validate_script], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                executor.execute([sys.executable, validate_script])
                 print("[OK] Successfully installed local Git hooks.")
             except Exception as e:
                 print(f"[WARN] Failed to install Git hooks: {e}")
