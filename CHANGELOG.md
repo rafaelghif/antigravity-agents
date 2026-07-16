@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.5] - 2026-07-16
+
+### 🐛 Bug Fixes
+- eliminate semantic skill auto-injection to fix token budget exhaustion
+
+
 ## [3.122.4] - 2026-07-16
 
 ### 🛠️ Refactors

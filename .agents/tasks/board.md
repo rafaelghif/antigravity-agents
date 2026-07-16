@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix: eliminate semantic skill auto-injection to fix token budget exhaustion (feat/371) <!-- id: 371 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: eliminate semantic skill auto-injection to fix token budget exhaustion (feat/371) <!-- id: 371 -->
 - [x] refactor: sharpen soul.md to eliminate rule redundancy (feat/370) <!-- id: 370 -->
 - [x] refactor: sharpen project rules and eliminate playbooks redundancy (feat/369) <!-- id: 369 -->
 - [x] refactor: sharpen AGENTS.md rules and offload to playbooks (feat/368) <!-- id: 368 -->
