@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.3] - 2026-07-16
+
+### 📝 Documentation
+- update installation flow for standalone binaries
+
+
 ## [3.121.2] - 2026-07-16
 
 ### 🐛 Bug Fixes

@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] docs: update installation flow for standalone binaries (feat/362) <!-- id: 362 -->
 - [x] fix: resolve remaining audit gaps for subtask tracking and scope leakage (feat/361) <!-- id: 361 -->
 - [x] feat: standalone pyinstaller build script and offline binaries (feat/360) <!-- id: 360 -->
 - [x] docs: enforce explicit skill file reading in AGENTS and rules templates (feat/359) <!-- id: 359 -->
