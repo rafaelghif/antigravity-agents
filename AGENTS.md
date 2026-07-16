@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.103.0
+- **Version:** 3.105.0
 - **Stack:** Python 3, Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -31,6 +31,7 @@
 - **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
 - **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
 - **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
+- **ALWAYS** prioritize using active Model Context Protocol (MCP) server tools (specifically `github` and `gitea` MCP tools) for all remote repository and project workflows (such as creating, fetching, and updating issues, pull requests, commits, merges, and project boards). Bypassing active MCP tools in favor of local files, custom wrapper scripts, or standard APIs is strictly prohibited, unless the remote MCP integration is invalid, offline, or unauthorized, in which case the agent MUST fall back to local file-based tracking (such as `.agents/issues/` files and `board.md`). When MCP is valid, ensure local tracking is kept in sync.
 - **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. The agent **MUST NEVER** assume, guess, or hallucinate database structures; all tables, fields, and types must be explicitly documented in `.agents/schema.md` before coding. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.
 - **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
 - **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as user home directory, global agent appData/brain directories, or global databases). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.

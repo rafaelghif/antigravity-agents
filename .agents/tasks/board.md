@@ -11,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] feat: prioritize MCP tools over local for issues pulls mergers and projects (feat/343) <!-- id: 343 -->
 - [x] fix: enforce strict agent script isolation rule in AGENTS.md template (feat/issue-342) <!-- id: 342 -->
 - [x] fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore (feat/issue-341) <!-- id: 341 -->
 - [x] fix: increase agent unit tests validation timeout to prevent CI pipeline hangs (feat/340) <!-- id: 340 -->
