@@ -1,7 +1,7 @@
 ---
 id: 342
 title: "fix: enforce strict agent script isolation rule in AGENTS.md template"
-status: Doing
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
