@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.5] - 2026-07-16
+
+### 🐛 Bug Fixes
+- rename standalone binary from agy to aac to prevent global conflicts
+
+
 ## [3.121.4] - 2026-07-16
 
 ### 🛠️ Refactors
