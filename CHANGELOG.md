@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.103.0] - 2026-07-16
+
+### 🚀 Features
+- fix: enforce strict agent script isolation rule in AGENTS.md template (ISSUE-342)
+
+### 🐛 Bug Fixes
+- enforce non-negotiable agent script isolation rule in AGENTS.md template
+
+
 ## [3.102.0] - 2026-07-16
 
 ### 🚀 Features

@@ -4,7 +4,7 @@
 
 ## 1. What this project is
 - **Product:** test-proj
-- **Version:** 3.102.0
+- **Version:** 3.103.0
 - **Stack:** Python 3, Docker
 - **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
@@ -17,6 +17,7 @@
 - **ALWAYS** distinguish between **Discussions** (informational queries, design questions, general research, diagnostics) and **Tasks** (codebase writes/modifications). Never create Git branches, task board entries, or commits for informational or diagnostic discussions. Only trigger the branch-and-issue tracking workflow when actual file edits/creations are required.
 - **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.
 - **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
+- **NEVER** read, modify, or attempt to repair any agent-internal scripts, workflows, or helper code inside `.agents/scripts/` or `.agents/workflows/` unless explicitly developing the Antigravity Agent Core repository itself. Your scope in target projects is strictly bounded to the target codebase and its memory directories.
 - **ALWAYS** run the project's test command before marking a task `Completed`.
 - **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.
 - **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.
