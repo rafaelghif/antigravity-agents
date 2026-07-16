@@ -12,8 +12,8 @@ created_at: 2026-06-27
 Provide a concise description of the bug, feature request, or chore.
 
 ## Tasks
-- [ ] Subtask 1
-- [ ] Subtask 2
+- [ ] Subtask 1 <!-- id: subtask-1 -->
+- [ ] Subtask 2 <!-- id: subtask-2 -->
 
 ## Acceptance Criteria
 - [ ] Criteria 1

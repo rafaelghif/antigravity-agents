@@ -369,7 +369,7 @@ github_number: {number}
 {body}
 
 ## Tasks
-- [ ] Implement remote synchronization fixes
+- [ ] Implement remote synchronization fixes <!-- id: sync-fixes -->
 
 ## Acceptance Criteria
 - [ ] Verification complete

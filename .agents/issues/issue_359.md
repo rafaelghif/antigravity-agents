@@ -1,6 +1,6 @@
 ---
-id: 358
-title: "fix: validate.py skill enforcement and rigid logic"
+id: 359
+title: "docs: enforce explicit skill file reading in AGENTS and rules templates"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
@@ -9,7 +9,7 @@ created_at: 2026-07-16
 # Issue Details
 
 ## Problem Statement
-fix: validate.py skill enforcement and rigid logic
+docs: enforce explicit skill file reading in AGENTS and rules templates
 
 ## Tasks
 - [ ] Task 1 <!-- id: task-1 -->

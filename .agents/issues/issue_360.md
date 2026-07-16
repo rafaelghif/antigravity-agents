@@ -1,7 +1,7 @@
 ---
-id: 358
-title: "fix: validate.py skill enforcement and rigid logic"
-status: closed
+id: 360
+title: "feat: standalone pyinstaller build script and offline binaries"
+status: open
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -9,7 +9,7 @@ created_at: 2026-07-16
 # Issue Details
 
 ## Problem Statement
-fix: validate.py skill enforcement and rigid logic
+feat: standalone pyinstaller build script and offline binaries
 
 ## Tasks
 - [ ] Task 1 <!-- id: task-1 -->

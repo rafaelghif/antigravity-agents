@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.120.2] - 2026-07-16
+
+### 📝 Documentation
+- enforce explicit skill file reading in AGENTS and rules templates
+
+### ⚙️ Chores
+- sync task board
+
+
 ## [3.120.1] - 2026-07-16
 
 ### 🐛 Bug Fixes

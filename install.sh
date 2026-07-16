@@ -11,31 +11,7 @@ if ! command -v git &>/dev/null; then
   exit 1
 fi
 
-# 2. Prerequisite Check: Python 3 presence and minimum version >= 3.8
-PYTHON_EXEC=""
-if command -v python3 &>/dev/null; then
-  PYTHON_EXEC="python3"
-elif command -v python &>/dev/null; then
-  if python --version 2>&1 | grep -q "Python 3"; then
-    PYTHON_EXEC="python"
-  fi
-fi
-
-if [ -z "$PYTHON_EXEC" ]; then
-  echo "Error: Python 3.8 or newer is required to run Antigravity Agent Core." >&2
-  exit 1
-fi
-
-# Check version
-PYTHON_VERSION=$("$PYTHON_EXEC" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
-MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
-if [ "$MAJOR" -lt 3 ] || { [ "$MAJOR" -eq 3 ] && [ "$MINOR" -lt 8 ]; }; then
-  echo "Error: Python 3.8 or newer is required. Found Python $PYTHON_VERSION." >&2
-  exit 1
-fi
-
-# 3. Clone source repository to a temp directory
+# 2. Clone source repository to a temp directory
 REPO_URL="${AAC_SOURCE_REPO:-https://github.com/rafaelghif/antigravity-agents.git}"
 IS_ONLINE=0
 for PROTO in "http://" "https://" "git@" "ssh://"; do
@@ -57,5 +33,42 @@ if ! git clone --depth 1 "$REPO_URL" "$TEMP_DIR/repo" &>/dev/null; then
   exit 1
 fi
 
-# 4. Invoke the python unified installer from the cloned temp repository
-"$PYTHON_EXEC" "$TEMP_DIR/repo/.agents/scripts/cli/helper.py" install "$TARGET_DIR" "$@"
+# 3. Check for standalone binary in the cloned repo
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+BINARY_NAME="agy-${OS}-${ARCH}"
+if [[ "$OS" == "MINGW"* || "$OS" == "CYGWIN"* || "$OS" == "MSYS"* ]]; then
+    BINARY_NAME="agy-Windows-${ARCH}.exe"
+fi
+
+if [ -x "$TEMP_DIR/repo/bin/${BINARY_NAME}" ]; then
+  # 4a. Invoke standalone binary
+  "$TEMP_DIR/repo/bin/${BINARY_NAME}" install "$TARGET_DIR" "$@"
+else
+  # 4b. Prerequisite Check: Python 3 presence and minimum version >= 3.8
+  PYTHON_EXEC=""
+  if command -v python3 &>/dev/null; then
+    PYTHON_EXEC="python3"
+  elif command -v python &>/dev/null; then
+    if python --version 2>&1 | grep -q "Python 3"; then
+      PYTHON_EXEC="python"
+    fi
+  fi
+
+  if [ -z "$PYTHON_EXEC" ]; then
+    echo "Error: Standalone binary missing and Python 3.8+ is required to run Antigravity Agent Core." >&2
+    exit 1
+  fi
+
+  # Check version
+  PYTHON_VERSION=$("$PYTHON_EXEC" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+  MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
+  MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
+  if [ "$MAJOR" -lt 3 ] || { [ "$MAJOR" -eq 3 ] && [ "$MINOR" -lt 8 ]; }; then
+    echo "Error: Python 3.8 or newer is required. Found Python $PYTHON_VERSION." >&2
+    exit 1
+  fi
+
+  # Invoke the python unified installer from the cloned temp repository
+  "$PYTHON_EXEC" "$TEMP_DIR/repo/.agents/scripts/cli/helper.py" install "$TARGET_DIR" "$@"
+fi

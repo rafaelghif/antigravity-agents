@@ -44,7 +44,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
     - `compliance` when auditing packages, versions, licenses, or PII safeguards.
     - `documentation` when updating manuals, docstrings, or schemas.
     - `coding-standards` when modifying core python command scripts.
-    Bypassing or omitting required playbooks is strictly audited by `validate.py` and blocks execution.
+    **WARNING:** Do not rely on the brief skill descriptions injected into your prompt! You must explicitly read the file; bypassing or omitting required playbooks is strictly audited by `validate.py` and blocks execution.
 
 ## 5. Plug-and-Play Adaptation & Self-Learning
 - **Stack Adaptiveness**: The agent layout is project-agnostic. `./helper.sh bootstrap` (a thin wrapper around `bootstrap.py` — all detection logic lives in the Python script, not duplicated in the shell wrapper, per the no-duplicate-templates rule in `AGENTS.md`) auto-detects and supports any programming language stack (e.g. Python, Node, PHP, Go, Rust, Java, C#) for the *target* project, without strict folder structure constraints.
