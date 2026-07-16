@@ -10,8 +10,8 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] Implement AI skill loading enforcer in validation checks <!-- id: issue-348 -->
 ## Done
+- [x] Implement AI skill loading enforcer in validation checks (feat/348) <!-- id: issue-348 -->
 - [x] Audit and refactor installer and bootstrapper for safety and path correctness (feat/347) <!-- id: issue-347 -->
 - [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/346) <!-- id: 346 -->
 - [x] feat: relax validation checks for human programmers to allow warning-only bypasses (feat/344) <!-- id: 344 -->
