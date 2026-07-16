@@ -489,6 +489,21 @@ def run(args):
     # Scaffold is True if a scaffolding pattern is selected and --no-scaffold is not passed
     scaffold = (arch in ("clean", "layered", "mvc")) and scaffold
 
+    # Check if we are bootstrapping the agent core repo itself
+    is_core = False
+    try:
+        # Resolve scripts dir to import git_api
+        cmd_dir = os.path.dirname(os.path.abspath(__file__))
+        scripts_dir = os.path.abspath(os.path.join(cmd_dir, "../.."))
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        import git_api
+        repo = git_api.get_repo_info()
+        if repo and "antigravity-agents" in repo.lower():
+            is_core = True
+    except Exception:
+        pass
+
     print(f"\nInitializing '{name}' using '{stack}' with '{arch}' architecture (DB: {db}, Infra: {infra}, Framework: {framework})...")
 
     import tempfile
@@ -592,6 +607,24 @@ def run(args):
             with open(".antigravityignore", 'w', encoding='utf-8') as f:
                 f.write(anti_ignore_content)
 
+    # For target projects: isolate agent internal directories to avoid self-repair leaks
+    if not is_core:
+        target_ignore_file = ".antigravityignore"
+        if os.path.exists(target_ignore_file):
+            try:
+                with open(target_ignore_file, 'r', encoding='utf-8') as f:
+                    ignore_lines = f.read()
+                
+                # Check if we already have the target project specific isolation section
+                isolation_marker = "# <<< TARGET PROJECT ISOLATION (PREVENT AGENT SELF-REPAIR) >>>"
+                if isolation_marker not in ignore_lines:
+                    prefix = "" if ignore_lines.endswith("\n") else "\n"
+                    isolation_block = f"{prefix}\n{isolation_marker}\n.agents/scripts/\n.agents/workflows/\n.agents/dashboard/\n.agents/templates/\n"
+                    with open(target_ignore_file, 'a', encoding='utf-8') as f:
+                        f.write(isolation_block)
+            except Exception as e:
+                print(f"Warning: Failed to append target isolation rules to .antigravityignore: {e}")
+
     # 3.1 Create GitHub CI workflow
     if scaffold:
         github_workflow_dir = ".github/workflows"
@@ -646,23 +679,9 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.101.2"
+    AAC_VERSION = "3.102.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
-    # Check if we are bootstrapping the agent core repo itself
-    is_core = False
-    try:
-        # Resolve scripts dir to import git_api
-        scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-        if scripts_dir not in sys.path:
-            sys.path.insert(0, scripts_dir)
-        import git_api
-        repo = git_api.get_repo_info()
-        if repo and "antigravity-agents" in repo.lower():
-            is_core = True
-    except Exception:
-        pass
-
     # Core repository check is based strictly on the git repository remote/name
     # to avoid treating target workspaces as the core repository itself.
 

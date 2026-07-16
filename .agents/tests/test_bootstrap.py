@@ -348,6 +348,18 @@ class TestBootstrapCommand(unittest.TestCase):
         
         # Verify core files and configs are still initialized (like .agents/config.json)
         self.assertTrue(os.path.exists(".agents/config.json"))
+        
+    def test_bootstrap_antigravityignore_isolation(self, mock_input):
+        bootstrap.run(["TestIsolationProject", "python", "none"])
+        
+        self.assertTrue(os.path.exists(".antigravityignore"))
+        with open(".antigravityignore", 'r', encoding='utf-8') as f:
+            content = f.read()
+            self.assertIn("# <<< TARGET PROJECT ISOLATION (PREVENT AGENT SELF-REPAIR) >>>", content)
+            self.assertIn(".agents/scripts/", content)
+            self.assertIn(".agents/workflows/", content)
+            self.assertIn(".agents/dashboard/", content)
+            self.assertIn(".agents/templates/", content)
 
 if __name__ == '__main__':
     unittest.main()

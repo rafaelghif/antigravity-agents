@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.102.0] - 2026-07-16
+
+### 🚀 Features
+- fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore (ISSUE-341)
+
+### 🐛 Bug Fixes
+- exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore
+
+
 ## [3.101.2] - 2026-07-15
 
 ### 🐛 Bug Fixes
