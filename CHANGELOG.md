@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.4] - 2026-07-16
+
+### 🛠️ Refactors
+- sharpen soul.md to eliminate rule redundancy
+
+
 ## [3.122.3] - 2026-07-16
 
 ### 🛠️ Refactors
