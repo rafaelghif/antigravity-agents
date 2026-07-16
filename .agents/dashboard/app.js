@@ -98,7 +98,7 @@ window.loadData = async function(force = false) {
     // 1. Version Info
     const versionBadge = document.getElementById('version-badge');
     if (versionBadge) {
-      versionBadge.textContent = 'v' + (data.version || '2.109.0');
+      versionBadge.textContent = 'v' + (data.version || '3.119.0');
     }
 
     // 2. Compliance Audits

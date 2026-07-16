@@ -147,7 +147,7 @@ def run_silent_validation():
 
 def get_dashboard_data(force=False):
     # 1. Version Info
-    version = "2.106.0"
+    version = "3.119.0"
     agents_path = "AGENTS.md"
     if os.path.exists(agents_path):
         try:
