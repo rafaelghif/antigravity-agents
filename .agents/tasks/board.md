@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor: sharpen soul.md to eliminate rule redundancy (feat/370) <!-- id: 370 -->
 - [x] refactor: sharpen project rules and eliminate playbooks redundancy (feat/369) <!-- id: 369 -->
 - [x] refactor: sharpen AGENTS.md rules and offload to playbooks (feat/368) <!-- id: 368 -->
 - [x] fix(skills): audit and restore truncated skills and broken references (feat/367) <!-- id: 367 -->
