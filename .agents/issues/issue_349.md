@@ -1,7 +1,7 @@
 ---
 id: issue-349
 title: "Improve skill scaffolding CLI remote sync offline registry and verification testing"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -16,8 +16,8 @@ Improve skill scaffolding CLI, support remote Gitea sync alongside GitHub, imple
 - **Option B**: Scaffold completely new wrapper modules and commands. Higher complexity, increases file size and prompt overhead unnecessarily.
 
 ## Tasks
-- [ ] Task 1: Scaffold directories structure (`scripts/`, `examples/`, `resources/` with README placeholders) and templates (`validate.py`, `setup.sh`) during `helper.sh skill create`. <!-- id: task-1 -->
-- [ ] Task 2: Enhance `git_api.py` to support Gitea. Detect origin url, load Gitea host and access token from git profile or environment variables, and map issue/release calls dynamically. <!-- id: task-2 -->
+- [x] Task 1: Scaffold directories structure (`scripts/`, `examples/`, `resources/` with README placeholders) and templates (`validate.py`, `setup.sh`) during `helper.sh skill create`. <!-- id: task-1 -->
+- [x] Task 2: Enhance `git_api.py` to support Gitea. Detect origin url, load Gitea host and access token from git profile or environment variables, and map issue/release calls dynamically. <!-- id: task-2 -->
 - [ ] Task 3: Implement local skill caching and offline registry fallback in `skill.py` (cache downloaded skills to `~/.gemini/antigravity-cli/cache/skills/` and load from cache or builtin if offline/git clone fails). <!-- id: task-3 -->
 - [ ] Task 4: Add `test` subcommand to `helper.sh skill` (validate `SKILL.md` frontmatter, structure, and run validation hooks). <!-- id: task-4 -->
 - [ ] Task 5: Run verification and workspace audits using `./helper.sh validate`. <!-- id: task-5 -->
@@ -34,9 +34,7 @@ Improve skill scaffolding CLI, support remote Gitea sync alongside GitHub, imple
   - [ ] `.agents/scripts/git_api.py` <!-- id: audit-git-api -->
   - [ ] `.agents/scripts/cli/commands/skill.py` <!-- id: audit-skill-py -->
 - Active module locks:
-  - [ ] skill <!-- id: lock-skill -->
-  - [ ] git_api <!-- id: lock-git_api -->
-  - [ ] test_skill <!-- id: lock-test_skill -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [ ] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [ ] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

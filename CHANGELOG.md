@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.113.0] - 2026-07-16
+
+### 🚀 Features
+- implement offline skill registry fallback and active verification testing subcommand
+- add native support for Gitea remote platform and dynamic origin detection
+- scaffold subdirectories and templates for skill creation
+- Improve skill scaffolding CLI remote sync offline registry and verification testing (ISSUE-349)
+
+### 🐛 Bug Fixes
+- resolve carriage returns parsing bug in frontmatter compliance check
+
+### 📝 Documentation
+- enforce strict skill playbook rules in workspace guidelines
+
+
 ## [3.112.0] - 2026-07-16
 
 ### 🚀 Features
