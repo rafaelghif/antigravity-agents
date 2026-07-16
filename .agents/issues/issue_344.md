@@ -1,7 +1,7 @@
 ---
 id: 344
 title: "feat: relax validation checks for human programmers to allow warning-only bypasses"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-16
 ---

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.107.0] - 2026-07-16
+
+### 🚀 Features
+- relax validation tests, lint, and subtasks checks for human programmer mode
+- feat: relax validation checks for human programmers to allow warning-only bypasses (ISSUE-344)
+
+
 ## [3.106.0] - 2026-07-16
 
 ### 🚀 Features

@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: relax validation checks for human programmers to allow warning-only bypasses (feat/344) <!-- id: 344 -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] feat: relax validation checks for human programmers to allow warning-only bypasses (feat/344) <!-- id: 344 -->
 - [x] feat: prioritize MCP tools over local for issues pulls mergers and projects (feat/343) <!-- id: 343 -->
 - [x] fix: enforce strict agent script isolation rule in AGENTS.md template (feat/issue-342) <!-- id: 342 -->
 - [x] fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore (feat/issue-341) <!-- id: 341 -->
