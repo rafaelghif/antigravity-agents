@@ -172,6 +172,15 @@ def load_profiles() -> Dict[str, Any]:
         sys.exit(1)
 
     try:
+        from core.entities import GitProfile, ValidationError
+    except ImportError:
+        try:
+            from .core.entities import GitProfile, ValidationError
+        except ImportError:
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+            from core.entities import GitProfile, ValidationError
+
+    try:
         from . import secrets as aac_secrets
     except ImportError:
         import secrets as aac_secrets
@@ -180,6 +189,15 @@ def load_profiles() -> Dict[str, Any]:
     # Secure storage migration / encryption on load
     modified = False
     profiles = data.get("profiles", [])
+    for p in profiles:
+        # Validate profile invariants using domain entity
+        try:
+            profile_entity = GitProfile.from_dict(p)
+            profile_entity.validate()
+        except ValidationError as ve:
+            print_warn(f"Validation warning for profile '{p.get('name', 'unknown')}': {ve}")
+        except Exception as ex:
+            print_warn(f"Failed to validate profile structure: {ex}")
     for p in profiles:
         # Check git_pat
         git_pat = p.get("git_pat") or p.get("git_token")
@@ -724,18 +742,30 @@ def handle_add(args: List[str]) -> None:
     if generate_ssh:
         ssh_key_path = generate_ssh_key(name, email)
             
-    new_profile = {
-        "name": name,
-        "email": email,
-        "active": False
-    }
-    if signing_key:
-        new_profile["signing_key"] = signing_key
-    if ssh_key_path:
-        new_profile["ssh_key_path"] = ssh_key_path
-    if git_pat:
-        new_profile["git_pat"] = git_pat
-        
+    try:
+        from core.entities import GitProfile, ValidationError
+    except ImportError:
+        try:
+            from .core.entities import GitProfile, ValidationError
+        except ImportError:
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+            from core.entities import GitProfile, ValidationError
+
+    profile_entity = GitProfile(
+        name=name,
+        email=email,
+        signing_key=signing_key,
+        ssh_key_path=ssh_key_path,
+        git_pat=git_pat,
+        active=False
+    )
+    try:
+        profile_entity.validate()
+    except ValidationError as ve:
+        print_err(f"Invalid profile configuration: {ve}")
+        sys.exit(1)
+
+    new_profile = profile_entity.to_dict()
     profiles.append(new_profile)
     data["profiles"] = profiles
     save_profiles(data)

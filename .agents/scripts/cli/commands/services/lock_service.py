@@ -112,7 +112,26 @@ def read_locks() -> dict:
             content = f.read()
             if not content.strip():
                 return {}
-            return json.loads(content)
+            data = json.loads(content)
+            
+            try:
+                from core.entities import ModuleLock, ValidationError
+            except ImportError:
+                try:
+                    from ....core.entities import ModuleLock, ValidationError
+                except ImportError:
+                    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
+                    from core.entities import ModuleLock, ValidationError
+                    
+            valid_locks = {}
+            for module, branch in data.items():
+                try:
+                    lock_entity = ModuleLock(module=module, branch=branch)
+                    lock_entity.validate()
+                    valid_locks[module] = branch
+                except ValidationError as ve:
+                    print(f"Warning: Ignored unsafe lock definition: {ve}")
+            return valid_locks
     except Exception:
         return {}
 

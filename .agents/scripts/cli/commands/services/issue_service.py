@@ -29,6 +29,22 @@ def parse_issue_frontmatter(content):
                 if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
                     v = v[1:-1]
                 fm[k] = v
+
+    if fm.get("id") or fm.get("title"):
+        try:
+            from core.entities import Issue, ValidationError
+        except ImportError:
+            try:
+                from ....core.entities import Issue, ValidationError
+            except ImportError:
+                sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
+                from core.entities import Issue, ValidationError
+        try:
+            issue_entity = Issue.from_dict(fm)
+            issue_entity.validate()
+        except ValidationError as ve:
+            print(f"Warning: Issue frontmatter validation failed: {ve}")
+
     return fm
 
 def get_issue_tasks(content):

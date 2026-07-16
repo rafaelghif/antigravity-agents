@@ -146,6 +146,15 @@ def run(args):
     if interactive_mode:
         commit_msg = run_interactive_commit()
 
+    try:
+        from core.entities import GitProfile
+    except ImportError:
+        try:
+            from .core.entities import GitProfile
+        except ImportError:
+            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+            from core.entities import GitProfile
+
     data = load_profiles()
     profiles = data.get("profiles", [])
     active_profile = None
@@ -163,23 +172,25 @@ def run(args):
         pass
 
     apply_profile = False
+    active_git_profile = None
     if active_profile:
+        active_git_profile = GitProfile.from_dict(active_profile)
         placeholder_emails = {"developer@company.com", "dev.personal@gmail.com"}
-        if active_profile.get("email") not in placeholder_emails:
+        if active_git_profile.email not in placeholder_emails:
             if not local_email:
                 apply_profile = True
             elif has_user_defined_profiles(profiles):
                 apply_profile = True
 
-    if apply_profile and active_profile:
-        print(f"Applying Git Profile: '{active_profile['name']}'")
-        email = active_profile.get("email")
-        name = active_profile.get("name", "Developer")
+    if apply_profile and active_git_profile:
+        print(f"Applying Git Profile: '{active_git_profile.name}'")
+        email = active_git_profile.email
+        name = active_git_profile.name or "Developer"
         if email:
             subprocess.run(['git', 'config', '--local', 'user.email', email])
         if name:
             subprocess.run(['git', 'config', '--local', 'user.name', name])
-        signing_key = active_profile.get("signing_key")
+        signing_key = active_git_profile.signing_key
         if signing_key and not signing_key.endswith("..."):
             subprocess.run(['git', 'config', '--local', 'user.signingkey', signing_key])
             subprocess.run(['git', 'config', '--local', 'commit.gpgsign', 'true'])
@@ -187,7 +198,7 @@ def run(args):
             subprocess.run(['git', 'config', '--local', '--unset', 'commit.gpgsign'], stderr=subprocess.DEVNULL)
             subprocess.run(['git', 'config', '--local', '--unset', 'user.signingkey'], stderr=subprocess.DEVNULL)
             
-        ssh_key = active_profile.get("ssh_key_path")
+        ssh_key = active_git_profile.ssh_key_path
         if ssh_key:
             subprocess.run(['git', 'config', '--local', 'core.sshCommand', f'ssh -i {ssh_key} -o IdentitiesOnly=yes'])
         else:
