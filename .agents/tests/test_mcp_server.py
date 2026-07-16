@@ -119,5 +119,49 @@ class TestMcpServer(unittest.TestCase):
         self.assertEqual(res["error"]["code"], -32700)
         self.assertIn("Parse error", res["error"]["message"])
 
+    def test_handle_message_notification(self):
+        # A valid JSON-RPC notification has no "id" and must return None (no response)
+        msg = {"jsonrpc": "2.0", "method": "notifications/initialized"}
+        res = mcp_server.handle_message(msg)
+        self.assertIsNone(res)
+
+        msg_unknown = {"jsonrpc": "2.0", "method": "telemetry/custom"}
+        res_unknown = mcp_server.handle_message(msg_unknown)
+        self.assertIsNone(res_unknown)
+
+    def test_call_tool_sanitize_token_usage(self):
+        # Negative prompt tokens
+        res = mcp_server.call_tool("log_token_usage", {"prompt_tokens": -5, "completion_tokens": 10})
+        self.assertTrue(res.get("isError"))
+        self.assertIn("prompt_tokens must be a non-negative integer", res["content"][0]["text"])
+
+        # Invalid task_id characters
+        res = mcp_server.call_tool("log_token_usage", {"prompt_tokens": 100, "completion_tokens": 50, "task_id": "invalid; rm -rf"})
+        self.assertTrue(res.get("isError"))
+        self.assertIn("task_id contains invalid characters", res["content"][0]["text"])
+
+    def test_call_tool_sanitize_lock_traversal(self):
+        # Empty module name
+        res = mcp_server.call_tool("acquire_module_lock", {"module_name": ""})
+        self.assertTrue(res.get("isError"))
+        self.assertIn("module_name must be a non-empty string", res["content"][0]["text"])
+
+        # Traversal sequence
+        res = mcp_server.call_tool("acquire_module_lock", {"module_name": "../etc/passwd"})
+        self.assertTrue(res.get("isError"))
+        self.assertIn("contains dangerous characters or path traversal sequences", res["content"][0]["text"])
+
+        # Traversal in release
+        res = mcp_server.call_tool("release_module_lock", {"module_name": "/absolute/path"})
+        self.assertTrue(res.get("isError"))
+        self.assertIn("contains dangerous characters or path traversal sequences", res["content"][0]["text"])
+
+    def test_is_safe_import_path(self):
+        allowed = "/home/user/project/.agents/scripts"
+        self.assertTrue(mcp_server.is_safe_import_path("/home/user/project/.agents/scripts/validate.py", allowed))
+        self.assertTrue(mcp_server.is_safe_import_path("/home/user/project/.agents/scripts/cli/commands/token.py", allowed))
+        self.assertFalse(mcp_server.is_safe_import_path("/home/user/project/.agents/scripts/../../validate.py", allowed))
+        self.assertFalse(mcp_server.is_safe_import_path("/home/user/project/other.py", allowed))
+
 if __name__ == '__main__':
     unittest.main()

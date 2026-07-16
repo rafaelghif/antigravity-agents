@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import io
+import re
 import platform
 import importlib.util
 from datetime import datetime
@@ -11,7 +12,12 @@ scripts_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Resolve scripts directory dynamically to target/workspace if available
 cwd_scripts_dir = os.path.abspath(os.path.join(os.getcwd(), '.agents', 'scripts'))
-is_valid_workspace = os.path.isdir(cwd_scripts_dir)
+is_valid_workspace = (
+    os.path.isdir(cwd_scripts_dir)
+    and os.path.exists(os.path.join(os.getcwd(), "AGENTS.md"))
+    and os.path.exists(os.path.join(os.getcwd(), ".agents", "rules.md"))
+)
+
 if is_valid_workspace:
     target_scripts_dir = cwd_scripts_dir
 else:
@@ -23,10 +29,14 @@ else:
 if target_scripts_dir not in sys.path:
     sys.path.insert(0, target_scripts_dir)
 
+def is_safe_import_path(filepath: str, allowed_dir: str) -> bool:
+    abs_filepath = os.path.abspath(filepath)
+    abs_allowed = os.path.abspath(allowed_dir)
+    return abs_filepath.startswith(abs_allowed + os.sep) or abs_filepath == abs_allowed
 
 token_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'token.py')
 token_cmd = None
-if os.path.exists(token_cmd_file):
+if os.path.exists(token_cmd_file) and is_safe_import_path(token_cmd_file, target_scripts_dir):
     try:
         spec = importlib.util.spec_from_file_location("mcp_token_cmd", token_cmd_file)
         token_cmd = importlib.util.module_from_spec(spec)
@@ -37,7 +47,7 @@ if os.path.exists(token_cmd_file):
 # Same for lock command
 lock_cmd_file = os.path.join(target_scripts_dir, 'cli', 'commands', 'lock.py')
 lock_cmd = None
-if os.path.exists(lock_cmd_file):
+if os.path.exists(lock_cmd_file) and is_safe_import_path(lock_cmd_file, target_scripts_dir):
     try:
         spec = importlib.util.spec_from_file_location("mcp_lock_cmd", lock_cmd_file)
         lock_cmd = importlib.util.module_from_spec(spec)
@@ -48,7 +58,7 @@ if os.path.exists(lock_cmd_file):
 # Same for validate module
 validate_file = os.path.join(target_scripts_dir, 'validate.py')
 validate_module = None
-if os.path.exists(validate_file):
+if os.path.exists(validate_file) and is_safe_import_path(validate_file, target_scripts_dir):
     try:
         spec = importlib.util.spec_from_file_location("mcp_validate", validate_file)
         validate_module = importlib.util.module_from_spec(spec)
@@ -135,6 +145,14 @@ def call_tool(name, arguments):
             completion = arguments.get("completion_tokens")
             task_id = arguments.get("task_id")
             
+            if not isinstance(prompt, int) or prompt < 0:
+                return {"content": [{"type": "text", "text": "Error: prompt_tokens must be a non-negative integer."}], "isError": True}
+            if not isinstance(completion, int) or completion < 0:
+                return {"content": [{"type": "text", "text": "Error: completion_tokens must be a non-negative integer."}], "isError": True}
+            if task_id:
+                if not isinstance(task_id, str) or not re.match(r"^[a-zA-Z0-9_\-]+$", task_id):
+                    return {"content": [{"type": "text", "text": "Error: task_id contains invalid characters."}], "isError": True}
+            
             args = [str(prompt), str(completion)]
             if task_id:
                 args.extend(["--task", task_id])
@@ -149,12 +167,26 @@ def call_tool(name, arguments):
             if not lock_cmd:
                 return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
             module_name = arguments.get("module_name")
+            if not isinstance(module_name, str) or not module_name:
+                return {"content": [{"type": "text", "text": "Error: module_name must be a non-empty string."}], "isError": True}
+            
+            normalized = module_name.replace("\\", "/")
+            if ".." in normalized or normalized.startswith("/") or normalized.startswith(":") or any(part in ("", ".") for part in normalized.split("/")):
+                return {"content": [{"type": "text", "text": "Error: module_name contains dangerous characters or path traversal sequences."}], "isError": True}
+                
             lock_cmd.run([module_name])
             
         elif name == "release_module_lock":
             if not lock_cmd:
                 return {"content": [{"type": "text", "text": "Error: lock command module not loaded."}], "isError": True}
             module_name = arguments.get("module_name")
+            if not isinstance(module_name, str) or not module_name:
+                return {"content": [{"type": "text", "text": "Error: module_name must be a non-empty string."}], "isError": True}
+            
+            normalized = module_name.replace("\\", "/")
+            if ".." in normalized or normalized.startswith("/") or normalized.startswith(":") or any(part in ("", ".") for part in normalized.split("/")):
+                return {"content": [{"type": "text", "text": "Error: module_name contains dangerous characters or path traversal sequences."}], "isError": True}
+                
             lock_cmd.run(["--release", module_name])
             
         elif name == "run_validation":
@@ -195,6 +227,7 @@ def handle_message(message):
         }
         
     msg_id = message.get("id")
+    is_notification = "id" not in message
     method = message.get("method")
     
     # Check JSON-RPC version
@@ -217,6 +250,9 @@ def handle_message(message):
                 "message": "Invalid Request: missing method name"
             }
         }
+        
+    if is_notification:
+        return None
         
     if method == "initialize":
         return {
