@@ -1,7 +1,7 @@
 ---
 id: 343
 title: "feat: prioritize MCP tools over local for issues pulls mergers and projects"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
