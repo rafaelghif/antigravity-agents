@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.114.0] - 2026-07-16
+
+### 🚀 Features
+- scaffold and implement new compliance and dependency management playbook
+- scaffold and implement new technical documentation and spec management playbook
+- scaffold and implement new refactoring and API deprecation playbook
+
+### 🛠️ Refactors
+- consolidate and de-duplicate rules for testing, secrets, and ADRs
+
+### ⚙️ Chores
+- Consolidate and expand agent skills playbooks (ISSUE-351)
+
+
 ## [3.113.1] - 2026-07-16
 
 ### 🐛 Bug Fixes

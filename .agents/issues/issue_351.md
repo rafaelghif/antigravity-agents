@@ -1,7 +1,7 @@
 ---
 id: issue-351
 title: "Consolidate and expand agent skills playbooks"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -34,14 +34,7 @@ Consolidate and expand agent skills playbooks
   - [x] `.agents/skills/documentation/SKILL.md` <!-- id: target-documentation -->
   - [x] `.agents/skills/compliance/SKILL.md` <!-- id: target-compliance -->
 - Active module locks:
-  - [x] `coding-standards` <!-- id: lock-coding-standards -->
-  - [x] `code-review` <!-- id: lock-code-review -->
-  - [x] `testing` <!-- id: lock-testing -->
-  - [x] `adr` <!-- id: lock-adr -->
-  - [x] `security-audit` <!-- id: lock-security-audit -->
-  - [x] `refactoring` <!-- id: lock-refactoring -->
-  - [x] `documentation` <!-- id: lock-documentation -->
-  - [x] `compliance` <!-- id: lock-compliance -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

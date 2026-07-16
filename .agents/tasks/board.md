@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Consolidate and expand agent skills playbooks (feat/issue-351) <!-- id: issue-351 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] Consolidate and expand agent skills playbooks (feat/issue-351) <!-- id: issue-351 -->
 - [x] Implement initial model/entity definitions <!-- id: issue-345 -->
 - [x] fix github action test_fetch_github_issues_success failure (feat/issue-350) <!-- id: issue-350 -->
 - [x] Improve skill scaffolding CLI remote sync offline registry and verification testing (feat/issue-349) <!-- id: issue-349 -->
