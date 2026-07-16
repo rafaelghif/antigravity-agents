@@ -1,12 +1,12 @@
-# AGENTS.md — {{NAME}}
+# AGENTS.md — Antigravity Agent Core (AAC) V3
 
 > Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.
 
 ## 1. What this project is
-- **Product:** {{PRODUCT}}
-- **Version:** {{VERSION}}
-- **Stack:** {{STACK}}
-- **Repo layout:** {{LAYOUT}}
+- **Product:** test-proj
+- **Version:** 3.121.0
+- **Stack:** Python 3, Docker
+- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).
 
 ## 2. Non-negotiable rules
 *(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*
@@ -60,6 +60,7 @@
   - *Management Thinking:* Align with the task board, split work into documented atomic subtasks, track budget limits, manage module locks, and maintain complete progress visibility.
   - *Production/Ops Thinking:* Ensure robust observability (structured JSON logs, telemetry, health endpoints), deployment containerization, backward-compatibility, and failover/concurrency safety.
 - **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.
+- **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.
 - **ALWAYS** translate and expand brief or informal user instructions (e.g. "A" or "continue previous task") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST perform systematic prompt expansion, defining clear checklist tasks, acceptance criteria, and compliance audits. The agent MUST strictly rely on and respect the user's human-in-the-loop command approval gates (never attempting to bypass or automate approval for proposed commands) and proactively verify ambiguous details interactively using `/grill-me` or interactive questions to prevent hallucinated actions.
 
 ## 3. CLI Helper Commands Reference
