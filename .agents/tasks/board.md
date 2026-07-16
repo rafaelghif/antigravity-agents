@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: implement Semantic Skill Router and Framework Blackbox Isolation (feat/366) <!-- id: 366 -->
 - [x] refactor: consolidate skills and enforce strict UARP XML reasoning protocol (feat/365) <!-- id: 365 -->
 - [x] fix: rename standalone binary from agy to aac to prevent global conflicts (feat/364) <!-- id: 364 -->
 - [x] refactor: remove redundant skill playbooks to optimize token footprint (feat/363) <!-- id: 363 -->
