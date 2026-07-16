@@ -10,8 +10,8 @@ This board tracks active development tasks.
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
-- [ ] fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore (feat/issue-341) <!-- id: 341 -->
 ## Done
+- [x] fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore (feat/issue-341) <!-- id: 341 -->
 - [x] fix: increase agent unit tests validation timeout to prevent CI pipeline hangs (feat/340) <!-- id: 340 -->
 - [x] fix: restore dynamic placeholders in schema template to fix bootstrap test (feat/339) <!-- id: 339 -->
 - [x] feat: enforce strict database schemas non-negotiable rule in agents.md (feat/338) <!-- id: 338 -->

@@ -1,7 +1,7 @@
 ---
 id: 341
 title: "fix: exclude agent changelog/memory from target installations and isolate agent scripts in antigravityignore"
-status: Doing
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
