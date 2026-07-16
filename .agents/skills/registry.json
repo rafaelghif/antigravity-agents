@@ -21,6 +21,13 @@
       "has_setup": false,
       "setup_path": null
     },
+    "documentation": {
+      "path": ".agents/skills/documentation",
+      "has_validation_hook": true,
+      "validation_hook_path": ".agents/skills/documentation/validate.py",
+      "has_setup": true,
+      "setup_path": ".agents/skills/documentation/setup.sh"
+    },
     "gitea-mcp": {
       "path": ".agents/skills/gitea-mcp",
       "has_validation_hook": false,
@@ -118,6 +125,20 @@
       "validation_hook_path": null,
       "has_setup": false,
       "setup_path": null
+    },
+    "refactoring": {
+      "path": ".agents/skills/refactoring",
+      "has_validation_hook": true,
+      "validation_hook_path": ".agents/skills/refactoring/validate.py",
+      "has_setup": true,
+      "setup_path": ".agents/skills/refactoring/setup.sh"
+    },
+    "compliance": {
+      "path": ".agents/skills/compliance",
+      "has_validation_hook": true,
+      "validation_hook_path": ".agents/skills/compliance/validate.py",
+      "has_setup": true,
+      "setup_path": ".agents/skills/compliance/setup.sh"
     },
     "database-evolution": {
       "path": ".agents/skills/database-evolution",
