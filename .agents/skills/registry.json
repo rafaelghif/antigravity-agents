@@ -1,21 +1,14 @@
 {
   "skills": {
-    "self-healing": {
-      "path": ".agents/skills/self-healing",
+    "engineering-standards": {
+      "path": ".agents/skills/engineering-standards",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
       "setup_path": null
     },
-    "release-management": {
-      "path": ".agents/skills/release-management",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "ci-cd": {
-      "path": ".agents/skills/ci-cd",
+    "troubleshooting": {
+      "path": ".agents/skills/troubleshooting",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -28,29 +21,8 @@
       "has_setup": true,
       "setup_path": ".agents/skills/documentation/setup.sh"
     },
-    "coding-standards": {
-      "path": ".agents/skills/coding-standards",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "security-audit": {
-      "path": ".agents/skills/security-audit",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "testing": {
       "path": ".agents/skills/testing",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "debugging": {
-      "path": ".agents/skills/debugging",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -70,8 +42,15 @@
       "has_setup": false,
       "setup_path": null
     },
-    "performance-optimization": {
-      "path": ".agents/skills/performance-optimization",
+    "security-compliance": {
+      "path": ".agents/skills/security-compliance",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "devops-release": {
+      "path": ".agents/skills/devops-release",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -104,20 +83,6 @@
       "validation_hook_path": null,
       "has_setup": false,
       "setup_path": null
-    },
-    "refactoring": {
-      "path": ".agents/skills/refactoring",
-      "has_validation_hook": true,
-      "validation_hook_path": ".agents/skills/refactoring/validate.py",
-      "has_setup": true,
-      "setup_path": ".agents/skills/refactoring/setup.sh"
-    },
-    "compliance": {
-      "path": ".agents/skills/compliance",
-      "has_validation_hook": true,
-      "validation_hook_path": ".agents/skills/compliance/validate.py",
-      "has_setup": true,
-      "setup_path": ".agents/skills/compliance/setup.sh"
     },
     "database-evolution": {
       "path": ".agents/skills/database-evolution",
