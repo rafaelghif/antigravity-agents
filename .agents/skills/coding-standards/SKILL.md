@@ -26,9 +26,7 @@ Before writing any code or proposing design decisions, the agent MUST perform a 
 A world-class code writer transforms ambiguous problems into clean, robust, and self-documenting code.
 
 ### A. The TDD (Test-Driven Development) Cycle
-- **Red**: Write a failing unit test that describes the desired feature or bugfix before writing any production code.
-- **Green**: Write the minimal amount of code necessary to make the test pass.
-- **Refactor**: Clean up the implementation. Remove duplication, improve naming, reduce cognitive complexity, and ensure type safety.
+We follow strict Test-Driven Development. For implementation steps and guidelines, see [testing/SKILL.md](file://.agents/skills/testing/SKILL.md#L67-L72).
 
 ### B. Defeating Cognitive Complexity
 - **Short Functions**: Keep functions under 50 lines. If a function does more than one thing, split it.
@@ -56,7 +54,7 @@ Before proposing any code review, developers must self-review their changes:
 - **Code Documentation**: Verify all public APIs have clean docstrings explaining parameters, returns, and exceptions.
 
 ### B. Core Inspection Gates
-- **Secrets Audit**: Programmatically and visually verify that no credentials, API keys, passwords, or `.env` configurations are checked in.
+- **Secrets Audit**: Programmatically and visually verify that no credentials, API keys, passwords, or `.env` configurations are checked in (see [security-audit/SKILL.md](file://.agents/skills/security-audit/SKILL.md#L10-L14)).
 - **Insulation Check**: Verify that layer boundaries are maintained. Helper utilities, DB models, and third-party frameworks must not bleed into core business logic.
 - **DRY & SOLID Verification**: Identify duplicate code patterns and recommend modular class structures following SOLID principles.
 - **Type Safety**: Ensure no variable types are declared as generic `Any` or left untyped at public interface boundaries.
@@ -70,19 +68,14 @@ Before proposing any code review, developers must self-review their changes:
 
 ## 4. Testing & Validation Gates
 
-Quality is not verified after implementation—it is built-in.
-
-- **Deterministic Tests**: Mock all network APIs, database queries, and OS processes. Unit tests must run offline, deterministically, and fast (under 100ms per test).
-- **Edge Case Coverage**: Write test assertions for null inputs, boundary values, empty arrays, and error-throwing states.
-- **Automated Validation**: Ensure static linting, typing checks, and testing suites are run before staging commits.
+Quality is not verified after implementation—it is built-in. Refer to [testing/SKILL.md](file://.agents/skills/testing/SKILL.md) for full testing conventions, mocking patterns, and isolation rules.
 
 ---
 
 ## 5. Architectural Integrity & Design Decisions (ADRs)
 
 Maintain a long-term, self-documenting system architecture.
-
-- **Use ADRs**: For every major design choice (e.g. library addition, folder reorganization, protocol switch), write an Architectural Decision Record in `.agents/memory/decisions/`.
+- **Use ADRs**: For every major design choice, write an Architectural Decision Record following [adr/SKILL.md](file://.agents/skills/adr/SKILL.md).
 - **Decoupled Architecture**: Structure modules into clear domains with well-defined APIs. Keep system utilities separate from business logic.
 
 ---
