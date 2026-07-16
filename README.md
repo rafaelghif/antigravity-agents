@@ -78,9 +78,9 @@ Verify your environment meets these basic requirements before installing:
 ### 1. Install AAC V3 in Your Repository
 
 **Option A: Standalone Binary (Recommended, No Python Required)**
-Download the pre-compiled offline binary for your OS from the [GitHub Releases](https://github.com/rafaelghif/antigravity-agents/releases) page. Place the binary in your system path (e.g., `/usr/local/bin/agy` or `C:\Windows\agy.exe`), navigate to your target project folder, and run:
+Download the pre-compiled offline binary for your OS from the [GitHub Releases](https://github.com/rafaelghif/antigravity-agents/releases) page. Place the binary in your system path (e.g., `/usr/local/bin/aac` or `C:\Windows\aac.exe`), navigate to your target project folder, and run:
 ```bash
-agy bootstrap
+aac bootstrap
 ```
 
 **Option B: Online Installer Script (Requires Python 3.8+)**
@@ -119,26 +119,26 @@ When triggering your agent (Aider, Cursor, Cline, or Claude), simply start the p
 
 ## 🛠️ CLI Commands Reference
 
-Use `./helper.sh` (POSIX), `./helper.ps1` (Windows), or the offline binary `agy` to dispatch workspace commands:
+Use `./helper.sh` (POSIX), `./helper.ps1` (Windows), or the offline binary `aac` to dispatch workspace commands:
 
 | Command | Usage | Description |
 | :--- | :--- | :--- |
-| **`bootstrap`** | `agy bootstrap [-q \| --quick]` | Re-initializes stack parameters and templates. Use `-q` to bypass the interview and bootstrap immediately with defaults. |
-| **`validate`** | `agy validate [-q \| --quiet]` | Runs 11 workspace audits. Use `-q` to output only failed tests and validation summaries. |
-| **`commit`** | `agy commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
-| **`dashboard`** | `agy dashboard` | Spawns a local visual monitoring dashboard on your browser. |
-| **`issue`** | `agy issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
-| **`skill`** | `agy skill <subcommand>` | Manages custom agent skills playbooks. Supports `create` (scaffold structure), `test` (execute hooks/validate metadata), and `list` (show active skills). |
-| **`lock`** | `agy lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
-| **`profile`** | `agy profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
-| **`context`** | `agy context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
-| **`token`** | `agy token [<subcommand>]` | Tracks LLM token usage and budgets. Defaults to the `status` panel if subcommand is omitted. |
-| **`pause`** / **`resume`** | `agy pause` / `agy resume` | Halts or resumes agent workspace execution locks. |
-| **`mcp`** | `agy mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
-| **`changelog`** | `agy changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
-| **`learn`** | `agy learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
-| **`doctor`** | `agy doctor` | Checks python environment, dependencies, and command accessibility. |
-| **`heartbeat`** | `agy heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
+| **`bootstrap`** | `aac bootstrap [-q \| --quick]` | Re-initializes stack parameters and templates. Use `-q` to bypass the interview and bootstrap immediately with defaults. |
+| **`validate`** | `aac validate [-q \| --quiet]` | Runs 11 workspace audits. Use `-q` to output only failed tests and validation summaries. |
+| **`commit`** | `aac commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
+| **`dashboard`** | `aac dashboard` | Spawns a local visual monitoring dashboard on your browser. |
+| **`issue`** | `aac issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
+| **`skill`** | `aac skill <subcommand>` | Manages custom agent skills playbooks. Supports `create` (scaffold structure), `test` (execute hooks/validate metadata), and `list` (show active skills). |
+| **`lock`** | `aac lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
+| **`profile`** | `aac profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
+| **`context`** | `aac context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
+| **`token`** | `aac token [<subcommand>]` | Tracks LLM token usage and budgets. Defaults to the `status` panel if subcommand is omitted. |
+| **`pause`** / **`resume`** | `aac pause` / `aac resume` | Halts or resumes agent workspace execution locks. |
+| **`mcp`** | `aac mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
+| **`changelog`** | `aac changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
+| **`learn`** | `aac learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
+| **`doctor`** | `aac doctor` | Checks python environment, dependencies, and command accessibility. |
+| **`heartbeat`** | `aac heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
 
 ---
 

@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 # 1. Prerequisite Check: Check if standalone binary exists
 $Arch = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "x86_64" } else { $env:PROCESSOR_ARCHITECTURE }
-$BinaryName = "agy-Windows-$Arch.exe"
+$BinaryName = "aac-Windows-$Arch.exe"
 
 if (Test-Path "bin\$BinaryName") {
     & "bin\$BinaryName" bootstrap $args

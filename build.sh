@@ -13,9 +13,9 @@ fi
 OS="$(uname -s)"
 ARCH="$(uname -m)"
 
-BINARY_NAME="agy-${OS}-${ARCH}"
+BINARY_NAME="aac-${OS}-${ARCH}"
 if [[ "$OS" == "MINGW"* || "$OS" == "CYGWIN"* || "$OS" == "MSYS"* ]]; then
-    BINARY_NAME="agy-Windows-${ARCH}.exe"
+    BINARY_NAME="aac-Windows-${ARCH}.exe"
 fi
 
 echo "Target binary: bin/${BINARY_NAME}"
