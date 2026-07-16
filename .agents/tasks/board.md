@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: resolve remaining audit gaps for subtask tracking and scope leakage (feat/361) <!-- id: 361 -->
 - [x] feat: standalone pyinstaller build script and offline binaries (feat/360) <!-- id: 360 -->
 - [x] docs: enforce explicit skill file reading in AGENTS and rules templates (feat/359) <!-- id: 359 -->
 - [x] fix: validate.py skill enforcement and rigid logic (feat/358) <!-- id: 358 -->

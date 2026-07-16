@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.2] - 2026-07-16
+
+### 🐛 Bug Fixes
+- resolve remaining audit gaps for subtask tracking and scope leakage
+
+
 ## [3.121.1] - 2026-07-16
 
 ### 🐛 Bug Fixes
