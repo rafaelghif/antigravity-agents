@@ -3,17 +3,19 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] Implement initial model/entity definitions <!-- id: issue-345 -->
+- [ ] Consolidate and expand agent skills playbooks (feat/issue-351) <!-- id: issue-351 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
 - [x] Test Issue (feat/issue-42) <!-- id: issue-42 -->
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
+- [x] Implement AI skill loading enforcer in validation checks (feat/348) <!-- id: issue-348 -->
 ## Doing
+
 ## Done
+- [x] Implement initial model/entity definitions <!-- id: issue-345 -->
 - [x] fix github action test_fetch_github_issues_success failure (feat/issue-350) <!-- id: issue-350 -->
 - [x] Improve skill scaffolding CLI remote sync offline registry and verification testing (feat/issue-349) <!-- id: issue-349 -->
-- [x] Implement AI skill loading enforcer in validation checks (feat/348) <!-- id: issue-348 -->
 - [x] Audit and refactor installer and bootstrapper for safety and path correctness (feat/347) <!-- id: issue-347 -->
 - [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/346) <!-- id: 346 -->
 - [x] feat: relax validation checks for human programmers to allow warning-only bypasses (feat/344) <!-- id: 344 -->
@@ -333,3 +335,4 @@ This board tracks active development tasks.
 - [x] Verify and harden dummy installation plug and play consistency (feat/issue-291) <!-- id: issue-291 -->
 - [x] Synchronize CLI commands in context map documentation (feat/issue-292) <!-- id: issue-292 -->
 - [x] Generate workspace audit report (feat/issue-294) <!-- id: issue-294 -->
+- [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/issue-346) <!-- id: issue-346 -->
