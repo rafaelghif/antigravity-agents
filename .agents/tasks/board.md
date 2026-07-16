@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: remove standalone binary installer fallbacks (feat/374) <!-- id: 374 -->
 - [x] feat: implement pruning for task board done column (feat/373) <!-- id: 373 -->
 - [x] feat: enforce session resumption protocol for account switching (feat/372) <!-- id: 372 -->
 - [x] fix: eliminate semantic skill auto-injection to fix token budget exhaustion (feat/371) <!-- id: 371 -->

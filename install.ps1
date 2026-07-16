@@ -43,46 +43,37 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
-# 3. Check for standalone binary in the cloned repo
-$Arch = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "x86_64" } else { $env:PROCESSOR_ARCHITECTURE }
-$BinaryName = "agy-Windows-$Arch.exe"
-
-if (Test-Path "$TempPath\repo\bin\$BinaryName") {
-    # 4a. Invoke standalone binary
-    & "$TempPath\repo\bin\$BinaryName" install $TargetDir @args
-} else {
-    # 4b. Prerequisite Check: Python 3 presence and minimum version >= 3.8
-    $PythonExec = ""
-    try {
-        if (Get-Command python -ErrorAction SilentlyContinue) {
-            $Version = [string](& python --version 2>&1)
-            if ($Version -match "Python 3") { $PythonExec = "python" }
-        }
-        if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
-            $Version = [string](& python3 --version 2>&1)
-            if ($Version -match "Python 3") { $PythonExec = "python3" }
-        }
-    } catch {}
-
-    if (-not $PythonExec) {
-        Write-Error "Error: Standalone binary missing and Python 3.8 or newer is required to run Antigravity Agent Core."
-        Exit 1
+# 3. Prerequisite Check: Python 3 presence and minimum version >= 3.8
+$PythonExec = ""
+try {
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        $Version = [string](& python --version 2>&1)
+        if ($Version -match "Python 3") { $PythonExec = "python" }
     }
-
-    # Verify version
-    $VersionString = & $PythonExec -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
-    $VersionString = $VersionString.Trim()
-    $Parts = $VersionString.Split('.')
-    $Major = [int]$Parts[0]
-    $Minor = [int]$Parts[1]
-    if ($Major -lt 3 -or ($Major -eq 3 -and $Minor -lt 8)) {
-        Write-Error "Error: Python 3.8 or newer is required. Found Python $VersionString."
-        Exit 1
+    if (-not $PythonExec -and (Get-Command python3 -ErrorAction SilentlyContinue)) {
+        $Version = [string](& python3 --version 2>&1)
+        if ($Version -match "Python 3") { $PythonExec = "python3" }
     }
+} catch {}
 
-    # Invoke the python unified installer from the cloned temp repository
-    & $PythonExec "$TempPath\repo\.agents\scripts\cli\helper.py" install $TargetDir @args
+if (-not $PythonExec) {
+    Write-Error "Error: Python 3.8 or newer is required to run Antigravity Agent Core."
+    Exit 1
 }
+
+# Verify version
+$VersionString = & $PythonExec -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+$VersionString = $VersionString.Trim()
+$Parts = $VersionString.Split('.')
+$Major = [int]$Parts[0]
+$Minor = [int]$Parts[1]
+if ($Major -lt 3 -or ($Major -eq 3 -and $Minor -lt 8)) {
+    Write-Error "Error: Python 3.8 or newer is required. Found Python $VersionString."
+    Exit 1
+}
+
+# 4. Invoke the python unified installer from the cloned temp repository
+& $PythonExec "$TempPath\repo\.agents\scripts\cli\helper.py" install $TargetDir @args
 
 # Cleanup
 Remove-Item -Recurse -Force $TempPath -ErrorAction SilentlyContinue
