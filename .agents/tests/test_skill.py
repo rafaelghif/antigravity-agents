@@ -40,7 +40,7 @@ class TestSkillCommand(unittest.TestCase):
         
         skill.handle_install("local/path/to/skill-c")
         
-        mock_copy.assert_called_once()
+        mock_copy.assert_any_call(os.path.abspath("local/path/to/skill-c"), os.path.join(".agents/skills", "skill-c"))
         mock_sync.assert_called_once()
 
     @patch('os.path.exists')
