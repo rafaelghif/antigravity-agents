@@ -688,7 +688,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.126.0"
+    AAC_VERSION = "3.127.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Core repository check is based strictly on the git repository remote/name
@@ -794,7 +794,7 @@ def run(args):
 This board tracks active development tasks.
 
 ## Todo
-- [ ] 🚨 **MANDATORY FIRST TASK**: Initialize project architecture blueprint (`schema.md`), tailor codebase rules (`rules.md`), and update project metadata in `AGENTS.md` by interviewing the user. DO NOT proceed with other tasks until this is completed. <!-- id: task-init -->
+- [ ] 🚨 **MANDATORY FIRST TASK**: Initialize project architecture blueprint (`schema.md`), tailor codebase rules (`rules.md`), update project metadata in `AGENTS.md`, and configure workspace directories in `projects.json` by interviewing the user. DO NOT proceed with other tasks until this is completed. <!-- id: task-init -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing

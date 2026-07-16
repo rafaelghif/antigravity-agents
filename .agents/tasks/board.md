@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: include projects.json in mandatory init task (feat/377) <!-- id: 377 -->
 - [x] feat: add AGENTS.md to mandatory init task (feat/376) <!-- id: 376 -->
 - [x] feat: enforce mandatory initialization task on bootstrap (feat/375) <!-- id: 375 -->
 - [x] fix: remove standalone binary installer fallbacks (feat/374) <!-- id: 374 -->
