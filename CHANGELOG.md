@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.0] - 2026-07-16
+
+### 🚀 Features
+- implement Semantic Skill Router and Framework Blackbox Isolation
+
+
 ## [3.121.7] - 2026-07-16
 
 ### 🛠️ Refactors
