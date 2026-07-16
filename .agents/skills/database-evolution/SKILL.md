@@ -29,8 +29,12 @@ Every database migration MUST be fully reversible.
 - **Up & Down Scripts**: Every migration file must contain both an `Up` script (applying changes) and a `Down` script (rolling back changes).
 - **No Data Loss on Down**: Rollback scripts must never lead to untracked data loss. If a column is dropped in the `Up` step, ensure it was backed up or that the rollback script restores the schema structure safely.
 - **Dry-run Verification**: Before applying migrations on target databases, run a local migration dry-run and verify rollback:
-  - For Laravel/PHP: `php artisan migrate:fresh` followed by tests.
-  - For Django/Python: `python manage.py migrate` and verify rollback using test suites.
+  - **Laravel/PHP**: `php artisan migrate:fresh` followed by tests.
+  - **Django/Python**: `python manage.py migrate` and verify rollback using test suites.
+  - **Node.js (Prisma)**: Use `npx prisma migrate dev` and verify down migrations if using custom SQL.
+  - **Node.js (TypeORM/Sequelize)**: Run `typeorm migration:run` / `sequelize db:migrate` and test the `down` methods.
+  - **Go (GORM/golang-migrate)**: Run `migrate -path db/migrations -database $DB_URL up` and `down` to verify reversibility.
+  - **Java (Flyway/Liquibase)**: Use `mvn flyway:migrate` and `mvn flyway:undo` to validate rollback paths.
 
 ---
 
