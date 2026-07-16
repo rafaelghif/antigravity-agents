@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.124.1] - 2026-07-16
+
+### 🐛 Bug Fixes
+- remove standalone binary installer fallbacks
+
+
 ## [3.124.0] - 2026-07-16
 
 ### 🚀 Features
