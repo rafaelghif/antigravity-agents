@@ -186,6 +186,55 @@ Provide detailed instructions, rules, and best practices for the {title} skill h
         with open(skill_md_path, 'w', encoding='utf-8') as f:
             f.write(content)
             
+        # Create optional subdirectories
+        for sub in ["scripts", "examples", "resources"]:
+            os.makedirs(os.path.join(dest_dir, sub), exist_ok=True)
+            
+        # Write scripts/README.md
+        with open(os.path.join(dest_dir, "scripts", "README.md"), 'w', encoding='utf-8') as f:
+            f.write("# Custom Scripts\n\nPlace helper scripts for this skill in this directory.\n")
+            
+        # Write examples/README.md
+        with open(os.path.join(dest_dir, "examples", "README.md"), 'w', encoding='utf-8') as f:
+            f.write("# Reference Examples\n\nInclude reference implementations and usage examples here.\n")
+            
+        # Write resources/README.md
+        with open(os.path.join(dest_dir, "resources", "README.md"), 'w', encoding='utf-8') as f:
+            f.write("# Resources & Templates\n\nPlace static assets, configurations, and templates here.\n")
+            
+        # Write validate.py (validation hook template)
+        validate_py_content = """#!/usr/bin/env python3
+import sys
+
+def main() -> int:
+    # Custom skill compliance validation check
+    # Return 0 for pass, non-zero for failure
+    print("Running compliance checks for this skill...")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+"""
+        with open(os.path.join(dest_dir, "validate.py"), 'w', encoding='utf-8') as f:
+            f.write(validate_py_content)
+        try:
+            os.chmod(os.path.join(dest_dir, "validate.py"), 0o755)
+        except Exception:
+            pass
+            
+        # Write setup.sh (setup script template)
+        setup_sh_content = """#!/usr/bin/env bash
+set -euo pipefail
+# Custom skill setup or dependencies installation
+echo "Setting up dependencies for this skill..."
+"""
+        with open(os.path.join(dest_dir, "setup.sh"), 'w', encoding='utf-8') as f:
+            f.write(setup_sh_content)
+        try:
+            os.chmod(os.path.join(dest_dir, "setup.sh"), 0o755)
+        except Exception:
+            pass
+            
         print_ok(f"Scaffolded skill '{name}' at '{dest_dir}' successfully.")
         run_sync()
     except Exception as e:
