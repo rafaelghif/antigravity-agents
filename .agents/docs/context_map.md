@@ -28,23 +28,18 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `AGENTS.md` | Identity, non-negotiables | Always — every prompt |
 | `.agents/rules.md` | Project-specific stack, style, and testing rules (language, lint, frameworks) | Always — loaded alongside `AGENTS.md` every prompt |
 | `.agents/skills/adr/SKILL.md` | Standardized playbook and template for generating new Architectural Decision Records. | On match |
-| `.agents/skills/ci-cd/SKILL.md` | Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. | On match |
 | `.agents/skills/code-review/SKILL.md` | Guidelines and checklists for performing high-quality, zero-regression code reviews. | On match |
-| `.agents/skills/coding-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. | On match |
-| `.agents/skills/compliance/SKILL.md` | Package pinning, license auditing, upgrade verification, and package pruning playbook | On match |
 | `.agents/skills/contract-synchronization/SKILL.md` | Playbook for managing API contract schemas, generating client code, and verifying backend/frontend synchronization. | On match |
 | `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | On match |
-| `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | On match |
+| `.agents/skills/devops-release/SKILL.md` | Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
 | `.agents/skills/documentation/SKILL.md` | API docstrings, onboarding manuals, blueprints, and docs sync playbook | On match |
+| `.agents/skills/engineering-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. SOLID refactoring, guard clauses, TDD, and legacy migration playbook Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | On match |
 | `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | On match |
-| `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | On match |
-| `.agents/skills/refactoring/SKILL.md` | SOLID refactoring, guard clauses, TDD, and legacy migration playbook | On match |
-| `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
-| `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | On match |
-| `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
+| `.agents/skills/security-compliance/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. Package pinning, license auditing, upgrade verification, and package pruning playbook | On match |
 | `.agents/skills/skill-evolution/SKILL.md` | Playbook instructing agents how to dynamically formulate, design, bootstrap, and register new workspace skills when facing skill gaps. | On match |
 | `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | On match |
 | `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | On match |
+| `.agents/skills/troubleshooting/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
 | `.agents/workflows/*.md` | Slash-command macros (e.g. `/sync-memory`) | Only when the command is run |
 | `.agents/memory/architecture.md` | Compressed system summary | Pulled on demand (`@.agents/memory/architecture.md`) before architecture-affecting work |
 | `.agents/memory/decisions/` | ADRs — full reasoning | On demand |
