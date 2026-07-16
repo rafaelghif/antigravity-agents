@@ -1,7 +1,7 @@
 ---
 id: issue-350
 title: "fix github action test_fetch_github_issues_success failure"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---

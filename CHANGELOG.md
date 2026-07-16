@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.113.1] - 2026-07-16
+
+### 🐛 Bug Fixes
+- fix github action test_fetch_github_issues_success failure (ISSUE-350)
+
+### 🧪 Tests
+- align fetch issues test mock with new git api get_service_info design
+
+
 ## [3.113.0] - 2026-07-16
 
 ### 🚀 Features
