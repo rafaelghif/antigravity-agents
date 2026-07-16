@@ -7,6 +7,18 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from typing import List
 
+try:
+    from core.executor import executor
+    from core.logger import logger
+except ImportError:
+    try:
+        from ....core.executor import executor
+        from ....core.logger import logger
+    except ImportError:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+        from core.executor import executor
+        from core.logger import logger
+
 BUDGET_FILE = ".agents/state/token_budget.json"
 LOG_FILE = ".agents/state/logs/token_usage.log"
 
@@ -181,7 +193,7 @@ def load_budget() -> dict:
                         try:
                             from ....core.entities import TokenBudget, ValidationError
                         except ImportError:
-                            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
+                            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
                             from core.entities import TokenBudget, ValidationError
 
                     try:
@@ -237,13 +249,8 @@ def check_date_resets(budget: dict) -> dict:
 
 def get_current_task_id() -> str:
     try:
-        res = subprocess.run(
-            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if res.returncode == 0:
+        res = executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+        if res.success:
             branch = res.stdout.strip()
             match = re.search(r'(task-\d+|issue-\d+)', branch.lower())
             if match:
@@ -349,14 +356,11 @@ def auto_detect_tokens() -> tuple:
     env = os.environ.copy()
     env["INTERNAL_SYNC"] = "true"
     try:
-        res = subprocess.run(
+        res = executor.execute(
             ["agy", "-p", "/usage"],
-            capture_output=True,
-            text=True,
-            timeout=40,
             env=env
         )
-        if res.returncode == 0:
+        if res.success:
             parsed = parse_usage_output(res.stdout)
             if parsed:
                 task_id = get_current_task_id()
@@ -866,14 +870,11 @@ def sync_from_platform_usage() -> dict:
         env = os.environ.copy()
         env["INTERNAL_SYNC"] = "true"
         try:
-            res = subprocess.run(
+            res = executor.execute(
                 ["agy", "-p", "/usage"],
-                capture_output=True,
-                text=True,
-                timeout=40,
                 env=env
             )
-            if res.returncode == 0:
+            if res.success:
                 parsed = parse_usage_output(res.stdout)
         except Exception:
             pass
