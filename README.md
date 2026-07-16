@@ -1,7 +1,7 @@
 # Antigravity Agent Core (AAC) V3
 ### *Enterprise Guardrails, Workspace Insulation, and Local Quality Gates for Autonomous AI Agents*
 
-[![Version](https://img.shields.io/badge/version-3.110.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.111.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)

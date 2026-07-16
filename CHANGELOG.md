@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.111.0] - 2026-07-16
+
+### 🚀 Features
+- refactor: upgrade agent core codebase to enterprise-grade standards (ISSUE-346)
+
+### 🛠️ Refactors
+- introduce StructuredLogger and ShellExecutor utilities to harden core services
+
+
 ## [3.110.0] - 2026-07-16
 
 ### 🚀 Features

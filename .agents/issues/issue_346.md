@@ -1,7 +1,7 @@
 ---
 id: issue-346
 title: "refactor: upgrade agent core codebase to enterprise-grade standards"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-16
 ---

@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] refactor: upgrade agent core codebase to enterprise-grade standards (feat/346) <!-- id: 346 -->
 - [ ] Implement initial model/entity definitions <!-- id: issue-345 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
@@ -12,6 +11,7 @@ This board tracks active development tasks.
 - [x] Implement V3 Phase 4: Multi-Developer Identity Isolation & Security (feat/issue-225) <!-- id: issue-225 -->
 ## Doing
 ## Done
+- [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/346) <!-- id: 346 -->
 - [x] feat: relax validation checks for human programmers to allow warning-only bypasses (feat/344) <!-- id: 344 -->
 - [x] feat: prioritize MCP tools over local for issues pulls mergers and projects (feat/343) <!-- id: 343 -->
 - [x] fix: enforce strict agent script isolation rule in AGENTS.md template (feat/issue-342) <!-- id: 342 -->
