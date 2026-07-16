@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.104.0] - 2026-07-16
+
+### 🚀 Features
+- feat: prioritize MCP tools over local for issues pulls mergers and projects (ISSUE-343)
+
+
 ## [3.103.0] - 2026-07-16
 
 ### 🚀 Features
