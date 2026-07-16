@@ -22,7 +22,13 @@ def get_current_branch() -> str:
 
 def get_issue_id(branch: str) -> str:
     match = re.search(r'(issue|task|chore)-[0-9]+', branch, re.IGNORECASE)
-    return match.group(0).lower() if match else ""
+    if match:
+        return match.group(0).lower()
+    # Support direct feat/123 or fix/123 format
+    match = re.search(r'(feat|fix|chore|docs)/([0-9]+)', branch, re.IGNORECASE)
+    if match:
+        return f"issue-{match.group(2)}"
+    return ""
 
 def parse_yaml_frontmatter(content: str) -> Dict[str, str]:
     meta = {}
@@ -55,10 +61,22 @@ def get_issue_details(issue_id: str) -> Dict[str, Any]:
         details["title"] = meta.get("title", "Unknown Title")
         
         tasks = []
+        in_problem_statement = False
+        problem_text = []
         for line in content.split('\n'):
+            if line.strip().startswith('## Problem Statement'):
+                in_problem_statement = True
+                continue
+            elif line.strip().startswith('## Tasks') or (in_problem_statement and line.strip().startswith('## ')):
+                in_problem_statement = False
+                
+            if in_problem_statement and line.strip():
+                problem_text.append(line.strip())
+                
             if line.strip().startswith('- ['):
                 tasks.append(line.strip())
         details["tasks"] = tasks
+        details["description"] = " ".join(problem_text) if problem_text else ""
     return details
 
 def get_locked_modules(branch: str) -> List[str]:
@@ -160,6 +178,32 @@ def get_workflow_mode() -> str:
             pass
     return "team"
 
+def get_semantic_skills(text: str) -> List[str]:
+    """Scan text for keywords and return a list of matching skill names."""
+    SKILL_MAP = {
+        "testing": ["test", "jest", "pytest", "mocha", "junit", "coverage", "mock", "tdd"],
+        "devops-release": ["docker", "deploy", "pipeline", "ci/cd", "ci", "cd", "build", "nginx", "github actions", "kubernetes", "k8s", "release", "semver", "version bump", "installer"],
+        "troubleshooting": ["bug", "error", "crash", "fix", "leak", "panic", "debug", "traceback", "exception", "fail"],
+        "engineering-standards": ["feature", "add", "create", "implement", "build", "refactor", "clean", "solid", "slow", "optimize", "memory", "performance", "architecture", "legacy"],
+        "task-management": ["spec", "plan", "checklist", "issue", "board", "task", "roadmap", "milestone", "grill-me"],
+        "database-evolution": ["database", "table", "field", "schema", "model", "migration", "relation", "sql", "orm", "query", "index", "column"],
+        "documentation": ["doc", "readme", "manual", "guide", "comment", "docstring", "api doc", "blueprint"],
+        "security-compliance": ["security", "vulnerability", "audit", "cve", "auth", "token", "jwt", "oauth", "password", "hash", "secret", "license"]
+    }
+    
+    text_lower = text.lower()
+    matched_skills = set()
+    
+    for skill, keywords in SKILL_MAP.items():
+        for kw in keywords:
+            # Match word boundary to avoid false positives (e.g. matching 'ci' inside 'specific')
+            if re.search(r'\b' + re.escape(kw) + r'\b', text_lower):
+                matched_skills.add(skill)
+                break
+                
+    return sorted(list(matched_skills))
+
+
 def optimize_context() -> None:
     # First, archive completed tasks and plans to keep LLM context clean
     archive_completed_tasks_and_plans()
@@ -209,6 +253,24 @@ def optimize_context() -> None:
         except Exception:
             pass
             
+    # Extract semantic skills based on issue content
+    issue_text = details.get("description", "") + "\n" + details.get("title", "")
+    semantic_skills = get_semantic_skills(issue_text)
+    
+    skills_injected_str = ""
+    if semantic_skills:
+        skills_blocks = []
+        for skill in semantic_skills:
+            skill_path = f".agents/skills/{skill}/SKILL.md"
+            if os.path.exists(skill_path):
+                try:
+                    with open(skill_path, 'r', encoding='utf-8') as sf:
+                        skills_blocks.append(f"### Skill: {skill}\n{sf.read().strip()}")
+                except Exception:
+                    pass
+        if skills_blocks:
+            skills_injected_str = "\n\n## 📖 Semantic Skill Auto-Injection\n*The following playbook(s) have been automatically loaded based on task keywords:*\n\n" + "\n\n".join(skills_blocks)
+
     context_content = f"""# 🎯 Active Workspace Context Manifest
 
 > [!IMPORTANT]
@@ -233,7 +295,7 @@ def optimize_context() -> None:
 
 ## ⚠️ Scope Boundaries
 - **Strict Scope**: Only edit the files listed under "Locked Modules & Files to Edit" or files relevant to the active issue.
-- **NEVER** edit files outside this scope unless explicitly requested by the USER.
+- **NEVER** edit files outside this scope unless explicitly requested by the USER.{skills_injected_str}
 """
     
     context_file = ".agents/state/active_context.md"
