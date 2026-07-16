@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.127.0] - 2026-07-16
+
+### 🚀 Features
+- include projects.json in mandatory init task
+
+
 ## [3.126.0] - 2026-07-16
 
 ### 🚀 Features
