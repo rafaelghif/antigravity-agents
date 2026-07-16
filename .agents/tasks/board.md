@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] Audit and refactor installer and bootstrapper for safety and path correctness <!-- id: issue-347 -->
 - [ ] Implement initial model/entity definitions <!-- id: issue-345 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->

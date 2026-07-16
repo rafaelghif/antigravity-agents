@@ -4,6 +4,18 @@ import shutil
 import re
 import subprocess
 from datetime import datetime
+
+try:
+    from core.executor import executor
+    from core.logger import logger
+except ImportError:
+    try:
+        from ....core.executor import executor
+        from ....core.logger import logger
+    except ImportError:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+        from core.executor import executor
+        from core.logger import logger
 from typing import List, Tuple
 
 def print_err(msg: str) -> None:
@@ -189,7 +201,7 @@ def run(args: List[str]) -> None:
     if not os.path.exists(target_git):
         print("Initializing empty Git repository in target directory...")
         try:
-            subprocess.run(['git', '-C', target_abs, 'init'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            executor.execute(['git', '-C', target_abs, 'init'])
         except Exception as e:
             print_warn(f"Failed to initialize Git repository: {e}")
 
@@ -232,7 +244,7 @@ def run(args: List[str]) -> None:
     # 10. Run final synchronization in target directory
     print("Running final synchronization...")
     try:
-        subprocess.run([sys.executable, ".agents/scripts/cli/helper.py", "sync"], check=True)
+        executor.execute([sys.executable, ".agents/scripts/cli/helper.py", "sync"], check=True)
     except Exception as e:
         print_warn(f"Failed to execute final sync: {e}")
 
