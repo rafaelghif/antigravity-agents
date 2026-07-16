@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.108.0] - 2026-07-16
+
+### 🚀 Features
+- feat: Implement initial model/entity definitions (ISSUE-345)
+
+
 ## [3.107.0] - 2026-07-16
 
 ### 🚀 Features

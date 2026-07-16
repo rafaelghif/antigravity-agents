@@ -174,6 +174,26 @@ def load_budget() -> dict:
                         data["daily_limit"] = 500000
                     if data.get("monthly_limit", 0) < 5000000:
                         data["monthly_limit"] = 5000000
+                        
+                    try:
+                        from core.entities import TokenBudget, ValidationError
+                    except ImportError:
+                        try:
+                            from ....core.entities import TokenBudget, ValidationError
+                        except ImportError:
+                            sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
+                            from core.entities import TokenBudget, ValidationError
+
+                    try:
+                        global_budget = TokenBudget.from_dict("global", data)
+                        global_budget.validate()
+                        
+                        for acc, acc_data in data.get("accounts", {}).items():
+                            acc_budget = TokenBudget.from_dict(acc, acc_data)
+                            acc_budget.validate()
+                    except ValidationError as ve:
+                        print(f"Warning: Token budget validation failed: {ve}")
+
                     return recalculate_used_from_log(data)
             except Exception:
                 return recalculate_used_from_log(default_budget)
