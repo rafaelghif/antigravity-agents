@@ -263,13 +263,9 @@ def optimize_context() -> None:
         for skill in semantic_skills:
             skill_path = f".agents/skills/{skill}/SKILL.md"
             if os.path.exists(skill_path):
-                try:
-                    with open(skill_path, 'r', encoding='utf-8') as sf:
-                        skills_blocks.append(f"### Skill: {skill}\n{sf.read().strip()}")
-                except Exception:
-                    pass
+                skills_blocks.append(f"- `view_file {skill_path}`")
         if skills_blocks:
-            skills_injected_str = "\n\n## 📖 Semantic Skill Auto-Injection\n*The following playbook(s) have been automatically loaded based on task keywords:*\n\n" + "\n\n".join(skills_blocks)
+            skills_injected_str = "\n\n## 📖 Recommended Playbooks\n*Based on your task keywords, you MUST read these playbooks using the view_file tool if you haven't already:*\n" + "\n".join(skills_blocks)
 
     context_content = f"""# 🎯 Active Workspace Context Manifest
 
