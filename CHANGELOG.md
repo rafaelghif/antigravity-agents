@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.123.0] - 2026-07-16
+
+### 🚀 Features
+- enforce session resumption protocol for account switching
+
+
 ## [3.122.5] - 2026-07-16
 
 ### 🐛 Bug Fixes
