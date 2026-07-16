@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.120.1] - 2026-07-16
+
+### 🐛 Bug Fixes
+- relax validate.py skill enforcement logic
+
+
 ## [3.120.0] - 2026-07-16
 
 ### 🚀 Features

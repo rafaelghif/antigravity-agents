@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: validate.py skill enforcement and rigid logic (feat/358) <!-- id: 358 -->
 - [x] upgrade fallback version references to v3.119.0 (feat/issue-357) <!-- id: issue-357 -->
 - [x] harden local mcp server jsonrpc and path checks (feat/issue-356) <!-- id: issue-356 -->
 - [x] harden global leak prevention guidelines in workspace rules (feat/issue-355) <!-- id: issue-355 -->
