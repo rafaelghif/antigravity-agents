@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix(skills): audit and restore truncated skills and broken references (feat/367) <!-- id: 367 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix(skills): audit and restore truncated skills and broken references (feat/367) <!-- id: 367 -->
 - [x] feat: implement Semantic Skill Router and Framework Blackbox Isolation (feat/366) <!-- id: 366 -->
 - [x] refactor: consolidate skills and enforce strict UARP XML reasoning protocol (feat/365) <!-- id: 365 -->
 - [x] fix: rename standalone binary from agy to aac to prevent global conflicts (feat/364) <!-- id: 364 -->

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.1] - 2026-07-16
+
+### 🐛 Bug Fixes
+- track missing consolidated skill playbooks
+- audit and restore truncated skills and broken references
+
+
 ## [3.122.0] - 2026-07-16
 
 ### 🚀 Features

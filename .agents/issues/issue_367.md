@@ -1,7 +1,7 @@
 ---
 id: 367
 title: "fix(skills): audit and restore truncated skills and broken references"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
