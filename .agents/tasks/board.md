@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: enforce session resumption protocol for account switching (feat/372) <!-- id: 372 -->
 - [x] fix: eliminate semantic skill auto-injection to fix token budget exhaustion (feat/371) <!-- id: 371 -->
 - [x] refactor: sharpen soul.md to eliminate rule redundancy (feat/370) <!-- id: 370 -->
 - [x] refactor: sharpen project rules and eliminate playbooks redundancy (feat/369) <!-- id: 369 -->

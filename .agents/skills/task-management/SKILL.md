@@ -49,3 +49,10 @@ Once the issue file is written:
 5. Create and checkout a new branch for the issue immediately (e.g., `./helper.sh issue checkout issue-[number]`). **NEVER** edit files or commit directly on the `main` or `master` branch.
 
 Note: Task statuses and checkbox states in `board.md` are automatically kept in sync with issue file statuses whenever issues are synchronized, checkout, or closed.
+
+## 3. Session Resumption (Handling Account Switches)
+When a user returns to a workspace after switching accounts or starting a fresh conversation session, they may issue a generic command like "continue", "resume", or "lanjutkan". 
+1. **ALWAYS** check `.agents/tasks/board.md` for active tasks in the `Doing` column FIRST.
+2. If an active task exists, do NOT create a new task or issue.
+3. Immediately run `./helper.sh issue checkout <task-id>` to restore the workspace to that issue's branch.
+4. Run `./helper.sh context optimize` and read `.agents/state/active_context.md` to perfectly reload the state, uncommitted changes, and active checklist.
