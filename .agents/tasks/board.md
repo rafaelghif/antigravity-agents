@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] refactor: sharpen project rules and eliminate playbooks redundancy (feat/369) <!-- id: 369 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor: sharpen project rules and eliminate playbooks redundancy (feat/369) <!-- id: 369 -->
 - [x] refactor: sharpen AGENTS.md rules and offload to playbooks (feat/368) <!-- id: 368 -->
 - [x] fix(skills): audit and restore truncated skills and broken references (feat/367) <!-- id: 367 -->
 - [x] feat: implement Semantic Skill Router and Framework Blackbox Isolation (feat/366) <!-- id: 366 -->

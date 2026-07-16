@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.3] - 2026-07-16
+
+### 🛠️ Refactors
+- sharpen project rules and eliminate playbooks redundancy
+
+
 ## [3.122.2] - 2026-07-16
 
 ### 🛠️ Refactors
