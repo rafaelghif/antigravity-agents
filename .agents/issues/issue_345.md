@@ -1,7 +1,7 @@
 ---
 id: issue-345
 title: "feat: Implement initial model/entity definitions"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-16
 ---
