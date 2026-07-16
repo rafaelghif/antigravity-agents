@@ -5,6 +5,18 @@ import subprocess
 import re
 
 try:
+    from core.executor import executor
+    from core.logger import logger
+except ImportError:
+    try:
+        from ....core.executor import executor
+        from ....core.logger import logger
+    except ImportError:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+        from core.executor import executor
+        from core.logger import logger
+
+try:
     import portalocker
 except ImportError:
     try:
@@ -34,13 +46,8 @@ def load_issue_content_from_branch(branch: str, issue_id: str) -> str:
     try:
         filename = f"{issue_id.replace('-', '_')}.md"
         path_in_repo = f".agents/issues/{filename}"
-        res = subprocess.run(
-            ['git', 'show', f"{branch}:{path_in_repo}"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if res.returncode == 0:
+        res = executor.execute(['git', 'show', f"{branch}:{path_in_repo}"])
+        if res.success:
             return res.stdout
     except Exception:
         pass
@@ -67,20 +74,10 @@ def parse_locks_from_content(content: str) -> list:
 def get_existing_branches() -> set:
     existing = set()
     try:
-        res = subprocess.run(
-            ['git', 'show-ref'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if res.returncode != 0:
-            res = subprocess.run(
-                ['git', 'branch', '--format=%(refname:short)'],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-        if res.returncode == 0:
+        res = executor.execute(['git', 'show-ref'])
+        if not res.success:
+            res = executor.execute(['git', 'branch', '--format=%(refname:short)'])
+        if res.success:
             for line in res.stdout.splitlines():
                 line = line.strip()
                 if not line:
@@ -146,13 +143,8 @@ def load_locks() -> dict:
     locks = {}
     branches = []
     try:
-        res = subprocess.run(
-            ['git', 'branch', '-a', '--format=%(refname:short)'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if res.returncode == 0:
+        res = executor.execute(['git', 'branch', '-a', '--format=%(refname:short)'])
+        if res.success:
             for line in res.stdout.splitlines():
                 b = line.strip()
                 if not b or "HEAD" in b:
@@ -165,7 +157,7 @@ def load_locks() -> dict:
 
     current_branch = "unknown"
     try:
-        res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
+        res = executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
         current_branch = res.stdout.strip()
     except Exception:
         pass
@@ -230,11 +222,11 @@ def save_locks(locks: dict) -> None:
         with portalocker.Lock(LOCK_FILE, 'w', flags=portalocker.LOCK_EX, timeout=5.0) as f:
             json.dump(locks, f, indent=2)
     except Exception as e:
-        print(f"Warning: Failed to write lock file: {e}")
+        logger.warn(f"Failed to write lock file: {e}")
 
     branch = "unknown"
     try:
-        res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE, text=True)
+        res = executor.execute(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
         branch = res.stdout.strip()
     except Exception:
         pass
@@ -295,4 +287,4 @@ def save_locks(locks: dict) -> None:
             with open(issue_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
         except Exception as e:
-            print(f"Error updating issue locks: {e}")
+            logger.error(f"Error updating issue locks: {e}")

@@ -679,7 +679,7 @@ def run(args):
 
     # 5. Update or Create AGENTS.md
     agents_file = "AGENTS.md"
-    AAC_VERSION = "3.109.0"
+    AAC_VERSION = "3.110.0"
     src_agents = os.path.join(src_root, "AGENTS.md")
     
     # Core repository check is based strictly on the git repository remote/name

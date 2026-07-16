@@ -4,6 +4,15 @@ import re
 import subprocess
 from datetime import datetime
 
+try:
+    from core.logger import logger
+except ImportError:
+    try:
+        from ....core.logger import logger
+    except ImportError:
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+        from core.logger import logger
+
 # Inject parent directory containing git_api
 scripts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 if scripts_dir not in sys.path:
@@ -37,13 +46,13 @@ def parse_issue_frontmatter(content):
             try:
                 from ....core.entities import Issue, ValidationError
             except ImportError:
-                sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
+                sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
                 from core.entities import Issue, ValidationError
         try:
             issue_entity = Issue.from_dict(fm)
             issue_entity.validate()
         except ValidationError as ve:
-            print(f"Warning: Issue frontmatter validation failed: {ve}")
+            logger.warn(f"Issue frontmatter validation failed: {ve}")
 
     return fm
 
@@ -107,9 +116,9 @@ def update_board_completed(issue_id):
                 
             with open(board_path, 'w', encoding='utf-8') as f:
                 f.write("\n".join(new_lines) + "\n")
-            print(f"[OK] Moved task '{issue_id}' to Done in task board.")
+            logger.success(f"Moved task '{issue_id}' to Done in task board.")
     except Exception as e:
-        print(f"Warning: Could not update task board: {e}")
+        logger.warn(f"Could not update task board: {e}")
 
 def sync_board_with_issues():
     board_path = ".agents/tasks/board.md"
@@ -271,19 +280,19 @@ def sync_board_with_issues():
 
         with open(board_path, 'w', encoding='utf-8') as f:
             f.write("\n".join(output) + "\n")
-        print("[OK] Task board (board.md) successfully synchronized with issue states.")
+        logger.success("Task board (board.md) successfully synchronized with issue states.")
     except Exception as e:
-        print(f"Warning: Could not sync task board: {e}")
+        logger.warn(f"Could not sync task board: {e}")
 
 def sync_issues():
     try:
         import git_api
         remote_issues = git_api.fetch_github_issues()
         if remote_issues is None:
-            print("[INFO] Operating in local offline mode using local issue cache.")
+            logger.info("Operating in local offline mode using local issue cache.")
             return
             
-        print("[INFO] Synchronizing local issues with GitHub remote...")
+        logger.info("Synchronizing local issues with GitHub remote...")
         if not os.path.exists(ISSUE_DIR):
             os.makedirs(ISSUE_DIR, exist_ok=True)
             
@@ -335,7 +344,7 @@ def sync_issues():
                             content = '\n'.join(lines)
                             with open(path, 'w', encoding='utf-8') as f:
                                 f.write(content)
-                            print(f"[OK] Updated local issue #{number} status to '{state}'.")
+                            logger.success(f"Updated local issue #{number} status to '{state}'.")
                 except Exception:
                     pass
             else:
@@ -368,11 +377,11 @@ github_number: {number}
                 try:
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(template)
-                    print(f"[OK] Pulled new remote issue #{number} as local file '{file_path}'.")
+                    logger.success(f"Pulled new remote issue #{number} as local file '{file_path}'.")
                 except Exception:
                     pass
     except Exception as e:
-        print(f"[WARN] Issue synchronization failed: {e}", file=sys.stderr)
+        logger.warn(f"Issue synchronization failed: {e}")
     finally:
         sync_board_with_issues()
 
@@ -386,7 +395,7 @@ def push_offline_issues():
     if not pat or not repo:
         return
         
-    print("[INFO] Auditing local issues for offline creations...")
+    logger.info("Auditing local issues for offline creations...")
     for f_name in os.listdir(ISSUE_DIR):
         if not f_name.endswith(".md") or "example" in f_name:
             continue
@@ -402,7 +411,7 @@ def push_offline_issues():
             title = fm.get("title")
             
             if not github_number and issue_id and title:
-                print(f"[INFO] Pushing local issue '{issue_id}' to GitHub remote...")
+                logger.info(f"Pushing local issue '{issue_id}' to GitHub remote...")
                 res = git_api.create_github_issue(title, f"Local tracking ID: {issue_id}")
                 if res:
                     url, number = res
@@ -415,9 +424,9 @@ def push_offline_issues():
                         new_content = "\n".join(lines) + "\n"
                         with open(path, 'w', encoding='utf-8') as f:
                             f.write(new_content)
-                        print(f"[OK] Successfully linked local issue '{issue_id}' to remote GitHub issue #{number}.")
+                        logger.success(f"Successfully linked local issue '{issue_id}' to remote GitHub issue #{number}.")
         except Exception as e:
-            print(f"[WARN] Failed to push local issue '{f_name}': {e}", file=sys.stderr)
+            logger.warn(f"Failed to push local issue '{f_name}': {e}")
 
 def get_issue_path(issue_id):
     normalized = issue_id.lower().replace('-', '_')
