@@ -30,13 +30,13 @@ created_at: [current-date]
 - **Key Modules**: [Files to create or edit]
 
 ## 2. Implementation Subtasks
-- [ ] Subtask A (e.g. Write tests)
-- [ ] Subtask B (e.g. Write business logic)
-- [ ] Subtask C (e.g. Validate output)
+- [ ] Subtask A (e.g. Write tests) <!-- id: task-1 -->
+- [ ] Subtask B (e.g. Write business logic) <!-- id: task-2 -->
+- [ ] Subtask C (e.g. Validate output) <!-- id: task-3 -->
 
 ## 3. Acceptance Criteria
-- [ ] Criterion 1 (e.g. Passes pre-commit checks)
-- [ ] Criterion 2 (e.g. Tests cover all endpoints)
+- [ ] Criterion 1 (e.g. Passes pre-commit checks) <!-- id: criteria-1 -->
+- [ ] Criterion 2 (e.g. Tests cover all endpoints) <!-- id: criteria-2 -->
 ```
 
 ## 2. Synchronizing with the Task Board and Git Branch
