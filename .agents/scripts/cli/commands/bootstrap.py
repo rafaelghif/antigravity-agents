@@ -794,7 +794,7 @@ def run(args):
 This board tracks active development tasks.
 
 ## Todo
-- [ ] 🚨 **MANDATORY FIRST TASK**: Initialize project architecture blueprint (`schema.md`), tailor codebase rules (`rules.md`), and update project metadata in `AGENTS.md` by interviewing the user. DO NOT proceed with other tasks until this is completed. <!-- id: task-init -->
+- [ ] 🚨 **MANDATORY FIRST TASK**: Initialize project architecture blueprint (`schema.md`), tailor codebase rules (`rules.md`), update project metadata in `AGENTS.md`, and configure workspace directories in `projects.json` by interviewing the user. DO NOT proceed with other tasks until this is completed. <!-- id: task-init -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing
