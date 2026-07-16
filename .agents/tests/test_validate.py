@@ -221,7 +221,8 @@ class TestValidate(unittest.TestCase):
     @patch('validate.audit_unit_tests', return_value=True)
     @patch('validate.audit_module_locks', return_value=True)
     @patch('validate.audit_commit_messages', return_value=True)
-    def test_run_validations_in_ci(self, m_commit, m_lock, m_test, m_lint, m_schema, m_sync, m_branch, m_link, m_secrets, m_crit, m_exit, m_post_status, m_sha, m_getenv):
+    @patch('validate.audit_codebase_rules_compliance', return_value=True)
+    def test_run_validations_in_ci(self, m_rules, m_commit, m_lock, m_test, m_lint, m_schema, m_sync, m_branch, m_link, m_secrets, m_crit, m_exit, m_post_status, m_sha, m_getenv):
         m_getenv.side_effect = lambda k: "true" if k in ("CI", "GITHUB_ACTIONS") else None
         m_sha.return_value = "dummy-sha-12345"
         
@@ -624,6 +625,37 @@ class TestValidate(unittest.TestCase):
         mock_get_mode.return_value = "solo"
         mock_get_branch.return_value = "feat/some-arbitrary-branch"
         self.assertTrue(validate.audit_module_locks())
+
+    @patch('validate.check_is_core', return_value=False)
+    @patch('os.environ.get')
+    @patch('os.path.exists')
+    @patch('os.path.isdir', return_value=True)
+    @patch('os.listdir')
+    @patch('os.path.getmtime')
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('subprocess.run')
+    def test_audit_codebase_rules_compliance_agent_skill_enforcer(self, mock_run, mock_file_open, mock_mtime, mock_listdir, mock_isdir, mock_exists, mock_getenv, mock_check_core):
+        # Setup environment as AI agent
+        mock_getenv.side_effect = lambda k, default=None: "1" if k == "ANTIGRAVITY_AGENT" else default
+        
+        # Mock git diff outputs (indicating a test file is modified)
+        m_git_diff = MagicMock()
+        m_git_diff.return_value.returncode = 0
+        m_git_diff.return_value.stdout = "tests/test_something.py\n"
+        mock_run.return_value = m_git_diff.return_value
+        
+        # Mock path existences for brain dir and transcript
+        mock_exists.side_effect = lambda path: True
+        mock_listdir.return_value = ["conv-123"]
+        mock_mtime.return_value = 100.0
+        
+        # Case 1: Transcript does NOT contain the viewed skill -> should fail
+        mock_file_open.side_effect = lambda *a, **kw: io.StringIO('{"step_index": 0, "tool_calls": []}\n')
+        self.assertFalse(validate.audit_codebase_rules_compliance())
+        
+        # Case 2: Transcript CONTAINS the viewed skill -> should pass
+        mock_file_open.side_effect = lambda *a, **kw: io.StringIO('{"step_index": 0, "tool_calls": [{"name": "view_file", "args": {"AbsolutePath": ".agents/skills/testing/SKILL.md"}}]}\n')
+        self.assertTrue(validate.audit_codebase_rules_compliance())
 
 if __name__ == '__main__':
     unittest.main()

@@ -2177,6 +2177,84 @@ def audit_codebase_rules_compliance() -> bool:
     except Exception as e:
         print_warn(f"Failed to scan clean architecture dependencies: {e}")
         
+    # 3. AI Agent skill playbook loading enforcer
+    is_agent = (os.environ.get("ANTIGRAVITY_AGENT") == "1")
+    if is_agent:
+        try:
+            # Find the active conversation's transcript
+            global_gemini_dir = os.environ.get("AAC_HOME") or os.path.expanduser("~/.gemini")
+            brain_dir = os.path.join(global_gemini_dir, "antigravity-cli/brain")
+            if os.path.exists(brain_dir):
+                cids = [d for d in os.listdir(brain_dir) if os.path.isdir(os.path.join(brain_dir, d)) and not d.startswith(".")]
+                if cids:
+                    cids.sort(key=lambda x: os.path.getmtime(os.path.join(brain_dir, x)), reverse=True)
+                    conversation_id = cids[0]
+                    transcript_path = os.path.join(brain_dir, conversation_id, ".system_generated/logs/transcript.jsonl")
+                    
+                    if os.path.exists(transcript_path):
+                        # Parse tool calls to find viewed skills
+                        viewed_skills = set()
+                        with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as tf:
+                            for line in tf:
+                                if not line.strip():
+                                    continue
+                                try:
+                                    step = json.loads(line)
+                                    tool_calls = step.get("tool_calls", [])
+                                    for tc in tool_calls:
+                                        if tc.get("name") in ("view_file", "default_api:view_file"):
+                                            args = tc.get("args") or tc.get("arguments") or {}
+                                            path_arg = args.get("AbsolutePath", "").strip('"\'')
+                                            if ".agents/skills/" in path_arg:
+                                                parts = path_arg.replace('\\', '/').split('/')
+                                                try:
+                                                    idx = parts.index("skills")
+                                                    if idx + 1 < len(parts):
+                                                        viewed_skills.add(parts[idx + 1])
+                                                except ValueError:
+                                                    pass
+                                except Exception:
+                                    pass
+                        
+                        # Determine required skills based on modified files
+                        required_skills = set()
+                        for f in modified_files:
+                            f_norm = f.replace('\\', '/')
+                            if "test_" in os.path.basename(f_norm) or f_norm.endswith("_test.py") or "tests/" in f_norm or ".agents/tests/" in f_norm:
+                                required_skills.add("testing")
+                            elif ".github/workflows/" in f_norm or "verify.yml" in f_norm or "ci.yml" in f_norm:
+                                required_skills.add("ci-cd")
+                            elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/"):
+                                required_skills.add("database-evolution")
+                            elif "git_profiles.json" in f_norm or ".env" in f_norm or "active_api_keys" in f_norm or "secrets.py" in f_norm:
+                                required_skills.add("security-audit")
+                            elif f_norm in ("CHANGELOG.md", "Dockerfile", "install.sh", "install.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/upgrade.py"):
+                                required_skills.add("release-management")
+                            elif f_norm.startswith(".agents/skills/"):
+                                required_skills.add("skill-evolution")
+                            elif f_norm == ".agents/mcp_config.json" or f_norm.endswith("mcp.py"):
+                                required_skills.add("github-mcp")
+                            elif f_norm == ".agents/tasks/board.md" or f_norm.startswith(".agents/issues/"):
+                                required_skills.add("task-management")
+                            elif f_norm.startswith(".agents/scripts/") and not any(k in f_norm for k in ("test_", "validate.py", "prepare_commit_msg.py")):
+                                required_skills.add("coding-standards")
+                                
+                        if "validate.py" in modified_files or "doctor.py" in modified_files:
+                            required_skills.add("debugging")
+                            
+
+                        # Perform checks
+                        for skill in required_skills:
+                            if skill not in viewed_skills:
+                                if skill == "github-mcp" and "gitea-mcp" in viewed_skills:
+                                    continue
+                                print_err(f"AI Compliance Audit: Required skill playbook '.agents/skills/{skill}/SKILL.md' was not loaded/viewed!")
+                                print_err(f"  You modified files related to the '{skill}' playbook but did not load it.")
+                                print_err(f"  Please run the view_file tool on '.agents/skills/{skill}/SKILL.md' before proceeding.")
+                                failed = True
+        except Exception as e:
+            print_warn(f"Failed to audit AI skill loading compliance: {e}")
+
     if not failed:
         print_ok("Codebase rule compliance check passed.")
     return not failed
