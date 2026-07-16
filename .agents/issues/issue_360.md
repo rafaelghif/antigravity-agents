@@ -1,7 +1,7 @@
 ---
 id: 360
 title: "feat: standalone pyinstaller build script and offline binaries"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
