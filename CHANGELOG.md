@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.112.0] - 2026-07-16
+
+### 🚀 Features
+- implement AI skill playbook loading enforcer check in validate.py
+
+
 ## [3.111.1] - 2026-07-16
 
 ### 🛠️ Refactors
