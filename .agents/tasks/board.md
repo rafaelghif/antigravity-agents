@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: rename standalone binary from agy to aac to prevent global conflicts (feat/364) <!-- id: 364 -->
 - [x] refactor: remove redundant skill playbooks to optimize token footprint (feat/363) <!-- id: 363 -->
 - [x] docs: update installation flow for standalone binaries (feat/362) <!-- id: 362 -->
 - [x] fix: resolve remaining audit gaps for subtask tracking and scope leakage (feat/361) <!-- id: 361 -->

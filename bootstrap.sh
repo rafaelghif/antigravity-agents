@@ -5,9 +5,9 @@ set -euo pipefail
 # 1. Prerequisite Check: Check if standalone binary exists
 OS="$(uname -s)"
 ARCH="$(uname -m)"
-BINARY_NAME="agy-${OS}-${ARCH}"
+BINARY_NAME="aac-${OS}-${ARCH}"
 if [[ "$OS" == "MINGW"* || "$OS" == "CYGWIN"* || "$OS" == "MSYS"* ]]; then
-    BINARY_NAME="agy-Windows-${ARCH}.exe"
+    BINARY_NAME="aac-Windows-${ARCH}.exe"
 fi
 
 # Try local bin first, then global install bin
