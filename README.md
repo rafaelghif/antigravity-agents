@@ -1,7 +1,7 @@
 # Antigravity Agent Core (AAC) V3
 ### *Enterprise Guardrails, Workspace Insulation, and Local Quality Gates for Autonomous AI Agents*
 
-[![Version](https://img.shields.io/badge/version-3.116.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.117.0-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)
@@ -28,7 +28,7 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 | **Parallel Coding Conflicts** | Filesystem-level mutex locks prevent agents from conflict-editing the same directories in parallel. |
 | **Platform / Installer Drift** | Core logic is centralized in Python scripts, with wrapper scripts acting as thin OS delegates. |
 | **Multi-Platform Repository Sync** | Native parser supports both GitHub and Gitea servers automatically using Git remote parsing and profile rotation keys. |
-| **Offline Setup & Custom Skills** | Scaffolding templates directory cache at `~/.gemini/` ensures fully offline installations and setup validations without remote dependencies. |
+| **Offline Setup & Custom Skills** | Pre-packaged builtin registry fallback ensures fully offline installations and setup validations without remote dependencies. |
 
 ---
 

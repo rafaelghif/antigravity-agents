@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.117.0] - 2026-07-16
+
+### 🚀 Features
+- remove global skills caching and enforce workspace isolation (ISSUE-354)
+
+### 🛠️ Refactors
+- remove global skills caching and enforce workspace isolation
+
+
 ## [3.116.0] - 2026-07-16
 
 ### 🚀 Features
