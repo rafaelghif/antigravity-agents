@@ -1,7 +1,7 @@
 ---
 id: issue-354
 title: "remove global skills caching and enforce workspace isolation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -31,7 +31,7 @@ remove global skills caching and enforce workspace isolation
   - [x] `.agents/tests/test_skill.py` <!-- id: target-test-skill -->
   - [x] `README.md` <!-- id: target-readme -->
 - Active module locks:
-  - [x] `skill` <!-- id: lock-skill -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->
