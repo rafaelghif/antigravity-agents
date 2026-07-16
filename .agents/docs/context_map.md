@@ -31,14 +31,17 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/skills/ci-cd/SKILL.md` | Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. | On match |
 | `.agents/skills/code-review/SKILL.md` | Guidelines and checklists for performing high-quality, zero-regression code reviews. | On match |
 | `.agents/skills/coding-standards/SKILL.md` | Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. | On match |
+| `.agents/skills/compliance/SKILL.md` | Package pinning, license auditing, upgrade verification, and package pruning playbook | On match |
 | `.agents/skills/contract-synchronization/SKILL.md` | Playbook for managing API contract schemas, generating client code, and verifying backend/frontend synchronization. | On match |
 | `.agents/skills/conversational-agent/SKILL.md` | Playbook for translating natural language requests about tasks, profiles, locking, and validation into CLI helper executions. | On match |
 | `.agents/skills/database-evolution/SKILL.md` | Playbook for writing safe database migrations, managing schema evolutions, executing reversible rollbacks, and avoiding table lock contention in enterprise environments. | On match |
 | `.agents/skills/debugging/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. | On match |
+| `.agents/skills/documentation/SKILL.md` | API docstrings, onboarding manuals, blueprints, and docs sync playbook | On match |
 | `.agents/skills/gitea-mcp/SKILL.md` | Playbook for configuring and executing Gitea Model Context Protocol (MCP) server commands, supporting repository, branch, release, tag, issue, and wiki management. | On match |
 | `.agents/skills/github-mcp/SKILL.md` | Playbook for setting up and managing the local GitHub Model Context Protocol (MCP) server for repository, issue, and pull request integration. | On match |
 | `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | On match |
 | `.agents/skills/performance-optimization/SKILL.md` | Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds. | On match |
+| `.agents/skills/refactoring/SKILL.md` | SOLID refactoring, guard clauses, TDD, and legacy migration playbook | On match |
 | `.agents/skills/release-management/SKILL.md` | Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification. | On match |
 | `.agents/skills/security-audit/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. | On match |
 | `.agents/skills/self-healing/SKILL.md` | Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
