@@ -27,6 +27,8 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 | **Context & Token Bloat** | Old task details, logs, and finished specifications are auto-archived, keeping the active context token-efficient. |
 | **Parallel Coding Conflicts** | Filesystem-level mutex locks prevent agents from conflict-editing the same directories in parallel. |
 | **Platform / Installer Drift** | Core logic is centralized in Python scripts, with wrapper scripts acting as thin OS delegates. |
+| **Multi-Platform Repository Sync** | Native parser supports both GitHub and Gitea servers automatically using Git remote parsing and profile rotation keys. |
+| **Offline Setup & Custom Skills** | Scaffolding templates directory cache at `~/.gemini/` ensures fully offline installations and setup validations without remote dependencies. |
 
 ---
 
@@ -118,6 +120,7 @@ Use `./helper.sh` (POSIX) or `./helper.ps1` (Windows) to dispatch workspace comm
 | **`commit`** | `./helper.sh commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
 | **`dashboard`** | `./helper.sh dashboard` | Spawns a local visual monitoring dashboard on your browser. |
 | **`issue`** | `./helper.sh issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
+| **`skill`** | `./helper.sh skill <subcommand>` | Manages custom agent skills playbooks. Supports `create` (scaffold structure), `test` (execute hooks/validate metadata), and `list` (show active skills). |
 | **`lock`** | `./helper.sh lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
 | **`profile`** | `./helper.sh profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
 | **`context`** | `./helper.sh context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
