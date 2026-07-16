@@ -1,7 +1,7 @@
 ---
 id: issue-347
 title: "Audit and refactor installer and bootstrapper for safety and path correctness"
-status: Doing
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---

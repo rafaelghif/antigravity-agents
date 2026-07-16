@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.111.1] - 2026-07-16
+
+### 🛠️ Refactors
+- harden bootstrap and install commands using safe ShellExecutor
+
+
 ## [3.111.0] - 2026-07-16
 
 ### 🚀 Features
