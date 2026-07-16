@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor: sharpen AGENTS.md rules and offload to playbooks (feat/368) <!-- id: 368 -->
 - [x] fix(skills): audit and restore truncated skills and broken references (feat/367) <!-- id: 367 -->
 - [x] feat: implement Semantic Skill Router and Framework Blackbox Isolation (feat/366) <!-- id: 366 -->
 - [x] refactor: consolidate skills and enforce strict UARP XML reasoning protocol (feat/365) <!-- id: 365 -->

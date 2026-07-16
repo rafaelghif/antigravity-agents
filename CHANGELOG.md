@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.122.2] - 2026-07-16
+
+### 🛠️ Refactors
+- sharpen AGENTS.md rules and offload to playbooks
+
+
 ## [3.122.1] - 2026-07-16
 
 ### 🐛 Bug Fixes
