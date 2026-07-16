@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] refactor: remove redundant skill playbooks to optimize token footprint (feat/363) <!-- id: 363 -->
 - [x] docs: update installation flow for standalone binaries (feat/362) <!-- id: 362 -->
 - [x] fix: resolve remaining audit gaps for subtask tracking and scope leakage (feat/361) <!-- id: 361 -->
 - [x] feat: standalone pyinstaller build script and offline binaries (feat/360) <!-- id: 360 -->

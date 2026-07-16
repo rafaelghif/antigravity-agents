@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.4] - 2026-07-16
+
+### 🛠️ Refactors
+- remove redundant skill playbooks to optimize token footprint
+
+
 ## [3.121.3] - 2026-07-16
 
 ### 📝 Documentation
