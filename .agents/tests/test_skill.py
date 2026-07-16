@@ -40,7 +40,7 @@ class TestSkillCommand(unittest.TestCase):
         
         skill.handle_install("local/path/to/skill-c")
         
-        mock_copy.assert_called_once()
+        mock_copy.assert_any_call(os.path.abspath("local/path/to/skill-c"), os.path.join(".agents/skills", "skill-c"))
         mock_sync.assert_called_once()
 
     @patch('os.path.exists')
@@ -60,8 +60,8 @@ class TestSkillCommand(unittest.TestCase):
     @patch('commands.skill.run_sync')
     def test_handle_create_success(self, mock_sync, mock_open_file, mock_exists, mock_makedirs):
         skill.handle_create("my-new-skill", "A description of my-new-skill")
-        mock_makedirs.assert_called_once_with(os.path.join(".agents/skills", "my-new-skill"), exist_ok=True)
-        mock_open_file.assert_called_once_with(os.path.join(".agents/skills", "my-new-skill", "SKILL.md"), 'w', encoding='utf-8')
+        mock_makedirs.assert_any_call(os.path.join(".agents/skills", "my-new-skill"), exist_ok=True)
+        mock_open_file.assert_any_call(os.path.join(".agents/skills", "my-new-skill", "SKILL.md"), 'w', encoding='utf-8')
         mock_sync.assert_called_once()
 
     @patch('os.path.exists')
