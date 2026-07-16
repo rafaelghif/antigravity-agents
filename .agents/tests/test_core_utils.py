@@ -14,8 +14,9 @@ from core.executor import ShellExecutor, ExecutionResult
 
 class TestLogger(unittest.TestCase):
 
-    def test_logger_colors_disabled_by_default_in_non_tty(self) -> None:
-        # Standard sys.stdout in test is typically not a tty
+    @patch('sys.stdout.isatty', return_value=False)
+    def test_logger_colors_disabled_by_default_in_non_tty(self, mock_isatty) -> None:
+        # Mock sys.stdout.isatty to ensure it behaves deterministically in non-tty mode
         logger = StructuredLogger("TEST")
         self.assertFalse(logger.color_enabled)
 

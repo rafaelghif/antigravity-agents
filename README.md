@@ -28,7 +28,7 @@ Autonomous coding agents (like Cursor, Aider, Cline, and Claude) are incredibly 
 | **Parallel Coding Conflicts** | Filesystem-level mutex locks prevent agents from conflict-editing the same directories in parallel. |
 | **Platform / Installer Drift** | Core logic is centralized in Python scripts, with wrapper scripts acting as thin OS delegates. |
 | **Multi-Platform Repository Sync** | Native parser supports both GitHub and Gitea servers automatically using Git remote parsing and profile rotation keys. |
-| **Offline Setup & Custom Skills** | Scaffolding templates directory cache at `~/.gemini/` ensures fully offline installations and setup validations without remote dependencies. |
+| **Offline Setup & Custom Skills** | Pre-packaged builtin registry fallback ensures fully offline installations and setup validations without remote dependencies. |
 
 ---
 

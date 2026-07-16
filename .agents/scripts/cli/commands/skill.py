@@ -74,22 +74,8 @@ def get_global_app_dir() -> str:
     home = os.path.expanduser("~")
     return os.path.join(home, ".gemini", "antigravity-cli")
 
-def get_cache_skills_dir() -> str:
-    return os.path.join(get_global_app_dir(), "cache", "skills")
-
 def get_builtin_skills_dir() -> str:
     return os.path.join(get_global_app_dir(), "builtin", "skills")
-
-def cache_skill(name: str, src_path: str) -> None:
-    cache_dir = get_cache_skills_dir()
-    os.makedirs(cache_dir, exist_ok=True)
-    dest_cache = os.path.join(cache_dir, name)
-    try:
-        if os.path.exists(dest_cache):
-            shutil.rmtree(dest_cache)
-        shutil.copytree(src_path, dest_cache)
-    except Exception as e:
-        sys.stderr.write(f"[WARN] Failed to cache skill '{name}' locally: {e}\n")
 
 def handle_install(source: str) -> None:
     if not source:
@@ -143,25 +129,19 @@ def handle_install(source: str) -> None:
                         shutil.rmtree(dest_p)
                     shutil.copytree(src_p, dest_p)
                     print_ok(f"Installed skill '{name}' under '{dest_p}'")
-                    # Cache the skill locally for offline use
-                    cache_skill(name, src_p)
             finally:
                 shutil.rmtree(temp_dir, ignore_errors=True)
         else:
-            # Fallback: try cache/builtin
+            # Fallback: try builtin registry
             name = os.path.basename(source.rstrip("/").split("/")[-1])
             if name.endswith(".git"):
                 name = name[:-4]
                 
             print(f"[INFO] Attempting offline fallback for skill '{name}'...")
-            cache_p = os.path.join(get_cache_skills_dir(), name)
             builtin_p = os.path.join(get_builtin_skills_dir(), name)
             
             src_p = None
-            if os.path.exists(cache_p):
-                src_p = cache_p
-                loc_type = "cache"
-            elif os.path.exists(builtin_p):
+            if os.path.exists(builtin_p):
                 src_p = builtin_p
                 loc_type = "builtin"
                 
@@ -172,7 +152,7 @@ def handle_install(source: str) -> None:
                 shutil.copytree(src_p, dest_p)
                 print_ok(f"Installed skill '{name}' from offline {loc_type} fallback.")
             else:
-                print_err(f"Failed to resolve skill '{name}'. Git clone failed and no local cache was found.")
+                print_err(f"Failed to resolve skill '{name}'. Git clone failed and no builtin registry was found.")
                 sys.exit(1)
     else:
         # Check if local path exists
@@ -185,22 +165,17 @@ def handle_install(source: str) -> None:
                     shutil.rmtree(dest_p)
                 shutil.copytree(source_path, dest_p)
                 print_ok(f"Installed skill '{name}' under '{dest_p}'")
-                cache_skill(name, source_path)
             else:
                 print_err("Target folder does not contain 'SKILL.md'.")
                 sys.exit(1)
         else:
-            # Check if simple name exists in cache/builtin
+            # Check if simple name exists in builtin registry
             name = source
             print(f"[INFO] Resolving local skill '{name}' from registry...")
-            cache_p = os.path.join(get_cache_skills_dir(), name)
             builtin_p = os.path.join(get_builtin_skills_dir(), name)
             
             src_p = None
-            if os.path.exists(cache_p):
-                src_p = cache_p
-                loc_type = "cache"
-            elif os.path.exists(builtin_p):
+            if os.path.exists(builtin_p):
                 src_p = builtin_p
                 loc_type = "builtin"
                 
@@ -211,7 +186,7 @@ def handle_install(source: str) -> None:
                 shutil.copytree(src_p, dest_p)
                 print_ok(f"Installed skill '{name}' from local {loc_type} registry.")
             else:
-                print_err(f"Skill '{name}' could not be resolved as local path, git URL, or cached/builtin registry.")
+                print_err(f"Skill '{name}' could not be resolved as local path, git URL, or builtin registry.")
                 sys.exit(1)
                 
     run_sync()
