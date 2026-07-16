@@ -376,13 +376,14 @@ def handle_test(name: str) -> None:
             content = f.read()
         
         # Parse YAML frontmatter
-        m_fm = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
+        content_norm = content.replace('\r\n', '\n')
+        m_fm = re.match(r'^---\s*\n(.*?)\n---\s*\n', content_norm, re.DOTALL)
         if not m_fm:
             print_err("Metadata check: FAIL (Invalid frontmatter format)")
         else:
             fm_text = m_fm.group(1)
-            name_val = re.search(r'name:\s*(.*?)\n', fm_text)
-            desc_val = re.search(r'description:\s*(.*?)\n', fm_text)
+            name_val = re.search(r'name:\s*(.*?)(?:\n|$)', fm_text)
+            desc_val = re.search(r'description:\s*(.*?)(?:\n|$)', fm_text)
             
             if not name_val or not desc_val:
                 print_err("Metadata check: FAIL (Missing 'name' or 'description' in frontmatter)")
