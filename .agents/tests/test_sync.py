@@ -37,12 +37,10 @@ class TestSync(unittest.TestCase):
         with patch('builtins.open', mock_open(read_data=mock_json_content)):
             self.assertEqual(git_api.get_pat(), "profile-token")
 
-    @patch('git_api.get_pat')
-    @patch('git_api.get_repo_info')
+    @patch('git_api.get_service_info')
     @patch('urllib.request.urlopen')
-    def test_fetch_github_issues_success(self, mock_urlopen, mock_repo, mock_pat):
-        mock_pat.return_value = "token"
-        mock_repo.return_value = "owner/repo"
+    def test_fetch_github_issues_success(self, mock_urlopen, mock_service_info):
+        mock_service_info.return_value = ("github", "https://api.github.com", "token", "owner", "repo")
         
         # Mock API response
         mock_res = MagicMock()
