@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] upgrade fallback version references to v3.119.0 (feat/issue-357) <!-- id: issue-357 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] upgrade fallback version references to v3.119.0 (feat/issue-357) <!-- id: issue-357 -->
 - [x] harden local mcp server jsonrpc and path checks (feat/issue-356) <!-- id: issue-356 -->
 - [x] harden global leak prevention guidelines in workspace rules (feat/issue-355) <!-- id: issue-355 -->
 - [x] remove global skills caching and enforce workspace isolation (feat/issue-354) <!-- id: issue-354 -->

@@ -1,7 +1,7 @@
 ---
 id: issue-357
 title: "upgrade fallback version references to v3.119.0"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
 ---
@@ -29,7 +29,7 @@ upgrade fallback version references to v3.119.0
   - [x] `.agents/dashboard/app.js` <!-- id: target-js -->
   - [x] `.agents/scripts/cli/commands/dashboard.py` <!-- id: target-py -->
 - Active module locks:
-  - [x] `dashboard` <!-- id: lock-dashboard -->
+  - [ ] None <!-- id: audit-module-locks -->
 - Non-negotiable rules checked:
   - [x] AGENTS.md §2 non-negotiables verified <!-- id: audit-agents-rules -->
   - [x] .agents/rules.md stack and style guidelines verified <!-- id: audit-project-rules -->

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.120.0] - 2026-07-16
+
+### 🚀 Features
+- upgrade fallback version references to v3.119.0 (ISSUE-357)
+
+
 ## [3.119.0] - 2026-07-16
 
 ### 🚀 Features
