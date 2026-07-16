@@ -68,14 +68,22 @@ flowchart TD
 
 Verify your environment meets these basic requirements before installing:
 * **Git**: Installed and available in the user path.
-* **Python**: Version **3.8 or newer** (`python3` or `python`).
 * **Shell**: Terminal access (`bash`, `zsh`, or PowerShell).
+* **Python**: Version **3.8 or newer** (Only required if using the Option B online script installer).
 
 ---
 
 ## 🚀 Quick Start Setup (4 Steps)
 
 ### 1. Install AAC V3 in Your Repository
+
+**Option A: Standalone Binary (Recommended, No Python Required)**
+Download the pre-compiled offline binary for your OS from the [GitHub Releases](https://github.com/rafaelghif/antigravity-agents/releases) page. Place the binary in your system path (e.g., `/usr/local/bin/agy` or `C:\Windows\agy.exe`), navigate to your target project folder, and run:
+```bash
+agy bootstrap
+```
+
+**Option B: Online Installer Script (Requires Python 3.8+)**
 Run the bootstrap installer script inside your target project's root folder:
 
 **Linux / macOS (Bash):**
@@ -111,26 +119,26 @@ When triggering your agent (Aider, Cursor, Cline, or Claude), simply start the p
 
 ## 🛠️ CLI Commands Reference
 
-Use `./helper.sh` (POSIX) or `./helper.ps1` (Windows) to dispatch workspace commands:
+Use `./helper.sh` (POSIX), `./helper.ps1` (Windows), or the offline binary `agy` to dispatch workspace commands:
 
 | Command | Usage | Description |
 | :--- | :--- | :--- |
-| **`bootstrap`** | `./helper.sh bootstrap [-q \| --quick]` | Re-initializes stack parameters and templates. Use `-q` to bypass the interview and bootstrap immediately with defaults. |
-| **`validate`** | `./helper.sh validate [-q \| --quiet]` | Runs 11 workspace audits. Use `-q` to output only failed tests and validation summaries. |
-| **`commit`** | `./helper.sh commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
-| **`dashboard`** | `./helper.sh dashboard` | Spawns a local visual monitoring dashboard on your browser. |
-| **`issue`** | `./helper.sh issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
-| **`skill`** | `./helper.sh skill <subcommand>` | Manages custom agent skills playbooks. Supports `create` (scaffold structure), `test` (execute hooks/validate metadata), and `list` (show active skills). |
-| **`lock`** | `./helper.sh lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
-| **`profile`** | `./helper.sh profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
-| **`context`** | `./helper.sh context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
-| **`token`** | `./helper.sh token [<subcommand>]` | Tracks LLM token usage and budgets. Defaults to the `status` panel if subcommand is omitted. |
-| **`pause`** / **`resume`** | `./helper.sh pause` / `./helper.sh resume` | Halts or resumes agent workspace execution locks. |
-| **`mcp`** | `./helper.sh mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
-| **`changelog`** | `./helper.sh changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
-| **`learn`** | `./helper.sh learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
-| **`doctor`** | `./helper.sh doctor` | Checks python environment, dependencies, and command accessibility. |
-| **`heartbeat`** | `./helper.sh heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
+| **`bootstrap`** | `agy bootstrap [-q \| --quick]` | Re-initializes stack parameters and templates. Use `-q` to bypass the interview and bootstrap immediately with defaults. |
+| **`validate`** | `agy validate [-q \| --quiet]` | Runs 11 workspace audits. Use `-q` to output only failed tests and validation summaries. |
+| **`commit`** | `agy commit [-i \| --interactive]` | Pre-commit validation wrapper. Use `-i` to review diffs and write Conventional Commits interactively. |
+| **`dashboard`** | `agy dashboard` | Spawns a local visual monitoring dashboard on your browser. |
+| **`issue`** | `agy issue <subcommand>` | Local task/issue tracker. Supports `create`, `list`, `checkout`, and `close`. |
+| **`skill`** | `agy skill <subcommand>` | Manages custom agent skills playbooks. Supports `create` (scaffold structure), `test` (execute hooks/validate metadata), and `list` (show active skills). |
+| **`lock`** | `agy lock [<module> \| --release \| --clear-all]` | Directory locks. Use `--clear-all` to clear locked directories manually. |
+| **`profile`** | `agy profile <subcommand>` | Dynamic author credentials rotation. Supports `add`, `switch`, `list`, and `apply`. |
+| **`context`** | `agy context optimize` | Rebuilds the active context manifest and archives completed tasks to save tokens. |
+| **`token`** | `agy token [<subcommand>]` | Tracks LLM token usage and budgets. Defaults to the `status` panel if subcommand is omitted. |
+| **`pause`** / **`resume`** | `agy pause` / `agy resume` | Halts or resumes agent workspace execution locks. |
+| **`mcp`** | `agy mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
+| **`changelog`** | `agy changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
+| **`learn`** | `agy learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
+| **`doctor`** | `agy doctor` | Checks python environment, dependencies, and command accessibility. |
+| **`heartbeat`** | `agy heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
 
 ---
 
