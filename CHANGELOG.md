@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.125.0] - 2026-07-16
+
+### 🚀 Features
+- enforce mandatory initialization task on bootstrap
+
+
 ## [3.124.1] - 2026-07-16
 
 ### 🐛 Bug Fixes

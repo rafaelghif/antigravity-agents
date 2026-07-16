@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: enforce mandatory initialization task on bootstrap (feat/375) <!-- id: 375 -->
 - [x] fix: remove standalone binary installer fallbacks (feat/374) <!-- id: 374 -->
 - [x] feat: implement pruning for task board done column (feat/373) <!-- id: 373 -->
 - [x] feat: enforce session resumption protocol for account switching (feat/372) <!-- id: 372 -->
