@@ -128,7 +128,7 @@ created_at: {current_date}
 {title}
 
 ## Tasks
-- [ ] Task 1
+- [ ] Task 1 <!-- id: task-1 -->
 
 ## Acceptance Criteria
 - [ ] Criteria 1

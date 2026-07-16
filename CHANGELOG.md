@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.121.1] - 2026-07-16
+
+### 🐛 Bug Fixes
+- restore AGENTS.md template placeholders and remove core rule leak
+
+
+## [3.121.0] - 2026-07-16
+
+### 🚀 Features
+- standalone pyinstaller build script and offline binaries
+
+
 ## [3.120.2] - 2026-07-16
 
 ### 📝 Documentation

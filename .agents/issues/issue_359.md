@@ -12,7 +12,7 @@ created_at: 2026-07-16
 docs: enforce explicit skill file reading in AGENTS and rules templates
 
 ## Tasks
-- [ ] Task 1
+- [ ] Task 1 <!-- id: task-1 -->
 
 ## Acceptance Criteria
 - [ ] Criteria 1

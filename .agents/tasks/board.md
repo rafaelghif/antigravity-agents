@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: standalone pyinstaller build script and offline binaries (feat/360) <!-- id: 360 -->
 - [x] docs: enforce explicit skill file reading in AGENTS and rules templates (feat/359) <!-- id: 359 -->
 - [x] fix: validate.py skill enforcement and rigid logic (feat/358) <!-- id: 358 -->
 - [x] upgrade fallback version references to v3.119.0 (feat/issue-357) <!-- id: issue-357 -->
