@@ -840,7 +840,7 @@ def run(args):
 This board tracks active development tasks.
 
 ## Todo
-- [ ] 🚨 **MANDATORY FIRST TASK**: Initialize project architecture blueprint (`schema.md`), tailor codebase rules (`rules.md`), update project metadata in `AGENTS.md`, and configure workspace directories in `projects.json` by interviewing the user. DO NOT proceed with other tasks until this is completed. <!-- id: task-init -->
+- [ ] 🚨 **MANDATORY FIRST TASK**: Deep-scan workspace to detect precise frameworks (e.g. Next.js, FastAPI, WPF) using the `research` subagent to save main context tokens. Update `schema.md`, `rules.md`, `AGENTS.md`, and `projects.json`. Interview user (`/grill-me`) for missing architecture decisions. DO NOT proceed until completed. <!-- id: task-init -->
 - [ ] Implement initial model/entity definitions <!-- id: task-bootstrap -->
 
 ## Doing

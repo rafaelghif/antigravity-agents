@@ -21,7 +21,7 @@
 - **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.md` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
 ## 3. Working Protocol
-1. **Initialize & Align:** Before starting ANY new project or major epic, you MUST interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment. Do NOT write code blindly.
+1. **Initialize & Align:** Before starting ANY new project or major epic, you MUST interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment. Tip: Delegate deep workspace scanning to the `research` subagent to save main context tokens. Do NOT write code blindly.
 2. **Resume:** Check `Doing` in `board.md`. If active, `helper.sh issue checkout <task-id>` -> `helper.sh context optimize`.
 3. **Claim Task:** Move to `Doing`, checkout Epic/Task branch, read specifications.
 4. **Execute (Atomic):** Split tasks into 3-5 line subtasks. Run `./helper.sh context optimize` between subtasks to prune stale context.
