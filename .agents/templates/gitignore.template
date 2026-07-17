@@ -10,6 +10,7 @@ vendor/
 .agents/locks.json
 .lock/
 .agents/git_profiles.json
+.agents/mcp_config.json
 .agents/api_keys
 .agents/active_api_keys
 .agents/active_api_keys.ps1
