@@ -11,7 +11,9 @@
 ## 2. Core Guardrails & Anti-Hallucination
 - **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><active_task_id>[ID]</active_task_id><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift. If `<active_task_id>` is empty or missing, you MUST halt and use `./helper.sh issue checkout` first.
 - **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
-- **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. If ambiguous, halt and prompt the USER. NEVER loop tool calls blindly if stuck.
+- **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. NEVER loop tool calls blindly if stuck.
+- **Descriptive Execution:** ALWAYS be explicitly descriptive. Explain the 'why' and exactly 'what' you are doing before making any changes. Do NOT execute actions silently.
+- **Human-in-the-Loop Escalation:** If a task requires human intervention (e.g., 2FA, ambiguous architecture decisions, or manual QA), you MUST clearly notify the USER, explain what is needed, and HALT execution.
 - **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/active_context.md`, and `.agents/tasks/board.md` before coding.
 - **MCP Priority (REMOTE-FIRST):** ALWAYS use MCP tools DIRECTLY to create issues, pull, merge, and manage remote PRs. DO NOT use `helper.sh issue ...` or local board flows if MCP is active. `helper.sh` and `.agents/issues/` are strictly fallbacks for offline mode.
 - **Scope Isolation:** NEVER leak data to global paths (e.g., `~/.gemini/`).
