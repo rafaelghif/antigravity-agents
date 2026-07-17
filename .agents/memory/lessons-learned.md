@@ -28,4 +28,5 @@ This file logs project-wide incident reports, testing optimizations, and workflo
 - **[2026-07-02] Python Encoding**: Reconfigure `sys.stdout` to utf-8, use cross-platform path resolution, and specify `encoding='utf-8'` on `subprocess.run` calls.
 
 ## Lessons Learned
+- **[2026-07-17]** **Git Profile & Credentials**: Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
 - **[2026-07-17]** **Path Handling / OS Compatibility**: Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.

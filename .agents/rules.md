@@ -38,4 +38,5 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Template & Wrapper Parity**: Before modifying templates, wrappers (bootstrap, install, helper), or generated configs, the agent MUST read `.agents/docs/template_map.md` to ensure exact parity across Linux (Bash) and Windows (PowerShell) platforms, preventing platform-drift and token waste.
 
 ## 6. Synthesized Rules (Self-Learning Memory)
+- **[Learning: Git & Security]** Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
 - **[Learning: OS Compatibility / PowerShell]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.

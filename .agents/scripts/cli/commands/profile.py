@@ -183,7 +183,10 @@ def load_profiles() -> Dict[str, Any]:
     try:
         from . import secrets as aac_secrets
     except ImportError:
-        import secrets as aac_secrets
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("aac_secrets", os.path.join(os.path.dirname(os.path.abspath(__file__)), "secrets.py"))
+        aac_secrets = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aac_secrets)
     import copy
     
     # Secure storage migration / encryption on load
@@ -240,7 +243,10 @@ def save_profiles(data: Dict[str, Any]) -> None:
     try:
         from . import secrets as aac_secrets
     except ImportError:
-        import secrets as aac_secrets
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("aac_secrets", os.path.join(os.path.dirname(os.path.abspath(__file__)), "secrets.py"))
+        aac_secrets = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aac_secrets)
     import copy
     
     disk_data = copy.deepcopy(data)
@@ -438,6 +444,50 @@ def apply_git_config(profile: Dict[str, Any], force_no_gpg: bool = False) -> Non
     except subprocess.CalledProcessError as e:
         print_err(f"Failed to apply local Git configuration: {e}")
 
+def apply_mcp_config(profile: Dict[str, Any]) -> None:
+    """Inject active profile secrets into the local MCP runtime configuration without exposing them in git."""
+    template_path = os.path.join(".agents", "templates", "mcp_config.json.template")
+    target_path = os.path.join(".agents", "mcp_config.json")
+    
+    if not os.path.exists(template_path):
+        return
+        
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            config = f.read()
+            
+        raw_github_mcp = profile.get("github_mcp_pat")
+        if raw_github_mcp and "Example" in raw_github_mcp:
+            raw_github_mcp = None
+            
+        git_pat = raw_github_mcp or profile.get("git_pat") or profile.get("git_token") or ""
+        gitea_token = profile.get("gitea_token") or ""
+        gitea_host = profile.get("gitea_host") or "https://gitea.com"
+        
+        config = config.replace("${input:github_mcp_pat}", git_pat)
+        config = config.replace("${input:gitea_token}", gitea_token)
+        config = config.replace("${input:gitea_host}", gitea_host)
+        
+        # Remove the inputs block if it exists to prevent IDE from prompting
+        import re
+        config = re.sub(r',\s*"inputs"\s*:\s*\[[\s\S]*?\]', '', config)
+        config = re.sub(r'"inputs"\s*:\s*\[[\s\S]*?\]\s*,?', '', config)
+        
+        with open(target_path, 'w', encoding='utf-8') as f:
+            f.write(config)
+            
+        try:
+            os.chmod(target_path, 0o600)
+        except Exception:
+            pass
+            
+        print_ok(f"Applied MCP secret injections to secure local configuration.")
+        
+        # Auto-register workspace tools securely
+        subprocess.run(["./helper.sh", "mcp", "register"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        print_err(f"Failed to compile and apply MCP configuration: {e}")
+
 def handle_switch(args: List[str]) -> None:
     """Switch active profile by name and apply settings to Git config."""
     force_no_gpg = False
@@ -540,6 +590,7 @@ def handle_switch(args: List[str]) -> None:
     for p in profiles:
         if p.get("active"):
             apply_git_config(p, force_no_gpg)
+            apply_mcp_config(p)
             break
 
 def validate_name(name: str) -> bool:
@@ -820,6 +871,20 @@ def handle_credential_helper(args: List[str]) -> None:
         
     sys.exit(0)
 
+def handle_apply(args: List[str]) -> None:
+    """Manually re-apply the active profile settings to git and MCP config."""
+    data = load_profiles()
+    profiles = data.get("profiles", [])
+    active_profile = next((p for p in profiles if p.get("active")), None)
+    
+    if not active_profile:
+        print_err("No active profile found. Please switch to a profile first.")
+        sys.exit(1)
+        
+    apply_git_config(active_profile, False)
+    apply_mcp_config(active_profile)
+    print_ok(f"Successfully re-applied active profile '{active_profile.get('name')}' configurations.")
+
 def run(args: List[str]) -> None:
     """Main CLI dispatch entry point for profile command."""
     if not args:
@@ -835,6 +900,8 @@ def run(args: List[str]) -> None:
         handle_add(args[1:])
     elif subcmd == "credential-helper":
         handle_credential_helper(args[1:])
+    elif subcmd == "apply":
+        handle_apply(args[1:])
     else:
-        print_err(f"Unknown subcommand '{subcmd}'. Available: list, switch, add")
+        print_err(f"Unknown subcommand '{subcmd}'. Available: list, switch, add, apply")
         sys.exit(1)
