@@ -294,7 +294,6 @@ created_at: {current_date}
             
         title = fm.get("title", "")
         if title:
-            import re
             title_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
             slug = f"{issue_id.lower().replace('_', '-')}-{title_slug}"
         else:

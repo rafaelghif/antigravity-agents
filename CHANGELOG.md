@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.137.0] - 2026-07-17
+
+### 🚀 Features
+- enforce uarp active_task_id and local auto-close hooks
+
+### 🐛 Bug Fixes
+- resolve unbound re variable in issue close command
+
+### 📝 Documentation
+- update readme with auto-close workflow and layout fixes
+
+
 ## [3.136.0] - 2026-07-17
 
 ### 🚀 Features

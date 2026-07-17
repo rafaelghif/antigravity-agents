@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
 - [x] feat: automate mcp secret injection from profiles and secure config (feat/381) <!-- id: 381 -->
 - [x] docs: update readme with v3 architecture and mermaid (feat/380) <!-- id: 380 -->
 - [x] docs: enforce descriptive branch naming and remote push rules (feat/379) <!-- id: 379 -->
@@ -366,4 +367,3 @@ This board tracks active development tasks.
 - [x] Synchronize CLI commands in context map documentation (feat/issue-292) <!-- id: issue-292 -->
 - [x] Generate workspace audit report (feat/issue-294) <!-- id: issue-294 -->
 - [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/issue-346) <!-- id: issue-346 -->
-- [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
