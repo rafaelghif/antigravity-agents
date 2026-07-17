@@ -46,7 +46,7 @@ Once the issue file is written:
    `- [ ] [Title] (feat/issue-[number]) <!-- id: issue-[number] -->`
 3. Add the issue ID (e.g., `- [ ] issue-[number]`) under the corresponding milestone version section in `.agents/memory/milestones.md`.
 4. Transition the task to `Doing` before starting work.
-5. Create and checkout a new branch for the issue immediately (e.g., `./helper.sh issue checkout issue-[number]`). **NEVER** edit files or commit directly on the `main` or `master` branch.
+5. Create and checkout a new branch for the issue immediately (e.g., `./helper.sh issue checkout issue-[number]`). Enforce Epic-Task branching: branch off the current active epic branch (if applicable), and **NEVER** edit files or commit directly on the `main` or `master` branch.
 
 Note: Task statuses and checkbox states in `board.md` are automatically kept in sync with issue file statuses whenever issues are synchronized, checkout, or closed.
 

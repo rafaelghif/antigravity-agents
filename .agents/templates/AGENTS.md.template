@@ -1,104 +1,41 @@
-# AGENTS.md — {{NAME}}
+# AGENTS.md — Antigravity Agent Core (AAC) V3
 
-> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.
+> Budget: < 150 lines. Be terse but uncompromisingly strict on guardrails.
 
-## 1. What this project is
-- **Product:** {{PRODUCT}}
-- **Version:** {{VERSION}}
-- **Stack:** {{STACK}}
-- **Repo layout:** {{LAYOUT}}
+## 1. Project
+- **Product:** test-proj | **Version:** 3.127.0 | **Stack:** Python 3, Docker
+- **Layout:** CLI scripts, `.agents/skills/` (playbooks), `.agents/workflows/`, `.agents/memory/`, `.agents/docs/`.
 
-## 2. Non-negotiable rules
-*(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*
+## 2. Core Guardrails & Anti-Hallucination
+- **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift.
+- **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
+- **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. If ambiguous, halt and prompt the USER. NEVER loop tool calls blindly if stuck.
+- **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/active_context.md`, and `.agents/tasks/board.md` before coding.
+- **MCP Priority:** ALWAYS use Gitea/GitHub MCP for issue/PR management. If offline, fallback to local `.agents/issues/`.
+- **Scope Isolation:** NEVER leak data to global paths (e.g., `~/.gemini/`).
+- **Zero-Trust & Security:** NEVER commit secrets or `.env`. Pin dependencies. Do NOT run unverified scripts.
+- **Architecture & Schema Sync:** `.agents/schema.md` is the absolute source of truth. If any database, table, or field is modified, you MUST instantly update `.agents/schema.md` to match. Check `.agents/memory/decisions/` before major changes.
+- **Skill Usage:** ALWAYS prioritize loading specific playbooks (e.g., `engineering-standards`, `security-compliance`) from `.agents/skills/` via `view_file` over guessing workflows.
+- **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.md` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
-- **UNIVERSAL AGENT REASONING PROTOCOL (UARP):** You **MUST ALWAYS** output a strict XML `<aac_preflight>` block in your visible response **BEFORE** executing any tools or modifying files. This guarantees cross-model reasoning consistency. The block MUST contain:
-  `<aac_preflight>`
-    `<audit>List target files to edit, active module locks, and matching schema boundaries.</audit>`
-    `<compliance>Verify 10-year scale limits and confirm NO global/home-directory config leakage.</compliance>`
-    `<action>State the exact CLI or code execution you are about to run.</action>`
-  `</aac_preflight>`
-  Never skip this XML block. It acts as the primary AI guardrail to eliminate context drift and hallucinations.
-- **ALWAYS** load, read, and strictly adhere to the agent core persona, tone guidelines, and philosophies defined in the agent soul profile [.agents/soul.md](file://.agents/soul.md) in every response and action to guarantee consistent enterprise-grade engineering identity across all platforms and accounts.
-- **ALWAYS** load and read the workspace's `.agents/active_context.md`, `.agents/schema.md`, the active issue specification file `.agents/issues/issue_[id].md`, and any custom workspace-level memory files (such as `memory.md`, `brain.md`, or custom context files in the root or `.agents/` directory) at the very beginning of the first conversation turn to align on task checklist, database/API schemas, scope boundaries, and local workspace memory before formulating any implementation plan or writing code.
-- **ALWAYS** distinguish between **Discussions** (informational queries, design questions, general research, diagnostics) and **Tasks** (codebase writes/modifications). Never create Git branches, task board entries, or commits for informational or diagnostic discussions. Only trigger the branch-and-issue tracking workflow when actual file edits/creations are required.
-- **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.
-- **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).
-- **NEVER** read, list, modify, or attempt to repair any agent-internal scripts, workflows, or helper code inside `.agents/scripts/` or `.agents/workflows/`. **These are impenetrable compiled framework binaries.** Focus 100% of your attention strictly on the user's application source code and its memory directories. If you encounter errors originating from these directories, do not try to fix them; simply report them to the USER.
-- **ALWAYS** run the project's test command before marking a task `Completed`.
-- **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.
-- **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `engineering-standards` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.
-- **NEVER** write or maintain duplicate code or inline file templates (such as `cat << 'EOF'` strings of repository files) inside bootstrap, install, or helper scripts. Always rely on a single source of truth (copying locally or fetching from the repository).
-- **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.
-- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don't duplicate it.
-- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body. The subject line MUST be descriptive of the technical changes made; **NEVER** use generic placeholder subjects (e.g. `fix: issue-122` or `chore: task-100`) without explanation. This exact format is what `./helper.sh changelog`'s parser depends on.
-- **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.
-- **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.
-- **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications. If a module is already locked by someone/something else, wait or escalate to the USER — never force-override or bypass an existing lock.
-- **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.
-- **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).
-- **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.
-- **ALWAYS** prioritize using active Model Context Protocol (MCP) server tools (specifically `github` and `gitea` MCP tools) for all remote repository and project workflows (such as creating, fetching, and updating issues, pull requests, commits, merges, and project boards). Bypassing active MCP tools in favor of local files, custom wrapper scripts, or standard APIs is strictly prohibited, unless the remote MCP integration is invalid, offline, or unauthorized, in which case the agent MUST fall back to local file-based tracking (such as `.agents/issues/` files and `board.md`). When MCP is valid, ensure local tracking is kept in sync.
-- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. The agent **MUST NEVER** assume, guess, or hallucinate database structures; all tables, fields, and types must be explicitly documented in `.agents/schema.md` before coding. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.
-- **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.
-- **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as the user's home directory, global agent appData/brain directories, or global databases). This strictly forbids caching skills playbooks, storing temporary files, exporting local credential keys, or saving execution reports outside the target repository boundaries (e.g. no writes to `~/.gemini/` or home folder directories except for static builtin read-only paths). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.
-- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don't run it ad hoc outside that step.
-- **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `troubleshooting` skill; if still unresolved, halt and prompt the USER for manual intervention.
-- **ALWAYS** check available skills in the prompt or `context_map.md` and load the required `SKILL.md` (via `view_file`) at the start of tasks matching that domain. **WARNING:** Do not rely solely on the brief skill descriptions injected in your prompt! Bypassing required playbook reads is strictly audited and blocks validation.
-- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task unless it is necessary to perform a deeper analysis, verify workspace state, or confirm modifications. Caching the results in your thinking block is still highly recommended to maximize prompt caching effectiveness and minimize token usage.
-- **ALWAYS** enforce Zero-Trust Security: never commit secrets, never pull unverified remote scripts, strictly pin all package dependencies, and never execute obfuscated code (detailed in `security-compliance` playbook).
-- **ALWAYS** implement robust error handling with tracebacks and never bypass static testing gates on base branches (detailed in `devops-release` playbook).
-- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.
-- **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.
-- **NEVER** run destructive Git commands such as `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git checkout .`, or `git push --force`. If you need to revert changes, discard files, or clean untracked assets, you MUST do it selectively or ask the programmer first.
-- **ALWAYS** act like an expert senior developer/software engineer: design with high foresight, keep cognitive complexity low, and prioritize standard, robust engineering patterns.
-- **ALWAYS** verify standard library solutions or already installed dependencies first before writing new helpers or adding third-party packages, to prevent duplicate libraries and minimize codebase bloat.
-- **ALWAYS** write enterprise-grade code that is clean, secure, performant, and scalable. Strict guidelines for Security, Performance (N+1 queries, memory leaks), Maintainability (SOLID principles), and 10-Year Architecture Foresight are offloaded to the `engineering-standards` and `security-compliance` playbooks.
-- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.
-- **ALWAYS** translate and expand brief or informal user instructions (e.g. "A" or "continue previous task") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST perform systematic prompt expansion, defining clear checklist tasks, acceptance criteria, and compliance audits. The agent MUST strictly rely on and respect the user's human-in-the-loop command approval gates (never attempting to bypass or automate approval for proposed commands) and proactively verify ambiguous details interactively using `/grill-me` or interactive questions to prevent hallucinated actions.
+## 3. Working Protocol
+1. **Resume:** Check `Doing` in `board.md`. If active, `helper.sh issue checkout <task-id>` -> `helper.sh context optimize`.
+2. **Claim Task:** Move to `Doing`, checkout Epic/Task branch, read specifications.
+3. **Execute (Atomic):** Split tasks into 3-5 line subtasks. Run `./helper.sh context optimize` between subtasks to prune stale context.
+4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`).
+5. **Complete:** Run tests and `./helper.sh validate`. Run `./helper.sh changelog`. Merge task to Epic branch, delete task branch. Run `/sync-memory` to learn.
 
-## 3. CLI Helper Commands Reference
+## 4. Enterprise Branching
+- **Strict Epic-Task:** `epic/<name>` -> `feat/<task-id>-slug`.
+- **Merge Flow:** Task branch merges to Epic branch. Epic branch merges to `main` ONLY when complete. NEVER commit/merge directly to `main` or `master`.
+- **PRs:** 1 Task = 1 PR. Require reviews for architecture changes.
 
-All workspace operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows). For the complete command list, flags, and options, see the [CLI Commands Reference](file://.agents/docs/context_map.md#1-cli-helper-commands-reference).
+## 5. Memory & Context Read Flow
+*Issues (`.agents/issues/`) and boards are ephemeral and can be archived. Memory (`.agents/memory/`, `lessons-learned.md`, `schema.md`) is PERMANENT and intolerant to archiving. It is STRICTLY FORBIDDEN to archive, truncate, or delete memory files.*
+- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past project errors.
+- **ALWAYS** read `.agents/docs/template_map.md` when modifying template files, scaffolding, or installer wrappers to maintain platform parity.
+- **ALWAYS** check `@.agents/memory/security-policy.md` for authentication or infrastructure tasks.
+- **Session Learning:** At the end of a session, use `./helper.sh learn` to record new technical lessons into `lessons-learned.md`.
 
-## 4. Context map — what loads when
-
-For the complete description of workspace metadata, ADRs, playbooks, memory structures, and their loading behaviors, see the [Workspace Context Map](file://.agents/docs/context_map.md#2-context-map--what-loads-when).
-
-
-## 5. Working protocol
-1. **Session Resumption & Account Switching:** When starting a new conversation session (or switching accounts), ALWAYS check `.agents/tasks/board.md` for active tasks in the `Doing` column before assuming a new task. If an active task exists, use `./helper.sh issue checkout <task-id>` to load its branch, run `./helper.sh context optimize`, and read `.agents/state/active_context.md` to precisely resume where the previous session left off. Never hallucinate or create a new issue for a task that is already in progress.
-2. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), task board, and the local git-identity profile (copies `.agents/git_profiles.example` → `.agents/git_profiles.json`, which must never be staged or committed) before writing any code.
-3. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`), run `./helper.sh context optimize`, and read `.agents/state/active_context.md` to align on active scope, checklist, and rules.
-4. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching using `.agents/active_context.md` as the primary source) before proposing or writing code.
-5. **Task Splitting:** The agent MUST split any assigned task into small, atomic subtasks (no more than 3-5 lines of code edits per step where practical) and list them under `Implementation Subtasks` in the local issue specification file (e.g. `.agents/issues/issue_xxx.md`).
-6. **Context Insulation (Single subtask focus):** The agent MUST focus on exactly ONE atomic subtask at a time. After completing a subtask, the agent MUST run validation and make a git commit with a clear Conventional Commit message referencing the task ID. This keeps the prompt cache warm and prevents context pollution.
-7. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.
-8. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.
-9. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.
-10. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch. When a task matches a skill's description, load that skill's `SKILL.md` using `view_file` to align on execution steps, ensuring the skill is used efficiently.
-11. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.
-12. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).
-
-## 6. Git & review
-- Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.
-- All code edits must be done on the designated branch. Committing to base branches (`main` or `master`) directly is strictly prohibited.
-- One task = one PR where practical; link the task ID in the PR description.
-- No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.
-- When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.
-
-## 7. Technical Alignment & Decision Capture Flow
-When aligning on technical details, features, or database specifications:
-1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.
-2. **Alignment Storage (Workspace Level)**:
-   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md` or modular files under `.agents/schemas/` (if database size is large). Whenever database structures, tables, or fields are discussed, updated, or created, the agent MUST immediately record them here to preserve data layout visibility.
-   * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.
-   * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.
-   * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.
-3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist), `.agents/docs/template_map.md` (for template-to-target and installer/bootstrap platform parity mappings), and `@.agents/memory/architecture.md` (for architectural boundaries). Depending on scope, load `@.agents/memory/milestones.md` for roadmap/release alignment, `@.agents/memory/security-policy.md` for security/GPG runbooks, and `@.agents/docs/collaboration.md` for team coordination and lock resolution. To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.
-4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill's description. They are strictly prohibited from being auto-loaded globally to optimize context size.
-
-## 8. Tool permissions
-Default to `request-review` in `./helper.sh config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.
-
-## 9. Maintaining this file
-Reviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.
+## 6. CLI Helpers
+Use `./helper.sh` (Linux/Mac) or `./helper.ps1` (Win). See [Docs](file://.agents/docs/context_map.md) for full commands.
