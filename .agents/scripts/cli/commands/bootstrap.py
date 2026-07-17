@@ -904,6 +904,15 @@ This board tracks active development tasks.
             print("or run: ./helper.sh profile add <name> <email>")
         print("==========================================================")
 
+    # Ensure Git is initialized so Epic/Task branch operations don't fail
+    if not os.path.exists(".git"):
+        try:
+            import subprocess
+            subprocess.run(["git", "init"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print("[OK] Initialized a new git repository to support AAC enterprise branching.")
+        except Exception as e:
+            print(f"[WARN] Failed to initialize git repository: {e}")
+
     # 8.5. Automatic Model Context Protocol (MCP) Registration
     print("\n==========================================================")
     print("   Setting up Model Context Protocol (MCP) Tools...      ")

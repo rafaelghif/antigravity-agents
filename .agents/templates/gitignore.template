@@ -16,6 +16,7 @@ vendor/
 .agents/active_api_profile_name
 .agents/active_context.md
 .agents/config.json
+.agents/mcp_config.json
 .agents/cooldowns.json
 .agents/sync_cache.json
 .agents/logs/
