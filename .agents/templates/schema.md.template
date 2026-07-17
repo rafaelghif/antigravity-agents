@@ -14,6 +14,7 @@
 ## 3. Structural Rules
 - Modules must communicate only through defined APIs.
 - Domain entities must have zero external dependencies.
+- **AI-Driven State Resolution**: If the agent detects a data contract mismatch, missing specification, or procedural conflict, it MUST halt operations, query this schema as the absolute source of truth, and logically self-correct without waiting for or relying on local script interventions.
 
 ## 4. Database Schema Registry
 
