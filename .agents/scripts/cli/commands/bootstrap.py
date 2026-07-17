@@ -404,6 +404,15 @@ def copy_core_files(src_root, force=False):
         except Exception:
             pass
 
+    # Copy git_profiles.example to git_profiles.json if it doesn't exist
+    src_git_ex = os.path.join(src_root, ".agents/git_profiles.example")
+    dest_git_json = os.path.join(target_root, ".agents/git_profiles.json")
+    if os.path.exists(src_git_ex) and not os.path.exists(dest_git_json):
+        try:
+            shutil.copy2(src_git_ex, dest_git_json)
+        except Exception:
+            pass
+
 def run(args):
     print("==========================================================")
     print("   Antigravity V3 Project Bootstrapper                    ")

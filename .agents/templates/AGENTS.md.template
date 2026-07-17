@@ -3,10 +3,10 @@
 > Budget: < 150 lines. Be terse but uncompromisingly strict on guardrails.
 
 ## 1. Project
-- **Product:** test-proj
-- **Version:** 3.128.0
-- **Stack:** Python 3, Docker
-- **Layout:** CLI scripts, `.agents/skills/` (playbooks), `.agents/workflows/`, `.agents/memory/`, `.agents/docs/`.
+- **Product:** {{PRODUCT}}
+- **Version:** {{VERSION}}
+- **Stack:** {{STACK}}
+- **Layout:** {{LAYOUT}}
 
 ## 2. Core Guardrails & Anti-Hallucination
 - **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift.
