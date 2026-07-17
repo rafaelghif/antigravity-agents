@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.133.0] - 2026-07-17
+
+### 🚀 Features
+- optimize initialization token usage by delegating deep architectural scan to research subagent
+- dynamically scan workspace and git config to generate projects.json and git_profiles.json
+- optimize core agent prompt and enforce Hermes protocol
+
+### 🐛 Bug Fixes
+- patch mcp_config.json secret leak in templates and prevent git workflow crash loop on fresh bootstrap
+- restore /grill-me interactive initialization requirement in AGENTS.md protocol
+- restore bootstrap templates and ensure clean target installation without AAC metadata leaks
+- resolve version parsing bug and restore v3.128.0
+
+### ⚙️ Chores
+- auto-generate changelog for init optimization
+- auto-generate changelog for dynamic json generation
+- auto-generate changelog for init protocol restore
+- auto-generate changelog for installation fixes
+- auto-generate changelog for memory consolidation
+- consolidate and prune redundant lessons-learned.md memory
+- auto-generate changelog and bump version to 0.1.0
+
+
 ## [3.132.0] - 2026-07-17
 
 ### 🚀 Features
