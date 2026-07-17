@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: update github mcp config to copilot endpoint (feat/issue-383) <!-- id: issue-383 -->
 - [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
 - [x] feat: automate mcp secret injection from profiles and secure config (feat/381) <!-- id: 381 -->
 - [x] docs: update readme with v3 architecture and mermaid (feat/380) <!-- id: 380 -->
