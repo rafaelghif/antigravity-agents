@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.130.0] - 2026-07-17
+
+### 🚀 Features
+- optimize core agent prompt and enforce Hermes protocol
+
+### 🐛 Bug Fixes
+- restore /grill-me interactive initialization requirement in AGENTS.md protocol
+- restore bootstrap templates and ensure clean target installation without AAC metadata leaks
+- resolve version parsing bug and restore v3.128.0
+
+### ⚙️ Chores
+- auto-generate changelog for installation fixes
+- auto-generate changelog for memory consolidation
+- consolidate and prune redundant lessons-learned.md memory
+- auto-generate changelog and bump version to 0.1.0
+
+
 ## [3.129.0] - 2026-07-17
 
 ### 🚀 Features
