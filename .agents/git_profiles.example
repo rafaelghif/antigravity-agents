@@ -1,15 +1,14 @@
 {
-  "_note1": "Secrets (git_pat, gpg_private_key) are encrypted at rest using a master key.",
-  "_note2": "Alternatively, you can use environment variables like AAC_GITHUB_TOKEN_<PROFILENAME> (in uppercase, replacing hyphens with underscores) or GITHUB_TOKEN/GIT_PAT.",
+  "_note": "Alternatively, you can use environment variables like AAC_GITHUB_TOKEN_<PROFILENAME> (in uppercase, replacing hyphens with underscores) or GITHUB_TOKEN/GIT_PAT.",
   "profiles": [
     {
       "name": "corporate-work",
       "email": "developer@company.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
-      "git_pat": "encrypted:gAAAAAB...",
-      "github_mcp_pat": "encrypted:gAAAAAB...",
-      "gitea_token": "encrypted:gAAAAAB...",
+      "git_pat": "ghp_YOUR_CORPORATE_TOKEN",
+      "github_mcp_pat": "ghp_YOUR_CORPORATE_TOKEN",
+      "gitea_token": "gnt_YOUR_CORPORATE_TOKEN",
       "gitea_host": "https://gitea.com",
       "active": true
     },
@@ -18,9 +17,9 @@
       "email": "dev.personal@gmail.com",
       "signing_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAJ...",
       "ssh_key_path": "~/.ssh/id_ed25519_personal",
-      "git_pat": "encrypted:gAAAAAB...",
-      "github_mcp_pat": "encrypted:gAAAAAB...",
-      "gitea_token": "encrypted:gAAAAAB...",
+      "git_pat": "ghp_YOUR_PERSONAL_TOKEN",
+      "github_mcp_pat": "ghp_YOUR_PERSONAL_TOKEN",
+      "gitea_token": "gnt_YOUR_PERSONAL_TOKEN",
       "gitea_host": "https://gitea.com",
       "active": false
     }

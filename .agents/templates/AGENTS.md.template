@@ -21,17 +21,18 @@
 - **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.md` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
 ## 3. Working Protocol
-1. **Initialize & Align:** Before starting ANY new project or major epic, you MUST interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
-2. **Claim Task via MCP:** Use GitHub/Gitea MCP directly to create issues, read specifications, and assign tasks. Do NOT use `helper.sh` issue commands if MCP is available.
-3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks.
+1. **Initialize & Align:** Before starting ANY new project or major epic, interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
+2. **Claim Task via MCP:** Use MCP to read/create issues. If Acceptance Criteria/DoD is vague, you MUST halt and clarify with the User before writing any code.
+3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
 4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`). Push to remote (`git push origin <branch>`).
-5. **PR & Merge via MCP:** Use MCP to create a Pull Request directly on GitHub/Gitea. Merge the PR directly via MCP. NEVER merge locally using `helper.sh` or local Git unless offline.
-6. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
+5. **PR & Merge via MCP:** Create PR directly via MCP. NEVER merge PRs unilaterally for critical changes; ALWAYS wait for CI pipeline checks to pass and explicit User approval.
+6. **Rollback & Recovery:** If a merged PR breaks the build or production, IMMEDIATELY halt forward progress, investigate, and propose a Revert or Hotfix PR.
+7. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
 
 ## 4. Enterprise Branching
 - **Strict Epic-Task:** Branches MUST be descriptive: `epic/<name>` -> `feat/<task-id>-<slug>`. NEVER use bare IDs (e.g., `feat/378` is forbidden; use `feat/378-fix-bootstrap`).
-- **Merge & Push Flow:** Task branch merges to Epic branch. Epic branch merges to `main`. NEVER commit/merge directly to `main`. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging or committing.
-- **PRs:** 1 Task = 1 PR. Require reviews for architecture changes.
+- **Merge & Push Flow:** Task branch merges to Epic branch. Epic branch merges to `main`. NEVER commit/merge directly to `main`. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging.
+- **PRs:** 1 Task = 1 PR. Assign the User as reviewer. Require explicit human approval and green CI checks for architecture changes.
 
 ## 5. Memory & Context Read Flow
 *Issues (`.agents/issues/`) and boards are ephemeral and can be archived. Memory (`.agents/memory/`, `lessons-learned.md`, `schema.md`) is PERMANENT and intolerant to archiving. It is STRICTLY FORBIDDEN to archive, truncate, or delete memory files.*
