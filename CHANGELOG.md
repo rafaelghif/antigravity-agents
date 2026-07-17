@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.136.0] - 2026-07-17
+
+### 🚀 Features
+- automate secure mcp secret injection from profiles
+- feat: automate mcp secret injection from profiles and secure config (ISSUE-381)
+
+
 ## [3.135.0] - 2026-07-17
 
 ### 🚀 Features
