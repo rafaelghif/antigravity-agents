@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] test: full workflow validation (feat/issue-384) <!-- id: issue-384 -->
 - [x] feat: update github mcp config to copilot endpoint (feat/issue-383) <!-- id: issue-383 -->
 - [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
 - [x] feat: automate mcp secret injection from profiles and secure config (feat/381) <!-- id: 381 -->
