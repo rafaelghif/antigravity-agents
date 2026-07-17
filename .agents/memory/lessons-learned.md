@@ -26,3 +26,6 @@ This file logs project-wide incident reports, testing optimizations, and workflo
 - **[2026-07-04] Parity**: Maintain exact functional parity between Bash (`.sh`) and PowerShell (`.ps1`) helper scripts.
 - **[2026-06-28] PowerShell Quirks**: Explicitly cast outputs to `[string]` when testing results. Enclose `Test-Path` in parentheses before using `-and`. Propagate `$LASTEXITCODE`.
 - **[2026-07-02] Python Encoding**: Reconfigure `sys.stdout` to utf-8, use cross-platform path resolution, and specify `encoding='utf-8'` on `subprocess.run` calls.
+
+## Lessons Learned
+- **[2026-07-17]** **Path Handling / OS Compatibility**: Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.

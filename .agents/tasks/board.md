@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] fix: resolve bootstrap version mismatch (feat/378) <!-- id: 378 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: resolve bootstrap version mismatch (feat/378) <!-- id: 378 -->
 - [x] feat: include projects.json in mandatory init task (feat/377) <!-- id: 377 -->
 - [x] feat: add AGENTS.md to mandatory init task (feat/376) <!-- id: 376 -->
 - [x] feat: enforce mandatory initialization task on bootstrap (feat/375) <!-- id: 375 -->
