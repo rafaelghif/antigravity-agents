@@ -366,3 +366,4 @@ This board tracks active development tasks.
 - [x] Synchronize CLI commands in context map documentation (feat/issue-292) <!-- id: issue-292 -->
 - [x] Generate workspace audit report (feat/issue-294) <!-- id: issue-294 -->
 - [x] refactor: upgrade agent core codebase to enterprise-grade standards (feat/issue-346) <!-- id: issue-346 -->
+- [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->

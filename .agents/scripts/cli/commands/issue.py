@@ -292,7 +292,18 @@ created_at: {current_date}
             except Exception as e:
                 print(f"Warning: Failed to update issue assignee: {e}")
             
-        slug = issue_id.lower().replace('_', '-')
+        title = fm.get("title", "")
+        if title:
+            import re
+            title_slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+            slug = f"{issue_id.lower().replace('_', '-')}-{title_slug}"
+        else:
+            slug = issue_id.lower().replace('_', '-')
+            
+        # Trim very long branch names
+        if len(slug) > 50:
+            slug = slug[:50].rstrip('-')
+            
         branch_name = f"feat/{slug}"
         if not validation.validate_safe_branch(branch_name):
             print(f"Error: Invalid branch name '{branch_name}'.")
