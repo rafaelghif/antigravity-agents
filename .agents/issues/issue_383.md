@@ -1,7 +1,7 @@
 ---
 id: issue-383
 title: "feat: update github mcp config to copilot endpoint"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-17
 ---

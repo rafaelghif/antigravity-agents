@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.138.0] - 2026-07-17
+
+### 🚀 Features
+- update github mcp server to use copilot http endpoint
+- feat: update github mcp config to copilot endpoint (ISSUE-383)
+
+
 ## [3.137.0] - 2026-07-17
 
 ### 🚀 Features

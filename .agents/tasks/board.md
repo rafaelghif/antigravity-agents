@@ -3,7 +3,6 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] feat: update github mcp config to copilot endpoint (feat/issue-383) <!-- id: issue-383 -->
 - [x] Implement rolling window token quotas and manual override sync (feat/issue-175) <!-- id: issue-175 -->
 - [x] Implement token usage trend and remaining reset time displays (feat/issue-174) <!-- id: issue-174 -->
 - [x] Automate token active account detection from CLI logs (feat/issue-173) <!-- id: issue-173 -->
@@ -13,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] feat: update github mcp config to copilot endpoint (feat/issue-383) <!-- id: issue-383 -->
 - [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
 - [x] feat: automate mcp secret injection from profiles and secure config (feat/381) <!-- id: 381 -->
 - [x] docs: update readme with v3 architecture and mermaid (feat/380) <!-- id: 380 -->
