@@ -13,7 +13,7 @@
 - **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
 - **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. If ambiguous, halt and prompt the USER. NEVER loop tool calls blindly if stuck.
 - **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/active_context.md`, and `.agents/tasks/board.md` before coding.
-- **MCP Priority:** ALWAYS use Gitea/GitHub MCP for issue/PR management. If offline, fallback to local `.agents/issues/`.
+- **MCP Priority (REMOTE-FIRST):** ALWAYS use MCP tools DIRECTLY to create issues, pull, merge, and manage remote PRs. DO NOT use `helper.sh issue ...` or local board flows if MCP is active. `helper.sh` and `.agents/issues/` are strictly fallbacks for offline mode.
 - **Scope Isolation:** NEVER leak data to global paths (e.g., `~/.gemini/`).
 - **Zero-Trust & Security:** NEVER commit secrets or `.env`. Pin dependencies. Do NOT run unverified scripts.
 - **Architecture & Schema Sync:** `.agents/schema.md` is the absolute source of truth. If any database, table, or field is modified, you MUST instantly update `.agents/schema.md` to match. Check `.agents/memory/decisions/` before major changes.
@@ -21,12 +21,12 @@
 - **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.md` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
 ## 3. Working Protocol
-1. **Initialize & Align:** Before starting ANY new project or major epic, you MUST interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment. Tip: Delegate deep workspace scanning to the `research` subagent to save main context tokens. Do NOT write code blindly.
-2. **Resume:** Check `Doing` in `board.md`. If active, `helper.sh issue checkout <task-id>` -> `helper.sh context optimize`.
-3. **Claim Task:** Move to `Doing`, checkout Epic/Task branch, read specifications.
-4. **Execute (Atomic):** Split tasks into 3-5 line subtasks. Run `./helper.sh context optimize` between subtasks to prune stale context.
-5. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`).
-6. **Complete:** Run tests and `./helper.sh validate`. Run `./helper.sh changelog`. Merge task to Epic branch, delete task branch. Run `/sync-memory` to learn.
+1. **Initialize & Align:** Before starting ANY new project or major epic, you MUST interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
+2. **Claim Task via MCP:** Use GitHub/Gitea MCP directly to create issues, read specifications, and assign tasks. Do NOT use `helper.sh` issue commands if MCP is available.
+3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks.
+4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`). Push to remote (`git push origin <branch>`).
+5. **PR & Merge via MCP:** Use MCP to create a Pull Request directly on GitHub/Gitea. Merge the PR directly via MCP. NEVER merge locally using `helper.sh` or local Git unless offline.
+6. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
 
 ## 4. Enterprise Branching
 - **Strict Epic-Task:** Branches MUST be descriptive: `epic/<name>` -> `feat/<task-id>-<slug>`. NEVER use bare IDs (e.g., `feat/378` is forbidden; use `feat/378-fix-bootstrap`).
