@@ -38,17 +38,15 @@ AAC V3 enforces a structured, step-by-step engineering cycle on the agent to pre
 
 ```mermaid
 flowchart TD
-    A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & issue_[id].md</code>"]
-    B --> C["3. Claim & Checkout Branch<br><code>./helper.sh issue checkout &lt;id&gt;</code>"]
-    B --> C_Fix["3. Claim & Checkout Fix Branch<br><code>git checkout -b fix/issue-&lt;id&gt;</code>"]
+    A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & board.md</code>"]
+    B --> C["3. Claim & Checkout Branch<br><code>git checkout -b feat/&lt;task-id&gt;-&lt;slug&gt;</code>"]
     C --> D["4. Read Schema & Context<br><code>schema.md & active_context.md</code>"]
-    C_Fix --> D
-    D --> E["5. Lock Active Module<br><code>./helper.sh lock &lt;module&gt;</code>"]
+    D --> E["5. Execute (Atomic)<br><code>split into 3-5 line subtasks</code>"]
     E --> F["6. Code, Lint, &amp; Test<br><code>validate.py</code>"]
-    F -- "Audit Fails" --> G["7. Self-Heal Workspace<br><code>self-healing/SKILL.md</code>"]
+    F -- "Audit Fails" --> G["7. Self-Heal Workspace<br><code>./helper.sh learn</code>"]
     G --> F
     F -- "Audit Passes" --> H["8. Commit with Task ID<br><code>Conventional Commits</code>"]
-    H --> I["9. Close Task &amp; Merge<br><code>./helper.sh issue close &lt;id&gt;</code>"]
+    H --> I["9. Close, Merge &amp; Push<br><code>git push origin &lt;branch&gt;</code>"]
 ```
 
 ---
@@ -281,13 +279,16 @@ After bootstrapping, your project will have the following layout:
 - `.agents/rules.md`: Automatically generated build, test, and style configurations.
 - `.agents/schema.md`: Holds definitions for config schemas and data formats.
 - `.agents/projects.json`: Monorepo project references.
+- `.agents/git_profiles.json`: Workspace-isolated developer profiles and signatures.
+- `.agents/mcp_config.json`: Model Context Protocol configuration for workspace tools.
 - `.agents/tasks/board.md`: Active markdown task board for tracking progress.
-- `.agents/archive/`: Contains completed tasks, issues, and plans excluded from LLM context.
+- `.agents/issues/`: Contains active and archived task specifications.
 - `.agents/memory/`:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
   - `soul.md`: Core agent values, communication policies, and identity.
-  - `tech-debt.md` & `lessons-learned.md`: Logs for long-term project quality.
-- `.agents/skills/`: Executable playbooks (e.g. `code-review/`, `self-healing/`, `database-evolution/`).
+  - `lessons-learned.md`: Logs for long-term project quality and self-learning.
+- `.agents/skills/`: Executable playbooks (e.g., `code-review/`, `database-evolution/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
+- `.agents/docs/`: Parity mappings for scripts and templates.

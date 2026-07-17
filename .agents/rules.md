@@ -39,4 +39,3 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 
 ## 6. Synthesized Rules (Self-Learning Memory)
 - **[Learning: OS Compatibility / PowerShell]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
-- **[Learning: Git Workflow]** ALWAYS use descriptive branch names (`feat/<task-id>-<slug>`) and explicitly run `git push origin <branch>` after merging or closing issues to prevent local-only commits.
