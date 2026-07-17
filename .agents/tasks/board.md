@@ -12,6 +12,7 @@ This board tracks active development tasks.
 ## Doing
 
 ## Done
+- [x] fix: resolve bootstrap version mismatch (feat/378) <!-- id: 378 -->
 - [x] feat: include projects.json in mandatory init task (feat/377) <!-- id: 377 -->
 - [x] feat: add AGENTS.md to mandatory init task (feat/376) <!-- id: 376 -->
 - [x] feat: enforce mandatory initialization task on bootstrap (feat/375) <!-- id: 375 -->
