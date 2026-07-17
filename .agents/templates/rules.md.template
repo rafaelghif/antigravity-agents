@@ -35,3 +35,4 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 
 ## 6. Synthesized Rules (Self-Learning Memory)
 - (No lessons learned logged yet)
+- **[Learning: Git Workflow]** ALWAYS use descriptive branch names (`feat/<task-id>-<slug>`) and explicitly run `git push origin <branch>` after merging or closing issues to prevent local-only commits.
