@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.135.0] - 2026-07-17
+
+### 🚀 Features
+- docs: update readme with v3 architecture and mermaid (ISSUE-380)
+
+### 📝 Documentation
+- update readme with v3 architecture and mermaid
+
+### ⚙️ Chores
+- track issue 380
+- sync board issue 379
+
+
 ## [3.134.0] - 2026-07-17
 
 ### 🚀 Features
