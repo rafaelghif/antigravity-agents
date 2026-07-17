@@ -395,21 +395,58 @@ def copy_core_files(src_root, force=False):
                     except Exception:
                         pass
 
-    # Copy projects.example to projects.json if it doesn't exist
-    src_projects_ex = os.path.join(src_root, ".agents/projects.example")
+    # Generate dynamic projects.json
     dest_projects_json = os.path.join(target_root, ".agents/projects.json")
-    if os.path.exists(src_projects_ex) and not os.path.exists(dest_projects_json):
+    if not os.path.exists(dest_projects_json):
         try:
-            shutil.copy2(src_projects_ex, dest_projects_json)
+            projects_data = {"projects": []}
+            for d in os.listdir(target_root):
+                full_path = os.path.join(target_root, d)
+                if os.path.isdir(full_path) and not d.startswith('.') and d not in ('node_modules', 'venv', 'env'):
+                    if os.path.exists(os.path.join(full_path, "package.json")):
+                        projects_data["projects"].append({"name": d, "path": d, "stack": "node", "test_command": "npm run test"})
+                    elif os.path.exists(os.path.join(full_path, "requirements.txt")) or os.path.exists(os.path.join(full_path, "pyproject.toml")):
+                        projects_data["projects"].append({"name": d, "path": d, "stack": "python", "test_command": "pytest"})
+                    elif os.path.exists(os.path.join(full_path, "go.mod")):
+                        projects_data["projects"].append({"name": d, "path": d, "stack": "go", "test_command": "go test ./..."})
+            if not projects_data["projects"]:
+                projects_data["projects"].append({
+                    "name": os.path.basename(os.path.abspath(target_root)).strip() or "root",
+                    "path": ".",
+                    "stack": detect_project_stack(target_root) or "python",
+                    "test_command": "pytest"
+                })
+            with open(dest_projects_json, "w", encoding="utf-8") as f:
+                json.dump(projects_data, f, indent=2)
         except Exception:
             pass
 
-    # Copy git_profiles.example to git_profiles.json if it doesn't exist
-    src_git_ex = os.path.join(src_root, ".agents/git_profiles.example")
+    # Generate dynamic git_profiles.json
     dest_git_json = os.path.join(target_root, ".agents/git_profiles.json")
-    if os.path.exists(src_git_ex) and not os.path.exists(dest_git_json):
+    if not os.path.exists(dest_git_json):
         try:
-            shutil.copy2(src_git_ex, dest_git_json)
+            import subprocess
+            def get_git_config(key):
+                try:
+                    return subprocess.check_output(["git", "config", "user." + key]).decode("utf-8").strip()
+                except Exception:
+                    return ""
+            git_name = get_git_config("name") or "Antigravity Agent"
+            git_email = get_git_config("email") or "agent@antigravity.local"
+            git_data = {
+                "profiles": [
+                    {
+                        "name": "default",
+                        "email": git_email,
+                        "signing_key": "",
+                        "ssh_key_path": "",
+                        "git_pat": "",
+                        "active": True
+                    }
+                ]
+            }
+            with open(dest_git_json, "w", encoding="utf-8") as f:
+                json.dump(git_data, f, indent=2)
         except Exception:
             pass
 
