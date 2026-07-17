@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.1.0] - 2026-07-17
+
+### 🚀 Features
+- optimize core agent prompt and enforce Hermes protocol
+
+
 ## [3.127.0] - 2026-07-16
 
 ### 🚀 Features

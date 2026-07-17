@@ -3,6 +3,8 @@
 This file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.
 
 ## Lessons Learned
+- **[2026-07-17]** ALWAYS run ./helper.sh changelog and understand SemVer (Major.Minor.Patch) before completing a task to ensure release notes are generated.
+- **[2026-07-17]** ALWAYS use the Epic/Task Git branching flow even when modifying agent-internal files like AGENTS.md. DO NOT make direct edits on the main branch without an issue.
 - **[2026-07-16]** **validation**: AI Skill Enforcer: Parse tool calls from the active conversation's transcript.jsonl and check if the required skill playbooks were viewed (via view_file) when modifying files or running commands associated with that skill, strictly blocking validation if not.
 - **[2026-07-14]** **bootstrap**: Established AGENTS.md.template and replaced brittle regex code replacements in bootstrap.py with static template placeholder substitution to ensure cleaner, maintainable, and reliable workspace generation.
 - **[2026-07-14]** **mcp**: Created mcp_config.json.template and mapped it in template_map.md to enforce parity verification and prevent MCP configuration drift during project bootsrapping.

@@ -1,0 +1,1241 @@
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'FallbackProject' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+F[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmp1lu1luoc/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestIsolationProject' using 'python' with 'none' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Skipping directory scaffolding generation due to --no-scaffold.
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmp8gu3qywa/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestPythonClean' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+F[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpyf7j69vm/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'FallbackClone' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+..[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpr0oln6dr/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+Interactive Setup (or run: helper.sh bootstrap <name> <stack> <arch: clean|layered|mvc|none> [--db <db>] [--infra <infra>] [--framework <fw>])
+
+Initializing 'tmpr2hzljsw' using 'python' with 'none' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Skipping directory scaffolding generation due to --no-scaffold.
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpr2hzljsw/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestInvalid' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpci6p93ut/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestInvalid2' using 'python' with 'none' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Skipping directory scaffolding generation due to --no-scaffold.
+Copying core agent scripts, skills, and CLI helper tools...
+Preserved existing '.agents/schema.md' architecture blueprint.
+Preserving existing version in AGENTS.md: 3.121.5
+Generated target AGENTS.md from template (version: 3.121.5).
+Preserved existing '.agents/rules.md' project rules.
+Preserved existing task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpci6p93ut/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestNodeLayered' using 'node' with 'layered' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 1.0.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpmj9868b1/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestPhpMvc' using 'php' with 'mvc' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpa77rdwg5/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestNoScaffold' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Skipping directory scaffolding generation due to --no-scaffold.
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpvg0ocw9q/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'TestCustomProject' using 'python' with 'none' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Skipping directory scaffolding generation due to --no-scaffold.
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Initialized task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpcz3dl6gm/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+==========================================================
+   Antigravity V3 Project Bootstrapper                    
+==========================================================
+
+Initializing 'MyExistingProject' using 'python' with 'clean' architecture (DB: None, Infra: None, Framework: None)...
+Using local templates registry at '/home/rafaelghifari/Muraghi/Project/antigravity-agent'...
+Copying core agent scripts, skills, and CLI helper tools...
+Generated '.github/workflows/verify.yml' CI pipeline configuration.
+Preserved existing '.agents/schema.md' architecture blueprint.
+Generated '.agents/mcp_config.json' from core config template.
+Generated '.agents/config.json' from template.
+Generated target AGENTS.md from template (version: 0.1.0).
+Generated '.agents/rules.md' from template.
+Preserved existing task board at '.agents/tasks/board.md'.
+
+Project bootstrapping completed successfully! Run './helper.sh validate' to verify.
+
+==========================================================
+   Setting up Model Context Protocol (MCP) Tools...      
+==========================================================
+.........................[91m[FAIL] Unsupported shell 'fish'. Supported: bash, zsh, powershell[0m
+.....[91m[FAIL] Mismatched Git Email Identity! The email 'wrong@personal.com' is not registered in git_profiles.json.
+  Please register the profile first: './helper.sh profile add <name> wrong@personal.com'
+  Or switch to an active profile: './helper.sh profile switch <profile_name>'[0m
+......[FAIL] Failed to execute command '/usr/bin/python3 -c raise SystemExit(1)': Command '['/usr/bin/python3', '-c', 'raise SystemExit(1)']' returned non-zero exit status 1.
+.....................................[91m[FAIL] Bootstrap script not found in target directories.[0m
+.....Fs..............[FAIL] Failed to execute command 'git branch -a --format=%(refname:short)': 'Mock' object is not subscriptable
+[FAIL] Failed to execute command 'git rev-parse --abbrev-ref HEAD': 'Mock' object is not subscriptable
+...[FAIL] Failed to execute command 'git branch -a --format=%(refname:short)': 'Mock' object is not subscriptable
+[FAIL] Failed to execute command 'git rev-parse --abbrev-ref HEAD': 'Mock' object is not subscriptable
+.[WARN] Failed to write lock file: fileno() returned a non-integer
+[FAIL] Failed to execute command 'git rev-parse --abbrev-ref HEAD': 
+.[WARN] Failed to write lock file: fileno() returned a non-integer
+......................................[91m[FAIL] Security Alert: SSH key path contains dangerous shell characters: ~/.ssh/id_rsa"; touch /tmp/pwned; echo "[0m
+........[91m[FAIL] Invalid email format: 'invalid-email'.[0m
+[91m[FAIL] Invalid profile name 'new prof with space'. Only alphanumeric, hyphens, and underscores allowed.[0m
+[91m[FAIL] Profile 'existing' already exists.[0m
+........[91m[FAIL] Profile 'non-existent' not found.[0m
+........[91m[FAIL] Mismatched Git Email Identity! The email 'wrong@personal.com' is not registered in git_profiles.json.
+  Please register the profile first: './helper.sh profile add <name> wrong@personal.com'
+  Or switch to an active profile: './helper.sh profile switch <profile_name>'[0m
+........................[91m[FAIL] Invalid skill name. Only lowercase alphanumeric characters and hyphens are allowed.[0m
+......[WARN] Access token for GITHUB is not configured.
+..[OK] Successfully registered MCP server in workspace config:
+     File: /tmp/tmpmkn32xl8/.agents/mcp_config.json
+[INFO] Global registration was bypassed to prevent cross-workspace path leakage.
+       To register globally (Cline settings and global config), please run:
+       ./helper.sh mcp register --global
+==========================================================
+
+==========================================================
+   Running Auto-Reconnaissance Scan...                    
+==========================================================
+==========================================================
+
+==========================================================
+   Next Steps: Workspace Configuration Guide             
+==========================================================
+1. Git Identity Rotation (Avoid commits with wrong emails):
+   Verify '.agents/git_profiles.json' exists. To add new profiles:
+     ./helper.sh profile add <name> <email>
+2. Monorepos & Multi-Project Validation:
+   To run tests across multiple projects inside this repository,
+   copy '.agents/projects.example' to '.agents/projects.json'
+   and configure your project paths.
+3. Claim a Task and Start Coding:
+   Open '.agents/tasks/board.md' to see available issues.
+   Checkout a task using: ./helper.sh issue checkout <task-id>
+==========================================================
+Copying core agent scripts, skills, and CLI helper tools...
+Copying core agent scripts, skills, and CLI helper tools...
+Copying core agent scripts, skills, and CLI helper tools...
+Copying core agent scripts, skills, and CLI helper tools...
+[91m[FAIL] Active Token Budget Exceeded (Daily Limit)![0m
+Daily Limit: 100 tokens
+Daily Used : 150 tokens
+Please run './helper.sh token status' to verify, or './helper.sh token reset --daily' to reset.
+To bypass this budget gate (for manual debugging), run: export AAC_BYPASS_BUDGET=1
+[91m[FAIL] Active Token Budget Exceeded (Monthly Limit)![0m
+Monthly Limit: 1000 tokens
+Monthly Used : 1200 tokens
+Please run './helper.sh token status' to verify, or './helper.sh token reset --monthly' to reset.
+To bypass this budget gate (for manual debugging), run: export AAC_BYPASS_BUDGET=1
+==========================================================
+   Antigravity Auto-Changelog & SemVer Generator         
+==========================================================
+Current version (AGENTS.md): 1.0.0
+Last version in CHANGELOG: 1.0.0
+Boundary commit found for version 1.0.0: hash1
+Found 1 commits since boundary.
+Calculated next version: 1.1.0
+Publishing automated GitHub Release Draft...
+[OK] GitHub Draft Release created successfully: https://github.com/test/repo/releases/tag/v1.1.0
+
+Release updates completed. Active version is now 1.1.0!
+[OK] Updated AGENTS.md version from 1.0.0 to 1.1.0.
+[OK] Updated package.json version to 1.1.0.
+Applying Git Profile: 'custom-work'
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[92m[OK] Git Config Email matches active profile 'p1' (p1@corp.com).[0m
+[92m[OK] No credentials, staged private files, mismatched profiles, or secrets detected.[0m
+Usage: helper.py context optimize
+[92m[OK] Context manifest successfully optimized and written to '.agents/state/active_context.md'.[0m
+[92m[OK] Context manifest successfully optimized and written to '.agents/state/active_context.md'.[0m
+[92m==========================================================[0m
+[92m🚀 AAC V3 Local Dashboard Server started at: http://127.0.0.1:8000/?token=e732bbdd16b95a54869c8ebc97f6fb2a[0m
+[92m==========================================================[0m
+[93mPress Ctrl+C to terminate dashboard server.[0m
+
+[92m==========================================================[0m
+[92m🚀 AAC V3 Local Dashboard Server started at: http://127.0.0.1:9000/?token=e732bbdd16b95a54869c8ebc97f6fb2a (accessible externally at your LAN IP)[0m
+[93m⚠️  [WARNING] External access is enabled! Make sure your network is secure.[0m
+[92m==========================================================[0m
+[93mPress Ctrl+C to terminate dashboard server.[0m
+
+============================================================
+      Antigravity Agent Core (AAC) V3 Diagnostics Doctor
+============================================================
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+Checking external CLI dependencies...
+[92m[OK] Binary 'gpg' detected at '/usr/bin/gpg' (version: 2.4.8).[0m
+[93m[WARN] Binary 'eslint' (JavaScript linter (used by validation checks for JS projects)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'black' (Python code formatter (used by static syntax checks)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'flake8' (Python linter (used by static style validation checks)) is missing from PATH (optional).[0m
+------------------------------------------------------------
+============================================================
+[93m[WARN] Diagnostics detected warnings or failures. Run with --repair to auto-fix.[0m
+============================================================
+      Antigravity Agent Core (AAC) V3 Diagnostics Doctor
+============================================================
+============================================================
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+Checking external CLI dependencies...
+[92m[OK] Binary 'gpg' detected at '/usr/bin/gpg' (version: 2.4.8).[0m
+[93m[WARN] Binary 'eslint' (JavaScript linter (used by validation checks for JS projects)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'black' (Python code formatter (used by static syntax checks)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'flake8' (Python linter (used by static style validation checks)) is missing from PATH (optional).[0m
+------------------------------------------------------------
+============================================================
+[92m[OK] All diagnostic audits PASSED! Local workspace is healthy.[0m
+============================================================
+============================================================
+      Antigravity Agent Core (AAC) V3 Diagnostics Doctor
+============================================================
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+------------------------------------------------------------
+Checking external CLI dependencies...
+[92m[OK] Binary 'gpg' detected at '/usr/bin/gpg' (version: 2.4.8).[0m
+[93m[WARN] Binary 'eslint' (JavaScript linter (used by validation checks for JS projects)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'black' (Python code formatter (used by static syntax checks)) is missing from PATH (optional).[0m
+[93m[WARN] Binary 'flake8' (Python linter (used by static style validation checks)) is missing from PATH (optional).[0m
+------------------------------------------------------------
+============================================================
+[92m[OK] All diagnostic audits PASSED! Local workspace is healthy.[0m
+============================================================
+Running auto-recovery repairs...
+[93m[WARN] Config '.agents/state/token_budget.json' is missing.[0m
+[92m[OK] Restored default configuration for '.agents/state/token_budget.json'.[0m
+[93m[WARN] Config '.agents/projects.json' is missing.[0m
+[92m[OK] Restored default configuration for '.agents/projects.json'.[0m
+[92m[OK] Recovered '.agents/git_profiles.json' from example template.[0m
+[92m[OK] Locks are managed git-natively on active branches. Stale locks are self-healing.[0m
+[92m[OK] Reinstalled/repaired all Git hooks.[0m
+==========================================================
+   Installing Antigravity Agent Core V3...                
+==========================================================
+Target Directory: /tmp/tmpbw66xhch/dest
+Existing installation found! Archiving to .agents_backup_20260716_211848...
+Backing up AGENTS.md to AGENTS.md.backup_20260716_211848...
+Copying core files recursively...
+Restoring user configurations and workspace state from backup...
+Transitioning to project setup and bootstrap configuration...
+[92m[OK] Bootstrap executed successfully.[0m
+Running final synchronization...
+==========================================================
+   AAC V3 Installation Completed Successfully!            
+   Run './helper.sh validate' in target folder to test.   
+==========================================================
+==========================================================
+   Installing Antigravity Agent Core V3...                
+==========================================================
+Target Directory: /tmp/tmp1sehvjdb/dest
+Copying core files recursively...
+Initializing empty Git repository in target directory...
+Transitioning to project setup and bootstrap configuration...
+==========================================================
+   Installing Antigravity Agent Core V3...                
+==========================================================
+Target Directory: /tmp/tmpotjywd2j/dest
+Existing installation found! Archiving to .agents_backup_20260716_211848...
+Backing up AGENTS.md to AGENTS.md.backup_20260716_211848...
+[93m[WARN] Failed to backup AGENTS.md: [Errno 2] No such file or directory: '/tmp/tmpotjywd2j/dest/AGENTS.md'[0m
+Copying core files recursively...
+Restoring user configurations and workspace state from backup...
+Transitioning to project setup and bootstrap configuration...
+[92m[OK] Bootstrap executed successfully.[0m
+Running final synchronization...
+==========================================================
+   AAC V3 Installation Completed Successfully!            
+   Run './helper.sh validate' in target folder to test.   
+==========================================================
+============================================================
+   Antigravity Agent Core (AAC) Global CLI Installer
+============================================================
+[92m[OK] Global wrapper installed successfully at '/home/rafaelghifari/.local/bin/aac'.[0m
+
+============================================================
+[93mACTION REQUIRED: Add the local bin directory to your PATH[0m
+------------------------------------------------------------
+Add this line to your shell profile (.bashrc or .zshrc):
+export PATH="\$HOME/.local/bin:\$PATH"
+============================================================
+
+============================================================
+============================================================
+   Antigravity Agent Core (AAC) Global CLI Installer
+============================================================
+[92m[OK] Global wrapper installed successfully at '/home/rafaelghifari/.local/bin/aac.ps1'.[0m
+
+============================================================
+[93mACTION REQUIRED: Add the local bin directory to your PATH[0m
+------------------------------------------------------------
+Run this in PowerShell to add to user PATH permanently:
+[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';/home/rafaelghifari/.local/bin', 'User')
+============================================================
+
+============================================================
+[92m[OK][0m Assigned issue 'issue-225' to active profile 'dev-alice' in frontmatter.
+Checking out Git branch 'feat/issue-225'...
+Warning: Failed to optimize context after checkout: expected string or bytes-like object, got 'MagicMock'
+
+🧠 [LEARN] Auto-Lessons Extractor: Analyzing git diff for lessons learned...
+
+Based on your changes, here are the suggested lessons learned:
+  1. [Testing / Mocking] Ensure mock side effects are isolated.
+  2. [Custom] Enter your own lesson learned note.
+  3. [Skip] Do not record any lesson learned.
+🧠 [LEARN] Auto-Lessons Extractor: Non-interactive mode detected. Auto-extracting lessons...
+[OK] Successfully auto-recorded 2 lessons learned.
+
+🧠 [LEARN] Auto-Lessons Extractor: Analyzing git diff for lessons learned...
+
+Based on your changes, here are the suggested lessons learned:
+  1. [Testing / Mocking] Ensure mock side effects are isolated.
+  2. [Custom] Enter your own lesson learned note.
+  3. [Skip] Do not record any lesson learned.
+
+🧠 [LEARN] Auto-Lessons Extractor: Analyzing git diff for lessons learned...
+
+Based on your changes, here are the suggested lessons learned:
+  1. [Testing / Mocking] Ensure mock side effects are isolated.
+  2. [Custom] Enter your own lesson learned note.
+  3. [Skip] Do not record any lesson learned.
+Skipped recording lesson learned.
+Successfully acquired lock on module 'module-to-lock' for branch 'feat/test-branch'.
+Pushing current branch 'feat/issue-226' to remote...
+[OK] Handover successfully pushed to remote.
+Successfully initiated handover msg_550c542d0c to reviewer-agent.
+Successfully sent message msg_bd795e8069 to reviewer-agent.
+{
+  "message_id": "msg_bd795e8069",
+  "conversation_id": "4e8e1c7b-a14a-41f2-b47f-071433e70f15",
+  "timestamp": "2026-07-16T14:18:48.648744Z",
+  "sender": "Alice",
+  "recipient": "reviewer-agent",
+  "status": "pending",
+  "payload": {
+    "task_id": "unknown",
+    "action": "request_review",
+    "msg": "Please review"
+  },
+  "signature": "a25d4ea87f59f7733f95b25c113568684074599f33b91a242138816257114ad1"
+}
+Successfully updated message msg_bd795e8069 status to 'completed'.
+Message msg_test123 status updated to 'processing'.
+Executing simulated action 'scaffold' for task 'issue-226'...
+[OK] Simulated scaffolding: created .agents/plans/scaffold_result.md
+Message msg_test123 status updated to 'completed'.
+[OK] Auto-committed status update for message msg_test123.
+Pulling remote updates for branch '<MagicMock name='run().stdout.strip()' id='137920790773840'>'...
+Scanning mailbox for profile 'reviewer-agent'...
+Found 1 pending message(s) to process.
+--- Processing message msg_1 ---
+Message msg_1 status updated to 'processing'.
+Executing simulated action 'review' for task 'issue-226'...
+[OK] Simulated review checklist:
+  - [x] Syntax checklist passes
+  - [x] No credentials exposed
+Message msg_1 status updated to 'completed'.
+[OK] Auto-committed status update for message msg_1.
+Successfully sent message msg_bb201733f4 to reviewer-agent.
+{
+  "message_id": "msg_bb201733f4",
+  "conversation_id": "b9e56174-e112-4927-bddf-db96b9316cdd",
+  "timestamp": "2026-07-16T14:18:48.652714Z",
+  "sender": "Alice",
+  "recipient": "reviewer-agent",
+  "status": "pending",
+  "payload": {
+    "task_id": "issue-223",
+    "action": "request_review",
+    "msg": "Please review"
+  },
+  "signature": "f2423580572c7b04ad0d9d5955317005db600fafd4568c57e6f9ff835cf8781c"
+}
+[93m[WARN] SSH private key file already exists at '/tmp/custom_ssh_dir/id_ed25519_test_name'. Registering the existing key.[0m
+Importing dynamic GPG private key...
+[92m[OK] Successfully imported GPG private key dynamically.[0m
+[92m[OK] Automatically resolved GPG signing key ID: 3AA5C34371567BD2[0m
+[92m[OK] Applied Git Profile to local config: 'p1' <p1@test.com>[0m
+[92m[OK] Initialized '.agents/git_profiles.json' from example configuration.[0m
+Generating secure Ed25519 SSH key pair at '/home/rafaelghifari/.ssh/id_ed25519_new-prof'...
+[93m[WARN] Non-interactive terminal detected. Defaulting to passphraseless SSH key generation.[0m
+[92m[OK] SSH key pair generated successfully.[0m
+
+============================================================
+[92mACTION REQUIRED:[0m Add this SSH public key to your GitHub account:
+------------------------------------------------------------
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
+============================================================
+
+[92m[OK] Profile 'new-prof' successfully added.[0m
+
+============================================================
+[92m   Antigravity Profile Registration Wizard   [0m
+============================================================
+Configure a new Git profile step-by-step.
+
+
+3. Choose Commit Signing Option:
+   [1] None (default)
+   [2] SSH Key (Automatic generation or existing file)
+   [3] GPG Key (Existing keyring Key ID)
+
+4. Authentication Token:
+   (Tip: To avoid plain-text storage, press Enter to skip and instead set the environment
+   variable 'AAC_GITHUB_TOKEN_WIZARD_PROF' inside your shell)
+[92m[OK] Profile 'wizard-prof' successfully added.[0m
+[92m[OK] SSH private key verified at '/fake/path'.[0m
+[92m[OK] Switched active profile to 'wizard-prof'.[0m
+[92m[OK] Applied Git Profile to local config: 'wizard-prof' <wizard@test.com>[0m
+[92m[OK] Profile 'new-prof' successfully added.[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+Validating GPG signing key '4A1D5B'...
+[92m[OK] GPG signing key is valid.[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+Validating GPG signing key '4A1D5B'...
+[92m[OK] GPG signing key is valid.[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+Validating GPG signing key '4A1D5B'...
+[93m[WARN] GPG signing key '4A1D5B' is not found or is invalid on this machine.[0m
+[93m[WARN] Commit signing might fail if this key is required.[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+
+Select a profile to switch to:
+  1) p1 - p1@test.com (active)
+  2) p2 - p2@test.com
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+[92m[OK] SSH private key verified at '/home/rafaelghifari/.ssh/id_rsa_p2'.[0m
+[92m[OK] Switched active profile to 'p2'.[0m
+[92m[OK] Applied Git Profile to local config: 'p2' <p2@test.com>[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[92m[OK] Auto-switched active profile in git_profiles.json to 'p1' to match Git config.[0m
+[92m[OK] No credentials, staged private files, mismatched profiles, or secrets detected.[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+Generated structured recommendations report at '.agents/plans/recon_recommendations.md'.
+Configured .agents/projects.json with detected root project.
+[92m[OK] Scaffolded skill 'my-new-skill' at '.agents/skills/my-new-skill' successfully.[0m
+[92m[OK] Installed skill 'skill-c' under '.agents/skills/skill-c'[0m
+[92m[OK] Successfully uninstalled skill 'skill-c'.[0m
+[INFO] Synchronizing local issues with GitHub remote...
+[OK] Pulled new remote issue #99 as local file '.agents/issues/issue_99.md'.
+.[INFO] Operating in local offline mode using local issue cache.
+.[INFO] Synchronizing local issues with GitHub remote...
+[OK] Updated local issue #42 status to 'closed'.
+[OK] Task board (board.md) successfully synchronized with issue states.
+..../home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/services/token_service.py:746: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "updated_at": datetime.utcnow().isoformat() + "Z"
+./home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_token.py:92: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  yesterday = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
+/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/services/token_service.py:231: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now_dt = datetime.utcnow()
+./home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_token.py:116: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  last_month = (datetime.utcnow() - timedelta(days=32)).isoformat() + "Z"
+...../home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/services/token_service.py:160: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "last_reset": datetime.utcnow().isoformat() + "Z",
+../home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_token.py:52: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "last_reset": datetime.utcnow().isoformat() + "Z",
+/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/token.py:154: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  budget["tasks"][task_id]["updated_at"] = datetime.utcnow().isoformat() + "Z"
+/usr/lib/python3.14/subprocess.py:1139: ResourceWarning: subprocess 111530 is still running
+  _warn("subprocess %s is still running" % self.pid,
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+../home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/token.py:318: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
+.../home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/scripts/cli/commands/services/token_service.py:896: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  budget["last_sync"] = datetime.utcnow().isoformat() + "Z"
+.........[91m[FAIL] AI Compliance Audit: Required skill playbook '.agents/skills/testing/SKILL.md' was not loaded/viewed![0m
+[91m[FAIL]   You modified files related to the 'testing' playbook but did not load it.[0m
+[91m[FAIL]   Please run the view_file tool on '.agents/skills/testing/SKILL.md' before proceeding.[0m
+.[91m[FAIL] Commit subject is too generic: 'fix: issue-106'[0m
+[91m[FAIL]   Please provide a descriptive subject summarizing what was changed (e.g. 'fix(security): resolve command injection').[0m
+.[91m[FAIL] Commit subject does not follow Conventional Commits: 'bad subject: message'[0m
+[91m[FAIL]   Expected format: 'feat: description', 'fix: description', etc.[0m
+.[91m[FAIL] Commit message is missing 'Refs: <issue-id>' trailer: 'feat: missing refs trailer'[0m
+[91m[FAIL]   Example: 'Refs: issue-106'[0m
+[91m[FAIL] Commit message is missing 'Compliance-Audit: passed' trailer: 'feat: missing refs trailer'[0m
+[91m[FAIL]   Please perform the Rule & Schema Compliance Audit and add 'Compliance-Audit: passed' to verify compliance.[0m
+..[91m[FAIL] Critical file '.agents/rules.md' is missing from workspace![0m
+..[91m[FAIL] Version mismatch: '.agents/scripts/cli/commands/bootstrap.py' version does not match version '2.192.0' in AGENTS.md![0m
+.[91m[FAIL] Direct edits or commits on base branch 'main' are prohibited! Please checkout a feature branch (e.g., './helper.sh issue checkout issue-028') before editing.[0m
+..[91m[FAIL] Branch contributor identity mismatch! Issue is assigned to 'dev-alice' with email 'alice@corp.com', but current Git Config email is 'bob@corp.com'.[0m
+[91m[FAIL] Please switch to profile 'dev-alice' using: './helper.sh profile switch dev-alice'[0m
+.[91m[FAIL] Active issue 'issue-040' has 1 unresolved required subtasks:[0m
+[91m[FAIL]   - [ ] Task 1[0m
+.[91m[FAIL] Active issue 'issue-040' has 1 unresolved required subtasks:[0m
+[91m[FAIL]   - [ ] Task 1[0m
+....[91m[FAIL] Broken link in 'AGENTS.md': linked file 'missing.md' does not exist.[0m
+[91m[FAIL] Broken anchor range in 'AGENTS.md': linked path 'relative/valid.md#L5-L10' points to line 10, but file only has 5 lines.[0m
+[91m[FAIL] Broken anchor range in '.agents/rules.md': linked path '.agents/relative/valid.md#L5-L10' points to line 10, but file only has 5 lines.[0m
+[91m[FAIL] Broken anchor range in '.agents/schema.md': linked path '.agents/relative/valid.md#L5-L10' points to line 10, but file only has 5 lines.[0m
+[91m[FAIL] Broken anchor range in '.agents/memory/architecture.md': linked path '.agents/memory/relative/valid.md#L5-L10' points to line 10, but file only has 5 lines.[0m
+.[91m[FAIL] Module 'src/validate' (file 'src/validate.py') is modified, but no lock is acquired! Please run './helper.sh lock src/validate' first.[0m
+[91m[FAIL] Module 'validate' (file 'src/validate.py') is locked by branch 'feat/issue-abc', but you are editing from 'feat/issue-032'![0m
+...[91m[FAIL] Ignored file (by .gitignore) is staged for commit: 'src/main.py'![0m
+[91m[FAIL] Ignored file (by .antigravityignore) is staged for commit: 'src/main.py'![0m
+...[91m[FAIL] Private file '.env' exists but is NOT ignored in .gitignore or .antigravityignore![0m
+[91m[FAIL]   Please add it to .gitignore or .antigravityignore immediately to prevent accidental exposure.[0m
+..........[91m[FAIL] Branch prefix is 'feat/', but no 'feat:' commits were found in this branch's history![0m
+[91m[FAIL]   Feature branches must introduce new features before they can be closed/merged.[0m
+.[91m[FAIL] Branch prefix is 'fix/', but a 'feat:' commit was found in history: 'feat: new feature'[0m
+[91m[FAIL]   Fix branches must not introduce new features. Please rename the branch to 'feat/' or change the commit type.[0m
+...[91m[FAIL] Skill 'test_skill' validation hook failed (exit code 1):[0m
+Error log
+.........
+======================================================================
+FAIL: test_bootstrap_agents_md_fallback (test_bootstrap.TestBootstrapCommand.test_bootstrap_agents_md_fallback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/unittest/mock.py", line 1439, in patched
+    return func(*newargs, **newkeywargs)
+  File "/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_bootstrap.py", line 161, in test_bootstrap_agents_md_fallback
+    self.assertIn("FallbackProject", content)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'FallbackProject' not found in '# AGENTS.md — Antigravity Agent Core (AAC) V3\n\n> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.\n\n## 1. What this project is\n- **Product:** test-proj\n- **Version:** 3.121.5\n- **Stack:** Python 3, Docker\n- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).\n\n## 2. Non-negotiable rules\n*(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*\n\n- **UNIVERSAL AGENT REASONING PROTOCOL (UARP):** You **MUST ALWAYS** output a strict XML `<aac_preflight>` block in your visible response **BEFORE** executing any tools or modifying files. This guarantees cross-model reasoning consistency. The block MUST contain:\n  `<aac_preflight>`\n    `<audit>List target files to edit, active module locks, and matching schema boundaries.</audit>`\n    `<compliance>Verify 10-year scale limits and confirm NO global/home-directory config leakage.</compliance>`\n    `<action>State the exact CLI or code execution you are about to run.</action>`\n  `</aac_preflight>`\n  Never skip this XML block. It acts as the primary AI guardrail to eliminate context drift and hallucinations.\n- **ALWAYS** load, read, and strictly adhere to the agent core persona, tone guidelines, and philosophies defined in the agent soul profile [.agents/soul.md](file://.agents/soul.md) in every response and action to guarantee consistent enterprise-grade engineering identity across all platforms and accounts.\n- **ALWAYS** load and read the workspace\'s `.agents/active_context.md`, `.agents/schema.md`, the active issue specification file `.agents/issues/issue_[id].md`, and any custom workspace-level memory files (such as `memory.md`, `brain.md`, or custom context files in the root or `.agents/` directory) at the very beginning of the first conversation turn to align on task checklist, database/API schemas, scope boundaries, and local workspace memory before formulating any implementation plan or writing code.\n- **ALWAYS** distinguish between **Discussions** (informational queries, design questions, general research, diagnostics) and **Tasks** (codebase writes/modifications). Never create Git branches, task board entries, or commits for informational or diagnostic discussions. Only trigger the branch-and-issue tracking workflow when actual file edits/creations are required.\n- **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.\n- **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).\n- **NEVER** read, modify, or attempt to repair any agent-internal scripts, workflows, or helper code inside `.agents/scripts/` or `.agents/workflows/` unless explicitly developing the Antigravity Agent Core repository itself. Your scope in target projects is strictly bounded to the target codebase and its memory directories.\n- **ALWAYS** run the project\'s test command before marking a task `Completed`.\n- **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `engineering-standards` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.\n- **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.\n- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don\'t duplicate it.\n- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body. The subject line MUST be descriptive of the technical changes made; **NEVER** use generic placeholder subjects (e.g. `fix: issue-122` or `chore: task-100`) without explanation. This exact format is what `./helper.sh changelog`\'s parser depends on.\n- **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.\n- **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.\n- **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications. If a module is already locked by someone/something else, wait or escalate to the USER — never force-override or bypass an existing lock.\n- **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.\n- **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).\n- **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.\n- **ALWAYS** prioritize using active Model Context Protocol (MCP) server tools (specifically `github` and `gitea` MCP tools) for all remote repository and project workflows (such as creating, fetching, and updating issues, pull requests, commits, merges, and project boards). Bypassing active MCP tools in favor of local files, custom wrapper scripts, or standard APIs is strictly prohibited, unless the remote MCP integration is invalid, offline, or unauthorized, in which case the agent MUST fall back to local file-based tracking (such as `.agents/issues/` files and `board.md`). When MCP is valid, ensure local tracking is kept in sync.\n- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. The agent **MUST NEVER** assume, guess, or hallucinate database structures; all tables, fields, and types must be explicitly documented in `.agents/schema.md` before coding. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.\n- **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.\n- **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as the user\'s home directory, global agent appData/brain directories, or global databases). This strictly forbids caching skills playbooks, storing temporary files, exporting local credential keys, or saving execution reports outside the target repository boundaries (e.g. no writes to `~/.gemini/` or home folder directories except for static builtin read-only paths). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.\n- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don\'t run it ad hoc outside that step.\n- **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `troubleshooting` skill; if still unresolved, halt and prompt the USER for manual intervention.\n- **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST proactively load and consult the corresponding skill\'s playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) at the start of any task or subtask that involves that domain (e.g. consult `engineering-standards` when restructuring code, `troubleshooting` when addressing latency/leaks or debugging, `security-compliance` for third-party packages or privacy checks, `documentation` for manuals/docstrings, `testing` for tests). **WARNING:** Do not rely on the brief skill descriptions injected into your prompt! You must explicitly read the file; bypassing required playbooks is strictly audited by `validate.py` and blocks verification.\n- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task unless it is necessary to perform a deeper analysis, verify workspace state, or confirm modifications. Caching the results in your thinking block is still highly recommended to maximize prompt caching effectiveness and minimize token usage.\n- **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.\n- **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.\n- **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.\n- **ALWAYS** specify pinned dependency versions (never use wildcard `*` or blank versions) to ensure deterministic, reproducible builds and block supply chain attacks.\n- **ALWAYS** implement robust, explicit error handling with structured logging or standardized traceback reporting instead of bare prints or silent exception catches.\n- **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.\n- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.\n- **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.\n- **NEVER** run destructive Git commands such as `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git checkout .`, or `git push --force`. If you need to revert changes, discard files, or clean untracked assets, you MUST do it selectively or ask the programmer first.\n- **ALWAYS** act like an expert senior developer/software engineer: design with high foresight, keep cognitive complexity low, and prioritize standard, robust engineering patterns.\n- **ALWAYS** verify standard library solutions or already installed dependencies first before writing new helpers or adding third-party packages, to prevent duplicate libraries and minimize codebase bloat.\n- **ALWAYS** optimize code like a senior developer to be highly efficient, secure, performant, maintainable, and scalable.\n- **ALWAYS** write enterprise-grade code that is clean, secure, performant, scalable, and highly maintainable:\n  - *Security:* Perform strict input validation and sanitization. Use parameterized queries or ORMs. NEVER hardcode secrets or credentials. Prevent OWASP Top 10 vulnerabilities.\n  - *Performance & Scale:* Avoid blocking I/O on primary threads, design for thread-safety, avoid N+1 database queries, and optimize memory/resource usage.\n  - *Maintainability:* Structure code modularly (SOLID principles, Clean Architecture), write comprehensive error handling (with tracebacks/structured logging), and document public APIs with type annotations and docstrings.\n  - *10-Year Foresight:* Evaluate long-term maintainability, API forward-compatibility, partition growth (10-100x volume), cascading delete risks, soft delete strategies, lock contention, and failover resilience before committing database or core engine designs.\n  - *Engineering Thinking:* Follow structured problem-solving, TDD, strict type constraints, PEP 8/SOLID standards, and keep cognitive complexity low (short functions, guard clauses).\n  - *Management Thinking:* Align with the task board, split work into documented atomic subtasks, track budget limits, manage module locks, and maintain complete progress visibility.\n  - *Production/Ops Thinking:* Ensure robust observability (structured JSON logs, telemetry, health endpoints), deployment containerization, backward-compatibility, and failover/concurrency safety.\n- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.\n- **ALWAYS** translate and expand brief or informal user instructions (e.g. "A" or "continue previous task") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST perform systematic prompt expansion, defining clear checklist tasks, acceptance criteria, and compliance audits. The agent MUST strictly rely on and respect the user\'s human-in-the-loop command approval gates (never attempting to bypass or automate approval for proposed commands) and proactively verify ambiguous details interactively using `/grill-me` or interactive questions to prevent hallucinated actions.\n\n## 3. CLI Helper Commands Reference\n\nAll workspace operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows). For the complete command list, flags, and options, see the [CLI Commands Reference](file://.agents/docs/context_map.md#1-cli-helper-commands-reference).\n\n## 4. Context map — what loads when\n\nFor the complete description of workspace metadata, ADRs, playbooks, memory structures, and their loading behaviors, see the [Workspace Context Map](file://.agents/docs/context_map.md#2-context-map--what-loads-when).\n\n\n## 5. Working protocol\n1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), task board, and the local git-identity profile (copies `.agents/git_profiles.example` → `.agents/git_profiles.json`, which must never be staged or committed) before writing any code.\n2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`), run `./helper.sh context optimize`, and read `.agents/active_context.md` to align on active scope, checklist, and rules.\n3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching using `.agents/active_context.md` as the primary source) before proposing or writing code.\n4. **Task Splitting:** The agent MUST split any assigned task into small, atomic subtasks (no more than 3-5 lines of code edits per step where practical) and list them under `Implementation Subtasks` in the local issue specification file (e.g. `.agents/issues/issue_xxx.md`).\n5. **Context Insulation (Single subtask focus):** The agent MUST focus on exactly ONE atomic subtask at a time. After completing a subtask, the agent MUST run validation and make a git commit with a clear Conventional Commit message referencing the task ID. This keeps the prompt cache warm and prevents context pollution.\n6. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.\n7. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.\n8. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.\n9. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch. When a task matches a skill\'s description, load that skill\'s `SKILL.md` using `view_file` to align on execution steps, ensuring the skill is used efficiently.\n10. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.\n11. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).\n\n## 6. Git & review\n- Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.\n- All code edits must be done on the designated branch. Committing to base branches (`main` or `master`) directly is strictly prohibited.\n- One task = one PR where practical; link the task ID in the PR description.\n- No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.\n- When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.\n\n## 7. Technical Alignment & Decision Capture Flow\nWhen aligning on technical details, features, or database specifications:\n1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.\n2. **Alignment Storage (Workspace Level)**:\n   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md` or modular files under `.agents/schemas/` (if database size is large). Whenever database structures, tables, or fields are discussed, updated, or created, the agent MUST immediately record them here to preserve data layout visibility.\n   * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.\n   * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.\n   * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.\n3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist) and `@.agents/memory/architecture.md` (for architectural boundaries). Depending on scope, load `@.agents/memory/milestones.md` for roadmap/release alignment, `@.agents/memory/security-policy.md` for security/GPG runbooks, and `@.agents/docs/collaboration.md` for team coordination and lock resolution. To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.\n4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill\'s description. They are strictly prohibited from being auto-loaded globally to optimize context size.\n\n## 8. Tool permissions\nDefault to `request-review` in `./helper.sh config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.\n\n## 9. Maintaining this file\nReviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.'
+
+======================================================================
+FAIL: test_bootstrap_clean_python (test_bootstrap.TestBootstrapCommand.test_bootstrap_clean_python)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/unittest/mock.py", line 1439, in patched
+    return func(*newargs, **newkeywargs)
+  File "/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_bootstrap.py", line 84, in test_bootstrap_clean_python
+    self.assertIn("TestPythonClean", agents)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'TestPythonClean' not found in '# AGENTS.md — Antigravity Agent Core (AAC) V3\n\n> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.\n\n## 1. What this project is\n- **Product:** test-proj\n- **Version:** 3.121.5\n- **Stack:** Python 3, Docker\n- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).\n\n## 2. Non-negotiable rules\n*(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*\n\n- **UNIVERSAL AGENT REASONING PROTOCOL (UARP):** You **MUST ALWAYS** output a strict XML `<aac_preflight>` block in your visible response **BEFORE** executing any tools or modifying files. This guarantees cross-model reasoning consistency. The block MUST contain:\n  `<aac_preflight>`\n    `<audit>List target files to edit, active module locks, and matching schema boundaries.</audit>`\n    `<compliance>Verify 10-year scale limits and confirm NO global/home-directory config leakage.</compliance>`\n    `<action>State the exact CLI or code execution you are about to run.</action>`\n  `</aac_preflight>`\n  Never skip this XML block. It acts as the primary AI guardrail to eliminate context drift and hallucinations.\n- **ALWAYS** load, read, and strictly adhere to the agent core persona, tone guidelines, and philosophies defined in the agent soul profile [.agents/soul.md](file://.agents/soul.md) in every response and action to guarantee consistent enterprise-grade engineering identity across all platforms and accounts.\n- **ALWAYS** load and read the workspace\'s `.agents/active_context.md`, `.agents/schema.md`, the active issue specification file `.agents/issues/issue_[id].md`, and any custom workspace-level memory files (such as `memory.md`, `brain.md`, or custom context files in the root or `.agents/` directory) at the very beginning of the first conversation turn to align on task checklist, database/API schemas, scope boundaries, and local workspace memory before formulating any implementation plan or writing code.\n- **ALWAYS** distinguish between **Discussions** (informational queries, design questions, general research, diagnostics) and **Tasks** (codebase writes/modifications). Never create Git branches, task board entries, or commits for informational or diagnostic discussions. Only trigger the branch-and-issue tracking workflow when actual file edits/creations are required.\n- **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.\n- **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).\n- **NEVER** read, modify, or attempt to repair any agent-internal scripts, workflows, or helper code inside `.agents/scripts/` or `.agents/workflows/` unless explicitly developing the Antigravity Agent Core repository itself. Your scope in target projects is strictly bounded to the target codebase and its memory directories.\n- **ALWAYS** run the project\'s test command before marking a task `Completed`.\n- **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `engineering-standards` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.\n- **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.\n- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don\'t duplicate it.\n- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body. The subject line MUST be descriptive of the technical changes made; **NEVER** use generic placeholder subjects (e.g. `fix: issue-122` or `chore: task-100`) without explanation. This exact format is what `./helper.sh changelog`\'s parser depends on.\n- **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.\n- **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.\n- **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications. If a module is already locked by someone/something else, wait or escalate to the USER — never force-override or bypass an existing lock.\n- **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.\n- **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).\n- **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.\n- **ALWAYS** prioritize using active Model Context Protocol (MCP) server tools (specifically `github` and `gitea` MCP tools) for all remote repository and project workflows (such as creating, fetching, and updating issues, pull requests, commits, merges, and project boards). Bypassing active MCP tools in favor of local files, custom wrapper scripts, or standard APIs is strictly prohibited, unless the remote MCP integration is invalid, offline, or unauthorized, in which case the agent MUST fall back to local file-based tracking (such as `.agents/issues/` files and `board.md`). When MCP is valid, ensure local tracking is kept in sync.\n- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. The agent **MUST NEVER** assume, guess, or hallucinate database structures; all tables, fields, and types must be explicitly documented in `.agents/schema.md` before coding. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.\n- **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.\n- **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as the user\'s home directory, global agent appData/brain directories, or global databases). This strictly forbids caching skills playbooks, storing temporary files, exporting local credential keys, or saving execution reports outside the target repository boundaries (e.g. no writes to `~/.gemini/` or home folder directories except for static builtin read-only paths). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.\n- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don\'t run it ad hoc outside that step.\n- **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `troubleshooting` skill; if still unresolved, halt and prompt the USER for manual intervention.\n- **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST proactively load and consult the corresponding skill\'s playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) at the start of any task or subtask that involves that domain (e.g. consult `engineering-standards` when restructuring code, `troubleshooting` when addressing latency/leaks or debugging, `security-compliance` for third-party packages or privacy checks, `documentation` for manuals/docstrings, `testing` for tests). **WARNING:** Do not rely on the brief skill descriptions injected into your prompt! You must explicitly read the file; bypassing required playbooks is strictly audited by `validate.py` and blocks verification.\n- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task unless it is necessary to perform a deeper analysis, verify workspace state, or confirm modifications. Caching the results in your thinking block is still highly recommended to maximize prompt caching effectiveness and minimize token usage.\n- **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.\n- **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.\n- **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.\n- **ALWAYS** specify pinned dependency versions (never use wildcard `*` or blank versions) to ensure deterministic, reproducible builds and block supply chain attacks.\n- **ALWAYS** implement robust, explicit error handling with structured logging or standardized traceback reporting instead of bare prints or silent exception catches.\n- **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.\n- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.\n- **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.\n- **NEVER** run destructive Git commands such as `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git checkout .`, or `git push --force`. If you need to revert changes, discard files, or clean untracked assets, you MUST do it selectively or ask the programmer first.\n- **ALWAYS** act like an expert senior developer/software engineer: design with high foresight, keep cognitive complexity low, and prioritize standard, robust engineering patterns.\n- **ALWAYS** verify standard library solutions or already installed dependencies first before writing new helpers or adding third-party packages, to prevent duplicate libraries and minimize codebase bloat.\n- **ALWAYS** optimize code like a senior developer to be highly efficient, secure, performant, maintainable, and scalable.\n- **ALWAYS** write enterprise-grade code that is clean, secure, performant, scalable, and highly maintainable:\n  - *Security:* Perform strict input validation and sanitization. Use parameterized queries or ORMs. NEVER hardcode secrets or credentials. Prevent OWASP Top 10 vulnerabilities.\n  - *Performance & Scale:* Avoid blocking I/O on primary threads, design for thread-safety, avoid N+1 database queries, and optimize memory/resource usage.\n  - *Maintainability:* Structure code modularly (SOLID principles, Clean Architecture), write comprehensive error handling (with tracebacks/structured logging), and document public APIs with type annotations and docstrings.\n  - *10-Year Foresight:* Evaluate long-term maintainability, API forward-compatibility, partition growth (10-100x volume), cascading delete risks, soft delete strategies, lock contention, and failover resilience before committing database or core engine designs.\n  - *Engineering Thinking:* Follow structured problem-solving, TDD, strict type constraints, PEP 8/SOLID standards, and keep cognitive complexity low (short functions, guard clauses).\n  - *Management Thinking:* Align with the task board, split work into documented atomic subtasks, track budget limits, manage module locks, and maintain complete progress visibility.\n  - *Production/Ops Thinking:* Ensure robust observability (structured JSON logs, telemetry, health endpoints), deployment containerization, backward-compatibility, and failover/concurrency safety.\n- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.\n- **ALWAYS** translate and expand brief or informal user instructions (e.g. "A" or "continue previous task") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST perform systematic prompt expansion, defining clear checklist tasks, acceptance criteria, and compliance audits. The agent MUST strictly rely on and respect the user\'s human-in-the-loop command approval gates (never attempting to bypass or automate approval for proposed commands) and proactively verify ambiguous details interactively using `/grill-me` or interactive questions to prevent hallucinated actions.\n\n## 3. CLI Helper Commands Reference\n\nAll workspace operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows). For the complete command list, flags, and options, see the [CLI Commands Reference](file://.agents/docs/context_map.md#1-cli-helper-commands-reference).\n\n## 4. Context map — what loads when\n\nFor the complete description of workspace metadata, ADRs, playbooks, memory structures, and their loading behaviors, see the [Workspace Context Map](file://.agents/docs/context_map.md#2-context-map--what-loads-when).\n\n\n## 5. Working protocol\n1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), task board, and the local git-identity profile (copies `.agents/git_profiles.example` → `.agents/git_profiles.json`, which must never be staged or committed) before writing any code.\n2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`), run `./helper.sh context optimize`, and read `.agents/active_context.md` to align on active scope, checklist, and rules.\n3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching using `.agents/active_context.md` as the primary source) before proposing or writing code.\n4. **Task Splitting:** The agent MUST split any assigned task into small, atomic subtasks (no more than 3-5 lines of code edits per step where practical) and list them under `Implementation Subtasks` in the local issue specification file (e.g. `.agents/issues/issue_xxx.md`).\n5. **Context Insulation (Single subtask focus):** The agent MUST focus on exactly ONE atomic subtask at a time. After completing a subtask, the agent MUST run validation and make a git commit with a clear Conventional Commit message referencing the task ID. This keeps the prompt cache warm and prevents context pollution.\n6. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.\n7. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.\n8. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.\n9. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch. When a task matches a skill\'s description, load that skill\'s `SKILL.md` using `view_file` to align on execution steps, ensuring the skill is used efficiently.\n10. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.\n11. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).\n\n## 6. Git & review\n- Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.\n- All code edits must be done on the designated branch. Committing to base branches (`main` or `master`) directly is strictly prohibited.\n- One task = one PR where practical; link the task ID in the PR description.\n- No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.\n- When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.\n\n## 7. Technical Alignment & Decision Capture Flow\nWhen aligning on technical details, features, or database specifications:\n1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.\n2. **Alignment Storage (Workspace Level)**:\n   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md` or modular files under `.agents/schemas/` (if database size is large). Whenever database structures, tables, or fields are discussed, updated, or created, the agent MUST immediately record them here to preserve data layout visibility.\n   * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.\n   * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.\n   * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.\n3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist) and `@.agents/memory/architecture.md` (for architectural boundaries). Depending on scope, load `@.agents/memory/milestones.md` for roadmap/release alignment, `@.agents/memory/security-policy.md` for security/GPG runbooks, and `@.agents/docs/collaboration.md` for team coordination and lock resolution. To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.\n4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill\'s description. They are strictly prohibited from being auto-loaded globally to optimize context size.\n\n## 8. Tool permissions\nDefault to `request-review` in `./helper.sh config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.\n\n## 9. Maintaining this file\nReviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.'
+
+======================================================================
+FAIL: test_installation_and_parity (test_install_parity.TestInstallParity.test_installation_and_parity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/rafaelghifari/Muraghi/Project/antigravity-agent/.agents/tests/test_install_parity.py", line 75, in test_installation_and_parity
+    self.assertNotIn(rule, content, f"Core rule leaked into target {filename}: {rule}")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files' unexpectedly found in '# AGENTS.md — Antigravity Agent Core (AAC) V3\n\n> Antigravity CLI prepends this file to **every** prompt in this repo. Keep it short, factual, durable. Anything only *sometimes* relevant belongs in `.agents/skills/`, `.agents/memory/`, or `.agents/tasks/` and gets pulled in on demand — see the context map below.\n\n## 1. What this project is\n- **Product:** test-proj\n- **Version:** 3.121.5\n- **Stack:** General Project\n- **Repo layout:** Core CLI scripts, custom agent skills (`.agents/skills/`), workflows (`.agents/workflows/`), and project memory (`.agents/memory/`).\n\n## 2. Non-negotiable rules\n*(Listed first and emphasized — the model weights early, ALWAYS/NEVER-style rules more reliably than buried prose.)*\n\n- **UNIVERSAL AGENT REASONING PROTOCOL (UARP):** You **MUST ALWAYS** output a strict XML `<aac_preflight>` block in your visible response **BEFORE** executing any tools or modifying files. This guarantees cross-model reasoning consistency. The block MUST contain:\n  `<aac_preflight>`\n    `<audit>List target files to edit, active module locks, and matching schema boundaries.</audit>`\n    `<compliance>Verify 10-year scale limits and confirm NO global/home-directory config leakage.</compliance>`\n    `<action>State the exact CLI or code execution you are about to run.</action>`\n  `</aac_preflight>`\n  Never skip this XML block. It acts as the primary AI guardrail to eliminate context drift and hallucinations.\n- **ALWAYS** load, read, and strictly adhere to the agent core persona, tone guidelines, and philosophies defined in the agent soul profile [.agents/soul.md](file://.agents/soul.md) in every response and action to guarantee consistent enterprise-grade engineering identity across all platforms and accounts.\n- **ALWAYS** load and read the workspace\'s `.agents/active_context.md`, `.agents/schema.md`, the active issue specification file `.agents/issues/issue_[id].md`, and any custom workspace-level memory files (such as `memory.md`, `brain.md`, or custom context files in the root or `.agents/` directory) at the very beginning of the first conversation turn to align on task checklist, database/API schemas, scope boundaries, and local workspace memory before formulating any implementation plan or writing code.\n- **ALWAYS** distinguish between **Discussions** (informational queries, design questions, general research, diagnostics) and **Tasks** (codebase writes/modifications). Never create Git branches, task board entries, or commits for informational or diagnostic discussions. Only trigger the branch-and-issue tracking workflow when actual file edits/creations are required.\n- **NEVER** commit secrets, `.env*` files, credentials, or `.agents/git_profiles.json` (the local identity-rotation file — generated from `.agents/git_profiles.example` by `./helper.sh bootstrap`). Use the secrets approach documented in `.agents/memory/architecture.md`. This rule governs *files in the repo*; runtime secret retrieval via environment variables is expected and does not conflict with the "no global config" rule below.\n- **NEVER** read, edit, stage, or commit files or directories that are ignored by `.gitignore` or `.antigravityignore` (such as dependencies, build assets, logs, media, or local credentials).\n- **NEVER** read, modify, or attempt to repair any agent-internal scripts, workflows, or helper code inside `.agents/scripts/` or `.agents/workflows/` unless explicitly developing the Antigravity Agent Core repository itself. Your scope in target projects is strictly bounded to the target codebase and its memory directories.\n- **ALWAYS** run the project\'s test command before marking a task `Completed`.\n- **ALWAYS** check `.agents/tasks/board.md` before starting work, and update it when status changes.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis comparing at least two options (following the `engineering-standards` playbook) to evaluate long-term maintenance, DRY principles, and simplicity *before* writing any code.\n- **ALWAYS** design with foresight, prioritizing public-release readiness, modularity, and future maintainability to prevent technical debt.\n- **NEVER** create a new architectural decision without checking `.agents/memory/decisions/` first — supersede an old one, don\'t duplicate it.\n- **ALWAYS** use Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`) with a `Refs: <task-id>` trailer line in the commit body. The subject line MUST be descriptive of the technical changes made; **NEVER** use generic placeholder subjects (e.g. `fix: issue-122` or `chore: task-100`) without explanation. This exact format is what `./helper.sh changelog`\'s parser depends on.\n- **NEVER** run or write raw CLI scripts directly in the workspace root; keep them organized in target directories.\n- **ALWAYS** register any new custom skills in their respective subdirectory with a `SKILL.md`.\n- **ALWAYS** acquire locks on modules before beginning edits to avoid conflicting parallel modifications. If a module is already locked by someone/something else, wait or escalate to the USER — never force-override or bypass an existing lock.\n- **ALWAYS** run `.agents/scripts/validate.py` locally and verify it passes before proposing commits or pull requests.\n- **ALWAYS** align your git branch name with an active issue ID and verify a matching issue file exists under `.agents/issues/` (e.g. branch `feat/issue-12` aligns with `.agents/issues/issue_12.md`).\n- **NEVER** edit files, stage changes, or commit directly on the `main` or `master` branch.\n- **ALWAYS** prioritize using active Model Context Protocol (MCP) server tools (specifically `github` and `gitea` MCP tools) for all remote repository and project workflows (such as creating, fetching, and updating issues, pull requests, commits, merges, and project boards). Bypassing active MCP tools in favor of local files, custom wrapper scripts, or standard APIs is strictly prohibited, unless the remote MCP integration is invalid, offline, or unauthorized, in which case the agent MUST fall back to local file-based tracking (such as `.agents/issues/` files and `board.md`). When MCP is valid, ensure local tracking is kept in sync.\n- **ALWAYS** strictly conform to and document all database models, tables, relationships, or API contracts in `.agents/schema.md`. If data layout grows large, split schemas into modular files under `.agents/schemas/*.md` (e.g. `users.md`, `billing.md`) with `.agents/schema.md` acting as the master directory. If any data structures, tables, databases, or schemas are discussed, proposed, or modified, the agent MUST immediately update `.agents/schema.md` (and any matching modular schema file under `.agents/schemas/`) to reflect these changes before proceeding, ensuring subsequent sessions understand the data flow without reading past transcripts. The agent **MUST NEVER** assume, guess, or hallucinate database structures; all tables, fields, and types must be explicitly documented in `.agents/schema.md` before coding. To optimize token budget, the agent MUST load only the specific schema modules relevant to the active subtasks checklist on-demand. Cross-module table relationships MUST be explicitly documented under a `## Cross-Module References` header in each module file using descriptive markdown file links to target schema files; the agent must proactively load referenced dependencies when modifying or analyzing related structures.\n- **ALWAYS** track and log token budget consumption at the end of each subtask or user response by running `./helper.sh token log <prompt_tokens> <completion_tokens> [--task <task-id>]` to prevent daily/monthly budget overruns and guarantee strict token auditing.\n- **NEVER** write, expose, or leak project-specific configurations, specifications, plans, designs, database data, or artifacts to the global system level (such as the user\'s home directory, global agent appData/brain directories, or global databases). This strictly forbids caching skills playbooks, storing temporary files, exporting local credential keys, or saving execution reports outside the target repository boundaries (e.g. no writes to `~/.gemini/` or home folder directories except for static builtin read-only paths). The agent must operate strictly at the workspace level, keeping all inputs, outputs, and intermediate states completely isolated within the repository directory to ensure multi-developer alignment and prevent global environment leakage.\n- **ALWAYS** keep `CHANGELOG.md` current via `./helper.sh changelog` as part of the release step in Working Protocol §5 (Step 10) — don\'t run it ad hoc outside that step.\n- **NEVER** loop or repeat tool calls, command executions, file checks, or code search patterns more than 3 times without making progress. If stuck, consult the `troubleshooting` skill; if still unresolved, halt and prompt the USER for manual intervention.\n- **ALWAYS** check available skill descriptions in the prompt or `context_map.md` before starting a task. You MUST proactively load and consult the corresponding skill\'s playbook file (via `view_file` on `.agents/skills/<name>/SKILL.md`) at the start of any task or subtask that involves that domain (e.g. consult `engineering-standards` when restructuring code, `troubleshooting` when addressing latency/leaks or debugging, `security-compliance` for third-party packages or privacy checks, `documentation` for manuals/docstrings, `testing` for tests). **WARNING:** Do not rely on the brief skill descriptions injected into your prompt! You must explicitly read the file; bypassing required playbooks is strictly audited by `validate.py` and blocks verification.\n- **NEVER** retrieve the same files or run the same codebase searches (`grep_search`, `list_dir`) more than once per task unless it is necessary to perform a deeper analysis, verify workspace state, or confirm modifications. Caching the results in your thinking block is still highly recommended to maximize prompt caching effectiveness and minimize token usage.\n- **NEVER** generate, execute, or inject malicious, obfuscated, or backdoored code. All deployed code must be human-readable, safe, secure, and follow standard secure programming guidelines.\n- **NEVER** download or pull unverified remote scripts or binaries during installation or operations. All components must be sourced from secure, pinned version tags or git-tracked source repositories.\n- **NEVER** expose, store, or log sensitive tokens, credentials, or private keys. Always use secure environment variable retrieval.\n- **ALWAYS** specify pinned dependency versions (never use wildcard `*` or blank versions) to ensure deterministic, reproducible builds and block supply chain attacks.\n- **ALWAYS** implement robust, explicit error handling with structured logging or standardized traceback reporting instead of bare prints or silent exception catches.\n- **NEVER** bypass static code checks, compilation guards, or unit testing gates on base branches; all production changes must pass local validations before pull request submission.\n- **ALWAYS** explicitly ask the user for specifications, database requirements, environment configurations, frameworks/libraries, and detailed features **BEFORE** starting development or writing any code for a new project, feature, or web application. You **MUST NEVER** assume, speculate, or hallucinate these requirements. If they are not fully detailed, you **MUST** prompt the user to provide them or suggest using the `/grill-me` slash command to align on design decisions first.\n- **ALWAYS** act as a self-driving, proactive agent. Do not halt or wait for user instructions between atomic subtasks on your checklist. Instead, loop your thoughts, chain tool calls, and execute the next subtasks sequentially in a single turn (or across consecutive turns without prompting the user for intermediate feedback) until the entire issue is fully completed. If there is any doubt or ambiguity in specifications, the agent **MUST** halt and prompt the USER for clarification rather than speculating or hallucinating.\n- **NEVER** run destructive Git commands such as `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git checkout .`, or `git push --force`. If you need to revert changes, discard files, or clean untracked assets, you MUST do it selectively or ask the programmer first.\n- **ALWAYS** act like an expert senior developer/software engineer: design with high foresight, keep cognitive complexity low, and prioritize standard, robust engineering patterns.\n- **ALWAYS** verify standard library solutions or already installed dependencies first before writing new helpers or adding third-party packages, to prevent duplicate libraries and minimize codebase bloat.\n- **ALWAYS** optimize code like a senior developer to be highly efficient, secure, performant, maintainable, and scalable.\n- **ALWAYS** write enterprise-grade code that is clean, secure, performant, scalable, and highly maintainable:\n  - *Security:* Perform strict input validation and sanitization. Use parameterized queries or ORMs. NEVER hardcode secrets or credentials. Prevent OWASP Top 10 vulnerabilities.\n  - *Performance & Scale:* Avoid blocking I/O on primary threads, design for thread-safety, avoid N+1 database queries, and optimize memory/resource usage.\n  - *Maintainability:* Structure code modularly (SOLID principles, Clean Architecture), write comprehensive error handling (with tracebacks/structured logging), and document public APIs with type annotations and docstrings.\n  - *10-Year Foresight:* Evaluate long-term maintainability, API forward-compatibility, partition growth (10-100x volume), cascading delete risks, soft delete strategies, lock contention, and failover resilience before committing database or core engine designs.\n  - *Engineering Thinking:* Follow structured problem-solving, TDD, strict type constraints, PEP 8/SOLID standards, and keep cognitive complexity low (short functions, guard clauses).\n  - *Management Thinking:* Align with the task board, split work into documented atomic subtasks, track budget limits, manage module locks, and maintain complete progress visibility.\n  - *Production/Ops Thinking:* Ensure robust observability (structured JSON logs, telemetry, health endpoints), deployment containerization, backward-compatibility, and failover/concurrency safety.\n- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past errors, and run `./helper.sh learn` to record new technical lessons at the end of the task to foster continuous self-learning.\n- **ALWAYS** perform a Pre-Implementation Impact Analysis mapping all files and command dependencies affected by a change. When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files (`install.sh`/`install.ps1`) and bootstrap wrappers (`bootstrap.sh`/`bootstrap.ps1`) to prevent platform-drift or missing options.\n- **ALWAYS** translate and expand brief or informal user instructions (e.g. "A" or "continue previous task") into a comprehensive, enterprise-grade structured implementation plan inside the active issue specification file. The agent MUST perform systematic prompt expansion, defining clear checklist tasks, acceptance criteria, and compliance audits. The agent MUST strictly rely on and respect the user\'s human-in-the-loop command approval gates (never attempting to bypass or automate approval for proposed commands) and proactively verify ambiguous details interactively using `/grill-me` or interactive questions to prevent hallucinated actions.\n\n## 3. CLI Helper Commands Reference\n\nAll workspace operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.ps1` (Windows). For the complete command list, flags, and options, see the [CLI Commands Reference](file://.agents/docs/context_map.md#1-cli-helper-commands-reference).\n\n## 4. Context map — what loads when\n\nFor the complete description of workspace metadata, ADRs, playbooks, memory structures, and their loading behaviors, see the [Workspace Context Map](file://.agents/docs/context_map.md#2-context-map--what-loads-when).\n\n\n## 5. Working protocol\n1. **Fresh Workspace Initialization:** If starting in a completely empty project directory, the agent MUST immediately execute `./helper.sh bootstrap` to interactively setup the project name, stack (Python, Node, PHP), architecture blueprint (`schema.md`), task board, and the local git-identity profile (copies `.agents/git_profiles.example` → `.agents/git_profiles.json`, which must never be staged or committed) before writing any code.\n2. **Before coding:** read `.agents/tasks/board.md`, claim the task, move it to `Doing`, create/checkout a new branch for the task (e.g., `./helper.sh issue checkout <task-id>`), run `./helper.sh context optimize`, and read `.agents/active_context.md` to align on active scope, checklist, and rules.\n3. **Compliance Audit:** Perform a Rule & Schema Compliance Audit (listing target files, locks, rules, and schema matching using `.agents/active_context.md` as the primary source) before proposing or writing code.\n4. **Task Splitting:** The agent MUST split any assigned task into small, atomic subtasks (no more than 3-5 lines of code edits per step where practical) and list them under `Implementation Subtasks` in the local issue specification file (e.g. `.agents/issues/issue_xxx.md`).\n5. **Context Insulation (Single subtask focus):** The agent MUST focus on exactly ONE atomic subtask at a time. After completing a subtask, the agent MUST run validation and make a git commit with a clear Conventional Commit message referencing the task ID. This keeps the prompt cache warm and prevents context pollution.\n6. **Active Context Pruning:** Between subtasks, if files are added or rules are changed, the agent MUST run `./helper.sh context optimize` to prune stale context, keeping the active context token-efficient and eliminating hallucinations.\n7. **Pre-Implementation:** Perform a Pre-Implementation Impact Analysis comparing at least two options (following the `coding-standards` playbook) to evaluate long-term maintenance and UI/UX simplicity.\n8. **Before any architecture-affecting change:** pull `@.agents/memory/architecture.md` and check `.agents/memory/decisions/` for a relevant ADR.\n9. **While working:** prefer invoking an existing skill over re-deriving a workflow from scratch. When a task matches a skill\'s description, load that skill\'s `SKILL.md` using `view_file` to align on execution steps, ensuring the skill is used efficiently.\n10. **Before marking a task `Completed`:** run all tests and `./helper.sh validate` to verify compliance. Once validation passes, run `./helper.sh changelog` to update release history, switch back to the base branch (`main` or `master`), merge the feature branch cleanly, and delete the feature branch local/remote if required.\n11. **End of session:** run `/sync-memory` to fold session learnings into memory and prune anything stale (see `.agents/workflows/sync-memory.md`).\n\n## 6. Git & review\n- Branches: `feat/<task-id>-slug`, `fix/<task-id>-slug`.\n- All code edits must be done on the designated branch. Committing to base branches (`main` or `master`) directly is strictly prohibited.\n- One task = one PR where practical; link the task ID in the PR description.\n- No self-merging architecturally significant PRs — a second reviewer (human or the `code-review` skill) signs off first.\n- When a task is finished, checkout the base branch, merge the feature branch, and delete the feature branch.\n\n## 7. Technical Alignment & Decision Capture Flow\nWhen aligning on technical details, features, or database specifications:\n1. **Interactive Alignment**: Use `/grill-me` (or interactive dialogue) to query stack details, library versions, features, and database schemas.\n2. **Alignment Storage (Workspace Level)**:\n   * **Database schemas/models/API blueprints**: Record strictly to `.agents/schema.md` or modular files under `.agents/schemas/` (if database size is large). Whenever database structures, tables, or fields are discussed, updated, or created, the agent MUST immediately record them here to preserve data layout visibility.\n   * **Task details & specification checklist**: Record strictly to `.agents/issues/issue_[id].md`.\n   * **Architectural patterns/ADRs**: Record strictly to `.agents/memory/decisions/` and index in `.agents/memory/architecture.md`.\n   * **Session learnings**: Record to `.agents/memory/lessons-learned.md` using `./helper.sh learn`.\n3. **Workspace Read Flow**: Before coding, the agent MUST read `.agents/schema.md` (for database conformity, index registry, and to discover modular schemas under `.agents/schemas/`), `.agents/active_context.md` (for the active subtasks checklist) and `@.agents/memory/architecture.md` (for architectural boundaries). Depending on scope, load `@.agents/memory/milestones.md` for roadmap/release alignment, `@.agents/memory/security-policy.md` for security/GPG runbooks, and `@.agents/docs/collaboration.md` for team coordination and lock resolution. To optimize context token limits, the agent MUST load only the specific schema modules under `.agents/schemas/*.md` that are relevant to the active subtasks checklist on-demand.\n4. **Skill Loading Optimization**: Custom playbooks under `.agents/skills/` MUST be loaded on-demand via `view_file` only when a task matches the skill\'s description. They are strictly prohibited from being auto-loaded globally to optimize context size.\n\n## 8. Tool permissions\nDefault to `request-review` in `./helper.sh config` for this repo (pauses before destructive/file-write actions). Reserve `proceed-in-sandbox` for disposable environments only. Never set `always-proceed` on a repo with reachable production credentials.\n\n## 9. Maintaining this file\nReviewed like code. Budget: stay under ~150 lines. If it grows past that, move the newest, least-universal addition into a skill or memory file and leave a one-line pointer here instead.' : Core rule leaked into target AGENTS.md: When modifying CLI commands, options, or core settings, the agent MUST explicitly review and synchronize the installer files
+
+----------------------------------------------------------------------
+Ran 279 tests in 1.535s
+
+FAILED (failures=3, skipped=1)
+Successfully synchronized synthesized rules in rules.md.
+Successfully archived 1 rules to .agents/memory/lessons-archive.md.
+[91m[FAIL] Prompt and completion tokens must be non-negative integers.[0m
+[91m[FAIL] Prompt and completion tokens must be non-negative integers.[0m
+[92m[OK] Logged 6000 tokens for task 'issue-164' (account: 'gemini:sha256-ba88894d').[0m
+[92m[OK] Reset daily token budget usage counter.[0m
+============================================================
+      Antigravity Agent Core (AAC) V3 Auto-Upgrader
+============================================================
+Fetching latest updates from official source repository: https://github.com/rafaelghif/antigravity-agents.git...
+[91m[FAIL] Failed to fetch updates from source repository: Git fetch error[0m
+============================================================
+      Antigravity Agent Core (AAC) V3 Auto-Upgrader
+============================================================
+Fetching latest updates from official source repository: https://github.com/rafaelghif/antigravity-agents.git...
+[93m[WARN] Uncommitted core modifications detected. Backing up to '.agents/backup/upgrade_20260716_211848' before proceeding...[0m
+Checking out core files...
+[92m[OK] Antigravity Agent Core has been upgraded successfully![0m
+Local configuration and profile settings were preserved.
+============================================================
+
+[11/11] Auditing Codebase Rule & Guidelines Compliance...
+
+[11/11] Auditing Codebase Rule & Guidelines Compliance...
+[92m[OK] Codebase rule compliance check passed.[0m
+
+[10/10] Auditing Commit Message Compliance...
+
+[10/10] Auditing Commit Message Compliance...
+
+[10/10] Auditing Commit Message Compliance...
+
+[10/10] Auditing Commit Message Compliance...
+[92m[OK] All commit messages are compliant with Conventional Commits and reference task IDs.[0m
+
+[1/9] Auditing Critical Files...
+[92m[OK] Found 'AGENTS.md'[0m
+[92m[OK] Found '.agents/rules.md'[0m
+[92m[OK] Found '.agents/tasks/board.md'[0m
+[92m[OK] Found '.agents/memory/architecture.md'[0m
+[92m[OK] Verified version sync in '.agents/scripts/cli/commands/bootstrap.py' (matches '2.192.0').[0m
+[93m[WARN] Git hook 'pre-commit' content is modified or outdated.[0m
+Auto-repairing Git hook 'pre-commit'...
+[92m[OK] Git hook 'pre-commit' repaired successfully.[0m
+[93m[WARN] Git hook 'commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'commit-msg'...
+[92m[OK] Git hook 'commit-msg' repaired successfully.[0m
+[93m[WARN] Git hook 'prepare-commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'prepare-commit-msg'...
+[92m[OK] Git hook 'prepare-commit-msg' repaired successfully.[0m
+
+[1/9] Auditing Critical Files...
+[92m[OK] Found 'AGENTS.md'[0m
+[92m[OK] Found '.agents/tasks/board.md'[0m
+[92m[OK] Found '.agents/memory/architecture.md'[0m
+[92m[OK] Verified version sync in '.agents/scripts/cli/commands/bootstrap.py' (matches '2.192.0').[0m
+[93m[WARN] Git hook 'pre-commit' content is modified or outdated.[0m
+Auto-repairing Git hook 'pre-commit'...
+[92m[OK] Git hook 'pre-commit' repaired successfully.[0m
+[93m[WARN] Git hook 'commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'commit-msg'...
+[92m[OK] Git hook 'commit-msg' repaired successfully.[0m
+[93m[WARN] Git hook 'prepare-commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'prepare-commit-msg'...
+[92m[OK] Git hook 'prepare-commit-msg' repaired successfully.[0m
+
+[1/9] Auditing Critical Files...
+[92m[OK] Found 'AGENTS.md'[0m
+[92m[OK] Found '.agents/rules.md'[0m
+[92m[OK] Found '.agents/tasks/board.md'[0m
+[92m[OK] Found '.agents/memory/architecture.md'[0m
+[93m[WARN] Git hook 'pre-commit' content is modified or outdated.[0m
+Auto-repairing Git hook 'pre-commit'...
+[92m[OK] Git hook 'pre-commit' repaired successfully.[0m
+[93m[WARN] Git hook 'commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'commit-msg'...
+[92m[OK] Git hook 'commit-msg' repaired successfully.[0m
+[93m[WARN] Git hook 'prepare-commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'prepare-commit-msg'...
+[92m[OK] Git hook 'prepare-commit-msg' repaired successfully.[0m
+
+[1/9] Auditing Critical Files...
+[92m[OK] Found 'AGENTS.md'[0m
+[92m[OK] Found '.agents/rules.md'[0m
+[92m[OK] Found '.agents/tasks/board.md'[0m
+[92m[OK] Found '.agents/memory/architecture.md'[0m
+[93m[WARN] Git hook 'pre-commit' content is modified or outdated.[0m
+Auto-repairing Git hook 'pre-commit'...
+[92m[OK] Git hook 'pre-commit' repaired successfully.[0m
+[93m[WARN] Git hook 'commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'commit-msg'...
+[92m[OK] Git hook 'commit-msg' repaired successfully.[0m
+[93m[WARN] Git hook 'prepare-commit-msg' content is modified or outdated.[0m
+Auto-repairing Git hook 'prepare-commit-msg'...
+[92m[OK] Git hook 'prepare-commit-msg' repaired successfully.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] On base branch 'main' (clean, no active modifications).[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-028' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/028' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue028' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-028-some-description' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[93m[WARN] Branch name 'some-random-branch' does not contain an issue ID. Auto-generating temporary ID: 'task-some-random-branch'[0m
+[92m[OK] Created ad-hoc task specification file '.agents/issues/issue_task_some_random_branch.md'.[0m
+[92m[OK] Branch 'some-random-branch' successfully aligned with registered issue 'task-some-random-branch'.[0m
+[92m[OK] All subtasks in issue 'task-some-random-branch' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-225' successfully aligned with registered issue 'issue-225'.[0m
+[92m[OK] Branch contributor identity aligns with assignee 'dev-alice' (alice@corp.com).[0m
+[92m[OK] All subtasks in issue 'issue-225' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-225' successfully aligned with registered issue 'issue-225'.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-040' successfully aligned with registered issue 'issue-040'.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-040' successfully aligned with registered issue 'issue-040'.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Workflow mode is 'solo' (skipping git branch to local issue alignment check).[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-040' successfully aligned with registered issue 'issue-040'.[0m
+[93m[WARN] Active issue 'issue-040' has 1 unresolved required subtasks (warning: intermediate commit).[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-040' successfully aligned with registered issue 'issue-040'.[0m
+[93m[WARN] Active issue 'issue-040' has 1 unresolved required subtasks (warning: intermediate commit).[0m
+
+[3/9] Auditing File Links inside Memory Registers...
+
+[3/9] Auditing File Links inside Memory Registers...
+[92m[OK] All file-link path integrity checks passed.[0m
+
+[3/9] Auditing File Links inside Memory Registers...
+
+[9/9] Auditing Module Lock Compliance...
+[92m[OK] On base branch 'main' (skipping lock compliance check).[0m
+
+[9/9] Auditing Module Lock Compliance...
+[92m[OK] Lock compliance check passed.[0m
+
+[9/9] Auditing Module Lock Compliance...
+
+[9/9] Auditing Module Lock Compliance...
+
+[9/9] Auditing Module Lock Compliance...
+[92m[OK] Module 'validate' (file 'src/validate.py') is correctly locked by this branch.[0m
+[92m[OK] Lock compliance check passed.[0m
+
+[9/9] Auditing Module Lock Compliance...
+[93m[WARN] Module Lock Compliance check bypassed by user request.[0m
+
+[9/9] Auditing Module Lock Compliance...
+[93m[WARN] Module Lock Compliance check bypassed by user request.[0m
+
+[9/9] Auditing Module Lock Compliance...
+[92m[OK] Workflow mode is 'solo' (skipping module lock compliance check).[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[92m[OK] No credentials, staged private files, mismatched profiles, or secrets detected.[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[93m[WARN] Git identity (name/email) is not configured locally or globally.[0m
+Auto-repairing Git identity locally using fallback: 'p1' <p1@test.com>...
+[92m[OK] Git Config Email matches active profile 'p1' (p1@test.com).[0m
+[93m[WARN] Commit signing is enabled with GPG key '4A1D5B', but key is missing from local keyring.[0m
+Auto-repairing: Disabling local Git commit signing to prevent commit failures...
+[92m[OK] No credentials, staged private files, mismatched profiles, or secrets detected.[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[93m[WARN] Git identity (name/email) is not configured locally or globally.[0m
+Auto-repairing Git identity locally using fallback: 'AAC Developer' <developer@antigravity.local>...
+[92m[OK] Using local Git Config Email 'developer@antigravity.local' (profiles are unconfigured).[0m
+[92m[OK] No credentials, staged private files, mismatched profiles, or secrets detected.[0m
+
+[2/9] Auditing for Staged Secrets, Private, and Ignored Files...
+[93m[WARN] Git identity (name/email) is not configured locally or globally.[0m
+Auto-repairing Git identity locally using fallback: 'rafaelghif' <business.rafaelghifari@gmail.com>...
+[92m[OK] Git Config Email matches active profile 'rafaelghif' (business.rafaelghifari@gmail.com).[0m
+[92m[OK] SSH private key path verified for profile 'rafaelghif'.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'feat/issue-028' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+
+[4/9] Auditing Git Branch to Local Issue Alignment...
+[92m[OK] Branch 'fix/issue-028' successfully aligned with registered issue 'issue-028'.[0m
+[92m[OK] All subtasks in issue 'issue-028' have been resolved.[0m
+Failed
+Running custom lint command for sub-project 'proj'...
+[92m[OK] Custom lint check for 'proj' passed.[0m
+==========================================================
+   Running AAC V3 Local Validation Guard...              
+==========================================================
+
+==========================================================
+   AAC V3 Local Validation Summary Checklist              
+   [Mode: AI Agent - Strict Compliance Enforced]           
+----------------------------------------------------------
+  - Critical Files                     : [[92mPASS[0m]
+  - Secrets & Ignored Files            : [[92mPASS[0m]
+  - Link Integrity                     : [[92mPASS[0m]
+  - Git Branch Alignment               : [[92mPASS[0m]
+  - Workspace Sync                     : [[92mPASS[0m]
+  - Task Board Schema                  : [[92mPASS[0m]
+  - Static Code Linting                : [[92mPASS[0m]
+  - Local Unit Tests                   : [[92mPASS[0m]
+  - Module Lock Compliance             : [[92mPASS[0m]
+  - Commit Message Compliance          : [[92mPASS[0m]
+  - Codebase Rule Compliance           : [[92mPASS[0m]
+  - Skill: documentation               : [[92mPASS[0m]
+==========================================================
+[92m   Validation PASSED! Workspace is compliant.      [0m
+==========================================================
