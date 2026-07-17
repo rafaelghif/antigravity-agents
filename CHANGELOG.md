@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.128.1] - 2026-07-17
+
+### ⚙️ Chores
+- consolidate and prune redundant lessons-learned.md memory
+
+
 ## [3.128.0] - 2026-07-17
 
 ### 🚀 Features
