@@ -29,8 +29,8 @@
 6. **Complete:** Run tests and `./helper.sh validate`. Run `./helper.sh changelog`. Merge task to Epic branch, delete task branch. Run `/sync-memory` to learn.
 
 ## 4. Enterprise Branching
-- **Strict Epic-Task:** `epic/<name>` -> `feat/<task-id>-slug`.
-- **Merge Flow:** Task branch merges to Epic branch. Epic branch merges to `main` ONLY when complete. NEVER commit/merge directly to `main` or `master`.
+- **Strict Epic-Task:** Branches MUST be descriptive: `epic/<name>` -> `feat/<task-id>-<slug>`. NEVER use bare IDs (e.g., `feat/378` is forbidden; use `feat/378-fix-bootstrap`).
+- **Merge & Push Flow:** Task branch merges to Epic branch. Epic branch merges to `main`. NEVER commit/merge directly to `main`. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging or committing.
 - **PRs:** 1 Task = 1 PR. Require reviews for architecture changes.
 
 ## 5. Memory & Context Read Flow
