@@ -2,7 +2,7 @@
 id: issue-1
 title: "Optimize core agent prompt and enforce Hermes protocol"
 status: open
-assignee: agent-antigravity
+assignee: rafaelghif
 milestone: "v3.127"
 created_at: 2026-07-17
 ---
