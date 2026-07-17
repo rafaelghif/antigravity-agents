@@ -1,7 +1,7 @@
 ---
-id: issue-383
-title: "feat: update github mcp config to copilot endpoint"
-status: closed
+id: issue-384
+title: "test: full workflow validation"
+status: open
 assignee: rafaelghif
 created_at: 2026-07-17
 ---
@@ -9,7 +9,7 @@ created_at: 2026-07-17
 # Issue Details
 
 ## Problem Statement
-feat: update github mcp config to copilot endpoint
+test: full workflow validation
 
 ## Tasks
 - [ ] Task 1 <!-- id: task-1 -->
