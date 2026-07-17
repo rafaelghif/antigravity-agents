@@ -1,7 +1,7 @@
 ---
 id: issue-384
 title: "test: full workflow validation"
-status: open
+status: closed
 assignee: rafaelghif
 created_at: 2026-07-17
 ---

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.139.0] - 2026-07-17
+
+### 🚀 Features
+- test: full workflow validation (ISSUE-384)
+
+### 🧪 Tests
+- add dummy workflow test
+
+
 ## [3.138.0] - 2026-07-17
 
 ### 🚀 Features
