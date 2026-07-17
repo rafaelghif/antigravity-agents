@@ -39,14 +39,14 @@ AAC V3 enforces a structured, step-by-step engineering cycle on the agent to pre
 ```mermaid
 flowchart TD
     A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & board.md</code>"]
-    B --> C["3. Claim & Checkout Branch<br><code>git checkout -b feat/&lt;task-id&gt;-&lt;slug&gt;</code>"]
+    B --> C["3. Claim & Checkout Branch<br><code>./helper.sh issue checkout &lt;task-id&gt;</code>"]
     C --> D["4. Read Schema & Context<br><code>schema.md & active_context.md</code>"]
     D --> E["5. Execute (Atomic)<br><code>split into 3-5 line subtasks</code>"]
     E --> F["6. Code, Lint, &amp; Test<br><code>validate.py</code>"]
     F -- "Audit Fails" --> G["7. Self-Heal Workspace<br><code>./helper.sh learn</code>"]
     G --> F
-    F -- "Audit Passes" --> H["8. Commit with Task ID<br><code>Conventional Commits</code>"]
-    H --> I["9. Close, Merge &amp; Push<br><code>git push origin &lt;branch&gt;</code>"]
+    F -- "Audit Passes" --> H["8. Commit with Task ID<br><code>Closes #ID (Auto-Close)</code>"]
+    H --> I["9. Push Task Branch<br><code>1 Task = 1 PR</code>"]
 ```
 
 ---
@@ -278,16 +278,18 @@ After bootstrapping, your project will have the following layout:
 - `AGENTS.md` (root): Master rules and directory maps loaded by the agent on every prompt.
 - `.agents/rules.md`: Automatically generated build, test, and style configurations.
 - `.agents/schema.md`: Holds definitions for config schemas and data formats.
+- `.agents/schemas/`: Modular sub-schemas for larger projects.
 - `.agents/projects.json`: Monorepo project references.
 - `.agents/git_profiles.json`: Workspace-isolated developer profiles and signatures.
 - `.agents/mcp_config.json`: Model Context Protocol configuration for workspace tools.
+- `.agents/soul.md`: Core agent values, communication policies, and identity.
 - `.agents/tasks/board.md`: Active markdown task board for tracking progress.
 - `.agents/issues/`: Contains active and archived task specifications.
+- `.agents/blueprints/`: Architectural reference blueprints.
 - `.agents/memory/`:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
-  - `soul.md`: Core agent values, communication policies, and identity.
   - `lessons-learned.md`: Logs for long-term project quality and self-learning.
 - `.agents/skills/`: Executable playbooks (e.g., `code-review/`, `database-evolution/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.

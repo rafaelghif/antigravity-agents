@@ -461,6 +461,9 @@ if [[ ! "$COMMIT_MSG" =~ $COMPLIANCE_REGEX ]]; then
   echo "=========================================================="
   exit 1
 fi
+
+# Auto-close local issues
+python3 .agents/scripts/auto_close.py "$COMMIT_MSG_FILE"
 """,
             "prepare-commit-msg": r"""#!/usr/bin/env bash
 if [ -z "${ANTIGRAVITY_AGENT}" ]; then

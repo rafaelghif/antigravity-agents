@@ -9,7 +9,7 @@
 - **Layout:** CLI scripts, `.agents/skills/` (playbooks), `.agents/workflows/`, `.agents/memory/`, `.agents/docs/`.
 
 ## 2. Core Guardrails & Anti-Hallucination
-- **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift.
+- **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><active_task_id>[ID]</active_task_id><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift. If `<active_task_id>` is empty or missing, you MUST halt and use `./helper.sh issue checkout` first.
 - **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
 - **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. If ambiguous, halt and prompt the USER. NEVER loop tool calls blindly if stuck.
 - **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/active_context.md`, and `.agents/tasks/board.md` before coding.
