@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.143.0] - 2026-07-18
+
+### 🚀 Features
+- enforce external MCP priority in rules (#63)
+- inject remote branch cleanup requirement into Hermes memory
+- strictly enforce branch-to-issue alignment in solo mode
+
+### 🐛 Bug Fixes
+- enforce programmatic changelog generation check (#65)
+
+
 ## [3.142.0] - 2026-07-18
 
 ### 🚀 Features
