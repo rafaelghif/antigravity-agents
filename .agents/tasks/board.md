@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] chore(memory): record Windows migration lessons learned (feat/issue-385) <!-- id: issue-385 -->
 - [ ] feat: Swarm Orchestration Playbook for Subagents (feat/swarm-orchestration) <!-- id: swarm-orchestration -->
 
 ## Doing

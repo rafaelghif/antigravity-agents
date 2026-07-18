@@ -89,7 +89,8 @@ If an agentic execution fails because of missing dependencies, outdated librarie
 
 1. **Package Re-installation**:
    - For Node: run `npm install --no-audit` or `npm ci`.
-   - For Python: run `pip install -r requirements.txt`.
+   - For Python: run `pip install -r requirements.txt`. On Python 3.13+ environments where older pinned packages (like PyInstaller 6.6.0) cause version mismatches, manually install compatible core libraries: `pip install pyyaml portalocker keyring cryptography`.
+   - **Windows Sandbox Bypass**: If terminal execution crashes with a sandbox path configuration error (`readwrite /: non-absolute file path`), request `unsandboxed` permission for `powershell` to execute tasks directly.
 2. **Environment Clean**:
    - Clean compiled caches:
      - Python: `find . -name "*.pyc" -delete && find . -name "__pycache__" -delete`

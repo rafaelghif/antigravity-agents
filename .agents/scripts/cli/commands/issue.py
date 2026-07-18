@@ -262,11 +262,16 @@ created_at: {current_date}
             except Exception:
                 pass
 
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            fm = parse_issue_frontmatter(content)
+        except Exception as e:
+            print(f"Error: Failed to read/parse issue file: {e}")
+            sys.exit(1)
+
         if active_profile_name:
             try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                fm = parse_issue_frontmatter(content)
                 curr_assignee = fm.get("assignee")
                 if curr_assignee != active_profile_name:
                     lines = content.splitlines()
