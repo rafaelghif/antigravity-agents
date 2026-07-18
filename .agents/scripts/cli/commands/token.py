@@ -4,7 +4,7 @@ import json
 import re
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone, timezone
 from typing import List
 
 try:
@@ -151,7 +151,7 @@ def run_log(args: List[str]) -> None:
     budget["tasks"][task_id]["prompt_tokens"] += prompt
     budget["tasks"][task_id]["completion_tokens"] += completion
     budget["tasks"][task_id]["total_tokens"] += total
-    budget["tasks"][task_id]["updated_at"] = datetime.utcnow().isoformat() + "Z"
+    budget["tasks"][task_id]["updated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     save_budget(budget)
     append_to_log(task_id, prompt, completion)
@@ -233,7 +233,7 @@ def run_status(args: List[str]) -> None:
                 if "five_hour_used" in parsed: budget["five_hour_used_override"] = parsed["five_hour_used"]
                 if "weekly_limit" in parsed: budget["weekly_limit"] = parsed["weekly_limit"]
                 if "five_hour_limit" in parsed: budget["five_hour_limit"] = parsed["five_hour_limit"]
-                budget["last_sync"] = datetime.utcnow().isoformat() + "Z"
+                budget["last_sync"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                 save_budget(budget)
         else:
             trigger_background_sync()
@@ -308,14 +308,14 @@ def run_reset(args: List[str]) -> None:
         budget["monthly_used"] = 0
         budget["tasks"] = {}
         budget["accounts"] = {}
-        budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
+        budget["last_reset"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         print_ok("Reset all token budget usage counters, task breakdown, and account statistics.")
     elif "--daily" in args:
         budget["daily_used"] = 0
         if "accounts" in budget:
             for acc in budget["accounts"].values():
                 acc["daily_used"] = 0
-        budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
+        budget["last_reset"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         print_ok("Reset daily token budget usage counter.")
     elif "--monthly" in args:
         budget["monthly_used"] = 0
@@ -323,7 +323,7 @@ def run_reset(args: List[str]) -> None:
             for acc in budget["accounts"].values():
                 acc["daily_used"] = 0
                 acc["monthly_used"] = 0
-        budget["last_reset"] = datetime.utcnow().isoformat() + "Z"
+        budget["last_reset"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         print_ok("Reset monthly token budget usage counter.")
     else:
         print("Usage: helper.py token reset [--daily | --monthly | --all]")

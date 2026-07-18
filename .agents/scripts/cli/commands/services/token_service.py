@@ -4,7 +4,7 @@ import json
 import re
 import subprocess
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta, timezone, timezone
 from typing import List
 
 try:
@@ -157,7 +157,7 @@ def load_budget() -> dict:
         "monthly_used": 0,
         "daily_limit": 500000,
         "daily_used": 0,
-        "last_reset": datetime.utcnow().isoformat() + "Z",
+        "last_reset": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "accounts": {},
         "tasks": {}
     }
@@ -226,9 +226,9 @@ def check_date_resets(budget: dict) -> dict:
             last_reset_str = last_reset_str[:-1] + "+00:00"
         last_reset_dt = datetime.fromisoformat(last_reset_str)
     except Exception:
-        last_reset_dt = datetime.utcnow()
+        last_reset_dt = datetime.now(timezone.utc)
 
-    now_dt = datetime.utcnow()
+    now_dt = datetime.now(timezone.utc)
     
     if now_dt.year != last_reset_dt.year or now_dt.month != last_reset_dt.month:
         budget["monthly_used"] = 0
@@ -237,13 +237,13 @@ def check_date_resets(budget: dict) -> dict:
             for acc in budget["accounts"].values():
                 acc["daily_used"] = 0
                 acc["monthly_used"] = 0
-        budget["last_reset"] = now_dt.isoformat() + "Z"
+        budget["last_reset"] = now_dt.isoformat().replace("+00:00", "Z")
     elif now_dt.date() != last_reset_dt.date():
         budget["daily_used"] = 0
         if "accounts" in budget:
             for acc in budget["accounts"].values():
                 acc["daily_used"] = 0
-        budget["last_reset"] = now_dt.isoformat() + "Z"
+        budget["last_reset"] = now_dt.isoformat().replace("+00:00", "Z")
 
     return budget
 
@@ -261,7 +261,7 @@ def get_current_task_id() -> str:
 
 def append_to_log(task_id: str, prompt: int, completion: int) -> None:
     os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     total = prompt + completion
     log_line = f"[{timestamp}] Task: {task_id} | Prompt: {prompt} | Completion: {completion} | Total: {total}\n"
     try:
@@ -743,7 +743,7 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
                         "prompt_tokens": prompt,
                         "completion_tokens": completion,
                         "total_tokens": total,
-                        "updated_at": datetime.utcnow().isoformat() + "Z"
+                        "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                     }
                 else:
                     m_table = re.match(r'\s*\|\s*(?:\*\*)?([a-zA-Z0-9_-]+)(?:\*\*)?\s*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|\s*([\d,]+)[^|]*\|', line)
@@ -757,7 +757,7 @@ def parse_usage_output(output: str, budget: dict = None) -> dict:
                                 "prompt_tokens": prompt,
                                 "completion_tokens": completion,
                                 "total_tokens": total,
-                                "updated_at": datetime.utcnow().isoformat() + "Z"
+                                "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
                             }
     if tasks:
         stats["tasks"] = tasks
@@ -893,7 +893,7 @@ def sync_from_platform_usage() -> dict:
         if "five_hour_remaining" in parsed: budget["five_hour_remaining_override"] = parsed["five_hour_remaining"]
         if "five_hour_used" in parsed: budget["five_hour_used_override"] = parsed["five_hour_used"]
 
-        budget["last_sync"] = datetime.utcnow().isoformat() + "Z"
+        budget["last_sync"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         if "weekly_limit" in parsed and not parsed.get("is_block_format"):
             budget["weekly_limit"] = parsed["weekly_limit"]
