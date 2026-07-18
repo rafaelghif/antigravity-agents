@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.141.0] - 2026-07-18
+
+### 🚀 Features
+- add ui-ux-design and fullstack-development playbooks
+- implement mcp-execution playbook and anti-hallucination rule
+
+### 🐛 Bug Fixes
+- automate pruning in validate and fix issue_service oldest-slicing bug
+
+### 📝 Documentation
+- explicitly prohibit offline local issue creation
+- mandate Fixes keyword in PR body for auto-close
+
+### ⚙️ Chores
+- resolve rules.md template drift
+- harden MCP rule exception and default template disabled state
+- sync rules.md template parity
+
+
 ## [3.140.0] - 2026-07-18
 
 ### 🚀 Features
