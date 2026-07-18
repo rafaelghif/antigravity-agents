@@ -1,6 +1,6 @@
 # Antigravity Agent Core (AAC) V3
 
-[![Version](https://img.shields.io/badge/version-3.144.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-3.144.1-blue.svg)](AGENTS.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
 [![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)

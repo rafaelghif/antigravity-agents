@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.144.1] - 2026-07-18
+
+### 🐛 Bug Fixes
+- auto-inject Fixes keyword to close GitHub issues
+
+### ⚙️ Chores
+- sync rag index
+
+
 ## [3.144.0] - 2026-07-18
 
 ### 🚀 Features
