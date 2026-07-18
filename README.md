@@ -106,6 +106,16 @@ This updates `.agents/git_profiles.json` (GPG/SSH commit signature keys and Git 
 When triggering your agent (Aider, Cursor, Cline, or Claude), simply start the prompt with:
 > "Read AGENTS.md and align with our workspace layout, rules, and memory ledger before starting."
 
+### 5. Utilize Agent Slash Commands (Anti-Hallucination)
+To maximize agent autonomy and prevent hallucinations caused by vague prompts, Antigravity CLI provides native slash commands. Simply type these in your chat UI:
+
+| Command | Usage Context | Description |
+| :--- | :--- | :--- |
+| **`/goal`** | `Long-running autonomy` | Instructs the agent to enter a persistent, infinite loop. It will break down complex epics, write code, validate, self-heal, and pull the next task from the board autonomously until the overarching goal is 100% complete. You can provide a high-level epic or a simple prompt; the agent handles the context scaling. |
+| **`/grill-me`** | `Requirements gathering` | Prevents hallucinations! Use this when you have a vague idea. The agent will pause coding and interview you with targeted questions to build a concrete architecture and schema before writing a single line of code. |
+| **`/teamwork-preview`** | `Parallel execution` | Divides a massive task into independent sub-tasks and spawns multiple background sub-agents to tackle them concurrently. |
+| **`/plan`** | `Step-by-step logic` | Forces the agent to output a rigorous step-by-step architectural plan before proceeding. |
+
 ---
 
 ## 🛠️ CLI Commands Reference
