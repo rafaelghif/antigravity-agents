@@ -620,8 +620,11 @@ created_at: {current_date}
                 base_branch = "master"
 
             try:
-                import token as token_cmd
-                budget = token_cmd.load_budget()
+                try:
+                    from services import token_service
+                except ImportError:
+                    from commands.services import token_service
+                budget = token_service.load_budget()
                 daily_used = budget.get("daily_used", 0)
                 daily_limit = budget.get("daily_limit", 5000000)
                 monthly_used = budget.get("monthly_used", 0)
