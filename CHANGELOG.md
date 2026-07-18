@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.140.0] - 2026-07-18
+
+### 🚀 Features
+- add GITEA_INSECURE parameter to Gitea MCP config template
+- harden pre-flight checks and MCP fallbacks
+- refactor CLI to use lazy loading and fix token warnings
+- migrate state memory to YAML
+- optimize persona, memory, and schema guardrails
+- enforce descriptive execution and human-in-the-loop
+- update enterprise workflow rules and remove encryption examples
+
+### 🐛 Bug Fixes
+- resolve validation import error during dynamic module loading
+- optimize install exclusion and resolve test timeout
+
+### 🛠️ Refactors
+- remove unused dashboard and message CLI commands
+- remove unused dashboard and message CLI commands
+
+### 📝 Documentation
+- promote changelog generation to core Working Protocol in AGENTS.md
+- sync original workspace rules.md with latest template rules
+- emphasize explicit user escalation on PR failures
+- enforce remote-first MCP workflow over local helper scripts
+
+### ⚙️ Chores
+- merge mcp remote-first rules
+
+
 ## [3.139.0] - 2026-07-17
 
 ### 🚀 Features
