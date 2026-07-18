@@ -180,17 +180,8 @@ def load_profiles() -> Dict[str, Any]:
             sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
             from core.entities import GitProfile, ValidationError
 
-    try:
-        from . import secrets as aac_secrets
-    except ImportError:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("aac_secrets", os.path.join(os.path.dirname(os.path.abspath(__file__)), "secrets.py"))
-        aac_secrets = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(aac_secrets)
     import copy
     
-    # Secure storage migration / encryption on load
-    modified = False
     profiles = data.get("profiles", [])
     for p in profiles:
         # Validate profile invariants using domain entity
@@ -201,69 +192,16 @@ def load_profiles() -> Dict[str, Any]:
             print_warn(f"Validation warning for profile '{p.get('name', 'unknown')}': {ve}")
         except Exception as ex:
             print_warn(f"Failed to validate profile structure: {ex}")
-    for p in profiles:
-        # Check git_pat
-        git_pat = p.get("git_pat") or p.get("git_token")
-        if git_pat and not git_pat.startswith("encrypted:"):
-            encrypted_pat = aac_secrets.encrypt(git_pat)
-            if "git_pat" in p:
-                p["git_pat"] = encrypted_pat
-            elif "git_token" in p:
-                p["git_token"] = encrypted_pat
-            modified = True
-            
-        # Check gpg_private_key
-        gpg_private_key = p.get("gpg_private_key")
-        if gpg_private_key and not gpg_private_key.startswith("encrypted:"):
-            p["gpg_private_key"] = aac_secrets.encrypt(gpg_private_key)
-            modified = True
 
-    if modified:
-        save_profiles(data)
-
-    # Return decrypted runtime data
+    # Return runtime data
     runtime_data = copy.deepcopy(data)
-    for p in runtime_data.get("profiles", []):
-        git_pat = p.get("git_pat") or p.get("git_token")
-        if git_pat and git_pat.startswith("encrypted:"):
-            decrypted_pat = aac_secrets.decrypt(git_pat)
-            if "git_pat" in p:
-                p["git_pat"] = decrypted_pat
-            elif "git_token" in p:
-                p["git_token"] = decrypted_pat
-                
-        gpg_private_key = p.get("gpg_private_key")
-        if gpg_private_key and gpg_private_key.startswith("encrypted:"):
-            p["gpg_private_key"] = aac_secrets.decrypt(gpg_private_key)
-
     return runtime_data
 
 def save_profiles(data: Dict[str, Any]) -> None:
-    """Save profiles dict back to JSON file, ensuring secrets are encrypted and permissions are secure."""
-    try:
-        from . import secrets as aac_secrets
-    except ImportError:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("aac_secrets", os.path.join(os.path.dirname(os.path.abspath(__file__)), "secrets.py"))
-        aac_secrets = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(aac_secrets)
+    """Save profiles dict back to JSON file, ensuring permissions are secure."""
     import copy
     
     disk_data = copy.deepcopy(data)
-    for p in disk_data.get("profiles", []):
-        # Encrypt git_pat
-        git_pat = p.get("git_pat") or p.get("git_token")
-        if git_pat and not git_pat.startswith("encrypted:"):
-            encrypted_pat = aac_secrets.encrypt(git_pat)
-            if "git_pat" in p:
-                p["git_pat"] = encrypted_pat
-            elif "git_token" in p:
-                p["git_token"] = encrypted_pat
-                
-        # Encrypt gpg_private_key
-        gpg_private_key = p.get("gpg_private_key")
-        if gpg_private_key and not gpg_private_key.startswith("encrypted:"):
-            p["gpg_private_key"] = aac_secrets.encrypt(gpg_private_key)
 
     try:
         with open(PROFILES_FILE, 'w', encoding='utf-8') as f:
