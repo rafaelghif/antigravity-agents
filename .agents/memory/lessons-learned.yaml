@@ -95,3 +95,13 @@ lessons:
   content: 'CRITICAL RULE: The agent MUST ALWAYS run ''./helper.sh changelog'' to
     generate release notes and bump versions BEFORE concluding any task or epic. Failure
     to do so breaks the deployment pipeline. This is non-negotiable.'
+- date: '2026-07-18'
+  category: testing
+  content: 'Unit test context bleeding: Ensure os.environ logic (like AAC_ENFORCE_SUBTASKS)
+    from CLI wrappers is explicitly mocked or deleted in test_validate.py to prevent
+    intermittent test failures.'
+- date: '2026-07-18'
+  category: cross-platform
+  content: Windows PowerShell wrappers (like install.ps1) must use try/finally blocks
+    instead of bash-style traps to guarantee temporary directory cleanup upon early
+    exit or failure.
