@@ -1362,7 +1362,55 @@ def audit_task_board_schema() -> bool:
             print_warn(f"Failed to scan task board schema: {e}")
             
     if not failed:
-        print_ok("Task board schema is compliant.")
+        try:
+            with open(task_board, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+            
+            output = []
+            done_section = []
+            in_done = False
+            for line in lines:
+                if line.strip().startswith("## Done"):
+                    in_done = True
+                    output.append(line)
+                    continue
+                elif line.strip().startswith("## ") and in_done:
+                    in_done = False
+                    
+                if in_done:
+                    if line.strip():
+                        done_section.append(line)
+                else:
+                    output.append(line)
+                    
+            if len(done_section) > 15:
+                # Keep only the newest 15 tasks (the last 15 in the list)
+                pruned = done_section[-15:]
+                
+                final_content = []
+                in_done_write = False
+                for line in lines:
+                    if line.strip().startswith("## Done"):
+                        in_done_write = True
+                        final_content.append(line)
+                        final_content.extend(pruned)
+                        if not pruned or not pruned[-1].endswith('\\n'):
+                            final_content.append('\\n')
+                        continue
+                    elif line.strip().startswith("## ") and in_done_write:
+                        in_done_write = False
+                        
+                    if not in_done_write:
+                        final_content.append(line)
+                        
+                with open(task_board, 'w', encoding='utf-8') as f:
+                    f.writelines(final_content)
+                print_ok("Task board schema is compliant (auto-pruned Done section to max 15).")
+            else:
+                print_ok("Task board schema is compliant.")
+        except Exception as e:
+            print_warn(f"Failed to auto-prune task board: {e}")
+            
     return not failed
 def get_modified_files() -> List[str]:
     """Retrieve list of modified files in the repository across staged/unstaged changes and diff comparison to base branch."""
