@@ -35,7 +35,7 @@ def run(args):
         print("[OK] No active module locks currently held.")
 
     # 3. Git Hooks Compliance Check
-    hooks = ['pre-commit', 'commit-msg', 'prepare-commit-msg']
+    hooks = ['pre-commit', 'commit-msg', 'prepare-commit-msg', 'post-commit']
     hooks_healthy = True
     for hook in hooks:
         hook_path = os.path.join(".git/hooks", hook)

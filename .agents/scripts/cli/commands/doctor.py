@@ -345,6 +345,13 @@ if command -v python3 &>/dev/null && python3 --version &>/dev/null; then
 elif command -v python &>/dev/null && python --version &>/dev/null; then
   python .agents/scripts/prepare_commit_msg.py "$COMMIT_MSG_FILE" "$COMMIT_SOURCE"
 fi
+""",
+                    "post-commit": r"""#!/usr/bin/env bash
+if command -v python3 &>/dev/null && python3 --version &>/dev/null; then
+  python3 -c "import sys, os, importlib.util; from pathlib import Path; spec = importlib.util.spec_from_file_location('rag', os.path.abspath('.agents/scripts/core/rag.py')); rag = importlib.util.module_from_spec(spec); spec.loader.exec_module(rag); rag.index_memory_files(Path('.'))" &>/dev/null &
+elif command -v python &>/dev/null && python --version &>/dev/null; then
+  python -c "import sys, os, importlib.util; from pathlib import Path; spec = importlib.util.spec_from_file_location('rag', os.path.abspath('.agents/scripts/core/rag.py')); rag = importlib.util.module_from_spec(spec); spec.loader.exec_module(rag); rag.index_memory_files(Path('.'))" &>/dev/null &
+fi
 """
                 }
                 for name, content in hooks.items():

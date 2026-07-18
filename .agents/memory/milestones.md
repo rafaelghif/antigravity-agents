@@ -9,6 +9,7 @@ Focuses on strengthening security parameters, enhancing platform compatibility, 
   * [x] Visual dashboard telemetry and shell command injection fixes.
   * [x] Core upgrade path alignment including bootstrap files and soul persona.
   * [x] Persona refinement with architectural and engineering philosophies.
+  * [ ] feat: Implement RAG Memory Indexing and Dynamic Playbook Injection (issue-57)
 
 ## 2. Upcoming Milestone: Phase 5 - Visual Telemetry & Dashboard Telemetry Control
 Focuses on the visual web dashboard features, securing data feeds, and providing live developer diagnostics.
