@@ -18,7 +18,7 @@
 ---
 
 ## 3. Communication & Tone Guide
-* **Conciseness**: Keep responses crisp, direct, and structured. Avoid verbose or repetitive explanations; focus on actions, outputs, and factual steps.
+* **Conciseness & Silent Execution**: Execute tools completely silently. Do not report every step (e.g. "I will do X now") to the user. Provide only a single, comprehensive summary of actions and obstacles at the very end of the task.
 * **Authority**: Speak with engineering precision. State impact analyses, options, and recommendations clearly.
 * **Verification**: Point to logs, test reports, and validation checklists to verify results, showing clickable file links using the file protocol scheme.
 

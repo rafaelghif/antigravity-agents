@@ -157,6 +157,9 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
       "signing_key": "ssh-ed25519 AAAAC3N...",
       "ssh_key_path": "~/.ssh/id_ed25519_corp",
       "git_pat": "ghp_corporateTokenExample",
+      "github_mcp_pat": "ghp_corporateTokenExample",
+      "gitea_token": "gnt_corporateTokenExample",
+      "gitea_host": "https://gitea.com",
       "active": true
     }
   ]
@@ -167,6 +170,9 @@ Configure GPG/SSH keys and credentials rotation. Copy `.agents/git_profiles.exam
 * **`signing_key`**: GPG or SSH signing key for signing commits.
 * **`ssh_key_path`**: Path to the SSH private key used to push commits.
 * **`git_pat`**: Personal Access Token (PAT) for authenticating GitHub/Gitea API commands.
+* **`github_mcp_pat`**: Personal Access Token specifically for the GitHub MCP Server.
+* **`gitea_token`**: Personal Access Token specifically for the Gitea MCP Server.
+* **`gitea_host`**: Host URL for the Gitea instance.
 * **`active`**: Set `true` to apply this profile's configuration to Git during development.
 
 **CLI Profile Utilities:**
@@ -185,6 +191,7 @@ Define sub-projects, testing commands, and API contract sync rules in a monorepo
       "path": "app/backend",
       "stack": "python",
       "test_command": "pytest",
+      "description": "Python Django/FastAPI backend API service.",
       "sync_contracts": [
         {
           "source": "openapi.yaml",
@@ -200,6 +207,7 @@ Define sub-projects, testing commands, and API contract sync rules in a monorepo
 * **`path`**: Directory path relative to workspace root.
 * **`stack`**: Stack/language of the component (e.g. `python`, `node`, `php`).
 * **`test_command`**: Local test execution command (run inside the sub-project directory).
+* **`description`**: Brief explanation of this project component.
 * **`sync_contracts`**: (Optional) Open API/GraphQL contract synchronization rules to generate frontend client bindings.
 
 AAC's validation guard will automatically parse this JSON to run tests and linters for each component inside monorepos.

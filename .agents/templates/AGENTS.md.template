@@ -12,7 +12,7 @@
 - **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><active_task_id>[ID]</active_task_id><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift. If `<active_task_id>` is empty or missing, you MUST halt and use `./helper.sh issue checkout` first.
 - **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
 - **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. NEVER loop tool calls blindly if stuck.
-- **Descriptive Execution:** ALWAYS be explicitly descriptive. Explain the 'why' and exactly 'what' you are doing before making any changes. Do NOT execute actions silently.
+- **Silent Execution & Final Reporting:** Execute tools and commands autonomously without providing conversational commentary or step-by-step reporting. Only provide a single, comprehensive summary of actions and any obstacles faced at the very end of the task. Do NOT explain every step before doing it.
 - **Human-in-the-Loop Escalation:** If a task requires human intervention (e.g., 2FA, ambiguous architecture decisions, or manual QA), you MUST clearly notify the USER, explain what is needed, and HALT execution.
 - **Strict Pre-Flight Compliance:** ALWAYS run local validation (e.g., `./helper.sh validate`) and review the output BEFORE attempting to commit. NEVER bypass validation using `AAC_BYPASS_COMPLIANCE=1` unless explicitly instructed by the user. If validation fails, fix the underlying code or templates instead.
 - **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/state/active_context.md`, and `.agents/tasks/board.md` before coding.
@@ -28,7 +28,7 @@
 2. **Claim Task via MCP (Remote-First):** ALWAYS create issues DIRECTLY on the remote Git tracker (GitHub/Gitea) using MCP tools. This is STRICTLY MANDATORY unless the Git MCP server is explicitly marked as `"disabled": true` in `.agents/mcp_config.json`. NEVER create offline local issues in `.agents/issues/` unless explicitly in offline mode. If Acceptance Criteria/DoD is vague, you MUST halt and clarify with the User before writing any code.
 3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
 4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`). Push to remote (`git push origin <branch>`).
-5. **PR & Merge via MCP:** Create PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue (read the `github_number` from the issue's markdown file). NEVER merge PRs unilaterally for critical changes; ALWAYS wait for CI pipeline checks to pass and explicit User approval.
+5. **PR & Merge via MCP:** Create PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue (read the `github_number` from the issue's markdown file). You may merge PRs and push changes autonomously without requiring explicit User approval to ensure a seamless workflow.
 6. **Rollback & Recovery:** If a merged PR breaks the build or production, IMMEDIATELY halt forward progress, investigate, and propose a Revert or Hotfix PR.
 7. **Changelog:** ALWAYS run `./helper.sh changelog` to generate release notes before concluding a task or epic.
 8. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
@@ -36,7 +36,7 @@
 ## 4. Enterprise Branching
 - **Strict Epic-Task:** Branches MUST be descriptive: `epic/<name>` -> `feat/<task-id>-<slug>`. NEVER use bare IDs (e.g., `feat/378` is forbidden; use `feat/378-fix-bootstrap`).
 - **Merge & Push Flow:** Task branch merges to Epic branch. Epic branch merges to `main`. NEVER commit/merge directly to `main`. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging.
-- **PRs:** 1 Task = 1 PR. Assign the User as reviewer. Require explicit human approval and green CI checks for architecture changes.
+- **PRs:** 1 Task = 1 PR. Assign the User as reviewer. Autonomous PR merging is allowed without waiting for explicit human approval, unless specifically restricted for a critical architectural overhaul.
 
 ## 5. Memory & Context Read Flow
 *Issues (`.agents/issues/`) and boards are ephemeral and can be archived. Memory (`.agents/memory/`, `lessons-learned.yaml`, `schema.md`) is PERMANENT and intolerant to archiving. It is STRICTLY FORBIDDEN to archive, truncate, or delete memory files.*
