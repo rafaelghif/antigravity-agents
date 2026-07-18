@@ -262,11 +262,16 @@ created_at: {current_date}
             except Exception:
                 pass
 
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            fm = parse_issue_frontmatter(content)
+        except Exception as e:
+            print(f"Error: Failed to read/parse issue file: {e}")
+            sys.exit(1)
+
         if active_profile_name:
             try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                fm = parse_issue_frontmatter(content)
                 curr_assignee = fm.get("assignee")
                 if curr_assignee != active_profile_name:
                     lines = content.splitlines()
@@ -316,9 +321,6 @@ created_at: {current_date}
             subprocess.run(['git', '-c', 'advice.detachedHead=false', 'checkout', '-b', branch_name])
             
         try:
-            cmd_dir = os.path.dirname(os.path.abspath(__file__))
-            if cmd_dir not in sys.path:
-                sys.path.insert(0, cmd_dir)
             import commands.context as context_cmd
             context_cmd.optimize_context()
         except Exception as e:
@@ -481,10 +483,10 @@ created_at: {current_date}
 
         print("Triggering Auto-Lessons Extractor...")
         try:
-            commands_dir = os.path.dirname(__file__)
-            if commands_dir not in sys.path:
-                sys.path.insert(0, commands_dir)
-            import learn
+            try:
+                from . import learn
+            except ImportError:
+                import learn
             
             base_branch = "main"
             res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -615,8 +617,11 @@ created_at: {current_date}
                 base_branch = "master"
 
             try:
-                import token as token_cmd
-                budget = token_cmd.load_budget()
+                try:
+                    from services import token_service
+                except ImportError:
+                    from commands.services import token_service
+                budget = token_service.load_budget()
                 daily_used = budget.get("daily_used", 0)
                 daily_limit = budget.get("daily_limit", 5000000)
                 monthly_used = budget.get("monthly_used", 0)
