@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.142.0] - 2026-07-18
+
+### 🚀 Features
+- implement tf-idf semantic indexing and dynamic playbook injection (#58)
+- enforce silent execution and final reporting
+- allow autonomous PR push and merge
+- align README schema and remove profile encryption
+
+### 🐛 Bug Fixes
+- align task-management skill with remote-first MCP workflow
+- sync rules.md template to prevent drift
+
+
 ## [3.141.0] - 2026-07-18
 
 ### 🚀 Features
