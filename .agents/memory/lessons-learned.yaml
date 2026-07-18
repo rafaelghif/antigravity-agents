@@ -107,7 +107,16 @@ lessons:
     exit or failure.
 - date: '2026-07-18'
   category: compatibility
-  content: 'Python 3.13 Migration: Pinning older packages like PyInstaller 6.6.0 fails on Python 3.13 due to python version constraints (<3.13). Manually install other core packages (pyyaml, portalocker, keyring, cryptography) to resolve validation dependencies.'
+  content: 'Python 3.13 Migration: Pinning older packages like PyInstaller 6.6.0 fails
+    on Python 3.13 due to python version constraints (<3.13). Manually install other
+    core packages (pyyaml, portalocker, keyring, cryptography) to resolve validation
+    dependencies.'
 - date: '2026-07-18'
   category: sandbox
-  content: 'Windows Sandbox Pathing: If run_command fails with "sandbox configuration error: readwrite /: non-absolute file path", request unsandboxed permission for powershell to run commands outside the sandbox container.'
+  content: 'Windows Sandbox Pathing: If run_command fails with "sandbox configuration
+    error: readwrite /: non-absolute file path", request unsandboxed permission for
+    powershell to run commands outside the sandbox container.'
+- date: '2026-07-18'
+  category: Path Handling / OS Compatibility
+  content: Use cross-platform path resolution helpers instead of hardcoded OS separators
+    to prevent Windows/Linux path mismatches.

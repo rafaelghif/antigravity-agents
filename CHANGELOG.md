@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.148.0] - 2026-07-18
+
+### 🚀 Features
+- resolve standard token library shadowing name collision in close command
+- support Windows compatibility and record lessons learned
+- enforce 3-tier fallback mindset for external APIs
+- Swarm Orchestration Playbook for Subagents
+- chore(memory): record Windows migration lessons learned (ISSUE-385)
+
+### 🐛 Bug Fixes
+- resolve token shadowing name collision in close command
+- enforce trap exit cleanup in Windows installer
+- isolate environment variables in validate unit tests
+- auto-inject Fixes keyword to close GitHub issues
+- suppress cleanup trap errors in public install scripts (#68)
+
+### 🛠️ Refactors
+- implement 3-strike rule and assumption tracking
+
+### 📝 Documentation
+- rewrite README for professional enterprise presentation
+- document slash commands to prevent prompt hallucinations
+
+### ⚙️ Chores
+- sync session lessons learned
+- sync rag index
+- release version 3.144.0
+
+
 ## [3.147.0] - 2026-07-18
 
 ### 🚀 Features

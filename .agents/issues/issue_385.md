@@ -1,7 +1,7 @@
 ---
 id: issue-385
 title: "chore(memory): record Windows migration lessons learned"
-status: open
+status: closed
 assignee: agent-antigravity
 created_at: 2026-07-18
 ---

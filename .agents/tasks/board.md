@@ -3,13 +3,13 @@
 This board tracks active development tasks.
 
 ## Todo
-- [ ] chore(memory): record Windows migration lessons learned (feat/issue-385) <!-- id: issue-385 -->
 - [ ] feat: Swarm Orchestration Playbook for Subagents (feat/swarm-orchestration) <!-- id: swarm-orchestration -->
 
 ## Doing
 - [ ] feat: Implement RAG Memory Indexing and Dynamic Playbook Injection (feat/issue-57-rag-and-dynamic-injection) <!-- id: issue-57 -->
 
 ## Done
+- [x] chore(memory): record Windows migration lessons learned (feat/issue-385) <!-- id: issue-385 -->
 - [x] test: full workflow validation (feat/issue-384) <!-- id: issue-384 -->
 - [x] feat: update github mcp config to copilot endpoint (feat/issue-383) <!-- id: issue-383 -->
 - [x] feat: enforce uarp active_task_id and local auto-close hooks (feat/382) <!-- id: 382 -->
