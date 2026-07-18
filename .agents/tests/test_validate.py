@@ -614,14 +614,30 @@ class TestValidate(unittest.TestCase):
 
     @patch('validate.get_workflow_mode')
     @patch('validate.get_current_branch')
+    @patch.dict('os.environ', {}, clear=False)
     def test_audit_git_branch_alignment_solo(self, mock_get_branch, mock_get_mode):
+        if "AAC_ENFORCE_SUBTASKS" in os.environ:
+            del os.environ["AAC_ENFORCE_SUBTASKS"]
         mock_get_mode.return_value = "solo"
         mock_get_branch.return_value = "feat/some-arbitrary-branch"
         self.assertTrue(validate.audit_git_branch_alignment())
 
     @patch('validate.get_workflow_mode')
     @patch('validate.get_current_branch')
+    @patch.dict('os.environ', {}, clear=False)
+    def test_audit_git_branch_alignment_team(self, mock_get_branch, mock_get_mode):
+        if "AAC_ENFORCE_SUBTASKS" in os.environ:
+            del os.environ["AAC_ENFORCE_SUBTASKS"]
+        mock_get_mode.return_value = "team"
+        mock_get_branch.return_value = "feat/some-arbitrary-branch"
+        self.assertTrue(validate.audit_git_branch_alignment())
+
+    @patch('validate.get_workflow_mode')
+    @patch('validate.get_current_branch')
+    @patch.dict('os.environ', {}, clear=False)
     def test_audit_module_locks_solo(self, mock_get_branch, mock_get_mode):
+        if "AAC_ENFORCE_SUBTASKS" in os.environ:
+            del os.environ["AAC_ENFORCE_SUBTASKS"]
         mock_get_mode.return_value = "solo"
         mock_get_branch.return_value = "feat/some-arbitrary-branch"
         self.assertTrue(validate.audit_module_locks())
