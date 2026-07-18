@@ -15,7 +15,7 @@
 - **Descriptive Execution:** ALWAYS be explicitly descriptive. Explain the 'why' and exactly 'what' you are doing before making any changes. Do NOT execute actions silently.
 - **Human-in-the-Loop Escalation:** If a task requires human intervention (e.g., 2FA, ambiguous architecture decisions, or manual QA), you MUST clearly notify the USER, explain what is needed, and HALT execution.
 - **Strict Pre-Flight Compliance:** ALWAYS run local validation (e.g., `./helper.sh validate`) and review the output BEFORE attempting to commit. NEVER bypass validation using `AAC_BYPASS_COMPLIANCE=1` unless explicitly instructed by the user. If validation fails, fix the underlying code or templates instead.
-- **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/active_context.md`, and `.agents/tasks/board.md` before coding.
+- **Initialization:** Run `./helper.sh bootstrap` on empty workspaces. Read `.agents/schema.md`, `.agents/state/active_context.md`, and `.agents/tasks/board.md` before coding.
 - **MCP Priority (REMOTE-FIRST):** ALWAYS use MCP tools DIRECTLY to create issues, pull, merge, and manage remote PRs. If the MCP server fails or is unauthenticated (e.g., `Bad Request`), ALWAYS fallback to automated CLI tools (e.g., `gh pr create`) before halting and escalating to the user. DO NOT use `helper.sh issue ...` or local board flows if MCP is active. `helper.sh` and `.agents/issues/` are strictly fallbacks for offline mode.
 - **Scope Isolation:** NEVER leak data to global paths (e.g., `~/.gemini/`).
 - **Zero-Trust & Security:** NEVER commit secrets or `.env`. Pin dependencies. Do NOT run unverified scripts.
