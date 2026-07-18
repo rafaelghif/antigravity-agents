@@ -84,3 +84,9 @@ lessons:
   content: 'ALWAYS use active external MCP tools (like issue_write, create_pull_request)
     provided by the system environment, even if the local .agents/mcp_config.json
     explicitly flags them as ''disabled: true''.'
+- date: '2026-07-18'
+  category: diagnostics
+  content: When MCP tools or external CLIs (like 'gh') fail, NEVER just halt with
+    a generic error message. You MUST proactively run diagnostic checks (e.g., testing
+    tokens, checking scopes) and report the exact technical root cause and error logs
+    to the user so they are fully informed of the bottleneck.

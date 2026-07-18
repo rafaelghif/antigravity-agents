@@ -3,6 +3,7 @@
 This board tracks active development tasks.
 
 ## Todo
+- [ ] feat: Swarm Orchestration Playbook for Subagents (feat/swarm-orchestration) <!-- id: swarm-orchestration -->
 
 ## Doing
 - [ ] feat: Implement RAG Memory Indexing and Dynamic Playbook Injection (feat/issue-57-rag-and-dynamic-injection) <!-- id: issue-57 -->
