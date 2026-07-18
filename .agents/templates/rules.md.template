@@ -28,7 +28,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Architectural Reference Blueprints:** Read `.agents/blueprints/` guides (e.g. `clean-architecture.md`, `monorepo.md`) to align on structural layout before planning new architectural components.
 - **Human Programmer Mode:** Human developers are granted warning-only bypasses for quality and bureaucratic checks (linting, module locks, etc.).
 - **Proactive Skill Loading:** You MUST proactively load the required `SKILL.md` via `view_file` at the start of tasks matching that domain (e.g., `testing`, `engineering-standards`, `security-compliance`, `troubleshooting`). Bypassing required playbook reads is strictly audited and blocks execution.
-- **Descriptive Execution:** The agent MUST explain its reasoning and actions explicitly to the user before execution. No silent background changes.
+- **Silent Execution & Final Reporting:** The agent MUST execute tools and commands silently in the background. Do NOT explain your reasoning or actions step-by-step before executing them (e.g., "I will run this command now"). Provide a single summary only when the entire task is completed.
 - **Human-in-the-Loop Escalation:** The agent MUST halt and notify the user clearly if it encounters tasks requiring human input (e.g., manual approvals, 2FA, ambiguous choices).
 
 ## 5. Plug-and-Play Adaptation & Self-Learning
