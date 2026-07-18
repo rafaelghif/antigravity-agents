@@ -27,6 +27,9 @@ Whenever any of the following target files are modified, their source template u
 | `.agents/templates/python_requirements.txt.template` | `requirements.txt` | Default Python project initializer requirements list. |
 | `.agents/memory/templates/security-policy.md.template` | `.agents/memory/security-policy.md` | Security runbook and guidelines config. |
 | `.agents/memory/templates/milestones.md.template` | `.agents/memory/milestones.md` | High-level roadmap and release tracker. |
+| `.agents/memory/templates/architecture.md.template` | `.agents/memory/architecture.md` | Compressed system architecture summary. |
+| `.agents/memory/templates/glossary.md.template` | `.agents/memory/glossary.md` | Core terminology index. |
+| `.agents/memory/templates/tech-debt.md.template` | `.agents/memory/tech-debt.md` | Tech debt and known issues registry. |
 
 ---
 

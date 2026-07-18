@@ -27,27 +27,14 @@ def print_warn(msg: str) -> None:
 def print_ok(msg: str) -> None:
     print(f"\033[92m[OK] {msg}\033[0m")
 
-def should_exclude(rel_path: str) -> bool:
-    """Determine if a file path should be excluded from installation copying."""
-    normalized_path = rel_path.replace("/", os.sep).replace("\\", os.sep)
-    parts = normalized_path.split(os.sep)
-    
-    # Exclude basic development directories
-    if any(p in ("__pycache__", ".git", ".github") for p in parts):
-        return True
+_cached_excluded_filenames = None
+
+def get_excluded_filenames() -> set:
+    global _cached_excluded_filenames
+    if _cached_excluded_filenames is not None:
+        return _cached_excluded_filenames
         
-    # Exclude git repository directory
-    if ".git" in parts:
-        return True
-        
-    # Exclude src directory to protect existing project code
-    if len(parts) > 0 and parts[0] == "src":
-        return True
-        
-    filename = os.path.basename(rel_path)
-    
-    # Exclude active/private configurations, keys, and databases
-    excluded_filenames = {
+    excluded = {
         "git_profiles.json",
         "projects.json",
         "locks.json",
@@ -76,15 +63,48 @@ def should_exclude(rel_path: str) -> bool:
         "install.sh",
         "install.ps1",
         "requirements.txt",
-        "pyproject.toml",
-        "architecture.md",
-        "glossary.md",
-        "lessons-archive.md",
-        "lessons-learned.yaml",
-        "milestones.md",
-        "security-policy.md",
-        "tech-debt.md"
+        "pyproject.toml"
     }
+    
+    # Dynamically extract excluded filenames from template_map.md
+    cmd_dir = os.path.dirname(os.path.abspath(__file__))
+    source_root = os.path.abspath(os.path.join(cmd_dir, "../../../.."))
+    template_map_path = os.path.join(source_root, ".agents", "docs", "template_map.md")
+    if os.path.exists(template_map_path):
+        try:
+            with open(template_map_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith('|') and '`' in line:
+                        parts = [p.strip() for p in line.split('|')]
+                        if len(parts) >= 3:
+                            target_val = parts[2].replace('`', '')
+                            excluded.add(os.path.basename(target_val))
+        except Exception:
+            pass
+            
+    _cached_excluded_filenames = excluded
+    return excluded
+
+def should_exclude(rel_path: str) -> bool:
+    """Determine if a file path should be excluded from installation copying."""
+    normalized_path = rel_path.replace("/", os.sep).replace("\\", os.sep)
+    parts = normalized_path.split(os.sep)
+    
+    # Exclude basic development directories
+    if any(p in ("__pycache__", ".git", ".github") for p in parts):
+        return True
+        
+    # Exclude git repository directory
+    if ".git" in parts:
+        return True
+        
+    # Exclude src directory to protect existing project code
+    if len(parts) > 0 and parts[0] == "src":
+        return True
+        
+    filename = os.path.basename(rel_path)
+    
+    excluded_filenames = get_excluded_filenames()
     
     if filename in excluded_filenames:
         return True

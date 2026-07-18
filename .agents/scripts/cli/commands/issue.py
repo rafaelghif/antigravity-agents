@@ -560,9 +560,24 @@ created_at: {current_date}
                 "README.md",
                 ".agents/scripts/cli/commands/issue.py",
                 ".agents/memory/lessons-learned.yaml",
-                ".agents/memory/lessons-archive.md",
-                ".agents/rules.md"
+                ".agents/memory/lessons-archive.yaml"
             ]
+            
+            # Dynamically add target files from template_map.md
+            template_map_path = ".agents/docs/template_map.md"
+            if os.path.exists(template_map_path):
+                try:
+                    with open(template_map_path, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            if line.strip().startswith('|') and '`' in line:
+                                parts = [p.strip() for p in line.split('|')]
+                                if len(parts) >= 3:
+                                    target_val = parts[2].replace('`', '')
+                                    if target_val not in files_to_stage:
+                                        files_to_stage.append(target_val)
+                except Exception:
+                    pass
+                    
             for f_to_stage in files_to_stage:
                 if os.path.exists(f_to_stage):
                     subprocess.run(['git', 'add', f_to_stage])
