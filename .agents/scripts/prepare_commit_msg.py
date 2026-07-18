@@ -70,10 +70,26 @@ def main():
             
     trailer = f"Refs: {issue_id}"
     
+    issues_dir = os.path.join(os.getcwd(), ".agents", "issues")
+    if os.path.isdir(issues_dir):
+        for fname in os.listdir(issues_dir):
+            if fname.endswith(".md"):
+                try:
+                    with open(os.path.join(issues_dir, fname), 'r', encoding='utf-8') as sf:
+                        c = sf.read()
+                        if f"id: {issue_id}" in c or f"id: '{issue_id}'" in c or f'id: "{issue_id}"' in c:
+                            m_gh = re.search(r'^github_number:\s*(\d+)', c, re.MULTILINE)
+                            if m_gh:
+                                trailer += f"\nFixes #{m_gh.group(1)}"
+                                break
+                except:
+                    pass
+    
     insert_lines = []
     if insert_idx > 0 and lines[insert_idx - 1].strip():
         insert_lines.append("")
-    insert_lines.append(trailer)
+    for t_line in trailer.split('\n'):
+        insert_lines.append(t_line)
     if insert_idx < len(lines):
         insert_lines.append("")
         

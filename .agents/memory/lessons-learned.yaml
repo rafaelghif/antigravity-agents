@@ -90,3 +90,8 @@ lessons:
     a generic error message. You MUST proactively run diagnostic checks (e.g., testing
     tokens, checking scopes) and report the exact technical root cause and error logs
     to the user so they are fully informed of the bottleneck.
+- date: '2026-07-18'
+  category: process
+  content: 'CRITICAL RULE: The agent MUST ALWAYS run ''./helper.sh changelog'' to
+    generate release notes and bump versions BEFORE concluding any task or epic. Failure
+    to do so breaks the deployment pipeline. This is non-negotiable.'
