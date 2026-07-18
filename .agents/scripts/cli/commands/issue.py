@@ -321,9 +321,6 @@ created_at: {current_date}
             subprocess.run(['git', '-c', 'advice.detachedHead=false', 'checkout', '-b', branch_name])
             
         try:
-            cmd_dir = os.path.dirname(os.path.abspath(__file__))
-            if cmd_dir not in sys.path:
-                sys.path.insert(0, cmd_dir)
             import commands.context as context_cmd
             context_cmd.optimize_context()
         except Exception as e:
@@ -486,10 +483,10 @@ created_at: {current_date}
 
         print("Triggering Auto-Lessons Extractor...")
         try:
-            commands_dir = os.path.dirname(__file__)
-            if commands_dir not in sys.path:
-                sys.path.insert(0, commands_dir)
-            import learn
+            try:
+                from . import learn
+            except ImportError:
+                import learn
             
             base_branch = "main"
             res_master = subprocess.run(['git', 'show-ref', 'refs/heads/master'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
