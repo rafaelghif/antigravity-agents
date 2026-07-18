@@ -42,5 +42,8 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - **Template & Wrapper Parity**: Before modifying templates, wrappers (bootstrap, install, helper), or generated configs, the agent MUST read `.agents/docs/template_map.md` to ensure exact parity across Linux (Bash) and Windows (PowerShell) platforms, preventing platform-drift and token waste.
 
 ## 6. Synthesized Rules (Self-Learning Memory)
-- **[Learning: Git & Security]** Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
-- **[Learning: OS Compatibility / PowerShell]** Use cross-platform path resolution helpers instead of hardcoded OS separators to prevent Windows/Linux path mismatches.
+- **[Learning: workflow]** ALWAYS use the strict Epic/Task Git branching flow even when modifying agent-internal files like AGENTS.md. DO NOT edit main directly.; ALWAYS run `./helper.sh changelog` and understand SemVer (Major.Minor.Patch) before completing a task to ensure release notes are generated.
+- **[Learning: Git & Security]** Harden Git hooks, sanitize user SSH keys, and enforce Git source downloading for offline compatibility.; Validate GPG key imports and developer identity rotation rules locally to safeguard credentials.
+- **[Learning: OS Compatibility / PowerShell]** Maintain exact functional parity between Bash (`.sh`) and PowerShell (`.ps1`) helper scripts.; PowerShell Quirks: Explicitly cast outputs to `[string]` when testing results. Enclose `Test-Path` in parentheses before using `-and`. Propagate `$LASTEXITCODE`.
+- **[Learning: compliance]** AI Skill Enforcer strictly blocks validation if required playbooks (e.g. `devops-release`) were not viewed when modifying related files.
+- **[Learning: configuration]** Replaced regex replacements with static `.template` files for config generation. Always sync template-to-target files (mapped in `template_map.md`) to prevent drift.; MCP servers are centralized in `mcp_config.json.template` (supporting local domains and tokens) and Git profiles in `.agents/git_profiles.json`.

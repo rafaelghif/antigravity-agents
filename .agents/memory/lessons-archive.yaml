@@ -1,0 +1,12 @@
+archived_rules:
+- '- **[Learning: skills]** Dynamically scaffold and index custom playbooks using
+  CLI skill tools to extend agent capabilities whenever facing domain-specific task
+  gaps.'
+- '- **[Learning: optimization]** Platform token limit usage parsing is optimized
+  to extract from markdown tables and lists.; Token usage sync executes as a detached
+  background subprocess (using Popen with `start_new_session`) to prevent blocking
+  the user.'
+- '- **[Learning: Testing / Mocking]** When mocking `sys.exit`, ALWAYS configure it
+  to raise `SystemExit` (`side_effect=SystemExit`) and wrap in `assertRaises`. Uncontrolled
+  mock exits leak and truncate real local configs.; Validation guard leverages git-diff
+  driven incremental validation to skip static checks/tests on untouched code.'
