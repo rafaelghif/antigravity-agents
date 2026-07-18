@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.145.0] - 2026-07-18
+
+### 🚀 Features
+- enforce 3-tier fallback mindset for external APIs
+- Swarm Orchestration Playbook for Subagents
+
+### 🐛 Bug Fixes
+- auto-inject Fixes keyword to close GitHub issues
+
+### 📝 Documentation
+- rewrite README for professional enterprise presentation
+
+### ⚙️ Chores
+- sync rag index
+- release version 3.144.0
+
+
 ## [3.144.1] - 2026-07-18
 
 ### 🐛 Bug Fixes

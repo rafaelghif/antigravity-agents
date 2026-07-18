@@ -4,14 +4,14 @@
 
 ## 1. Project
 - **Product:** test-proj
-- **Version:** 3.144.1
+- **Version:** 3.145.0
 - **Stack:** Python 3, Docker
 - **Layout:** CLI scripts, `.agents/skills/` (playbooks), `.agents/workflows/`, `.agents/memory/`, `.agents/docs/`.
 
 ## 2. Core Guardrails & Anti-Hallucination
 - **UARP (REQUIRED):** ALWAYS output XML `<aac_preflight><active_task_id>[ID]</active_task_id><audit/><compliance/><action/></aac_preflight>` BEFORE any tool call or code modification to enforce reasoning and prevent context drift. If `<active_task_id>` is empty or missing, you MUST halt and use `./helper.sh issue checkout` first.
 - **Identity & Quality:** ALWAYS act as a senior enterprise engineer. Read `.agents/soul.md` for identity. Write clean, robust, SOLID code. NEVER write duplicate code.
-- **Anti-Hallucination:** NEVER guess requirements, API contracts, or database schemas. NEVER loop tool calls blindly if stuck.
+- **Anti-Hallucination & 3-Strike Rule:** NEVER guess requirements, API contracts, or schemas. If a command, tool, or validation fails 3 times consecutively despite adjustments, you MUST halt and escalate to the human to prevent infinite token waste loops.
 - **Silent Execution & Final Reporting:** Execute tools and commands autonomously without providing conversational commentary or step-by-step reporting. Only provide a single, comprehensive summary of actions and any obstacles faced at the very end of the task. Do NOT explain every step before doing it.
 - **Human-in-the-Loop Escalation:** If a task requires human intervention (e.g., 2FA, ambiguous architecture decisions, or manual QA), you MUST clearly notify the USER, explain what is needed, and HALT execution.
 - **Strict Pre-Flight Compliance:** ALWAYS run local validation (e.g., `./helper.sh validate`) and review the output BEFORE attempting to commit. NEVER bypass validation using `AAC_BYPASS_COMPLIANCE=1` unless explicitly instructed by the user. If validation fails, fix the underlying code or templates instead.
