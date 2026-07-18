@@ -38,7 +38,8 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/skills/observability/SKILL.md` | Guidelines for implementing structured logging, distributed tracing (OpenTelemetry), performance metrics, and centralized error telemetry. | On match |
 | `.agents/skills/security-compliance/SKILL.md` | Diagnostic playbook for scanning vulnerabilities, verifying secret exclusion, and executing OWASP Top 10 compliance audits. Package pinning, license auditing, upgrade verification, and package pruning playbook. | On match |
 | `.agents/skills/skill-evolution/SKILL.md` | Playbook instructing agents how to dynamically formulate, design, bootstrap, and register new workspace skills when facing skill gaps. | On match |
-| `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment from /grill-me, generating issue specifications, and managing task boards. | On match |
+| `.agents/skills/swarm-orchestration/SKILL.md` | Playbook for delegating tasks to subagents, utilizing isolated branch workspaces to prevent code conflicts, and aggregating pull requests. | On match |
+| `.agents/skills/task-management/SKILL.md` | Playbook for capturing design alignment, generating remote Git issues via MCP, and managing task boards. | On match |
 | `.agents/skills/testing/SKILL.md` | Playbook for executing unit and integration tests, mocking external services, and structuring test suites. | On match |
 | `.agents/skills/troubleshooting/SKILL.md` | Diagnostic playbook for troubleshooting CLI errors, shell script crashes, and test failures. Diagnostic and recovery playbook for resolving local git states, locked configuration files, broken workspace setups, and process deadlocks. | On match |
 | `.agents/skills/ui-ux-design/SKILL.md` | Strict guidelines enforcing modern UI aesthetics (Glassmorphism, Dark-mode first), micro-animations, Accessibility (a11y), and Core Web Vitals optimization. | On match |
