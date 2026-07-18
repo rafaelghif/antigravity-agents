@@ -72,7 +72,7 @@ All notable changes to this project will be documented in this file.
 - auto-generate changelog for init protocol restore
 - auto-generate changelog for installation fixes
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
@@ -95,7 +95,7 @@ All notable changes to this project will be documented in this file.
 - auto-generate changelog for init protocol restore
 - auto-generate changelog for installation fixes
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
@@ -116,7 +116,7 @@ All notable changes to this project will be documented in this file.
 - auto-generate changelog for init protocol restore
 - auto-generate changelog for installation fixes
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
@@ -135,7 +135,7 @@ All notable changes to this project will be documented in this file.
 - auto-generate changelog for init protocol restore
 - auto-generate changelog for installation fixes
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
@@ -152,7 +152,7 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Chores
 - auto-generate changelog for installation fixes
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
@@ -167,14 +167,14 @@ All notable changes to this project will be documented in this file.
 
 ### ⚙️ Chores
 - auto-generate changelog for memory consolidation
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 - auto-generate changelog and bump version to 0.1.0
 
 
 ## [3.128.1] - 2026-07-17
 
 ### ⚙️ Chores
-- consolidate and prune redundant lessons-learned.md memory
+- consolidate and prune redundant lessons-learned.yaml memory
 
 
 ## [3.128.0] - 2026-07-17

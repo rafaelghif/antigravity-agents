@@ -559,7 +559,7 @@ created_at: {current_date}
                 ".agents/scripts/cli/commands/bootstrap.py",
                 "README.md",
                 ".agents/scripts/cli/commands/issue.py",
-                ".agents/memory/lessons-learned.md",
+                ".agents/memory/lessons-learned.yaml",
                 ".agents/memory/lessons-archive.md",
                 ".agents/rules.md"
             ]

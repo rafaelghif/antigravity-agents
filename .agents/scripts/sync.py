@@ -106,72 +106,39 @@ def get_canonical_category(title: str) -> str:
     return title.strip()
 
 def sync_lessons_to_rules():
-    lessons_file = ".agents/memory/lessons-learned.md"
+    lessons_file = ".agents/memory/lessons-learned.yaml"
     rules_file = ".agents/rules.md"
     
     if not os.path.exists(lessons_file) or not os.path.exists(rules_file):
-        print("Warning: lessons-learned.md or rules.md missing.")
+        print("Warning: lessons-learned.yaml or rules.md missing.")
         return
         
     try:
+        import yaml
         with open(lessons_file, 'r', encoding='utf-8') as f:
-            content = f.read()
+            data = yaml.safe_load(f)
             
-        parsed_lessons = []
-        in_lessons_section = False
-        for line in content.split('\n'):
-            line_strip = line.strip()
-            if line_strip.startswith('## Lessons Learned'):
-                in_lessons_section = True
-                continue
-            elif line_strip.startswith('##') and in_lessons_section:
-                break
-                
-            if in_lessons_section and line_strip.startswith('- '):
-                # Extract date if present, e.g. **[2026-07-02]**
-                date_match = re.search(r'^\s*-\s+\*\*\[(\d{4}-\d{2}-\d{2})\]\*\*', line)
-                date_str = date_match.group(1) if date_match else "1970-01-01"
-                
-                # Strip prefix bullet and date to get the rest
-                rest = re.sub(r'^-\s+(\*\*\[\d{4}-\d{2}-\d{2}\]\*\*\s*)?', '', line_strip)
-                
-                # Match title/category and description, e.g. **Category**: Description
-                match = re.match(r'^\*\*([^*]+)\*\*:\s*(.*)', rest)
-                if match:
-                    cat = match.group(1).strip()
-                    desc = match.group(2).strip()
-                    parsed_lessons.append({
-                        "date": date_str,
-                        "category": cat,
-                        "description": desc
-                    })
-                else:
-                    # Fallback if the format is not standard
-                    parsed_lessons.append({
-                        "date": date_str,
-                        "category": "General",
-                        "description": rest
-                    })
-                    
+        parsed_lessons = data.get("lessons", []) if data else []
         if not parsed_lessons:
-            print("No lessons found in lessons-learned.md to synthesize.")
+            print("No lessons found in lessons-learned.yaml to synthesize.")
             return
 
         # Cluster lessons
         clustered = {} # canonical_category -> {"max_date": str, "descriptions": []}
         for item in parsed_lessons:
-            canon_cat = get_canonical_category(item["category"])
+            canon_cat = get_canonical_category(item.get("category", "General"))
+            date_str = item.get("date", "1970-01-01")
             if canon_cat not in clustered:
                 clustered[canon_cat] = {
-                    "max_date": item["date"],
+                    "max_date": date_str,
                     "descriptions": []
                 }
             else:
-                if item["date"] > clustered[canon_cat]["max_date"]:
-                    clustered[canon_cat]["max_date"] = item["date"]
+                if date_str > clustered[canon_cat]["max_date"]:
+                    clustered[canon_cat]["max_date"] = date_str
             
-            desc = item["description"]
-            if desc not in clustered[canon_cat]["descriptions"]:
+            desc = item.get("content", "")
+            if desc and desc not in clustered[canon_cat]["descriptions"]:
                 clustered[canon_cat]["descriptions"].append(desc)
 
         # Sort canonical categories by max_date descending
@@ -208,16 +175,13 @@ def sync_lessons_to_rules():
 
         # Archive pruned rules to historical file
         if archived_rules:
-            archive_file = ".agents/memory/lessons-archive.md"
+            archive_file = ".agents/memory/lessons-archive.yaml"
             existing_archive_rules = []
             if os.path.exists(archive_file):
                 try:
                     with open(archive_file, 'r', encoding='utf-8') as af:
-                        archive_content = af.read()
-                    for line in archive_content.split('\n'):
-                        line_strip = line.strip()
-                        if line_strip.startswith('- **[Learning:'):
-                            existing_archive_rules.append(line_strip)
+                        archive_data = yaml.safe_load(af)
+                        existing_archive_rules = archive_data.get("archived_rules", []) if archive_data else []
                 except Exception:
                     pass
             
@@ -227,17 +191,10 @@ def sync_lessons_to_rules():
                 if r not in all_archived:
                     all_archived.append(r)
             
-            archive_header = """# AAC V3 Lessons Learned Archive
-
-This file stores archived historical lessons learned that have been pruned from the active prompt context to optimize token overhead.
-
-## Archived Lessons
-"""
-            archive_body = "\n".join(all_archived) + "\n"
             try:
                 os.makedirs(os.path.dirname(archive_file), exist_ok=True)
                 with open(archive_file, 'w', encoding='utf-8') as af:
-                    af.write(archive_header + archive_body)
+                    yaml.dump({"archived_rules": all_archived}, af, default_flow_style=False)
                 print(f"Successfully archived {len(archived_rules)} rules to {archive_file}.")
             except Exception as e:
                 print(f"Warning: Failed to write rules archive: {e}")

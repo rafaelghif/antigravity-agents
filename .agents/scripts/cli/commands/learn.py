@@ -125,47 +125,46 @@ def analyze_diff(base_branch="main"):
         return []
 
 def record_lesson(lesson: str, category: str = None):
-    lessons_path = ".agents/memory/lessons-learned.md"
+    lessons_path = ".agents/memory/lessons-learned.yaml"
     if not os.path.exists(".agents/memory"):
         os.makedirs(".agents/memory", exist_ok=True)
         
-    if not os.path.exists(lessons_path):
-        # Bootstrap lessons-learned.md if missing
-        with open(lessons_path, 'w', encoding='utf-8') as f:
-            f.write("# AAC V3 Lessons Learned\n\nThis file logs project-wide incident reports, testing optimizations, and workflow patterns learned from development sessions.\n\n## Lessons Learned\n")
-            
-    # Read the current content
-    with open(lessons_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-        
-    # Prevent duplicate lessons from accumulating
-    if lesson in content:
-        print(f"[INFO] Lesson already exists in '{lessons_path}'. Skipping recording.")
+    try:
+        import yaml
+    except ImportError:
+        print("[ERROR] PyYAML is required. Please install it using `pip install pyyaml`.")
         return
         
-    # Append the lesson to the list under ## Lessons Learned
+    data = {"lessons": []}
+    if os.path.exists(lessons_path):
+        try:
+            with open(lessons_path, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f) or {"lessons": []}
+        except Exception:
+            pass
+            
+    # Prevent duplicate lessons from accumulating
+    for existing_lesson in data.get("lessons", []):
+        if existing_lesson.get("content") == lesson:
+            print(f"[INFO] Lesson already exists in '{lessons_path}'. Skipping recording.")
+            return
+            
     date_str = datetime.now().strftime("%Y-%m-%d")
-    prefix = f"**{category}**: " if category else ""
-    new_bullet = f"- **[{date_str}]** {prefix}{lesson}\n"
     
-    # Insert right under ## Lessons Learned header
-    header_marker = "## Lessons Learned"
-    idx = content.find(header_marker)
-    if idx != -1:
-        insert_pos = idx + len(header_marker)
-        # Find next newline or just append right after
-        nl_pos = content.find('\n', insert_pos)
-        if nl_pos != -1:
-            updated_content = content[:nl_pos+1] + new_bullet + content[nl_pos+1:]
-        else:
-            updated_content = content + "\n" + new_bullet
-    else:
-        updated_content = content + f"\n## Lessons Learned\n{new_bullet}"
+    new_entry = {
+        "date": date_str,
+        "category": category if category else "General",
+        "content": lesson
+    }
+    
+    if "lessons" not in data:
+        data["lessons"] = []
+    data["lessons"].append(new_entry)
         
     with open(lessons_path, 'w', encoding='utf-8') as f:
-        f.write(updated_content)
+        yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
         
-    print(f"[OK] Successfully recorded lesson: \"{lesson}\" in '{lessons_path}'.")
+    print(f"[OK] Successfully recorded lesson in '{lessons_path}'.")
 
 def extract_lessons_from_commits(base_branch="main"):
     """

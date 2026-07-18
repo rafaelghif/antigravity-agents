@@ -125,43 +125,64 @@ Problem status: open
         finally:
             sys.path = old_path
         
-        lessons_content = """## Lessons Learned
-- **[2026-07-02]** **Testing / Mocking**: Ensure mock side effects are isolated
-- **[2026-06-27]** **Python Mock Leaks**: When mocking sys.exit in Python
-- **[2026-07-01]** **OS Compatibility / PowerShell**: Use cross-platform path helpers
-- **[2026-06-30]** **Git & Security**: Validate GPG keys
-- **[2026-06-29]** **Performance**: Optimize validators
-- **[2026-06-28]** **Workspace Optimization**: Specify read ranges
-- **[2026-06-25]** **Dummy Category**: This is a test dummy rule
+        lessons_content = """lessons:
+  - date: "2026-07-02"
+    category: "Testing / Mocking"
+    content: "Ensure mock side effects are isolated"
+  - date: "2026-06-27"
+    category: "Python Mock Leaks"
+    content: "When mocking sys.exit in Python"
+  - date: "2026-07-01"
+    category: "OS Compatibility / PowerShell"
+    content: "Use cross-platform path helpers"
+  - date: "2026-06-30"
+    category: "Git & Security"
+    content: "Validate GPG keys"
+  - date: "2026-06-29"
+    category: "Performance"
+    content: "Optimize validators"
+  - date: "2026-06-28"
+    category: "Workspace Optimization"
+    content: "Specify read ranges"
+  - date: "2026-06-25"
+    category: "Dummy Category"
+    content: "This is a test dummy rule"
 """
         rules_content = "# Project Rules\n"
         
         written_data = {}
         
+        import io
         def mock_open_impl(filename, mode='r', **kwargs):
             filename_str = str(filename)
             mock_file_handle = MagicMock()
             
             if 'r' in mode:
-                if "lessons-learned.md" in filename_str:
-                    mock_file_handle.read.return_value = lessons_content
-                elif "lessons-archive.md" in filename_str:
-                    mock_file_handle.read.return_value = ""
+                if "lessons-learned.yaml" in filename_str:
+                    mock_file_handle = io.StringIO(lessons_content)
+                elif "lessons-archive.yaml" in filename_str:
+                    mock_file_handle = io.StringIO("")
                 else:
-                    mock_file_handle.read.return_value = rules_content
+                    mock_file_handle = io.StringIO(rules_content)
+                    
+                # We also need to mock __enter__ for StringIO to work in a context manager
+                mock_file_handle.__enter__ = lambda self: self
+                mock_file_handle.__exit__ = lambda self, exc_type, exc_val, exc_tb: None
             elif 'w' in mode:
                 def write_impl(data):
-                    written_data[filename_str] = data
+                    if filename_str not in written_data:
+                        written_data[filename_str] = ""
+                    written_data[filename_str] += data
                 mock_file_handle.write.side_effect = write_impl
+                mock_file_handle.__enter__.return_value = mock_file_handle
                 
-            mock_file_handle.__enter__.return_value = mock_file_handle
             return mock_file_handle
 
-        with patch('builtins.open', mock_open_impl):
+        with patch('builtins.open', side_effect=mock_open_impl):
             sync.sync_lessons_to_rules()
             
         rules_written_key = next((k for k in written_data if "rules.md" in k), None)
-        archive_written_key = next((k for k in written_data if "lessons-archive.md" in k), None)
+        archive_written_key = next((k for k in written_data if "lessons-archive.yaml" in k), None)
         
         self.assertIsNotNone(rules_written_key)
         self.assertIn("## 6. Synthesized Rules", written_data[rules_written_key])

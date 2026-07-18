@@ -14,7 +14,7 @@ Automatically run `git diff` on the feature branch compared to the base branch, 
 
 ### Downstream Impacts
 - Modifies the CLI issue close workflow in `.agents/scripts/cli/commands/issue.py` by adding an interactive step.
-- Updates `.agents/memory/lessons-learned.md`.
+- Updates `.agents/memory/lessons-learned.yaml`.
 - Requires modifying the test suite to mock interactive inputs (`sys.stdin`) and command line diff outputs.
 
 **Decision**: **Option B** is selected because it fully satisfies the requirements, automates context extraction, and provides a polished interactive experience.

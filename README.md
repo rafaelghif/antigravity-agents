@@ -127,7 +127,7 @@ Use `./helper.sh` (POSIX) or `./helper.ps1` (Windows) to dispatch workspace comm
 | **`pause`** / **`resume`** | `./helper.sh pause` / `./helper.sh resume` | Halts or resumes agent workspace execution locks. |
 | **`mcp`** | `./helper.sh mcp <subcommand>` | Integrates Model Context Protocol tools. Supports `register` and `start`. |
 | **`changelog`** | `./helper.sh changelog` | Evaluates commits, maps categories from local issues, bumps SemVer, and logs changes. |
-| **`learn`** | `./helper.sh learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.md`. |
+| **`learn`** | `./helper.sh learn "Lesson..."` | Appends a developer/agent technical lesson to `lessons-learned.yaml`. |
 | **`doctor`** | `./helper.sh doctor` | Checks python environment, dependencies, and command accessibility. |
 | **`heartbeat`** | `./helper.sh heartbeat` | Quick diagnostics check verifying hooks, locks, profile status, and quota. |
 
@@ -290,7 +290,7 @@ After bootstrapping, your project will have the following layout:
   - `architecture.md`: High-level system architecture summary.
   - `decisions/`: Repository containing Architectural Decision Records (ADRs).
   - `glossary.md`: Key terms definitions.
-  - `lessons-learned.md`: Logs for long-term project quality and self-learning.
+  - `lessons-learned.yaml`: Logs for long-term project quality and self-learning.
 - `.agents/skills/`: Executable playbooks (e.g., `code-review/`, `database-evolution/`).
 - `.agents/workflows/`: Automation macros for shell slash commands.
 - `.agents/docs/`: Parity mappings for scripts and templates.

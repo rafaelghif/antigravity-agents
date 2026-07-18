@@ -12,7 +12,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 - `./helper.sh profile <add|switch|list|apply>`: Credentials rotation and auto-sync config.
 - `./helper.sh changelog`: Conventional commits parser and SemVer version bump.
 - `./helper.sh sync`: Updates skills and ADR registries.
-- `./helper.sh learn "<lesson>" [--category <name>]`: Appends a lesson to `.agents/memory/lessons-learned.md`.
+- `./helper.sh learn "<lesson>" [--category <name>]`: Appends a lesson to `.agents/memory/lessons-learned.yaml`.
 - `./helper.sh token [<log | status | sync | reset>]`: Logs/displays token budget statistics. Defaults to status if subcommand is omitted.
 - `./helper.sh heartbeat`: Runs workspace heartbeat diagnostic checks.
 - `./helper.sh pause`: Halts agent execution (blocks any tool/command runs by the agent).
@@ -44,7 +44,7 @@ All operations must be performed using `./helper.sh` (Linux/macOS) or `./helper.
 | `.agents/memory/architecture.md` | Compressed system summary | Pulled on demand (`@.agents/memory/architecture.md`) before architecture-affecting work |
 | `.agents/memory/decisions/` | ADRs — full reasoning | On demand |
 | `.agents/memory/glossary.md` | Domain terms | On demand when unfamiliar terms appear |
-| `.agents/memory/tech-debt.md`, `lessons-learned.md` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
+| `.agents/memory/tech-debt.md`, `lessons-learned.yaml` | Known shortcuts, past incidents | On demand before related work; appended after the fact |
 | `.agents/memory/milestones.md` | Release milestones and roadmap tracker | On demand, read when scoping upcoming versions or cross-feature milestones |
 | `.agents/memory/security-policy.md` | Security runbook and network safelist | On demand, read when performing security audits or changing credentials/profiles |
 | `.agents/docs/collaboration.md` | Agent-Human collaboration protocol | On demand, read when resolving workspace/lock conflicts or coordinating tasks |

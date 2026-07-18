@@ -20,7 +20,7 @@ created_at: 2026-07-17
 - [x] Inject Hermes Protocol into AGENTS.md <!-- id: task-3 -->
 - [ ] Sync AGENTS.md to .agents/templates/AGENTS.md.template <!-- id: task-4 -->
 - [ ] Commit changes on proper branch and merge <!-- id: task-5 -->
-- [ ] Record mistake in lessons-learned.md <!-- id: task-6 -->
+- [ ] Record mistake in lessons-learned.yaml <!-- id: task-6 -->
 
 ## Acceptance Criteria
 - [x] Pre-commit hook passes <!-- id: ac-1 -->

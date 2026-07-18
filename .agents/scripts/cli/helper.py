@@ -58,7 +58,7 @@ def print_help():
   🔒 {GREEN}{BOLD}lock{RESET}            Acquires module locks to prevent concurrent modifications.
   👤 {GREEN}{BOLD}profile{RESET}         Configures/switches developer git commit identities.
   📝 {GREEN}{BOLD}changelog{RESET}       Generates conventional commit release notes & bumps SemVer.
-  🧠 {GREEN}{BOLD}learn{RESET}           Records developer/agent lessons directly to lessons-learned.md.
+  🧠 {GREEN}{BOLD}learn{RESET}           Records developer/agent lessons directly to lessons-learned.yaml.
   💬 {GREEN}{BOLD}commit{RESET}          Fires safe git commit command gated by validation guard.
   🩺 {GREEN}{BOLD}doctor{RESET}          Runs workspace diagnostics health audits.
   ⬆️ {GREEN}{BOLD}upgrade{RESET}         Upgrades Antigravity Agent Core core scripts & wrappers.
@@ -128,7 +128,7 @@ def print_command_help(cmd):
 {BOLD}Usage:{RESET} ./helper.sh changelog""",
 
         "learn": f"""{CYAN}{BOLD}Command: learn{RESET}
-🧠 Records developer/agent lessons directly to memory/lessons-learned.md.
+🧠 Records developer/agent lessons directly to memory/lessons-learned.yaml.
 
 {BOLD}Usage:{RESET} ./helper.sh learn "<lesson_text>" [--category <name>]""",
 

@@ -1,6 +1,6 @@
 ---
 id: issue-3
-title: "Review and Consolidate redundant lessons-learned.md"
+title: "Review and Consolidate redundant lessons-learned.yaml"
 status: open
 assignee: agent-antigravity
 milestone: "v3.129"
@@ -14,7 +14,7 @@ created_at: 2026-07-17
 - **Architecture**: Memory Optimization
 
 ## Tasks
-- [x] Analyze lessons-learned.md for redundancy <!-- id: task-1 -->
+- [x] Analyze lessons-learned.yaml for redundancy <!-- id: task-1 -->
 - [ ] Consolidate redundant entries (Token budget, PowerShell, Testing, Git) <!-- id: task-2 -->
 - [ ] Run helper.sh changelog to bump SemVer <!-- id: task-3 -->
 - [ ] Commit, merge, and push <!-- id: task-4 -->
