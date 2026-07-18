@@ -20,7 +20,7 @@
 - **Zero-Trust & Security:** NEVER commit secrets or `.env`. Pin dependencies. Do NOT run unverified scripts.
 - **Architecture & Schema Sync:** `.agents/schema.md` is the absolute source of truth. If any database, table, or field is modified, you MUST instantly update `.agents/schema.md` to match. Check `.agents/memory/decisions/` before major changes.
 - **Skill Usage:** ALWAYS prioritize loading specific playbooks (e.g., `engineering-standards`, `security-compliance`) from `.agents/skills/` via `view_file` over guessing workflows.
-- **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.md` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
+- **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.yaml` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
 ## 3. Working Protocol
 1. **Initialize & Align:** Before starting ANY new project or major epic, interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
@@ -37,11 +37,11 @@
 - **PRs:** 1 Task = 1 PR. Assign the User as reviewer. Require explicit human approval and green CI checks for architecture changes.
 
 ## 5. Memory & Context Read Flow
-*Issues (`.agents/issues/`) and boards are ephemeral and can be archived. Memory (`.agents/memory/`, `lessons-learned.md`, `schema.md`) is PERMANENT and intolerant to archiving. It is STRICTLY FORBIDDEN to archive, truncate, or delete memory files.*
-- **ALWAYS** check `.agents/memory/lessons-learned.md` before coding to avoid repeating past project errors.
+*Issues (`.agents/issues/`) and boards are ephemeral and can be archived. Memory (`.agents/memory/`, `lessons-learned.yaml`, `schema.md`) is PERMANENT and intolerant to archiving. It is STRICTLY FORBIDDEN to archive, truncate, or delete memory files.*
+- **ALWAYS** check `.agents/memory/lessons-learned.yaml` before coding to avoid repeating past project errors.
 - **ALWAYS** read `.agents/docs/template_map.md` when modifying template files, scaffolding, or installer wrappers to maintain platform parity.
 - **ALWAYS** check `@.agents/memory/security-policy.md` for authentication or infrastructure tasks.
-- **Session Learning:** At the end of a session, use `./helper.sh learn` to record new technical lessons into `lessons-learned.md`.
+- **Session Learning:** At the end of a session, use `./helper.sh learn` to record new technical lessons into `lessons-learned.yaml`.
 
 ## 6. CLI Helpers
 Use `./helper.sh` (Linux/Mac) or `./helper.ps1` (Win). See [Docs](file://.agents/docs/context_map.md) for full commands.

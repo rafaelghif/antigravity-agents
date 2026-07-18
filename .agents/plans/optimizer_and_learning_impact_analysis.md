@@ -20,7 +20,7 @@ Create a dedicated `.agents/active_context.md` that outlines the precise file sc
 
 ## 2. Memory Synthesizer (`sync_memory.py`)
 
-We evaluate two options for converting unstructured lessons from `lessons-learned.md` into active agent rules in `.agents/rules.md`.
+We evaluate two options for converting unstructured lessons from `lessons-learned.yaml` into active agent rules in `.agents/rules.md`.
 
 ### Option A: Complete Regeneration of `rules.md`
 Overwrite `.agents/rules.md` entirely using a static base template and appending lessons.

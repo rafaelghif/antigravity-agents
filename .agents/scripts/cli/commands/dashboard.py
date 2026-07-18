@@ -226,7 +226,7 @@ def get_dashboard_data(force=False):
 
     # 5. Lessons Learned
     lessons = []
-    lessons_path = ".agents/memory/lessons-learned.md"
+    lessons_path = ".agents/memory/lessons-learned.yaml"
     if os.path.exists(lessons_path):
         try:
             with open(lessons_path, 'r', encoding='utf-8') as f:

@@ -80,7 +80,7 @@ def should_exclude(rel_path: str) -> bool:
         "architecture.md",
         "glossary.md",
         "lessons-archive.md",
-        "lessons-learned.md",
+        "lessons-learned.yaml",
         "milestones.md",
         "security-policy.md",
         "tech-debt.md"
