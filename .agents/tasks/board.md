@@ -5,6 +5,7 @@ This board tracks active development tasks.
 ## Todo
 
 ## Doing
+- [ ] feat: Implement RAG Memory Indexing and Dynamic Playbook Injection (feat/issue-57-rag-and-dynamic-injection) <!-- id: issue-57 -->
 
 ## Done
 - [x] test: full workflow validation (feat/issue-384) <!-- id: issue-384 -->
