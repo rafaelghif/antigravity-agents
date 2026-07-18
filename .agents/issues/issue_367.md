@@ -4,6 +4,8 @@ title: "fix(skills): audit and restore truncated skills and broken references"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/39"
+github_number: 39
 ---
 
 # Issue Details

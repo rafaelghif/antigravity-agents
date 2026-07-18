@@ -4,6 +4,8 @@ title: "refactor: sharpen AGENTS.md rules and offload to playbooks"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/41"
+github_number: 41
 ---
 
 # Issue Details

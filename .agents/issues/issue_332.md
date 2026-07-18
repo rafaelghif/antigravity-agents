@@ -4,6 +4,8 @@ title: "feat: integrate github and gitea mcp settings into git profiles"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/26"
+github_number: 26
 ---
 
 # Issue Details

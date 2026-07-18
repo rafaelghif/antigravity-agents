@@ -28,7 +28,7 @@
 2. **Claim Task via MCP:** Use MCP to read/create issues. If Acceptance Criteria/DoD is vague, you MUST halt and clarify with the User before writing any code.
 3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
 4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`). Push to remote (`git push origin <branch>`).
-5. **PR & Merge via MCP:** Create PR directly via MCP. NEVER merge PRs unilaterally for critical changes; ALWAYS wait for CI pipeline checks to pass and explicit User approval.
+5. **PR & Merge via MCP:** Create PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue (read the `github_number` from the issue's markdown file). NEVER merge PRs unilaterally for critical changes; ALWAYS wait for CI pipeline checks to pass and explicit User approval.
 6. **Rollback & Recovery:** If a merged PR breaks the build or production, IMMEDIATELY halt forward progress, investigate, and propose a Revert or Hotfix PR.
 7. **Changelog:** ALWAYS run `./helper.sh changelog` to generate release notes before concluding a task or epic.
 8. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.

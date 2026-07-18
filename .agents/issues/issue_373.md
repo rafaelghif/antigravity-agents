@@ -4,6 +4,8 @@ title: "feat: implement pruning for task board done column"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/50"
+github_number: 50
 ---
 
 # Issue Details

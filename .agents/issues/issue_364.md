@@ -4,6 +4,8 @@ title: "fix: rename standalone binary from agy to aac to prevent global conflict
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/47"
+github_number: 47
 ---
 
 # Issue Details

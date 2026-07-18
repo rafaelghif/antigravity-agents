@@ -4,6 +4,8 @@ title: "feat: remove github copilot mcp reference and configs"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/46"
+github_number: 46
 ---
 
 # Issue Details

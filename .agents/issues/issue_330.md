@@ -4,6 +4,8 @@ title: "fix: harden core and verify installation manifest"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-12
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/29"
+github_number: 29
 ---
 
 # Issue Details

@@ -5,6 +5,8 @@ status: open
 assignee: rafaelghif
 milestone: "v3.127"
 created_at: 2026-07-17
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/25"
+github_number: 25
 ---
 
 # Design & Task Specification
