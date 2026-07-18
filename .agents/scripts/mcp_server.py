@@ -28,6 +28,9 @@ else:
 # Add target scripts dir to sys.path to ensure dynamic imports find local dependencies
 if target_scripts_dir not in sys.path:
     sys.path.insert(0, target_scripts_dir)
+cli_commands_dir = os.path.join(target_scripts_dir, 'cli', 'commands')
+if cli_commands_dir not in sys.path:
+    sys.path.insert(0, cli_commands_dir)
 
 def is_safe_import_path(filepath: str, allowed_dir: str) -> bool:
     abs_filepath = os.path.abspath(filepath)
