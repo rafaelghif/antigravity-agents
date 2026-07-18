@@ -321,24 +321,19 @@ def main():
             error_msg = f"Command module file '{cmd_file}' not found"
             sys.exit(1)
             
-        # Inject project root path into sys.path to resolve imports correctly
-        root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-        if root_path not in sys.path:
-            sys.path.insert(0, root_path)
+        # Inject CLI directory into sys.path to allow standard importing of the commands package
+        cli_dir = os.path.abspath(os.path.dirname(__file__))
+        if cli_dir not in sys.path:
+            sys.path.insert(0, cli_dir)
             
-        commands_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-        if commands_dir not in sys.path:
-            sys.path.append(commands_dir)
-            
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(f"cmd_{module_name}", cmd_file)
-        if spec is None or spec.loader is None:
-            print(f"{RED}Error: Could not load command module spec for '{cmd}'.{RESET}")
+        import importlib
+        try:
+            cmd_module = importlib.import_module(f"commands.{module_name}")
+        except ImportError as e:
+            print(f"{RED}Error: Could not import command module '{cmd}': {e}{RESET}")
             status = "failed"
-            error_msg = f"Could not load command module spec for '{cmd}'"
+            error_msg = f"Could not import command module '{cmd}': {e}"
             sys.exit(1)
-        cmd_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cmd_module)
         if not hasattr(cmd_module, "run"):
             print(f"{RED}Error: Command module '{cmd}' does not implement required 'run(args)' method.{RESET}")
             status = "failed"

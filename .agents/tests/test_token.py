@@ -3,7 +3,7 @@ from unittest.mock import patch, mock_open, MagicMock
 import sys
 import os
 import importlib.util
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta, timezone
 
 # Inject scripts folders
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts')))
@@ -21,9 +21,12 @@ class TestTokenCommand(unittest.TestCase):
         self.mutex_patcher = patch('helper.FileLockMutex')
         self.mock_mutex = self.mutex_patcher.start()
         self.mock_mutex.return_value.__enter__.return_value = self.mock_mutex.return_value
+        self.popen_patcher = patch('subprocess.Popen')
+        self.popen_patcher.start()
 
     def tearDown(self):
         self.mutex_patcher.stop()
+        self.popen_patcher.stop()
 
     @patch('os.path.exists', return_value=False)
     def test_load_budget_default(self, mock_exists):
@@ -49,7 +52,7 @@ class TestTokenCommand(unittest.TestCase):
                 "monthly_used": 0,
                 "daily_limit": 500000,
                 "daily_used": 0,
-                "last_reset": datetime.utcnow().isoformat() + "Z",
+                "last_reset": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 "accounts": {},
                 "tasks": {}
             }
@@ -89,7 +92,7 @@ class TestTokenCommand(unittest.TestCase):
             self.assertEqual(len(token_cmd.get_active_api_account()), len("gemini:sha256-") + 8)
 
     def test_check_date_resets_daily(self):
-        yesterday = (datetime.utcnow() - timedelta(days=1)).isoformat() + "Z"
+        yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat().replace("+00:00", "Z")
         budget = {
             "monthly_limit": 5000000,
             "monthly_used": 20000,
@@ -113,7 +116,7 @@ class TestTokenCommand(unittest.TestCase):
         self.assertEqual(updated["accounts"]["gemini:sha256-ba88894d"]["monthly_used"], 20000)
 
     def test_check_date_resets_monthly(self):
-        last_month = (datetime.utcnow() - timedelta(days=32)).isoformat() + "Z"
+        last_month = (datetime.now(timezone.utc) - timedelta(days=32)).isoformat().replace("+00:00", "Z")
         budget = {
             "monthly_limit": 5000000,
             "monthly_used": 20000,
@@ -590,7 +593,7 @@ class TestTokenCommand(unittest.TestCase):
         )
         
         import json
-        from datetime import datetime, timezone
+        from datetime import datetime, timezone, timezone
         step1 = {
             "step_index": 1,
             "created_at": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
