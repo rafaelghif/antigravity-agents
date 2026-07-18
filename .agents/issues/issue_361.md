@@ -4,6 +4,8 @@ title: "fix: resolve remaining audit gaps for subtask tracking and scope leakage
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/27"
+github_number: 27
 ---
 
 # Issue Details

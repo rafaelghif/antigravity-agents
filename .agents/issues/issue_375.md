@@ -4,6 +4,8 @@ title: "feat: enforce mandatory initialization task on bootstrap"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/33"
+github_number: 33
 ---
 
 # Issue Details

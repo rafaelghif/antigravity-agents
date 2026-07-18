@@ -4,6 +4,8 @@ title: "feat: relax codebase search and file retrieval redundancy constraints to
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-12
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/45"
+github_number: 45
 ---
 
 # Issue Details

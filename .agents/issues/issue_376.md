@@ -4,6 +4,8 @@ title: "feat: add AGENTS.md to mandatory init task"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/24"
+github_number: 24
 ---
 
 # Issue Details

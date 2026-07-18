@@ -4,6 +4,8 @@ title: "refactor: consolidate skills and enforce strict UARP XML reasoning proto
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/28"
+github_number: 28
 ---
 
 # Issue Details

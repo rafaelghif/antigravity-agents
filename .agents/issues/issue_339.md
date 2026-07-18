@@ -4,6 +4,8 @@ title: "fix: restore dynamic placeholders in schema template to fix bootstrap te
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-15
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/49"
+github_number: 49
 ---
 
 # Issue Details

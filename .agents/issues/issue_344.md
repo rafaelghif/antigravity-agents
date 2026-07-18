@@ -4,6 +4,8 @@ title: "feat: relax validation checks for human programmers to allow warning-onl
 status: closed
 assignee: agent-antigravity
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/34"
+github_number: 34
 ---
 
 # Issue Details

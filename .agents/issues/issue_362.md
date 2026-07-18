@@ -4,6 +4,8 @@ title: "docs: update installation flow for standalone binaries"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/35"
+github_number: 35
 ---
 
 # Issue Details

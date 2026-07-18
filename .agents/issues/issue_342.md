@@ -4,6 +4,8 @@ title: "fix: enforce strict agent script isolation rule in AGENTS.md template"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/48"
+github_number: 48
 ---
 
 # Issue Details

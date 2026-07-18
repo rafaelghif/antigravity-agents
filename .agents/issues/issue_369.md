@@ -4,6 +4,8 @@ title: "refactor: sharpen project rules and eliminate playbooks redundancy"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/37"
+github_number: 37
 ---
 
 # Issue Details

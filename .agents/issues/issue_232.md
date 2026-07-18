@@ -4,6 +4,8 @@ title: "Fix Ubuntu installation and ensure full Git source updates"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-10
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/32"
+github_number: 32
 ---
 
 # Issue Details

@@ -4,6 +4,8 @@ title: "refactor: remove redundant skill playbooks to optimize token footprint"
 status: closed
 assignee: rafaelghif
 created_at: 2026-07-16
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/44"
+github_number: 44
 ---
 
 # Issue Details

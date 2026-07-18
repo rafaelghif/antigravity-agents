@@ -5,6 +5,8 @@ status: open
 assignee: agent-antigravity
 milestone: "v3.129"
 created_at: 2026-07-17
+github_url: "https://github.com/rafaelghif/antigravity-agents/issues/43"
+github_number: 43
 ---
 
 # Design & Task Specification
