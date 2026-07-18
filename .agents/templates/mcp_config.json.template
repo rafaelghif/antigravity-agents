@@ -13,7 +13,7 @@
       "headers": {
         "Authorization": "Bearer ${input:github_mcp_pat}"
       },
-      "disabled": false
+      "disabled": true
     },
     "gitea": {
       "command": "docker",
@@ -34,7 +34,7 @@
         "GITEA_HOST": "${input:gitea_host}",
         "GITEA_INSECURE": "${input:gitea_insecure}"
       },
-      "disabled": false
+      "disabled": true
     }
   },
   "inputs": [
