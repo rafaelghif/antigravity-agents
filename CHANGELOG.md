@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.144.0] - 2026-07-18
+
+### 🚀 Features
+- Swarm Orchestration Playbook for Subagents
+
+### 📝 Documentation
+- rewrite README for professional enterprise presentation
+
+
 ## [3.143.0] - 2026-07-18
 
 ### 🚀 Features
