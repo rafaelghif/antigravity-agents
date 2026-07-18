@@ -66,11 +66,9 @@ def print_help():
   🌐 {GREEN}{BOLD}install-global{RESET}  Installs the global 'aac' launcher wrapper to PATH.
   📥 {GREEN}{BOLD}install{RESET}         Installs the Antigravity Agent Core into a target directory.
   🎯 {GREEN}{BOLD}context{RESET}         Optimizes workspace context scope for active task.
-  📊 {GREEN}{BOLD}dashboard{RESET}       Launches the local interactive web-based dashboard dashboard.
   🪙 {GREEN}{BOLD}token{RESET}           Logs and displays LLM token budget usage statistics.
   🔌 {GREEN}{BOLD}mcp{RESET}             Manages MCP tool integration and server registration.
   💓 {GREEN}{BOLD}heartbeat{RESET}       Runs workspace heartbeat diagnostic checks (verifies locks, hooks, budget).
-  📧 {GREEN}{BOLD}message{RESET}         Manages the peer-to-peer asynchronous messaging protocol.
 
 {BOLD}For more information on a command, run:{RESET} ./helper.sh help <command>
 """
@@ -163,10 +161,6 @@ def print_command_help(cmd):
 
 {BOLD}Usage:{RESET} ./helper.sh context optimize""",
 
-        "dashboard": f"""{CYAN}{BOLD}Command: dashboard{RESET}
-📊 Launches the local interactive web-based visual dashboard.
-
-{BOLD}Usage:{RESET} ./helper.sh dashboard""",
 
         "token": f"""{CYAN}{BOLD}Command: token{RESET}
 🪙 Manages LLM token usage tracking and daily/monthly budgets.
@@ -189,13 +183,6 @@ def print_command_help(cmd):
 {BOLD}Usage:{RESET}
   - ./helper.sh heartbeat : Runs the diagnostics check.""",
 
-        "message": f"""{CYAN}{BOLD}Command: message{RESET}
-📧 Manages the peer-to-peer asynchronous swarm messaging protocol.
-
-{BOLD}Usage:{RESET}
-  - ./helper.sh message send <recipient> <action> "<payload>"  : Sends a new peer message.
-  - ./helper.sh message list                                    : Lists messages in the mailbox.
-  - ./helper.sh message status <msg_id> <status> [reply_info]   : Updates the status of a message."""
     }
 
     if cmd in command_help:
@@ -275,7 +262,7 @@ def main():
             print_help()
         sys.exit(0)
         
-    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'dashboard', 'token', 'mcp', 'heartbeat', 'message', 'pause', 'resume', 'install'}
+    allowed_commands = {'lock', 'validate', 'sync', 'issue', 'commit', 'bootstrap', 'profile', 'changelog', 'learn', 'skill', 'doctor', 'upgrade', 'completion', 'install-global', 'context', 'token', 'mcp', 'heartbeat', 'pause', 'resume', 'install'}
     
     if len(sys.argv) > 2 and sys.argv[2].lower() in help_args:
         print_command_help(cmd)
@@ -301,7 +288,7 @@ def main():
     ALLOWED_COMMANDS = {
         'bootstrap', 'changelog', 'commit', 'completion', 'context', 'dashboard',
         'doctor', 'heartbeat', 'install_global', 'issue', 'learn', 'lock',
-        'mcp', 'message', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate',
+        'mcp', 'profile', 'skill', 'sync', 'token', 'upgrade', 'validate',
         'pause', 'resume', 'install'
     }
     
@@ -359,7 +346,7 @@ def main():
         duration_ms = (time.perf_counter() - start_time) * 1000.0
         log_cli_execution(cmd, sys.argv[2:], status, duration_ms, error_msg)
         try:
-            if cmd not in ('upgrade', 'dashboard'):
+            if cmd not in ('upgrade',):
                 state_file = ".agents/upgrade_state.json"
                 now = time.time()
                 should_check = True
