@@ -25,11 +25,14 @@
         "GITEA_ACCESS_TOKEN",
         "-e",
         "GITEA_HOST",
+        "-e",
+        "GITEA_INSECURE",
         "docker.gitea.com/gitea-mcp-server"
       ],
       "env": {
         "GITEA_ACCESS_TOKEN": "${input:gitea_token}",
-        "GITEA_HOST": "${input:gitea_host}"
+        "GITEA_HOST": "${input:gitea_host}",
+        "GITEA_INSECURE": "${input:gitea_insecure}"
       },
       "disabled": false
     }
@@ -51,6 +54,12 @@
       "type": "promptString",
       "id": "gitea_host",
       "description": "Gitea Host URL (e.g. https://gitea.com or local Gitea domain)",
+      "password": false
+    },
+    {
+      "type": "promptString",
+      "id": "gitea_insecure",
+      "description": "Allow insecure local Gitea SSL? (true/false)",
       "password": false
     }
   ]
