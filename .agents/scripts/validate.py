@@ -931,7 +931,33 @@ def audit_git_branch_alignment() -> bool:
             except Exception as e:
                 print_warn(f"Failed to check git status on base branch: {e}")
                 
-            print_ok(f"On base branch '{branch}' (clean, no active modifications).")
+            # Check for unreleased commits (missing changelog)
+            try:
+                git_log = subprocess.run(
+                    ['git', 'log', '--oneline'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=True
+                )
+                unreleased_commits = []
+                for line in git_log.stdout.splitlines():
+                    # Stop searching once we hit the last release commit
+                    if "chore(release):" in line.lower() or "chore: release" in line.lower():
+                        break
+                    # If it's a feat or fix commit, we have unreleased changes
+                    if "feat:" in line.lower() or "fix:" in line.lower() or "feat(" in line.lower() or "fix(" in line.lower():
+                        unreleased_commits.append(line)
+                
+                if unreleased_commits:
+                    print_err(f"CRITICAL: Found {len(unreleased_commits)} unreleased feature/fix commits on '{branch}'!")
+                    print_err("You MUST generate a changelog and bump the version before concluding this epic/task.")
+                    print_err("Run: './helper.sh changelog' and create a PR for the release branch.")
+                    return False
+            except Exception as e:
+                print_warn(f"Failed to verify unreleased changelog commits: {e}")
+
+            print_ok(f"On base branch '{branch}' (clean, no active modifications, changelog is up-to-date).")
             return True
         
     match = re.search(r'(task[-_]?\d+|issue[-_]?\d+|(?:\b|_|/)\d+(?:\b|_|$))', branch.lower())
