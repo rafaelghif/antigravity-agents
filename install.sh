@@ -25,7 +25,7 @@ if [ "$IS_ONLINE" -eq 0 ]; then
 fi
 
 TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
+trap 'rm -rf "$TEMP_DIR" >/dev/null 2>&1 || true' EXIT
 
 echo "Fetching latest source core files..."
 if ! git clone --depth 1 "$REPO_URL" "$TEMP_DIR/repo" &>/dev/null; then

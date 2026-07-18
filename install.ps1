@@ -76,4 +76,4 @@ if ($Major -lt 3 -or ($Major -eq 3 -and $Minor -lt 8)) {
 & $PythonExec "$TempPath\repo\.agents\scripts\cli\helper.py" install $TargetDir @args
 
 # Cleanup
-Remove-Item -Recurse -Force $TempPath -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force $TempPath -ErrorAction SilentlyContinue | Out-Null
