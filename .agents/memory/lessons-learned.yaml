@@ -74,3 +74,8 @@ lessons:
   content: Always ensure README.md examples strictly match the python domain entities
     (GitProfile, Project). Profile credentials (ssh, pat, token) should no longer
     use encryption.
+- date: '2026-07-18'
+  category: workflow
+  content: ALWAYS delete remote tracking branches (git push origin --delete <branch>)
+    and local branches after successfully merging PRs to prevent stale branch accumulation
+    on the remote tracker.
