@@ -897,14 +897,11 @@ def audit_git_branch_alignment() -> bool:
         return True
         
     workflow_mode = get_workflow_mode()
-    if workflow_mode == "solo":
-        print_ok("Workflow mode is 'solo' (skipping git branch to local issue alignment check).")
-        return True
 
     if branch in ('main', 'master', 'HEAD'):
         is_real_ci = (os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true") and 'unittest' not in sys.modules and 'pytest' not in sys.modules
-        if workflow_mode == "solo" or is_real_ci:
-            print_ok(f"On base branch '{branch}' (solo/CI mode active, allowing direct edits).")
+        if is_real_ci:
+            print_ok(f"On base branch '{branch}' (CI mode active, allowing direct edits).")
         else:
             # Check if there are staged changes or modified files (excluding untracked git_profiles/locks configs)
             try:
