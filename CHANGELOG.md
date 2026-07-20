@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.152.0] - 2026-07-20
+
+### 🚀 Features
+- **validation:** enforce dynamic skill triggers and fix branch extraction hook
+
+
 ## [3.151.0] - 2026-07-20
 
 ### 🚀 Features
