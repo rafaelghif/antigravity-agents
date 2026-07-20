@@ -2062,7 +2062,7 @@ def audit_commit_messages() -> bool:
     # Conventional commit regex pattern (subject line)
     conv_pattern = re.compile(r'^(feat|fix|chore|refactor|docs|test|style|ci|perf|build|revert)(\(.*\))?!?: .+$', re.IGNORECASE)
     # Refs pattern (anywhere in commit message)
-    refs_pattern = re.compile(r'Refs:\s*(issue|task)-\d+', re.IGNORECASE)
+    refs_pattern = re.compile(r'(?:Refs:\s*(?:issue|task)-\d+|Fixes\s+#\d+|Closes\s+#\d+|Resolves\s+#\d+)', re.IGNORECASE)
     # Compliance Audit pattern (anywhere in commit message)
     compliance_pattern = re.compile(r'Compliance-Audit:\s*passed', re.IGNORECASE)
 
@@ -2107,8 +2107,8 @@ def audit_commit_messages() -> bool:
 
         # Check Refs trailer line
         if not refs_pattern.search(commit):
-            print_err(f"Commit message is missing 'Refs: <issue-id>' trailer: '{subject}'")
-            print_err("  Example: 'Refs: issue-106'")
+            print_err(f"Commit message is missing 'Fixes #<issue-id>' or 'Refs: <issue-id>' trailer: '{subject}'")
+            print_err("  Example: 'Fixes #106' or 'Refs: issue-106'")
             failed = True
 
         # Check Compliance-Audit trailer line
