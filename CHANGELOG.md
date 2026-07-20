@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.153.1] - 2026-07-20
+
+### 🐛 Bug Fixes
+- **mcp:** enforce strict stopwatch methods for Gitea time tracking to prevent duration hallucination
+
+### 📝 Documentation
+- **memory:** record hermes lessons for bootstrap guards, git hooks, and dynamic playbook optimization
+
+
 ## [3.153.0] - 2026-07-20
 
 ### 🚀 Features
