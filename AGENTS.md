@@ -23,19 +23,22 @@
 - **Skill Usage:** ALWAYS prioritize loading specific playbooks (e.g., `engineering-standards`, `security-compliance`) from `.agents/skills/` via `view_file` over guessing workflows.
 - **Self-Learning (Hermes Protocol):** If you fail a task, lack a required skill, or receive a correction from a human reviewer, you MUST immediately record the solution in `.agents/memory/lessons-learned.yaml` (via `./helper.sh learn`) or bootstrap a new skill (via `skill-evolution`). NEVER repeat a mistake once corrected.
 
-## 3. Working Protocol
+## 3. Strict Working Protocol (NO EXCEPTIONS)
+*You MUST follow this exact lifecycle sequentially for every task. Skipping steps is a critical failure.*
 1. **Initialize & Align:** Before starting ANY new project or major epic, interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
-2. **Claim Task via MCP (Remote-First):** ALWAYS create issues DIRECTLY on the remote Git tracker (GitHub/Gitea) using MCP tools. This is STRICTLY MANDATORY unless the Git MCP server is explicitly marked as `"disabled": true` in `.agents/mcp_config.json`. NEVER create offline local issues in `.agents/issues/` unless explicitly in offline mode. If Acceptance Criteria/DoD is vague, you MUST halt and clarify with the User before writing any code.
+2. **Create Issue (Remote-First):** ALWAYS create an issue DIRECTLY on the remote Git tracker (GitHub/Gitea) using MCP tools BEFORE starting work. This is STRICTLY MANDATORY.
 3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
-4. **Test & Commit:** Validate subtasks locally. Use Conventional Commits (`feat: msg`, trailer: `Refs: <task-id>`). Push to remote (`git push origin <branch>`).
-5. **PR & Merge via MCP:** Create PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue (read the `github_number` from the issue's markdown file). You may merge PRs and push changes autonomously without requiring explicit User approval to ensure a seamless workflow.
-6. **Rollback & Recovery:** If a merged PR breaks the build or production, IMMEDIATELY halt forward progress, investigate, and propose a Revert or Hotfix PR.
-7. **Changelog:** ALWAYS run `./helper.sh changelog` to generate release notes before concluding a task or epic.
-8. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
+4. **Test & Commit:** Validate subtasks locally. You MUST use strict Conventional Commits (e.g., `feat: msg`, trailer: `Refs: <task-id>`).
+5. **Push:** Push your commits to the remote branch (`git push origin <branch>`).
+6. **PR & Merge (Pull):** Create a PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue. You may merge PRs autonomously.
+7. **Delete Merged Branch:** After a successful merge, you MUST immediately delete the local and remote task branch to keep the workspace clean (`git branch -d <branch>` and `git push origin --delete <branch>`).
+8. **Rollback & Recovery:** If a merged PR breaks the build or production, IMMEDIATELY halt forward progress, investigate, and propose a Revert or Hotfix PR.
+9. **Changelog:** ALWAYS run `./helper.sh changelog` to generate release notes before concluding a task or epic.
+10. **Learn:** Run `/sync-memory` or `./helper.sh learn` to record new lessons.
 
 ## 4. Enterprise Branching
 - **Strict Epic-Task:** Branches MUST be descriptive: `epic/<name>` -> `feat/<task-id>-<slug>`. NEVER use bare IDs (e.g., `feat/378` is forbidden; use `feat/378-fix-bootstrap`).
-- **Merge & Push Flow:** Task branch merges to Epic branch. Epic branch merges to `main`. NEVER commit/merge directly to `main`. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging.
+- **Merge & Push Flow:** Task branches merge to Epic branches, and Epic branches merge to `main`/`master`. The agent **IS ALLOWED** to commit, merge, or push directly to `main`/`master` for hotfixes or minor updates. ALWAYS ensure changes are explicitly pushed to the remote repository (`git push origin <branch>`) after merging.
 - **PRs:** 1 Task = 1 PR. Assign the User as reviewer. Autonomous PR merging is allowed without waiting for explicit human approval, unless specifically restricted for a critical architectural overhaul.
 
 ## 5. Memory & Context Read Flow

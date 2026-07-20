@@ -1,35 +1,14 @@
 {
   "skills": {
-    "adr": {
-      "path": ".agents/skills/adr",
+    "engineering-standards": {
+      "path": ".agents/skills/engineering-standards",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
       "setup_path": null
     },
-    "code-review": {
-      "path": ".agents/skills/code-review",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "contract-synchronization": {
-      "path": ".agents/skills/contract-synchronization",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "database-evolution": {
-      "path": ".agents/skills/database-evolution",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "devops-release": {
-      "path": ".agents/skills/devops-release",
+    "troubleshooting": {
+      "path": ".agents/skills/troubleshooting",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -42,13 +21,6 @@
       "has_setup": true,
       "setup_path": ".agents/skills/documentation/setup.sh"
     },
-    "engineering-standards": {
-      "path": ".agents/skills/engineering-standards",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "fullstack-development": {
       "path": ".agents/skills/fullstack-development",
       "has_validation_hook": false,
@@ -56,29 +28,8 @@
       "has_setup": false,
       "setup_path": null
     },
-    "mcp-execution": {
-      "path": ".agents/skills/mcp-execution",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "observability": {
-      "path": ".agents/skills/observability",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "security-compliance": {
-      "path": ".agents/skills/security-compliance",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "skill-evolution": {
-      "path": ".agents/skills/skill-evolution",
+    "testing": {
+      "path": ".agents/skills/testing",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -98,22 +49,71 @@
       "has_setup": false,
       "setup_path": null
     },
-    "testing": {
-      "path": ".agents/skills/testing",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "troubleshooting": {
-      "path": ".agents/skills/troubleshooting",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "ui-ux-design": {
       "path": ".agents/skills/ui-ux-design",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "observability": {
+      "path": ".agents/skills/observability",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "security-compliance": {
+      "path": ".agents/skills/security-compliance",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "devops-release": {
+      "path": ".agents/skills/devops-release",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "code-review": {
+      "path": ".agents/skills/code-review",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "adr": {
+      "path": ".agents/skills/adr",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "contract-synchronization": {
+      "path": ".agents/skills/contract-synchronization",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "skill-evolution": {
+      "path": ".agents/skills/skill-evolution",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "mcp-execution": {
+      "path": ".agents/skills/mcp-execution",
+      "has_validation_hook": false,
+      "validation_hook_path": null,
+      "has_setup": false,
+      "setup_path": null
+    },
+    "database-evolution": {
+      "path": ".agents/skills/database-evolution",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
