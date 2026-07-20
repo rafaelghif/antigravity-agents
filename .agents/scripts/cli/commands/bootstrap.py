@@ -343,11 +343,10 @@ def copy_core_files(src_root, force=False):
                 except Exception:
                     pass
                 
-    # Root helper wrappers
     helpers = [
         "helper.sh", "helper.ps1", "bootstrap.sh", "bootstrap.ps1",
         ".agents/git_profiles.example", ".agents/projects.example",
-        "Dockerfile", ".agents/soul.md"
+        "Dockerfile"
     ]
     for h in helpers:
         src_file = os.path.join(src_root, h)

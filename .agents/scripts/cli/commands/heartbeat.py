@@ -14,12 +14,10 @@ def run(args):
     
     pulse_passed = True
 
-    # 1. Soul & Identity Alignment Check
-    soul_file = ".agents/soul.md"
-    if os.path.exists(soul_file):
-        print("[OK] Agent soul profile exists and is integrated.")
-    else:
-        print("[WARN] Agent soul profile (soul.md) is missing from .agents root.")
+    # 1. Schema & Identity Alignment Check
+    schema_file = ".agents/memory/schema.md"
+    if not os.path.exists(schema_file):
+        print(f"[WARN] Schema registry ({schema_file}) is missing.")
         pulse_passed = False
 
     # 2. Lock Compliance Check
