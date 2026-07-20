@@ -21,13 +21,6 @@
       "has_setup": true,
       "setup_path": ".agents/skills/documentation/setup.sh"
     },
-    "fullstack-development": {
-      "path": ".agents/skills/fullstack-development",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "testing": {
       "path": ".agents/skills/testing",
       "has_validation_hook": false,
@@ -37,13 +30,6 @@
     },
     "swarm-orchestration": {
       "path": ".agents/skills/swarm-orchestration",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "task-management": {
-      "path": ".agents/skills/task-management",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,

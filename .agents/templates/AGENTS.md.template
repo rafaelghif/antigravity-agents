@@ -50,6 +50,7 @@
 - **ALWAYS** check `.agents/memory/lessons-learned.yaml` before coding to avoid repeating past project errors.
 - **ALWAYS** read `.agents/docs/template_map.md` when modifying template files, configuration files (e.g., `requirements.txt`), scaffolding, or installer wrappers to maintain platform parity and prevent configuration drift.
 - **ALWAYS** check `@.agents/memory/security-policy.md` for authentication or infrastructure tasks.
+- **Session Resumption:** When resuming a session after an account switch, ALWAYS check `.agents/tasks/board.md` for active tasks FIRST. Do NOT create a new task if one is active. Checkout the active branch and run `./helper.sh context optimize` to perfectly reload state.
 - **Session Learning:** At the end of a session, use `./helper.sh learn` to record new technical lessons into `lessons-learned.yaml`.
 
 ## 6. CLI Helpers
