@@ -255,10 +255,6 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
                 ctype = "chore"
                 
             cat = "breaking" if is_breaking else ctype
-            if issue_id and cat != "breaking":
-                issue_cat = classify_from_local_issue(issue_id)
-                if issue_cat:
-                    cat = issue_cat
             priority = type_priority.get(cat, 1)
             
             entry = desc

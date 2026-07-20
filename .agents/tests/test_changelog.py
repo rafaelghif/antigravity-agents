@@ -131,17 +131,17 @@ class TestChangelog(unittest.TestCase):
     @patch('os.path.exists')
     @patch('os.listdir')
     @patch('builtins.open', new_callable=mock_open, read_data="---\ntitle: \"Resolve versioning bug in installer\"\n---\n")
-    def test_parse_commits_issue_override(self, mock_file, mock_listdir, mock_exists):
+    def test_parse_commits_explicit_override_prevents_hallucination(self, mock_file, mock_listdir, mock_exists):
         mock_exists.return_value = True
         mock_listdir.return_value = ["issue_022.md"]
         
-        # The commit message uses 'feat:', but since the issue is a bug fix, it should classify it as 'fix'
+        # The commit message uses 'feat:'. It must NOT be overridden by the issue's bug fix category!
         commits = [("hash123", "feat: implement test features (Refs: issue-022)")]
         categories = changelog.parse_conventional_commits(commits)
         
-        self.assertEqual(len(categories["fix"]), 1)
-        self.assertEqual(len(categories["feat"]), 0)
-        self.assertIn("Resolve versioning bug in installer", categories["fix"][0])
+        self.assertEqual(len(categories["feat"]), 1)
+        self.assertEqual(len(categories["fix"]), 0)
+        self.assertIn("Resolve versioning bug in installer", categories["feat"][0])
 
     @patch('subprocess.run')
     def test_get_boundary_commit_tags(self, mock_run):
