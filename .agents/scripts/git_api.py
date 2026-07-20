@@ -5,7 +5,7 @@ import urllib.error
 import subprocess
 import sys
 import re
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any, Union
 
 def get_active_profile() -> Optional[dict]:
     profiles_file = ".agents/git_profiles.json"
@@ -96,76 +96,59 @@ def get_repo_info() -> Optional[str]:
         return f"{owner}/{repo}"
     return None
 
-def create_github_issue(title: str, body: str = "") -> Optional[Tuple[str, int]]:
+def _make_api_request(method: str, endpoint: str, payload: Optional[dict] = None, timeout: float = 10.0) -> Tuple[Optional[Union[dict, list]], int]:
     service, host, token, owner, repo = get_service_info()
     if not token or not owner or not repo:
-        print(f"[WARN] Bypassing remote {service.upper()} issue creation due to missing configuration.", file=sys.stderr)
-        return None
-        
+        if method != "GET":
+            print(f"[WARN] Bypassing remote {service.upper()} operation due to missing configuration.", file=sys.stderr)
+        return None, 0
+
     if service == "github":
-        url = f"{host}/repos/{owner}/{repo}/issues"
+        url = f"{host}/repos/{owner}/{repo}{endpoint}"
         headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
             "User-Agent": "Antigravity-Agent-Core"
         }
-    else: # gitea
-        url = f"{host}/api/v1/repos/{owner}/{repo}/issues"
+    else:
+        url = f"{host}/api/v1/repos/{owner}/{repo}{endpoint}"
         headers = {
             "Authorization": f"token {token}",
             "Accept": "application/json",
             "User-Agent": "Antigravity-Agent-Core"
         }
-        
-    data = json.dumps({"title": title, "body": body}).encode('utf-8')
-    headers["Content-Type"] = "application/json"
-    
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+
+    data = None
+    if payload is not None:
+        data = json.dumps(payload).encode('utf-8')
+        headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=10.0) as res:
-            res_data = json.loads(res.read().decode('utf-8'))
-            return res_data.get("html_url"), res_data.get("number")
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            status = res.status
+            body = res.read().decode('utf-8')
+            res_data = json.loads(body) if body else {}
+            return res_data, status
     except urllib.error.HTTPError as e:
         sys.stderr.write(f"[WARN] {service.upper()} API error code: {e.code}\n")
     except Exception as e:
-        sys.stderr.write(f"[FAIL] Failed to create remote issue on {service.upper()}: {e}\n")
+        sys.stderr.write(f"[FAIL] Failed remote API call on {service.upper()}: {e}\n")
+    return None, 0
+
+def create_github_issue(title: str, body: str = "") -> Optional[Tuple[str, int]]:
+    res_data, status = _make_api_request("POST", "/issues", {"title": title, "body": body})
+    if res_data and isinstance(res_data, dict):
+        return res_data.get("html_url"), res_data.get("number")
     return None
 
 def close_github_issue(issue_number: int) -> bool:
-    service, host, token, owner, repo = get_service_info()
-    if not token or not owner or not repo or not issue_number:
-        print(f"[WARN] Bypassing remote {service.upper()} issue closure due to missing configuration.", file=sys.stderr)
-        return False
-        
-    if service == "github":
-        url = f"{host}/repos/{owner}/{repo}/issues/{issue_number}"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-    else: # gitea
-        url = f"{host}/api/v1/repos/{owner}/{repo}/issues/{issue_number}"
-        headers = {
-            "Authorization": f"token {token}",
-            "Accept": "application/json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-        
-    data = json.dumps({"state": "closed"}).encode('utf-8')
-    headers["Content-Type"] = "application/json"
-    
-    req = urllib.request.Request(url, data=data, headers=headers, method="PATCH")
-    try:
-        with urllib.request.urlopen(req, timeout=10.0) as res:
-            return res.status in (200, 201)
-    except Exception as e:
-        sys.stderr.write(f"[FAIL] Failed to close remote issue #{issue_number} on {service.upper()}: {e}\n")
-    return False
+    _, status = _make_api_request("PATCH", f"/issues/{issue_number}", {"state": "closed"})
+    return status in (200, 201)
 
 def fetch_github_issues(force: bool = False) -> Optional[list]:
-    service, host, token, owner, repo = get_service_info()
-    if not token or not owner or not repo:
+    service, _, _, owner, repo = get_service_info()
+    if not owner or not repo:
         return None
         
     cache_file = ".agents/sync_cache.json"
@@ -181,108 +164,37 @@ def fetch_github_issues(force: bool = False) -> Optional[list]:
         except Exception:
             pass
             
-    if service == "github":
-        url = f"{host}/repos/{owner}/{repo}/issues?state=all&per_page=100"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-    else: # gitea
-        url = f"{host}/api/v1/repos/{owner}/{repo}/issues?state=all&limit=100"
-        headers = {
-            "Authorization": f"token {token}",
-            "Accept": "application/json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-        
-    req = urllib.request.Request(url, headers=headers, method="GET")
-    try:
-        with urllib.request.urlopen(req, timeout=5.0) as res:
-            data = json.loads(res.read().decode('utf-8'))
-            try:
-                os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-                with open(cache_file, 'w', encoding='utf-8') as f:
-                    json.dump({"last_sync_time": time.time(), "cached_issues": data}, f)
-            except Exception:
-                pass
-            return data
-    except Exception as e:
-        sys.stderr.write(f"[WARN] Failed to fetch remote issues from {service.upper()}: {e}\n")
+    endpoint = "/issues?state=all&per_page=100" if service == "github" else "/issues?state=all&limit=100"
+    data, status = _make_api_request("GET", endpoint, timeout=5.0)
+    
+    if data is not None:
+        try:
+            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump({"last_sync_time": time.time(), "cached_issues": data}, f)
+        except Exception:
+            pass
+        return data
     return None
 
 def post_commit_status(sha: str, state: str, target_url: str = "", description: str = "", context: str = "AAC Validation Guard") -> bool:
-    service, host, token, owner, repo = get_service_info()
-    if not token or not owner or not repo or not sha:
-        return False
-        
-    if service == "github":
-        url = f"{host}/repos/{owner}/{repo}/statuses/{sha}"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-    else: # gitea
-        url = f"{host}/api/v1/repos/{owner}/{repo}/statuses/{sha}"
-        headers = {
-            "Authorization": f"token {token}",
-            "Accept": "application/json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-        
     payload = {
-        "state": state, # pending, success, error, failure
+        "state": state,
         "target_url": target_url,
         "description": description,
         "context": context
     }
-    data = json.dumps(payload).encode('utf-8')
-    headers["Content-Type"] = "application/json"
-    
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=10.0) as res:
-            return res.status in (200, 201)
-    except Exception as e:
-        sys.stderr.write(f"[FAIL] Failed to post status to {service.upper()}: {e}\n")
-    return False
+    _, status = _make_api_request("POST", f"/statuses/{sha}", payload)
+    return status in (200, 201)
 
 def create_github_release(tag_name: str, name: str, body: str, draft: bool = True) -> Optional[str]:
-    service, host, token, owner, repo = get_service_info()
-    if not token or not owner or not repo:
-        print(f"[WARN] Bypassing remote {service.upper()} release creation due to missing configuration.", file=sys.stderr)
-        return None
-        
-    if service == "github":
-        url = f"{host}/repos/{owner}/{repo}/releases"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-    else: # gitea
-        url = f"{host}/api/v1/repos/{owner}/{repo}/releases"
-        headers = {
-            "Authorization": f"token {token}",
-            "Accept": "application/json",
-            "User-Agent": "Antigravity-Agent-Core"
-        }
-        
     payload = {
         "tag_name": tag_name,
         "name": name,
         "body": body,
         "draft": draft
     }
-    data = json.dumps(payload).encode('utf-8')
-    headers["Content-Type"] = "application/json"
-    
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=10.0) as res:
-            res_data = json.loads(res.read().decode('utf-8'))
-            return res_data.get("html_url")
-    except Exception as e:
-        sys.stderr.write(f"[FAIL] Failed to create release on {service.upper()}: {e}\n")
+    res_data, status = _make_api_request("POST", "/releases", payload)
+    if res_data and isinstance(res_data, dict):
+        return res_data.get("html_url")
     return None
