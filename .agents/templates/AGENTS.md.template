@@ -26,7 +26,7 @@
 ## 3. Strict Working Protocol (NO EXCEPTIONS)
 *You MUST follow this exact lifecycle sequentially for every task. Skipping steps is a critical failure.*
 1. **Initialize & Align:** Before starting ANY new project or major epic, interview the user (or recommend `/grill-me`) to finalize database schemas, architecture, and alignment.
-2. **Create Issue (Remote-First):** ALWAYS create an issue DIRECTLY on the remote Git tracker (GitHub/Gitea) using MCP tools BEFORE starting work. This is STRICTLY MANDATORY.
+2. **Issue & Time Tracking (Remote-First):** ALWAYS create an issue DIRECTLY on the remote Git tracker (GitHub/Gitea) using MCP tools BEFORE starting work. If picking up an existing Gitea issue, the strict workflow MUST be: **Start Time Tracker** -> Branch & Code -> Git Conventional Commit -> Push -> PR/Merge -> Clean.
 3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
 4. **Test & Commit:** Validate subtasks locally. You MUST use strict Conventional Commits (e.g., `feat: msg`, trailer: `Refs: <task-id>`).
 5. **Push:** Push your commits to the remote branch (`git push origin <branch>`).
