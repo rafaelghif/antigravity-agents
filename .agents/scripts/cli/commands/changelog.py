@@ -12,14 +12,44 @@ from datetime import datetime
 from typing import List, Dict, Any, Tuple, Optional
 
 def get_current_version() -> str:
-    """Read the current version from AGENTS.md."""
-    agents_path = "AGENTS.md"
-    if os.path.exists(agents_path):
-        with open(agents_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        match = re.search(r"-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)", content)
-        if match:
-            return match.group(1)
+    """Read the current version from project files or default to 0.0.0."""
+    import json
+    if is_agent_core_repo():
+        agents_path = "AGENTS.md"
+        if os.path.exists(agents_path):
+            with open(agents_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r"-\s+\*\*Version:\*\*\s*(\d+\.\d+\.\d+)", content)
+            if match:
+                return match.group(1)
+                
+    changelog_path = "CHANGELOG.md"
+    if os.path.exists(changelog_path):
+        with open(changelog_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                match = re.search(r"^##\s+\[(\d+\.\d+\.\d+)\]", line)
+                if match:
+                    return match.group(1)
+
+    if os.path.exists("package.json"):
+        try:
+            with open("package.json", 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if data and "version" in data:
+                return data["version"]
+        except Exception:
+            pass
+            
+    if os.path.exists("pyproject.toml"):
+        try:
+            with open("pyproject.toml", 'r', encoding='utf-8') as f:
+                content = f.read()
+            match = re.search(r'(^|\n)\s*version\s*=\s*["\'](\d+\.\d+\.\d+)["\']', content)
+            if match:
+                return match.group(2)
+        except Exception:
+            pass
+
     return "0.0.0"
 
 def get_latest_changelog_version() -> Optional[str]:
@@ -309,22 +339,23 @@ def is_agent_core_repo() -> bool:
 
 def update_version_in_files(old_version: str, new_version: str) -> None:
     """Update version strings in AGENTS.md, native project configs, or agent bootstrap files."""
-    # 1. Update AGENTS.md
-    agents_path = "AGENTS.md"
-    if os.path.exists(agents_path):
-        with open(agents_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        content = re.sub(
-            r"-\s+\*\*Version:\*\*\s*" + re.escape(old_version),
-            f"- **Version:** {new_version}",
-            content
-        )
-        with open(agents_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print(f"[OK] Updated AGENTS.md version from {old_version} to {new_version}.")
-
-    # 2. Conditionally update files based on repository type
+    
+    # Conditionally update files based on repository type
     if is_agent_core_repo():
+        # 1. Update AGENTS.md only for the agent core repo
+        agents_path = "AGENTS.md"
+        if os.path.exists(agents_path):
+            with open(agents_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            content = re.sub(
+                r"-\s+\*\*Version:\*\*\s*" + re.escape(old_version),
+                f"- **Version:** {new_version}",
+                content
+            )
+            with open(agents_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"[OK] Updated AGENTS.md version from {old_version} to {new_version}.")
+
         # Update bootstrap.py
         bootstrap_py = ".agents/scripts/cli/commands/bootstrap.py"
         if os.path.exists(bootstrap_py):
