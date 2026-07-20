@@ -64,7 +64,7 @@ class TestChangelog(unittest.TestCase):
             ("hash3", "chore: tidy up files")
         ]
         categories = changelog.parse_conventional_commits(commits)
-        self.assertEqual(categories["feat"], ["Auto-Changelog Feature (ISSUE-022)"])
+        self.assertEqual(categories["feat"], ["**scope:** Auto-Changelog Feature (ISSUE-022)"])
         self.assertEqual(categories["fix"], ["fix minor issue"])
         self.assertEqual(categories["chore"], ["tidy up files"])
 

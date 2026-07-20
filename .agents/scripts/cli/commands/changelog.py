@@ -214,7 +214,7 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
     }
     
     # Regex to check Conventional Commits format
-    conv_regex = re.compile(r"^(feat|fix|chore|refactor|docs|test|style|perf)(?:\([^)]+\))?(!)?:\s+(.+)", re.IGNORECASE)
+    conv_regex = re.compile(r"^(feat|fix|chore|refactor|docs|test|style|perf)(?:\(([^)]+)\))?(!)?:\s+(.+)", re.IGNORECASE)
     # Regex to find task/issue reference
     issue_regex = re.compile(r"((?:issue|task)-\d+)", re.IGNORECASE)
     
@@ -249,7 +249,7 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
         issue_id = issue_match.group(1).upper() if issue_match else None
         
         if match:
-            ctype, is_breaking, desc = match.groups()
+            ctype, scope, is_breaking, desc = match.groups()
             ctype = ctype.lower()
             if ctype in ("style", "perf"):
                 ctype = "chore"
@@ -257,11 +257,14 @@ def parse_conventional_commits(commits: List[Tuple[str, str]]) -> Dict[str, List
             cat = "breaking" if is_breaking else ctype
             priority = type_priority.get(cat, 1)
             
+            if scope:
+                desc = f"**{scope}:** {desc}"
+            
             entry = desc
             if issue_id:
                 clean_title = extract_issue_title(issue_id)
                 if clean_title:
-                    entry = f"{clean_title} ({issue_id})"
+                    entry = f"**{scope}:** {clean_title} ({issue_id})" if scope else f"{clean_title} ({issue_id})"
                 else:
                     entry = f"{desc} ({issue_id})"
                     
