@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.153.2] - 2026-07-20
+
+### 🛠️ Refactors
+- **skills:** consolidate redundant playbooks into core standards to save agent token context
+
+
 ## [3.153.1] - 2026-07-20
 
 ### 🐛 Bug Fixes
