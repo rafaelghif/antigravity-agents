@@ -2,7 +2,7 @@
 id: 379
 title: "docs: enforce descriptive branch naming and remote push rules"
 status: open
-assignee: agent-antigravity
+assignee: rafaelghif
 created_at: 2026-07-17
 github_url: "https://github.com/rafaelghif/antigravity-agents/issues/40"
 github_number: 40

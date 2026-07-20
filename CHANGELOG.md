@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.150.0] - 2026-07-20
+
+### 🚀 Features
+- strictly enforce DRY principle and centralized logic
+- enforce zero drift policy for schema sync before coding
+- forbid stack hallucination and enforce projects.json adherence
+- mandate scalable secure production-ready architecture over MVP
+- enforce enterprise quality, deep debugging resilience, and strict learning
+- emphasize issue workflow and mcp priority
+- enforce time tracker for existing gitea issues
+
+### 🐛 Bug Fixes
+- **bootstrap:** prevent AAC core version leakage into fresh project initialization
+- **rules:** synchronize rule templates and deprecate manual issue closing in favor of commit trailers
+- **rules:** strictly mandate explicit conventional commit scopes in core guidelines
+- **changelog:** capture and display conventional commit scopes in release notes
+- **core:** respect explicit conventional commits and prevent issue-based category hallucination
+- **core:** sync strict python check to ps1 and decouple project changelog versioning
+- **core:** enforce strict python 3.8+ dependency check and halt on failure
+- **guardrails:** enforce native CLI scaffolding to prevent token waste
+- **guardrails:** enforce ecosystem and framework-native alignment
+
+### 🛠️ Refactors
+- **scripts:** centralize git_api requests to enforce strict DRY principles
+
+
 ## [3.149.0] - 2026-07-20
 
 ### 🚀 Features
