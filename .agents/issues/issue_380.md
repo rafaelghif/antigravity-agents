@@ -2,7 +2,7 @@
 id: 380
 title: "docs: update readme with v3 architecture and mermaid"
 status: closed
-assignee: agent-antigravity
+assignee: rafaelghif
 created_at: 2026-07-17
 github_url: "https://github.com/rafaelghif/antigravity-agents/issues/31"
 github_number: 31

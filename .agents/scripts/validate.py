@@ -2298,26 +2298,26 @@ def audit_codebase_rules_compliance() -> bool:
                             if "test_" in os.path.basename(f_norm) or f_norm.endswith("_test.py") or "tests/" in f_norm or ".agents/tests/" in f_norm:
                                 required_skills.add("testing")
                             elif ".github/workflows/" in f_norm or "verify.yml" in f_norm or "ci.yml" in f_norm:
-                                required_skills.add("ci-cd")
+                                required_skills.add("devops-release")
                             elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/"):
                                 required_skills.add("database-evolution")
                             elif f_norm in ("CHANGELOG.md", "Dockerfile", "install.sh", "install.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/upgrade.py"):
-                                required_skills.add("release-management")
+                                required_skills.add("devops-release")
                             elif f_norm.startswith(".agents/skills/"):
                                 required_skills.add("skill-evolution")
                             elif f_norm == ".agents/mcp_config.json" or f_norm.endswith("mcp.py"):
-                                required_skills.add("github-mcp")
+                                required_skills.add("mcp-execution")
                             elif f_norm == ".agents/tasks/board.md" or f_norm.startswith(".agents/issues/"):
                                 required_skills.add("task-management")
                                 
                         if "validate.py" in modified_files or "doctor.py" in modified_files:
-                            required_skills.add("debugging")
+                            required_skills.add("troubleshooting")
                             
 
                         # Perform checks
                         for skill in required_skills:
                             if skill not in viewed_skills:
-                                if skill == "github-mcp" and "gitea-mcp" in viewed_skills:
+                                if skill == "mcp-execution" and "gitea-mcp" in viewed_skills:
                                     continue
                                 print_warn(f"AI Compliance Audit: Required skill playbook '.agents/skills/{skill}/SKILL.md' was not loaded explicitly.")
                                 print_warn(f"  Dynamically injecting '{skill}' playbook into active context to bypass block.")
