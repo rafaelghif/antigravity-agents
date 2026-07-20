@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.153.0] - 2026-07-20
+
+### 🚀 Features
+- **skills:** consolidate fullstack and task-management into core principles to optimize token overhead
+
+
 ## [3.152.0] - 2026-07-20
 
 ### 🚀 Features
