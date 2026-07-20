@@ -13,7 +13,7 @@ These rules extend the core guidelines in `AGENTS.md` with project-specific lang
 - Follow **PEP 8** style guidelines for all Python code.
 - Always include clear docstrings for public classes, modules, and functions.
 - Keep functions short, focused, and under 50 lines where practical.
-- Commit message subjects must be descriptive and explain the technical change made; generic messages such as `fix: issue-122` or `chore: task-100` are strictly forbidden. Always explain what was changed (e.g. `fix(perf): cap thread pool size`).
+- Commit message subjects must be descriptive, explain the technical change, and MUST include a specific scope; generic messages or bare commits such as `fix: issue-122` or `chore: task-100` are strictly forbidden. Always use a scope to explain what component was changed (e.g. `fix(core): cap thread pool size`, `feat(auth): add login`).
 
 ## 3. Testing Requirements
 - Every new feature or command module MUST have corresponding unit tests under `tests/`.
