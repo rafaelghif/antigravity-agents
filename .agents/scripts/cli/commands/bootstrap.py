@@ -762,7 +762,7 @@ def run(args):
     else:
         # For target/managed projects: use template
         detected_ver = detect_project_version(".")
-        project_version = detected_ver if detected_ver else "0.1.0"
+        project_version = detected_ver if detected_ver else "0.0.0"
         if os.path.exists(agents_file):
             try:
                 with open(agents_file, 'r', encoding='utf-8') as f:
