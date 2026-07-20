@@ -42,12 +42,16 @@ def main():
     if not branch:
         return
         
-    # Search for (task-|issue-|chore-)[a-zA-Z0-9_-]+ in branch name
-    m = re.search(r'((?:task|issue|chore)-[a-zA-Z0-9_-]+)', branch, re.IGNORECASE)
-    if not m:
-        return
-        
-    issue_id = m.group(1)
+    # Search for modern feature branch ID (e.g. feat/82-xxx -> issue-82)
+    m = re.search(r'^(?:feat|fix|chore|docs|refactor|test|style|epic)/(\d+)-', branch, re.IGNORECASE)
+    if m:
+        issue_id = f"issue-{m.group(1)}"
+    else:
+        # Fallback to older pattern
+        m2 = re.search(r'((?:task|issue|chore)-\d+)', branch, re.IGNORECASE)
+        if not m2:
+            return
+        issue_id = m2.group(1)
     
     if not os.path.exists(commit_msg_filepath):
         return

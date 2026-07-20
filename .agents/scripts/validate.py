@@ -2295,13 +2295,13 @@ def audit_codebase_rules_compliance() -> bool:
                         required_skills = set()
                         for f in modified_files:
                             f_norm = f.replace('\\', '/')
-                            if "test_" in os.path.basename(f_norm) or f_norm.endswith("_test.py") or "tests/" in f_norm or ".agents/tests/" in f_norm:
+                            if "test_" in os.path.basename(f_norm) or f_norm.endswith("_test.py") or "tests/" in f_norm or ".agents/tests/" in f_norm or f_norm.endswith(".test.ts") or f_norm.endswith(".spec.ts") or f_norm.endswith(".test.js") or f_norm.endswith(".spec.js"):
                                 required_skills.add("testing")
                             elif ".github/workflows/" in f_norm or "verify.yml" in f_norm or "ci.yml" in f_norm:
                                 required_skills.add("devops-release")
-                            elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/"):
+                            elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/") or "prisma/" in f_norm or "migrations/" in f_norm:
                                 required_skills.add("database-evolution")
-                            elif f_norm in ("CHANGELOG.md", "Dockerfile", "install.sh", "install.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/upgrade.py"):
+                            elif f_norm in ("CHANGELOG.md", "Dockerfile", "install.sh", "install.ps1", "bootstrap.sh", "bootstrap.ps1", ".agents/scripts/cli/commands/upgrade.py") or "docker-compose" in f_norm:
                                 required_skills.add("devops-release")
                             elif f_norm.startswith(".agents/skills/"):
                                 required_skills.add("skill-evolution")
@@ -2309,6 +2309,15 @@ def audit_codebase_rules_compliance() -> bool:
                                 required_skills.add("mcp-execution")
                             elif f_norm == ".agents/tasks/board.md" or f_norm.startswith(".agents/issues/"):
                                 required_skills.add("task-management")
+                            elif f_norm.endswith((".css", ".scss", ".less", ".html", ".vue", ".jsx", ".tsx", ".svelte", ".blade.php")):
+                                required_skills.add("ui-ux-design")
+                                required_skills.add("engineering-standards")
+                            elif f_norm.endswith((".ts", ".js", ".py", ".go", ".php", ".cs", ".java", ".rb")) and not f_norm.endswith(".md"):
+                                required_skills.add("engineering-standards")
+                                if "api" in f_norm or "controllers" in f_norm or "services" in f_norm or "routes" in f_norm or "pages" in f_norm or "components" in f_norm or "views" in f_norm:
+                                    required_skills.add("fullstack-development")
+                            elif f_norm in ("package.json", "requirements.txt", "pom.xml", "go.mod", "Cargo.toml", ".env.example", "composer.json"):
+                                required_skills.add("security-compliance")
                                 
                         if "validate.py" in modified_files or "doctor.py" in modified_files:
                             required_skills.add("troubleshooting")

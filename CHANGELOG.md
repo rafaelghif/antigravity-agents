@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.151.0] - 2026-07-20
+
+### 🚀 Features
+- **validation:** enforce dynamic skill triggers for UI/UX, fullstack, and security playbooks based on domain file modifications
+
+
 ## [3.150.1] - 2026-07-20
 
 ### 🐛 Bug Fixes
