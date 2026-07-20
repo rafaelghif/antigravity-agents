@@ -789,9 +789,10 @@ def run(args):
                         agents_content
                     )
                     # Remove template_map.md reference from Workspace Read Flow
-                    agents_content = agents_content.replace(
-                        ", `.agents/docs/template_map.md` (for template-to-target and installer/bootstrap platform parity mappings),",
-                        ""
+                    agents_content = re.sub(
+                        r'-\s+\*\*ALWAYS\*\*\s+read\s+`\.agents/docs/template_map\.md`.*?(?:\r?\n|$)',
+                        '',
+                        agents_content
                     )
                 with open(agents_file, 'w', encoding='utf-8') as f:
                     f.write(agents_content)

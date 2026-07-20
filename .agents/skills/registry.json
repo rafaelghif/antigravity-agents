@@ -21,36 +21,8 @@
       "has_setup": true,
       "setup_path": ".agents/skills/documentation/setup.sh"
     },
-    "testing": {
-      "path": ".agents/skills/testing",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "swarm-orchestration": {
       "path": ".agents/skills/swarm-orchestration",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "ui-ux-design": {
-      "path": ".agents/skills/ui-ux-design",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "observability": {
-      "path": ".agents/skills/observability",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "security-compliance": {
-      "path": ".agents/skills/security-compliance",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,
@@ -63,22 +35,8 @@
       "has_setup": false,
       "setup_path": null
     },
-    "code-review": {
-      "path": ".agents/skills/code-review",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
     "adr": {
       "path": ".agents/skills/adr",
-      "has_validation_hook": false,
-      "validation_hook_path": null,
-      "has_setup": false,
-      "setup_path": null
-    },
-    "contract-synchronization": {
-      "path": ".agents/skills/contract-synchronization",
       "has_validation_hook": false,
       "validation_hook_path": null,
       "has_setup": false,

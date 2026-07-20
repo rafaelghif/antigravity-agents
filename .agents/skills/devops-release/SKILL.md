@@ -1,6 +1,6 @@
 ---
 name: devops-release
-description: Playbook for setting up CI/CD pipelines, automating linting, testing, building, caching, and staging release gates. Guidelines for containerization (Dockerfile best practices), release versioning, blue-green deployment, feature flag rollouts, and post-deployment smoke verification.
+description: Playbook for CI/CD, release management, comprehensive testing (unit/integration), mocking, security compliance, dependency auditing, and containerization.
 ---
 
 ## Inherited from ci-cd
@@ -108,3 +108,102 @@ When releasing high-risk features, decouple deployment from release using featur
 - **Post-Deploy Smoke Tests**:
   - Run lightweight API health check endpoints (`/health` or `/ping`) immediately after deployment.
   - Monitor logs for a spike in 5xx status codes or traceback exceptions. If error rates exceed 1% in the first 5 minutes, trigger an **automated rollback** immediately.
+
+## Inherited from testing
+
+# Testing & Test Automation Playbook
+
+This playbook establishes the guidelines, strategies, and patterns for implementing testing and test automation at an enterprise scale, ensuring code safety, reliability, and zero-regression deployments without unnecessary overhead.
+
+---
+
+## 1. Test Categorization & Isolation
+
+To maintain a fast and reliable CI/CD pipeline, tests are divided into two tiers (E2E testing is omitted to optimize token usage and avoid redundant runtime overhead):
+
+### A. Unit Tests (Fast & Deterministic)
+- **Scope**: Validate single functions, utility modules, or isolated classes.
+- **Rules**:
+  - Must run completely offline (no database, no external network, no file system read/write dependencies).
+  - Use mocking or dependency injection to isolate the code under test.
+  - Execution speed must be under 100ms per test.
+
+### B. Integration Tests (Component Interoperability)
+- **Scope**: Validate interactions between modules, database repositories, API clients, and services.
+- **Rules**:
+  - Network and database components may be active, but should preferably use local mocks or isolated databases (e.g., SQLite in-memory).
+  - Maintain absolute cleanup (rollback database transactions or reset state) after each test run.
+
+---
+
+## 2. Mocking Guidelines & Best Practices
+
+Mocking is essential for isolation, but over-mocking leads to fragile tests that fail to detect real integration bugs.
+
+### A. What to Mock
+- **External APIs**: Always mock HTTP calls to external vendors or web endpoints.
+- **Timers and System Clocks**: Mock time dependencies to ensure consistency (e.g., testing token expiration).
+- **Expensive Operations**: Mock heavy computational tasks or slow subprocesses.
+
+### B. Mocking Patterns in Python (pytest / unittest.mock)
+```python
+from unittest.mock import patch, MagicMock
+
+# Best Practice: Patch at the import location, not definition location
+@patch('module_under_test.external_api_call')
+def test_fetch_user_data(mock_api):
+    # Setup mock return value
+    mock_api.return_value = {"id": 1, "name": "John Doe"}
+    
+    result = module_under_test.get_user(1)
+    
+    assert result["name"] == "John Doe"
+    mock_api.assert_called_once_with(1)
+```
+
+---
+
+## 3. Test Organization & Conventions
+
+To keep tests clean and maintainable:
+- **Test Directory**: Place all tests in a `tests/` directory at the root of the project.
+- **File Naming**: Name files with a `test_` prefix (e.g., `test_auth.py`, `test_utils.py`).
+- **Test Cases**: Name test functions descriptively starting with `test_` followed by the action and expected behavior (e.g., `test_authenticate_with_invalid_credentials_fails`).
+- **Assertive Assertions**: Use specific assertions and descriptive error messages rather than simple `assert True`.
+
+---
+
+## 4. The Test-Driven Development (TDD) Cycle
+- **Red**: Write a failing unit test that describes the desired feature or bugfix *before* writing any production code.
+- **Green**: Write the minimal amount of code necessary to make the test pass.
+- **Refactor**: Clean up the implementation. Remove duplication, improve naming, reduce cognitive complexity, and ensure type safety.
+
+## Inherited from security-compliance
+
+# Security & Compliance Playbook
+
+This playbook outlines steps for auditing code changes against security guidelines, secret exposure risks, and library vulnerabilities, as well as managing dependencies.
+
+## 1. Secrets Leak Prevention
+- **Scan Working Tree**: Search for hardcoded keys, passwords, bearer tokens, AWS IDs, or RSA keys before staging changes.
+- **Gitignore Verification**: Ensure `.env` and other local credentials files are explicitly ignored in `.gitignore`.
+- **Environment Templates**: Always document required environment variables in a generic template file (e.g. `.env.example`) containing placeholders rather than values.
+
+## 2. Vulnerability Assessment Checklist
+- **SQL Injections**: Check all database operations. Ensure queries use parameterized inputs or ORM safe-execution methods. Never concatenate raw strings inside database queries.
+- **XSS (Cross-Site Scripting)**: Verify that user inputs are sanitized and escaped before rendering them in HTML or sending them to client applications.
+- **Static Analysis (SAST)**: Use automated static code security scanners (e.g., `bandit` for Python, `eslint-plugin-security` for JavaScript/TypeScript, or CodeQL) to scan the codebase for structural vulnerabilities.
+- **Insecure Dependencies**: Run dependency vulnerability scans:
+  - For Node.js: `npm audit` or `pnpm audit`
+  - For Python: `pip-audit` or `safety check`
+  - For Go: `govulncheck ./...`
+
+## 3. Deployment Security
+- **Least Privilege**: Ensure network egress rules and API scopes are restricted to the bare minimum required for operations.
+- **Secure Storage**: Sensitive configuration files or API keys MUST NOT be globally stored in `~/.` or shared user folders on servers.
+
+## 4. Package Auditing & Compliance
+- **Package Pinning**: All dependencies in production applications MUST be pinned to exact versions (e.g. `1.2.3` instead of `^1.2.3` or `*`). This ensures reproducible builds and protects against supply chain attacks.
+- **License Auditing**: Verify that third-party packages do not use restrictive copyleft licenses (like GPL) if the project is proprietary. Stick to MIT, Apache 2.0, or BSD licenses when possible.
+- **Upgrade Verification**: When upgrading packages, always check the package's changelog for breaking changes and run the full test suite immediately.
+- **Package Pruning**: Regularly scan for and remove unused dependencies from `package.json` or `requirements.txt` to minimize the attack surface.

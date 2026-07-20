@@ -1,6 +1,6 @@
 ---
 name: engineering-standards
-description: Principles, workflows, and standards for writing clean, secure, and highly optimized code, including guidelines for code writing, code review, and architectural integrity. SOLID refactoring, guard clauses, TDD, and legacy migration playbook Guidelines for CPU profiling, identifying database query bottlenecks (N+1 queries), diagnosing memory leaks, and optimizing resource execution speeds.
+description: Principles and standards for fullstack development, clean architecture, SOLID refactoring, UI/UX aesthetics, observability, code review, and API contract synchronization.
 ---
 
 ## Inherited from coding-standards
@@ -270,3 +270,166 @@ This playbook defines framework-agnostic architectural standards for building sc
 * [ ] Is server state cached and managed efficiently without redundant network requests?
 * [ ] Are optimistic updates implemented for critical data mutations?
 * [ ] Are errors and loading states handled gracefully at the component level?
+
+## Inherited from ui-ux-design
+
+# UI/UX Design & Aesthetic Standards
+
+This playbook defines the strict aesthetic and user experience standards required for any frontend development. The goal is to completely avoid "generic AI" outputs by enforcing high-end, professional, and bespoke design patterns.
+
+## 1. Aesthetic Principles
+* **Anti-Generic Design:** Do NOT use default, unstyled, or raw component libraries (e.g., raw Bootstrap, default Tailwind without curation). Designs must feel bespoke, polished, and tailored.
+* **Modern Paradigms:** 
+  * **Dark-Mode First:** Prioritize dark mode designs with high contrast ratios, refined typography (e.g., Inter, Roboto, Outfit), and subtle glowing effects.
+  * **Glassmorphism:** Utilize frosted glass effects (`backdrop-blur`), subtle translucent borders, and soft gradients.
+  * **Micro-Animations:** Implement smooth hover states, layout transitions, and loading states. Interfaces must feel alive and highly responsive (avoid instant, rigid state jumps).
+
+## 2. Accessibility (a11y) & UX
+* **Semantic HTML:** Always use correct HTML5 elements (`<nav>`, `<main>`, `<article>`, `<button>` vs `<a>`) for screen reader compatibility.
+* **Contrast & Legibility:** Maintain WCAG 2.1 AA compliance for text contrast. Ensure focus rings are visible for keyboard navigation.
+* **Aria Attributes:** Implement standard `aria-*` labels for dynamic or custom interactive elements.
+
+## 3. Core Web Vitals (Performance)
+* **LCP (Largest Contentful Paint):** Preload hero images/fonts. Defer offscreen loading.
+* **FID (First Input Delay):** Minimize main-thread blocking JavaScript. Keep interactions snappy.
+* **CLS (Cumulative Layout Shift):** Always reserve space for images, ads, and dynamic content to prevent layout jumps during load.
+
+## 4. Implementation Checklist
+* [ ] Does the UI look premium (not like a generic template)?
+* [ ] Are micro-animations applied to interactive elements?
+* [ ] Is it fully responsive across mobile, tablet, and desktop?
+* [ ] Are Core Web Vitals considered in the DOM structure?
+* [ ] Is the design fully accessible (keyboard navigation, semantic tags, contrast)?
+
+## Inherited from observability
+
+# Observability & Telemetry Skill Playbook
+
+This playbook establishes the enterprise-grade practices for implementing observability, structured logging, distributed tracing, and metrics tracking inside software projects.
+
+---
+
+## 1. Structured Logging Standards
+
+Enterprise applications must emit logs in a machine-readable format to enable searchability and analysis in central log aggregators (e.g. ELK stack, Datadog).
+
+### A. Format Requirements
+- **JSON Format**: Output all logs in JSON format in production.
+- **Log Levels**: 
+  - `DEBUG`: Verbose diagnostics (disabled by default in production).
+  - `INFO`: Normal operational events (e.g. request started, job completed).
+  - `WARN`: Unexpected but non-fatal conditions (e.g. slow response, cache miss).
+  - `ERROR`: Runtime errors needing immediate investigation (includes stack trace).
+  - `FATAL`: Critical system failure causing application shutdown.
+
+### B. Standard Fields
+Every log line must include:
+- `timestamp`: UTC ISO-8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+- `level`: Log severity.
+- `message`: Descriptive human-readable message.
+- `correlation_id`: Unique request or transaction identifier.
+- `module`: File or package namespace.
+
+### C. Security Boundaries
+- **NEVER** log sensitive personal information (PII) like emails, addresses, or phone numbers.
+- **NEVER** log secrets, passwords, bearer tokens, authorization headers, or database credentials.
+
+---
+
+## 2. Distributed Tracing (OpenTelemetry)
+
+Distributed tracing allows developers to track requests as they flow across multiple servers, databases, and microservices.
+
+### A. Context Propagation
+- **Correlation Context**: Ensure every incoming HTTP request or message queue task extracts the parent trace context (W3C Trace Context standard).
+- **Context Injection**: Inject trace context headers (`traceparent`) into all outgoing external HTTP requests, gRPC calls, or message queue tasks.
+
+### B. Instrumentation Checklist
+- **Database Spans**: Automatically trace database queries to detect slow-running transactions.
+- **HTTP Clients**: Trace outbound network calls to identify external dependency latency.
+- **Long-Running Jobs**: Wrap background task executions (e.g. Celery, Cron) in spans.
+
+---
+
+## 3. Metrics Tracking
+
+Use standard application metrics to measure service health, performance, and saturation.
+
+### A. The RED Method (Request-scoped services)
+Track:
+1. **Rate**: Number of requests processed per second (RPS).
+2. **Errors**: Number of failed requests per second.
+3. **Duration**: Time taken to process requests (measure percentiles: p50, p90, p99).
+
+### B. The USE Method (System resource monitoring)
+Track:
+1. **Utilization**: Percentage of resource capacity used (e.g. CPU, RAM, Disk).
+2. **Saturation**: Extra work that the resource cannot process yet (e.g. request queues, thread pool queues).
+3. **Errors**: System-level resource errors.
+
+---
+
+## 4. Error Telemetry & Alerting
+
+Graceful error capturing prevents silent failures and helps maintain system stability.
+
+- **Centralized Handlers**: Wrap top-level route controllers or execution loops in try-except statements that report uncaught exceptions to telemetry providers (e.g. Sentry, Datadog).
+- **Enriched Context**: Attach custom tags (e.g. `user_id`, `tenant_id`, `environment`) to error reports to accelerate troubleshooting.
+- **Alert Fatigue Prevention**: Define alert policies only for critical anomalies (e.g. HTTP 5xx rate > 1%) rather than transient failures.
+
+## Inherited from code-review
+
+# Code Review Skill
+
+This playbook outlines the standards for auditing pull requests, commits, and changes in this repository.
+
+## Review Checklist
+1. **Safety & Security**: Verify that no credentials, access tokens, or secrets are committed (see [security-compliance playbook](file://.agents/skills/security-compliance/SKILL.md)).
+2. **Linting & Formatting**: Ensure all codebase styles adhere to project rules.
+3. **Layer Decoupling**: Check that business logic is completely isolated from system utilities/scripts (see [engineering-standards playbook](file://.agents/skills/engineering-standards/SKILL.md)).
+4. **Test Coverage**: Validate that all new functions or scripts have corresponding unit tests (see [testing playbook](file://.agents/skills/testing/SKILL.md)).
+
+## Inherited from contract-synchronization
+
+# API Contract & Multi-Project Synchronization Playbook
+
+This playbook defines the standards and workflows for maintaining absolute contract compliance and synchronization between backend and frontend sub-projects in a monorepo workspace.
+
+---
+
+## 1. Shared Schema: The Single Source of Truth
+
+To prevent API contract mismatch and runtime integration errors:
+- **Define a Contract**: Place a machine-readable API specification (e.g., `openapi.yaml`, `schema.json`, or shared Type Definitions) in a shared directory at the root of the workspace or in the backend's public docs directory (e.g., `docs/openapi.yaml`).
+- **Never Define Types Manually**: The frontend must not manually recreate request/response interfaces or endpoint routes. All API-related types, endpoints, and HTTP client bindings must be derived from the shared schema.
+
+---
+
+## 2. Automated Frontend Client Codegen
+
+To synchronize changes instantly from Backend $\rightarrow$ Frontend:
+- **Codegen Trigger**: When backend API models are modified, run the client code generator (e.g. `openapi-generator-cli`, `orval`, or custom typescript generators) to regenerate types and fetching hooks inside the frontend directory (e.g. `app/frontend/src/api/`).
+- **Check-in Policy**: Generated client files MUST be checked into source control along with the API contract modification. The build pipeline will fail if the code generator produces unstaged changes.
+
+---
+
+## 3. Double-Sided Contract Verification
+
+Validation must happen on both ends of the interface boundary:
+
+### A. Backend-Side Verification
+- Validate that the actual endpoints match the declared API specification.
+- Use schema-driven test runners (e.g., **Schemathesis** in Python, or **openapi-validator** in Node.js) to dynamically fuzz or test backend routes against the OpenAPI file:
+  ```bash
+  schemathesis run docs/openapi.yaml --base-url http://localhost:8000/api
+  ```
+
+### B. Frontend-Side Verification
+- Ensure the frontend build process strictly compiles against the generated TypeScript definitions.
+- Running `npm run build` or `tsc --noEmit` in the frontend directory serves as the final gate to verify that all API components, arguments, and data shapes match the backend payload.
+
+---
+
+## 4. Multi-Project Validation Gate
+
+When validation is run, the agent must check all projects. The root validation script [validate.py](file://./.agents/scripts/validate.py) reads [.agents/projects.json](file://./.agents/projects.json) to automatically run tests in each sub-directory (e.g., `app/backend` and `app/frontend`), ensuring that changes in one module do not break the tests in the other.

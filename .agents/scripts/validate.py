@@ -2296,7 +2296,7 @@ def audit_codebase_rules_compliance() -> bool:
                         for f in modified_files:
                             f_norm = f.replace('\\', '/')
                             if "test_" in os.path.basename(f_norm) or f_norm.endswith("_test.py") or "tests/" in f_norm or ".agents/tests/" in f_norm or f_norm.endswith(".test.ts") or f_norm.endswith(".spec.ts") or f_norm.endswith(".test.js") or f_norm.endswith(".spec.js"):
-                                required_skills.add("testing")
+                                required_skills.add("devops-release")
                             elif ".github/workflows/" in f_norm or "verify.yml" in f_norm or "ci.yml" in f_norm:
                                 required_skills.add("devops-release")
                             elif f_norm == ".agents/schema.md" or f_norm.startswith(".agents/schemas/") or "prisma/" in f_norm or "migrations/" in f_norm:
@@ -2308,7 +2308,6 @@ def audit_codebase_rules_compliance() -> bool:
                             elif f_norm == ".agents/mcp_config.json" or f_norm.endswith("mcp.py"):
                                 required_skills.add("mcp-execution")
                             elif f_norm.endswith((".css", ".scss", ".less", ".html", ".vue", ".jsx", ".tsx", ".svelte", ".blade.php")):
-                                required_skills.add("ui-ux-design")
                                 required_skills.add("engineering-standards")
                             elif f_norm.endswith((".ts", ".js", ".py", ".go", ".php", ".cs", ".java", ".rb")) and not f_norm.endswith(".md"):
                                 required_skills.add("engineering-standards")
@@ -2329,9 +2328,19 @@ def audit_codebase_rules_compliance() -> bool:
                                 try:
                                     with open(f".agents/skills/{skill}/SKILL.md", "r", encoding="utf-8") as f:
                                         skill_content = f.read()
-                                    with open(".agents/state/active_context.md", "a", encoding="utf-8") as acf:
-                                        acf.write(f"\n\n## 📖 Dynamically Injected Playbook: {skill}\n")
-                                        acf.write(skill_content)
+                                        
+                                    # Prevent exponential duplication by checking if already injected
+                                    context_path = ".agents/state/active_context.md"
+                                    already_injected = False
+                                    if os.path.exists(context_path):
+                                        with open(context_path, "r", encoding="utf-8") as acf_read:
+                                            if f"## 📖 Dynamically Injected Playbook: {skill}" in acf_read.read():
+                                                already_injected = True
+                                                
+                                    if not already_injected:
+                                        with open(context_path, "a", encoding="utf-8") as acf:
+                                            acf.write(f"\n\n## 📖 Dynamically Injected Playbook: {skill}\n")
+                                            acf.write(skill_content)
                                 except Exception as inner_e:
                                     print_warn(f"  Failed to dynamically inject playbook: {inner_e}")
                                 # Dynamic injection successful, bypassing failure
