@@ -32,7 +32,7 @@
    - **Strict Execution Order:** (1) Check/Create Issue -> (2) Start Time Tracker (for GitHub/Gitea) -> (3) Branch & Code -> (4) Git Conventional Commit -> (5) Push -> (6) PR/Merge -> (7) Clean.
    - **Tool Priority (NEVER SKIP):** You MUST execute the above using this strict priority: **1. MCP Tools** (Primary) -> **2. CLI Fallback** (e.g., `gh`) -> **3. HALT & Inform Human** (If both fail). Do NOT skip the issue steps or fallback to local files silently.
 3. **Branch & Code:** Checkout your Epic/Task branch locally. Execute tasks in small, atomic chunks. ALWAYS run formatting and linting tools before committing.
-4. **Test & Commit:** Validate subtasks locally. You MUST use strict Conventional Commits with specific scopes (e.g., `feat(auth): msg`, trailer: `Refs: <task-id>`). Do NOT use bare commit types without scopes.
+4. **Test & Commit:** Validate subtasks locally. You MUST use strict Conventional Commits with specific scopes (e.g., `feat(auth): msg`, trailer: `Refs: <task-id>`). Do NOT use bare commit types without scopes. ALWAYS use `Fixes #<issue-id>` or `Closes #<issue-id>` in the commit message or PR body to auto-close issues. NEVER use `helper.sh issue close` manually.
 5. **Push:** Push your commits to the remote branch (`git push origin <branch>`).
 6. **PR & Merge (Pull):** Create a PR directly via MCP. ALWAYS include `Fixes #<github_number>` in the PR body to auto-close the remote issue. You may merge PRs autonomously.
 7. **Delete Merged Branch:** After a successful merge, you MUST immediately delete the local and remote task branch to keep the workspace clean (`git branch -d <branch>` and `git push origin --delete <branch>`).
