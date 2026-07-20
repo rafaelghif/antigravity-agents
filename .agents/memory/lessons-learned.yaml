@@ -120,3 +120,17 @@ lessons:
   category: Path Handling / OS Compatibility
   content: Use cross-platform path resolution helpers instead of hardcoded OS separators
     to prevent Windows/Linux path mismatches.
+- date: '2026-07-20'
+  category: environment
+  content: When writing bootstrapping scripts (sh/ps1), ALWAYS include explicit fallback
+    checks for Python 3 runtimes to prevent silent failures on fresh enterprise environments.
+- date: '2026-07-20'
+  category: git-hooks
+  content: When writing Git hooks (e.g. prepare-commit-msg), ensure regex branch extraction
+    targets numbers (\d+) strictly for 'feat/<id>-slug' to prevent greedy string matching
+    that corrupts commit trailers.
+- date: '2026-07-20'
+  category: optimization
+  content: To optimize token context, merge overlapping playbooks (like fullstack
+    and engineering-standards) and use dynamic regex domain-mapping in validate.py
+    to only inject them when relevant files (e.g., .tsx, api/) are modified.
