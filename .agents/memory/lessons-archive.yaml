@@ -28,3 +28,14 @@ archived_rules:
   files for config generation. Always sync template-to-target files (mapped in `template_map.md`)
   to prevent drift.; MCP servers are centralized in `mcp_config.json.template` (supporting
   local domains and tokens) and Git profiles in `.agents/git_profiles.json`.'
+- '- **[Learning: OS Compatibility / PowerShell]** Maintain exact functional parity
+  between Bash (`.sh`) and PowerShell (`.ps1`) helper scripts.; PowerShell Quirks:
+  Explicitly cast outputs to `[string]` when testing results. Enclose `Test-Path`
+  in parentheses before using `-and`. Propagate `$LASTEXITCODE`.'
+- '- **[Learning: General]** Always ensure README.md examples strictly match the python
+  domain entities (GitProfile, Project). Profile credentials (ssh, pat, token) should
+  no longer use encryption.'
+- '- **[Learning: diagnostics]** When MCP tools or external CLIs (like ''gh'') fail,
+  NEVER just halt with a generic error message. You MUST proactively run diagnostic
+  checks (e.g., testing tokens, checking scopes) and report the exact technical root
+  cause and error logs to the user so they are fully informed of the bottleneck.'

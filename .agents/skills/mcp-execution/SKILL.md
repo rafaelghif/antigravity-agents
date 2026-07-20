@@ -33,3 +33,10 @@ When crafting your `Arguments` payload for `call_mcp_tool`:
 If the MCP server is unreachable, unauthenticated, or fails to execute properly even with correct schemas:
 1. Fallback to local offline CLI tools (e.g., `gh pr create` or native Git CLI).
 2. If BOTH methods fail, you MUST IMMEDIATELY halt execution and explicitly prompt the Human User with a manual intervention link. DO NOT silently retry endlessly.
+
+## 4. Gitea Time Tracking & Stopwatch Strict Enforcement
+When using the Gitea `timetracking_write` tool, agents frequently hallucinate arbitrary durations (e.g., 30m or 1h) by guessing the `time` parameter in the `add_time` method.
+- **NEVER** use the `add_time` method with guessed parameters.
+- **ALWAYS** use the `start_stopwatch` method when beginning an issue.
+- **ALWAYS** use the `stop_stopwatch` method when concluding an issue.
+This offloads time calculation entirely to the Gitea server, ensuring exact chronological accuracy without agent hallucination.
