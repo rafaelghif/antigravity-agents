@@ -2,7 +2,7 @@
 id: 381
 title: "feat: automate mcp secret injection from profiles and secure config"
 status: closed
-assignee: agent-antigravity
+assignee: rafaelghif
 created_at: 2026-07-17
 github_url: "https://github.com/rafaelghif/antigravity-agents/issues/38"
 github_number: 38

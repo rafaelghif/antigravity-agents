@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [3.150.1] - 2026-07-20
+
+### 🐛 Bug Fixes
+- **core:** update validation script to require modernized AAC V3 skills
+
+
 ## [3.150.0] - 2026-07-20
 
 ### 🚀 Features
