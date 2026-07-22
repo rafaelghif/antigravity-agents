@@ -1,6 +1,6 @@
 [project]
 name = "antigravity-agent-core"
-version = "3.92.0"
+version = "4.0.1"
 dependencies = [
     "cryptography>=42.0.5",
     "keyring>=24.3.1",
