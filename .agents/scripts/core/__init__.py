@@ -1,1 +1,0 @@
-# AAC Core Domain Package

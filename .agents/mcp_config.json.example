@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "github": {
+      "serverUrl": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_GITHUB_PAT"
+      }
+    },
+    "gitea": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "gitea-mcp",
+        "-t", "stdio",
+        "-H", "http://10.137.1.87:8081",
+        "-T", "<your personal access token>"
+      ]
+    }
+  }
+}

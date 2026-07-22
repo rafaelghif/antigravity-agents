@@ -1,128 +1,115 @@
-# Antigravity Agent Core (AAC) V3
+# Antigravity Agent Core (AAC) V4
 
-[![Version](https://img.shields.io/badge/version-3.153.2-blue.svg)](AGENTS.md)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](.agents/scripts/validate.py)
-[![Platforms](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey.svg)](helper.sh)
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](.agents/rules.md)
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](AGENTS.md)
+[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](AGENTS.md)
+[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/rafaelghifari/antigravity-agents)
 
-**Enterprise-Grade Guardrails, Workspace Insulation, and Quality Gates for Autonomous AI Coding Agents.**
+**Enterprise-Grade Guardrails, Zero-Assumption Execution, and Quality Gates for Autonomous AI Coding Agents.**
 
-Autonomous coding agents (like Cursor, Aider, Cline, and Claude) offer massive productivity boosts, but running them in unstructured repositories introduces severe risks: credential leaks, architectural drift, messy commit histories, and exploding token budgets.
+Autonomous coding agents offer massive productivity boosts, but running them in unstructured repositories introduces severe risks: hallucinated architectures, credential leaks, messy commit histories, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V3** solves this by wrapping a strict, local-first workflow loop around your repository. Designed for the **Antigravity CLI (agy)**, AAC ensures that AI-driven coding conforms exactly to professional engineering standards without relying on cloud dependencies.
+**Antigravity Agent Core (AAC) V4** solves this by enforcing a strict, token-optimized, skill-based workflow loop governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4 ensures that AI-driven coding conforms exactly to professional engineering standards, handles edge cases autonomously, and never assumes anything.
 
 > [!IMPORTANT]
-> **100% Local Insulation**: AAC V3 operates entirely within your workspace. All configurations, task boards, developer profiles, and execution logs are isolated under the `.agents/` directory.
+> **100% Declarative & Skill-Based**: AAC V4 abandons clunky bash scripts in favor of AI-native `.agents/skills/`. All configurations, plans, schemas, and execution logs are isolated securely under the `.agents/` directory.
 
 > [!WARNING]
-> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V3 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
+> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V4 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
 
 ---
 
-## ⚡ Why Use AAC V3?
+## ⚡ What's New in V4?
 
-| The AI Coding Risk | The AAC V3 Solution |
+| The AI Coding Risk | The AAC V4 Solution |
 | :--- | :--- |
-| **Credential & Secret Leaks** | Local git hooks proactively block staging or committing `.env` files, private keys, and local credentials. |
-| **Messy Branch Commits** | Enforces Conventional Commits with mandatory task ID references. Direct commits to `main` are blocked. |
-| **Context & Token Bloat** | Auto-archives old tasks, logs, and finished specifications to keep the active agent context lean and token-efficient. |
-| **Parallel Coding Conflicts** | Filesystem-level mutex locks (`./helper.sh lock`) prevent agents from conflicting when editing the same directories. |
-| **Amnesia (Loss of Context)** | Features a localized "Hermes Protocol" (`lessons-learned.yaml`) where agents self-correct and memorize solutions for future sessions. |
+| **Hallucination & Token Bloat** | **Zero-Assumption Policy**: Agents are explicitly forbidden from guessing fields. Strict rules enforce paginated targeted reads instead of blind full-file ingestions. |
+| **Infinite Loops & Hanging** | **Automated Rollback Protocol**: If 3 approaches fail, the agent snapshots the state, logs an incident report, and reverts to a known good state. A 5-minute timeout on user inputs ensures the agent aborts safely without hanging. |
+| **Rogue Actions** | **Strict Precedence & Boundaries**: `AGENTS.md` is the supreme law. Critical actions (schema changes, merging, modifying rules) absolutely require user permission via `ask_question`. |
+| **Silent Failures** | **Security & Observability Auditors**: Native skills scan for hardcoded secrets via `gitleaks`, enforce SAST execution, and verify structured JSON logging. |
+| **Dependency Bloat** | **Execution Manager**: Mandates ephemeral invocations (`npx`, `pnpm dlx`) and actively blocks global installations or redundant framework packages. |
 
 ---
 
 ## 🗺️ The Autonomous Workflow
 
-AAC V3 enforces a structured engineering cycle on the agent to prevent speculative or rogue coding:
+AAC V4 enforces a highly structured, skill-driven engineering cycle:
 
 ```mermaid
 flowchart TD
-    A["1. Provision Workspace<br><code>./helper.sh bootstrap</code>"] --> B["2. Align Specs (/grill-me)<br><code>schema.md & board.md</code>"]
-    B --> C["3. Claim & Checkout Branch<br><code>./helper.sh issue checkout &lt;task-id&gt;</code>"]
-    C --> D["4. Read Schema & Context<br><code>schema.md & active_context.md</code>"]
-    D --> E["5. Execute (Atomic)<br><code>split into 3-5 line subtasks</code>"]
-    E --> F["6. Code, Lint, &amp; Test<br><code>validate.py</code>"]
-    F -- "Audit Fails" --> G["7. Self-Heal Workspace<br><code>./helper.sh learn</code>"]
-    G --> F
-    F -- "Audit Passes" --> H["8. Commit with Task ID<br><code>Closes #ID (Auto-Close)</code>"]
-    H --> I["9. Push Task Branch<br><code>1 Task = 1 PR</code>"]
+    A["1. User Request"] --> B["2. Planning & Discovery<br><code>AGENTS.md & !quick check</code>"]
+    B --> C["3. Architecture Audit<br><code>Blast Radius & Reusability</code>"]
+    C --> D["4. Schema Manager<br><code>Migration generation</code>"]
+    D --> E["5. Implementation<br><code>Ephemeral tools only</code>"]
+    E --> F["6. UI & a11y Review<br><code>Aesthetics & WCAG</code>"]
+    F --> G["7. Security & Observability<br><code>SAST & gitleaks</code>"]
+    G --> H["8. Git Workflow<br><code>Branch, Commit, PR</code>"]
+    H --> I["9. Ask Question<br><code>Merge Approval</code>"]
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Core Skills
 
-### 1. Prerequisites
-- **Git** installed and available in your PATH.
-- **Python 3.8+** installed.
-- Terminal access (Bash, Zsh, or PowerShell).
+AAC V4 operates using modular, specialized **Skills** located in `.agents/skills/`. If multiple skills trigger, they execute in a strict sequence:
 
-### 2. Install AAC V3
-Run the installer script at the root of your target project:
+1. **`architecture-auditor`**: Performs rigorous Holistic Impact Analysis (blast radius, DRY, extensibility) before major code changes.
+2. **`schema-manager`**: Single point of authority for DB schemas. Enforces reversible migrations and prevents field hallucination.
+3. **`execution-manager`**: Oversees dependency installations, prevents redundancy, and enforces ephemeral execution (`npx` instead of `npm -g`).
+4. **`ui-a11y-reviewer`**: Validates frontend components against WCAG standards, Admin vs. Consumer logic branching, and aesthetic guidelines.
+5. **`security-observability-auditor`**: Scans for secrets, missing input sanitization, and verifies structured logging (JSON/Prometheus).
+6. **`git-workflow`**: Strictly handles the end-to-end Version Control Lifecycle (Issue -> Time Tracking -> Branch -> Atomic Commits -> PR).
 
-**Linux / macOS (Bash):**
+---
+
+## 🛠️ Installation & Setup
+
+### 1. Integrate into Your Project
+To apply AAC V4 to any existing project, simply clone this repository and copy the core files over to your target project's root directory. The included `.gitignore` and scaffolded templates ensure your secrets and temporary agent states are never accidentally committed.
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+# Clone the AAC repository
+git clone https://github.com/rafaelghifari/antigravity-agents.git
+cd antigravity-agents
+
+# Copy the core constitution, skills, and hygiene configs to your target project
+cp AGENTS.md /path/to/your/project/
+cp .gitignore /path/to/your/project/
+cp -r .agents /path/to/your/project/
 ```
 
-**Windows (PowerShell):**
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
-```
+### 2. Configure MCP Servers (Optional but Recommended)
+AAC V4 relies on Model Context Protocol (MCP) servers to interact with version control safely and execute the `git-workflow` skill.
 
-### 3. Bootstrap the Workspace
-Initialize the workspace to auto-detect your stack (e.g., Python, Node) and generate rules:
+We provide a ready-to-use sample configuration file:
 ```bash
-./helper.sh bootstrap
+cp .agents/mcp_config.json.example .agents/mcp_config.json
 ```
+Edit `.agents/mcp_config.json` to insert your specific Personal Access Tokens (PAT) and your local Gitea server IP (e.g., `http://10.137.1.87:8081`).
 
-### 4. Direct Your Coding Agent
-When prompting your agent, instruct it to respect the workspace rules:
-> "Read AGENTS.md and align with our workspace layout, rules, and memory ledger before starting."
-
-### 5. Utilize Slash Commands (Anti-Hallucination)
-To maximize agent autonomy and prevent hallucinations caused by vague instructions, Antigravity provides native slash commands. Start your prompt with:
-
-| Command | Best For | Description |
-| :--- | :--- | :--- |
-| **`/goal`** | `Long-running autonomy` | Forces the agent into a persistent loop. It will break down epics, write code, run tests, self-heal, and pull the next task autonomously until 100% complete. |
-| **`/grill-me`** | `Requirements gathering` | The agent pauses coding and interviews you with targeted questions to build a concrete architecture before writing any code. |
-| **`/teamwork-preview`** | `Parallel execution` | Divides massive tasks and spawns multiple background sub-agents to tackle them concurrently. |
-| **`/plan`** | `Step-by-step logic` | Forces the agent to output a rigorous step-by-step architectural plan before proceeding. |
-
----
-
-## 🛠️ Core CLI Tools (`helper.sh` / `helper.ps1`)
-
-| Command | Description |
-| :--- | :--- |
-| **`validate`** | Runs 11 strict workspace audits (secrets, linters, tests, branch alignment). |
-| **`commit`** | Pre-commit wrapper. Enforces Conventional Commits and blocks unvalidated code. |
-| **`issue`** | Local issue tracker (create, list, checkout, close). |
-| **`profile`** | Manages Git identities (`add`, `switch`, `list`) to prevent pushing under the wrong profile. |
-| **`mcp`** | Integrates Model Context Protocol (MCP) servers (`register`, `start`) securely. |
-| **`token`** | Tracks local LLM token usage and budgets. |
-| **`doctor`** | Checks Python environment, dependencies, and git configuration health. |
-| **`changelog`** | Evaluates commits, maps categories, bumps SemVer, and generates release notes. |
-
----
-
-## ⚙️ Advanced Configuration
-
-AAC is highly customizable via JSON configs located in `.agents/`:
-
-- **`.agents/config.json`**: Set `"workflow_mode": "solo"` to allow direct local commits to `main`, or `"team"` to enforce strict PR workflows.
-- **`.agents/git_profiles.json`**: Safely store and rotate GPG/SSH keys and Personal Access Tokens (PATs) for specific workspaces.
-- **`.agents/projects.json`**: Define sub-projects in a monorepo (test commands, API contract sync rules).
-- **`.agents/mcp_config.json`**: Define MCP servers (GitHub, Gitea) and inject credentials dynamically without leaking them globally.
+- **GitHub MCP**: Connects via Copilot's Remote Server-Sent Events (SSE).
+- **Gitea MCP**: Powered by the local [Gitea MCP binary](https://gitea.com/gitea/gitea-mcp). Once active, AAC V4's `git-workflow` skill will automatically detect it and enforce strict time-tracking.
 
 ---
 
 ## 📂 Directory Layout
 
-- `AGENTS.md`: The "Soul" and master ruleset loaded by the agent.
-- `.agents/rules.md`: Generated build, test, and style configurations.
-- `.agents/schema.md`: Database and architectural source of truth.
-- `.agents/tasks/board.md`: The active Kanban-style task board.
-- `.agents/memory/lessons-learned.yaml`: The self-learning ledger where the agent memorizes past mistakes.
-- `.agents/skills/`: Executable playbooks (e.g., code-review, security-compliance) the agent can dynamically load.
+- `AGENTS.md`: The "Constitution" and supreme ruleset.
+- `.agents/brain/`: Permanent memory (`schema.md`, `state.json`, `mcp-registry.json`, `rules.md`).
+- `.agents/incidents/`: Post-mortem incident reports for failed tasks or timeouts.
+- `.agents/plans/`: Lightweight sequential task checklists.
+- `.agents/scratch/`: Ephemeral/short-term notes and debugging context.
+- `.agents/skills/`: The 6 core operational skills listed above.
+
+---
+
+## ⚡ Slash Commands (Anti-Hallucination)
+
+Start your prompt with these commands to maximize autonomy:
+
+| Command | Best For | Description |
+| :--- | :--- | :--- |
+| **`/goal`** | `Long-running autonomy` | Forces the agent into a persistent loop to hit complex milestones. |
+| **`/grill-me`** | `Requirements gathering` | The agent pauses coding and interviews you with targeted questions. |
+| **`/teamwork-preview`** | `Parallel execution` | Divides massive tasks and spawns multiple sub-agents. |
+| **`/plan`** | `Step-by-step logic` | Outputs a rigorous step-by-step checklist before proceeding. |
+| **`/learn`** | `Self-Correction` | Documents a new pattern in `rules.md` or generates a new skill. |
