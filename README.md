@@ -87,7 +87,7 @@ cp .agents/mcp_config.json.example .agents/mcp_config.json
 Edit `.agents/mcp_config.json` to insert your specific Personal Access Tokens (PAT) and your Gitea server URL (e.g., `http://localhost:3000`).
 
 - **GitHub MCP**: Connects via Copilot's Remote Server-Sent Events (SSE).
-- **Gitea MCP**: Powered by the local [Gitea MCP binary](https://gitea.com/gitea/gitea-mcp). Once active, AAC V4's `git-workflow` skill will automatically detect it and enforce strict time-tracking.
+- **Gitea MCP**: Connects via HTTP mode (e.g., `http://10.137.1.87:8081/mcp`) to a Gitea instance hosting the MCP endpoint. Once active, AAC V4's `git-workflow` skill will automatically detect it and enforce strict time-tracking.
 
 ---
 

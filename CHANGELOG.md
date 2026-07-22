@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Automated Rollback Protocol**: A strict 3-strike rule that forces the agent to snapshot (`git stash`), document the incident in `.agents/incidents/`, revert to a known good state, and validate via linters/smoke tests before escalating.
 - **Zero-Assumption Policy**: Prohibits agents from guessing database fields or API contracts without explicit verification.
 - **Token Optimization & Verification**: Rules to limit context window bloat via paginated reading (`StartLine`/`EndLine`). Clarified that partial reads are only valid if they capture full structural blocks.
-- **MCP Dynamic Discovery & Configuration**: Introduced `.agents/brain/mcp-registry.json` for dynamic discovery, and `.agents/mcp_config.json.example` demonstrating correct GitHub Copilot SSE and local Gitea binary integrations.
+- **MCP Dynamic Discovery & Configuration**: Introduced `.agents/brain/mcp-registry.json` for dynamic discovery, and `.agents/mcp_config.json.example` demonstrating correct GitHub Copilot SSE and HTTP-based Gitea integrations.
 - **Git Hygiene & Scaffolding**: Deployed `.gitignore` to prevent credential/state leakage (e.g., ignoring `.agents/scratch/`), alongside `.gitkeep` placeholders and baseline templates (`schema.md`, `rules.md`) to guarantee exact directory replication upon cloning.
 - **Strict `!quick` Mode**: A specific bypass command that skips Issue generation and PR overhead but strictly maintains branching (`quick-`), atomic commits, and merge approval gates.
 - **Merge Conflict Resolution Protocol**: Specific guidance for regenerating lock files (`yarn.lock`, `poetry.lock`, `go.sum`, etc.) from `main` to break loops.
