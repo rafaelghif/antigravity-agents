@@ -4,7 +4,7 @@
 
 ## 1. Project
 - **Product:** test-proj
-- **Version:** 3.153.2
+- **Version:** 4.0.1
 - **Stack:** Python 3, Docker
 - **Layout:** CLI scripts, `.agents/skills/` (playbooks), `.agents/workflows/`, `.agents/memory/`, `.agents/docs/`.
 

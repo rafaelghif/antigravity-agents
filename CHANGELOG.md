@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [4.0.1] - 2026-07-22
+
+### 🐛 Bug Fixes
+- **hooks:** allow GitHub auto-close syntax in commit validation hooks
+
+
 ## [3.153.2] - 2026-07-20
 
 ### 🛠️ Refactors
