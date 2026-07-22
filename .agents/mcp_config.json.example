@@ -12,7 +12,7 @@
       "command": [
         "gitea-mcp",
         "-t", "stdio",
-        "-H", "http://10.137.1.87:8081",
+        "-H", "http://localhost:3000",
         "-T", "<your personal access token>"
       ]
     }
