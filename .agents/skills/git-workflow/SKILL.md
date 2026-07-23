@@ -36,9 +36,9 @@ However:
 - Summarize intermediate tool outputs and reasoning from the planning phase into `.agents/scratch/compaction.md`.
 - Drop redundant tokens and preserve only essential variables required for later git commits.
 
-### 3. Branching
+### 3. Branching (Worktree Protocol)
 - Fetch and checkout the latest `main` (or designated base branch).
-- Create a new branch.
+- Instead of checking out the branch in the main directory where conflicts might corrupt state, consider using `git worktree add ../<branch-name> -b <branch-name> origin/main` for high-risk operations.
 - **Prefixes Allowed**: `feature/`, `bugfix/`, `hotfix/`, `chore/`, `refactor/`. If in `!quick` mode, use format `<prefix>/quick-<slug>` (e.g., `feature/quick-<slug>`).
 
 ### 4. Code Execution & Atomic Commits

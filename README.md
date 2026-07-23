@@ -1,6 +1,6 @@
 # Antigravity Agent Core (AAC) V4
 
-[![Version](https://img.shields.io/badge/version-4.1.1-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-4.1.2-blue.svg)](AGENTS.md)
 [![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](AGENTS.md)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/rafaelghifari/antigravity-agents)
 

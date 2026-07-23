@@ -4,6 +4,15 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.2] - 2026-07-23
+
+### Added
+- **Server-Side Enforcement**: Scaffolding for GitHub Actions `.github/workflows/agent-gates.yml` to enforce CI/CD checks (Gitleaks, Semgrep) at the server level, preventing manual bypasses.
+- **RAG/Vector Brain Support**: Formalized the requirement in `AGENTS.md` to prioritize RAG or Vector-Based MCP integrations over legacy paginated reads for enterprise scalability.
+
+### Changed
+- **Worktree Rollback Protocol**: Upgraded the agent's safe abort protocol from `git stash` to `git worktree add`, enabling safe isolation and immediate discarding of ephemeral corrupted states.
+
 ## [4.1.1] - 2026-07-23
 
 ### Fixed

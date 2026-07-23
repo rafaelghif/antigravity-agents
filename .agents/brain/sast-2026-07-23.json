@@ -1,0 +1,19 @@
+{
+  "date": "2026-07-23",
+  "scope": "Full Agent Repository",
+  "secret_scanning": {
+    "status": "passed",
+    "details": "No hardcoded secrets found. .agents/mcp_config.json is successfully gitignored. env-required.json is currently missing and needs to be created to comply with the baseline."
+  },
+  "sast": {
+    "status": "skipped",
+    "details": "No application code (JS/TS, Python, Go, Java) is present in this repository to run SAST against. The repository only contains Agent Markdown definitions and JSON configs."
+  },
+  "observability": {
+    "status": "passed",
+    "details": "Structured logging baseline is delegated to Antigravity CLI and .agents/common/utils.md specifies redaction rules for audit logs."
+  },
+  "remediation": [
+    "Create .agents/brain/env-required.json to document required environment variables."
+  ]
+}
