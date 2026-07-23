@@ -1,6 +1,6 @@
 # AGENTS.md — Antigravity Agent Core (AAC) V4
 
-**Core Version**: 4.1.0
+**Core Version**: 4.1.1
 
 This core directive governs all agents in this workspace. Reference `.agents/config.json` for all numeric constants and `.agents/common/utils.md` for shared utilities.
 

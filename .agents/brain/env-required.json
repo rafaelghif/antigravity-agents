@@ -1,0 +1,12 @@
+{
+  "GITEA_PAT": {
+    "required": false,
+    "secret": true,
+    "description": "Personal Access Token for Gitea MCP operations."
+  },
+  "GITHUB_PAT": {
+    "required": false,
+    "secret": true,
+    "description": "Personal Access Token for GitHub MCP operations."
+  }
+}
