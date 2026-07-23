@@ -4,6 +4,33 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-07-23
+
+### Added
+- **New Agentic Skills**: Introduced `test-engineer`, `documentation-engineer`, and `performance-profiler` for comprehensive lifecycle management.
+- **Centralized Configuration**: Moved timeouts, retries, trust metrics, and viewports into a single `.agents/config.json`.
+- **Shared Utilities**: Created `.agents/common/utils.md` for framework discovery, API version negotiation, and log redaction.
+- **Skill Version Decoupling**: Skills now declare compatibility via `requires_core` frontmatter, decoupled from hardcoded core directives.
+- **Safe Abort Protocol**: Replaced destructive resets with safe git stashing during timeout aborts (`git stash push -u -m "agent-abort-backup-<timestamp>"`).
+- **Log Redaction**: Automatic regex-based redaction of secrets in `audit.jsonl` and mandatory log rotation.
+- **API Version Negotiation**: Added fallback mechanisms and version checks for external tools (MCP, Gitea, GitHub).
+- **Just-In-Time Manifest Verification**: Dynamically validates `SKILL.md` hashes against expected signatures via `sha256sum`.
+
+### Changed
+- **Optimized Context Window (MVC)**: Severely truncated `AGENTS.md` and pruned universal software engineering concepts from skill files, significantly reducing context bloat and improving execution accuracy.
+- **State Locking Stability**: Replaced advisory locking (`flock`) with atomic writes (`.tmp` to `.json`) for `.agents/brain/state.json`.
+- **Orchestration Concurrency**: Paralleled independent audit skills (`ui-a11y-reviewer` and `performance-profiler`).
+- **Merge Gate Hardening**: Substring matching replaced with an explicit `/merge-confirm <ticket>` command requirement.
+- **Supply Chain Trust Checks**: Enforced objective metrics (downloads, stars, age) against `.agents/config.json` before installing dependencies via `npm audit` and `safety check`.
+- **SAST & Secret Scanning Robustness**: Mandated `npx gitleaks` fallback, cached SAST checks, and explicit tool availability validations (`which`/`npx`).
+- **Time Tracking Override**: Formalized "proceed without tracking" to prevent workflow blockage while maintaining incident documentation.
+- **Quick Branch Pattern**: Replaced ambiguous quick mode prefixing with explicit `<prefix>/quick-<slug>` format.
+
+### Fixed
+- Addressed infinite recursion deadlocks between `schema-manager` and `architecture-auditor` by enforcing a maximum of 1 re-audit cycle.
+- Fixed broken section references across all skill files, making references to `AGENTS.md` context-independent.
+- Clarified UI responsiveness automated checks requiring `Puppeteer/Playwright` and fixed blind spots in consumer vs. admin review criteria.
+
 ## [4.0.0] - 2026-07-22
 
 ### Added

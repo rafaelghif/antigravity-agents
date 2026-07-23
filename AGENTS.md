@@ -1,51 +1,45 @@
 # AGENTS.md — Antigravity Agent Core (AAC) V4
 
-This core directive governs all agents in this workspace.
+**Core Version**: 4.1.0
+
+This core directive governs all agents in this workspace. Reference `.agents/config.json` for all numeric constants and `.agents/common/utils.md` for shared utilities.
 
 ## 1. Core Principles & Autonomy
-- **Proactive Execution**: Operate autonomously. Use the `ask_question` tool for critical decisions (schema changes, new dependencies, auth changes, data deletion, modifying `.agents/`). If a 5-minute timeout occurs waiting for user input, stop any active Gitea time trackers, log to `.agents/incidents/`, notify the user via `ask_question` that the operation was aborted due to timeout, and abort safely. Use the separate `ask_permission` tool *strictly* for OS-level permission errors (EACCES, EPERM). If both apply, `ask_question` wins.
-- **Tenacity vs. Escalation (Rollback Protocol)**: Iteratively explore solutions. If 3 distinct approaches fail, trigger the Rollback Protocol: (1) Snapshot failed state (`git stash`), (2) Document incident in `.agents/incidents/<slug>-<date>-incident.md` (Severity, Impact, Context, Approaches, Root Cause, Reverted To), (3) Revert to last known good state, (4) Validate state (run linters, unit tests, smoke tests). If validation fails, revert to the exact commit before the branch was created, and escalate to the user with the validation failures.
-- **Rule Precedence**: The rules in this `AGENTS.md` file are the supreme constitution. If a `.agents/skills/<name>/SKILL.md` conflicts with this document, `AGENTS.md` ALWAYS wins. Any skill that diverges from this directive is considered invalid and must be corrected.
-- **Unified Planning**: Complex tasks require sequential planning: (1) Unless bypassed by `!quick`, create a GitHub/Gitea issue for external tracking, then (2) Create a lightweight task checklist in `.agents/plans/` for internal traceability.
+- **Proactive Execution**: Operate autonomously. Use `ask_question` for critical decisions (schema changes, modifying `.agents/`). If a timeout occurs (see `.agents/config.json`), trigger the **Safe Abort Protocol** (stop trackers, close handles, `git stash push -u -m "agent-abort-backup-<timestamp>"` if in progress, log to `.agents/incidents/abort-<timestamp>.json`, and print a direct message to the user). Use `ask_permission` *strictly* for OS-level permission errors.
+- **Tenacity vs. Escalation (Rollback Protocol)**: Track attempted approaches with SHA of approach definition. Increment counter only when approach differs by >30%. If distinct approaches fail (limit in `.agents/config.json`): (1) Revert to the branch-start commit if isolated, or `git revert <bad-commit>` if shared, (2) Document in `.agents/incidents/`, (3) Escalate via `ask_question` with a summary of failures.
+- **Rule Precedence**: `AGENTS.md` ALWAYS overrides any `.agents/skills/*.md`.
 
 ## 2. Anti-Hallucination & State Management
-- **Zero-Assumption Policy**: NEVER guess file contents, variables, database schemas, or API props. Verify via `grep_search`, `view_file`, or documentation.
-- **Strict Schema Documentation**: Document all database/architecture contracts in `.agents/brain/schema.md`. Any schema mutation demands a global cascading impact analysis.
-- **Directory Manifest**: Store all artifacts strictly within these designated workspace locations:
-  - `.agents/scratch/`: Ephemeral/short-term notes, debugging context.
-  - `.agents/brain/`: Permanent decisions, `schema.md`, architectural records.
-  - `.agents/incidents/`: Post-mortem incident reports for failed tasks.
-  - `.agents/plans/`: Lightweight sequential task checklists.
-  - `.agents/skills/`: Auto-generated, reusable operational skills.
-- **Token Optimization & Verification**: Aggressively limit context window size. Use `StartLine`/`EndLine`. A partial read is valid ONLY if it captures the complete block/function/table. If a target spans >50 lines, paginate. If ambiguity persists after 3 targeted reads, escalate to `ask_question`.
-- **State & MCP Registry**: Maintain agent memory in `.agents/brain/state.json` (schema: `session_id`, `active_plan`, `pending_decisions`, `stack_trace`, `last_action`, `context`). Document available MCP servers in `.agents/brain/mcp-registry.json`. On startup, dynamically discover unknown servers via `list_servers` (or equivalent) and update the registry. Always check the registry before assuming external tool availability.
+- **Zero-Assumption**: Verify via tools; never guess file contents or API props.
+- **Directory Manifest**: 
+  - `.agents/scratch/`: Ephemeral notes, context compaction.
+  - `.agents/brain/`: `schema.md`, `state.json`, `mcp-registry.json`, architectural records.
+  - `.agents/incidents/`: Failed task reports.
+  - `.agents/plans/`: Task checklists.
+  - `.agents/skills/`: Operational skills.
+- **State Management Protocol**: Maintain memory in `.agents/brain/state.json`. Use atomic writes (write to `.agents/brain/state.json.tmp` and `mv` to `.agents/brain/state.json`) to prevent locks. Schema-validate on read. State includes `current_branch`. Delete `.agents/scratch/*` on successful task completion; preserve on failure. Update `.agents/brain/mcp-registry.json` at task start.
+- **Error Taxonomy**: 
+  - Transient Network (ECONNRESET, ETIMEDOUT): Retry with backoff (see `.agents/config.json`).
+  - Permission (EACCES, EPERM): `ask_permission`.
+  - Validation (Schema mismatch): Rollback + incident.
+  - Logic (Null pointer): Halt + escalate.
+  - Dependency (Missing package): Execution Manager.
 
-## 3. Engineering Excellence
-- **Holistic Impact**: Evaluate blast radius, future-proofing, scalability, and security before writing code.
-- **Framework-Native Tooling**: Always use official CLI generators instead of manual boilerplate. To respect isolation rules, ALWAYS use ephemeral invocations (e.g., `npx`, `pnpm dlx`, `pipx run`) rather than global system installations.
-- **UI Frameworks & Dependencies**: Strictly use native UI components if a framework is present. Check dependency files before installing to avoid redundant libraries.
-- **Mandatory Testing & Scope**: Measure coverage on changed files only (e.g., using `--changed-files` flag in CI). Maintain 80% coverage for features. *Hotfix Rules*: A `hotfix/` is strictly for urgent production outages/security issues (<2hr SLA), requires `ask_question` approval, and lowers the coverage gate to 60% with mandatory manual QA.
-- **Security Baseline**: NEVER hardcode secrets (use env vars; scan via `gitleaks` if possible). Code MUST pass static analysis (SAST like CodeQL) and rigorous linting (`eslint`/`pylint`). These checks are mandatory even for hotfixes. All user inputs must be sanitized using framework-native libraries.
-- **Observability Baseline**: Production code MUST include structured JSON logs (INFO for prod, DEBUG for dev) with `trace_id` for correlation. Expose Prometheus metrics (e.g., `/metrics`).
-- **Adaptive UI/UX**: Match UI complexity to user intent. For admin panels, prioritize clarity. For consumer views, implement premium aesthetics, micro-interactions, and strict WCAG accessibility (verified via automated tools like `axe-core`).
+## 3. Version Control & Collaboration
+- **Strict Workflow**: Unless `!quick` mode is specified, execute sequentially: Issue -> Gitea Tracker -> Plan -> Context Compaction -> Branch -> Code -> PR.
+- **Branching**: Use standard prefixes (`feature/`, `bugfix/`, `hotfix/`, `chore/`, `refactor/`). In `!quick` mode, use format `<prefix>/quick-<slug>` (e.g., `feature/quick-<slug>`).
+- **Merge Gate**: Merging to `main` REQUIRES explicit confirmation: user must type `/merge-confirm` with the ticket ID. No substring matching allowed.
 
-## 4. Skills & Self-Learning
-- **Ecosystem First**: Always check existing `<skills>` and `<mcp_servers>` before writing custom scripts.
-- **Controlled Generation**: For recurring tasks, generate a custom skill in `.agents/skills/<name>/`. Extend an existing skill if the core behavior matches ≥80%. Create a new skill if >50% code changes are needed or the domain differs. Deprecated skills must set `deprecated: true` in their frontmatter with a migration path and 30-day grace period.
-- **Self-Learning**: Persist newfound solutions via markdown rules in `.agents/brain/rules.md`. When the user invokes the `/learn` slash command, document the new pattern (Problem -> Context -> Solution -> Verification) in rules or generate a new skill.
-
-## 5. Version Control & Collaboration
-- **Strict End-to-End Workflow**: Unless the user specifies `!quick` mode, execute sequentially:
-  - *(Note: `!quick` mode means skip issue creation, Gitea time tracking, and PR creation. DO NOT skip branching, atomic commits, or merge approval.)*
-  1. **Issue Creation**: Create an issue (GitHub/MCP).
-  2. **Gitea Time Tracking**: If on Gitea, start the time tracker on the issue.
-  3. **Plan**: Create internal `.agents/plans/` checklist.
-  4. **Branch**: Create standard prefix branch (`feature/`, `bugfix/`, `hotfix/`, `chore/`, `refactor/`, or `quick-` for `!quick` mode).
-  5. **Execute & Commit**: Atomic commits with auto-close keywords.
-  6. **PR & Cleanup**: Create PR. **Merging to main is a high-stakes action:** you MUST use `ask_question` to get explicit user approval before merging. No override is permitted unless the user explicitly commands "merge without approval". After approval, merge, stop Gitea tracker (if applicable), and delete branch.
-
-## 6. Execution & Safety
-- **Skill Sequencing**: The `git-workflow` skill acts as the outer wrapper (Branch → Code → PR). During the *Implementation phase*, execute triggered skills in this order: Architecture Auditor -> Schema Manager -> Implementation -> UI/a11y Reviewer.
-- **Error Fallbacks & Retries**: For network/transient errors, retry 3 times with exponential backoff. If it's a permission error, use `ask_permission` first. Otherwise, attempt to use the package manager's native CLI via ephemeral execution (e.g., `npx` or `pnpm dlx`). If that fails, fallback to global invocation only if installed system-wide; otherwise escalate.
-- **Artifacts**: Use GitHub-flavored markdown and Mermaid (quote special characters). Use Carousels for sequential step-by-step guides (using the ` ` ` `carousel \n ... <!-- slide --> ... ` ` ` ` format). Use absolute paths starting from the workspace root for links.
-- **Isolation & Security Auditing**: Restrict all memory and generated scripts to the local workspace (`.agents/`). No global OS/dependency installations. All external API calls and tool executions MUST be logged to `.agents/brain/audit.jsonl` for security auditing.
+## 4. Execution & Safety
+- **Skill Execution**: Load `.agents/skills/<name>/SKILL.md` dynamically only when triggered. Ensure skill frontmatter requires compatible core version (`requires_core: ">=4.0.0"`). Verify dynamic skill SHA-256 hashes on execution against expected signatures rather than relying on a single start-of-task `manifest.json`. If mismatch during execution, `ask_question` to update manifest or abort.
+- **Orchestration Sequence**:
+  1. `architecture-auditor` (if change > 10 lines)
+  2. `schema-manager` (if DB changes) -> `architecture-auditor` (max 1 re-audit cycle; escalate via ask_question if loop persists)
+  3. `execution-manager` (if dependencies needed)
+  4. Implementation
+  5. `ui-a11y-reviewer` and `performance-profiler` (can run concurrently)
+  6. `security-observability-auditor` (always, halt if fails)
+  7. `git-workflow` (PR and merge)
+- **Ephemeral Tooling**: ALWAYS use ephemeral invocations (e.g., `npx`, `pnpm dlx`). No global installations.
+- **Error Fallbacks**: For network errors, retry (see `.agents/config.json`) with backoff. If permanently unreachable, halt execution and escalate immediately.
+- **Logging Infrastructure**: All external API calls and tool executions MUST be logged to `.agents/brain/audit.jsonl` (Rotate daily or limit size to 10MB). Implement automatic redaction of known secrets in audit logs before writing using regex filters (see `.agents/common/utils.md`). No secrets in `.agents/`.

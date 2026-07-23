@@ -1,0 +1,23 @@
+{
+  "core_version": "4.1.0",
+  "timeouts": {
+    "abort_minutes": 5,
+    "remediation_timebox_minutes": 30
+  },
+  "retries": {
+    "network_error_max": 3,
+    "rollback_distinct_approaches": 3,
+    "flaky_tests_max": 3
+  },
+  "ui": {
+    "viewports_px": [320, 768, 1024, 1920],
+    "spacing_grid_px": 8
+  },
+  "security": {
+    "trust_metrics": {
+      "min_weekly_downloads": 1000,
+      "min_repo_stars": 10,
+      "max_publish_age_days": 365
+    }
+  }
+}
