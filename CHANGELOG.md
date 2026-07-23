@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.3] - 2026-07-23
+
+### Fixed
+- **Supply Chain Security**: Pinned GitHub Actions (`actions/checkout` and `gitleaks-action`) to full 40-character commit SHAs instead of mutable tags (`@v4`, `@v2`) to resolve Semgrep SAST blocking findings.
+
 ## [4.1.2] - 2026-07-23
 
 ### Added
