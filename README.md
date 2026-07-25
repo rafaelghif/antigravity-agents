@@ -22,6 +22,7 @@ Autonomous coding agents offer massive productivity boosts, but running them in 
 
 | The AI Coding Risk | The AAC V4 Solution |
 | :--- | :--- |
+| **Agent Amnesia** | **Hermes Protocol**: Agents dynamically generate permanent, executable skills (`.agents/skills/`) from procedural learnings rather than relying on dead text files. |
 | **Hallucination & Token Bloat** | **Zero-Assumption Policy**: Agents are explicitly forbidden from guessing fields. Strict rules enforce paginated targeted reads instead of blind full-file ingestions. |
 | **Prompt Injection & Deadlocks** | **AI Safety & Socratic Verification**: Filters out prompt injections, enforces recursive deadlock detection, and adds state lock/recovery mechanisms. |
 | **Infinite Loops & Hanging** | **Automated Rollback Protocol**: If 3 approaches fail, the agent snapshots the state, logs an incident report, and reverts to a known good state. A 5-minute timeout on user inputs ensures the agent aborts safely without hanging. |
@@ -49,16 +50,25 @@ flowchart TD
 
 ---
 
-## 🚀 Core Skills
+## 🚀 Core Skills (10 Modules)
 
-AAC V4 operates using modular, specialized **Skills** located in `.agents/skills/`. If multiple skills trigger, they execute in a strict sequence:
+AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agents/skills/`. When triggered, they govern specific domain workflows:
 
-1. **`architecture-auditor`**: Performs rigorous Holistic Impact Analysis (blast radius, DRY, extensibility) before major code changes.
-2. **`schema-manager`**: Single point of authority for DB schemas. Enforces reversible migrations and prevents field hallucination.
-3. **`execution-manager`**: Oversees dependency installations, prevents redundancy, and enforces ephemeral execution (`npx` instead of `npm -g`).
-4. **`ui-a11y-reviewer`**: Validates frontend components against WCAG standards, Admin vs. Consumer logic branching, and aesthetic guidelines.
-5. **`security-observability-auditor`**: Scans for secrets, missing input sanitization, and verifies structured logging (JSON/Prometheus).
-6. **`git-workflow`**: Strictly handles the end-to-end Version Control Lifecycle (Issue -> Time Tracking -> Branch -> Atomic Commits -> PR).
+### 🛡️ Security & Architecture
+- **`architecture-auditor`**: Performs rigorous Holistic Impact Analysis (blast radius, DRY, extensibility) before major code changes.
+- **`schema-manager`**: Single point of authority for DB schemas. Enforces reversible migrations and prevents field hallucination.
+- **`security-observability-auditor`**: Scans for secrets via `gitleaks`, missing input sanitization, and verifies structured logging.
+
+### ⚙️ Execution & Quality
+- **`execution-manager`**: Oversees dependencies, prevents redundancy, and enforces ephemeral tool execution (e.g., `npx` over `npm -g`).
+- **`ui-a11y-reviewer`**: Validates frontend components against WCAG standards and aesthetic guidelines.
+- **`test-engineer`**: Generates and executes unit, integration, and E2E testing workflows.
+- **`performance-profiler`**: Profiles code to detect performance regressions or memory leaks.
+
+### 📚 Workflow & Maintenance
+- **`git-workflow`**: Handles the end-to-end Version Control Lifecycle (Branching, PRs, Merge Gates).
+- **`branch-janitor`**: An auto-generated skill that actively cleans up stale local and remote branches post-merge.
+- **`documentation-engineer`**: Synchronizes READMEs, API docs, and inline comments alongside code changes.
 
 ---
 
