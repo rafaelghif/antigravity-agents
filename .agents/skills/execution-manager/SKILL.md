@@ -29,6 +29,7 @@ Before running any dependency management command, detect the ecosystem using the
 - **ALWAYS** use ephemeral executors: `npx`, `pnpm dlx`, `yarn dlx`, or `pipx run`.
 - **Version Pinning**: Prefer `npx -y <package>@<version>` over `npx <package>`. Check for `@latest` and warn if used. Document installed version in `.agents/scratch/deps.log`.
 - **Security**: Use `npm audit` or `safety check` before installation. Block if high‑severity vulnerabilities exist. Verify trust metrics against `.agents/config.json`. Document reasoning for any package with < 10k weekly downloads.
+- **Provenance Verification**: Verify package integrity via `npm integrity` field in lockfile. For critical packages, check sigstore signatures (e.g., `npx sigstore verify <package>@<version>`). If verification fails: Halt, ask_question.
 
 ### 4. API Version Negotiation
 - Before invoking external tools (e.g., Gitea, GitHub, MCP), verify version compatibility (see `.agents/common/utils.md`).

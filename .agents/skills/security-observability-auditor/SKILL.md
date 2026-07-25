@@ -36,7 +36,13 @@ Enforces the Security and Observability Baselines defined in AGENTS.md.
 - Ensure ALL logs across all skill executions and application code output a `trace_id` for request correlation (see `.agents/common/utils.md`).
 - Check that application metrics (`/metrics`) are exposed and updated correctly. Grep for `logger.error` or equivalent; verify that `process.env.NODE_ENV === 'production'` conditionally omits `stack` property, OR recommend using a logging library that automatically differentiates environments (e.g., `pino` with `redact`).
 
-### 4. Remediation
+### 4. Dependency Vulnerability Scan
+- Run `npm audit` (Node.js), `pip-audit` (Python), `cargo audit` (Rust), or `dependency-check` (Java).
+- If any vulnerability with CVSS ≥ 7.0 found → block PR.
+- If CVSS 4.0-6.9 → create technical debt ticket.
+- Cache results in `.agents/brain/deps-audit-<date>.json`.
+
+### 5. Remediation
 - If any secrets are found, immediately halt, use `git reset`, and escalate.
 - If SAST or Observability checks fail, refactor the code to comply before proceeding. **Remediation Timebox**: If remediation takes > `config.json -> timeouts.remediation_timebox_minutes`, escalate to user and document in `.agents/incidents/security-<date>.md`.
 - Record the audit results in `.agents/brain/sast-<date>.json`.

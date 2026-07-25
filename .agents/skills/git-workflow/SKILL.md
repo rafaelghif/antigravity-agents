@@ -67,4 +67,4 @@ However:
 - **Merge Gate**: Merging to the base branch is a destructive/high-stakes action. You MUST use the `ask_question` tool to get explicit user approval before executing the merge, unless previously overridden.
 - **Merge**: Execute the merge after approval.
 - **Time Tracking**: If on Gitea, STOP the issue time tracker.
-- **Branch Cleanup**: Delete the branch both locally and remotely to prevent repository bloat.
+- **Branch Cleanup**: Delete the branch both locally and remotely to prevent repository bloat. After deletion, verify remote branch is gone (`git ls-remote --heads origin <branch>`). If it still exists, retry 2x then ask_question.

@@ -16,12 +16,13 @@ Eradicate AI hallucinations regarding database fields, tables, and architectures
 ## Execution Steps
 0. **Pre-Migration**: Generate explicit `up` and `down` migration files.
    - **Migration Naming**: `YYYYMMDDHHMMSS_<action>_<table>.sql` (Actions: `create`, `alter`, `drop`, `add_column`, `rename_column`).
-   - **ORM Detection**: Check `package.json` (`typeorm`, `sequelize`, `prisma`, `drizzle`), `requirements.txt` (`sqlalchemy`, `django`), `Gemfile` (`rails`). Use native generator if found. Fallback to raw SQL.
+   - **ORM Detection**: Utilize the framework detection standard in `.agents/common/utils.md` to identify the project's ORM (e.g., Prisma, SQLAlchemy, Rails). Use the native generator if found. Fallback to raw SQL.
    - **Dry-Run Protocol**: Always run migration with `--dry-run` first. Log to `.agents/scratch/migration-<date>.log`. Confirm via `ask_question` before executing (unless `!force`).
 1. **Impact Analysis**: Delegate complex structural impact analysis to the `architecture-auditor` skill. For immediate field tracking, use `grep_search` to find ALL occurrences of the modified field.
-2. **Update Codebase**: Safely refactor all found dependencies to match the new schema.
-3. **Update Brain**: Overwrite or update `.agents/brain/schema.md` to reflect the exact new structure. You MUST append a `last_verified: YYYY-MM-DD` timestamp to the modified schema entities.
-4. **Mandatory Testing**: Run or write unit tests to verify the schema change hasn't broken serialization or database queries. *Exception*: If this change is a critical `hotfix/`, adhere to the reduced testing protocol (60% coverage + manual QA). The `last_verified` timestamp must also include a `(hotfix)` note.
+2. Update Codebase: Safely refactor all found dependencies to match the new schema.
+3. Update Brain: Overwrite or update `.agents/brain/schema.md` to reflect the exact new structure. You MUST append a `last_verified: YYYY-MM-DD` timestamp to the modified schema entities.
+4. Mandatory Testing: Run or write unit tests to verify the schema change hasn't broken serialization or database queries. *Exception*: If this change is a critical `hotfix/`, adhere to the reduced testing protocol (60% coverage + manual QA). The `last_verified` timestamp must also include a `(hotfix)` note, and you MUST automatically create a technical debt ticket in the issue tracker to complete the remaining test coverage.
+5. Rollback Verification: After migration, run `down` migration and verify schema returns to previous state (in dev environment). If rollback fails → halt, escalate, document in `.agents/incidents/rollback-fail-<timestamp>.json`.
 
 ## Zero-Assumption Rule
 Never guess a field name. If a field is present in the codebase but absent from `schema.md`: 

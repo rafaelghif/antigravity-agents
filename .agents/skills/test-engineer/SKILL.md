@@ -20,3 +20,4 @@ Ensure code reliability by maintaining or improving test coverage across unit, i
 4. **Coverage**: Store current coverage in `.agents/brain/coverage-baseline.json` at project start. Run test suite and ensure coverage percentage is maintained or improved against the baseline across unit, integration, and E2E tests.
 5. **Snapshot Tests**: Update or create snapshot tests for UI components.
 6. **Flaky Test Detection**: If tests fail intermittently, retry up to `retries.flaky_tests_max` (see `.agents/config.json`). Document flakes in `.agents/incidents/flaky-tests-<date>.md`.
+7. **CI/CD Integration**: Before PR creation, verify tests pass in CI environment (not just local). If CI fails, halt PR, auto-fix (if deterministic) or ask_question. Track test failure rates per commit in `.agents/brain/test-metrics.jsonl`.

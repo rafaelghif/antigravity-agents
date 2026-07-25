@@ -16,6 +16,6 @@ Identify and resolve performance bottlenecks such as N+1 queries, memory leaks, 
 ## Execution Steps
 1. Check for N+1 queries in ORM/database operations.
 2. Analyze loops for inefficient algorithmic complexity (e.g., O(n²) vs O(n)).
-3. Check for memory leaks. For Node.js: use `--inspect` + Chrome DevTools, `clinic`, or `node-memwatch`. For Python: use `tracemalloc` or `memory_profiler`. At minimum, scan for unclosed connections/listeners in the code.
+3. Check for memory leaks. Run memory profiler in production mode for 5 minutes with simulated load. Track heap size growth pattern: if +10% in <5 minutes → investigate. Check event listener count: `process._getActiveHandles()` (Node.js) or `len(weakref.getweakrefs())` (Python). Report findings with before/after heap snapshots.
 4. For frontend applications, run Lighthouse (or similar) to evaluate performance metrics.
 5. Report findings in `.agents/plans/perf-<date>.md` and propose optimizations.

@@ -26,6 +26,7 @@ Enforce the "World-Class Engineering Mindset" defined in AGENTS.md (Holistic Imp
 3. Use the following explicit template for the report:
    - **Blast Radius**: Modules impacted directly/indirectly.
    - **Future-Proofing**: Number of hardcoded values > 3? Business logic vs. presentation mixed? API response fields not versioned? Constants used in > 5 files?
+   - **Deprecation Debt**: Add scoring (1pt per deprecated API version, 3pt per unpatched CVE, 5pt for EOL within 12 months). Score > 10 → mandatory technical debt ticket creation.
    - **Reusability**: Shared utility extraction potential.
    - **Performance**: Algorithmic complexity and bottlenecks.
    - **Security**: Authentication, authorization, and data exposure.

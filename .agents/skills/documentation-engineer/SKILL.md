@@ -15,7 +15,7 @@ Keep all project documentation in sync with the codebase.
 
 ## Execution Steps
 1. Update `README.md` with any new features, configuration steps, or behavioral changes.
-2. Update API docs (e.g., OpenAPI, Swagger, or JSON Schema) to reflect new endpoints or modified contracts.
+2. Update API docs (e.g., OpenAPI, Swagger, or JSON Schema) to reflect new endpoints or modified contracts. Run `api-diff` against OpenAPI spec to verify docs align with implementation.
 3. Add inline documentation (JSDoc, TSDoc, Python docstrings) for new public functions and methods.
-4. Update `CHANGELOG.md` following semantic versioning guidelines.
+4. Update `CHANGELOG.md` following semantic versioning guidelines. (Major version if API breaking, minor if new features, patch if bug fixes).
 5. Create a draft for release notes if this closes a milestone.

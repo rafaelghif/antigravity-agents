@@ -18,6 +18,31 @@
       "min_weekly_downloads": 1000,
       "min_repo_stars": 10,
       "max_publish_age_days": 365
-    }
+    },
+    "sast_tools": ["semgrep", "eslint-plugin-security", "bandit", "gosec", "spotbugs"],
+    "secret_scanning": ["gitleaks", "trufflehog"],
+    "dependency_scanning": ["npm-audit", "pip-audit", "cargo-audit", "dependency-check"],
+    "vulnerability_threshold_cvss": 7.0
+  },
+  "state_management": {
+    "lock_timeout_seconds": 30,
+    "backup_rotation_count": 3,
+    "checkpoint_interval_tool_calls": 10,
+    "token_budget": 100000
+  },
+  "orchestration": {
+    "max_skill_depth": 5,
+    "deadlock_retries": 3,
+    "parallel_skills": ["ui-a11y-reviewer", "performance-profiler"]
+  },
+  "degradation": {
+    "external_service_timeout_seconds": 120,
+    "fallback_mode_enabled": true,
+    "sync_after_degradation": true
+  },
+  "ai_safety": {
+    "input_sanitization_enabled": true,
+    "input_whitelist": ["proceed", "merge", "abort", "confirm", "retry"],
+    "blacklist_keywords": ["ignore", "override", "skip", "disable"]
   }
 }

@@ -20,4 +20,5 @@ Ensure all frontend code adheres to the "Adaptive UI/UX" rules defined in AGENTS
    - **For Admin Panels**: Evaluate data density (maximize information) and utility (bulk actions, filtering, sorting).
    - **WCAG Compliance**: Verify contrast (`axe-core` or `pa11y`), keyboard navigation (manual tab test to `.agents/scratch/a11y-test-<date>.md`), and ARIA properties (`eslint-plugin-jsx-a11y`).
    - **Responsive Design**: Verify UI works at the viewports defined in `.agents/config.json` (Use Puppeteer/Playwright in the toolchain for automated viewport testing). Images use `srcset`. No horizontal scrolling.
+   - **Mobile Accessibility**: Verify touch targets ≥ 44px (WCAG 2.5.5). Test gesture navigation (swipe, pinch) for browser compatibility. Run Lighthouse mobile score → block if < 60.
 2. If violations are found, immediately halt the process and refactor the code to comply before proceeding.
