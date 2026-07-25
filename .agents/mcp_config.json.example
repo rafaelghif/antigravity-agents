@@ -7,9 +7,17 @@
       }
     },
     "gitea": {
-      "serverURL": "http://localhost:3000/mcp",
-      "headers": {
-        "Authorization": "Bearer <your personal access token>"
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITEA_ACCESS_TOKEN",
+        "docker.gitea.com/gitea-mcp-server"
+      ],
+      "env": {
+        "GITEA_ACCESS_TOKEN": "<YOUR_GITEA_TOKEN>"
       }
     }
   }

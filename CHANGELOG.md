@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Forced agent auto-learning by injecting `rules.md` loading into `TASK_TEMPLATE.md` Pre-flight checklist.
   - Generated new `branch-janitor` skill autonomously to handle cleanup of stale local/remote branches.
   - Generated `polyglot-developer` and `advanced-debugger` skills to enforce language-agnostic clean code standards and scientific debugging methods.
+  - Generated `ci-cd-specialist`, `data-synthesizer`, and `context-optimizer` to complete the 15-module Elite Enterprise architecture (handling pipelines, mock data, and token bloat compression).
 
 ## [4.1.3] - 2026-07-23
 

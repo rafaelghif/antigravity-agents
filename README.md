@@ -50,7 +50,7 @@ flowchart TD
 
 ---
 
-## 🚀 Core Skills (12 Modules)
+## 🚀 Core Skills (15 Modules)
 
 AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agents/skills/`. When triggered, they govern specific domain workflows:
 
@@ -62,17 +62,20 @@ AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agent
 ### ⚙️ Implementation & Debugging
 - **`polyglot-developer`**: Enforces universal Clean Code and SOLID principles while idiomatically adapting to the repository's primary language (Python, PHP, TS, Java, Go, etc.).
 - **`advanced-debugger`**: Mandates the "Scientific Debugging Method" (Hypothesis -> Probe -> Execute -> Analyze) to prevent the AI from wildly guessing solutions.
+- **`data-synthesizer`**: Injects realistic, varied mock data into local databases to ensure UI/API testing is performed in production-like states.
 
 ### ⚙️ Execution & Quality
 - **`execution-manager`**: Oversees dependencies, prevents redundancy, and enforces ephemeral tool execution (e.g., `npx` over `npm -g`).
 - **`ui-a11y-reviewer`**: Validates frontend components against WCAG standards and aesthetic guidelines.
 - **`test-engineer`**: Generates and executes unit, integration, and E2E testing workflows.
 - **`performance-profiler`**: Profiles code to detect performance regressions or memory leaks.
+- **`ci-cd-specialist`**: Audits GitHub Actions/GitLab CI configurations, enforces provenance, and debugs pipeline failures.
 
 ### 📚 Workflow & Maintenance
 - **`git-workflow`**: Handles the end-to-end Version Control Lifecycle (Branching, PRs, Merge Gates).
 - **`branch-janitor`**: An auto-generated skill that actively cleans up stale local and remote branches post-merge.
 - **`documentation-engineer`**: Synchronizes READMEs, API docs, and inline comments alongside code changes.
+- **`context-optimizer`**: A token janitor that compresses incident memories and purges scratch files to prevent LLM context bloat.
 
 ---
 
