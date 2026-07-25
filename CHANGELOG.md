@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 - **State Initialization Bypass**: Injected a `CRITICAL ENFORCEMENT` rule at the very top of `AGENTS.md` and created default `.agents/brain/state.json` and `.agents/brain/audit.jsonl` files to resolve agents silently skipping the State Management Protocol.
+- **Full Audit Fixes (Priority 1-4)**:
+  - Added State Lock Protocol and State Recovery Mechanism to prevent corruption.
+  - Added Token Budget Management to prevent context window bloat.
+  - Added Orchestration Deadlock Detection to prevent infinite recursive loops.
+  - Added Prompt Injection Sanitization for `ask_question` inputs.
+  - Added MCP Plugin Verification and Degradation Protocol for service unavailability.
+  - Enhanced all 9 skills with audit recommendations (Provenance Verification, Rollback Verification, Memory Leak Protocols, CI Integration, Mobile Accessibility Tests).
 
 ## [4.1.3] - 2026-07-23
 

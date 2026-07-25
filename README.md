@@ -23,6 +23,7 @@ Autonomous coding agents offer massive productivity boosts, but running them in 
 | The AI Coding Risk | The AAC V4 Solution |
 | :--- | :--- |
 | **Hallucination & Token Bloat** | **Zero-Assumption Policy**: Agents are explicitly forbidden from guessing fields. Strict rules enforce paginated targeted reads instead of blind full-file ingestions. |
+| **Prompt Injection & Deadlocks** | **AI Safety & Socratic Verification**: Filters out prompt injections, enforces recursive deadlock detection, and adds state lock/recovery mechanisms. |
 | **Infinite Loops & Hanging** | **Automated Rollback Protocol**: If 3 approaches fail, the agent snapshots the state, logs an incident report, and reverts to a known good state. A 5-minute timeout on user inputs ensures the agent aborts safely without hanging. |
 | **Rogue Actions** | **Strict Precedence & Boundaries**: `AGENTS.md` is the supreme law. Critical actions (schema changes, merging, modifying rules) absolutely require user permission via `ask_question`. |
 | **Silent Failures** | **Security & Observability Auditors**: Native skills scan for hardcoded secrets via `gitleaks`, enforce SAST execution, and verify structured JSON logging. |
