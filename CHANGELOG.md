@@ -4,6 +4,14 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.4] - 2026-07-25
+
+### Added
+- **Task Entrypoint SOP**: Introduced `.agents/TASK_TEMPLATE.md` to force agents to explicitly check off pre-flight and execution requirements before coding, addressing behavioral eagerness.
+
+### Fixed
+- **State Initialization Bypass**: Injected a `CRITICAL ENFORCEMENT` rule at the very top of `AGENTS.md` and created default `.agents/brain/state.json` and `.agents/brain/audit.jsonl` files to resolve agents silently skipping the State Management Protocol.
+
 ## [4.1.3] - 2026-07-23
 
 ### Fixed
