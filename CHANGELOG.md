@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Implemented the Hermes Protocol in `AGENTS.md` to distinguish between static rules and dynamic procedural skill generation.
   - Forced agent auto-learning by injecting `rules.md` loading into `TASK_TEMPLATE.md` Pre-flight checklist.
   - Generated new `branch-janitor` skill autonomously to handle cleanup of stale local/remote branches.
+  - Generated `polyglot-developer` and `advanced-debugger` skills to enforce language-agnostic clean code standards and scientific debugging methods.
 
 ## [4.1.3] - 2026-07-23
 

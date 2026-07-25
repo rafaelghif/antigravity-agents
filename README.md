@@ -50,7 +50,7 @@ flowchart TD
 
 ---
 
-## 🚀 Core Skills (10 Modules)
+## 🚀 Core Skills (12 Modules)
 
 AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agents/skills/`. When triggered, they govern specific domain workflows:
 
@@ -58,6 +58,10 @@ AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agent
 - **`architecture-auditor`**: Performs rigorous Holistic Impact Analysis (blast radius, DRY, extensibility) before major code changes.
 - **`schema-manager`**: Single point of authority for DB schemas. Enforces reversible migrations and prevents field hallucination.
 - **`security-observability-auditor`**: Scans for secrets via `gitleaks`, missing input sanitization, and verifies structured logging.
+
+### ⚙️ Implementation & Debugging
+- **`polyglot-developer`**: Enforces universal Clean Code and SOLID principles while idiomatically adapting to the repository's primary language (Python, PHP, TS, Java, Go, etc.).
+- **`advanced-debugger`**: Mandates the "Scientific Debugging Method" (Hypothesis -> Probe -> Execute -> Analyze) to prevent the AI from wildly guessing solutions.
 
 ### ⚙️ Execution & Quality
 - **`execution-manager`**: Oversees dependencies, prevents redundancy, and enforces ephemeral tool execution (e.g., `npx` over `npm -g`).
