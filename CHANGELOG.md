@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Added Prompt Injection Sanitization for `ask_question` inputs.
   - Added MCP Plugin Verification and Degradation Protocol for service unavailability.
   - Enhanced all 9 skills with audit recommendations (Provenance Verification, Rollback Verification, Memory Leak Protocols, CI Integration, Mobile Accessibility Tests).
+- **Hermes Protocol & Self-Learning**:
+  - Implemented the Hermes Protocol in `AGENTS.md` to distinguish between static rules and dynamic procedural skill generation.
+  - Forced agent auto-learning by injecting `rules.md` loading into `TASK_TEMPLATE.md` Pre-flight checklist.
+  - Generated new `branch-janitor` skill autonomously to handle cleanup of stale local/remote branches.
 
 ## [4.1.3] - 2026-07-23
 
