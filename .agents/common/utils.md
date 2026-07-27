@@ -14,13 +14,22 @@
 ## 2.5 State Management & File I/O
 - **Atomic Writes**: Always perform state updates (e.g., `state.json`) atomically to prevent locking and corruption. Write to a temporary file first, then move it: `echo "$DATA" > .agents/brain/state.json.tmp && mv .agents/brain/state.json.tmp .agents/brain/state.json`.
 
-## 3. Framework Detection (Shared)
-1. Read current working directory.
-2. Check `package.json` for npm/pnpm/yarn (use `workspaces` for monorepos).
-3. Check `requirements.txt` for pip.
-4. Check `Cargo.toml` for cargo.
-5. Check `go.mod` for go.
-6. Check `Gemfile` for bundler.
+## 3. Universal Polyglot Framework & Language Detection
+1. Read current working directory and inspect project tree.
+2. **JavaScript / TypeScript / Node.js**: Check `package.json` (npm, pnpm, yarn, bun, workspaces).
+3. **Python**: Check `pyproject.toml`, `requirements.txt`, `Pipfile`, `environment.yml`.
+4. **Go**: Check `go.mod`.
+5. **Rust**: Check `Cargo.toml`.
+6. **PHP**: Check `composer.json`.
+7. **Java / Kotlin**: Check `pom.xml`, `build.gradle`, `build.gradle.kts`.
+8. **C# / .NET / VB.NET**: Check `*.csproj`, `*.vbproj`, `*.sln`.
+9. **Dart / Flutter**: Check `pubspec.yaml`.
+10. **Ruby**: Check `Gemfile`.
+11. **C / C++**: Check `CMakeLists.txt`, `Makefile`, `configure.ac`.
+12. **Legacy ASP / VB6 / Classic Systems**: Check `*.asp`, `*.vbp`, `*.bas`, `*.cls`, `web.config`.
+13. **Swift / Objective-C**: Check `Package.swift`, `*.xcodeproj`, `Podfile`.
+14. **Elixir / Erlang**: Check `mix.exs`, `rebar.config`.
+
 
 ## 4. API Version Negotiation
 - Before invoking external tools (e.g., Gitea, GitHub, MCP), verify version compatibility (e.g., `tool --version` or `/api/v1/version`).

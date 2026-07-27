@@ -4,7 +4,25 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-07-27
+
+### Added
+- **Multi-Agent Execution Topologies**: Introduced Parallel Swarm Topology (for independent multi-domain audits) and Sequential Pipeline Topology (stage-gated dependency ordering for architecture, development, and QA).
+- **Synchronization Barriers & Mutex Task Locking**: Guaranteed zero-skipped responses for concurrent subagents via `claimed_tasks` mutexing and Orchestrator execution freezing until all subagents finish.
+- **Universal Polyglot & Legacy Framework Detection**: Expanded `utils.md` and `code-engineer` skill to idiomatically support 14+ language ecosystems (TypeScript, JavaScript, Python, Go, Rust, PHP, Java/Kotlin, C#/.NET, Dart/Flutter, C/C++, Swift, Elixir, and legacy ASP/VB6).
+- **Human-Centric Engineering Co-Pilot Persona**: Overhauled `.agents/brain/soul.md` to embody a warm, friendly Senior Partner persona who is uncompromisingly firm on code quality and zero "Yes-Man" pushback.
+- **5-Dimension Performance Profiling**: Upgraded `quality-assurance` skill to profile CPU execution, File & Network I/O, Database connection pooling, Heap memory leaks, and historical baseline tracking via `.agents/brain/perf-baseline.json`.
+
+### Changed
+- **6 Core Domain Skills Consolidation**: Streamlined 15 redundant skill directories into 6 high-precision core domain skills (`code-engineer`, `system-architect`, `quality-assurance`, `devops-manager`, `security-docs-auditor`, `system-janitor`), reducing initial token bloat by >60%.
+- **Google Antigravity Standard Alignment**: Formalized `AGENTS.md` as the supreme workspace directive, defining strict precedence over project-specific `GEMINI.md` files.
+
+### Fixed
+- **Hardcoded Credential Redaction**: Fully remediated hardcoded secrets in `.agents/mcp_config.json` and `.env` using environment variable substitution (`${GITHUB_PAT}`, `${GITEA_PAT}`).
+- **Anti-Snippet Tunnel Vision**: Explicitly prohibited inferring data structures from truncated snippets; enforced full symbol definition inspection.
+
 ## [4.1.4] - 2026-07-25
+
 
 ### Added
 - **Task Entrypoint SOP**: Introduced `.agents/TASK_TEMPLATE.md` to force agents to explicitly check off pre-flight and execution requirements before coding, addressing behavioral eagerness.

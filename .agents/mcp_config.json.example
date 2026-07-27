@@ -3,7 +3,7 @@
     "github": {
       "serverURL": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer <YOUR_GITHUB_PAT>"
+        "Authorization": "Bearer ${GITHUB_PAT}"
       }
     },
     "gitea": {
@@ -13,12 +13,13 @@
         "-i",
         "--rm",
         "-e",
-        "GITEA_ACCESS_TOKEN",
+        "GITEA_PAT",
         "docker.gitea.com/gitea-mcp-server"
       ],
       "env": {
-        "GITEA_ACCESS_TOKEN": "<YOUR_GITEA_TOKEN>"
+        "GITEA_PAT": "<YOUR_GITEA_TOKEN>"
       }
     }
   }
 }
+

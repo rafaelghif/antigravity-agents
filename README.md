@@ -1,6 +1,6 @@
 # Antigravity Agent Core (AAC) V4
 
-[![Version](https://img.shields.io/badge/version-4.1.4-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](AGENTS.md)
 [![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](AGENTS.md)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/rafaelghifari/antigravity-agents)
 
@@ -8,74 +8,39 @@
 
 Autonomous coding agents offer massive productivity boosts, but running them in unstructured repositories introduces severe risks: hallucinated architectures, credential leaks, messy commit histories, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V4** solves this by enforcing a strict, token-optimized, skill-based workflow loop governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4 ensures that AI-driven coding conforms exactly to professional engineering standards, handles edge cases autonomously, and never assumes anything.
+**Antigravity Agent Core (AAC) V4.2** solves this by enforcing a strict, token-optimized, skill-based workflow loop governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4.2 ensures that AI-driven coding conforms exactly to professional engineering standards, handles edge cases autonomously, and never assumes anything.
 
 > [!IMPORTANT]
-> **100% Declarative & Skill-Based**: AAC V4 abandons clunky bash scripts in favor of AI-native `.agents/skills/`. All configurations, plans, schemas, and execution logs are isolated securely under the `.agents/` directory.
+> **100% Declarative & Skill-Based**: AAC V4.2 abandons clunky bash scripts in favor of AI-native `.agents/skills/`. All configurations, plans, schemas, and execution logs are isolated securely under the `.agents/` directory.
 
 > [!WARNING]
-> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V4 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
+> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V4.2 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
 
 ---
 
-## ⚡ What's New in V4?
+## ⚡ What's New in V4.2?
 
-| The AI Coding Risk | The AAC V4 Solution |
+| The AI Coding Risk | The AAC V4.2 Solution |
 | :--- | :--- |
-| **Agent Amnesia** | **Hermes Protocol**: Agents dynamically generate permanent, executable skills (`.agents/skills/`) from procedural learnings rather than relying on dead text files. |
-| **Hallucination & Token Bloat** | **Zero-Assumption Policy**: Agents are explicitly forbidden from guessing fields. Strict rules enforce paginated targeted reads instead of blind full-file ingestions. |
-| **Prompt Injection & Deadlocks** | **AI Safety & Socratic Verification**: Filters out prompt injections, enforces recursive deadlock detection, and adds state lock/recovery mechanisms. |
-| **Infinite Loops & Hanging** | **Automated Rollback Protocol**: If 3 approaches fail, the agent snapshots the state, logs an incident report, and reverts to a known good state. A 5-minute timeout on user inputs ensures the agent aborts safely without hanging. |
-| **Rogue Actions** | **Strict Precedence & Boundaries**: `AGENTS.md` is the supreme law. Critical actions (schema changes, merging, modifying rules) absolutely require user permission via `ask_question`. |
-| **Silent Failures** | **Security & Observability Auditors**: Native skills scan for hardcoded secrets via `gitleaks`, enforce SAST execution, and verify structured JSON logging. |
-| **Dependency Bloat** | **Execution Manager**: Mandates ephemeral invocations (`npx`, `pnpm dlx`) and actively blocks global installations or redundant framework packages. |
+| **Agent Amnesia & Bloat** | **Hermes Protocol & 6 Core Domain Skills**: Consolidates 15 redundant skills into 6 lean domain skills (`code-engineer`, `system-architect`, `quality-assurance`, `devops-manager`, `security-docs-auditor`, `system-janitor`), reducing token bloat by >60%. |
+| **Race Conditions & Skipped Steps** | **Multi-Agent Execution Topologies**: Supports Parallel Swarms (with Synchronization Barriers) for independent audits and Sequential Stage-Gated Pipelines for feature dev. |
+| **Language Limitation** | **Universal Polyglot Support**: Native best practices for TypeScript, Python, Go, Rust, PHP, Java/Kotlin, C#/.NET, Dart/Flutter, C/C++, Swift, Elixir, and legacy ASP/VB6. |
+| **Hallucination & Snippet Blindness** | **Zero-Assumption & Anti-Snippet Policy**: Prohibits guessing fields or inferring data structures from partial snippet views. Enforces mandatory full symbol inspection. |
+| **Secret Leaks** | **Zero Secrets & SAST Enforcement**: Strict environment variable substitution (`${GITHUB_PAT}`, `${GITEA_PAT}`) and CVSS $\ge 7.0$ vulnerability blocking. |
 
 ---
 
-## 🗺️ The Autonomous Workflow
+## 🚀 Core Skills (6 Consolidated Domain Modules)
 
-AAC V4 enforces a highly structured, skill-driven engineering cycle:
+AAC V4.2 operates using a dynamic arsenal of 6 core modular **Skills** located in `.agents/skills/`:
 
-```mermaid
-flowchart TD
-    A["1. User Request"] --> B["2. Planning & Discovery<br><code>AGENTS.md & !quick check</code>"]
-    B --> C["3. Architecture Audit<br><code>Blast Radius & Reusability</code>"]
-    C --> D["4. Schema Manager<br><code>Migration generation</code>"]
-    D --> E["5. Implementation<br><code>Ephemeral tools only</code>"]
-    E --> F["6. UI & a11y Review<br><code>Aesthetics & WCAG</code>"]
-    F --> G["7. Security & Observability<br><code>SAST & gitleaks</code>"]
-    G --> H["8. Git Workflow<br><code>Branch, Commit, PR</code>"]
-    H --> I["9. Ask Question<br><code>Merge Approval</code>"]
-```
+- **`code-engineer`**: Universal clean code enforcer (SOLID/DRY) across 14+ language families and scientific log-driven debugging.
+- **`system-architect`**: Single authority for architectural impact auditing, DB schema governance (`.agents/brain/schema.md`), and mock data synthesis.
+- **`quality-assurance`**: Automated test suite execution, WCAG 2.1 AA UI/A11y review, and 5-dimension performance profiling (CPU, I/O, DB, Memory, Network).
+- **`devops-manager`**: End-to-end Git version control lifecycle (Issue, Branching, PRs), branch janitor cleanup, and local CI pipeline simulation (`act`).
+- **`security-docs-auditor`**: SAST vulnerability scanning, secret leakage prevention, and technical documentation sync (OpenAPI & SemVer CHANGELOG).
+- **`system-janitor`**: Token budget optimization (>80% compaction), ephemeral scratch purging, and background process timeout management.
 
----
-
-## 🚀 Core Skills (15 Modules)
-
-AAC V4 operates using a dynamic arsenal of modular **Skills** located in `.agents/skills/`. When triggered, they govern specific domain workflows:
-
-### 🛡️ Security & Architecture
-- **`architecture-auditor`**: Performs rigorous Holistic Impact Analysis (blast radius, DRY, extensibility) before major code changes.
-- **`schema-manager`**: Single point of authority for DB schemas. Enforces reversible migrations and prevents field hallucination.
-- **`security-observability-auditor`**: Scans for secrets via `gitleaks`, missing input sanitization, and verifies structured logging.
-
-### ⚙️ Implementation & Debugging
-- **`polyglot-developer`**: Enforces universal Clean Code and SOLID principles while idiomatically adapting to the repository's primary language (Python, PHP, TS, Java, Go, etc.).
-- **`advanced-debugger`**: Mandates the "Scientific Debugging Method" (Hypothesis -> Probe -> Execute -> Analyze) to prevent the AI from wildly guessing solutions.
-- **`data-synthesizer`**: Injects realistic, varied mock data into local databases to ensure UI/API testing is performed in production-like states.
-
-### ⚙️ Execution & Quality
-- **`execution-manager`**: Oversees dependencies, prevents redundancy, and enforces ephemeral tool execution (e.g., `npx` over `npm -g`).
-- **`ui-a11y-reviewer`**: Validates frontend components against WCAG standards and aesthetic guidelines.
-- **`test-engineer`**: Generates and executes unit, integration, and E2E testing workflows.
-- **`performance-profiler`**: Profiles code to detect performance regressions or memory leaks.
-- **`ci-cd-specialist`**: Audits GitHub Actions/GitLab CI configurations, enforces provenance, and debugs pipeline failures.
-
-### 📚 Workflow & Maintenance
-- **`git-workflow`**: Handles the end-to-end Version Control Lifecycle (Branching, PRs, Merge Gates).
-- **`branch-janitor`**: An auto-generated skill that actively cleans up stale local and remote branches post-merge.
-- **`documentation-engineer`**: Synchronizes READMEs, API docs, and inline comments alongside code changes.
-- **`context-optimizer`**: A token janitor that compresses incident memories and purges scratch files to prevent LLM context bloat.
 
 ---
 

@@ -1,27 +1,27 @@
-# Agent Task Execution Template
+# Agent Task Execution Template (AAC v4.2)
 
 **Instructions for the Agent:**
-When assigned a task using this template, you MUST follow these exact steps sequentially. Do not skip any step. 
-Check off each step internally before moving to the next.
+Follow these steps sequentially upon receiving a task.
 
-## Pre-flight Checklist
-- [ ] 1. Read `.agents/brain/rules.md` to absorb past learnings and corrections.
-- [ ] 2. Read `.agents/brain/state.json` and verify current state.
-- [ ] 3. Update `.agents/brain/state.json.tmp` with the new task name and `mv` to `state.json` (Atomic write).
-- [ ] 4. Log the start of this task in `.agents/brain/audit.jsonl`.
-- [ ] 5. Create a specific plan in `.agents/plans/<task-name>.md`.
-- [ ] 6. Read the required skill files dynamically using the `view_file` tool (e.g., `.agents/skills/architecture-auditor/SKILL.md`).
+## 1. Pre-flight & Memory Boot Sequence
+- [ ] 1. Read `.agents/brain/soul.md` to align persona, tone, and empathy.
+- [ ] 2. Read `.agents/brain/rules.md` to absorb project invariants and corrections.
+- [ ] 3. Read `.agents/brain/schema.md` (or domain schemas in `.agents/brain/schemas/`) to enforce Zero-Assumption data contracts.
+- [ ] 4. Read `.agents/brain/state.json` to inspect `session_id`, active branch, token metrics, and claimed task locks.
+- [ ] 5. **Select Execution Tier**:
+  - **Tier 1 (Quick Fix)**: Skip planning overhead; perform direct edit, verification, and commit.
+  - **Tier 2 (Feature)**: Create plan in `.agents/plans/<task-name>.md`, branch, and run test verification.
+  - **Tier 3 (Architecture/Major)**: Full audit cycle + multi-agent delegation.
+- [ ] 6. Atomic write updated state to `.agents/brain/state.json.tmp` and `mv` to `state.json`.
 
-## Execution (Orchestration Sequence)
-- [ ] 1. **architecture-auditor**: Audit impact before coding.
-- [ ] 2. **schema-manager**: Check if DB changes are needed.
-- [ ] 3. **execution-manager**: Manage tool dependencies.
-- [ ] 4. **Implementation**: Branch out (`feature/` or `bugfix/`) and write code.
-- [ ] 5. **ui-a11y-reviewer** & **performance-profiler**: Validate code quality.
-- [ ] 6. **security-observability-auditor**: Scan for secrets and metrics (Halt if fails).
-- [ ] 7. **git-workflow**: Create PR and ask user for `/merge-confirm <ticket-id>`.
 
-## Post-flight Checklist
-- [ ] 1. Delete `.agents/scratch/*` artifacts (if successful).
-- [ ] 2. Update `state.json` back to `idle`.
-- [ ] 3. Log completion in `audit.jsonl`.
+## 2. Execution & Delegation Protocol
+- [ ] 1. **Multi-Agent Delegation Check**: If task requires deep research (> 5 files) or independent sub-features, launch subagent (`invoke_subagent`).
+- [ ] 2. **Task Lock**: Claim subtasks in `state.json -> claimed_tasks` before writing files.
+- [ ] 3. **Verification Step**: Run project test/build commands (`npm test`, `pytest`, `cargo test`) before declaring completed.
+
+## 3. Post-flight Cleanup
+- [ ] 1. Delete ephemeral `.agents/scratch/*` notes.
+- [ ] 2. Reset `state.json` status to `idle`.
+- [ ] 3. Log task completion in `.agents/brain/audit.jsonl`.
+

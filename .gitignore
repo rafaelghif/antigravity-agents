@@ -1,11 +1,16 @@
 # Sensitive Agent Configurations
 .agents/mcp_config.json
 
-# Ephemeral Agent State and Scratchpad
+# Ephemeral Agent State, Plans, Incidents, and Scratchpad
 .agents/scratch/*
 !.agents/scratch/.gitkeep
+.agents/plans/*
+!.agents/plans/.gitkeep
+.agents/incidents/*
+!.agents/incidents/.gitkeep
 .agents/brain/state.json
 .agents/brain/audit.jsonl
+
 
 # Environment Variables
 .env
