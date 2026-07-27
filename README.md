@@ -1,6 +1,6 @@
 # Antigravity Agent Core (AAC) V4
 
-[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](AGENTS.md)
+[![Version](https://img.shields.io/badge/version-4.2.1-blue.svg)](AGENTS.md)
 [![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](AGENTS.md)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/rafaelghifari/antigravity-agents)
 
@@ -8,10 +8,11 @@
 
 Autonomous coding agents offer massive productivity boosts, but running them in unstructured repositories introduces severe risks: hallucinated architectures, credential leaks, messy commit histories, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V4.2** solves this by enforcing a strict, token-optimized, skill-based workflow loop governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4.2 ensures that AI-driven coding conforms exactly to professional engineering standards, handles edge cases autonomously, and never assumes anything.
+**Antigravity Agent Core (AAC) V4.2.1** solves this by enforcing a strict, token-optimized, skill-based workflow loop governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4.2.1 ensures that AI-driven coding conforms exactly to professional engineering standards, handles edge cases autonomously, and never assumes anything.
 
 > [!IMPORTANT]
-> **100% Declarative & Skill-Based**: AAC V4.2 abandons clunky bash scripts in favor of AI-native `.agents/skills/`. All configurations, plans, schemas, and execution logs are isolated securely under the `.agents/` directory.
+> **100% Declarative & Skill-Based**: AAC V4.2.1 abandons clunky bash scripts in favor of AI-native `.agents/skills/`. All configurations, plans, schemas, and execution logs are isolated securely under the `.agents/` directory.
+
 
 > [!WARNING]
 > **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V4.2 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.

@@ -30,6 +30,13 @@
 13. **Swift / Objective-C**: Check `Package.swift`, `*.xcodeproj`, `Podfile`.
 14. **Elixir / Erlang**: Check `mix.exs`, `rebar.config`.
 
+## 3.5 Specific Framework Adaptation Rules
+- **Frontend Stack**: Inspect dependencies for `react` / `next`, `vue` / `nuxt`, `angular`, `svelte` / `sveltekit`. Load component purity & hydration guidelines.
+- **Python Backend**: Detect `django`, `fastapi`, `flask`. Enforce ORM transaction safety and async loop handling.
+- **Node.js Backend**: Detect `express`, `nestjs`, `fastify`. Enforce middleware error bounds and dependency injection patterns.
+- **Java / .NET Enterprise**: Detect `spring-boot` or `Microsoft.AspNetCore`. Enforce tier isolation and connection pool management.
+
+
 
 ## 4. API Version Negotiation
 - Before invoking external tools (e.g., Gitea, GitHub, MCP), verify version compatibility (e.g., `tool --version` or `/api/v1/version`).

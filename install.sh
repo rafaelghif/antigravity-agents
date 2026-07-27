@@ -5,7 +5,8 @@
 
 set -e
 
-echo "🚀 Installing Antigravity Agent Core (AAC) v4.2.0..."
+echo "🚀 Installing Antigravity Agent Core (AAC) v4.2.1..."
+
 
 # Create target directory structure if needed
 mkdir -p .agents/brain/schemas .agents/plans .agents/incidents .agents/scratch .agents/skills .agents/common

@@ -3,7 +3,8 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.2.0..." -ForegroundColor Cyan
+Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.2.1..." -ForegroundColor Cyan
+
 
 # Create target directory structure
 New-Item -ItemType Directory -Force -Path ".agents\brain\schemas" | Out-Null

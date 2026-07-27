@@ -101,9 +101,10 @@ The Orchestrator MUST intelligently choose the appropriate execution topology ba
      3. **Stage 3 (Quality & Security Audit)**: `quality-assurance` (tests, performance, I/O) and `security-docs-auditor` (SAST, secrets, docs) run *after* development completes.
    - **Stage Gate Enforcement**: Never run Stage 3 quality/security audits on incomplete code while Stage 2 development is still active. Each stage MUST verify clean completion before passing artifacts to the next stage.
 
-
-
-
+### 5.3 Parallel File Locking Protocol (Mutex Enforcement)
+- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit lock in `.agents/brain/state.json -> claimed_tasks` (keyed by target file path).
+- **Lock Timeout**: Locks auto-expire after `config.json -> state_management.lock_timeout_seconds` (30s) to prevent orphan deadlocks.
+- **Conflict Resolution**: Before merging results from parallel subagents, the Orchestrator MUST execute `git diff --name-only` to verify no write collisions occurred across parallel tasks.
 
 ---
 
@@ -116,6 +117,16 @@ Select the execution tier based on task complexity:
 | **Tier 1: Patch / Quick Edit** | Minor bug fix or single-file edit (< 20 lines) | Read `rules.md` $\rightarrow$ Edit $\rightarrow$ Mandatory Test/Build Verification $\rightarrow$ Atomic Commit |
 | **Tier 2: Feature Dev** | Multi-file features or isolated sub-systems | Plan (`.agents/plans/`) $\rightarrow$ Branch $\rightarrow$ Code $\rightarrow$ Test Verification $\rightarrow$ PR / Sync |
 | **Tier 3: Core Architecture** | Schema alterations, major refactors (> 100 lines) | Audit (`system-architect`) $\rightarrow$ Schema Update (`system-architect`) $\rightarrow$ Multi-Agent Dev $\rightarrow$ Security Audit (`security-docs-auditor`) $\rightarrow$ PR Gate |
+
+### 6.5 Automated Rollback & Recovery Protocol
+When test/build verification fails after code modifications:
+1. **Auto-Rollback Threshold**: If $> 2$ consecutive test verification attempts fail:
+   - Execute `git reset --hard HEAD` (or discard the active ephemeral worktree) to immediately restore the pre-change clean state.
+   - Autonomously generate a post-mortem report under `.agents/incidents/rollback-<timestamp>.md`.
+   - Notify the user via `ask_question`: *"Automated Rollback executed after 2 failed verification attempts. Would you like to proceed with an alternative architectural approach?"*
+2. **Staged Worktree Safety**: Use isolated `git worktree` or temporary `git stash` to preserve work-in-progress during verification runs.
+3. **Database Migration Safety**: Ensure all ORM database schema alterations maintain explicit `down` rollback migrations.
+
 
 ---
 

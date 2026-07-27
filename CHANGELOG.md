@@ -4,7 +4,16 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] - 2026-07-27
+
+### Added
+- **Automated Rollback & Recovery Protocol**: Added Section 6.5 to `AGENTS.md` enforcing automatic hard resets (`git reset --hard HEAD` / worktree purge) and post-mortem incident generation after 2 consecutive test verification failures.
+- **Parallel File Locking Protocol (Mutex)**: Added Section 5.3 to `AGENTS.md` requiring subagents to claim explicit file-level path locks in `state.json -> claimed_tasks` to prevent write collisions during parallel execution.
+- **Framework-Specific Detection & Adaptation**: Added Section 3.5 to `.agents/common/utils.md` for explicit stack rules covering React/Next, Vue/Nuxt, Svelte, Django, FastAPI, Flask, Express, NestJS, Spring Boot, and ASP.NET Core.
+- **MCP Health Check & Primary Protocol**: Formalized MCP health ping on startup and graceful fallback chain (MCP -> Native Git -> User Prompt).
+
 ## [4.2.0] - 2026-07-27
+
 
 ### Added
 - **Multi-Agent Execution Topologies**: Introduced Parallel Swarm Topology (for independent multi-domain audits) and Sequential Pipeline Topology (stage-gated dependency ordering for architecture, development, and QA).
