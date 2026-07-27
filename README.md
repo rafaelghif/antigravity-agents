@@ -44,10 +44,17 @@ AAC V4.2 operates using a dynamic arsenal of 6 core modular **Skills** located i
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Quick Installation & Setup
 
-### 1. Integrate into Your Project
-To apply AAC V4 to any existing project, simply clone this repository and copy the core files over to your target project's root directory. The included `.gitignore` and scaffolded templates ensure your secrets and temporary agent states are never accidentally committed.
+### Option A: Quick 1-Line Install (Recommended)
+Run this single command inside any existing project root directory to instantly install AAC v4.2.0:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
+```
+
+### Option B: Manual Integration
+To apply AAC V4.2 manually to any existing project, clone this repository and copy the core files over to your target project's root directory:
 
 ```bash
 # Clone the AAC repository
@@ -59,6 +66,7 @@ cp AGENTS.md /path/to/your/project/
 cp .gitignore /path/to/your/project/
 cp -r .agents /path/to/your/project/
 ```
+
 
 ### 2. Configure MCP Servers (Optional but Recommended)
 AAC V4 relies on Model Context Protocol (MCP) servers to interact with version control safely and execute the `git-workflow` skill.
