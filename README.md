@@ -46,15 +46,23 @@ AAC V4.2 operates using a dynamic arsenal of 6 core modular **Skills** located i
 
 ## 🛠️ Quick Installation & Setup
 
-### Option A: Quick 1-Line Install (Recommended)
-Run this single command inside any existing project root directory to instantly install AAC v4.2.0:
+### Option A: Quick 1-Line Install (Linux / macOS / WSL)
+Run this single command inside your project root directory:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
 ```
 
-### Option B: Manual Integration
+### Option B: Quick 1-Line Install (Windows PowerShell)
+Run this single command inside your project root directory in PowerShell:
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.ps1 | iex
+```
+
+### Option C: Manual Integration
 To apply AAC V4.2 manually to any existing project, clone this repository and copy the core files over to your target project's root directory:
+
 
 ```bash
 # Clone the AAC repository

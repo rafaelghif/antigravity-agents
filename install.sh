@@ -23,6 +23,28 @@ if [ ! -f .env.example ]; then
   cp "$TMP_DIR/.env.example" ./.env.example
 fi
 
+# Reset clean state.json for new user onboarding (Zero state leakage)
+if [ -f .agents/brain/state.json ]; then
+  cat << 'EOF' > .agents/brain/state.json
+{
+  "session_id": null,
+  "current_branch": "main",
+  "active_task": null,
+  "current_tier": "Tier 1",
+  "current_step": "idle",
+  "token_usage": {
+    "current_used": 0,
+    "max_budget": 100000,
+    "last_compaction_timestamp": null
+  },
+  "active_subagents": [],
+  "claimed_tasks": {},
+  "last_updated": "2026-07-27T00:00:00Z"
+}
+EOF
+fi
+
+
 # Clean up temporary directory
 rm -rf "$TMP_DIR"
 
