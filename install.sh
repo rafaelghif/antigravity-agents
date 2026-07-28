@@ -23,17 +23,6 @@ if [ ! -f .env.example ]; then
   cp "$TMP_DIR/.env.example" ./.env.example
 fi
 
-# Reset clean state.json for new user onboarding (Mutex registry only)
-if [ -f .agents/brain/state.json ]; then
-  cat << 'EOF' > .agents/brain/state.json
-{
-  "claimed_tasks": {},
-  "last_updated": "2026-07-28T00:00:00Z"
-}
-EOF
-fi
-
-
 # Clean up temporary directory
 rm -rf "$TMP_DIR"
 
