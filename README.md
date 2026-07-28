@@ -1,8 +1,9 @@
 # Antigravity Agent Core (AAC) V4.3
 
-[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](AGENTS.md)
-[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](AGENTS.md)
-[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/rafaelghifari/antigravity-agents)
+[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/rafaelghifari/antigravity-agents/releases/tag/v4.3.0)
+[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](https://github.com/rafaelghifari/antigravity-agents/releases/tag/v4.3.0)
+[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/google-antigravity/antigravity-cli)
+
 
 **Enterprise-Grade Guardrails, Task-Driven Execution Engine, and Deterministic Quality Gates for Autonomous AI Coding Agents.**
 
