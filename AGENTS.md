@@ -1,6 +1,6 @@
 # AGENTS.md — Antigravity Agent Core (AAC) V4.3
 
-**Core Version**: 4.3.0  
+**Core Version**: 4.3.1  
 **Architecture Pattern**: Deterministic Task-Driven & File-Backed Execution Protocol
 
 This core directive governs all agents and subagents in this workspace. Reference `.agents/config.json` for numerical constants and `.agents/common/utils.md` for shared utilities.
@@ -141,9 +141,10 @@ Select the execution tier based on task complexity:
 
 ## 8. Git Workflow Integration & Workspace Isolation
 
-### 8.1 Branching per Task Plan
-- **Task Isolation**: Before executing code modifications for Tier 2 or Tier 3 tasks, the agent MUST automatically integrate with Git by creating a dedicated branch or worktree matching the task slug (e.g., `git checkout -b task/<task-slug>`).
-- **Atomic Commits**: Code modifications MUST be committed atomically matching the completion of micro-task phases in the active plan.
+### 8.1 Strict Issue-Driven Git Workflow
+- **Standard Flow**: Every task MUST follow: `Create Issue` $\rightarrow$ `Create Branch` $\rightarrow$ `Conventional Commit (with Close Issue notation)` $\rightarrow$ `Push` $\rightarrow$ `Merge` $\rightarrow$ `Clean Branch`.
+- **Task Isolation**: Before executing code modifications for Tier 2 or Tier 3 tasks, the agent MUST ensure an Issue exists, then automatically integrate with Git by creating a dedicated branch matching the issue/task slug (e.g., `git checkout -b task/issue-123-<slug>`).
+- **Gitea Timetracking**: For repositories hosted on Gitea, every issue MUST have its timetracker accurately updated upon completion.
 
 ---
 

@@ -9,11 +9,12 @@ requires_core: ">=4.3.0"
 I'm here to ensure our version control and CI/CD pipelines run seamlessly. I'll handle branching, commit standards, and safe merge strategies so we don't break the build.
 
 ## 1. Version Control Lifecycle (Git Workflow)
-- **Branching per Task Plan**: I will automatically create branch names based on our active Task Plan (e.g., `task/<task-slug>`). If we're doing high-risk refactors, I might use `git worktree add ../<branch-name> -b <branch-name> origin/main` to keep our workspace safe.
-- **Atomic Commits**: We'll use logical conventional commits (`feat: ...`, `fix: ...`).
-- **Platform-Specific Issue Linking**:
+- **Standard Flow Requirement**: Every task MUST follow this strict sequence: `Create Issue (Per Task)` $\rightarrow$ `Branch using Git Conventional` $\rightarrow$ `Commit using Git Conventional Message (also used to close issue)` $\rightarrow$ `Push` $\rightarrow$ `Pull Merge` $\rightarrow$ `Clean Merged Branch`.
+- **Branching per Task**: I will strictly create branches per task/issue (e.g., `feat/issue-123-task-slug`). 
+- **Atomic Commits & Issue Closing**: We'll use logical conventional commits (`feat: ...`, `fix: ...`). The commit message must include the issue closing directive.
+- **Platform-Specific Issue Linking & Time Tracking**:
   - GitHub: `<type>: <description> (Fixes #<id>)`
-  - Gitea: `<type>: <description> (Closes #<id>)`
+  - Gitea: `<type>: <description> (Closes #<id>)`. **CRITICAL**: For Gitea, every issue MUST have the timetracker updated accurately.
 - **PR Generation & Draft Strategy**: If a PR is massive ($> 500$ lines), I'll submit it as a Draft first. I'll make sure it includes a summary, rationale, and reproduction steps.
 - **Git Merge Conflict Resolution Protocol**:
   - Before finalizing tests, I'll run `git rebase main` to ensure we're up-to-date.

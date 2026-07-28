@@ -4,6 +4,20 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2026-07-28
+
+### Added
+- **Standard Issue-Driven Git Workflow**: Added strict standard flow enforcing: `Create Issue` $\rightarrow$ `Create Branch` $\rightarrow$ `Conventional Commit` $\rightarrow$ `Push` $\rightarrow$ `Merge` $\rightarrow$ `Clean Branch`.
+- **Gitea Timetracking Integration**: Enforced accurate timetracker updates for every Gitea issue upon completion.
+- **Single Active Plan Priority**: Introduced timestamp-based prioritization for `.agents/plans/*.md` to eliminate context switching amnesia.
+
+### Changed
+- **Humanized Skill Modules**: Completely refactored all internal AI skill modules (`code-engineer`, `devops-manager`, `quality-assurance`, `security-docs-auditor`, `system-architect`, `system-janitor`) to replace robotic/imperative instructions with a natural, collaborative "Senior Engineering Co-Pilot" persona.
+
+### Fixed
+- **Plan File TOCTOU Race Conditions**: Fixed state loss vulnerabilities by mandating POSIX Directory Locks for plan files prior to modification.
+- **Atomic Backup Safety**: Hardened `replace_file_content` updates by enforcing strict `cp` shell backups before any plan writes.
+
 ## [4.3.0] - 2026-07-28
 
 ### Added
