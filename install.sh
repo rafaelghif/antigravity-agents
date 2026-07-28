@@ -5,11 +5,11 @@
 
 set -e
 
-echo "🚀 Installing Antigravity Agent Core (AAC) v4.2.1..."
+echo "🚀 Installing Antigravity Agent Core (AAC) v4.3.0..."
 
 
 # Create target directory structure if needed
-mkdir -p .agents/brain/schemas .agents/plans .agents/incidents .agents/scratch .agents/skills .agents/common
+mkdir -p .agents/brain/schemas .agents/plans .agents/incidents .agents/scratch .agents/skills .agents/common .agents/locks
 
 # Temporary clone directory
 TMP_DIR=$(mktemp -d)
@@ -24,23 +24,12 @@ if [ ! -f .env.example ]; then
   cp "$TMP_DIR/.env.example" ./.env.example
 fi
 
-# Reset clean state.json for new user onboarding (Zero state leakage)
+# Reset clean state.json for new user onboarding (Mutex registry only)
 if [ -f .agents/brain/state.json ]; then
   cat << 'EOF' > .agents/brain/state.json
 {
-  "session_id": null,
-  "current_branch": "main",
-  "active_task": null,
-  "current_tier": "Tier 1",
-  "current_step": "idle",
-  "token_usage": {
-    "current_used": 0,
-    "max_budget": 100000,
-    "last_compaction_timestamp": null
-  },
-  "active_subagents": [],
   "claimed_tasks": {},
-  "last_updated": "2026-07-27T00:00:00Z"
+  "last_updated": "2026-07-28T00:00:00Z"
 }
 EOF
 fi
@@ -49,5 +38,6 @@ fi
 # Clean up temporary directory
 rm -rf "$TMP_DIR"
 
-echo "✅ AAC v4.2.0 successfully installed into $(pwd)!"
-echo "💡 Start your Antigravity CLI session (agy) to experience Zero-Amnesia, Zero-Yes-Man autonomous coding."
+echo "✅ AAC v4.3.0 successfully installed into $(pwd)!"
+echo "💡 Start your Antigravity CLI session (agy) to experience Task-Driven Zero-Amnesia autonomous coding."
+
