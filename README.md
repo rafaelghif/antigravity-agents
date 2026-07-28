@@ -87,7 +87,8 @@ cp .agents/mcp_config.json.example .agents/mcp_config.json
 Edit `.agents/mcp_config.json` to insert your specific Personal Access Tokens (PAT) and your Gitea server URL (e.g., `http://localhost:3000`).
 
 - **GitHub MCP**: Connects via Copilot's Remote Server-Sent Events (SSE).
-- **Gitea MCP (Self-Hosted)**: Connects to your local self-hosted Gitea instance via official `gitea-mcp` binary using `stdio` transport mode with `GITEA_HOST` and `GITEA_ACCESS_TOKEN`.
+- **Gitea MCP (Self-Hosted)**: Connects to your local self-hosted Gitea instance via container (`docker` or `podman` on Windows) running `gitea/gitea-mcp:latest` with `GITEA_HOST` and `GITEA_ACCESS_TOKEN`.
+
 
 
 ---
