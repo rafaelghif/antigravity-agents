@@ -1,5 +1,5 @@
 # Antigravity Agent Core (AAC) Windows PowerShell One-Line Installer Script
-# Usage: Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.ps1 | iex
+# Usage: Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
@@ -17,7 +17,8 @@ New-Item -ItemType Directory -Force -Path ".agents\locks" | Out-Null
 
 # Temporary clone directory
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
-git clone --depth 1 https://github.com/rafaelghifari/antigravity-agents.git $TmpDir | Out-Null
+git clone --depth 1 https://github.com/rafaelghif/antigravity-agents.git $TmpDir | Out-Null
+
 
 # Copy Core Directive and Configurations
 Copy-Item -Path "$TmpDir\AGENTS.md" -Destination ".\AGENTS.md" -Force

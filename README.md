@@ -1,8 +1,9 @@
 # Antigravity Agent Core (AAC) V4.3
 
-[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/rafaelghifari/antigravity-agents/releases/tag/v4.3.0)
-[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](https://github.com/rafaelghifari/antigravity-agents/releases/tag/v4.3.0)
+[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
+[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/google-antigravity/antigravity-cli)
+
 
 
 **Enterprise-Grade Guardrails, Task-Driven Execution Engine, and Deterministic Quality Gates for Autonomous AI Coding Agents.**
@@ -52,14 +53,14 @@ AAC V4.3 operates using a dynamic arsenal of 6 core modular **Skills** located i
 Run this single command inside your project root directory:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
 ```
 
 ### Option B: Quick 1-Line Install (Windows PowerShell)
 Run this single command inside your project root directory in PowerShell:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
 ```
 
 ### Option C: Manual Integration
@@ -68,7 +69,8 @@ To apply AAC V4.3 manually to any existing project, clone this repository and co
 
 ```bash
 # Clone the AAC repository
-git clone https://github.com/rafaelghifari/antigravity-agents.git
+git clone https://github.com/rafaelghif/antigravity-agents.git
+
 cd antigravity-agents
 
 # Copy the core constitution, skills, and hygiene configs to your target project

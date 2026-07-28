@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
-
 # Antigravity Agent Core (AAC) One-Line Installer Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
 
 set -e
 
@@ -13,7 +11,8 @@ mkdir -p .agents/brain/schemas .agents/plans .agents/incidents .agents/scratch .
 
 # Temporary clone directory
 TMP_DIR=$(mktemp -d)
-git clone --depth 1 https://github.com/rafaelghifari/antigravity-agents.git "$TMP_DIR" > /dev/null 2>&1
+git clone --depth 1 https://github.com/rafaelghif/antigravity-agents.git "$TMP_DIR" > /dev/null 2>&1
+
 
 # Copy Core Directive and Configurations
 cp "$TMP_DIR/AGENTS.md" ./AGENTS.md
