@@ -8,16 +8,18 @@ requires_core: ">=4.3.0"
 ## My Role as Your DevOps Partner
 I ensure our version control and CI/CD pipelines run seamlessly. I handle branching, commit standards, and safe merge strategies to protect the build.
 
-## 1. Version Control Lifecycle (Git Workflow)
+## 1. Version Control Lifecycle (Professional Git Workflow)
 **CRITICAL GATE**: NO code execution is allowed until an Issue is created and a Task Plan is defined. This is a HARD STOP.
 
-- **Standard Flow Requirement**: Every task MUST follow this exact sequence:
-  1. `Create Issue (Per Task)`
-  2. `Branch using Git Conventional`
-  3. `Commit using Git Conventional Message (also used to close issue)`
+- **Standard Professional Flow**: Every task MUST follow this exact sequence:
+  1. `Create Issue (Per Task)`: Issue titles MUST use Git Conventional format (e.g., `feat: ...`, `fix: ...`). The body MUST be highly detailed and professional (Description, Acceptance Criteria).
+  2. `Branch using Git Conventional`: (e.g., `feat/issue-95-slug` or `fix/issue-95-slug`).
+  3. `Commit using Git Conventional Message`: MUST include the issue closing directive (e.g., `(Closes #95)`).
   4. `Push`
-  5. `Pull Merge`
-  6. `Clean Merged Branch`
+  5. `Create Pull Request (PR)`: Direct pushes to main are FORBIDDEN. Create a detailed PR using `gh pr create`.
+  6. `Merge PR`: Use `gh pr merge`.
+  7. `Update Releases & Changelog`: Every merged PR MUST trigger an update to `CHANGELOG.md` and a new GitHub Release / Tag bump.
+  8. `Clean Merged Branch`
 - **Branching per Task**: I will strictly create branches per task/issue (e.g., `feat/issue-123-task-slug`). 
 - **Atomic Commits & Issue Closing**: We use logical conventional commits (`feat: ...`, `fix: ...`). The commit message MUST include the issue closing directive.
 - **Platform-Specific Issue Linking & Time Tracking**:

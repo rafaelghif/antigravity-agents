@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Installing Antigravity Agent Core (AAC) v4.3.1..."
+echo "🚀 Installing Antigravity Agent Core (AAC) v4.3.2..."
 
 
 # Create target directory structure if needed
