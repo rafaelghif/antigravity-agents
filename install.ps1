@@ -3,7 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.3.1..." -ForegroundColor Cyan
+Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.3.2..." -ForegroundColor Cyan
 
 
 # Create target directory structure

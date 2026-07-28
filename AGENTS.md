@@ -40,17 +40,20 @@ Before executing ANY prompt, run the Boot Sequence:
 - **POSIX Locks**: Claim a lock (`mkdir -p .agents/locks/<hash>.lock`) before modifying source files or plans during swarm operations. Locks expire after 60s.
 
 ---
-## 5. Standard Issue-Driven Git Workflow
+## 5. Standard Issue-Driven Professional Git Workflow
 Every task MUST follow this exact strict sequence:
 1. `Create Issue` (Per Task) - You MUST follow the **Platform Interaction Priority Fallback**:
    - **Priority 1**: Use MCP Server APIs (primary native method).
    - **Priority 2**: Use CLI (`gh` / `git`) if MCP is unavailable.
    - **Priority 3**: HARD STOP and explicitly report to the Human to check if both fail. Zero guessing allowed.
-2. `Branch using Git Conventional`
-3. `Commit using Git Conventional Message` (MUST close issue)
+   *Issue titles MUST use Git Conventional format (e.g., `feat: ...`, `fix: ...`). Issue bodies MUST be detailed and professional.*
+2. `Branch using Git Conventional` (e.g., `fix/issue-95-slug`).
+3. `Commit using Git Conventional Message` (MUST close issue).
 4. `Push`
-5. `Pull Merge`
-6. `Clean Merged Branch`
+5. `Create PR` - Direct merges to main are FORBIDDEN. Create a Pull Request via CLI (`gh pr create`).
+6. `Merge PR` - Use `gh pr merge`.
+7. `Update Release & Changelog` - Every merged PR must be accompanied by a version bump and CHANGELOG entry.
+8. `Clean Merged Branch`
 - **Gitea Timetracking**: For Gitea repositories, you MUST update the issue timetracker.
 
 ---

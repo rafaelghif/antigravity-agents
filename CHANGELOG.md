@@ -4,6 +4,17 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.2] - 2026-07-28
+
+### Added
+- **MCP-First Priority Fallback**: Established a strict Platform Interaction Priority Fallback (Priority 1: MCP, Priority 2: CLI, Priority 3: Human Report) to maximize AI-native API interactions before falling back to CLI.
+- **Git Conventional Standards**: Enforced Git Conventional formats for all Issue Titles (`feat: ...`, `fix: ...`) and required professional, highly detailed Issue Bodies (Description, Acceptance Criteria).
+- **PR-First Workflow**: Prohibited direct merges to `main`. Enforced `gh pr create` and `gh pr merge` as the mandatory integration pathway.
+
+### Fixed
+- **Issue ID Hallucination**: Added an explicit Anti-Hallucination Gate prohibiting the agent from guessing or hallucinating Issue IDs. The agent MUST empirically verify or create issues via CLI/MCP.
+- **Continuous Release Syncing**: Ensured every merged PR triggers a mandatory update to `CHANGELOG.md` and a new version bump / GitHub release.
+
 ## [4.3.1] - 2026-07-28
 
 ### Added
