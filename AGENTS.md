@@ -29,6 +29,7 @@ Before executing ANY prompt, run the Boot Sequence:
 1. **Read Contracts**: Read `soul.md`, `rules.md`, and relevant `schema.md`.
 2. **Scan Active Plans**: Check `.agents/plans/*.md`. Only ONE plan can be active (newest timestamp).
 3. **Resume Execution**: Find the first uncompleted task (`- [ ]`). 
+   * **Plan Re-Validation Protocol**: If resuming a paused plan, validate that the remaining tasks still align with the current codebase architecture. Do not execute blindly.
    * **Anti-Forgetfulness Gate**: If code for `- [ ]` already exists and passes empirical verification (`npm test`), mark `- [x]` and proceed.
 
 ---
