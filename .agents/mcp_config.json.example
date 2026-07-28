@@ -7,19 +7,12 @@
       }
     },
     "gitea": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITEA_PAT",
-        "docker.gitea.com/gitea-mcp-server"
-      ],
+      "command": "gitea-mcp",
+      "args": ["-t", "stdio"],
       "env": {
-        "GITEA_PAT": "<YOUR_GITEA_TOKEN>"
+        "GITEA_HOST": "http://localhost:3000",
+        "GITEA_ACCESS_TOKEN": "${GITEA_PAT}"
       }
     }
   }
 }
-
