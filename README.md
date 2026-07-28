@@ -1,123 +1,114 @@
-# Antigravity Agent Core (AAC) V4.3
+<div align="center">
 
-[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
-[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
-[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg)](https://github.com/google-antigravity/antigravity-cli)
+# ⚡ Antigravity Agent Core (AAC) V4.3
 
-
+[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg?style=for-the-badge)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
+[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg?style=for-the-badge)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.0)
+[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-lightgrey.svg?style=for-the-badge)](https://antigravity.google/docs/cli/overview)
+[![Architecture](https://img.shields.io/badge/architecture-AAC_V4.3_Deterministic-orange.svg?style=for-the-badge)](https://github.com/rafaelghif/antigravity-agents)
 
 **Enterprise-Grade Guardrails, Task-Driven Execution Engine, and Deterministic Quality Gates for Autonomous AI Coding Agents.**
 
-Autonomous coding agents offer massive productivity boosts, but running them in unstructured repositories introduces severe risks: hallucinated architectures, context amnesia across session switches, skipped workflow gates, and exploding token budgets.
+</div>
 
-**Antigravity Agent Core (AAC) V4.3.0** solves this by introducing a **Deterministic Task-Driven & File-Backed Execution Engine** governed by a supreme constitution (`AGENTS.md`). Designed for the **Antigravity CLI (agy)**, AAC V4.3.0 ensures that AI-driven coding conforms exactly to professional engineering standards, handles session interrupts seamlessly, and never assumes anything.
+---
+
+### 💡 Why Antigravity Agent Core?
+
+Autonomous AI coding agents offer massive productivity boosts, but running them in un-governed repositories introduces severe friction: hallucinated architectures, context amnesia across session switches, skipped workflow gates, robotic tone, and exploding token budgets.
+
+**Antigravity Agent Core (AAC) V4.3.0** solves this by establishing a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
 
 > [!IMPORTANT]
-> **100% Task-Driven & File-Backed**: AAC V4.3.0 eliminates volatile state.json tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`) and POSIX directory-based file locking (`.agents/locks/`).
-
-> [!WARNING]
-> **Disclaimer of Liability**: This software is provided "as is", without warranty of any kind. Autonomous AI agents run processes and modify files directly in your local environment. While AAC V4.3 establishes security hooks and quality gates, the user is solely responsible for reviewing and approving all commands, code modifications, and commits. The authors assume no liability for code regressions, data loss, credential exposures, or system errors resulting from agent activities.
+> **100% Task-Driven & File-Backed**: AAC V4.3.0 eliminates volatile tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
 
 ---
 
-## ⚡ What's New in V4.3?
+## ⚡ Key Architecture & Core Capabilities
 
-| The AI Coding Risk | The AAC V4.3 Solution |
+| Architectural Challenge | The AAC V4.3 Solution |
 | :--- | :--- |
-| **Session Amnesia & State Loss** | **Task-Driven Plan Checklists (`.agents/plans/`)**: Replaces volatile state pointers with physical, file-backed micro-task checklists. Enables instant recovery from session switches or crashes without re-implementing finished code. |
-| **Race Conditions in Multi-Agent Swarms** | **POSIX Directory-Based Mutex Locking (`.agents/locks/`)**: Implements OS-level atomic directory locking (`mkdir -p .agents/locks/<hash>.lock`) with 60s auto-expiration to guarantee zero TOCTOU collisions. |
-| **LLM Workflow Bypass & Eagerness** | **Strict Pre-Execution Hard-Lock Gate**: Prohibits any source code edits until (1) a granular plan file exists in `.agents/plans/` AND (2) a dedicated Git branch (`task/<slug>`) is created. |
-| **Lost /grill-me & Interview Decisions** | **Decisions & Architectural Trade-offs Ledger**: Forces mandatory logging of user directives, constraints, and `/grill-me` interview agreements directly into the plan file's permanent header. |
-| **LLM Batching & False Completion** | **Zero-Batching & Empirical Verification Gate**: Forces single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test` or `tsc`) before marking tasks `- [x]`. |
- |
+| **Session Amnesia & State Loss** | **Task-Driven Plan Checklists (`.agents/plans/`)**: File-backed micro-task checklists enable instant recovery across session switches or crashes without re-implementing finished code. |
+| **Robotic AI Tone & Yes-Man Bias** | **Humanized Senior Co-Pilot (`.agents/brain/soul.md`)**: Replaces canned AI fluff with a warm, authentic, crisp senior engineering partner voice while maintaining uncompromising technical pushback. |
+| **Swarm Race Conditions** | **POSIX Directory Mutex Locks (`.agents/locks/`)**: OS-level atomic directory locks (`mkdir -p .agents/locks/<hash>.lock`) with 60s auto-expiration guarantee zero TOCTOU collisions. |
+| **LLM Eagerness & Workflow Bypass** | **Strict Pre-Execution Gate**: Prohibits code edits until (1) a granular plan file exists in `.agents/plans/` AND (2) a dedicated Git branch (`task/<slug>`) is checked out. |
+| **LLM Batching & False Completion** | **Zero-Batching & Empirical Verification**: Enforces single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test` or `tsc`) before marking `- [x]`. |
 
 ---
 
-## 🚀 Core Skills (6 Consolidated Domain Modules)
+## 🚀 6 Consolidated Core Domain Skills
 
-AAC V4.3 operates using a dynamic arsenal of 6 core modular **Skills** located in `.agents/skills/`:
+AAC V4.3 operates via 6 specialized domain skills inside `.agents/skills/`:
 
-- **`code-engineer`**: Universal clean code enforcer (SOLID/DRY) across 14+ language families and scientific log-driven debugging.
-- **`system-architect`**: Single authority for architectural impact auditing, DB schema governance (`.agents/brain/schema.md`), and mock data synthesis.
-- **`quality-assurance`**: Automated test suite execution, WCAG 2.1 AA UI/A11y review, and 5-dimension performance profiling (CPU, I/O, DB, Memory, Network).
-- **`devops-manager`**: End-to-end Git version control lifecycle (Issue, Branching, PRs), branch janitor cleanup, and local CI pipeline simulation (`act`).
-- **`security-docs-auditor`**: SAST vulnerability scanning, secret leakage prevention, and technical documentation sync (OpenAPI & SemVer CHANGELOG).
-- **`system-janitor`**: Token budget optimization (>80% compaction), ephemeral scratch purging, and background process timeout management.
-
+```
+.agents/skills/
+├── code-engineer/          # Clean Code (SOLID/DRY) & Polyglot Scientific Debugging
+├── system-architect/       # Architectural Blast Radius & DB Schema Governance
+├── quality-assurance/      # Test Suites, WCAG 2.1 AA UI/A11y & 5-Dim Perf Profiling
+├── devops-manager/         # Git Lifecycle (Issues, Branching, PRs) & Local CI Simulation
+├── security-docs-auditor/  # SAST Scanning, Secret Leak Prevention & OpenAPI/SemVer Sync
+└── system-janitor/         # Token Budget Optimization & Ephemeral Scratch Purging
+```
 
 ---
 
-## 🛠️ Quick Installation & Setup
+## 🛠️ Quick Installation
 
-### Option A: Quick 1-Line Install (Linux / macOS / WSL)
-Run this single command inside your project root directory:
-
+### Option A: Linux / macOS / WSL (1-Line Quick Install)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
 ```
 
-### Option B: Quick 1-Line Install (Windows PowerShell)
-Run this single command inside your project root directory in PowerShell:
-
+### Option B: Windows PowerShell (1-Line Quick Install)
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
 ```
 
-### Option C: Manual Integration
-To apply AAC V4.3 manually to any existing project, clone this repository and copy the core files over to your target project's root directory:
-
-
+### Option C: Manual Scaffolding
 ```bash
-# Clone the AAC repository
 git clone https://github.com/rafaelghif/antigravity-agents.git
-
 cd antigravity-agents
 
-# Copy the core constitution, skills, and hygiene configs to your target project
+# Copy core constitution and agents directory into your project root
 cp AGENTS.md /path/to/your/project/
-cp .gitignore /path/to/your/project/
 cp -r .agents /path/to/your/project/
 ```
 
+---
 
-### 2. Configure MCP Servers (Optional but Recommended)
-AAC V4.3 relies on Model Context Protocol (MCP) servers to interact with version control safely and execute the `devops-manager` skill.
+## 📂 System Directory Structure
 
-We provide a ready-to-use sample configuration file:
-```bash
-cp .agents/mcp_config.json.example .agents/mcp_config.json
 ```
-Edit `.agents/mcp_config.json` to insert your specific Personal Access Tokens (PAT) and your Gitea server URL (e.g., `http://localhost:3000`).
-
-- **GitHub MCP**: Connects via Copilot's Remote Server-Sent Events (SSE).
-- **Gitea MCP (Self-Hosted)**: Connects to your local self-hosted Gitea instance via container (`docker` or `podman` on Windows) running `gitea/gitea-mcp:latest` with `GITEA_HOST` and `GITEA_ACCESS_TOKEN`.
-
-
-
----
-
-## 📂 Directory Layout
-
-- `AGENTS.md`: The "Constitution" and supreme ruleset.
-- `.agents/brain/`: Permanent memory (`schema.md`, `rules.md`, `env-required.json`, `audit.jsonl`).
-- `.agents/`: Global config & MCP servers (`config.json`, `mcp_config.json`).
-- `.agents/locks/`: Atomic POSIX directory-based mutex locks (`.agents/locks/<hash>.lock`).
-- `.agents/incidents/`: Post-mortem incident reports for failed tasks or timeouts.
-- `.agents/plans/`: Granular markdown execution checklists (Single Source of Truth).
-- `.agents/scratch/`: Ephemeral/short-term notes and debugging context.
-- `.agents/skills/`: The 6 core operational skills listed above.
-
+├── AGENTS.md             # Supreme Workspace Directive & Constitution (AAC v4.3)
+└── .agents/
+    ├── brain/            # Permanent Memory & Operational Contracts
+    │   ├── soul.md       # Persona, Humanized Senior Partner Tone & Oath
+    │   ├── rules.md      # Persisted Invariants & Project Lessons
+    │   ├── schema.md     # Single Source of Truth DB & System Schemas
+    │   └── audit.jsonl   # Immutable Task Execution Audit Log
+    ├── config.json       # Master Numerical Bounds, Timeouts & Swarm Rules
+    ├── TASK_TEMPLATE.md  # Standard Granular Task Execution Plan Template
+    ├── plans/            # Granular Task Plan Checklists (Single Source of Truth)
+    ├── locks/            # Atomic POSIX Directory Mutex Locks
+    ├── scratch/          # Ephemeral Temporary Intermediate Workspace
+    └── skills/           # 6 Core Executable Domain Modules
+```
 
 ---
 
-## ⚡ Slash Commands (Anti-Hallucination)
+## ⚡ Antigravity Native Slash Commands
 
-Start your prompt with these commands to maximize autonomy:
+Maximize workflow autonomy using native Antigravity slash commands:
 
-| Command | Best For | Description |
-| :--- | :--- | :--- |
-| **`/goal`** | `Long-running autonomy` | Forces the agent into a persistent loop to hit complex milestones. |
-| **`/grill-me`** | `Requirements gathering` | The agent pauses coding and interviews you with targeted questions. |
-| **`/teamwork-preview`** | `Parallel execution` | Divides massive tasks and spawns multiple sub-agents. |
-| **`/plan`** | `Step-by-step logic` | Outputs a rigorous step-by-step checklist before proceeding. |
-| **`/learn`** | `Self-Correction` | Documents a new pattern in `rules.md` or generates a new skill. |
+- **`/goal`**: Launch long-running overnight autonomous loops with deep verification.
+- **`/grill-me`**: Pause coding and initiate an interactive alignment interview to clarify design trade-offs.
+- **`/plan`**: Generate a structured step-by-step micro-task checklist before execution.
+- **`/learn`**: Auto-document newly discovered engineering patterns into `rules.md` or workspace skills.
+
+---
+
+<div align="center">
+
+**Crafted for Antigravity AI Engineers** • Standardized under AAC v4.3 Protocol
+
+</div>

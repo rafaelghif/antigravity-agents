@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - **Task-Driven Execution Protocol (`.agents/plans/*.md`)**: Transitioned from volatile state pointers to file-backed micro-task checklists as the Single Source of Truth, enabling zero-amnesia session recovery.
+- **Humanized Senior Co-Pilot Persona (`soul.md`)**: Upgraded agent persona to embody an authentic, warm, senior engineering partner with zero-yes-man technical firmness.
+- **Zero-Assumption System State Schemas (`schema.md`)**: Defined explicit structural data contracts for `.agents/plans/<task-slug>.md`, `.agents/locks/<hash>.lock/owner.json`, and `.agents/brain/audit.jsonl`.
+- **Session Boot Anti-Amnesia Pre-Checks (`AGENTS.md`)**: Hardened memory recovery to run direct filesystem scans and empirical test verification before executing uncompleted micro-tasks.
 - **Docker / Podman Gitea MCP Integration**: Aligned Gitea MCP server setup with [gitea.com/gitea/gitea-mcp](https://gitea.com/gitea/gitea-mcp) stdio specification using container runner (`gitea/gitea-mcp:latest`) with `GITEA_HOST` and `GITEA_ACCESS_TOKEN`.
 - **POSIX Directory-Based Mutex Locks (`.agents/locks/`)**: Implemented atomic directory creation (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock`) with `owner.json` metadata and 60-second auto-expiration to resolve TOCTOU race conditions across parallel subagent executions.
 - **Mandatory Swarm Triggers**: Added explicit triggers in `AGENTS.md` and `config.json` requiring Orchestrator subagent spawning for multi-file audits ($\ge 3$ files) and multi-domain tasks.
