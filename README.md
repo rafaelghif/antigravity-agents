@@ -94,7 +94,8 @@ Edit `.agents/mcp_config.json` to insert your specific Personal Access Tokens (P
 ## 📂 Directory Layout
 
 - `AGENTS.md`: The "Constitution" and supreme ruleset.
-- `.agents/brain/`: Permanent memory (`schema.md`, `rules.md`, `env-required.json`, `mcp-registry.json`).
+- `.agents/brain/`: Permanent memory (`schema.md`, `rules.md`, `env-required.json`, `audit.jsonl`).
+- `.agents/`: Global config & MCP servers (`config.json`, `mcp_config.json`).
 - `.agents/locks/`: Atomic POSIX directory-based mutex locks (`.agents/locks/<hash>.lock`).
 - `.agents/incidents/`: Post-mortem incident reports for failed tasks or timeouts.
 - `.agents/plans/`: Granular markdown execution checklists (Single Source of Truth).

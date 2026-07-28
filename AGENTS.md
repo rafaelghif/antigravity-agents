@@ -12,13 +12,15 @@ This core directive governs all agents and subagents in this workspace. Referenc
 The `.agents/` directory is the agent's central nervous system and operational workspace:
 * **`.agents/plans/`**: **Primary Execution Engine (Single Source of Truth)**. Contains active, granular markdown plan checklists (`<task-slug>.md`). Every non-trivial task MUST have a plan file here before code execution begins.
 * **`.agents/locks/`**: **POSIX Directory-Based Mutex Locks**. Contains atomic lock directories (`.agents/locks/<md5_hash_of_filepath>.lock/`) to prevent TOCTOU race conditions across parallel subagents.
+* **`.agents/`**: Core configuration and MCP definitions:
+  - `mcp_config.json` (and `.example`): Manifest of Model Context Protocol (MCP) server endpoints.
+  - `config.json`: Master numerical bounds, execution thresholds, and timeouts.
 * **`.agents/brain/`**: Core memory & contract specifications:
   - `soul.md`: Persona, tone, empathy, and pair-programming collaboration values. Read on every session start.
   - `rules.md`: High-level invariants and persisted user lessons. Read at the start of EVERY session.
   - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas, table column definitions, and API contracts.
   - `audit.jsonl`: Immutable task execution and token consumption audit trail.
   - `env-required.json`: Declaration of required environment variables and secrets.
-  - `mcp-registry.json`: Registry of dynamic Model Context Protocol (MCP) server endpoints.
 * **`.agents/common/`**: Shared execution utilities and system functions (`utils.md`).
 * **`.agents/scratch/`**: Ephemeral workspace for temporary intermediate files. Ephemeral files are automatically purged by `system-janitor` upon task completion.
 * **`.agents/incidents/`**: Autonomously generated post-mortem reports (`abort-*.json` or `security-*.md`).
