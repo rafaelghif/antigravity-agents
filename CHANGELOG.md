@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - **Humanized Skill Modules**: Completely refactored all internal AI skill modules (`code-engineer`, `devops-manager`, `quality-assurance`, `security-docs-auditor`, `system-architect`, `system-janitor`) to replace robotic/imperative instructions with a natural, collaborative "Senior Engineering Co-Pilot" persona.
+- **Strict Pre-Execution Gates & Token Efficiency**: Rewrote `AGENTS.md` to aggressively enforce pre-execution issue/plan gates (HARD STOP). Compacted the directive to under 60 lines with a strict $\le 150$ characters per line limit to maximize context token efficiency.
+- **Clean Markdown Standards**: Removed messy inline math formatting from `devops-manager/SKILL.md` in favor of standard markdown lists.
 
 ### Fixed
 - **Plan File TOCTOU Race Conditions**: Fixed state loss vulnerabilities by mandating POSIX Directory Locks for plan files prior to modification.
