@@ -9,6 +9,7 @@ Follow these steps sequentially upon receiving a task.
 - [ ] 3. Read `.agents/brain/schema.md` (or domain schemas in `.agents/brain/schemas/`) to enforce Zero-Assumption data contracts.
 - [ ] 4. **Check Active Tasks & Resume (Direct Filesystem Scan)**:
   - Perform direct scan on `.agents/plans/*.md`.
+  - **Single Active Plan Priority**: If multiple plans exist, prioritize the one with the most recent modification timestamp. Pause others to prevent context switching.
   - Check for uncompleted micro-tasks (`- [ ]` or `- [~]`). Restore from `.bak` if file is corrupted.
   - If uncompleted tasks exist, **resume execution immediately** from the first uncompleted micro-task without asking redundant questions.
 
@@ -26,10 +27,11 @@ Follow these steps sequentially upon receiving a task.
 ## 3. Execution & Atomic Checkpoint Protocol
 - [ ] 1. Execute **EXACTLY ONE micro-task at a time** (Zero-Batching Directive).
 - [ ] 2. If delegating to a subagent, mark status as `- [~] (Assigned: <subagent_id>)`.
-- [ ] 3. Claim POSIX directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock` and write `owner.json`) before modifying files.
+- [ ] 3. Claim POSIX directory lock (`mkdir -p .agents/locks/<hash>.lock` and write `owner.json`) before modifying ANY source file or the active plan file itself.
 - [ ] 4. After completing each micro-task, run empirical verification (`npm test`, `tsc`, `pytest`).
-- [ ] 5. **Immediately update the plan file**: Change `- [ ]` to `- [x]` for the completed micro-task using `replace_file_content` (maintaining `.bak` copy).
-- [ ] 6. Repeat until all micro-tasks in `.agents/plans/<task-slug>.md` are marked `- [x]`.
+- [ ] 5. **Atomic Backup**: Run `cp .agents/plans/<task-slug>.md .agents/plans/<task-slug>.md.bak` before updating.
+- [ ] 6. **Immediately update the plan file**: Change `- [ ]` to `- [x]` for the completed micro-task.
+- [ ] 7. Repeat until all micro-tasks in `.agents/plans/<task-slug>.md` are marked `- [x]`.
 
 ## 4. Post-flight Cleanup & Gate
 - [ ] 1. Delete ephemeral `.agents/scratch/*` notes (coordinated with `system-janitor`).

@@ -5,20 +5,20 @@ requires_core: ">=4.3.0"
 ---
 # Quality Assurance Skill
 
-## Objective
-Comprehensive quality assurance covering automated test suites, UI/WCAG accessibility, and multi-dimensional performance profiling.
+## My Role as Your QA Engineer
+I am responsible for ensuring our code passes all tests, meets accessibility standards, and runs performantly. I won't let bad code slip through the cracks.
 
 ## 1. Automated Testing (Unit, Integration, E2E)
-- Run project test suites (`npm test`, `pytest`, `cargo test`) and ensure 100% pass rate.
-- Generate unit/integration tests for uncovered edge cases.
+- I'll run our test suites (`npm test`, `pytest`, `cargo test`) and make sure we have a 100% pass rate.
+- I'll gladly generate unit or integration tests for any uncovered edge cases.
 
 ## 2. UI & Accessibility (A11y) Review
-- Validate UI components against WCAG 2.1 AA standards (color contrast, semantic HTML, ARIA labels, keyboard navigation).
-- Enforce visual aesthetics (Google Fonts, HSL color palettes, dynamic glassmorphism/micro-animations).
+- I'll review our UI components to ensure they meet WCAG 2.1 AA standards (color contrast, semantic HTML, ARIA labels, keyboard navigation).
+- Let's keep our visual aesthetics sharp with modern fonts, tailored color palettes, and slick micro-animations.
 
 ## 3. 5-Dimension Performance Profiling
-- **Database & Data Access**: Check for N+1 ORM queries and missing indexes.
-- **File & Network I/O**: Audit blocking synchronous file reads/writes and API payload compression.
-- **CPU & Algorithmic Complexity**: Replace $O(n^2)$ nested loops with $O(1)$ map lookups.
-- **Heap Memory & Resource Leaks**: Track memory growth under load; detect listener/handle leaks.
-- **Performance Baseline Storage**: Compare metrics against `.agents/brain/perf-baseline.json`. Halt release if performance degrades $>15\%$.
+- **Database & Data Access**: I'll watch out for N+1 ORM queries and ensure we're using indexes correctly.
+- **File & Network I/O**: I'll flag blocking file operations or uncompressed API payloads.
+- **CPU & Algorithmic Complexity**: I'll suggest replacing $O(n^2)$ nested loops with $O(1)$ lookups where possible.
+- **Heap Memory & Resource Leaks**: I'll help track memory growth to catch listener or handle leaks.
+- **Performance Baseline Storage**: I'll compare our metrics against `.agents/brain/perf-baseline.json`. If performance degrades by $>15\%$, I'll halt the release and let you know.

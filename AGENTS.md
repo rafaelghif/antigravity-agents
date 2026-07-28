@@ -41,6 +41,7 @@ Before executing ANY prompt or task step, the agent MUST run the Memory & Task R
    - Read `.agents/brain/rules.md` (Invariants & Persisted Lessons).
 2. **Inspect Active Task Registry & Storage Cleanup (Direct Filesystem Scan)**:
    - Perform a direct filesystem scan of the `.agents/plans/` directory for any active `<task-slug>.md` plan files containing uncompleted checkboxes (`- [ ]` or `- [~]`).
+   - **Single Active Plan Priority**: If multiple plans exist, the plan with the most recent modification timestamp takes priority. Other plans must be paused to prevent context switching amnesia.
    - If a plan file is malformed or corrupted due to a past system crash, immediately restore from `.agents/plans/<task-slug>.md.bak`.
    - **Orphan Scratch Cleanup**: Autonomously purge any ephemeral files in `.agents/scratch/` that do not belong to active task plans to prevent context confusion across session switches.
 3. **Session & Interrupt Recovery Protocol (ZERO Amnesia & Anti-Redundancy Gate)**:
@@ -81,7 +82,9 @@ Every `.agents/plans/<task-slug>.md` file MUST strictly follow the structure def
 To guarantee zero loss of context during network disconnects, session switches, token compaction, or user interrupts:
 
 1. **Atomic Checkpointing After EVERY Micro-Task**:
-   - As soon as a single micro-task is complete and verified, the agent MUST immediately edit `.agents/plans/<task-slug>.md` using `replace_file_content` to mark it as `- [x]`. Always create a `.bak` backup before editing.
+   - As soon as a single micro-task is complete and verified, the agent MUST immediately edit `.agents/plans/<task-slug>.md` to mark it as `- [x]`. 
+   - **Mandatory Atomic Backup**: Before editing, execute an explicit shell copy `cp .agents/plans/<task-slug>.md .agents/plans/<task-slug>.md.bak`.
+   - **POSIX Plan Lock**: You MUST claim a directory lock on the plan file itself before modifying it during multi-agent orchestration.
 2. **Crash & Interrupt Recovery State**:
    - On the next prompt or session reload, the agent inspects the file directly, sees `- [x]` for finished items, and picks up at the very first `- [ ]` item.
 3. **Zero Amnesia Merging**: When multiple micro-tasks are completed, the progress log in the plan file serves as the definitive audit trail.
@@ -114,7 +117,7 @@ Hermes Protocol operates on TWO learning sources: **User Corrections** AND **Aut
   - `self`: Isolated parallel code modifications bound strictly to an assigned micro-task block.
 
 ### 6.2 POSIX Directory-Based File Locking Protocol
-- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit atomic directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock`) containing `owner.json` metadata (`{"claimed_by": "<agent_id>", "claimed_at": "<ISO8601>"}`).
+- **File Lock Claiming (Source Code & Plans)**: Any subagent attempting to modify a specific source code file OR an active `.agents/plans/<task-slug>.md` plan file MUST claim an explicit atomic directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock`) containing `owner.json` metadata (`{"claimed_by": "<agent_id>", "claimed_at": "<ISO8601>"}`).
 - **Lock Timeout**: Locks auto-expire after `config.json -> state_management.lock_timeout_seconds` (60s) to prevent orphan deadlocks.
 
 ---

@@ -5,17 +5,17 @@ requires_core: ">=4.3.0"
 ---
 # System Architect Skill
 
-## Objective
-Single authority for architectural impact auditing, database schema governance, and synthetic data generation.
+## My Role as Your System Architect
+I'll help you audit architectural impacts, manage database schemas, and synthesize test data.
 
 ## 1. Holistic Impact Audit
-- Trace blast radius across modules before making architectural modifications.
-- Ensure public API backward compatibility; define migration strategies for breaking changes.
+- Before we make architectural modifications, I'll trace the blast radius across our modules.
+- I'll ensure public API backward compatibility and help define migration strategies for any breaking changes.
 
 ## 2. Schema Governance
-- Single Source of Truth: Keep `.agents/brain/schema.md` or `.agents/brain/schemas/<domain>.md` synchronized whenever ORM models change (`prisma.schema`, `models.py`, `schema.sql`).
-- Zero-Assumption Rule: Never guess column names, data types, or relationships without verifying the schema authority.
+- **Single Source of Truth**: I'll keep `.agents/brain/schema.md` synchronized whenever our ORM models change (`prisma.schema`, `models.py`, `schema.sql`).
+- **Zero-Assumption Rule**: I'll never guess column names or data types without verifying our schema authority first.
 
 ## 3. Data Synthesis
-- Generate realistic mock datasets for database seeding and API tests.
-- Ensure synthetic data respects schema constraints, foreign key relationships, and data privacy rules.
+- I can generate realistic mock datasets for database seeding and API tests.
+- I'll make sure the synthetic data respects our schema constraints, foreign key relationships, and data privacy rules.
