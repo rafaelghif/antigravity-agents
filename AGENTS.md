@@ -3,7 +3,7 @@
 **Core Version**: 4.3.0  
 **Architecture Pattern**: Deterministic Task-Driven & File-Backed Execution Protocol
 
-This core directive governs all agents and subagents in this workspace. Reference `.agents/config.json` for numeric constants and `.agents/common/utils.md` for shared utilities.
+This core directive governs all agents and subagents in this workspace. Reference `.agents/config.json` for numerical constants and `.agents/common/utils.md` for shared utilities.
 
 ---
 
@@ -16,9 +16,9 @@ The `.agents/` directory is the agent's central nervous system and operational w
   - `mcp_config.json` (and `.example`): Manifest of Model Context Protocol (MCP) server endpoints.
   - `config.json`: Master numerical bounds, execution thresholds, and timeouts.
 * **`.agents/brain/`**: Core memory & contract specifications:
-  - `soul.md`: Persona, tone, empathy, and pair-programming collaboration values. Read on every session start.
+  - `soul.md`: Persona, humanized tone, empathy, and pair-programming collaboration values. Read on every session start.
   - `rules.md`: High-level invariants and persisted user lessons. Read at the start of EVERY session.
-  - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas, table column definitions, and API contracts.
+  - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas, table column definitions, agent state contracts, and API specifications.
   - `audit.jsonl`: Immutable task execution and token consumption audit trail.
   - `env-required.json`: Declaration of required environment variables and secrets.
 * **`.agents/common/`**: Shared execution utilities and system functions (`utils.md`).
@@ -37,8 +37,8 @@ The `.agents/` directory is the agent's central nervous system and operational w
 Before executing ANY prompt or task step, the agent MUST run the Memory & Task Recovery Boot sequence:
 
 1. **Read Persona & Invariants**:
-   - Read `.agents/brain/soul.md` (Persona & Empathy).
-   - Read `.agents/brain/rules.md` (Invariants & Lessons).
+   - Read `.agents/brain/soul.md` (Persona, Humanized Warm Tone & Empathy).
+   - Read `.agents/brain/rules.md` (Invariants & Persisted Lessons).
 2. **Inspect Active Task Registry & Storage Cleanup (Direct Filesystem Scan)**:
    - Perform a direct filesystem scan of the `.agents/plans/` directory for any active `<task-slug>.md` plan files containing uncompleted checkboxes (`- [ ]` or `- [~]`).
    - If a plan file is malformed or corrupted due to a past system crash, immediately restore from `.agents/plans/<task-slug>.md.bak`.
@@ -49,7 +49,7 @@ Before executing ANY prompt or task step, the agent MUST run the Memory & Task R
      - **DO NOT start over or re-implement finished tasks (`- [x]`)**.
      - If a task is marked `- [~] (Assigned: <subagent_id>)`, check if the subagent is still active before re-delegating or executing.
      - Identify the **FIRST uncompleted micro-task** (`- [ ]`) in the plan.
-     - **Empirical Artifact Pre-Check (Anti-Forgetfulness Gate)**: Before executing code for `- [ ]`, inspect if the target file/function exists AND passes empirical verification (`npm test`, `tsc`, `pytest`). DO NOT rely on simple file presence alone. If the code exists AND passes verification, update the checkbox to `- [x]` and proceed to the next micro-task. If verification fails, repair the existing code.
+     - **Empirical Artifact Pre-Check (Anti-Forgetfulness Gate)**: Before executing code for `- [ ]`, inspect if the target file/function exists AND passes empirical verification (`npm test`, `tsc`, `pytest`, or explicit file output check). DO NOT rely on simple file presence alone. If the code exists AND passes verification, update the checkbox to `- [x]` and proceed to the next micro-task. If verification fails, repair the existing code.
      - Inspect its explicit references (e.g. `Ref: schema.md#table_name`, `Target File: src/...`) and resume execution.
 
 4. **Read Domain Contracts**: Read `.agents/brain/schema.md` (or relevant `schemas/<domain>.md`) referenced by the active micro-task.
@@ -67,7 +67,7 @@ Before executing ANY prompt or task step, the agent MUST run the Memory & Task R
 > [!CRITICAL] ZERO-BATCHING DIRECTIVE
 > You are FORBIDDEN from executing multiple uncompleted micro-tasks (`- [ ]`) in a single step.
 > 1. Execute EXACTLY ONE micro-task.
-> 2. Run the empirical validation command (`npm test`, `tsc`, `pytest`).
+> 2. Run the empirical validation command (`npm test`, `tsc`, `pytest`, or log inspection).
 > 3. Update the plan file to `- [x]` using `replace_file_content`.
 > 4. STOP and proceed to the next micro-task sequentially.
 
@@ -134,7 +134,6 @@ Select the execution tier based on task complexity:
 > You CANNOT mark a micro-task as `- [x]` based on confidence or subjective belief.
 > Evidence Requirement: You MUST have physical terminal output showing `exit code 0` in your context window. If you haven't run the build/test command, YOU DO NOT KNOW if it works.
 
-
 ---
 
 ## 8. Git Workflow Integration & Workspace Isolation
@@ -154,5 +153,3 @@ Agents SHOULD proactively recommend native Antigravity slash commands to the use
 - Recommend `/grill-me` when design decisions or architectural trade-offs require alignment.
 - Recommend `/diff` when the user wants an interactive visual review of proposed file changes.
 - Recommend `/learn` when the user provides explicit structural corrections to be persisted.
-
-

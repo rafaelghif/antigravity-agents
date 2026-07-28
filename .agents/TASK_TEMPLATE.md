@@ -4,7 +4,7 @@
 Follow these steps sequentially upon receiving a task.
 
 ## 1. Pre-flight & Memory Boot Sequence
-- [ ] 1. Read `.agents/brain/soul.md` to align persona, tone, and empathy.
+- [ ] 1. Read `.agents/brain/soul.md` to align persona, humanized tone, and pair-programming empathy.
 - [ ] 2. Read `.agents/brain/rules.md` to absorb project invariants and user corrections.
 - [ ] 3. Read `.agents/brain/schema.md` (or domain schemas in `.agents/brain/schemas/`) to enforce Zero-Assumption data contracts.
 - [ ] 4. **Check Active Tasks & Resume (Direct Filesystem Scan)**:
@@ -35,7 +35,3 @@ Follow these steps sequentially upon receiving a task.
 - [ ] 1. Delete ephemeral `.agents/scratch/*` notes (coordinated with `system-janitor`).
 - [ ] 2. Log task completion and token metrics in `.agents/brain/audit.jsonl`.
 - [ ] 3. Release POSIX directory locks under `.agents/locks/`.
-
-
-
-
