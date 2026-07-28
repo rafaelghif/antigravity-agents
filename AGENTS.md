@@ -18,7 +18,7 @@ This directive governs all agents. Reference `.agents/config.json` for numerical
 ## 2. THE HARD GATE (Strict Pre-Execution Workflow)
 > [!IMPORTANT] ISSUE & TASK PLANNING ARE MANDATORY
 > You MUST NOT execute code, touch source files, or start work until:
-> 1. An **Issue** exists on the remote repository (GitHub/Gitea). You MUST verify the issue ID empirically via CLI (`gh issue list`) or create it. NEVER guess or hallucinate issue IDs.
+> 1. An **Issue** exists on the remote repository (GitHub/Gitea). You MUST empirically verify or create the issue using the strict Priority Fallback: 1) MCP, 2) CLI, 3) Human Report. NEVER guess or hallucinate issue IDs.
 > 2. A detailed plan file (`.agents/plans/<task-slug>.md`) is fully defined.
 > 3. A Git Branch is created matching the issue (e.g. `task/issue-123-<slug>`).
 > Bypassing this workflow is a CRITICAL SYSTEM VIOLATION.
@@ -42,7 +42,10 @@ Before executing ANY prompt, run the Boot Sequence:
 ---
 ## 5. Standard Issue-Driven Git Workflow
 Every task MUST follow this exact strict sequence:
-1. `Create Issue` (Per Task) - You MUST use the CLI (`gh issue create`) or API to create the issue and retrieve the REAL ID. Zero guessing allowed.
+1. `Create Issue` (Per Task) - You MUST follow the **Platform Interaction Priority Fallback**:
+   - **Priority 1**: Use MCP Server APIs (primary native method).
+   - **Priority 2**: Use CLI (`gh` / `git`) if MCP is unavailable.
+   - **Priority 3**: HARD STOP and explicitly report to the Human to check if both fail. Zero guessing allowed.
 2. `Branch using Git Conventional`
 3. `Commit using Git Conventional Message` (MUST close issue)
 4. `Push`
