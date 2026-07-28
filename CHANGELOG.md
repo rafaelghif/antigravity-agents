@@ -7,17 +7,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [4.3.0] - 2026-07-28
 
 ### Added
-- **Task-Driven Architecture (Spec-First Protocol)**: Overhauled execution engine to rely on physical markdown plan checklists (`.agents/plans/<task-slug>.md`) as the Single Source of Truth for task state, eliminating amnesia and hallucination across session switches.
-- **POSIX Directory-Based Mutex Locking (`.agents/locks/`)**: Implemented OS-level atomic directory creation (`mkdir -p .agents/locks/<file_hash>.lock`) with `owner.json` metadata and 60-second auto-expiration, resolving TOCTOU race conditions during parallel subagent executions.
-- **Mandatory Swarm Triggers**: Enforced automatic Orchestrator subagent spawning (`invoke_subagent`) whenever tasks involve multi-file audits (> 3 files) or multi-domain implementations.
-- **Decisions & `/grill-me` Permanent Ledger**: Integrated `## 1. Decisions & Architectural Trade-offs` into the plan template to record all user directives, constraints, and `/grill-me` interview agreements directly to disk.
-- **Zero-Batching & Empirical Verification Gate**: Mandated single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test`, `tsc`, `pytest`) before marking tasks completed (`- [x]`).
-- **Empirical Artifact Pre-Check & Auto-Backup (`.bak`)**: Created automatic plan file backups before edits and added full empirical test checks on existing files during session boot to prevent redundant code execution.
-- **Git Merge Conflict & Rebase Protocol**: Formalized `git rebase main` requirements prior to test verification in `devops-manager`, prohibiting conflict markers (`<<<<<<< HEAD`) from reaching source code.
+- **Task-Driven Execution Protocol (`.agents/plans/*.md`)**: Transitioned from volatile state pointers to file-backed micro-task checklists as the Single Source of Truth, enabling zero-amnesia session recovery.
+- **POSIX Directory-Based Mutex Locks (`.agents/locks/`)**: Implemented atomic directory creation (`mkdir -p .agents/locks/<file_hash>.lock`) with 60-second auto-expiration to resolve TOCTOU race conditions across parallel subagent executions.
+- **Mandatory Swarm Triggers**: Added explicit triggers in `AGENTS.md` and `config.json` requiring Orchestrator subagent spawning for multi-file audits (> 3 files) and multi-domain tasks.
+- **Decisions & `/grill-me` Ledger**: Introduced mandatory `## 1. Decisions & Architectural Trade-offs` section in task plans to freeze user directives, design choices, and `/grill-me` interview logs directly to disk.
+- **Strict Pre-Execution Hard-Lock Gate**: Prohibited any source code edits until (1) a granular plan file exists in `.agents/plans/` AND (2) a dedicated Git branch (`task/<slug>`) is created.
+- **Zero-Batching & Empirical Verification Gate**: Enforced single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test` or `tsc`) before marking tasks `- [x]`.
+- **Empirical Artifact Pre-Check & Auto-Backup (`.bak`)**: Added plan file `.bak` backup protection and full empirical test checks on existing files during session boot to prevent redundant code execution.
+- **Git Merge Conflict & Rebase Protocol**: Added strict `git rebase main` requirements in `devops-manager` prior to testing, prohibiting merge conflict markers (`<<<<<<< HEAD`) from reaching source code.
 
 ### Changed
-- **State.json Refactoring**: Purged legacy tracking keys from `state.json`, focusing it exclusively as a lightweight registry for mutex file locking.
-- **Skill Version Alignment**: Upgraded all 6 core domain skills (`code-engineer`, `system-architect`, `quality-assurance`, `devops-manager`, `security-docs-auditor`, `system-janitor`) to require core version `>=4.3.0`.
+- **Optimized Core Directive Length**: Refactored `AGENTS.md` to ~150 lines per Google Antigravity Best Practices to maximize LLM attention window performance and eliminate context token bloat.
+- **Skill Core Version Decoupling**: Updated all 6 core domain skills (`code-engineer`, `system-architect`, `quality-assurance`, `devops-manager`, `security-docs-auditor`, `system-janitor`) to require core version `>=4.3.0`.
+- **Installer Script Scaffolding**: Updated `install.sh` and `install.ps1` to automatically create `.agents/locks/` scaffolding during one-line installations.
+
+### Fixed
+- **Orphan Scratch Context Leakage**: Resolved context confusion across session switches by enforcing autonomous purging of orphan ephemeral files in `.agents/scratch/` during Session Boot.
+- **TOCTOU Race Condition in Parallel Subagents**: Fixed file locking race conditions by replacing file-level JSON mutations with atomic POSIX directory creation.
+
+### Removed
+- **Legacy `state.json` Persistence File**: Completely eliminated `.agents/brain/state.json` and its schema references from `schema.md` and `AGENTS.md`, deprecating volatile state tracking.
+
 
 ## [4.2.1] - 2026-07-27
 
