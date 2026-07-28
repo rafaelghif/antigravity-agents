@@ -13,9 +13,9 @@
         "-i",
         "--rm",
         "-e",
-        "GITEA_HOST=http://host.docker.internal:3000",
+        "GITEA_HOST=${GITEA_HOST}",
         "-e",
-        "GITEA_ACCESS_TOKEN=${GITEA_PAT}",
+        "GITEA_ACCESS_TOKEN=${GITEA_TOKEN}",
         "gitea/gitea-mcp:latest"
       ]
     }
