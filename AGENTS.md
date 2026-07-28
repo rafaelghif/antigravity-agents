@@ -21,6 +21,10 @@ The `.agents/` directory is the agent's central nervous system and operational w
 * **`.agents/incidents/`**: Autonomously generated post-mortem reports (`abort-*.json` or `security-*.md`).
 * **`.agents/skills/`**: Domain-specific executable workflows loaded dynamically on demand.
 
+> [!CRITICAL] STRICT DIRECTORY MANIFEST INVARIANT
+> Any file or state artifact NOT explicitly listed in this manifest (such as legacy `state.json`) is strictly classified as OBSOLETE/DEPRECATED and FORBIDDEN to exist. If detected during Session Boot, the agent MUST purge it immediately.
+
+
 ---
 
 ## 2. Session Boot & Anti-Amnesia Protocol (Task-Driven Recovery)
