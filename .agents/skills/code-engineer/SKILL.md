@@ -1,7 +1,7 @@
 ---
 name: code-engineer
 description: Universal software engineering enforcer for any programming language (TypeScript, JavaScript, Python, Go, Rust, PHP, Java, C#, Dart/Flutter, C/C++, Swift, VB6, VB.NET, ASP/ASP.NET) and scientific advanced debugging workflow. Triggers when writing new features, refactoring code, or debugging complex runtime bugs and tracebacks.
-requires_core: ">=4.2.0"
+requires_core: ">=4.3.0"
 ---
 # Code Engineer Skill
 
@@ -20,9 +20,10 @@ Ensure all generated code strictly follows SOLID, DRY, Clean Code, and framework
 - **C / C++**: Enforce RAII, smart pointers (`std::unique_ptr`, `std::shared_ptr`), memory safety, and `valgrind`/`cppcheck`.
 - **Legacy Systems (VB6, Classic ASP)**: Respect legacy syntax (`Option Explicit`), explicit object cleanup (`Set obj = Nothing`), COM error handling (`On Error GoTo`), and prevent injection vulnerabilities in dynamic SQL.
 
-## 2. Subagent Delegation & Recursion Limit
-- Check current depth in `.agents/brain/state.json`. If depth $\ge$ `config.json -> orchestration.max_skill_depth` (default 5), **DO NOT spawn further subagents**; execute directly to prevent infinite recursive loops.
-- Otherwise, if implementation spans across > 3 distinct modules, delegate sub-modules to `self` subagents using `invoke_subagent`.
+## 2. Subagent Swarm Delegation & Recursion Limit
+- Check current execution depth via active task plan (`.agents/plans/<task-slug>.md`) or `audit.jsonl` traces. If depth $\ge$ `config.json -> orchestration.max_skill_depth` (default 5), **DO NOT spawn further subagents**; execute directly to prevent infinite recursive loops.
+- Delegate sub-modules to worker subagents using `invoke_subagent` when mandatory swarm triggers are met (`multi_file_threshold > 3`).
+
 
 ## 3. Scientific Advanced Debugging Workflow
 - **Log-Driven Diagnosis**: Read raw error tracebacks before forming hypotheses. Never guess or swallow exceptions.

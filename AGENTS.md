@@ -1,178 +1,181 @@
-# AGENTS.md — Antigravity Agent Core (AAC) V4.2
+# AGENTS.md — Antigravity Agent Core (AAC) V4.3
 
-**Core Version**: 4.2.0
+**Core Version**: 4.3.0  
+**Architecture Pattern**: Deterministic Task-Driven & File-Backed Execution Protocol
 
 This core directive governs all agents and subagents in this workspace. Reference `.agents/config.json` for numeric constants and `.agents/common/utils.md` for shared utilities.
 
 ---
 
-## 1. Complete Directory Manifest & Brain Structure
+## 1. Complete Directory Manifest & Task-Driven Brain Structure
 
 The `.agents/` directory is the agent's central nervous system and operational workspace:
-* **`.agents/brain/`**: Core memory and state persistence:
+* **`.agents/plans/`**: **Primary Execution Engine (Single Source of Truth)**. Contains active, granular markdown plan checklists (`<task-slug>.md`). Every non-trivial task MUST have a plan file here before code execution begins.
+* **`.agents/locks/`**: **POSIX Directory-Based Mutex Locks**. Contains atomic lock directories (`.agents/locks/<file_hash>.lock/`) to prevent TOCTOU race conditions across parallel subagents.
+* **`.agents/brain/`**: Core memory & contract specifications:
   - `soul.md`: Persona, tone, empathy, and pair-programming collaboration values. Read on every session start.
   - `rules.md`: High-level invariants and persisted user lessons. Read at the start of EVERY session.
-  - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas and API contracts.
-  - `state.json`: Active execution state, claimed task locks, active branch, and tier status.
-* **`.agents/common/`**: Shared execution utilities and system functions:
-  - `utils.md`: Standardized algorithms for retry logic, log redaction (API keys/tokens), atomic file writing (`.tmp -> target`), framework auto-detection, and API version negotiation.
-* **`.agents/scratch/`**: Ephemeral workspace for temporary intermediate files, raw tool outputs, and context compaction notes. Ephemeral files are automatically purged by `system-janitor` upon task completion.
-
-* **`.agents/plans/`**: Structured markdown checklists (`<task-slug>.md`) for tracking subtasks in Tier 2 & Tier 3 executions.
-* **`.agents/incidents/`**: Autonomously generated post-mortem reports (`abort-*.json` or `security-*.md`) created when a task fails, times out, or encounters a deadlock.
+  - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas, table column definitions, and API contracts.
+* **`.agents/common/`**: Shared execution utilities and system functions (`utils.md`).
+* **`.agents/scratch/`**: Ephemeral workspace for temporary intermediate files. Ephemeral files are automatically purged by `system-janitor` upon task completion.
+* **`.agents/incidents/`**: Autonomously generated post-mortem reports (`abort-*.json` or `security-*.md`).
 * **`.agents/skills/`**: Domain-specific executable workflows loaded dynamically on demand.
 
 ---
 
-## 2. Session & Memory Boot Sequence (Anti-Amnesia Protocol)
+## 2. Session Boot & Anti-Amnesia Protocol (Task-Driven Recovery)
 
-Before executing ANY prompt or task step, the agent MUST run the Memory Boot sequence:
-1. **Read Persona & Mindset (`.agents/brain/soul.md`)**: Align tone, empathy, and collaborative mindset.
-2. **Read Core Lessons (`.agents/brain/rules.md`)**: Absorb all past corrections and invariants. Never repeat documented errors across session switches.
-3. **Read Project Schema (`.agents/brain/schema.md`)**: Understand current data structures and contracts.
-4. **Inspect State (`.agents/brain/state.json`)**: Check current active branch, active tier, and claimed subagent tasks.
+Before executing ANY prompt or task step, the agent MUST run the Memory & Task Recovery Boot sequence:
+
+1. **Read Persona & Invariants**:
+   - Read `.agents/brain/soul.md` (Persona & Empathy).
+   - Read `.agents/brain/rules.md` (Invariants & Lessons).
+2. **Inspect Active Task Registry & Storage Cleanup (Direct Filesystem Scan)**:
+   - Perform a direct filesystem scan of the `.agents/plans/` directory for any active `<task-slug>.md` plan files containing uncompleted checkboxes (`- [ ]` or `- [~]`).
+   - If a plan file is malformed or corrupted due to a past system crash, immediately restore from `.agents/plans/<task-slug>.md.bak`.
+   - **Orphan Scratch Cleanup**: Autonomously purge any ephemeral files in `.agents/scratch/` that do not belong to active task plans to prevent context confusion across session switches.
+3. **Session & Interrupt Recovery Protocol (ZERO Amnesia & Anti-Redundancy Gate)**:
+   - If an active plan exists with uncompleted tasks (`- [ ]` or `- [~]`):
+     - **DO NOT ask the user what to do next**.
+     - **DO NOT start over or re-implement finished tasks (`- [x]`)**.
+     - If a task is marked `- [~] (Assigned: <subagent_id>)`, check if the subagent is still active before re-delegating or executing.
+     - Identify the **FIRST uncompleted micro-task** (`- [ ]`) in the plan.
+     - **Empirical Artifact Pre-Check (Anti-Forgetfulness Gate)**: Before executing code for `- [ ]`, inspect if the target file/function exists AND passes empirical verification (`npm test`, `tsc`, `pytest`). DO NOT rely on simple file presence alone. If the code exists AND passes verification, update the checkbox to `- [x]` and proceed to the next micro-task. If verification fails, repair the existing code.
+     - Inspect its explicit references (e.g. `Ref: schema.md#table_name`, `Target File: src/...`) and resume execution.
+
+4. **Read Domain Contracts**: Read `.agents/brain/schema.md` (or relevant `schemas/<domain>.md`) referenced by the active micro-task.
 
 ---
 
-## 3. Dynamic Self-Learning & Self-Correction (Hermes Protocol)
+## 3. Engineering-Grade Task Definition Protocol (Spec-First Architecture)
 
-### 3.1 Dual-Source Learning Architecture
+### 3.1 Strict Pre-Execution Rules (Hard-Lock Gate)
+- **No Code Without a Task Plan**: No source code file may be created or edited (Tier 2/Tier 3) until a detailed plan file `.agents/plans/<task-slug>.md` has been written and persisted to disk.
+- **Workflow Bypass Prohibition**: Writing code before completing (1) Plan File Creation and (2) Git Branch Creation (`git checkout -b task/<task-slug>`) is strictly classified as a **System Violation**.
+- **Micro-Task Granularity Standard**: Tasks in `.agents/plans/` CANNOT be high-level vague statements like "Create User CRUD". They MUST be broken down into micro-units of execution.
+
+### 3.2 Granular Micro-Task Plan Format & Zero-Batching Directive
+> [!CRITICAL] ZERO-BATCHING DIRECTIVE
+> You are FORBIDDEN from executing multiple uncompleted micro-tasks (`- [ ]`) in a single step.
+> 1. Execute EXACTLY ONE micro-task.
+> 2. Run the empirical validation command (`npm test`, `tsc`, `pytest`).
+> 3. Update the plan file to `- [x]` using `replace_file_content`.
+> 4. STOP and proceed to the next micro-task sequentially.
+
+Every `.agents/plans/<task-slug>.md` file MUST follow this exact engineering format:
+
+```markdown
+# Plan: <Task Title>
+
+## 1. Decisions & Architectural Trade-offs
+- **User Directives & `/grill-me` Logs**: [MANDATORY: Record all direct user decisions, architecture trade-offs, and design agreements from chat or /grill-me sessions]
+- **Domain Schema Ref**: `.agents/brain/schema.md#<section>` (e.g. Table `users`: `id`, `email`, `role`)
+- **Target Files**: `path/to/file1.ts`, `path/to/file2.ts`
+- **Dependencies**: Prerequisites or required packages
+
+## 2. Micro-Task Execution Breakdown
+
+### Phase 1: Data Access & Types Definition
+- [ ] 1.1 Create DTO Interfaces (`src/types/user.ts`)
+  - [ ] Define `CreateUserDTO` matching `schema.md` columns (`name: string`, `email: string`, `role: UserRole`)
+  - [ ] Define `UserResponseDTO` excluding sensitive columns (`password_hash`)
+- [ ] 1.2 Database Repository Layer (`src/repositories/userRepo.ts`)
+  - [ ] Implement `findById(id: string)` with exact SQL query targeting `users` table
+  - [ ] Implement `create(dto: CreateUserDTO)` returning inserted ID
+  - [ ] Implement `update(id: string, dto: UpdateUserDTO)` with partial update support
+
+### Phase 2: Business Logic & API Endpoints
+- [ ] 2.1 Controller Layer (`src/controllers/userController.ts`)
+  - [ ] Endpoint `POST /api/v1/users`: Validate payload against DTO, return HTTP 201
+  - [ ] Endpoint `GET /api/v1/users/:id`: Handle non-existent ID with HTTP 404 response
+- [ ] 2.2 Route Registration (`src/routes/userRoutes.ts`)
+  - [ ] Bind controller endpoints to HTTP verbs with auth middleware
+
+### Phase 3: Empirical Verification & Testing
+- [ ] 3.1 Unit/Integration Testing
+  - [ ] Execute `npm test -- userController.test.ts`
+- [ ] 3.2 System Build Gate
+  - [ ] Execute `npm run build` and confirm 0 TypeScript / Linter errors
+```
+
+---
+
+## 4. Atomic Progress Checkpointing & Interrupt Safety
+
+To guarantee zero loss of context during network disconnects, session switches, token compaction, or user interrupts:
+
+1. **Atomic Checkpointing After EVERY Micro-Task**:
+   - As soon as a single micro-task is complete and verified, the agent MUST immediately edit `.agents/plans/<task-slug>.md` using `replace_file_content` to mark it as `- [x]`. Always create a `.bak` backup before editing.
+2. **Crash & Interrupt Recovery State**:
+   - On the next prompt or session reload, the agent inspects the file directly, sees `- [x]` for finished items, and picks up at the very first `- [ ]` item.
+3. **Zero Amnesia Merging**: When multiple micro-tasks are completed, the progress log in the plan file serves as the definitive audit trail.
+
+---
+
+## 5. Dynamic Self-Learning & Self-Correction (Hermes Protocol)
+
+### 5.1 Dual-Source Learning Architecture
 Hermes Protocol operates on TWO learning sources: **User Corrections** AND **Autonomous Self-Evaluation**.
 
-1. **User Feedback Learning**:
-   - **Static Rules**: Append static constraints (tech stack, limits, formatting) to `.agents/brain/rules.md`.
-   - **Procedural Workflows**: When user corrects a multi-step flow, autonomously write/update an executable skill under `.agents/skills/<name>/SKILL.md`.
-
+1. **User Feedback Learning (Physical Activation Requirement)**:
+   - **Mandatory Disk Write**: When a user corrects a workflow, structural error, or provides an explicit new constraint, the agent MUST physically write/update an executable skill under `.agents/skills/<skill-slug>/SKILL.md` (or append to `rules.md`). **Mere verbal chat acknowledgment is considered a system failure.**
 2. **Autonomous Self-Evaluation (Self-Correction Engine)**:
-   - **Error Pattern Reflection**: Whenever a bugfix requires > 2 retry attempts or a non-trivial workaround is discovered:
-     - The agent MUST evaluate the root cause.
-     - Extract the solution into a repeatable pattern.
-     - Autonomously generate a workspace skill in `.agents/skills/<skill-name>/SKILL.md` (format: YAML frontmatter with `name`, `description`, and `instruction`).
-   - **Progressive Skill Discovery**: Store workspace-specific patterns in `.agents/skills/` so future sessions automatically discover and execute them.
-
-3. **Zero "Lazy Confirmation"**: Every confirmation or learning step MUST be backed by an immediate physical disk write (`rules.md`, `schema.md`, or a generated `SKILL.md`). Display the physical diff to the user.
-
-### 3.2 Token Budget & Memory Scaling Strategy (Anti-Bloat Architecture)
-To prevent `rules.md` from swelling into thousands of lines and exhausting context token windows as the project scales:
-1. **Rule Offloading to Skills (Procedural Distillation)**:
-   - `rules.md` is strictly reserved for high-level **Invariants & Non-Negotiables** (max ~50-100 lines).
-   - Any detailed, step-by-step procedural rule MUST be distilled out of `rules.md` and moved into a dedicated skill file (`.agents/skills/<domain-workflow>/SKILL.md`).
-2. **Category Archiving & Partitioning**:
-   - When `rules.md` exceeds 100 lines, trigger `system-janitor` to group obsolete or domain-specific rules into topic-based archives: `.agents/brain/rules/<domain>.md` (e.g. `ui-rules.md`, `db-rules.md`).
-   - Read domain rules dynamically ONLY when working in that specific directory or file scope.
-
-3. **Skill Progressive Disclosure**:
-   - Primary agents ONLY read skill YAML frontmatter (`name` and `description`) during startup. Full `SKILL.md` body is fetched via `view_file` strictly when that skill is active, maintaining ultra-lean baseline token consumption.
+   - Whenever a bugfix requires > 2 retry attempts, extract the solution into a repeatable pattern and generate a workspace skill physically under `.agents/skills/`.
+3. **Zero "Lazy Confirmation"**: Every confirmation or learning step MUST be backed by an immediate physical disk write. Display the physical diff to the user.
 
 ---
 
-## 4. Schema Management & Scale Strategy
+## 6. Multi-Agent Swarm Orchestration & POSIX Task Locking
 
-For small to medium projects, schemas reside in `.agents/brain/schema.md`.
-For large-scale/enterprise projects with extensive domain models:
-1. **Directory Modularization**: Split schemas by domain under `.agents/brain/schemas/<domain>.md` (e.g., `auth.md`, `billing.md`, `orders.md`).
-2. **Zero-Assumption Rule**: NEVER guess database column names, types, or API signatures. Always verify against `.agents/brain/schema.md` or actual ORM model files before writing code.
-3. **Schema Sync Protocol**: Whenever a model or database migration changes, update the corresponding schema doc in `.agents/brain/` immediately.
-
----
-
-## 5. Multi-Agent Swarm Orchestration & Task Locking
-
-### 5.1 Roles & Subagent Lifecycle
-- **Orchestrator Role**: Primary agent decomposes tasks, delegates work, and synthesizes final responses.
+### 6.1 Roles & Mandatory Swarm Triggers
+- **Orchestrator Role**: Primary agent decomposes tasks into `.agents/plans/`, delegates work, and synthesizes final responses.
+- **Mandatory Swarm Triggers**: The Orchestrator MUST autonomously split execution into a Multi-Agent Swarm (`invoke_subagent`) if any of the following conditions are met:
+  1. **Multi-File Audits**: The task requires auditing, reading, or analyzing $> 3$ files.
+  2. **Multi-Domain Tasks**: The task spans multiple functional domains (e.g., UI Components + Backend API + DB Schema).
+  3. **High Complexity**: The execution token budget is predicted to be exceeded by a single agent.
 - **Worker Subagents**:
-  - `research`: Deep codebase analysis, documentation fetching, log inspection, and security sweeps. (Authorized to write summaries to `.agents/scratch/subagent-<id>.md` and state locks).
-  - `self`: Isolated parallel code modifications.
+  - `research`: Deep codebase analysis, document fetching, and summary aggregation.
+  - `self`: Isolated parallel code modifications bound strictly to an assigned micro-task block.
 
-### 5.2 Multi-Agent Execution Topologies (Parallel Swarm vs. Sequential Pipeline)
-
-The Orchestrator MUST intelligently choose the appropriate execution topology based on task dependency:
-
-1. **Parallel Swarm Topology (Independent Subtasks)**:
-   - **Trigger**: Multi-domain audits, full workspace inspections, independent module testing, or security sweeps.
-   - **Execution**: Launch 2 to 5 parallel subagents simultaneously (`invoke_subagent`).
-   - **Synchronization Barrier**: Wait for ALL parallel subagents to complete before synthesizing results.
-
-2. **Sequential Pipeline Topology (Dependent Stage-Gated Workflow)**:
-   - **Trigger**: End-to-end feature development or Tier 3 core architecture refactoring.
-   - **Execution**: Execute subagents sequentially in strict dependency order:
-     1. **Stage 1 (Architecture & Plan)**: `system-architect` defines ORM schemas and impact boundaries.
-     2. **Stage 2 (Development)**: `code-engineer` implements the feature code.
-     3. **Stage 3 (Quality & Security Audit)**: `quality-assurance` (tests, performance, I/O) and `security-docs-auditor` (SAST, secrets, docs) run *after* development completes.
-   - **Stage Gate Enforcement**: Never run Stage 3 quality/security audits on incomplete code while Stage 2 development is still active. Each stage MUST verify clean completion before passing artifacts to the next stage.
-
-### 5.3 Parallel File Locking Protocol (Mutex Enforcement)
-- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit lock in `.agents/brain/state.json -> claimed_tasks` (keyed by target file path).
-- **Lock Timeout**: Locks auto-expire after `config.json -> state_management.lock_timeout_seconds` (30s) to prevent orphan deadlocks.
-- **Conflict Resolution**: Before merging results from parallel subagents, the Orchestrator MUST execute `git diff --name-only` to verify no write collisions occurred across parallel tasks.
+### 6.2 POSIX Directory-Based File Locking Protocol
+- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit atomic directory lock (`mkdir -p .agents/locks/<file_hash>.lock`) containing `owner.json` metadata.
+- **Lock Timeout**: Locks auto-expire after `config.json -> state_management.lock_timeout_seconds` (60s) to prevent orphan deadlocks.
 
 ---
 
-## 6. Tiered Execution Engine & Verification
+## 7. Tiered Execution Engine & Mandatory Verification
 
 Select the execution tier based on task complexity:
 
 | Tier Level | Scope / Trigger | Required Workflow |
 | :--- | :--- | :--- |
 | **Tier 1: Patch / Quick Edit** | Minor bug fix or single-file edit (< 20 lines) | Read `rules.md` $\rightarrow$ Edit $\rightarrow$ Mandatory Test/Build Verification $\rightarrow$ Atomic Commit |
-| **Tier 2: Feature Dev** | Multi-file features or isolated sub-systems | Plan (`.agents/plans/`) $\rightarrow$ Branch $\rightarrow$ Code $\rightarrow$ Test Verification $\rightarrow$ PR / Sync |
-| **Tier 3: Core Architecture** | Schema alterations, major refactors (> 100 lines) | Audit (`system-architect`) $\rightarrow$ Schema Update (`system-architect`) $\rightarrow$ Multi-Agent Dev $\rightarrow$ Security Audit (`security-docs-auditor`) $\rightarrow$ PR Gate |
+| **Tier 2: Feature Dev** | Multi-file features or isolated sub-systems | Define Granular Plan in `.agents/plans/` $\rightarrow$ Branch Isolation $\rightarrow$ Atomic Micro-Task Execution $\rightarrow$ Test Verification $\rightarrow$ Sync |
+| **Tier 3: Core Architecture** | Schema alterations, major refactors (> 100 lines) | Audit (`system-architect`) $\rightarrow$ Schema Update (`schema.md`) $\rightarrow$ Plan in `.agents/plans/` $\rightarrow$ Multi-Agent Swarm Dev $\rightarrow$ Security Audit $\rightarrow$ Gate |
 
-### 6.5 Automated Rollback & Recovery Protocol
-When test/build verification fails after code modifications:
-1. **Auto-Rollback Threshold**: If $> 2$ consecutive test verification attempts fail:
-   - Execute `git reset --hard HEAD` (or discard the active ephemeral worktree) to immediately restore the pre-change clean state.
-   - Autonomously generate a post-mortem report under `.agents/incidents/rollback-<timestamp>.md`.
-   - Notify the user via `ask_question`: *"Automated Rollback executed after 2 failed verification attempts. Would you like to proceed with an alternative architectural approach?"*
-2. **Staged Worktree Safety**: Use isolated `git worktree` or temporary `git stash` to preserve work-in-progress during verification runs.
-3. **Database Migration Safety**: Ensure all ORM database schema alterations maintain explicit `down` rollback migrations.
-
+### 7.1 Mandatory Runtime Build/Test Gate & Zero-Assumption Verification
+> [!IMPORTANT] ZERO-ASSUMPTION VERIFICATION
+> You CANNOT mark a micro-task as `- [x]` based on confidence or subjective belief.
+> Evidence Requirement: You MUST have physical terminal output showing `exit code 0` in your context window. If you haven't run the build/test command, YOU DO NOT KNOW if it works.
 
 ---
 
-## 7. World-Class Software Engineering Standards
+## 8. Git Workflow Integration & Workspace Isolation
 
-To produce production-grade, maintainable, and high-performance software for the agentic era, agents MUST adhere to these non-negotiable principles:
+### 8.1 Branching per Task Plan
+- **Task Isolation**: Before executing code modifications for Tier 2 or Tier 3 tasks, the agent MUST automatically integrate with Git by creating a dedicated branch or worktree matching the task slug (e.g., `git checkout -b task/<task-slug>`).
+- **Atomic Commits**: Code modifications MUST be committed atomically matching the completion of micro-task phases in the active plan.
 
-### 7.1 Architectural Integrity & DRY (Don't Repeat Yourself)
-- **Zero Duplication**: Always search existing utilities (`grep_search`) before creating new functions or helper modules.
-- **Modularity & Scalability**: Write loosely coupled, highly cohesive code with clear boundary separations (SOLID principles).
-- **Public API Stability**: Preserving backwards compatibility is mandatory. Never modify public method signatures or API contracts without a formal migration plan.
+---
 
-### 7.2 Security-First Architecture
-- **Zero Secrets Leakage**: Never hardcode API keys, passwords, or tokens in source files or logs. Utilize `.agents/brain/env-required.json` and strict environment variables (`process.env` / `os.environ`).
-- **Input Sanitization & SAST**: Run `security-docs-auditor` to check for injection vulnerabilities, unvalidated inputs, and supply-chain package risks before pushing code.
+## 9. Antigravity Native Extensions & Slash Command Integration
 
-
-### 7.3 High-Performance & Resource Efficiency
-- **Algorithmic Efficiency**: Avoid $O(n^2)$ loops, redundant database queries (N+1 problem), and unnecessary deep cloning.
-- **Memory & Resource Cleanup**: Properly close file handles, stream buffers, and DB connections. Ensure async tasks do not leak promises or main looper handles.
-
-### 7.4 Empirical Verification & Zero Hallucination
-- **Log-Driven Fixes**: Formulate hypotheses from raw tracebacks, not guesswork.
-- **No Snippet Tunnel Vision**: NEVER infer variable definitions or struct signatures from partial snippet views (`L1-L15`). If `view_file` output indicates truncation, adjust `StartLine`/`EndLine` or `ContentOffset` to inspect the full symbol definition before writing code.
-- **Mandatory Runtime Build/Test Gate**: NEVER declare an implementation complete without running empirical build and test validation commands (`npm test`, `pytest`, `cargo test`).
-
-### 7.5 MCP Graceful Degradation Protocol
-- If an external Model Context Protocol (MCP) tool or remote integration encounters a network timeout (> 30s) or error:
-  1. DO NOT crash the session or fabricate dummy responses.
-  2. Fall back cleanly to native local tools (`run_command` via local `git`, `grep_search`, or local filesystem reads).
-  3. Document the degradation in `.agents/incidents/service-unavailable.md` and notify the developer gracefully.
-
-
-## 8. Antigravity Native Extensions & Slash Command Integration
-
-### 8.1 Workspace Rule Precedence (`GEMINI.md` vs `AGENTS.md`)
-- In standard Google Antigravity workspaces, `AGENTS.md` (AAC V4.2) serves as the primary procedural system directive governing agent workflows, execution tiers, safety, and memory management.
-- If a project contains a root `GEMINI.md`, the agent MUST treat it as the authoritative source for **project-specific domain rules** (tech stack, styling, API formats).
-- **Conflict Resolution Hierarchy**: If a direct contradiction arises between `GEMINI.md` and `AGENTS.md`:
-  1. `AGENTS.md` takes absolute precedence for execution workflow, subagent locking, and safety gates.
-  2. `GEMINI.md` takes precedence for domain-specific coding constraints and styling conventions.
-  3. If the conflict persists or breaks execution, the agent MUST use `ask_question` to resolve it with the user.
-
-### 8.2 Proactive Slash Command Recommendations
-Agents cannot directly execute slash commands on the chat UI surface. However, agents SHOULD proactively recommend native Antigravity slash commands to the user when appropriate:
+### 9.1 Proactive Slash Command Recommendations
+Agents SHOULD proactively recommend native Antigravity slash commands to the user when appropriate:
 - Recommend `/goal` when the user requests overnight or complex autonomous tasks.
+- Recommend `/plan` when initializing complex multi-step features.
+- Recommend `/grill-me` when design decisions or architectural trade-offs require alignment.
 - Recommend `/diff` when the user wants an interactive visual review of proposed file changes.
-- Recommend `/mcp` when external service/data integration is required.
 - Recommend `/learn` when the user provides explicit structural corrections to be persisted.
+
+

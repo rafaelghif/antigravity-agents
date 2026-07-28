@@ -11,8 +11,13 @@
   - Database URIs: `s/:\/\/[^:]+:[^@]+@/:\/\/***:\*\*\*@/g`
 - **Trace Propagation**: Ensure a generated `trace_id` is appended to all logs across all skill executions to correlate events.
 
-## 2.5 State Management & File I/O
-- **Atomic Writes**: Always perform state updates (e.g., `state.json`) atomically to prevent locking and corruption. Write to a temporary file first, then move it: `echo "$DATA" > .agents/brain/state.json.tmp && mv .agents/brain/state.json.tmp .agents/brain/state.json`.
+## 2.5 State Management, File I/O & POSIX Directory Locks
+- **Atomic Writes & Plan Backup Protection**: Always perform file updates atomically. When modifying `.agents/plans/<task-slug>.md`, maintain an automatic `.bak` copy (`cp plan.md plan.md.bak`). If a crash occurs mid-write and `plan.md` becomes corrupted, restore immediately from `plan.md.bak`.
+- **POSIX Directory-Based Mutex Locks**: To prevent TOCTOU race conditions across parallel subagents, DO NOT use JSON file writes for locking. Use atomic directory creation: `mkdir -p .agents/locks/<file_hash>.lock`.
+  - Inside the lock directory, write a metadata file `owner.json` containing `{"claimed_by": "<agent_id>", "claimed_at": "<ISO8601>"}`.
+  - Locks older than `config.json -> state_management.lock_timeout_seconds` (60s) MUST be pruned automatically to release orphan locks safely.
+
+
 
 ## 3. Universal Polyglot Framework & Language Detection
 1. Read current working directory and inspect project tree.

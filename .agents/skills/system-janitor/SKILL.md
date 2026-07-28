@@ -1,7 +1,7 @@
 ---
 name: system-janitor
 description: Token budget optimizer, context memory compactor, process manager, and incident recovery specialist. Triggers when context usage exceeds budget, cleaning intermediate scratch files, or handling execution timeouts.
-requires_core: ">=4.2.0"
+requires_core: ">=4.3.0"
 ---
 # System Janitor Skill
 
@@ -9,9 +9,10 @@ requires_core: ">=4.2.0"
 Manage context token budgets, purge ephemeral scratch files, and oversee process execution timeouts.
 
 ## 1. Token Budget & Memory Compaction
-- Monitor token usage metrics (`state.json -> token_usage`).
-- When `current_used` reaches $> 80\%$ of `max_budget` (100,000 tokens), compact memory notes into `.agents/scratch/compaction.md`.
-- Purge intermediate scratch files upon task completion to keep context baseline ultra-lean.
+- Monitor token usage metrics via `audit.jsonl` logs or internal payload.
+- When token consumption reaches $> 80\%$ of budget, compact memory notes into `.agents/scratch/compaction.md`.
+- Purge intermediate scratch files ONLY after verifying the main agent has reached the `Post-flight Cleanup` phase in the active task plan, to prevent cleanup race conditions.
+
 
 ## 2. Ephemeral Process & Incident Recovery
 - Manage background process execution timeouts (`config.json -> timeouts.abort_minutes`).

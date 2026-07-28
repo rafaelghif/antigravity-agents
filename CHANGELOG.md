@@ -4,7 +4,23 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-07-28
+
+### Added
+- **Task-Driven Architecture (Spec-First Protocol)**: Overhauled execution engine to rely on physical markdown plan checklists (`.agents/plans/<task-slug>.md`) as the Single Source of Truth for task state, eliminating amnesia and hallucination across session switches.
+- **POSIX Directory-Based Mutex Locking (`.agents/locks/`)**: Implemented OS-level atomic directory creation (`mkdir -p .agents/locks/<file_hash>.lock`) with `owner.json` metadata and 60-second auto-expiration, resolving TOCTOU race conditions during parallel subagent executions.
+- **Mandatory Swarm Triggers**: Enforced automatic Orchestrator subagent spawning (`invoke_subagent`) whenever tasks involve multi-file audits (> 3 files) or multi-domain implementations.
+- **Decisions & `/grill-me` Permanent Ledger**: Integrated `## 1. Decisions & Architectural Trade-offs` into the plan template to record all user directives, constraints, and `/grill-me` interview agreements directly to disk.
+- **Zero-Batching & Empirical Verification Gate**: Mandated single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test`, `tsc`, `pytest`) before marking tasks completed (`- [x]`).
+- **Empirical Artifact Pre-Check & Auto-Backup (`.bak`)**: Created automatic plan file backups before edits and added full empirical test checks on existing files during session boot to prevent redundant code execution.
+- **Git Merge Conflict & Rebase Protocol**: Formalized `git rebase main` requirements prior to test verification in `devops-manager`, prohibiting conflict markers (`<<<<<<< HEAD`) from reaching source code.
+
+### Changed
+- **State.json Refactoring**: Purged legacy tracking keys from `state.json`, focusing it exclusively as a lightweight registry for mutex file locking.
+- **Skill Version Alignment**: Upgraded all 6 core domain skills (`code-engineer`, `system-architect`, `quality-assurance`, `devops-manager`, `security-docs-auditor`, `system-janitor`) to require core version `>=4.3.0`.
+
 ## [4.2.1] - 2026-07-27
+
 
 ### Added
 - **Automated Rollback & Recovery Protocol**: Added Section 6.5 to `AGENTS.md` enforcing automatic hard resets (`git reset --hard HEAD` / worktree purge) and post-mortem incident generation after 2 consecutive test verification failures.

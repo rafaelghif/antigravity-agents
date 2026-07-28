@@ -1,7 +1,5 @@
 {
-  "core_version": "4.2.0",
-
-
+  "core_version": "4.3.0",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
@@ -27,21 +25,28 @@
     "vulnerability_threshold_cvss": 7.0
   },
   "state_management": {
-    "lock_timeout_seconds": 30,
+    "lock_mechanism": "directory_based",
+    "lock_timeout_seconds": 60,
     "backup_rotation_count": 3,
-    "checkpoint_interval_tool_calls": 10,
     "token_budget": 100000
   },
   "orchestration": {
     "max_skill_depth": 5,
     "deadlock_retries": 3,
     "parallel_skills": ["quality-assurance"],
-
     "multi_agent": {
       "subagent_roles": ["research", "self"],
       "task_claim_lock": true,
-      "auto_delegate_research_threshold_files": 5
+      "auto_delegate_research_threshold_files": 3,
+      "mandatory_swarm_triggers": {
+        "multi_domain_enabled": true,
+        "multi_file_threshold": 3
+      }
     }
+  },
+  "git_workflow": {
+    "auto_branch_creation": true,
+    "branch_prefix": "task/"
   },
   "degradation": {
     "external_service_timeout_seconds": 120,
@@ -54,4 +59,6 @@
     "blacklist_keywords": ["ignore", "override", "skip", "disable"]
   }
 }
+
+
 

@@ -1,7 +1,7 @@
 ---
 name: quality-assurance
 description: Universal Quality Assurance manager for Unit/E2E testing, UI & Accessibility (A11y) auditing, and 5-dimension performance profiling (CPU, I/O, DB, Memory, Network). Triggers during PR reviews, UI component validation, performance profiling, or test suite execution.
-requires_core: ">=4.2.0"
+requires_core: ">=4.3.0"
 ---
 # Quality Assurance Skill
 
