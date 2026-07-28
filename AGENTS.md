@@ -11,11 +11,14 @@ This core directive governs all agents and subagents in this workspace. Referenc
 
 The `.agents/` directory is the agent's central nervous system and operational workspace:
 * **`.agents/plans/`**: **Primary Execution Engine (Single Source of Truth)**. Contains active, granular markdown plan checklists (`<task-slug>.md`). Every non-trivial task MUST have a plan file here before code execution begins.
-* **`.agents/locks/`**: **POSIX Directory-Based Mutex Locks**. Contains atomic lock directories (`.agents/locks/<file_hash>.lock/`) to prevent TOCTOU race conditions across parallel subagents.
+* **`.agents/locks/`**: **POSIX Directory-Based Mutex Locks**. Contains atomic lock directories (`.agents/locks/<md5_hash_of_filepath>.lock/`) to prevent TOCTOU race conditions across parallel subagents.
 * **`.agents/brain/`**: Core memory & contract specifications:
   - `soul.md`: Persona, tone, empathy, and pair-programming collaboration values. Read on every session start.
   - `rules.md`: High-level invariants and persisted user lessons. Read at the start of EVERY session.
   - `schema.md` (or `schemas/<domain>.md`): Single Source of Truth for database schemas, table column definitions, and API contracts.
+  - `audit.jsonl`: Immutable task execution and token consumption audit trail.
+  - `env-required.json`: Declaration of required environment variables and secrets.
+  - `mcp-registry.json`: Registry of dynamic Model Context Protocol (MCP) server endpoints.
 * **`.agents/common/`**: Shared execution utilities and system functions (`utils.md`).
 * **`.agents/scratch/`**: Ephemeral workspace for temporary intermediate files. Ephemeral files are automatically purged by `system-janitor` upon task completion.
 * **`.agents/incidents/`**: Autonomously generated post-mortem reports (`abort-*.json` or `security-*.md`).
@@ -101,7 +104,7 @@ Hermes Protocol operates on TWO learning sources: **User Corrections** AND **Aut
 ### 6.1 Roles & Mandatory Swarm Triggers
 - **Orchestrator Role**: Primary agent decomposes tasks into `.agents/plans/`, delegates work, and synthesizes final responses.
 - **Mandatory Swarm Triggers**: The Orchestrator MUST autonomously split execution into a Multi-Agent Swarm (`invoke_subagent`) if any of the following conditions are met:
-  1. **Multi-File Audits**: The task requires auditing, reading, or analyzing $> 3$ files.
+  1. **Multi-File Audits**: The task requires auditing, reading, or analyzing $\ge 3$ files.
   2. **Multi-Domain Tasks**: The task spans multiple functional domains (e.g., UI Components + Backend API + DB Schema).
   3. **High Complexity**: The execution token budget is predicted to be exceeded by a single agent.
 - **Worker Subagents**:
@@ -109,7 +112,7 @@ Hermes Protocol operates on TWO learning sources: **User Corrections** AND **Aut
   - `self`: Isolated parallel code modifications bound strictly to an assigned micro-task block.
 
 ### 6.2 POSIX Directory-Based File Locking Protocol
-- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit atomic directory lock (`mkdir -p .agents/locks/<file_hash>.lock`) containing `owner.json` metadata.
+- **File Lock Claiming**: Any subagent attempting to modify a specific file path MUST claim an explicit atomic directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock`) containing `owner.json` metadata (`{"claimed_by": "<agent_id>", "claimed_at": "<ISO8601>"}`).
 - **Lock Timeout**: Locks auto-expire after `config.json -> state_management.lock_timeout_seconds` (60s) to prevent orphan deadlocks.
 
 ---
@@ -120,14 +123,15 @@ Select the execution tier based on task complexity:
 
 | Tier Level | Scope / Trigger | Required Workflow |
 | :--- | :--- | :--- |
-| **Tier 1: Patch / Quick Edit** | Minor bug fix or single-file edit (< 20 lines) | Read `rules.md` $\rightarrow$ Edit $\rightarrow$ Mandatory Test/Build Verification $\rightarrow$ Atomic Commit |
-| **Tier 2: Feature Dev** | Multi-file features or isolated sub-systems | Define Granular Plan in `.agents/plans/` $\rightarrow$ Branch Isolation $\rightarrow$ Atomic Micro-Task Execution $\rightarrow$ Test Verification $\rightarrow$ Sync |
+| **Tier 1: Patch / Quick Edit** | Minor bug fix or single-file edit (< 50 lines) | Read `rules.md` $\rightarrow$ Edit $\rightarrow$ Mandatory Test/Build Verification $\rightarrow$ Atomic Commit |
+| **Tier 2: Feature Dev** | Multi-file features or single-file edits ($\ge 50$ lines) | Define Granular Plan in `.agents/plans/` $\rightarrow$ Branch Isolation $\rightarrow$ Atomic Micro-Task Execution $\rightarrow$ Test Verification $\rightarrow$ Sync |
 | **Tier 3: Core Architecture** | Schema alterations, major refactors (> 100 lines) | Audit (`system-architect`) $\rightarrow$ Schema Update (`schema.md`) $\rightarrow$ Plan in `.agents/plans/` $\rightarrow$ Multi-Agent Swarm Dev $\rightarrow$ Security Audit $\rightarrow$ Gate |
 
 ### 7.1 Mandatory Runtime Build/Test Gate & Zero-Assumption Verification
 > [!IMPORTANT] ZERO-ASSUMPTION VERIFICATION
 > You CANNOT mark a micro-task as `- [x]` based on confidence or subjective belief.
 > Evidence Requirement: You MUST have physical terminal output showing `exit code 0` in your context window. If you haven't run the build/test command, YOU DO NOT KNOW if it works.
+
 
 ---
 

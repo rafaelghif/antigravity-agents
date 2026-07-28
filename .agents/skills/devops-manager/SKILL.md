@@ -19,8 +19,9 @@ Seamless management of Git version control lifecycles, branch hygiene, and CI/CD
 - **Git Merge Conflict Resolution Protocol**:
   - Before running final empirical test verification, execute `git rebase main` to ensure the task branch is up-to-date with base main.
   - If merge conflicts occur (`<<<<<<< HEAD`), identify conflicting files via `git diff --name-only`.
-  - **Conflict Boundary**: For lockfile conflicts (`package-lock.json`), accept main base and rerun `npm install`. For source code conflicts, resolve using AST/SOLID rules and NEVER leave conflict markers in code. For unresolvable binary conflicts, escalate immediately via `ask_question`.
-- **Merge Gate Approval**: Merging to the base branch REQUIRES explicit user approval via `ask_question`.
+  - **Conflict Boundary**: For lockfile conflicts (`package-lock.json`), accept main base and rerun `npm install`. For source code conflicts, resolve using AST/SOLID rules and NEVER leave conflict markers in code. For unresolvable binary conflicts, escalate immediately to the user.
+- **Merge Gate Approval**: Merging to the base branch REQUIRES explicit user approval before executing `git merge`.
+
 
 
 

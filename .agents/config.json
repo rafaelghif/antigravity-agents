@@ -36,7 +36,6 @@
     "parallel_skills": ["quality-assurance"],
     "multi_agent": {
       "subagent_roles": ["research", "self"],
-      "task_claim_lock": true,
       "auto_delegate_research_threshold_files": 3,
       "mandatory_swarm_triggers": {
         "multi_domain_enabled": true,

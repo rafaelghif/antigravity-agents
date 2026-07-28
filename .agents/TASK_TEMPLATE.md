@@ -26,7 +26,7 @@ Follow these steps sequentially upon receiving a task.
 ## 3. Execution & Atomic Checkpoint Protocol
 - [ ] 1. Execute **EXACTLY ONE micro-task at a time** (Zero-Batching Directive).
 - [ ] 2. If delegating to a subagent, mark status as `- [~] (Assigned: <subagent_id>)`.
-- [ ] 3. Claim POSIX directory lock (`mkdir -p .agents/locks/<file_hash>.lock`) before modifying files.
+- [ ] 3. Claim POSIX directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock` and write `owner.json`) before modifying files.
 - [ ] 4. After completing each micro-task, run empirical verification (`npm test`, `tsc`, `pytest`).
 - [ ] 5. **Immediately update the plan file**: Change `- [ ]` to `- [x]` for the completed micro-task using `replace_file_content` (maintaining `.bak` copy).
 - [ ] 6. Repeat until all micro-tasks in `.agents/plans/<task-slug>.md` are marked `- [x]`.

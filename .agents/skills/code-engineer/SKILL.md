@@ -20,9 +20,11 @@ Ensure all generated code strictly follows SOLID, DRY, Clean Code, and framework
 - **C / C++**: Enforce RAII, smart pointers (`std::unique_ptr`, `std::shared_ptr`), memory safety, and `valgrind`/`cppcheck`.
 - **Legacy Systems (VB6, Classic ASP)**: Respect legacy syntax (`Option Explicit`), explicit object cleanup (`Set obj = Nothing`), COM error handling (`On Error GoTo`), and prevent injection vulnerabilities in dynamic SQL.
 
-## 2. Subagent Swarm Delegation & Recursion Limit
-- Check current execution depth via active task plan (`.agents/plans/<task-slug>.md`) or `audit.jsonl` traces. If depth $\ge$ `config.json -> orchestration.max_skill_depth` (default 5), **DO NOT spawn further subagents**; execute directly to prevent infinite recursive loops.
-- Delegate sub-modules to worker subagents using `invoke_subagent` when mandatory swarm triggers are met (`multi_file_threshold > 3`).
+## 2. Subagent Swarm Delegation & File Locking
+- **POSIX Directory Locking Gate**: Before modifying any source file, claim an explicit atomic directory lock (`mkdir -p .agents/locks/<md5_hash_of_filepath>.lock`) containing `owner.json` metadata.
+- **Recursion Limit**: Check current execution depth via active task plan (`.agents/plans/<task-slug>.md`) or `audit.jsonl` traces. If depth $\ge$ `config.json -> orchestration.max_skill_depth` (default 5), **DO NOT spawn further subagents**; execute directly to prevent infinite recursive loops.
+- Delegate sub-modules to worker subagents using `invoke_subagent` when mandatory swarm triggers are met (`multi_file_threshold >= 3`).
+
 
 
 ## 3. Scientific Advanced Debugging Workflow
