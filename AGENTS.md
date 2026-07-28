@@ -66,41 +66,8 @@ Before executing ANY prompt or task step, the agent MUST run the Memory & Task R
 > 3. Update the plan file to `- [x]` using `replace_file_content`.
 > 4. STOP and proceed to the next micro-task sequentially.
 
-Every `.agents/plans/<task-slug>.md` file MUST follow this exact engineering format:
+Every `.agents/plans/<task-slug>.md` file MUST strictly follow the structure defined in `.agents/TASK_TEMPLATE.md` (including `## 1. Decisions & Architectural Trade-offs`, DTOs, Repository, Controllers, and Verification Gates).
 
-```markdown
-# Plan: <Task Title>
-
-## 1. Decisions & Architectural Trade-offs
-- **User Directives & `/grill-me` Logs**: [MANDATORY: Record all direct user decisions, architecture trade-offs, and design agreements from chat or /grill-me sessions]
-- **Domain Schema Ref**: `.agents/brain/schema.md#<section>` (e.g. Table `users`: `id`, `email`, `role`)
-- **Target Files**: `path/to/file1.ts`, `path/to/file2.ts`
-- **Dependencies**: Prerequisites or required packages
-
-## 2. Micro-Task Execution Breakdown
-
-### Phase 1: Data Access & Types Definition
-- [ ] 1.1 Create DTO Interfaces (`src/types/user.ts`)
-  - [ ] Define `CreateUserDTO` matching `schema.md` columns (`name: string`, `email: string`, `role: UserRole`)
-  - [ ] Define `UserResponseDTO` excluding sensitive columns (`password_hash`)
-- [ ] 1.2 Database Repository Layer (`src/repositories/userRepo.ts`)
-  - [ ] Implement `findById(id: string)` with exact SQL query targeting `users` table
-  - [ ] Implement `create(dto: CreateUserDTO)` returning inserted ID
-  - [ ] Implement `update(id: string, dto: UpdateUserDTO)` with partial update support
-
-### Phase 2: Business Logic & API Endpoints
-- [ ] 2.1 Controller Layer (`src/controllers/userController.ts`)
-  - [ ] Endpoint `POST /api/v1/users`: Validate payload against DTO, return HTTP 201
-  - [ ] Endpoint `GET /api/v1/users/:id`: Handle non-existent ID with HTTP 404 response
-- [ ] 2.2 Route Registration (`src/routes/userRoutes.ts`)
-  - [ ] Bind controller endpoints to HTTP verbs with auth middleware
-
-### Phase 3: Empirical Verification & Testing
-- [ ] 3.1 Unit/Integration Testing
-  - [ ] Execute `npm test -- userController.test.ts`
-- [ ] 3.2 System Build Gate
-  - [ ] Execute `npm run build` and confirm 0 TypeScript / Linter errors
-```
 
 ---
 
