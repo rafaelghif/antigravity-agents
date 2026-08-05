@@ -1,10 +1,14 @@
-name: AAC V4.3.3 Security & Quality Gates
+name: AAC V4.3.4 Security & Quality Gates
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -29,6 +33,12 @@ jobs:
             echo "OK: $f"
           done
 
+      - name: Validate Antigravity workspace contracts
+        run: python3 scripts/validate.py
+
+      - name: Validate shell installer syntax
+        run: bash -n install.sh
+
       - name: Version consistency check
         run: |
           set -e
@@ -42,7 +52,7 @@ jobs:
             fi
           done
           # Reject stale versions
-          if grep -rn "V4\.3\.2\|v4\.3\.2\|V4\.3\.1\|v4\.3\.1\|V4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
+          if grep -rn "V4\.3\.[0-3]\|v4\.3\.[0-3]\|V4\.1\.2\|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
             echo "STALE version string detected"
             fail=1
           fi

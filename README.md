@@ -1,13 +1,13 @@
 <div align="center">
 
-# ⚡ Antigravity Agent Core (AAC) V4.3
+# ⚡ Antigravity Agent Core (AAC) V4.3.4
 
-[![Version](https://img.shields.io/badge/version-4.3.3-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.3)
-[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.3)
+[![Version](https://img.shields.io/badge/version-4.3.4-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.4)
+[![Status](https://img.shields.io/badge/status-release_candidate-yellow.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.4)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=for-the-badge&logo=google&logoColor=white)](https://antigravity.google/docs/cli/overview)
 [![Architecture](https://img.shields.io/badge/architecture-AAC_V4.3_Deterministic-orange.svg?style=for-the-badge&logo=diagramsdotnet&logoColor=white)](https://github.com/rafaelghif/antigravity-agents)
 
-**Enterprise-Grade Guardrails, Task-Driven Execution Engine, and Deterministic Quality Gates for Autonomous AI Coding Agents.**
+**Task-Driven Guardrails, Antigravity CLI Skills, and Deterministic Quality Gates for Autonomous AI Coding Agents.**
 
 [Features](#-key-architecture--core-capabilities) • [Domain Skills](#-6-consolidated-core-domain-skills) • [Installation](#%EF%B8%8F-quick-installation) • [Directory Structure](#-system-directory-structure) • [Slash Commands](#-antigravity-native-slash-commands)
 
@@ -19,10 +19,10 @@
 
 Autonomous AI coding agents offer massive productivity boosts, but running them in un-governed repositories introduces severe friction: hallucinated architectures, context amnesia across session switches, skipped workflow gates, robotic tone, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V4.3.3** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
+**Antigravity Agent Core (AAC) V4.3.4** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
 
 > [!IMPORTANT]
-> **100% Task-Driven & File-Backed**: AAC V4.3.3 eliminates volatile state tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
+> **100% Task-Driven & File-Backed**: AAC V4.3.4 eliminates volatile state tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
 
 ---
 
@@ -75,12 +75,12 @@ AAC V4.3 operates via 6 specialized domain skills inside `.agents/skills/`:
 
 ### Option A: Linux / macOS / WSL (1-Line Quick Install)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.4/install.sh | bash
 ```
 
 ### Option B: Windows PowerShell (1-Line Quick Install)
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.4/install.ps1 | iex
 ```
 
 ### Option C: Manual Scaffolding
@@ -107,8 +107,11 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
 ├── install.ps1                    # Windows PowerShell One-Line Installer Script
 ├── LICENSE                        # MIT License
 ├── CHANGELOG.md                   # Semantic Version History
+├── scripts/                        # Dependency-free validation helpers
+│   └── validate.py
 └── .agents/                       # Agentic AI Engine & Central Nervous System
-    ├── config.json                # Master Numerical Bounds, Timeouts & Swarm Rules
+     ├── config.json                # Master Numerical Bounds, Timeouts & Swarm Rules
+     ├── antigravity-settings.example.json # Sandbox and permission baseline
     ├── mcp_config.json            # Model Context Protocol (MCP) Server Declarations (gitignored, local)
     ├── mcp_config.json.example    # MCP Setup Sample Template
     ├── TASK_TEMPLATE.md           # Standard Granular Task Execution Plan Template
@@ -124,13 +127,13 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
     ├── incidents/                 # Post-Mortem Incident & Abort Reports
     ├── scratch/                   # Ephemeral Intermediate Scratchpad Workspace
     ├── common/                    # Shared Helper Protocols (utils.md)
-    └── skills/                    # 6 Core Executable Domain Modules
-        ├── code-engineer/        # SKILL.md
-        ├── system-architect/     # SKILL.md
-        ├── quality-assurance/    # SKILL.md
-        ├── devops-manager/       # SKILL.md
-        ├── security-docs-auditor/# SKILL.md
-        └── system-janitor/       # SKILL.md
+    └── skills/                    # 6 Core Antigravity Workspace Skills
+        ├── code-engineer.md
+        ├── system-architect.md
+        ├── quality-assurance.md
+        ├── devops-manager.md
+        ├── security-docs-auditor.md
+        └── system-janitor.md
 ```
 
 ---

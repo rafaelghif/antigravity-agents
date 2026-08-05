@@ -1,4 +1,4 @@
-# AGENTS.md — Antigravity Agent Core (AAC) V4.3.3
+# AGENTS.md — Antigravity Agent Core (AAC) V4.3.4
 
 **Architecture Pattern**: Deterministic Task-Driven & File-Backed Execution Protocol
 This directive governs all agents. Numerical thresholds live in `.agents/config.json`; the execution SOP lives in `.agents/TASK_TEMPLATE.md`.
@@ -17,13 +17,15 @@ Root:
 * **`.agents/mcp_config.json`**: MCP server declarations (gitignored, local).
 * **`.agents/mcp_config.json.example`**: MCP setup sample template.
 * **`.agents/TASK_TEMPLATE.md`**: Standard granular task execution SOP.
+* **`.agents/antigravity-settings.example.json`**: Sandbox-first global settings baseline.
 * **`.agents/brain/`**: Permanent memory & contracts — `soul.md` (persona), `rules.md`, `schema.md` (data contracts), `env-required.json` (secret declarations), `audit.jsonl` (local task trail), `schemas/` (extended domain schemas).
 * **`.agents/plans/`**: Primary Execution Engine. Active markdown checklists (`<slug>.md`).
 * **`.agents/locks/`**: POSIX locks (`<hash>.lock/owner.json`) for TOCTOU prevention.
 * **`.agents/incidents/`**: Post-mortem incident & abort reports.
 * **`.agents/scratch/`**: Ephemeral workspace (purged automatically post-flight).
 * **`.agents/common/`**: Shared helper protocols (`utils.md`).
-* **`.agents/skills/`**: Domain-specific executable workflows (6 core skills).
+* **`.agents/skills/`**: Domain-specific executable workflows (6 core `.md` skills).
+* **`scripts/validate.py`**: Dependency-free structural contract validator used by CI and installers.
 
 > [!CRITICAL] FORBIDDEN ARTIFACTS
 > Legacy state files (e.g. `state.json`) are OBSOLETE and FORBIDDEN. Purge immediately on boot.
@@ -87,7 +89,7 @@ Every T2/T3 task MUST follow this exact strict sequence:
 
 ---
 ## 7. Swarm Orchestration & Hermes Learning
-- **Swarm Triggers**: Spawn subagents for tasks spanning `>= config.json -> orchestration.multi_agent.mandatory_swarm_triggers.multi_file_threshold` (3) files or multiple domains.
+- **Swarm Triggers**: Use Antigravity's `/agents` panel and background subagents for tasks spanning `>= config.json -> orchestration.multi_agent.mandatory_swarm_triggers.multi_file_threshold` (3) files or multiple domains.
 - **Hermes Learning (Dual-Source)**: User corrections MUST be physically written to `.agents/skills/`, `.agents/brain/rules.md`, or `.agents/brain/schema.md`. Verbal acknowledgment without a physical disk write is a failure.
 
 ---

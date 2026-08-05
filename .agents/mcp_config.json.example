@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "github": {
-      "serverURL": "https://api.githubcopilot.com/mcp/",
+      "serverUrl": "https://api.githubcopilot.com/mcp/",
       "headers": {
         "Authorization": "Bearer ${GITHUB_PAT}"
       }
@@ -16,7 +16,7 @@
         "GITEA_HOST=${GITEA_HOST}",
         "-e",
         "GITEA_ACCESS_TOKEN=${GITEA_TOKEN}",
-        "gitea/gitea-mcp:latest"
+        "gitea/gitea-mcp:v0.1.0"
       ]
     }
   }

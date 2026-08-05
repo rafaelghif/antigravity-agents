@@ -42,3 +42,8 @@
   "token_usage": { "input": 0, "output": 0 }
 }
 ```
+
+### 2.4 Antigravity Workspace Customizations
+- Workspace MCP configuration: `.agents/mcp_config.json`, with remote servers using `serverUrl`.
+- Workspace skills: `.agents/skills/<name>.md` with YAML frontmatter containing `name` and `description`.
+- Settings baseline: `.agents/antigravity-settings.example.json`; copy values into the global Antigravity CLI settings file.
