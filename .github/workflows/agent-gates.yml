@@ -1,4 +1,4 @@
-name: AAC V4.3.5 Security & Quality Gates
+name: AAC v4.4.0 Security & Quality Gates
 
 on:
   workflow_dispatch:
@@ -38,6 +38,9 @@ jobs:
 
       - name: Validate shell installer syntax
         run: bash -n install.sh
+
+      - name: Detect verification commands
+        run: python3 scripts/verify.py
 
       - name: Validate release and scanner applicability
         run: |

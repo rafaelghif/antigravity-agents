@@ -20,6 +20,7 @@ VERSION_FILES = (
 )
 REQUIRED_PATHS = (
     "AGENTS.md",
+    "GEMINI.md",
     ".agents/config.json",
     ".agents/TASK_TEMPLATE.md",
     ".agents/brain/soul.md",
@@ -30,13 +31,16 @@ REQUIRED_PATHS = (
     ".agents/mcp_config.json.example",
     ".agents/antigravity-settings.example.json",
     ".agents/antigravity-compatibility.json",
-    ".agents/skills/code-engineer.md",
-    ".agents/skills/devops-manager.md",
-    ".agents/skills/quality-assurance.md",
-    ".agents/skills/security-docs-auditor.md",
-    ".agents/skills/system-architect.md",
-    ".agents/skills/system-janitor.md",
+    ".agents/agents/planner.md",
+    ".agents/agents/implementer.md",
+    ".agents/agents/reviewer.md",
+    ".agents/agents/security-reviewer.md",
+    ".agents/skills/code-quality.md",
+    ".agents/skills/verification.md",
+    ".agents/skills/security.md",
+    ".agents/skills/architecture.md",
     "scripts/validate.py",
+    "scripts/verify.py",
 )
 
 
@@ -77,23 +81,31 @@ def validate_mcp() -> None:
             fail(f"MCP server {name} uses mutable :latest image")
 
 
-def validate_skills() -> None:
-    skills_dir = ROOT / ".agents/skills"
-    skill_files = sorted(skills_dir.glob("*.md"))
-    if len(skill_files) != 6:
-        fail(f"expected 6 flat workspace skills, found {len(skill_files)}")
-    if list(skills_dir.glob("*/SKILL.md")):
-        fail("nested SKILL.md files are not supported; use .agents/skills/<name>.md")
-    for path in skill_files:
+def validate_markdown_metadata(directory: str, expected_count: int, required_fields: tuple[str, ...]) -> None:
+    files = sorted((ROOT / directory).glob("*.md"))
+    if len(files) != expected_count:
+        fail(f"expected {expected_count} files in {directory}, found {len(files)}")
+    for path in files:
         content = path.read_text(encoding="utf-8")
         match = re.match(r"^---\n(?P<frontmatter>.*?)\n---\n", content, re.DOTALL)
         if not match:
             fail(f"{path.relative_to(ROOT)} is missing YAML frontmatter")
         frontmatter = match.group("frontmatter")
-        if not re.search(r"^name:\s*\S+", frontmatter, re.MULTILINE):
-            fail(f"{path.relative_to(ROOT)} is missing frontmatter name")
-        if not re.search(r"^description:\s*\S+", frontmatter, re.MULTILINE):
-            fail(f"{path.relative_to(ROOT)} is missing frontmatter description")
+        for field in required_fields:
+            if not re.search(rf"^{field}:\s*\S+", frontmatter, re.MULTILINE):
+                fail(f"{path.relative_to(ROOT)} is missing frontmatter {field}")
+        if len(content.split()) > 700:
+            fail(f"{path.relative_to(ROOT)} exceeds the 700-word instruction budget")
+
+
+def validate_instruction_budget() -> None:
+    for relative_path, maximum in (("AGENTS.md", 600), ("GEMINI.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
+        words = (ROOT / relative_path).read_text(encoding="utf-8").split()
+        if len(words) > maximum:
+            fail(f"{relative_path} exceeds the {maximum}-word always-on budget")
+    bootstrap = (ROOT / "GEMINI.md").read_text(encoding="utf-8")
+    if "AGENTS.md" not in bootstrap:
+        fail("GEMINI.md must bootstrap AGENTS.md")
 
 
 def validate_settings() -> None:
@@ -172,15 +184,20 @@ def validate_version() -> None:
     version = config.get("core_version")
     if not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version):
         fail("config.json core_version must be semantic version text")
-    for relative_path in VERSION_FILES:
+    markers = {
+        "README.md": f"version-{version}",
+        "install.sh": f' AAC_REF="v{version}"',
+        "install.ps1": f'$AacRef = "v{version}"',
+        ".agents/TASK_TEMPLATE.md": f"AAC v{version}",
+        ".github/workflows/agent-gates.yml": f"AAC v{version}",
+    }
+    for relative_path, marker in markers.items():
         content = (ROOT / relative_path).read_text(encoding="utf-8")
-        if version not in content:
-            fail(f"{relative_path} does not contain core version {version}")
-    stale = re.compile(r"(?:V|v)?4\.3\.[012]")
-    for relative_path in VERSION_FILES:
-        content = (ROOT / relative_path).read_text(encoding="utf-8")
-        if stale.search(content.replace(version, "")):
-            fail(f"{relative_path} contains a stale 4.3.x version")
+        if marker not in content:
+            fail(f"{relative_path} does not contain version marker {marker}")
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    if f"## [{version}]" not in changelog:
+        fail(f"CHANGELOG.md does not contain release heading [{version}]")
 
 
 def main() -> int:
@@ -190,7 +207,9 @@ def main() -> int:
         load_json(".agents/brain/env-required.json")
         load_json(".agents/antigravity-compatibility.json")
         validate_mcp()
-        validate_skills()
+        validate_markdown_metadata(".agents/skills", 4, ("name", "description"))
+        validate_markdown_metadata(".agents/agents", 4, ("name", "description", "mode"))
+        validate_instruction_budget()
         validate_settings()
         validate_compatibility()
         validate_recovery_state()
