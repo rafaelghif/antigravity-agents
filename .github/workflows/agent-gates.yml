@@ -42,7 +42,7 @@ jobs:
             fi
           done
           # Reject stale versions
-          if grep -rn "V4\.3\.1\|v4\.3\.1\|V4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
+          if grep -rn "V4\.3\.2\|v4\.3\.2\|V4\.3\.1\|v4\.3\.1\|V4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
             echo "STALE version string detected"
             fail=1
           fi
@@ -69,5 +69,5 @@ jobs:
 
       - name: Run Semgrep (SAST)
         run: |
-          python3 -m pip install semgrep
+          python3 -m pip install semgrep==1.138.0
           semgrep scan --config auto --error

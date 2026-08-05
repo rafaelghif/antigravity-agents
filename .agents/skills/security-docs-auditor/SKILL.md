@@ -1,7 +1,7 @@
 ---
 name: security-docs-auditor
 description: Security SAST scanner, secret detector, and documentation synchronization engineer. Triggers when auditing security vulnerabilities, checking secrets, or updating README, API docs, and CHANGELOG.
-requires_core: ">=4.3.0"
+requires_core: ">=4.3.3"
 ---
 # Security & Documentation Auditor Skill
 

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [4.3.3] - 2026-08-05
 
+### Security
+- **Hardcoded GitHub PAT Removed**: `opencode.json` now references the token via `{env:GITHUB_PAT}` interpolation instead of an inlined classic PAT. **Action required**: revoke the previously-committed token (`ghp_20E9…`) in GitHub Settings and re-issue before setting `GITHUB_PAT`.
+- **Config Leak Surface Reduced**: `opencode.json` added to `.gitignore` so local MCP header config is never tracked.
+
+### Changed
+- **Skill Version Range Bumped**: All 6 core domain skills now declare `requires_core: ">=4.3.3"` (was `>=4.3.0`), matching the canonical `core_version`.
+- **Semgrep Version Pinned**: `agent-gates.yml` SAST step now pins `semgrep==1.138.0` to eliminate flaky, network-dependent unpinned installs.
+- **Stale-Version Sentinel Extended**: Version-consistency check now also rejects `4.3.2`/`V4.3.2` alongside earlier stale versions.
+
 ### Added
 - **Tier-Aware Hard Gate**: The pre-execution HARD GATE is now tiered — T1 patches (`< 50 lines`, single file, no contract change) follow a fast path and are exempt from the Issue/Plan/PR ceremony, resolving the direct contradiction between `§2/§5` and the Tiered Execution Engine. T2/T3 retain the full Issue → Plan → Branch → PR → Merge workflow.
 - **Complete Directory Manifest**: Restored the full manifest in `AGENTS.md §1` (added `common/`, `incidents/`, `config.json`, `mcp_config.json(.example)`, `TASK_TEMPLATE.md`, `brain/env-required.json`, `brain/schemas/`).

@@ -1,7 +1,7 @@
 ---
 name: system-architect
 description: System architecture auditor, database schema manager, and test data synthesizer. Triggers when auditing system impact, designing ORM schemas, migrating databases, or generating mock seed data.
-requires_core: ">=4.3.0"
+requires_core: ">=4.3.3"
 ---
 # System Architect Skill
 
