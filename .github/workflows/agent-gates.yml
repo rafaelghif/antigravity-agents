@@ -1,4 +1,4 @@
-name: AAC V4.1.2 Security & Quality Gates
+name: AAC V4.3.3 Security & Quality Gates
 
 on:
   push:
@@ -7,7 +7,54 @@ on:
     branches: [ "main" ]
 
 jobs:
+  validate:
+    name: Structural Validation (JSON + Version Consistency)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be571a5d730aa6d8f0f407dab38d95f17 # v5
+        with:
+          python-version: '3.x'
+
+      - name: Validate JSON files
+        run: |
+          set -e
+          for f in .agents/config.json .agents/mcp_config.json.example .agents/brain/env-required.json; do
+            python3 -m json.tool "$f" > /dev/null
+            echo "OK: $f"
+          done
+
+      - name: Version consistency check
+        run: |
+          set -e
+          CORE=$(python3 -c "import json;print(json.load(open('.agents/config.json'))['core_version'])")
+          echo "core_version=$CORE"
+          fail=0
+          for f in AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; do
+            if ! grep -q "$CORE" "$f"; then
+              echo "MISSING version $CORE in $f"
+              fail=1
+            fi
+          done
+          # Reject stale versions
+          if grep -rn "V4\.3\.2\|v4\.3\.2\|V4\.3\.1\|v4\.3\.1\|V4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
+            echo "STALE version string detected"
+            fail=1
+          fi
+          # Reject wrong Prisma filename
+          if grep -rn "prisma\.schema" .agents/ AGENTS.md README.md; then
+            echo "Wrong Prisma filename (prisma.schema) detected"
+            fail=1
+          fi
+          exit $fail
+
   security-and-quality:
+    name: SAST + Secret Scanning
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,8 +66,8 @@ jobs:
         uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Run Semgrep (SAST)
         run: |
-          python3 -m pip install semgrep
+          python3 -m pip install semgrep==1.138.0
           semgrep scan --config auto --error

@@ -1,10 +1,10 @@
 # Project Architecture & Schema Authority
 
 *Single Source of Truth for database schemas, ORM models, API contracts, and Agent System State.*
-*Last Verified*: 2026-07-28
+*Last Verified*: 2026-08-05
 
 ## 1. Dynamic Schema Bootstrap Rule
-- Whenever an ORM model (`prisma.schema`, `models.py`, `schema.sql`) or API contract is added to the application codebase, `system-architect` MUST infer and append the entity structure here or under `.agents/brain/schemas/<domain>.md`.
+- Whenever an ORM model (`schema.prisma`, `models.py`, `schema.sql`) or API contract is added to the application codebase, `system-architect` MUST infer and append the entity structure here or under `.agents/brain/schemas/<domain>.md`.
 
 ## 2. Agent System Core Contracts
 
@@ -30,6 +30,9 @@
 ```
 
 ### 2.3 Audit Log Schema (`.agents/brain/audit.jsonl`)
+> [!NOTE] LOCAL PER-MACHINE TRAIL
+> `audit.jsonl` is gitignored and therefore a **local, per-machine** execution trail. It does NOT provide cross-machine immutability. For shared audit history, rely on the Git history and the remote Issue/PR record.
+
 ```json
 {
   "timestamp": "<ISO8601>",
@@ -39,7 +42,3 @@
   "token_usage": { "input": 0, "output": 0 }
 }
 ```
-
-
-
-

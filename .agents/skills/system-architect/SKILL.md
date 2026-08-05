@@ -1,7 +1,7 @@
 ---
 name: system-architect
 description: System architecture auditor, database schema manager, and test data synthesizer. Triggers when auditing system impact, designing ORM schemas, migrating databases, or generating mock seed data.
-requires_core: ">=4.3.0"
+requires_core: ">=4.3.3"
 ---
 # System Architect Skill
 
@@ -13,7 +13,7 @@ I'll help you audit architectural impacts, manage database schemas, and synthesi
 - I'll ensure public API backward compatibility and help define migration strategies for any breaking changes.
 
 ## 2. Schema Governance
-- **Single Source of Truth**: I'll keep `.agents/brain/schema.md` synchronized whenever our ORM models change (`prisma.schema`, `models.py`, `schema.sql`).
+- **Single Source of Truth**: I'll keep `.agents/brain/schema.md` synchronized whenever our ORM models change (`schema.prisma`, `models.py`, `schema.sql`).
 - **Zero-Assumption Rule**: I'll never guess column names or data types without verifying our schema authority first.
 
 ## 3. Data Synthesis

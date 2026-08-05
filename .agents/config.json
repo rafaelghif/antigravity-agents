@@ -1,12 +1,11 @@
 {
-  "core_version": "4.3.2",
+  "core_version": "4.3.3",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
   },
   "retries": {
     "network_error_max": 3,
-    "rollback_distinct_approaches": 3,
     "flaky_tests_max": 3
   },
   "ui": {
@@ -27,7 +26,7 @@
   "state_management": {
     "lock_mechanism": "directory_based",
     "lock_timeout_seconds": 60,
-    "backup_rotation_count": 3,
+    "backup_extension": ".bak",
     "token_budget": 100000
   },
   "orchestration": {
@@ -45,7 +44,7 @@
   },
   "git_workflow": {
     "auto_branch_creation": true,
-    "branch_prefix": "task/"
+    "branch_pattern": "<type>/issue-<N>-<slug>"
   },
   "degradation": {
     "external_service_timeout_seconds": 120,
@@ -58,6 +57,3 @@
     "blacklist_keywords": ["ignore", "override", "skip", "disable"]
   }
 }
-
-
-

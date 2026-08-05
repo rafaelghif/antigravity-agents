@@ -3,7 +3,7 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.3.2..." -ForegroundColor Cyan
+Write-Host "🚀 Installing Antigravity Agent Core (AAC) v4.3.3..." -ForegroundColor Cyan
 
 
 # Create target directory structure
@@ -32,5 +32,5 @@ if (-not (Test-Path ".\.env.example")) {
 # Clean up temporary directory
 Remove-Item -Path $TmpDir -Recurse -Force | Out-Null
 
-Write-Host "✅ AAC v4.3.1 successfully installed into $((Get-Location).Path)!" -ForegroundColor Green
+Write-Host "✅ AAC v4.3.3 successfully installed into $((Get-Location).Path)!" -ForegroundColor Green
 Write-Host "💡 Start your Antigravity CLI session (agy) to experience Task-Driven Zero-Amnesia autonomous coding." -ForegroundColor Yellow

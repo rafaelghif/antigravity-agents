@@ -1,7 +1,7 @@
 ---
 name: devops-manager
 description: Version Control Lifecycle manager, branch hygiene janitor, and CI/CD local runner specialist. Triggers when creating issues, branching, submitting PRs, cleaning merged branches, or simulating GitHub Actions locally.
-requires_core: ">=4.3.0"
+requires_core: ">=4.3.3"
 ---
 # DevOps Manager Skill
 
@@ -13,14 +13,14 @@ I ensure our version control and CI/CD pipelines run seamlessly. I handle branch
 
 - **Standard Professional Flow**: Every task MUST follow this exact sequence:
   1. `Create Issue (Per Task)`: Issue titles MUST use Git Conventional format (e.g., `feat: ...`, `fix: ...`). The body MUST be highly detailed and professional (Description, Acceptance Criteria).
-  2. `Branch using Git Conventional`: (e.g., `feat/issue-95-slug` or `fix/issue-95-slug`).
+  2. `Branch using Conventional Branching`: `<type>/issue-<N>-<slug>` (e.g. `fix/issue-95-professional-workflows`).
   3. `Commit using Git Conventional Message`: MUST include the issue closing directive (e.g., `(Closes #95)`).
   4. `Push`
   5. `Create Pull Request (PR)`: Direct pushes to main are FORBIDDEN. Create a detailed PR using `gh pr create`.
   6. `Merge PR`: Use `gh pr merge`.
   7. `Update Releases & Changelog`: Every merged PR MUST trigger an update to `CHANGELOG.md` and a new GitHub Release / Tag bump.
   8. `Clean Merged Branch`
-- **Branching per Task**: I will strictly create branches per task/issue (e.g., `feat/issue-123-task-slug`). 
+- **Branching per Task**: I will strictly create one branch per task or issue using Conventional Branching `<type>/issue-<N>-<slug>` (e.g. `feat/issue-123-add-auth`).
 - **Atomic Commits & Issue Closing**: We use logical conventional commits (`feat: ...`, `fix: ...`). The commit message MUST include the issue closing directive.
 - **Platform-Specific Issue Linking & Time Tracking**:
   - GitHub: `<type>: <description> (Fixes #<id>)`
