@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/v4.3.5/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/v4.4.0/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.3.5"
+$AacRef = "v4.4.0"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -25,11 +25,12 @@ function Copy-ManagedFile($Source, $RelativeDestination) {
 }
 
 try {
-    New-Item -ItemType Directory -Force -Path "$TargetDir\.agents\brain", "$TargetDir\.agents\common", "$TargetDir\.agents\incidents", "$TargetDir\.agents\locks", "$TargetDir\.agents\plans", "$TargetDir\.agents\scratch", "$TargetDir\.agents\skills", "$TargetDir\scripts" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$TargetDir\.agents\brain", "$TargetDir\.agents\common", "$TargetDir\.agents\incidents", "$TargetDir\.agents\locks", "$TargetDir\.agents\plans", "$TargetDir\.agents\scratch", "$TargetDir\.agents\skills", "$TargetDir\.agents\agents", "$TargetDir\scripts" | Out-Null
     git clone --depth 1 --branch $AacRef $Repository $TmpDir | Out-Null
     python "$TmpDir\scripts\validate.py"
 
     Copy-ManagedFile "$TmpDir\AGENTS.md" "AGENTS.md"
+    Copy-ManagedFile "$TmpDir\GEMINI.md" "GEMINI.md"
     if (-not (Test-Path "$TargetDir\.env.example")) {
         Copy-Item "$TmpDir\.env.example" "$TargetDir\.env.example"
     }
@@ -40,8 +41,10 @@ try {
     Copy-ManagedFile "$TmpDir\.agents\mcp_config.json.example" ".agents\mcp_config.json.example"
     Copy-ManagedFile "$TmpDir\.agents\brain" ".agents\brain"
     Copy-ManagedFile "$TmpDir\.agents\common" ".agents\common"
+    Copy-ManagedFile "$TmpDir\.agents\agents" ".agents\agents"
     Copy-ManagedFile "$TmpDir\.agents\skills" ".agents\skills"
     Copy-ManagedFile "$TmpDir\scripts\validate.py" "scripts\validate.py"
+    Copy-ManagedFile "$TmpDir\scripts\verify.py" "scripts\verify.py"
     Write-Host "AAC $AacRef installed into $TargetDir"
     Write-Host "Copy .agents\antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }

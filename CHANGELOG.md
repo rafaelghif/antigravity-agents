@@ -4,6 +4,15 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-08-05
+
+### Changed
+- **Compact Always-On Policy**: Replaced the oversized procedural `AGENTS.md` with a behavior-first policy under 600 words.
+- **Focused Skills**: Replaced six broad, duplicated skills with four task-specific skills for quality, verification, security, and architecture.
+- **Discoverable Custom Agents**: Added planner, implementer, reviewer, and security-reviewer agents using the official `.agents/agents/*.md` format.
+- **Stack-Aware Verification**: Added `scripts/verify.py` to detect available project commands instead of guessing generic test commands.
+- **Instruction Budgets**: CI now validates and rejects oversized always-on, agent, or skill instructions.
+
 ## [4.3.5] - 2026-08-05
 
 ### Security

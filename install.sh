@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.5/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.0/install.sh | bash
 
 set -Eeuo pipefail
 
-readonly AAC_REF="v4.3.5"
+readonly AAC_REF="v4.4.0"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -46,13 +46,14 @@ require_command mktemp
 
 mkdir -p "$TARGET_DIR/.agents" "$TARGET_DIR/.agents/brain" "$TARGET_DIR/.agents/common" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \
-  "$TARGET_DIR/.agents/scratch" "$TARGET_DIR/.agents/skills" "$TARGET_DIR/scripts"
+  "$TARGET_DIR/.agents/scratch" "$TARGET_DIR/.agents/skills" "$TARGET_DIR/.agents/agents" "$TARGET_DIR/scripts"
 
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
 
 python3 "$TMP_DIR/source/scripts/validate.py"
 
 copy_managed "$TMP_DIR/source/AGENTS.md" AGENTS.md
+copy_managed "$TMP_DIR/source/GEMINI.md" GEMINI.md
 if [[ ! -e "$TARGET_DIR/.env.example" ]]; then
   cp "$TMP_DIR/source/.env.example" "$TARGET_DIR/.env.example"
 fi
@@ -63,8 +64,10 @@ copy_managed "$TMP_DIR/source/.agents/antigravity-compatibility.json" .agents/an
 copy_managed "$TMP_DIR/source/.agents/mcp_config.json.example" .agents/mcp_config.json.example
 copy_managed "$TMP_DIR/source/.agents/brain" .agents/brain
 copy_managed "$TMP_DIR/source/.agents/common" .agents/common
+copy_managed "$TMP_DIR/source/.agents/agents" .agents/agents
 copy_managed "$TMP_DIR/source/.agents/skills" .agents/skills
 copy_managed "$TMP_DIR/source/scripts/validate.py" scripts/validate.py
+copy_managed "$TMP_DIR/source/scripts/verify.py" scripts/verify.py
 
 printf 'AAC %s installed into %s\n' "$AAC_REF" "$TARGET_DIR"
 printf 'Backups, when needed, are stored in %s\n' "$BACKUP_DIR"
