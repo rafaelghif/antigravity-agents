@@ -1,17 +1,32 @@
 {
-  "GITEA_HOST": {
-    "required": true,
-    "secret": false,
-    "description": "Base URL of self-hosted Gitea instance (e.g. http://localhost:3000)."
-  },
-  "GITEA_TOKEN": {
-    "required": true,
-    "secret": true,
-    "description": "Gitea Access Token for MCP operations (mapped to GITEA_ACCESS_TOKEN)."
-  },
   "GITHUB_PAT": {
     "required": true,
     "secret": true,
+    "platform": "github",
     "description": "Personal Access Token for GitHub MCP operations."
+  },
+  "GITEA_HOST": {
+    "required": false,
+    "secret": false,
+    "platform": "gitea",
+    "description": "Base URL of self-hosted Gitea instance (e.g. http://localhost:3000). Required only when targeting a Gitea remote."
+  },
+  "GITEA_TOKEN": {
+    "required": false,
+    "secret": true,
+    "platform": "gitea",
+    "description": "Gitea Access Token for MCP operations (mapped to GITEA_ACCESS_TOKEN). Required only when targeting a Gitea remote."
+  },
+  "NODE_ENV": {
+    "required": false,
+    "secret": false,
+    "platform": "runtime",
+    "description": "Node.js runtime environment (e.g. development, production)."
+  },
+  "PORT": {
+    "required": false,
+    "secret": false,
+    "platform": "runtime",
+    "description": "Application listening port."
   }
 }

@@ -4,6 +4,33 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.3] - 2026-08-05
+
+### Added
+- **Tier-Aware Hard Gate**: The pre-execution HARD GATE is now tiered — T1 patches (`< 50 lines`, single file, no contract change) follow a fast path and are exempt from the Issue/Plan/PR ceremony, resolving the direct contradiction between `§2/§5` and the Tiered Execution Engine. T2/T3 retain the full Issue → Plan → Branch → PR → Merge workflow.
+- **Complete Directory Manifest**: Restored the full manifest in `AGENTS.md §1` (added `common/`, `incidents/`, `config.json`, `mcp_config.json(.example)`, `TASK_TEMPLATE.md`, `brain/env-required.json`, `brain/schemas/`).
+- **MIT License**: Added `LICENSE` for the `curl|bash`-distributed installer.
+- **CI Structural Validation**: Added a `validate` job to `agent-gates.yml` that parses all JSON, enforces a single canonical version across artifacts, and rejects stale version strings and the wrong `prisma.schema` filename.
+- **Audit Trail Clarification**: Documented `audit.jsonl` as a local per-machine trail (gitignored) with no cross-machine immutability guarantee.
+- **AI Safety Wiring**: Referenced `config.json -> ai_safety` input sanitization from `AGENTS.md §4`.
+
+### Changed
+- **Canonical Version Source**: All version strings now derive from `config.json -> core_version` (`4.3.3`). Synced `AGENTS.md` title, `README.md` header/body/badges, `install.sh`, `install.ps1`, `TASK_TEMPLATE.md`, and the CI workflow name.
+- **Unified Branch Convention**: Standardized on Conventional Branching `<type>/issue-<N>-<slug>` across `config.json`, `AGENTS.md`, and `devops-manager/SKILL.md`, replacing the inconsistent `task/` vs `feat/issue-` mix.
+- **Platform-Conditional Secrets**: `env-required.json` now marks Gitea credentials as optional (GitHub-only repos no longer fail validation for missing Gitea vars) and adds runtime vars (`NODE_ENV`, `PORT`).
+- **Prisma Filename**: Corrected `prisma.schema` → `schema.prisma` in `schema.md` and `system-architect/SKILL.md`.
+- **Hermes Learning Targets**: Unified the persistence target set across `AGENTS.md §7` and `soul.md` (`skills/`, `rules.md`, `schema.md`).
+- **Slash Commands**: Unified the command list between `AGENTS.md §8` and `README.md` (`/goal`, `/plan`, `/grill-me`, `/teamwork-preview`, `/learn`).
+- **Section Numbering**: Fixed non-sequential headers (`2.5`, `3.5`) in `common/utils.md`.
+- **Config Hygiene**: Removed dead `retries.rollback_distinct_approaches`; replaced misleading `backup_rotation_count: 3` with `backup_extension: ".bak"` reflecting the single-backup reality.
+
+### Fixed
+- **MCP Config Leak**: Replaced the hardcoded internal IP in `mcp_config.json` `GITEA_HOST` with the `${GITEA_HOST}` placeholder.
+- **Stale `.gitignore`**: Removed the obsolete `.agents/brain/state.json` ignore line (artifact is FORBIDDEN, not merely ignored) and added `*.bak` coverage.
+- **README Directory Tree**: Corrected `TASK_TEMPLATE.md` location (`.agents/`, not root) and added `LICENSE`/`CHANGELOG.md`.
+- **Stale Scratch Artifact**: Removed lingering `release_notes.txt` (v4.1.4) from `.agents/scratch/`.
+- **`schema.md` Staleness**: Refreshed "Last Verified" date.
+
 ## [4.3.2] - 2026-07-28
 
 ### Added

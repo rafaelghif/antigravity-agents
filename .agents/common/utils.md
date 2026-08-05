@@ -11,7 +11,7 @@
   - Database URIs: `s/:\/\/[^:]+:[^@]+@/:\/\/***:\*\*\*@/g`
 - **Trace Propagation**: Ensure a generated `trace_id` is appended to all logs across all skill executions to correlate events.
 
-## 2.5 State Management, File I/O & POSIX Directory Locks
+## 3. State Management, File I/O & POSIX Directory Locks
 - **Atomic Writes & Plan Backup Protection**: Always perform file updates atomically. When modifying `.agents/plans/<task-slug>.md`, maintain an automatic `.bak` copy (`cp plan.md plan.md.bak`). If a crash occurs mid-write and `plan.md` becomes corrupted, restore immediately from `plan.md.bak`.
 - **POSIX Directory-Based Mutex Locks**: To prevent TOCTOU race conditions across parallel subagents, DO NOT use JSON file writes for locking. Use atomic directory creation: `mkdir -p .agents/locks/<file_hash>.lock`.
   - Inside the lock directory, write a metadata file `owner.json` containing `{"claimed_by": "<agent_id>", "claimed_at": "<ISO8601>"}`.
@@ -19,7 +19,7 @@
 
 
 
-## 3. Universal Polyglot Framework & Language Detection
+## 4. Universal Polyglot Framework & Language Detection
 1. Read current working directory and inspect project tree.
 2. **JavaScript / TypeScript / Node.js**: Check `package.json` (npm, pnpm, yarn, bun, workspaces).
 3. **Python**: Check `pyproject.toml`, `requirements.txt`, `Pipfile`, `environment.yml`.
@@ -35,7 +35,7 @@
 13. **Swift / Objective-C**: Check `Package.swift`, `*.xcodeproj`, `Podfile`.
 14. **Elixir / Erlang**: Check `mix.exs`, `rebar.config`.
 
-## 3.5 Specific Framework Adaptation Rules
+## 5. Specific Framework Adaptation Rules
 - **Frontend Stack**: Inspect dependencies for `react` / `next`, `vue` / `nuxt`, `angular`, `svelte` / `sveltekit`. Load component purity & hydration guidelines.
 - **Python Backend**: Detect `django`, `fastapi`, `flask`. Enforce ORM transaction safety and async loop handling.
 - **Node.js Backend**: Detect `express`, `nestjs`, `fastify`. Enforce middleware error bounds and dependency injection patterns.
@@ -43,6 +43,6 @@
 
 
 
-## 4. API Version Negotiation
+## 6. API Version Negotiation
 - Before invoking external tools (e.g., Gitea, GitHub, MCP), verify version compatibility (e.g., `tool --version` or `/api/v1/version`).
 - Fallback to safe known API endpoints if the newest API version is unsupported.

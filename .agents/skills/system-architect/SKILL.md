@@ -13,7 +13,7 @@ I'll help you audit architectural impacts, manage database schemas, and synthesi
 - I'll ensure public API backward compatibility and help define migration strategies for any breaking changes.
 
 ## 2. Schema Governance
-- **Single Source of Truth**: I'll keep `.agents/brain/schema.md` synchronized whenever our ORM models change (`prisma.schema`, `models.py`, `schema.sql`).
+- **Single Source of Truth**: I'll keep `.agents/brain/schema.md` synchronized whenever our ORM models change (`schema.prisma`, `models.py`, `schema.sql`).
 - **Zero-Assumption Rule**: I'll never guess column names or data types without verifying our schema authority first.
 
 ## 3. Data Synthesis

@@ -2,8 +2,8 @@
 
 # ⚡ Antigravity Agent Core (AAC) V4.3
 
-[![Version](https://img.shields.io/badge/version-4.3.2-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.2)
-[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.2)
+[![Version](https://img.shields.io/badge/version-4.3.3-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.3)
+[![Status](https://img.shields.io/badge/status-production_ready-brightgreen.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.3)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=for-the-badge&logo=google&logoColor=white)](https://antigravity.google/docs/cli/overview)
 [![Architecture](https://img.shields.io/badge/architecture-AAC_V4.3_Deterministic-orange.svg?style=for-the-badge&logo=diagramsdotnet&logoColor=white)](https://github.com/rafaelghif/antigravity-agents)
 
@@ -19,10 +19,10 @@
 
 Autonomous AI coding agents offer massive productivity boosts, but running them in un-governed repositories introduces severe friction: hallucinated architectures, context amnesia across session switches, skipped workflow gates, robotic tone, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V4.3.1** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
+**Antigravity Agent Core (AAC) V4.3.3** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
 
 > [!IMPORTANT]
-> **100% Task-Driven & File-Backed**: AAC V4.3.1 eliminates volatile state tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
+> **100% Task-Driven & File-Backed**: AAC V4.3.3 eliminates volatile state tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
 
 ---
 
@@ -51,7 +51,7 @@ Autonomous AI coding agents offer massive productivity boosts, but running them 
 | **Session Amnesia & State Loss** | **Task-Driven Plan Checklists (`.agents/plans/`)**: File-backed micro-task checklists enable instant recovery across session switches or crashes without re-implementing finished code. |
 | **Robotic AI Tone & Yes-Man Bias** | **Humanized Senior Co-Pilot (`.agents/brain/soul.md`)**: Replaces canned AI fluff with a warm, authentic, crisp senior engineering partner voice while maintaining uncompromising technical pushback. |
 | **Swarm Race Conditions** | **POSIX Directory Mutex Locks (`.agents/locks/`)**: OS-level atomic directory locks (`mkdir -p .agents/locks/<hash>.lock`) with 60s auto-expiration guarantee zero TOCTOU collisions. |
-| **LLM Eagerness & Workflow Bypass** | **Strict Pre-Execution Gate**: Prohibits code edits until (1) a granular plan file exists in `.agents/plans/` AND (2) a dedicated Git branch (`task/<slug>`) is checked out. |
+| **LLM Eagerness & Workflow Bypass** | **Tier-Aware Pre-Execution Gate**: T1 patches (`< 50 lines`, single file) take a fast path; T2/T3 features and refactors are prohibited from code edits until (1) a granular plan file exists in `.agents/plans/` AND (2) a dedicated Conventional branch (`<type>/issue-<N>-<slug>`) is checked out. |
 | **LLM Batching & False Completion** | **Zero-Batching & Empirical Verification**: Enforces single micro-task execution per turn with mandatory physical CLI output (`exit code 0` from `npm test` or `tsc`) before marking `- [x]`. |
 
 ---
@@ -102,20 +102,22 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
 ```
 .
 ├── AGENTS.md                      # Supreme Constitution & AAC v4.3 Operational Directive
-├── TASK_TEMPLATE.md               # Standard Granular Task Execution Plan Template
 ├── .env.example                   # Environment Variable Template (GitHub/Gitea Tokens)
 ├── install.sh                     # Linux/macOS One-Line Installer Script
 ├── install.ps1                    # Windows PowerShell One-Line Installer Script
+├── LICENSE                        # MIT License
+├── CHANGELOG.md                   # Semantic Version History
 └── .agents/                       # Agentic AI Engine & Central Nervous System
     ├── config.json                # Master Numerical Bounds, Timeouts & Swarm Rules
-    ├── mcp_config.json            # Model Context Protocol (MCP) Server Declarations
+    ├── mcp_config.json            # Model Context Protocol (MCP) Server Declarations (gitignored, local)
     ├── mcp_config.json.example    # MCP Setup Sample Template
+    ├── TASK_TEMPLATE.md           # Standard Granular Task Execution Plan Template
     ├── brain/                     # Permanent Memory & Operational Contracts
     │   ├── soul.md                # Senior Co-Pilot Persona, Warm Tone & Oath
     │   ├── rules.md               # Persisted Project Invariants & User Lessons
     │   ├── schema.md              # Single Source of Truth DB & System Schemas
     │   ├── env-required.json      # Mandatory Secret & Environment Declarations
-    │   ├── audit.jsonl            # Immutable Task Execution & Token Audit Trail
+    │   ├── audit.jsonl            # Local Task Execution & Token Audit Trail (gitignored)
     │   └── schemas/               # Domain-Specific Extended Schemas
     ├── plans/                     # Granular Markdown Task Plan Checklists (Single Source of Truth)
     ├── locks/                     # POSIX Directory-Based Mutex Locks (<hash>.lock/owner.json)

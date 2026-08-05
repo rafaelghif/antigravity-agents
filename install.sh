@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Installing Antigravity Agent Core (AAC) v4.3.2..."
+echo "🚀 Installing Antigravity Agent Core (AAC) v4.3.3..."
 
 
 # Create target directory structure if needed
@@ -26,6 +26,6 @@ fi
 # Clean up temporary directory
 rm -rf "$TMP_DIR"
 
-echo "✅ AAC v4.3.1 successfully installed into $(pwd)!"
+echo "✅ AAC v4.3.3 successfully installed into $(pwd)!"
 echo "💡 Start your Antigravity CLI session (agy) to experience Task-Driven Zero-Amnesia autonomous coding."
 

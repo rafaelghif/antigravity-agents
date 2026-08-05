@@ -8,9 +8,10 @@
 !.agents/plans/.gitkeep
 .agents/incidents/*
 !.agents/incidents/.gitkeep
-.agents/brain/state.json
 .agents/brain/audit.jsonl
 
+# Local plan backups
+*.bak
 
 # Environment Variables
 .env
