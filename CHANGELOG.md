@@ -4,6 +4,20 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.4] - 2026-08-05
+
+### Security
+- **Antigravity Permission Baseline**: Added a sandbox-first settings example using review-oriented artifact handling and workspace-only access.
+- **CI Least Privilege**: Restricted GitHub Actions to `contents: read` and added manual workflow dispatch.
+- **Mutable MCP Reference Removed**: Replaced the Gitea MCP `latest` image reference with a versioned image tag.
+
+### Changed
+- **Official MCP Schema**: Updated workspace MCP examples to use Antigravity's documented `serverUrl` property.
+- **Workspace Skill Discovery**: Flattened all six skills to `.agents/skills/<name>.md` with documented YAML frontmatter.
+- **Reproducible Installers**: Linux and Windows installers now target a release ref, clean up temporary state, back up overwritten files, preserve local state, and validate the installed workspace.
+- **Structural Validation**: Added a dependency-free validator for Antigravity MCP, skills, manifest, version, and mutable dependency contracts.
+- **Active Plan Portability**: Tracked the active plan while retaining local-only audit, scratch, incident, and backup state.
+
 ## [4.3.3] - 2026-08-05
 
 ### Security

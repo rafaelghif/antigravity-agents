@@ -1,7 +1,7 @@
 ---
 name: system-janitor
 description: Token budget optimizer, context memory compactor, process manager, and incident recovery specialist. Triggers when context usage exceeds budget, cleaning intermediate scratch files, or handling execution timeouts.
-requires_core: ">=4.3.3"
+requires_core: ">=4.3.4"
 ---
 # System Janitor Skill
 

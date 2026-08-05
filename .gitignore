@@ -7,9 +7,11 @@ opencode.json
 !.agents/scratch/.gitkeep
 .agents/plans/*
 !.agents/plans/.gitkeep
+!.agents/plans/*.md
 .agents/incidents/*
 !.agents/incidents/.gitkeep
 .agents/brain/audit.jsonl
+.agents-backups/
 
 # Local plan backups
 *.bak

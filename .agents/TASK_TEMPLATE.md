@@ -1,4 +1,4 @@
-# Agent Task Execution Template (AAC v4.3.3 Task-Driven Standard)
+# Agent Task Execution Template (AAC v4.3.4 Task-Driven Standard)
 
 **Instructions for the Agent:**
 Follow these steps sequentially upon receiving a task.
@@ -16,7 +16,7 @@ Follow these steps sequentially upon receiving a task.
 ## 2. Engineering Task Planning Phase (MANDATORY BEFORE CODE EDIT)
 - [ ] 1. Create a detailed plan file at `.agents/plans/<task-slug>.md`.
 - [ ] 2. Record all direct user decisions, context limits, and `/grill-me` discussion logs under `## 1. Decisions & Architectural Trade-offs`.
-- [ ] 3. Create dedicated Git Branch matching task slug (`git checkout -b task/<task-slug>`).
+- [ ] 3. Create dedicated Git Branch matching task slug (`git checkout -b <type>/issue-<N>-<task-slug>`).
 - [ ] 4. Include explicit **Single Source of Truth** links (e.g., `schema.md#table_name`).
 - [ ] 5. Breakdown implementation into **Granular Micro-Tasks**:
   - Types/DTOs & Contract Layer
@@ -26,7 +26,7 @@ Follow these steps sequentially upon receiving a task.
 
 ## 3. Execution & Atomic Checkpoint Protocol
 - [ ] 1. Execute **EXACTLY ONE micro-task at a time** (Zero-Batching Directive).
-- [ ] 2. If delegating to a subagent, mark status as `- [~] (Assigned: <subagent_id>)`.
+- [ ] 2. If delegating to an Antigravity subagent, mark status as `- [~] (Assigned: <subagent_id>)` and monitor it through `/agents`.
 - [ ] 3. Claim POSIX directory lock (`mkdir -p .agents/locks/<hash>.lock` and write `owner.json`) before modifying ANY source file or the active plan file itself.
 - [ ] 4. After completing each micro-task, run empirical verification (`npm test`, `tsc`, `pytest`).
 - [ ] 5. **Atomic Backup**: Run `cp .agents/plans/<task-slug>.md .agents/plans/<task-slug>.md.bak` before updating.

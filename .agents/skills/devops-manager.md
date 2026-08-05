@@ -1,7 +1,7 @@
 ---
 name: devops-manager
 description: Version Control Lifecycle manager, branch hygiene janitor, and CI/CD local runner specialist. Triggers when creating issues, branching, submitting PRs, cleaning merged branches, or simulating GitHub Actions locally.
-requires_core: ">=4.3.3"
+requires_core: ">=4.3.4"
 ---
 # DevOps Manager Skill
 
