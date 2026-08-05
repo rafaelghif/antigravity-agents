@@ -1,7 +1,7 @@
 ---
 name: code-engineer
 description: Universal software engineering enforcer for any programming language (TypeScript, JavaScript, Python, Go, Rust, PHP, Java, C#, Dart/Flutter, C/C++, Swift, VB6, VB.NET, ASP/ASP.NET) and scientific advanced debugging workflow. Triggers when writing new features, refactoring code, or debugging complex runtime bugs and tracebacks.
-requires_core: ">=4.3.4"
+requires_core: ">=4.3.5"
 ---
 # Code Engineer Skill
 

@@ -1,5 +1,5 @@
 {
-  "core_version": "4.3.4",
+  "core_version": "4.3.5",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
@@ -21,7 +21,13 @@
     "sast_tools": ["semgrep", "eslint-plugin-security", "bandit", "gosec", "spotbugs"],
     "secret_scanning": ["gitleaks", "trufflehog"],
     "dependency_scanning": ["npm-audit", "pip-audit", "cargo-audit", "dependency-check"],
-    "vulnerability_threshold_cvss": 7.0
+    "vulnerability_threshold_cvss": 7.0,
+    "scanner_applicability": {
+      "repository": ["gitleaks", "semgrep"],
+      "language_specific": [],
+      "dependency": [],
+      "not_applicable_reason": "AAC is a configuration and documentation repository with no package or application dependency manifest."
+    }
   },
   "state_management": {
     "lock_mechanism": "directory_based",
