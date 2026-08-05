@@ -132,6 +132,8 @@ def validate_compatibility() -> None:
 
 def validate_recovery_state() -> None:
     plans = sorted((ROOT / ".agents/plans").glob("*.md"))
+    if not plans:
+        return
     if len(plans) != 1:
         fail(f"expected exactly one active plan, found {len(plans)}")
     content = plans[0].read_text(encoding="utf-8")
