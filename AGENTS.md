@@ -1,4 +1,4 @@
-# AGENTS.md — Antigravity Agent Core (AAC) V4.3.4
+# AGENTS.md — Antigravity Agent Core (AAC) V4.3.5
 
 **Architecture Pattern**: Deterministic Task-Driven & File-Backed Execution Protocol
 This directive governs all agents. Numerical thresholds live in `.agents/config.json`; the execution SOP lives in `.agents/TASK_TEMPLATE.md`.
@@ -18,6 +18,7 @@ Root:
 * **`.agents/mcp_config.json.example`**: MCP setup sample template.
 * **`.agents/TASK_TEMPLATE.md`**: Standard granular task execution SOP.
 * **`.agents/antigravity-settings.example.json`**: Sandbox-first global settings baseline.
+* **`.agents/antigravity-compatibility.json`**: Tested Antigravity CLI version and official documentation baseline.
 * **`.agents/brain/`**: Permanent memory & contracts — `soul.md` (persona), `rules.md`, `schema.md` (data contracts), `env-required.json` (secret declarations), `audit.jsonl` (local task trail), `schemas/` (extended domain schemas).
 * **`.agents/plans/`**: Primary Execution Engine. Active markdown checklists (`<slug>.md`).
 * **`.agents/locks/`**: POSIX locks (`<hash>.lock/owner.json`) for TOCTOU prevention.
@@ -50,6 +51,7 @@ Before executing ANY prompt, run the Boot Sequence:
 2. **Load Execution SOP**: Read `.agents/TASK_TEMPLATE.md` for the standard task-driven checklist.
 3. **Scan Active Plans**: Check `.agents/plans/*.md`. Only ONE plan can be active (newest timestamp).
 4. **Resume Execution**: Find the first uncompleted task (`- [ ]`).
+   * If the active plan has `status: COMPLETE` in `## Delivery Status`, archive it and do not resume it.
    * **Plan Re-Validation Protocol**: If resuming a paused plan, validate that the remaining tasks still align with the current codebase architecture. Do not execute blindly.
    * **Anti-Forgetfulness Gate**: If code for `- [ ]` already exists and passes empirical verification (`exit code 0`), mark `- [x]` and proceed.
 
@@ -93,10 +95,14 @@ Every T2/T3 task MUST follow this exact strict sequence:
 - **Hermes Learning (Dual-Source)**: User corrections MUST be physically written to `.agents/skills/`, `.agents/brain/rules.md`, or `.agents/brain/schema.md`. Verbal acknowledgment without a physical disk write is a failure.
 
 ---
-## 8. Slash Commands
+## 8. Antigravity Workflow Commands
 Recommend native Antigravity slash commands when applicable (keep this list in sync with `README.md`):
-- `/goal` (long-running autonomous execution)
-- `/plan` (complex setup / step-by-step checklist)
-- `/grill-me` (design alignment interview / requirements gathering)
-- `/teamwork-preview` (parallel sub-agent execution)
-- `/learn` (persist user corrections)
+- `/agents` (monitor and select subagents)
+- `/mcp` (manage MCP servers)
+- `/config` (edit settings and permission policy)
+- `/tasks` (monitor background commands)
+- `/fork` (branch a conversation into another project)
+- `/rewind` (course-correct to a stable conversation state)
+- `-p --output-format json` (headless machine-readable automation)
+
+Workspace skills under `.agents/skills/*.md` become custom slash commands automatically; do not claim undocumented custom aliases are native commands.

@@ -4,6 +4,17 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.5] - 2026-08-05
+
+### Security
+- **Scoped Permission Baseline**: Added sandbox-first settings with explicit command, file, URL, and MCP approval boundaries.
+- **Recovery Validation**: Added checks for active-plan state, forbidden legacy state, scanner applicability, compatibility metadata, and structured release markers.
+
+### Changed
+- **Installer Safety**: Installers validate the staged release before mutation, use one immutable documented ref, back up every managed target, clean temporary state, and preserve user additions.
+- **Windows Coverage**: Added a Windows CI job that parses the PowerShell installer.
+- **Compatibility Boundary**: Documented `.agents/` as the Antigravity surface and `opencode.json` as optional OpenCode-only configuration.
+
 ## [4.3.4] - 2026-08-05
 
 ### Security

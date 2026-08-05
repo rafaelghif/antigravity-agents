@@ -1,9 +1,9 @@
 <div align="center">
 
-# ⚡ Antigravity Agent Core (AAC) V4.3.4
+# ⚡ Antigravity Agent Core (AAC) V4.3.5
 
-[![Version](https://img.shields.io/badge/version-4.3.4-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.4)
-[![Status](https://img.shields.io/badge/status-release_candidate-yellow.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.4)
+[![Version](https://img.shields.io/badge/version-4.3.5-blue.svg?style=for-the-badge&logo=git&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.5)
+[![Status](https://img.shields.io/badge/status-release_candidate-yellow.svg?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.3.5)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=for-the-badge&logo=google&logoColor=white)](https://antigravity.google/docs/cli/overview)
 [![Architecture](https://img.shields.io/badge/architecture-AAC_V4.3_Deterministic-orange.svg?style=for-the-badge&logo=diagramsdotnet&logoColor=white)](https://github.com/rafaelghif/antigravity-agents)
 
@@ -19,10 +19,10 @@
 
 Autonomous AI coding agents offer massive productivity boosts, but running them in un-governed repositories introduces severe friction: hallucinated architectures, context amnesia across session switches, skipped workflow gates, robotic tone, and exploding token budgets.
 
-**Antigravity Agent Core (AAC) V4.3.4** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
+**Antigravity Agent Core (AAC) V4.3.5** establishes a **Deterministic Task-Driven & File-Backed Execution Protocol** governed by a supreme constitution (`AGENTS.md`). Built natively for **Google Antigravity**, AAC V4.3 ensures AI-driven coding conforms exactly to senior engineering standards, recovers seamlessly from interrupts, and pair-programs like a real human partner.
 
 > [!IMPORTANT]
-> **100% Task-Driven & File-Backed**: AAC V4.3.4 eliminates volatile state tracking in favor of physical, granular markdown plan checklists (`.agents/plans/*.md`), zero-assumption contracts (`.agents/brain/schema.md`), and POSIX directory mutex locks (`.agents/locks/`).
+> **Task-Driven & File-Backed**: AAC V4.3.5 uses tracked execution plans, zero-assumption contracts, and POSIX directory mutex locks. Recovery state is validated locally; it is not a substitute for Git history or remote PR records.
 
 ---
 
@@ -75,12 +75,12 @@ AAC V4.3 operates via 6 specialized domain skills inside `.agents/skills/`:
 
 ### Option A: Linux / macOS / WSL (1-Line Quick Install)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.4/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.5/install.sh | bash
 ```
 
 ### Option B: Windows PowerShell (1-Line Quick Install)
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.4/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.5/install.ps1 | iex
 ```
 
 ### Option C: Manual Scaffolding
@@ -101,7 +101,7 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
 
 ```
 .
-├── AGENTS.md                      # Supreme Constitution & AAC v4.3 Operational Directive
+├── AGENTS.md                      # Supreme Constitution & AAC v4.3.5 Operational Directive
 ├── .env.example                   # Environment Variable Template (GitHub/Gitea Tokens)
 ├── install.sh                     # Linux/macOS One-Line Installer Script
 ├── install.ps1                    # Windows PowerShell One-Line Installer Script
@@ -111,6 +111,7 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
 │   └── validate.py
 └── .agents/                       # Agentic AI Engine & Central Nervous System
      ├── config.json                # Master Numerical Bounds, Timeouts & Swarm Rules
+     ├── antigravity-compatibility.json # Tested CLI version and official docs baseline
      ├── antigravity-settings.example.json # Sandbox and permission baseline
     ├── mcp_config.json            # Model Context Protocol (MCP) Server Declarations (gitignored, local)
     ├── mcp_config.json.example    # MCP Setup Sample Template
@@ -138,22 +139,32 @@ Below is the verified, authoritative layout of the `.agents/` engine and root fi
 
 ---
 
-## ⚡ Antigravity Native Slash Commands
+## ⚡ Antigravity Workflow
 
-Maximize workflow autonomy using native Antigravity slash commands:
+### Configuration boundary
+
+Antigravity CLI consumes the workspace files under `.agents/`, including `.agents/mcp_config.json` and `.agents/skills/*.md`. The ignored root `opencode.json` is an optional OpenCode compatibility file and is not read by Antigravity CLI. Do not place Antigravity MCP settings in `opencode.json`.
+
+Follow the official Antigravity workflow: explore first, create an implementation plan, then execute with verification loops. Use `@` path completion to provide high-fidelity context and `/agents` to monitor parallel subagents.
+
+Official commands used by AAC:
 
 | Command | Best For | Description |
 | :--- | :--- | :--- |
-| **`/goal`** | `Long-running autonomy` | Forces the agent into a persistent loop to hit complex milestones. |
-| **`/grill-me`** | `Requirements gathering` | The agent pauses coding and interviews you with targeted questions. |
-| **`/teamwork-preview`** | `Parallel execution` | Divides massive tasks and spawns multiple sub-agents. |
-| **`/plan`** | `Step-by-step logic` | Outputs a rigorous step-by-step checklist before proceeding. |
-| **`/learn`** | `Self-Correction` | Documents a new pattern in `rules.md` or generates a new skill. |
+| **`/agents`** | `Parallel execution` | Opens the agent manager for subagent selection and monitoring. |
+| **`/mcp`** | `MCP operations` | Opens the MCP manager and connection logs. |
+| **`/config`** | `Safety settings` | Opens the settings editor for permissions and sandbox preferences. |
+| **`/tasks`** | `Background commands` | Monitors non-agentic background tasks. |
+| **`/fork`** | `Safe experiments` | Forks a conversation into another project. |
+| **`/rewind`** | `Course correction` | Returns the conversation to a previous stable point. |
+| **`-p --output-format json`** | `Headless automation` | Runs one prompt and captures machine-readable output. |
+
+Workspace skills in `.agents/skills/*.md` are automatically exposed as custom slash commands by Antigravity. Their command names come from each skill's filename and are not hard-coded in this README.
 
 ---
 
 <div align="center">
 
-**Crafted for Antigravity AI Engineers** • Standardized under AAC v4.3 Protocol
+**Crafted for Antigravity AI Engineers** • Standardized under AAC v4.3.5 Protocol
 
 </div>

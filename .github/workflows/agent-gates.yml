@@ -1,4 +1,4 @@
-name: AAC V4.3.4 Security & Quality Gates
+name: AAC V4.3.5 Security & Quality Gates
 
 on:
   workflow_dispatch:
@@ -38,6 +38,21 @@ jobs:
 
       - name: Validate shell installer syntax
         run: bash -n install.sh
+
+      - name: Validate release and scanner applicability
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('.agents/config.json').read_text())
+          declared = set(config['security']['sast_tools']) | set(config['security']['secret_scanning'])
+          configured = set(config['security']['scanner_applicability']['repository'])
+          if not configured <= declared:
+              raise SystemExit('scanner applicability contains undeclared tools')
+          if configured != {'gitleaks', 'semgrep'}:
+              raise SystemExit('repository scanner applicability does not match CI')
+          print('release and scanner applicability: OK')
+          PY
 
       - name: Version consistency check
         run: |
@@ -81,3 +96,26 @@ jobs:
         run: |
           python3 -m pip install semgrep==1.138.0
           semgrep scan --config auto --error
+
+  windows-installer:
+    name: Windows Installer Syntax
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Parse PowerShell installer
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/install.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | Format-List | Out-String | Write-Error
+            exit 1
+          }
+          Write-Output "PowerShell syntax: OK"

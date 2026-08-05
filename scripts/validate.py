@@ -29,12 +29,14 @@ REQUIRED_PATHS = (
     ".agents/common/utils.md",
     ".agents/mcp_config.json.example",
     ".agents/antigravity-settings.example.json",
+    ".agents/antigravity-compatibility.json",
     ".agents/skills/code-engineer.md",
     ".agents/skills/devops-manager.md",
     ".agents/skills/quality-assurance.md",
     ".agents/skills/security-docs-auditor.md",
     ".agents/skills/system-architect.md",
     ".agents/skills/system-janitor.md",
+    "scripts/validate.py",
 )
 
 
@@ -94,6 +96,69 @@ def validate_skills() -> None:
             fail(f"{path.relative_to(ROOT)} is missing frontmatter description")
 
 
+def validate_settings() -> None:
+    settings = load_json(".agents/antigravity-settings.example.json")
+    required = {
+        "toolPermission": "proceed-in-sandbox",
+        "enableTerminalSandbox": True,
+        "allowNonWorkspaceAccess": False,
+        "artifactReviewPolicy": "asks-for-review",
+    }
+    for key, expected in required.items():
+        if settings.get(key) != expected:
+            fail(f"settings baseline must set {key}={expected!r}")
+    permissions = settings.get("permissions")
+    if not isinstance(permissions, dict):
+        fail("settings baseline must define permissions")
+    for key in ("allow", "ask", "deny"):
+        if not isinstance(permissions.get(key), list) or not permissions[key]:
+            fail(f"settings permissions.{key} must be a non-empty list")
+    if not any(item.startswith("command(") for item in permissions["deny"]):
+        fail("settings baseline must deny at least one command")
+    if "mcp(*)" not in permissions["ask"]:
+        fail("settings baseline must ask before MCP tools")
+
+
+def validate_compatibility() -> None:
+    compatibility = load_json(".agents/antigravity-compatibility.json")
+    if not re.fullmatch(r"\d+\.\d+\.\d+", str(compatibility.get("cli_version"))):
+        fail("compatibility cli_version must be semantic version text")
+    if not compatibility.get("official_docs") or not all(
+        str(url).startswith("https://antigravity.google/docs/")
+        for url in compatibility["official_docs"]
+    ):
+        fail("compatibility must list official Antigravity documentation URLs")
+
+
+def validate_recovery_state() -> None:
+    plans = sorted((ROOT / ".agents/plans").glob("*.md"))
+    if len(plans) != 1:
+        fail(f"expected exactly one active plan, found {len(plans)}")
+    content = plans[0].read_text(encoding="utf-8")
+    if "status: COMPLETE" in content:
+        fail("active plan cannot be marked COMPLETE")
+    if not re.search(r"- \[ \]", content):
+        fail("active plan must contain an unchecked delivery task")
+    for forbidden in (".agents/brain/state.json", ".agents/brain/mcp-registry.json"):
+        if (ROOT / forbidden).exists():
+            fail(f"forbidden legacy state file exists: {forbidden}")
+
+
+def validate_scanner_applicability() -> None:
+    security = load_json(".agents/config.json")["security"]
+    applicability = security.get("scanner_applicability")
+    if not isinstance(applicability, dict):
+        fail("security scanner_applicability is required")
+    declared = set(security.get("sast_tools", [])) | set(security.get("secret_scanning", []))
+    configured = set(applicability.get("repository", [])) | set(applicability.get("language_specific", []))
+    if not configured <= declared:
+        fail("scanner applicability contains undeclared tools")
+    if not isinstance(applicability.get("dependency", []), list):
+        fail("scanner applicability dependency must be a list")
+    if not applicability.get("not_applicable_reason"):
+        fail("scanner applicability needs a not-applicable reason")
+
+
 def validate_manifest() -> None:
     for relative_path in REQUIRED_PATHS:
         if not (ROOT / relative_path).is_file():
@@ -121,8 +186,13 @@ def main() -> int:
         validate_manifest()
         load_json(".agents/config.json")
         load_json(".agents/brain/env-required.json")
+        load_json(".agents/antigravity-compatibility.json")
         validate_mcp()
         validate_skills()
+        validate_settings()
+        validate_compatibility()
+        validate_recovery_state()
+        validate_scanner_applicability()
         validate_version()
     except ValueError as exc:
         print(f"FAIL: {exc}")

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.3.5/install.sh | bash
 
 set -Eeuo pipefail
 
-readonly AAC_REF="v4.3.4"
+readonly AAC_REF="v4.3.5"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -27,6 +27,19 @@ backup_if_present() {
   fi
 }
 
+copy_managed() {
+  local source="$1"
+  local destination="$TARGET_DIR/$2"
+  backup_if_present "$destination" "$2"
+  mkdir -p "$(dirname "$destination")"
+  if [[ -d "$source" ]]; then
+    mkdir -p "$destination"
+    cp -a "$source/." "$destination/"
+  else
+    cp -a "$source" "$destination"
+  fi
+}
+
 require_command git
 require_command cp
 require_command mktemp
@@ -37,24 +50,21 @@ mkdir -p "$TARGET_DIR/.agents" "$TARGET_DIR/.agents/brain" "$TARGET_DIR/.agents/
 
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
 
-backup_if_present "$TARGET_DIR/AGENTS.md" AGENTS.md
-backup_if_present "$TARGET_DIR/.agents/config.json" .agents/config.json
-backup_if_present "$TARGET_DIR/.agents/TASK_TEMPLATE.md" .agents/TASK_TEMPLATE.md
+python3 "$TMP_DIR/source/scripts/validate.py"
 
-cp "$TMP_DIR/source/AGENTS.md" "$TARGET_DIR/AGENTS.md"
+copy_managed "$TMP_DIR/source/AGENTS.md" AGENTS.md
 if [[ ! -e "$TARGET_DIR/.env.example" ]]; then
   cp "$TMP_DIR/source/.env.example" "$TARGET_DIR/.env.example"
 fi
-cp "$TMP_DIR/source/.agents/config.json" "$TARGET_DIR/.agents/config.json"
-cp "$TMP_DIR/source/.agents/TASK_TEMPLATE.md" "$TARGET_DIR/.agents/TASK_TEMPLATE.md"
-cp "$TMP_DIR/source/.agents/antigravity-settings.example.json" "$TARGET_DIR/.agents/antigravity-settings.example.json"
-cp "$TMP_DIR/source/.agents/mcp_config.json.example" "$TARGET_DIR/.agents/mcp_config.json.example"
-cp -R "$TMP_DIR/source/.agents/brain/." "$TARGET_DIR/.agents/brain/"
-cp -R "$TMP_DIR/source/.agents/common/." "$TARGET_DIR/.agents/common/"
-cp -R "$TMP_DIR/source/.agents/skills/." "$TARGET_DIR/.agents/skills/"
-cp "$TMP_DIR/source/scripts/validate.py" "$TARGET_DIR/scripts/validate.py"
-
-python3 "$TARGET_DIR/scripts/validate.py"
+copy_managed "$TMP_DIR/source/.agents/config.json" .agents/config.json
+copy_managed "$TMP_DIR/source/.agents/TASK_TEMPLATE.md" .agents/TASK_TEMPLATE.md
+copy_managed "$TMP_DIR/source/.agents/antigravity-settings.example.json" .agents/antigravity-settings.example.json
+copy_managed "$TMP_DIR/source/.agents/antigravity-compatibility.json" .agents/antigravity-compatibility.json
+copy_managed "$TMP_DIR/source/.agents/mcp_config.json.example" .agents/mcp_config.json.example
+copy_managed "$TMP_DIR/source/.agents/brain" .agents/brain
+copy_managed "$TMP_DIR/source/.agents/common" .agents/common
+copy_managed "$TMP_DIR/source/.agents/skills" .agents/skills
+copy_managed "$TMP_DIR/source/scripts/validate.py" scripts/validate.py
 
 printf 'AAC %s installed into %s\n' "$AAC_REF" "$TARGET_DIR"
 printf 'Backups, when needed, are stored in %s\n' "$BACKUP_DIR"

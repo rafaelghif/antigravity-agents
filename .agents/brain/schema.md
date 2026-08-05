@@ -47,3 +47,17 @@
 - Workspace MCP configuration: `.agents/mcp_config.json`, with remote servers using `serverUrl`.
 - Workspace skills: `.agents/skills/<name>.md` with YAML frontmatter containing `name` and `description`.
 - Settings baseline: `.agents/antigravity-settings.example.json`; copy values into the global Antigravity CLI settings file.
+- Compatibility metadata: `.agents/antigravity-compatibility.json` records the tested CLI version, docs baseline date, and official references.
+
+### 2.5 Delivery State
+```yaml
+status: ACTIVE | COMPLETE
+issue: <number>
+commit: <sha>
+pull_request: <number>
+merge_commit: <sha>
+release: <tag>
+completed_at: <ISO8601>
+```
+
+An agent must not resume a plan with `status: COMPLETE`.
