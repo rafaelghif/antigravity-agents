@@ -185,6 +185,7 @@ def validate_version() -> None:
     if not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version):
         fail("config.json core_version must be semantic version text")
     markers = {
+        "AGENTS.md": f"AAC v{version}",
         "README.md": f"version-{version}",
         "install.sh": f' AAC_REF="v{version}"',
         "install.ps1": f'$AacRef = "v{version}"',
