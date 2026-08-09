@@ -38,9 +38,9 @@
   "orchestration": {
     "max_skill_depth": 5,
     "deadlock_retries": 3,
-    "parallel_skills": ["quality-assurance"],
+    "parallel_skills": ["code-quality", "security", "verification"],
     "multi_agent": {
-      "subagent_roles": ["research", "self"],
+      "subagent_roles": ["planner", "implementer", "reviewer", "security-reviewer"],
       "auto_delegate_research_threshold_files": 3,
       "mandatory_swarm_triggers": {
         "multi_domain_enabled": true,

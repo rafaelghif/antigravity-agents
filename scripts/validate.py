@@ -35,10 +35,10 @@ REQUIRED_PATHS = (
     ".agents/agents/implementer.md",
     ".agents/agents/reviewer.md",
     ".agents/agents/security-reviewer.md",
-    ".agents/skills/code-quality.md",
-    ".agents/skills/verification.md",
-    ".agents/skills/security.md",
-    ".agents/skills/architecture.md",
+    ".agents/skills/code-quality/SKILL.md",
+    ".agents/skills/verification/SKILL.md",
+    ".agents/skills/security/SKILL.md",
+    ".agents/skills/architecture/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
 )
@@ -81,8 +81,8 @@ def validate_mcp() -> None:
             fail(f"MCP server {name} uses mutable :latest image")
 
 
-def validate_markdown_metadata(directory: str, expected_count: int, required_fields: tuple[str, ...]) -> None:
-    files = sorted((ROOT / directory).glob("*.md"))
+def validate_markdown_metadata(directory: str, expected_count: int, required_fields: tuple[str, ...], pattern: str = "*.md") -> None:
+    files = sorted((ROOT / directory).glob(pattern))
     if len(files) != expected_count:
         fail(f"expected {expected_count} files in {directory}, found {len(files)}")
     for path in files:
@@ -208,7 +208,7 @@ def main() -> int:
         load_json(".agents/brain/env-required.json")
         load_json(".agents/antigravity-compatibility.json")
         validate_mcp()
-        validate_markdown_metadata(".agents/skills", 4, ("name", "description"))
+        validate_markdown_metadata(".agents/skills", 4, ("name", "description"), "*/SKILL.md")
         validate_markdown_metadata(".agents/agents", 4, ("name", "description", "mode"))
         validate_instruction_budget()
         validate_settings()
