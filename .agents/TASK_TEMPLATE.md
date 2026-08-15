@@ -1,26 +1,22 @@
-# AAC v4.4.4 Task Template
+# AAC v4.4.5 Task Template Contracts
 
-Use this only for multi-file, architectural, security, or ambiguous work. T1 changes need no plan ceremony.
+## Active Plan
 
-## Plan
+**Goal:** Provide the minimal context to satisfy the ticket.
+**Files:**
+- [ ] `path/to/file`
 
-```markdown
-# Plan: <title>
+**Steps:**
+1. [ ] Do X to Y
+2. [ ] Verify Z
 
-## Decisions
-- Scope, constraints, source-of-truth files, and user decisions.
+**Constraints:**
+- Preserve behavior X.
+- Ensure Y matches the contract.
 
-## Tasks
-- [ ] Explore: inspect relevant symbols, contracts, tests, and stack.
-- [ ] Plan: list the smallest implementation and verification steps.
-- [ ] Execute: edit only the planned files.
-- [ ] Verify: run `python3 scripts/verify.py` or the detected project checks.
-- [ ] Review: inspect diff, security/error paths, and residual risks.
-```
+**Risks:**
+- Potential breaking change in Z.
 
-## Recovery
-
-- Keep one active plan in `.agents/plans/`.
-- Archive/delete a plan after delivery is complete; never resume `status: COMPLETE`.
-- Back up the plan before changing its checklist.
-- Do not claim completion without physical verification output.
+**Verification:**
+- `make test-unit`
+- `curl http://localhost/health`

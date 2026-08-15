@@ -1,6 +1,6 @@
 ---
 name: verification
-description: Use this skill immediately after modifying code to execute rigorous test-driven validation.
+description: Use this skill when the user asks to run tests, or immediately after modifying code to execute rigorous test-driven validation.
 ---
 
 <CRITICAL_DIRECTIVE>

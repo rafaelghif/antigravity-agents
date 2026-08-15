@@ -18,8 +18,11 @@ def command(*parts: str) -> str:
 def detect() -> list[tuple[str, str, str]]:
     checks: list[tuple[str, str, str]] = []
     if (ROOT / "package.json").is_file():
-        data = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        scripts = data.get("scripts", {})
+        try:
+            data = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+            scripts = data.get("scripts") or {}
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            scripts = {}
         manager = "npm"
         if (ROOT / "pnpm-lock.yaml").is_file():
             manager = "pnpm"

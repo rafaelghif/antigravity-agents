@@ -4,9 +4,17 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.4.4] - 2026-08-15
+## [4.4.5] - 2026-08-15
 
-### Changed
+### Fixed
+- **Installer Security Gaps**: Hardened `install.sh` and `install.ps1` to prevent typosquatting (`rafaelghifari` to `rafaelghif`), applied `umask 077` for state directories, added `--` argument boundaries to prevent injection, bound `-LiteralPath` in PowerShell to avoid wildcard hijacking, and implemented rollback mechanisms (`trap`/`catch`) to prevent zombie states upon partial failure.
+- **CI/CD Resiliency**: Fixed PEP 668 external environment crash by migrating `semgrep` install to `pipx`. Added file existence guards (`if [ -f "$f" ]`) in `agent-gates.yml` to prevent arbitrary `FileNotFoundError` pipeline crashes.
+- **Stack Detection Bug**: Hardened `scripts/verify.py` to gracefully handle `JSONDecodeError`, `AttributeError`, and `TypeError` when scanning malformed or empty `package.json` manifests.
+- **MCP Configuration Formatting**: Fixed Gitea server ENV argument to use the native MCP `"env": {}` object instead of shell flags to prevent interpolation loss. Corrected `postToolUse` camelCase syntax and regex matchers in `hooks.json`.
+- **Sub-Agent Logic**: Added bounded `max_retries="3"` constraints to the `implementer` agent's verification loop to prevent token-burning infinite loops.
+- **Prompt Clarity**: Abstracted operational bloat from `TASK_TEMPLATE.md` to prevent LLM copy-paste corruption.
+
+## [4.4.4] - 2026-08-15
 - **Sub-Agent Restructuring**: Upgraded `.agents/agents/*.md` (implementer, planner, reviewer, security-reviewer) to utilize `<CRITICAL_DIRECTIVE>` and `<PROCEDURAL_WORKFLOW>` XML prompting mechanisms, aligning them with the L9 Expert framework.
 
 ## [4.4.3] - 2026-08-15

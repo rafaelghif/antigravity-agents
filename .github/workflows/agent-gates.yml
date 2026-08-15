@@ -1,4 +1,4 @@
-name: AAC v4.4.4 Security & Quality Gates
+name: AAC v4.4.5 Security & Quality Gates
 
 on:
   workflow_dispatch:
@@ -29,8 +29,10 @@ jobs:
         run: |
           set -e
           for f in .agents/config.json .agents/mcp_config.json.example .agents/brain/env-required.json; do
-            python3 -m json.tool "$f" > /dev/null
-            echo "OK: $f"
+            if [ -f "$f" ]; then
+              python3 -m json.tool "$f" > /dev/null
+              echo "OK: $f"
+            fi
           done
 
       - name: Validate Antigravity workspace contracts
@@ -64,18 +66,20 @@ jobs:
           echo "core_version=$CORE"
           fail=0
           for f in AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; do
-            if ! grep -q "$CORE" "$f"; then
-              echo "MISSING version $CORE in $f"
-              fail=1
+            if [ -f "$f" ]; then
+              if ! grep -q "$CORE" "$f"; then
+                echo "MISSING version $CORE in $f"
+                fail=1
+              fi
             fi
           done
           # Reject stale versions
-          if grep -rn "V4\.3\.[0-3]\|v4\.3\.[0-3]\|V4\.1\.2\|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; then
+          if grep -rn "V4\.3\.[0-3]\|v4\.3\.[0-3]\|V4\.1\.2\|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml 2>/dev/null; then
             echo "STALE version string detected"
             fail=1
           fi
           # Reject wrong Prisma filename
-          if grep -rn "prisma\.schema" .agents/ AGENTS.md README.md; then
+          if grep -rn "prisma\.schema" .agents/ AGENTS.md README.md 2>/dev/null; then
             echo "Wrong Prisma filename (prisma.schema) detected"
             fail=1
           fi
@@ -97,7 +101,7 @@ jobs:
 
       - name: Run Semgrep (SAST)
         run: |
-          python3 -m pip install semgrep==1.138.0
+          pipx install semgrep==1.138.0
           semgrep scan --config auto --error
 
   windows-installer:

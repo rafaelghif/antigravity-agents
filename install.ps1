@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/v4.4.4/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.5/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.4.4"
+$AacRef = "v4.4.5"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -13,17 +13,17 @@ if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw "Required c
 
 function Copy-ManagedFile($Source, $RelativeDestination) {
     $Destination = Join-Path $TargetDir $RelativeDestination
-    if (Test-Path $Destination) {
+    if (Test-Path -LiteralPath $Destination) {
         $BackupDestination = Join-Path $BackupDir $RelativeDestination
         New-Item -ItemType Directory -Force -Path (Split-Path $BackupDestination) | Out-Null
-        Copy-Item $Destination $BackupDestination -Recurse -Force
+        Copy-Item -LiteralPath $Destination -Destination $BackupDestination -Recurse -Force
     }
     New-Item -ItemType Directory -Force -Path (Split-Path $Destination) | Out-Null
-    if (Test-Path $Source -PathType Container) {
+    if (Test-Path -LiteralPath $Source -PathType Container) {
         New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-        Copy-Item (Join-Path $Source '*') $Destination -Recurse -Force
+        Get-ChildItem -LiteralPath $Source | Copy-Item -Destination $Destination -Recurse -Force
     } else {
-        Copy-Item $Source $Destination -Force
+        Copy-Item -LiteralPath $Source -Destination $Destination -Force
     }
 }
 
@@ -36,8 +36,8 @@ try {
 
     Copy-ManagedFile "$TmpDir/AGENTS.md" "AGENTS.md"
     Copy-ManagedFile "$TmpDir/GEMINI.md" "GEMINI.md"
-    if (-not (Test-Path "$TargetDir/.env.example")) {
-        Copy-Item "$TmpDir/.env.example" "$TargetDir/.env.example"
+    if (-not (Test-Path -LiteralPath "$TargetDir/.env.example")) {
+        Copy-Item -LiteralPath "$TmpDir/.env.example" -Destination "$TargetDir/.env.example"
     }
     Copy-ManagedFile "$TmpDir/.agents/config.json" ".agents/config.json"
     Copy-ManagedFile "$TmpDir/.agents/TASK_TEMPLATE.md" ".agents/TASK_TEMPLATE.md"
@@ -53,6 +53,10 @@ try {
     Write-Host "AAC $AacRef installed into $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }
+catch {
+    if (Test-Path -LiteralPath $BackupDir) { Get-ChildItem -LiteralPath $BackupDir | Copy-Item -Destination $TargetDir -Recurse -Force }
+    throw
+}
 finally {
-    if (Test-Path $TmpDir) { Remove-Item $TmpDir -Recurse -Force }
+    if (Test-Path -LiteralPath $TmpDir) { Remove-Item -LiteralPath $TmpDir -Recurse -Force }
 }
