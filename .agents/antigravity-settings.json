@@ -1,0 +1,29 @@
+{
+  "toolPermission": "proceed-in-sandbox",
+  "enableTerminalSandbox": true,
+  "allowNonWorkspaceAccess": false,
+  "artifactReviewPolicy": "asks-for-review",
+  "permissions": {
+    "allow": [
+      "command(git)",
+      "command(python3 scripts/validate.py)",
+      "write_file(.agents/)"
+    ],
+    "deny": [
+      "command(rm -rf)",
+      "command(sudo)",
+      "command(curl .*)",
+      "write_file(.git/)",
+      "write_file(~/.ssh/)",
+      "read_file(~/.ssh/)",
+      "write_file(/home/*/.ssh/)",
+      "read_file(/home/*/.ssh/)"
+    ],
+    "ask": [
+      "command(*)",
+      "mcp(*)",
+      "read_url(*)",
+      "execute_url(*)"
+    ]
+  }
+}
