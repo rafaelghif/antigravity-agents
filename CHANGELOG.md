@@ -4,6 +4,16 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.11] - 2026-08-15
+
+### Added
+- **Developer Experience**: Added GitHub Issue templates and Pull Request templates to standardise human and AI contributions.
+- **Resilience**: Added Python unit tests (`tests/test_verify.py` and `tests/test_validate.py`) and integrated them directly into `.github/workflows/agent-gates.yml` via `pytest` to prevent systemic regressions.
+
+### Fixed
+- **Edge Case Elimination**: Hardened `scripts/validate.py` and `scripts/verify.py` to prevent crashes when JSON config blocks are absent or when files cannot be loaded (`KeyError`, `FileNotFoundError`, `OSError`).
+- **Contract Strictness**: Fixed an invalid auto-verify wrapper in `hooks.json` and anchored its regex execution string.
+
 ## [4.4.9] - 2026-08-15
 
 ### Changed
