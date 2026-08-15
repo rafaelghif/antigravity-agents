@@ -1,77 +1,68 @@
-# Antigravity Agent Core v4.4.6
+<div align="center">
+  <h1>🚀 Antigravity Agent Core (AAC)</h1>
+  <p><strong>A deterministic, always-on workspace policy for reliable AI coding.</strong></p>
 
-Compact always-on policy, discoverable Antigravity custom agents, focused skills, and stack-aware verification for reliable AI coding.
+  [![Version](https://img.shields.io/badge/version-4.4.7-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.7)
+  [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
+</div>
 
-[![Version](https://img.shields.io/badge/version-4.4.6-blue.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.6)
-[![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg)](https://antigravity.google/docs/cli/overview)
+---
 
-## Architecture
+**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development environment. It introduces a strict, zero-hallucination execution policy, highly specialized sub-agents, and self-healing verification loops to ensure your AI assistant writes maintainable, secure, and production-ready code.
 
-- `AGENTS.md`: always-on policy, under 600 words.
-- `GEMINI.md`: tiny compatibility bootstrap that points to `AGENTS.md`.
-- `.agents/agents/`: planner, implementer, reviewer, and security-reviewer.
-- `.agents/skills/`: code-quality, verification, security, and architecture.
-- `scripts/verify.py`: detects the project stack and available checks.
-- `scripts/validate.py`: validates AAC contracts and instruction budgets.
-- `.agents/mcp_config.json`: Antigravity workspace MCP configuration.
-- `.agents/antigravity-settings.example.json`: sandbox and permission baseline.
+## ✨ Key Capabilities
 
-## Workflow
+- **🧠 Specialized Sub-Agents**: Delegate complex tasks to expert personas including a *Planner*, *Implementer*, *Reviewer*, and *Security Auditor*.
+- **🛡️ Stack-Aware Verification**: Automatically detects your project's stack (npm, pnpm, python, etc.) and enforces rigorous pre-commit test healing.
+- **⚡ Deterministic Constraints**: The `AGENTS.md` policy strictly limits the AI's blast radius, ensuring it focuses purely on the requested scope without unsolicited refactoring.
+- **🔒 Security-First**: Out-of-the-box skills that enforce strict secret-scanning, boundary audits, and safe installer executions.
 
-Follow official Antigravity best practice:
+## 🚀 Quick Start
 
-1. Explore relevant files, symbols, contracts, tests, and stack.
-2. Use `/planning` or `--mode plan` for multi-file, architectural, security, or ambiguous work.
-3. Execute the smallest correct change in the sandbox.
-4. Run `python3 scripts/verify.py`, then every available project check it reports.
-5. Review the artifact/diff, error paths, security boundaries, and residual risks.
+Run the reproducible installer to bootstrap your current repository. The installer will safely copy managed files, validate schema integrity, and automatically back up existing states.
 
-Use `/agents` for custom agents, `/skills` for loaded skills, `/mcp` for MCP, `/config` and `/permissions` for safety, `/artifact` or `/diff` for review, `/tasks` for background commands, and `/rewind` for course correction. For automation use `agy -p ... --output-format json`.
-
-Workspace skills become custom slash commands automatically. They are not a substitute for `AGENTS.md`.
-
-## Installation
-
-Linux/macOS/WSL:
-
+### Linux / macOS / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.6/install.sh | bash
-
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.7/install.sh | bash
 ```
 
-Windows PowerShell:
-
+### Windows PowerShell
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.6/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.7/install.ps1 | iex
 ```
 
-Installers validate before mutation, back up managed files, preserve local state, and run structural validation. Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` and adapt permissions to your environment. Note: The `.agents/config.json` file is a custom configuration exclusively read by the `scripts/validate.py` and `scripts/verify.py` scripts, and is not a native Antigravity CLI configuration file.
+> **Note**: Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` to adapt global CLI permissions to your environment.
 
-## Layout
+## 🏗️ Core Architecture
 
-```text
-AGENTS.md
-CHANGELOG.md
-install.sh / install.ps1
-scripts/
-  validate.py
-  verify.py
-.agents/
-  agents/ planner.md implementer.md reviewer.md security-reviewer.md
-  skills/ code-quality.md verification.md security.md architecture.md
-  brain/ plans/ common/
-  mcp_config.json.example
-  antigravity-settings.example.json
-  antigravity-compatibility.json
-```
+AAC is built on the official Antigravity customization principles, maintaining a minimal footprint:
 
-`opencode.json` is ignored and optional OpenCode-only configuration. Antigravity CLI uses the `.agents/` workspace surface.
+- 📜 `AGENTS.md` — The ultimate source of truth (always-on policy, <600 words).
+- 🧩 `.agents/agents/` — L9-level expert sub-agents ready to be invoked.
+- 🛠️ `.agents/skills/` — On-demand capabilities (`architecture`, `code-quality`, `security`, `verification`).
+- ⚙️ `.agents/mcp_config.json` — Pre-configured Model Context Protocol (MCP) integrations.
+- 🔬 `scripts/verify.py` — Dynamic project stack analyzer and verification runner.
 
-## References
+## 🔄 The Delivery Protocol
 
+AAC enforces a strict, logical pipeline for every AI interaction. This is not a suggestion—it's the built-in protocol:
+
+1. **Explore**: Comprehensively read dependencies and contracts.
+2. **Plan**: Draft a roadmap for multi-file or architectural changes.
+3. **Execute**: Implement the exact minimal delta (no speculative changes).
+4. **Verify**: Trigger `verify.py` to test and auto-heal any broken code.
+5. **Review**: Final human/agent audit of the diff and security boundaries.
+
+## 📚 References & Documentation
+
+Explore the official Antigravity documentation to understand the mechanics powering AAC:
 - [Best Practices](https://antigravity.google/docs/cli/best-practices)
 - [Plugins and Skills](https://antigravity.google/docs/cli/plugins)
 - [Subagents](https://antigravity.google/docs/cli/subagents)
-- [MCP](https://antigravity.google/docs/cli/mcp)
+- [Model Context Protocol (MCP)](https://antigravity.google/docs/cli/mcp)
 - [Permissions and Sandbox](https://antigravity.google/docs/cli/permissions)
-- [Headless Mode](https://antigravity.google/docs/cli/headless)
+
+---
+<div align="center">
+  <sub>Built with precision for Gemini and Antigravity CLI.</sub>
+</div>

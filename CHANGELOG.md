@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.7] - 2026-08-15
+
+### Changed
+- **Branding & Presentation**: Completely overhauled `README.md` to feature a modern, eye-catching, and highly readable layout using flat-square badges, center-aligned headers, structured emoji grids, and concise marketing copy. Replaced dense, hard-to-read text blocks with clear architectural bullet points and logical workflow steps without exaggerating capabilities.
+
 ## [4.4.6] - 2026-08-15
 
 ### Changed
