@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.0/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.1/install.sh | bash
 
 set -Eeuo pipefail
 
-readonly AAC_REF="v4.4.0"
+readonly AAC_REF="v4.4.1"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -45,9 +45,9 @@ require_command cp
 require_command mktemp
 require_command python3
 
-mkdir -p "$TARGET_DIR/.agents" "$TARGET_DIR/.agents/brain" "$TARGET_DIR/.agents/common" \
+mkdir -p "$TARGET_DIR/.agents" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \
-  "$TARGET_DIR/.agents/scratch" "$TARGET_DIR/.agents/skills" "$TARGET_DIR/.agents/agents" "$TARGET_DIR/scripts"
+  "$TARGET_DIR/.agents/scratch" "$TARGET_DIR/scripts"
 
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
 
