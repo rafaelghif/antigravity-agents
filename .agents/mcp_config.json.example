@@ -12,12 +12,12 @@
         "run",
         "-i",
         "--rm",
-        "-e",
-        "GITEA_HOST=${GITEA_HOST}",
-        "-e",
-        "GITEA_ACCESS_TOKEN=${GITEA_TOKEN}",
         "gitea/gitea-mcp:v0.1.0"
-      ]
+      ],
+      "env": {
+        "GITEA_HOST": "${GITEA_HOST}",
+        "GITEA_ACCESS_TOKEN": "${GITEA_TOKEN}"
+      }
     }
   }
 }

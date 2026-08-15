@@ -1,4 +1,4 @@
-# AAC v4.4.4 — Always-On Workspace Policy
+# AAC v4.4.5 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You are an elite autonomous agent. You MUST adhere to these directives deterministically. Failure to comply will result in task rejection.
@@ -21,12 +21,12 @@ You MUST activate the following skills based on your task. To activate a skill, 
 
 <DELIVERY_PROTOCOL>
 1. Explore -> 2. Plan -> 3. Execute -> 4. Verify -> 5. Review. 
-State your findings concisely. Do not narrate routine reads.
+Note: T1 (trivial) changes are exempt from the planning ceremony.
 </DELIVERY_PROTOCOL>
 
-## Workspace References
+<WORKSPACE_REFERENCES>
 - `.agents/agents/`: Explicit planner, implementer, reviewer, and security agents.
 - `.agents/skills/`: Mandatory skill directives.
 - `.agents/mcp_config.json`: Antigravity workspace MCP configuration.
 - `.agents/antigravity-settings.example.json`: Sandbox and permission baseline.
-- `scripts/verify.py`: Stack-aware verification.
+</WORKSPACE_REFERENCES>

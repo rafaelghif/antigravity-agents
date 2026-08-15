@@ -1,12 +1,12 @@
 {
   "auto-verify": {
-    "PostToolUse": [
+    "postToolUse": [
       {
-        "matcher": "write_to_file\\|replace_file_content\\|multi_replace_file_content",
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 scripts/verify.py > /dev/null 2>&1; echo '{}'"
+            "command": "bash -c \"python3 scripts/verify.py > /dev/null 2>&1; echo '{}'\""
           }
         ]
       }
