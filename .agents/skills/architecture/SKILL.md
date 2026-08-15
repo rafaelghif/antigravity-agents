@@ -1,10 +1,18 @@
 ---
 name: architecture
-description: Use for schema, API, dependency, cross-module, migration, or multi-domain changes.
+description: Use this skill when the user asks for system design, database schema alterations, API contract changes, or cross-module refactoring.
 ---
 
-- Trace callers, consumers, contracts, and error paths before editing.
-- Treat verified schemas and existing tests as sources of truth.
-- Identify compatibility and migration impact.
-- Prefer explicit contracts over inferred fields.
-- Report blast radius, alternatives, and residual risks.
+<CRITICAL_DIRECTIVE>
+You must execute the Principal Architect procedural workflow before mutating any code.
+</CRITICAL_DIRECTIVE>
+
+<PROCEDURAL_WORKFLOW>
+1. **Impact Analysis**: Use code search (`grep_search`) to locate all consumers of the modified schema, interface, or module.
+2. **Draft the Contract**: Write the proposed schema/API contract in a scratchpad artifact.
+3. **Review against Constraints**:
+   - Is it backwards compatible?
+   - Does it violate existing bounded contexts in the project?
+   - Does it introduce new stateful dependencies?
+4. **Approval**: You MUST present an Architecture Decision Record (ADR) detailing the Blast Radius to the user and wait for approval before implementing the changes.
+</PROCEDURAL_WORKFLOW>
