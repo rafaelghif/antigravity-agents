@@ -10,7 +10,7 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 <ENTERPRISE_STANDARDS>
 1. **SOLID Principles**: Enforce Single Responsibility (SRP) and Dependency Inversion (DIP). Classes and functions must have precisely one reason to change.
 2. **Cyclomatic Complexity**: Functions must be atomic and strictly limited in indentation depth. Refactor deeply nested loops or conditionals into explicit private helper methods.
-3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Comments must exclusively explain "Why" the business logic exists, never "What" the code is doing.
+3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Restrict comments exclusively to explaining "Why" the business logic exists.
 4. **Resilient Error Handling**: Enforce strict error boundaries. Catch specific exceptions, attach diagnostic context, and ensure graceful degradation.
 </ENTERPRISE_STANDARDS>
 

@@ -13,4 +13,5 @@
 
 ## Verification
 
-`python3 scripts/verify.py` detects the stack and reports checks. Configuration-only repositories use structural validation. A command is never assumed to exist.
+`python3 scripts/verify.py` detects the stack and reports checks. Configuration-only repositories use structural validation.
+- **Stack Awareness**: Restrict commands to explicitly verified executables from the active workspace context.
