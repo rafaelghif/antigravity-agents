@@ -4,6 +4,15 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.2] - 2026-08-15
+
+### Added
+- **Auto-verification Hook**: Added `hooks.json` to automatically trigger `scripts/verify.py` after code modification tools (`write_to_file`, `replace_file_content`, `multi_replace_file_content`) are used.
+- **MCP Setup Skill**: Added `mcp-setup` skill to easily initialize Copilot and other external MCP tools from the example config.
+
+### Changed
+- Clarified that `.agents/config.json` is a custom internal schema for scripts, not an official Antigravity manifest.
+
 ## [4.4.1] - 2026-08-15
 
 ### Fixed
