@@ -1,8 +1,8 @@
-# Antigravity Agent Core v4.4.5
+# Antigravity Agent Core v4.4.6
 
 Compact always-on policy, discoverable Antigravity custom agents, focused skills, and stack-aware verification for reliable AI coding.
 
-[![Version](https://img.shields.io/badge/version-4.4.5-blue.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.5)
+[![Version](https://img.shields.io/badge/version-4.4.6-blue.svg)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.6)
 [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg)](https://antigravity.google/docs/cli/overview)
 
 ## Architecture
@@ -35,14 +35,14 @@ Workspace skills become custom slash commands automatically. They are not a subs
 Linux/macOS/WSL:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.5/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.6/install.sh | bash
 
 ```
 
 Windows PowerShell:
 
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.5/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.6/install.ps1 | iex
 ```
 
 Installers validate before mutation, back up managed files, preserve local state, and run structural validation. Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` and adapt permissions to your environment. Note: The `.agents/config.json` file is a custom configuration exclusively read by the `scripts/validate.py` and `scripts/verify.py` scripts, and is not a native Antigravity CLI configuration file.

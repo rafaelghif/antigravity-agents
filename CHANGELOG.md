@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.6] - 2026-08-15
+
+### Changed
+- **Gemini Context Optimization**: Conducted a final round of LLM Prompt Engineering across all `AGENTS.md`, custom agents (`.agents/agents/*.md`), and skills (`.agents/skills/*.md`). Replaced all negative constraints (e.g., "Do not edit", "NEVER guess") with strict explicit positive boundary constraints (e.g., "Restrict your actions exclusively to...", "Constrain your edits to...") to ensure optimal zero-shot parsing by Gemini 1.5 Pro and other high-reasoning LLMs.
+
 ## [4.4.5] - 2026-08-15
 
 ### Fixed
