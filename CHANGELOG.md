@@ -4,9 +4,13 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.4.2] - 2026-08-15
+## [4.4.3] - 2026-08-15
 
-### Added
+### Changed
+- **Skill Restructuring**: Completely overhauled `.agents/skills/*.md` to align with official Antigravity best practices (removed generic computer science theory, added strict Procedural Workflows and Autonomous CI/CD loops).
+- **Mandatory Triggers**: Updated `AGENTS.md` with `<MANDATORY_SKILL_TRIGGERS>` and `<CRITICAL_SYSTEM_DIRECTIVES>` XML blocks to enforce deterministic skill activation.
+
+## [4.4.2] - 2026-08-15
 - **Auto-verification Hook**: Added `hooks.json` to automatically trigger `scripts/verify.py` after code modification tools (`write_to_file`, `replace_file_content`, `multi_replace_file_content`) are used.
 - **MCP Setup Skill**: Added `mcp-setup` skill to easily initialize Copilot and other external MCP tools from the example config.
 
