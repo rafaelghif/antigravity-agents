@@ -4,8 +4,15 @@ description: Use this skill when the user asks to write, refactor, or review app
 ---
 
 <CRITICAL_DIRECTIVE>
-Enforce Staff-level procedural rigor during implementation.
+Enforce Staff-level procedural rigor and Enterprise-Grade software architecture during implementation.
 </CRITICAL_DIRECTIVE>
+
+<ENTERPRISE_STANDARDS>
+1. **SOLID Principles**: Enforce Single Responsibility (SRP) and Dependency Inversion (DIP). Classes and functions must have precisely one reason to change.
+2. **Cyclomatic Complexity**: Functions must be atomic and strictly limited in indentation depth. Refactor deeply nested loops or conditionals into explicit private helper methods.
+3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Comments must exclusively explain "Why" the business logic exists, never "What" the code is doing.
+4. **Resilient Error Handling**: Enforce strict error boundaries. Catch specific exceptions, attach diagnostic context, and ensure graceful degradation.
+</ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
 1. **Context Acquisition**: You must fully read and understand a file's content and imports prior to executing any modifications.

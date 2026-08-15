@@ -4,8 +4,15 @@ description: Use this skill when the user asks for system design, database schem
 ---
 
 <CRITICAL_DIRECTIVE>
-You must execute the Principal Architect procedural workflow before mutating any code.
+You must execute the Principal Architect procedural workflow and enforce Enterprise Scale before mutating any code.
 </CRITICAL_DIRECTIVE>
+
+<ENTERPRISE_STANDARDS>
+1. **Scalability (Big-O)**: Rigorously analyze the time and space complexity of loops, database queries, and caching strategies. Ensure operations scale linearly or logarithmically.
+2. **Statelessness**: Enforce stateless service layers. Application servers must be capable of horizontal scaling behind a load balancer without localized state corruption.
+3. **Database Performance**: Mandate index utilization for frequent queries. Actively prevent and eliminate N+1 query patterns in ORMs.
+4. **Separation of Concerns**: Enforce strict module isolation (e.g., separating routing controllers, business domain logic, and data access layers).
+</ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
 1. **Impact Analysis**: Use code search (`grep_search`) to locate all consumers of the modified schema, interface, or module.

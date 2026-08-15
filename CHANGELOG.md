@@ -4,6 +4,12 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.8] - 2026-08-15
+
+### Added
+- **Enterprise-Grade Code Quality Boundaries**: Upgraded the `code-quality` skill to strictly enforce SOLID principles, Cyclomatic Complexity limits, Descriptive Self-Documenting code, and Resilient Error Handling (graceful degradation).
+- **Enterprise-Grade Architecture Standards**: Upgraded the `architecture` skill to mandate Scalability (Big-O analysis), Stateless service layers, optimized Database Performance (Index utilization, N+1 query prevention), and absolute Separation of Concerns.
+
 ## [4.4.7] - 2026-08-15
 
 ### Changed
