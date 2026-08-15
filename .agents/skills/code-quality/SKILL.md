@@ -8,7 +8,7 @@ Enforce Staff-level procedural rigor during implementation.
 </CRITICAL_DIRECTIVE>
 
 <PROCEDURAL_WORKFLOW>
-1. **Context Acquisition**: Never modify a file without first reading its entire content and understanding its imports.
+1. **Context Acquisition**: You must fully read and understand a file's content and imports prior to executing any modifications.
 2. **Minimal Delta Enforcement**: Only apply the exact changes requested. Strip out speculative or unrelated refactorings from your plan.
 3. **Test Gap Analysis**: Check the adjacent test file. If the modified behavior is uncovered, you MUST write the corresponding test case.
 4. **Local Verification**: Run the stack's linter and test runner (via `scripts/verify.py` or native commands).
