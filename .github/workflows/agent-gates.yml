@@ -35,11 +35,15 @@ jobs:
             fi
           done
 
-      - name: Validate Antigravity workspace contracts
-        run: python3 scripts/validate.py
-
       - name: Validate shell installer syntax
         run: bash -n install.sh
+
+      - name: Structural Validation
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          python3 scripts/validate.py
+          pytest tests/
 
       - name: Detect verification commands
         run: python3 scripts/verify.py
@@ -67,14 +71,14 @@ jobs:
           fail=0
           for f in AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; do
             if [ -f "$f" ]; then
-              if ! grep -q "$CORE" "$f"; then
+              if ! grep -qF "$CORE" "$f"; then
                 echo "MISSING version $CORE in $f"
                 fail=1
               fi
             fi
           done
           # Reject stale versions
-          if grep -rn "V4\.3\.[0-3]\|v4\.3\.[0-3]\|V4\.1\.2\|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml 2>/dev/null; then
+          if grep -En "V4\.3\.[0-3]|v4\.3\.[0-3]|V4\.1\.2|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml 2>/dev/null; then
             echo "STALE version string detected"
             fail=1
           fi
