@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/v4.4.0/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghifari/antigravity-agents/v4.4.1/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.4.0"
+$AacRef = "v4.4.1"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -28,7 +28,7 @@ function Copy-ManagedFile($Source, $RelativeDestination) {
 }
 
 try {
-    New-Item -ItemType Directory -Force -Path "$TargetDir/.agents/brain", "$TargetDir/.agents/common", "$TargetDir/.agents/incidents", "$TargetDir/.agents/locks", "$TargetDir/.agents/plans", "$TargetDir/.agents/scratch", "$TargetDir/.agents/skills", "$TargetDir/.agents/agents", "$TargetDir/scripts" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$TargetDir/.agents/incidents", "$TargetDir/.agents/locks", "$TargetDir/.agents/plans", "$TargetDir/.agents/scratch", "$TargetDir/scripts" | Out-Null
     git clone --depth 1 --branch $AacRef $Repository $TmpDir | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
     python "$TmpDir/scripts/validate.py"

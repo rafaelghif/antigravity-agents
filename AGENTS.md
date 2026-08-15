@@ -1,4 +1,4 @@
-# AAC v4.4.0 — Always-On Workspace Policy
+# AAC v4.4.1 — Always-On Workspace Policy
 
 This file is the compact workspace policy for Antigravity CLI. Follow it before editing. Detailed procedures are opt-in skills under `.agents/skills/` and custom agents under `.agents/agents/`.
 
