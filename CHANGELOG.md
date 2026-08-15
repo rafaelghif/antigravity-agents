@@ -4,6 +4,12 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.9] - 2026-08-15
+
+### Changed
+- **Realistic LLM Boundaries**: Audited and corrected instances of over-confident prompting across `.agents/brain/` (`rules.md`, `soul.md`) and `.agents/common/utils.md`. Replaced strict negative constraints ("Never claim...", "Never place...") with positive, realistic execution boundaries to match the stochastic nature of Large Language Models.
+- **Honest Documentation**: Revised `README.md` to remove mathematically impossible marketing claims ("zero-hallucination", "ensure") and replaced them with technically accurate descriptions ("hallucination-resistant", "strongly guide") emphasizing the AI's role as a co-pilot rather than an infallible entity.
+
 ## [4.4.8] - 2026-08-15
 
 ### Added

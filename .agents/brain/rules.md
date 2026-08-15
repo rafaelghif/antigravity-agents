@@ -1,6 +1,6 @@
 # AAC Engineering Invariants
 
-- Never place secrets in tracked files; use environment variables or Antigravity auth providers.
+- Restrict all secrets exclusively to environment variables or Antigravity auth providers.
 - Inspect full relevant symbols and contracts before editing.
 - Prefer the smallest correct change; preserve behavior and public contracts.
 - Detect the project stack before selecting verification commands.

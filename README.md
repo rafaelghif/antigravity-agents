@@ -2,13 +2,13 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>A deterministic, always-on workspace policy for reliable AI coding.</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.4.8-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.8)
+  [![Version](https://img.shields.io/badge/version-4.4.9-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.9)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
 </div>
 
 ---
 
-**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development environment. It introduces a strict, zero-hallucination execution policy, highly specialized sub-agents, and self-healing verification loops to ensure your AI assistant writes maintainable, secure, and production-ready code.
+**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development environment. It introduces a strict, hallucination-resistant execution policy, highly specialized sub-agents, and self-healing verification loops to strongly guide your AI assistant toward writing maintainable, secure, and production-ready code.
 
 ## ✨ Key Capabilities
 
@@ -23,12 +23,12 @@ Run the reproducible installer to bootstrap your current repository. The install
 
 ### Linux / macOS / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.8/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.9/install.sh | bash
 ```
 
 ### Windows PowerShell
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.8/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.9/install.ps1 | iex
 ```
 
 > **Note**: Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` to adapt global CLI permissions to your environment.
