@@ -1,2 +1,0 @@
-### Changed
-- **Gemini Context Optimization**: Conducted a final round of LLM Prompt Engineering across all `AGENTS.md`, custom agents (`.agents/agents/*.md`), and skills (`.agents/skills/*.md`). Replaced all negative constraints (e.g., "Do not edit", "NEVER guess") with strict explicit positive boundary constraints (e.g., "Restrict your actions exclusively to...", "Constrain your edits to...") to ensure optimal zero-shot parsing by Gemini 1.5 Pro and other high-reasoning LLMs.

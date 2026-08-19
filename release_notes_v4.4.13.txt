@@ -1,2 +1,0 @@
-### Changed
-- **Agent Behavior**: Updated `AGENTS.md` and `implementer.md` to mandate atomic commits using Git Conventional Commits after successful file modification and verification. This ensures state is cleanly checkpointed and makes rollbacks trivial.

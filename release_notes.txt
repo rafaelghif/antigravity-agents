@@ -1,7 +1,0 @@
-### Added
-- **Developer Experience**: Added GitHub Issue templates and Pull Request templates to standardise human and AI contributions.
-- **Resilience**: Added Python unit tests (`tests/test_verify.py` and `tests/test_validate.py`) and integrated them directly into `.github/workflows/agent-gates.yml` via `pytest` to prevent systemic regressions.
-
-### Fixed
-- **Edge Case Elimination**: Hardened `scripts/validate.py` and `scripts/verify.py` to prevent crashes when JSON config blocks are absent or when files cannot be loaded (`KeyError`, `FileNotFoundError`, `OSError`).
-- **Contract Strictness**: Fixed an invalid auto-verify wrapper in `hooks.json` and anchored its regex execution string.
