@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.27] - 2026-08-19
+
+### MCP Database Support
+- Added official MCP server template configurations in `.agents/mcp_config.json.example` for PostgreSQL, MySQL, and Microsoft SQL Server (MSSQL).
+- Supports fully customizable connection ports via environment variables (`DB_PORT_PG`, `DB_PORT_MYSQL`, `DB_PORT_MSSQL`).
+- Updated `.env.example` with the necessary payload variables.
+
 ## [4.4.26] - 2026-08-19
 
 ### Architecture (Bot Mode)

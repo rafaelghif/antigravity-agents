@@ -18,6 +18,30 @@
         "GITEA_HOST": "${GITEA_HOST}",
         "GITEA_ACCESS_TOKEN": "${GITEA_TOKEN}"
       }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
+      ]
+    },
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-server-mysql",
+        "mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
+      ]
+    },
+    "mssql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@microsoft/mcp-sql-server",
+        "Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;"
+      ]
     }
   }
 }
