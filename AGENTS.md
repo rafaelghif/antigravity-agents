@@ -1,4 +1,4 @@
-# AAC v4.4.25 — Always-On Workspace Policy
+# AAC v4.4.26 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You MUST adhere to these directives deterministically. Failure to comply results in task rejection.
@@ -39,7 +39,7 @@ CRITICAL: Your VERY FIRST action for any task MUST be to use `view_file` to read
 
 <DELIVERY_PROTOCOL>
 0. Load Memory (use `grep_search` on `.agents/brain/rules.md` for keywords).
-1. Load Skill -> 2. Explore -> 3. Delegate to Planner -> 4. Delegate to Implementer -> 5. Review. 
+1. Load Skill -> 2. Explore -> 3. Delegate to Planner -> 4. Delegate to Implementer <-> 5. Review (via Multi-Agent Inbox `scripts/inbox_manager.py`). 
 Note: T1 (trivial) changes are exempt from the planning ceremony and orchestration.
 </DELIVERY_PROTOCOL>
 
