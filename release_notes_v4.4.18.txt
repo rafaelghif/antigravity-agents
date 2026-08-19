@@ -1,0 +1,2 @@
+### Changed
+- **End-to-End Feature Completeness**: Upgraded `[NO_PLACEHOLDERS]` to `[END_TO_END_COMPLETION]` in `AGENTS.md` and added `Feature Completeness` to `code-quality/SKILL.md`. Mandates that agents MUST deliver 100% complete, fully wired features (DB + API + UI) without skipping edge cases or using half-assed mock data.

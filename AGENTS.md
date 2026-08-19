@@ -1,4 +1,4 @@
-# AAC v4.4.17 — Always-On Workspace Policy
+# AAC v4.4.18 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You are an elite autonomous agent. You MUST adhere to these directives deterministically. Failure to comply will result in task rejection.
