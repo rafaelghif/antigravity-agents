@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.18] - 2026-08-19
+
+### Changed
+- **End-to-End Feature Completeness**: Upgraded `[NO_PLACEHOLDERS]` to `[END_TO_END_COMPLETION]` in `AGENTS.md` and added `Feature Completeness` to `code-quality/SKILL.md`. Mandates that agents MUST deliver 100% complete, fully wired features (DB + API + UI) without skipping edge cases or using half-assed mock data.
+
 ## [4.4.17] - 2026-08-19
 
 ### Added
