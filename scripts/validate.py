@@ -23,11 +23,6 @@ REQUIRED_PATHS = (
     "GEMINI.md",
     ".agents/config.json",
     ".agents/TASK_TEMPLATE.md",
-    ".agents/brain/soul.md",
-    ".agents/brain/rules.md",
-    ".agents/brain/schema.md",
-    ".agents/brain/env-required.json",
-    ".agents/common/utils.md",
     ".agents/mcp_config.json.example",
     ".agents/antigravity-settings.example.json",
     ".agents/antigravity-compatibility.json",
@@ -43,6 +38,14 @@ REQUIRED_PATHS = (
     "scripts/verify.py",
 )
 
+OPTIONAL_PATHS = (
+    ".agents/brain/soul.md",
+    ".agents/brain/rules.md",
+    ".agents/brain/schema.md",
+    ".agents/brain/env-required.json",
+    ".agents/common/utils.md",
+)
+
 
 def fail(message: str) -> None:
     raise ValueError(message)
@@ -50,6 +53,8 @@ def fail(message: str) -> None:
 
 def load_json(relative_path: str) -> dict:
     path = ROOT / relative_path
+    if relative_path in OPTIONAL_PATHS and not path.exists():
+        return {}
     try:
         with path.open(encoding="utf-8") as handle:
             value = json.load(handle)

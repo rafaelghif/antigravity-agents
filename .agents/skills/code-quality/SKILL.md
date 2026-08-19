@@ -18,6 +18,6 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 1. **Context Acquisition**: You must fully read and understand a file's content and imports prior to executing any modifications.
 2. **Minimal Delta Enforcement**: Only apply the exact changes requested. Strip out speculative or unrelated refactorings from your plan.
 3. **Test Gap Analysis**: Check the adjacent test file. If the modified behavior is uncovered, you MUST write the corresponding test case.
-4. **Local Verification**: Run the stack's linter and test runner (via `scripts/verify.py` or native commands).
+4. **Local Verification**: Run the stack's linter and test runner (via `python3 scripts/verify.py --execute` or native commands).
 5. **Diff Review**: Inspect your own diff. Ensure no debugging statements or residual dead code remains.
 </PROCEDURAL_WORKFLOW>

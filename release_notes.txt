@@ -1,9 +1,7 @@
+### Added
+- **Developer Experience**: Added GitHub Issue templates and Pull Request templates to standardise human and AI contributions.
+- **Resilience**: Added Python unit tests (`tests/test_verify.py` and `tests/test_validate.py`) and integrated them directly into `.github/workflows/agent-gates.yml` via `pytest` to prevent systemic regressions.
 
 ### Fixed
-- **Installer Security Gaps**: Hardened `install.sh` and `install.ps1` to prevent typosquatting (`rafaelghifari` to `rafaelghif`), applied `umask 077` for state directories, added `--` argument boundaries to prevent injection, bound `-LiteralPath` in PowerShell to avoid wildcard hijacking, and implemented rollback mechanisms (`trap`/`catch`) to prevent zombie states upon partial failure.
-- **CI/CD Resiliency**: Fixed PEP 668 external environment crash by migrating `semgrep` install to `pipx`. Added file existence guards (`if [ -f "$f" ]`) in `agent-gates.yml` to prevent arbitrary `FileNotFoundError` pipeline crashes.
-- **Stack Detection Bug**: Hardened `scripts/verify.py` to gracefully handle `JSONDecodeError`, `AttributeError`, and `TypeError` when scanning malformed or empty `package.json` manifests.
-- **MCP Configuration Formatting**: Fixed Gitea server ENV argument to use the native MCP `"env": {}` object instead of shell flags to prevent interpolation loss. Corrected `postToolUse` camelCase syntax and regex matchers in `hooks.json`.
-- **Sub-Agent Logic**: Added bounded `max_retries="3"` constraints to the `implementer` agent's verification loop to prevent token-burning infinite loops.
-- **Prompt Clarity**: Abstracted operational bloat from `TASK_TEMPLATE.md` to prevent LLM copy-paste corruption.
-
+- **Edge Case Elimination**: Hardened `scripts/validate.py` and `scripts/verify.py` to prevent crashes when JSON config blocks are absent or when files cannot be loaded (`KeyError`, `FileNotFoundError`, `OSError`).
+- **Contract Strictness**: Fixed an invalid auto-verify wrapper in `hooks.json` and anchored its regex execution string.
