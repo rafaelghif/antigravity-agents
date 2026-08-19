@@ -1,37 +1,24 @@
 ---
-name: Design and Frontend Execution
-description: Guidelines for generating UI/UX components, CSS, Responsive states, and enforcing framework CLIs.
+name: design
+description: Use this skill when the user asks to modify or create UI components, apply CSS styling, manage frontend architectures, or debug visual issues.
 ---
 
-# Design & Frontend Rules
+<CRITICAL_DIRECTIVE>
+Enforce expert-level Frontend Architecture and strict design consistency during implementation.
+</CRITICAL_DIRECTIVE>
 
-You are acting as an Expert Frontend Architect. Whenever you interact with the frontend layer (React, Vue, Angular, HTML/CSS, Mobile), you MUST strictly adhere to the following rules:
+<ENTERPRISE_STANDARDS>
+1. **CLI-First**: DO NOT write boilerplate manually. You MUST use native framework CLIs (e.g., `nest g`, `ionic g page`, `npx shadcn-ui add`) for structural generation.
+2. **Framework Tooling**: Strictly use utility classes (e.g., Tailwind CSS) or standard module scoping. Ban custom global CSS overrides unless explicitly required.
+3. **Responsive Design**: Follow Mobile-First design strictly. Base styles apply to mobile; use `sm:`, `md:`, `lg:` exclusively for larger viewports.
+4. **State Management**: Every component MUST account for "Unhappy Paths": Loading states (Skeletons/Spinners), Empty states (visual fallbacks), and Error states (graceful degradation/toasts).
+5. **Accessibility (a11y)**: All interactive elements MUST be keyboard navigable. Mandate the use of semantic HTML, ARIA labels, and explicit form associations.
+</ENTERPRISE_STANDARDS>
 
-## 1. CLI-First (No Manual Boilerplates)
-- **Do NOT write empty files from scratch.** If the framework has a CLI, you must use it.
-- **Components/Services:** `ng g c name`, `ionic g page name`, `npx generate-react-cli component Name`.
-- **UI Libraries:** If using a UI library like Shadcn, DO NOT write the button manually. Run `npx shadcn-ui@latest add button`.
-
-## 2. Framework-Specific Tooling over Custom CSS
-- **Tailwind CSS:** Do NOT write custom CSS or inline styles if Tailwind classes exist. Use standard utility classes (`flex`, `items-center`, `justify-between`, etc.).
-- **CSS Modules:** If the project uses standard CSS, use BEM conventions. Avoid global CSS overrides unless explicitly requested.
-
-## 3. Responsive & Breakpoints
-- Follow Mobile-First design strictly.
-- Base styles apply to mobile. Use `sm:`, `md:`, `lg:` only for larger screens. 
-- Example: `flex-col md:flex-row`.
-
-## 4. UI/UX States (The "Unhappy Paths")
-Never build a component that only handles the "Happy Path". You must always implement:
-- **Loading State:** Skeletons or spinners when fetching data.
-- **Empty State:** A visually distinct fallback when arrays or lists return zero results.
-- **Error State:** Graceful degradation or error boundary toasts when requests fail.
-
-## 5. Accessibility (a11y)
-- All interactive elements MUST be keyboard navigable (`tabIndex={0}` or native `<button>`).
-- Forms must have `<label>` tags with `htmlFor`.
-- Icons and images must have `aria-label` or `alt` tags.
-
-## 6. Visual Debugging (If Available)
-- If tests are failing on the UI side, or if the user complains about visual alignment, DO NOT blindly guess the CSS fix.
-- Utilize visual testing commands (e.g., `npm run cy:run`, or running Playwright visual assertions) if they exist in the project to verify your CSS changes.
+<PROCEDURAL_WORKFLOW>
+1. **Design Context Acquisition**: Identify the project's styling framework before writing code to prevent framework collision.
+2. **Component Scaffold**: Run the corresponding framework CLI tool to scaffold the requested component.
+3. **Implementation**: Edit the scaffolded file and strictly apply the `ENTERPRISE_STANDARDS`.
+4. **Visual Testing**: If visual regression or integration testing tools exist, use them to verify your implementation.
+5. **Diff Review**: Inspect your diff to ensure no hardcoded colors, missing accessibility attributes, or forgotten empty/error states remain.
+</PROCEDURAL_WORKFLOW>
