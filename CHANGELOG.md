@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.28] - 2026-08-19
+
+### Bug Fixes
+- **MCP Configurations**: Fixed a critical bug where `${ENV_VAR}` string interpolation in `.agents/mcp_config.json.example` failed because standard MCP clients do not natively expand variables in JSON `args`. Wrapped the execution commands in `bash -c` to ensure shell-level environment substitution works correctly for database connection strings.
+
 ## [4.4.27] - 2026-08-19
 
 ### MCP Database Support

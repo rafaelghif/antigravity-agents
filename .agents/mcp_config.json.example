@@ -20,27 +20,24 @@
       }
     },
     "postgres": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
+        "-c",
+        "npx -y @modelcontextprotocol/server-postgres postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
       ]
     },
     "mysql": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "mcp-server-mysql",
-        "mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
+        "-c",
+        "npx -y mcp-server-mysql mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
       ]
     },
     "mssql": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "@microsoft/mcp-sql-server",
-        "Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;"
+        "-c",
+        "npx -y @microsoft/mcp-sql-server \"Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;\""
       ]
     }
   }
