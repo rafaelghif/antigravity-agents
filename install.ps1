@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.23/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.24/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.4.23"
+$AacRef = "v4.4.24"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -29,6 +29,18 @@ function Copy-ManagedFile($Source, $RelativeDestination) {
 
 try {
     New-Item -ItemType Directory -Force -Path "$TargetDir/.agents/incidents", "$TargetDir/.agents/locks", "$TargetDir/.agents/plans", "$TargetDir/.agents/scratch", "$TargetDir/scripts" | Out-Null
+    
+    if (Test-Path -LiteralPath "$TargetDir/.agents/config.json") {
+        Write-Host "=> Initiating AAC Upgrade to $AacRef..."
+    } else {
+        Write-Host "=> Initiating AAC Clean Install of $AacRef..."
+    }
+
+    $RulesBak = Join-Path $TmpDir "rules.md.bak"
+    if (Test-Path -LiteralPath "$TargetDir/.agents/brain/rules.md") {
+        Copy-Item -LiteralPath "$TargetDir/.agents/brain/rules.md" -Destination $RulesBak
+    }
+
     git clone --depth 1 --branch $AacRef $Repository $TmpDir | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
     python "$TmpDir/scripts/validate.py"
@@ -45,12 +57,17 @@ try {
     Copy-ManagedFile "$TmpDir/.agents/antigravity-compatibility.json" ".agents/antigravity-compatibility.json"
     Copy-ManagedFile "$TmpDir/.agents/mcp_config.json.example" ".agents/mcp_config.json.example"
     Copy-ManagedFile "$TmpDir/.agents/brain" ".agents/brain"
+
+    if (Test-Path -LiteralPath $RulesBak) {
+        Copy-Item -LiteralPath $RulesBak -Destination "$TargetDir/.agents/brain/rules.md" -Force
+    }
+
     Copy-ManagedFile "$TmpDir/.agents/common" ".agents/common"
     Copy-ManagedFile "$TmpDir/.agents/agents" ".agents/agents"
     Copy-ManagedFile "$TmpDir/.agents/skills" ".agents/skills"
     Copy-ManagedFile "$TmpDir/scripts/validate.py" "scripts/validate.py"
     Copy-ManagedFile "$TmpDir/scripts/verify.py" "scripts/verify.py"
-    Write-Host "AAC $AacRef installed into $TargetDir"
+    Write-Host "AAC $AacRef successfully configured in $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }
 catch {

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.23/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.24/install.sh | bash
 
 set -Eeuo pipefail
 umask 077
 
-readonly AAC_REF="v4.4.23"
+readonly AAC_REF="v4.4.24"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -56,6 +56,17 @@ mkdir -p -- "$TARGET_DIR/.agents" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \
   "$TARGET_DIR/.agents/scratch" "$TARGET_DIR/scripts"
 
+
+if [[ -f "$TARGET_DIR/.agents/config.json" ]]; then
+  printf "=> Initiating AAC Upgrade to %s...\n" "$AAC_REF"
+else
+  printf "=> Initiating AAC Clean Install of %s...\n" "$AAC_REF"
+fi
+
+if [[ -f "$TARGET_DIR/.agents/brain/rules.md" ]]; then
+  cp -- "$TARGET_DIR/.agents/brain/rules.md" "$TMP_DIR/rules.md.bak"
+fi
+
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
 
 python3 "$TMP_DIR/source/scripts/validate.py"
@@ -71,12 +82,17 @@ copy_managed "$TMP_DIR/source/.agents/antigravity-settings.example.json" .agents
 copy_managed "$TMP_DIR/source/.agents/antigravity-compatibility.json" .agents/antigravity-compatibility.json
 copy_managed "$TMP_DIR/source/.agents/mcp_config.json.example" .agents/mcp_config.json.example
 copy_managed "$TMP_DIR/source/.agents/brain" .agents/brain
+
+if [[ -f "$TMP_DIR/rules.md.bak" ]]; then
+  cp -- "$TMP_DIR/rules.md.bak" "$TARGET_DIR/.agents/brain/rules.md"
+fi
+
 copy_managed "$TMP_DIR/source/.agents/common" .agents/common
 copy_managed "$TMP_DIR/source/.agents/agents" .agents/agents
 copy_managed "$TMP_DIR/source/.agents/skills" .agents/skills
 copy_managed "$TMP_DIR/source/scripts/validate.py" scripts/validate.py
 copy_managed "$TMP_DIR/source/scripts/verify.py" scripts/verify.py
 
-printf 'AAC %s installed into %s\n' "$AAC_REF" "$TARGET_DIR"
+printf 'AAC %s successfully configured in %s\n' "$AAC_REF" "$TARGET_DIR"
 printf 'Backups, when needed, are stored in %s\n' "$BACKUP_DIR"
 printf 'Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile.\n'

@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.24] - 2026-08-19
+
+### Features
+- **Smart Upgrade Logic**: Installers (`install.sh`, `install.ps1`) now dynamically detect if they are performing a clean install or an upgrade.
+- **Procedural Memory Preservation**: During an upgrade, the installer will no longer blindly overwrite `.agents/brain/rules.md`, strictly preserving the user's localized self-learned rules while still backing up the entire agent core to `.agents-backups/`.
+
 ## [4.4.23] - 2026-08-19
 
 ### Chores
