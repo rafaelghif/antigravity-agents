@@ -1,9 +1,10 @@
-# AAC Engineering Invariants
+---
+name: rules
+description: Long-term memory for the agent. Contains learned architectural lessons and user corrections.
+---
 
-- Restrict all secrets exclusively to environment variables or Antigravity auth providers.
-- Inspect full relevant symbols and contracts before editing.
-- Prefer the smallest correct change; preserve behavior and public contracts.
-- Detect the project stack before selecting verification commands.
-- Run available formatters, linters, type checks, and tests; report unavailable checks.
-- Review the final diff and security/error paths before completion.
-- Use Conventional Commits for delivery and include the verified issue reference.
+# Learned Lessons
+
+This file acts as the agent's persistent memory. If the agent makes a mistake, the user corrects it, or a deeply nested framework bug is solved, the solution MUST be appended here to prevent future regressions.
+
+## Rules
