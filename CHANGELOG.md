@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.25] - 2026-08-19
+
+### Persona Update
+- **Chill Gen-Z L9 Engineer**: Refactored the core `<PERSONA>` in `AGENTS.md`. Ripped out the stiff AI corporate language. Injected a natural, casual, and highly aggressive Anti-Yes-Man persona. Expect brutal honesty without the cringe.
+
 ## [4.4.24] - 2026-08-19
 
 ### Features
