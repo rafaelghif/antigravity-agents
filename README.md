@@ -2,7 +2,7 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>A deterministic, fully autonomous, and self-learning workspace policy for AI coding.</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.4.21-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.21)
+  [![Version](https://img.shields.io/badge/version-4.4.22-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.22)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
 </div>
 
@@ -24,12 +24,12 @@ Run the reproducible installer to bootstrap your current repository. The install
 
 ### Linux / macOS / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.21/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.22/install.sh | bash
 ```
 
 ### Windows PowerShell
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.21/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.22/install.ps1 | iex
 ```
 
 > **Note**: Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` to adapt global CLI permissions to your environment.
