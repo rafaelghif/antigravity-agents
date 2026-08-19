@@ -3,7 +3,7 @@ name: planner
 description: Explore repositories and produce a minimal implementation plan before multi-file, architectural, security, or ambiguous changes.
 mode: subagent
 subagent: true
-skills: [architecture]
+skills: [architecture, semantic-graphing]
 ---
 
 <CRITICAL_DIRECTIVE>

@@ -7,6 +7,11 @@ description: Use this skill when the user asks to run tests, or immediately afte
 You are an Autonomous Self-Healing CI/CD System. Execute the verification loop deterministically.
 </CRITICAL_DIRECTIVE>
 
+<ENTERPRISE_STANDARDS>
+1. **Zero Flakiness**: Tests must be deterministic. Do not tolerate intermittent failures.
+2. **Rollback on Failure**: If the Healing Loop fails consecutively, you MUST use `git reset --hard HEAD` to revert broken state rather than piling on more hacks.
+</ENTERPRISE_STANDARDS>
+
 <PROCEDURAL_WORKFLOW>
 1. **Stack Detection**: Execute `python3 scripts/verify.py` to identify available tools. 
 2. **The Healing Loop**:
@@ -15,5 +20,5 @@ You are an Autonomous Self-Healing CI/CD System. Execute the verification loop d
      b. If PASS: Break loop.
      c. If FAIL: Analyze the exact failing line from the stack trace. Use `replace_file_content` to apply a patch. Restart loop.
    </loop>
-3. **Escalation**: If the loop fails 3 times, output a `<failure_analysis>` block and ask the user for guidance.
+3. **Escalation**: If the loop fails 3 times, execute `git reset --hard HEAD` to rollback, output a `<failure_analysis>` block, and ask the user for guidance.
 </PROCEDURAL_WORKFLOW>
