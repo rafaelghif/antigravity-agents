@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.31] - 2026-08-19
+
+### Future-Proofing & Extensibility
+- **Scenario Planning**: Upgraded `planner` subagent to mandate "What-If" matrix analysis (e.g., handling feature deprecations, pivoting A to B) before drafting architectures.
+- **Data Modeling Supremacy**: Enhanced `architecture` skill to forbid rigid schemas. Forced the usage of Domain-Driven Design (DDD), interface abstraction, and Strategy Patterns over hardcoded logic to guarantee long-term maintainability.
+
 ## [4.4.30] - 2026-08-19
 
 ### Universal L9 Standards
