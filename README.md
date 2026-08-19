@@ -1,21 +1,22 @@
 <div align="center">
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
-  <p><strong>A deterministic, always-on workspace policy for reliable AI coding.</strong></p>
+  <p><strong>A deterministic, fully autonomous, and self-learning workspace policy for AI coding.</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.4.15-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.15)
+  [![Version](https://img.shields.io/badge/version-4.4.16-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.16)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
 </div>
 
 ---
 
-**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development environment. It introduces a strict, hallucination-resistant execution policy, highly specialized sub-agents, and self-healing verification loops to strongly guide your AI assistant toward writing maintainable, secure, and production-ready code.
+**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development ecosystem. AAC operates on a strict, hallucination-resistant policy that enforces world-class software engineering practices. Unlike standard "chat-and-wait" assistants, AAC acts as a **Principal Architect**: capable of autonomous orchestration, automated git rollbacks, and persistent self-learning.
 
 ## ✨ Key Capabilities
 
-- **🧠 Specialized Sub-Agents**: Delegate complex tasks to expert personas including a *Planner*, *Implementer*, *Reviewer*, and *Security Auditor*.
-- **🛡️ Stack-Aware Verification**: Automatically detects your project's stack (npm, pnpm, python, etc.) and enforces rigorous pre-commit test healing.
-- **⚡ Deterministic Constraints**: The `AGENTS.md` policy strictly limits the AI's blast radius, ensuring it focuses purely on the requested scope without unsolicited refactoring.
-- **🔒 Security-First**: Out-of-the-box skills that enforce strict secret-scanning, boundary audits, and safe installer executions.
+- **🔄 Fully Autonomous Goal-Seeking**: Trigger the `/goal` command to let the agent orchestrate sub-agents (Planner → Implementer → Reviewer), self-heal tests, and iterate tirelessly until the final outcome meets Enterprise standards.
+- **🧠 Persistent Self-Learning**: Through the `/learn` command, AAC permanently logs your architectural preferences and bug-fixes into its physical `.agents/brain/rules.md`. It never repeats the same mistake twice.
+- **🛡️ Stack-Aware Healing & Rollbacks**: Automatically triggers `scripts/verify.py --execute` after coding. If the tests fail 3 times, the agent automatically executes `git restore . && git clean -fd` to revert to a pristine state.
+- **⚡ CLI-First & Boilerplate Ban**: AAC is strictly forbidden from manually typing empty boilerplate. It mandates the use of framework-native generators (`nest g`, `ionic g`, `npx shadcn-ui add`).
+- **🎨 Design & UX Mastery**: Dedicated `.agents/skills/design/SKILL.md` ensures mobile-first CSS, standard utility classes (Tailwind), a11y compliance, and mandatory fallback UI states (Loading/Error/Empty).
 
 ## 🚀 Quick Start
 
@@ -23,12 +24,12 @@ Run the reproducible installer to bootstrap your current repository. The install
 
 ### Linux / macOS / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.15/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.16/install.sh | bash
 ```
 
 ### Windows PowerShell
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.15/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.16/install.ps1 | iex
 ```
 
 > **Note**: Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` to adapt global CLI permissions to your environment.
@@ -37,9 +38,10 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubus
 
 AAC is built on the official Antigravity customization principles, maintaining a minimal footprint:
 
-- 📜 `AGENTS.md` — The ultimate source of truth (always-on policy, <600 words).
-- 🧩 `.agents/agents/` — L9-level expert sub-agents ready to be invoked.
-- 🛠️ `.agents/skills/` — On-demand capabilities (`architecture`, `code-quality`, `security`, `verification`).
+- 📜 `AGENTS.md` — The ultimate source of truth (always-on policy, orchestration, self-learning).
+- 🧩 `.agents/agents/` — L9-level expert sub-agents (`planner`, `implementer`, `reviewer`, `security`).
+- 🛠️ `.agents/skills/` — On-demand capabilities (`architecture`, `code-quality`, `design`, `security`, `verification`).
+- 🧠 `.agents/brain/` — The physical long-term memory for persistence.
 - ⚙️ `.agents/mcp_config.json` — Pre-configured Model Context Protocol (MCP) integrations.
 - 🔬 `scripts/verify.py` — Dynamic project stack analyzer and verification runner.
 
@@ -47,11 +49,12 @@ AAC is built on the official Antigravity customization principles, maintaining a
 
 AAC enforces a strict, logical pipeline for every AI interaction. This is not a suggestion—it's the built-in protocol:
 
-1. **Explore**: Comprehensively read dependencies and contracts.
-2. **Plan**: Draft a roadmap for multi-file or architectural changes.
-3. **Execute**: Implement the exact minimal delta (no speculative changes).
-4. **Verify**: Trigger `verify.py` to test and auto-heal any broken code.
-5. **Review**: Final human/agent audit of the diff and security boundaries.
+1. **Load Skill & Context**: Verify dependencies and architectural constraints (`grep_search` over blind reads).
+2. **Plan**: Draft a roadmap via the `planner` subagent.
+3. **Execute**: Delegate to `implementer` to write the exact minimal delta.
+4. **Verify & Heal**: Trigger `verify.py` to auto-heal. Rollback if broken.
+5. **Peer Review**: Await `STATUS: APPROVED` from the `reviewer` subagent.
+6. **Atomic Commit**: Stash changes cleanly using Conventional Git Commits.
 
 ## 📚 References & Documentation
 

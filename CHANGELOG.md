@@ -4,6 +4,15 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.16] - 2026-08-19
+
+### Added
+- **Long-Term Memory (`.agents/brain/rules.md`)**: Bootstrapped a persistent memory file to support the `/learn` slash command and autonomous mistake tracking.
+- **Autonomous Execution Constraints**: Added `[AUTONOMOUS_EXECUTION]` and `[SELF_LEARNING]` to `AGENTS.md` to formally enable non-stop `/goal` workflows and mandate memory persistence.
+
+### Changed
+- **Repository Identity**: Revamped `README.md` to highlight AAC's true capabilities: Autonomous Goal-Seeking, Self-Learning, Atomic Rollbacks, and Design/UX Mastery.
+
 ## [4.4.15] - 2026-08-19
 
 ### Added
