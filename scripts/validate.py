@@ -35,6 +35,8 @@ REQUIRED_PATHS = (
     ".agents/skills/security/SKILL.md",
     ".agents/skills/architecture/SKILL.md",
     ".agents/skills/design/SKILL.md",
+    ".agents/skills/semantic-graphing/SKILL.md",
+    "scripts/semantic_grapher.py",
     "scripts/validate.py",
     "scripts/verify.py",
 )
@@ -214,7 +216,7 @@ def main() -> int:
         load_json(".agents/brain/env-required.json")
         load_json(".agents/antigravity-compatibility.json")
         validate_mcp()
-        validate_markdown_metadata(".agents/skills", 6, ("name", "description"), "*/SKILL.md")
+        validate_markdown_metadata(".agents/skills", 7, ("name", "description"), "*/SKILL.md")
         validate_markdown_metadata(".agents/agents", 4, ("name", "description", "mode"))
         validate_instruction_budget()
         validate_settings()

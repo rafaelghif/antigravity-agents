@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.19] - 2026-08-19
+
+### Added
+- **Semantic Graphing**: Introduced `scripts/semantic_grapher.py` and `semantic-graphing` skill to allow the agent to parse Abstract Syntax Trees (AST) and build a structural map of the workspace instead of using blind grep.
+
 ## [4.4.18] - 2026-08-19
 
 ### Changed
