@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.4.20] - 2026-08-19
+
+### Features
+- **[SELF_LEARNING]**: Activated the Procedural Memory engine. All subagents are now forced to inject `.agents/brain/rules.md` before execution to establish long-term learning.
+- **Anti-Yes-Man Persona**: Agents will now aggressively push back against suboptimal architectures instead of blindly agreeing.
+- **Semantic Grapher Tests**: Added full test coverage for the AST parser (`scripts/semantic_grapher.py`) ensuring stability for Python, TS, and Go AST extraction.
+- **Subagent Consistency**: Implemented `<ENTERPRISE_STANDARDS>` across all skills and enforced mandatory memory injection across all subagent protocols.
+
 All notable changes to the Antigravity Agent Core (AAC) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

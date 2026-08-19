@@ -1,0 +1,7 @@
+# v4.4.20 - Anti-Yes-Man & Procedural Memory
+
+### Features
+- **[SELF_LEARNING]**: Activated the Procedural Memory engine. All subagents are now forced to inject `.agents/brain/rules.md` before execution to establish long-term learning.
+- **Anti-Yes-Man Persona**: Agents will now aggressively push back against suboptimal architectures instead of blindly agreeing.
+- **Semantic Grapher Tests**: Added full test coverage for the AST parser (`scripts/semantic_grapher.py`) ensuring stability for Python, TS, and Go AST extraction.
+- **Subagent Consistency**: Implemented `<ENTERPRISE_STANDARDS>` across all skills and enforced mandatory memory injection across all subagent protocols.
