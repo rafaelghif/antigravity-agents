@@ -1,10 +1,3 @@
----
-name: rules
-description: Long-term memory for the agent. Contains learned architectural lessons and user corrections.
----
+# Procedural Memory Rules
 
-# Learned Lessons
-
-This file acts as the agent's persistent memory. If the agent makes a mistake, the user corrects it, or a deeply nested framework bug is solved, the solution MUST be appended here to prevent future regressions.
-
-## Rules
+- **[NO_TRASH]**: NEVER leave temporary files, scratch scripts, or intermediate artifacts (e.g., `release_notes.txt`, `patch.py`) in the repository. If you must create a file to run a command, you MUST delete it immediately after the command executes. Do NOT track temporary artifacts in Git.
