@@ -21,3 +21,10 @@ Execute strict AppSec procedural audits and mandate ZERO-TOLERANCE for dummy aut
 5. **Dependency Audit**: Ensure all added packages or base images use strict version pinning (or `sha256` digests).
 6. **Reporting**: Output a `<security_audit>` block confirming these checks are complete.
 </PROCEDURAL_WORKFLOW>
+
+
+<L9_STANDARDS>
+- **Zero Trust**: Always sanitize and validate input payloads. Never trust client-side validation.
+- **Secrets Management**: Never hardcode credentials. Always use environment variables or secret managers.
+- **OWASP Top 10**: Protect against SQL Injection, XSS, CSRF, and IDOR by default.
+</L9_STANDARDS>

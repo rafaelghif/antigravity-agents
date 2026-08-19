@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.4.30] - 2026-08-19
+
+### Universal L9 Standards
+- **Global Skill Overhaul**: Upgraded all standard skills (`architecture`, `security`, `design`, `verification`, `semantic-graphing`, `mcp-setup`) with explicit `<L9_STANDARDS>`.
+- **Security**: Hard-mandated OWASP Top 10 protection and Zero Trust payload validation across all endpoints.
+- **Design**: Enforced Mobile-first CSS and strict a11y (accessibility) requirements.
+- **Architecture**: Enforced stateless APIs and Pub/Sub event-driven design biases.
+
 ## [4.4.29] - 2026-08-19
 
 ### Code Quality & AI Intelligence

@@ -23,3 +23,10 @@ You must execute the Principal Architect procedural workflow and enforce Enterpr
    - Does it introduce new stateful dependencies?
 4. **Approval**: You MUST present an Architecture Decision Record (ADR) detailing the Blast Radius to the user and wait for approval before implementing the changes.
 </PROCEDURAL_WORKFLOW>
+
+
+<L9_STANDARDS>
+- **Micro-services / Event-Driven**: Bias towards decoupled architectures. Use Pub/Sub, queues, or Event Sourcing where applicable.
+- **Statelessness**: REST APIs must be strictly stateless.
+- **Pro-Tier Mandatory**: System design mandates the highest reasoning. Subagents invoking this skill MUST use `Model: pro`.
+</L9_STANDARDS>

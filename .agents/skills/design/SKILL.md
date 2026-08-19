@@ -22,3 +22,10 @@ Enforce expert-level Frontend Architecture and strict design consistency during 
 4. **Visual Testing**: If visual regression or integration testing tools exist, use them to verify your implementation.
 5. **Diff Review**: Inspect your diff to ensure no hardcoded colors, missing accessibility attributes, or forgotten empty/error states remain.
 </PROCEDURAL_WORKFLOW>
+
+
+<L9_STANDARDS>
+- **Component Reusability**: Extract repetitive UI into atomic components.
+- **Responsive First**: Mobile-first CSS. No absolute positioning hacks.
+- **Accessibility (a11y)**: Aria labels, contrast ratios, and keyboard navigation are non-negotiable.
+</L9_STANDARDS>
