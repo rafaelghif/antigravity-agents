@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.34] - 2026-08-19
+
+### Advanced Engineering Upgrades
+- **QA Automation Engineer**: Introduced `qa-engineer` subagent dedicated to Playwright/Cypress E2E visual regression and a11y testing.
+- **Circuit Breaker Protocol**: Upgraded `AGENTS.md` to enforce Lateral Thinking. Subagents are now forced to rollback and change their approach completely after 3 consecutive failures, preventing infinite loop brute-forcing.
+- **Data Engineering Skill**: Added `data-engineering` skill enforcing the "Expand and Contract" pattern for zero-downtime database migrations.
+
 ## [4.4.33] - 2026-08-19
 
 ### DevOps & Observability Skills
