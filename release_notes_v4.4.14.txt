@@ -1,0 +1,5 @@
+### Changed
+- **Agent Orchestration**: Enforced strict `[ORCHESTRATE]` constraints in `AGENTS.md` to prevent agent from attempting complex implementations without delegating to `planner` and `implementer`.
+- **Agent Context Control**: Mandated `grep_search` and targeted code reads in `AGENTS.md` to prevent context bloat from blindly reading large files.
+- **Agent Rollbacks**: Instructed `implementer.md` to automatically `git restore .` and revert the working tree to a clean state if the healing loop fails 3 times.
+- **Peer Review Loop**: Added an explicit step in `implementer.md` to invoke the `reviewer` subagent via message before committing.
