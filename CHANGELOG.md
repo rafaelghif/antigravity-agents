@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.33] - 2026-08-19
+
+### DevOps & Observability Skills
+- **DevOps Skill**: Added `.agents/skills/devops/SKILL.md` enforcing Docker distroless images, Kubernetes Gateway API, encrypted Terraform state, and Agentic worker-pool infrastructure.
+- **Observability Skill**: Added `.agents/skills/observability/SKILL.md` standardizing OpenTelemetry (OTLP), structured JSON logging, RED metrics, and AI-specific token/debate telemetry.
+
 ## [4.4.32] - 2026-08-19
 
 ### Documentation & Marketing
