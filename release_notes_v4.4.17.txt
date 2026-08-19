@@ -1,0 +1,7 @@
+### Added
+- **Anti-Hallucination (`[TRUTH_SEEKING]`)**: Mandates the use of `search_web`, documentation reading, or `pro` subagent invocation instead of guessing logic or schemas.
+- **Zero Dummy Code (`[NO_PLACEHOLDERS]`)**: Strictly forbids writing `// TODO` placeholders or dummy variables unless explicitly asked.
+- **Industrial Security**: Added strict PBAC/ABAC/RBAC rules to `security/SKILL.md` to prevent dummy roles.
+
+### Fixed
+- **Skill Injection Gap**: Forced `planner` and `implementer` subagents to execute `view_file` on `SKILL.md` before coding to ensure rules are actually loaded into context.
