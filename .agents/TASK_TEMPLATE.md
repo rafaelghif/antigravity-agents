@@ -1,4 +1,4 @@
-# AAC v4.4.27 Task Template Contracts
+# AAC v4.4.28 Task Template Contracts
 
 ## Active Plan
 

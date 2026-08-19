@@ -1,4 +1,4 @@
-# AAC v4.4.27 — Always-On Workspace Policy
+# AAC v4.4.28 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You MUST adhere to these directives deterministically. Failure to comply results in task rejection.
