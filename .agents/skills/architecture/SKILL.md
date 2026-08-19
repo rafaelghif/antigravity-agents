@@ -12,6 +12,8 @@ You must execute the Principal Architect procedural workflow and enforce Enterpr
 2. **Statelessness**: Enforce stateless service layers. Application servers must be capable of horizontal scaling behind a load balancer without localized state corruption.
 3. **Database Performance**: Mandate index utilization for frequent queries. Actively prevent and eliminate N+1 query patterns in ORMs.
 4. **Separation of Concerns**: Enforce strict module isolation (e.g., separating routing controllers, business domain logic, and data access layers).
+5. **Future-Proof Data Modeling**: Never design rigid schemas. Anticipate evolutionary changes (e.g., what if entity A merges with B? What if C is added later?). Use Domain-Driven Design (DDD), interfaces, and abstract repository patterns so the domain logic isn't coupled to the DB.
+6. **Extensibility & Polymorphism**: Build plugin-ready architecture. If you think the user might add more types later, use polymorphic associations or Strategy Patterns instead of hardcoded `if/else` ladders.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
