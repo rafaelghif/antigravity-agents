@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.29] - 2026-08-19
+
+### Code Quality & AI Intelligence
+- **Opus/Pro Tier Mandate**: Updated `AGENTS.md` (Core Constraint 14) to explicitly mandate `Model: "pro"` for all `implementer` and `reviewer` subagents to ensure deep reasoning and enterprise-grade code generation that matches top-tier LLMs.
+- **Zero-Tolerance Anti-Patterns**: Upgraded `.agents/skills/code-quality/SKILL.md` to outright reject `any` types in TS, broad `except Exception:` blocks, and O(N^2) algorithms in favor of O(1) HashMaps.
+- **AGENTS.md Compression**: Refactored `AGENTS.md` down to 284 words to significantly reduce context bloat while amplifying rules.
+
 ## [4.4.28] - 2026-08-19
 
 ### Bug Fixes
