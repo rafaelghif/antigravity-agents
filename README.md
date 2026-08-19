@@ -1,26 +1,29 @@
 <div align="center">
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
-  <p><strong>A deterministic, fully autonomous, and self-learning workspace policy for AI coding.</strong></p>
+  <p><strong>Stop chatting with AI. Start orchestrating an L9 Principal Engineer.</strong></p>
 
   [![Version](https://img.shields.io/badge/version-4.4.31-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.31)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
+  [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 </div>
 
 ---
 
-**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace into an enterprise-grade AI development ecosystem. AAC operates on a strict, hallucination-resistant policy that enforces world-class software engineering practices. Unlike standard "chat-and-wait" assistants, AAC acts as a **Principal Architect**: capable of autonomous orchestration, automated git rollbacks, and persistent self-learning.
+**Antigravity Agent Core (AAC)** transforms your standard Antigravity workspace from a basic "chat-and-wait" assistant into a **Production-Grade Enterprise Orchestrator**. 
 
-## ✨ Key Capabilities
+Built for 2026, AAC replaces outdated prompt engineering with rigid **Context Engineering**. It strips away AI hallucinations, enforces Zero Trust security, and runs a synchronized Multi-Agent Pub-Sub Room (Bot Mode) to debate, review, and auto-heal your code until it meets L9 Staff-level standards. 
 
-- **🔄 Fully Autonomous Goal-Seeking**: Trigger the `/goal` command to let the agent orchestrate sub-agents (Planner → Implementer → Reviewer), self-heal tests, and iterate tirelessly until the final outcome meets Enterprise standards.
-- **🧠 Persistent Self-Learning**: Through the `/learn` command, AAC permanently logs your architectural preferences and bug-fixes into its physical `.agents/brain/rules.md`. It never repeats the same mistake twice.
-- **🛡️ Stack-Aware Healing & Rollbacks**: Automatically triggers `scripts/verify.py --execute` after coding. If the tests fail 3 times, the agent automatically executes `git restore . && git clean -fd` to revert to a pristine state.
-- **⚡ CLI-First & Boilerplate Ban**: AAC is strictly forbidden from manually typing empty boilerplate. It mandates the use of framework-native generators (`nest g`, `ionic g`, `npx shadcn-ui add`).
-- **🎨 Design & UX Mastery**: Dedicated `.agents/skills/design/SKILL.md` ensures mobile-first CSS, standard utility classes (Tailwind), a11y compliance, and mandatory fallback UI states (Loading/Error/Empty).
+## 🔥 Why Use AAC? (The L9 Difference)
 
-## 🚀 Quick Start
+- **🔄 Multi-Agent Inbox (Bot Mode)**: Stop babysitting. AAC delegates complex tasks to a decentralized team of `planner`, `implementer`, and `reviewer` subagents. They debate asynchronously in a controlled Inbox, verify code, and only bother you when the feature is 100% complete.
+- **🛡️ The Control Plane**: Features hardcoded limits against infinite loops, strictly mandates the `Pro` model tier for reasoning tasks, and forbids database schema coupling via Domain-Driven Design (DDD).
+- **🧠 Permanent Procedural Memory**: If the agent makes a mistake, it learns from it and writes the fix directly into its physical `.agents/brain/rules.md`. The AI actually gets smarter the longer it stays in your repo.
+- **⚡ Anti-Dummy & Boilerplate Ban**: AAC is strictly forbidden from writing `// TODO` stubs, mock arrays, or raw CSS hacks. It mandates framework-native CLIs (`nest g`, `npx shadcn-ui add`), HashMaps over O(N^2) loops, and production-ready implementations.
+- **🛡️ Stack-Aware Auto-Healing**: After any code edit, it triggers `scripts/verify.py`. If tests fail, it self-corrects. If it fails consecutively, it automatically executes `git reset --hard HEAD` to prevent piling hacks on top of broken states.
 
-Run the reproducible installer to bootstrap your current repository. The installer will safely copy managed files, validate schema integrity, and automatically back up existing states.
+## 🚀 One-Command Bootstrap
+
+Run the reproducible installer to inject the AAC Control Plane into your existing repository. It safely copies policies, verifies hooks, and automatically backs up any existing states.
 
 ### Linux / macOS / WSL
 ```bash
@@ -32,40 +35,28 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.
 Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.31/install.ps1 | iex
 ```
 
-> **Note**: Copy `.agents/antigravity-settings.example.json` manually to `~/.gemini/antigravity-cli/settings.json` to adapt global CLI permissions to your environment.
+> **Note**: Don't forget to configure your databases! Copy `.agents/mcp_config.json.example` to `.agents/mcp_config.json` and inject your `.env` variables to instantly hook up Postgres, MySQL, or MSSQL to the AI.
 
-## 🏗️ Core Architecture
+## 🏗️ The AAC Architecture
 
-AAC is built on the official Antigravity customization principles, maintaining a minimal footprint:
+AAC leverages standard Antigravity customization paths, but pushes them to the absolute limit:
 
-- 📜 `AGENTS.md` — The ultimate source of truth (always-on policy, orchestration, self-learning).
-- 🧩 `.agents/agents/` — L9-level expert sub-agents (`planner`, `implementer`, `reviewer`, `security`).
-- 🛠️ `.agents/skills/` — On-demand capabilities (`architecture`, `code-quality`, `design`, `security`, `verification`).
-- 🧠 `.agents/brain/` — The physical long-term memory for persistence.
-- ⚙️ `.agents/mcp_config.json` — Pre-configured Model Context Protocol (MCP) integrations.
-- 🔬 `scripts/verify.py` — Dynamic project stack analyzer and verification runner.
+- 📜 `AGENTS.md` — The L9 Control Plane enforcing Zero-Tolerance standards.
+- 📬 `scripts/inbox_manager.py` — The Orchestration Layer for multi-agent asynchronous debates.
+- 🧩 `.agents/agents/` — Autonomous experts (`planner`, `implementer`, `reviewer`, `security-reviewer`).
+- 🛠️ `.agents/skills/` — On-demand enterprise constraints (`architecture`, `code-quality`, `design`, `security`, `verification`, `mcp-setup`).
+- 🧠 `.agents/brain/` — Evolving physical memory.
+- ⚙️ `.agents/mcp_config.json` — Out-of-the-box Model Context Protocol integrations.
 
-## 🔄 The Delivery Protocol
+## 📚 Official Documentation
 
-AAC enforces a strict, logical pipeline for every AI interaction. This is not a suggestion—it's the built-in protocol:
-
-1. **Load Skill & Context**: Verify dependencies and architectural constraints (`grep_search` over blind reads).
-2. **Plan**: Draft a roadmap via the `planner` subagent.
-3. **Execute**: Delegate to `implementer` to write the exact minimal delta.
-4. **Verify & Heal**: Trigger `verify.py` to auto-heal. Rollback if broken.
-5. **Peer Review**: Await `STATUS: APPROVED` from the `reviewer` subagent.
-6. **Atomic Commit**: Stash changes cleanly using Conventional Git Commits.
-
-## 📚 References & Documentation
-
-Explore the official Antigravity documentation to understand the mechanics powering AAC:
+Explore the official Antigravity documentation to understand the native mechanics powering AAC:
 - [Best Practices](https://antigravity.google/docs/cli/best-practices)
 - [Plugins and Skills](https://antigravity.google/docs/cli/plugins)
 - [Subagents](https://antigravity.google/docs/cli/subagents)
 - [Model Context Protocol (MCP)](https://antigravity.google/docs/cli/mcp)
-- [Permissions and Sandbox](https://antigravity.google/docs/cli/permissions)
 
 ---
 <div align="center">
-  <sub>Built with precision for Gemini and Antigravity CLI.</sub>
+  <sub>Engineered by Anti-Yes-Men for the Antigravity Engine.</sub>
 </div>
