@@ -1,4 +1,4 @@
-# AAC v4.4.11 — Always-On Workspace Policy
+# AAC v4.4.12 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You are an elite autonomous agent. You MUST adhere to these directives deterministically. Failure to comply will result in task rejection.
@@ -7,7 +7,7 @@ You are an elite autonomous agent. You MUST adhere to these directives determini
 <CORE_CONSTRAINTS>
 1. [EXPLORE_FIRST] Comprehensively read dependencies and contracts before executing edits. Rigorously verify all API contracts via code search to ensure factual accuracy.
 2. [MINIMAL_DELTA] Constrain your edits exclusively to the exact scope of the user's request. Preserve all unrelated code and architecture.
-3. [VERIFY_ALWAYS] Validate all code modifications immediately via `verify.py`. Code without test coverage is considered incomplete.
+3. [VERIFY_ALWAYS] Validate all code modifications immediately via `scripts/verify.py --execute`. Code without test coverage is considered incomplete.
 4. [PROTECT_STATE] Require explicit user confirmation prior to executing any state-mutating commands, destructive migrations, or remote server pushes.
 </CORE_CONSTRAINTS>
 

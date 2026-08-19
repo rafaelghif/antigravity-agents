@@ -1,0 +1,6 @@
+### Fixed
+- **Verification Loop**: Added `--execute` flag to `scripts/verify.py` and updated hooks and agents to strictly execute tests instead of just detecting them.
+- **Hook Feedback**: Fixed `.agents/hooks.json` to properly capture test output and return JSON prompts on failure.
+- **Security Automation**: Enhanced `security/SKILL.md` to mandate the use of automated scanning tools like `gitleaks` and `semgrep`.
+- **Installer Coupling**: Made `scripts/validate.py` more modular by separating optional templates from required files.
+- **Review Schema**: Added strict JSON schema constraints for outputting reviews in `reviewer.md`.

@@ -14,7 +14,13 @@ class TestVerify(unittest.TestCase):
 
     def test_main(self):
         # The verify main script should execute without throwing errors
-        self.assertEqual(verify.main(), 0)
+        import sys
+        original_argv = sys.argv
+        sys.argv = ['verify.py']
+        try:
+            self.assertEqual(verify.main(), 0)
+        finally:
+            sys.argv = original_argv
 
 if __name__ == '__main__':
     unittest.main()

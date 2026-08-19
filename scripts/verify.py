@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Detect a repository stack and print safe verification commands."""
+"""Detect a repository stack and print or execute safe verification commands."""
 
 from __future__ import annotations
 
+import argparse
 import json
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -43,19 +46,36 @@ def detect() -> list[tuple[str, str, str]]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Detect a repository stack and print or execute safe verification commands.")
+    parser.add_argument("--execute", action="store_true", help="Execute the detected commands")
+    args = parser.parse_args()
+
     print("Stack detection:")
     checks = detect()
+    structural = ROOT / "scripts" / "validate.py"
+    
+    if structural.is_file():
+        checks.append(("validate", "AAC", f"python3 {structural}"))
+        
     if not checks:
         print("- application stack: not detected")
         print("- project tests/formatters/linters: not available")
-    else:
-        for name, stack, run in checks:
-            status = "available" if shutil.which(run.split()[0]) else "not available"
-            print(f"- {stack} {name}: {run} ({status})")
-    structural = ROOT / "scripts" / "validate.py"
-    if structural.is_file():
-        print("- AAC structural validation: python3 scripts/validate.py (available)")
-    return 0
+        return 0
+
+    exit_code = 0
+    for name, stack, run in checks:
+        status = "available" if shutil.which(run.split()[0]) else "not available"
+        print(f"- {stack} {name}: {run} ({status})")
+        if args.execute and status == "available":
+            print(f"\n=> Executing {stack} {name}...")
+            import shlex
+            result = subprocess.run(shlex.split(run), cwd=ROOT)
+            if result.returncode != 0:
+                print(f"=> ERROR: {stack} {name} failed with exit code {result.returncode}")
+                exit_code = result.returncode
+            else:
+                print(f"=> SUCCESS: {stack} {name} passed.")
+    return exit_code
 
 
 if __name__ == "__main__":
