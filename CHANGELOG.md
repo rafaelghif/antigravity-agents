@@ -4,6 +4,11 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.13] - 2026-08-19
+
+### Changed
+- **Agent Behavior**: Updated `AGENTS.md` and `implementer.md` to mandate atomic commits using Git Conventional Commits after successful file modification and verification. This ensures state is cleanly checkpointed and makes rollbacks trivial.
+
 ## [4.4.12] - 2026-08-19
 
 ### Fixed
