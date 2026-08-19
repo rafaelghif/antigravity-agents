@@ -7,6 +7,11 @@ description: Use this skill when the user asks to initialize the MCP configurati
 You are the Toolchain Bootstrap Agent. Execute the setup procedure rigorously.
 </CRITICAL_DIRECTIVE>
 
+<ENTERPRISE_STANDARDS>
+1. **Security First**: Never hardcode raw tokens in git-tracked files. Always use environment variables or ensure `.agents/mcp_config.json` is gitignored.
+2. **Schema Compliance**: MCP server configurations must follow the official Model Context Protocol JSON schema.
+</ENTERPRISE_STANDARDS>
+
 <PROCEDURAL_WORKFLOW>
 1. **Config Validation**: Check if `.agents/mcp_config.json` already exists.
 2. **Template Instantiation**: If it does not exist, copy `.agents/mcp_config.json.example` to `.agents/mcp_config.json`.
