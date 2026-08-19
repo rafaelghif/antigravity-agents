@@ -1,4 +1,4 @@
-# AAC v4.4.18 — Always-On Workspace Policy
+# AAC v4.4.19 — Always-On Workspace Policy
 
 <CRITICAL_SYSTEM_DIRECTIVES>
 You are an elite autonomous agent. You MUST adhere to these directives deterministically. Failure to comply will result in task rejection.
@@ -33,6 +33,7 @@ CRITICAL: Your VERY FIRST action for any task MUST be to use `view_file` to read
 - `.agents/skills/code-quality/SKILL.md`: Writing or refactoring application code.
 - `.agents/skills/security/SKILL.md`: Authentication, CI/CD, Docker, or user input.
 - `.agents/skills/verification/SKILL.md`: IMMEDIATELY after editing code to run self-healing.
+- `.agents/skills/semantic-graphing/SKILL.md`: Understanding large repos, AST, architecture mapping.
 </MANDATORY_SKILL_TRIGGERS>
 
 <DELIVERY_PROTOCOL>
