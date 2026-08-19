@@ -4,6 +4,16 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.17] - 2026-08-19
+
+### Added
+- **Anti-Hallucination (`[TRUTH_SEEKING]`)**: Mandates the use of `search_web`, documentation reading, or `pro` subagent invocation instead of guessing logic or schemas.
+- **Zero Dummy Code (`[NO_PLACEHOLDERS]`)**: Strictly forbids writing `// TODO` placeholders or dummy variables unless explicitly asked.
+- **Industrial Security**: Added strict PBAC/ABAC/RBAC rules to `security/SKILL.md` to prevent dummy roles.
+
+### Fixed
+- **Skill Injection Gap**: Forced `planner` and `implementer` subagents to execute `view_file` on `SKILL.md` before coding to ensure rules are actually loaded into context.
+
 ## [4.4.16] - 2026-08-19
 
 ### Added
