@@ -2,7 +2,7 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>Stop chatting with AI. Start orchestrating an L9 Principal Engineer.</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.4.32-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.32)
+  [![Version](https://img.shields.io/badge/version-4.4.33-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.4.33)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 </div>
@@ -27,12 +27,12 @@ Run the reproducible installer to inject the AAC Control Plane into your existin
 
 ### Linux / macOS / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.32/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.33/install.sh | bash
 ```
 
 ### Windows PowerShell
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.32/install.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force; iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.33/install.ps1 | iex
 ```
 
 > **Note**: Don't forget to configure your databases! Copy `.agents/mcp_config.json.example` to `.agents/mcp_config.json` and inject your `.env` variables to instantly hook up Postgres, MySQL, or MSSQL to the AI.
