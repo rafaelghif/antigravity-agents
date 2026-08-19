@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.23] - 2026-08-19
+
+### Chores
+- **Workspace De-cluttering**: Purged legacy `release_notes_v4.4.x.txt` files and `scratch/` script dumps from version control. Added strict `.gitignore` rules to prevent temporary file leakage in the future.
+
 ## [4.4.22] - 2026-08-19
 
 ### Architecture

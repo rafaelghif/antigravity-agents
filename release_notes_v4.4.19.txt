@@ -1,2 +1,0 @@
-### Added
-- **Semantic Graphing**: Introduced `scripts/semantic_grapher.py` and `semantic-graphing` skill to allow the agent to parse Abstract Syntax Trees (AST) and build a structural map of the workspace instead of using blind grep.
