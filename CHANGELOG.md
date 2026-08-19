@@ -4,6 +4,14 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.14] - 2026-08-19
+
+### Changed
+- **Agent Orchestration**: Enforced strict `[ORCHESTRATE]` constraints in `AGENTS.md` to prevent agent from attempting complex implementations without delegating to `planner` and `implementer`.
+- **Agent Context Control**: Mandated `grep_search` and targeted code reads in `AGENTS.md` to prevent context bloat from blindly reading large files.
+- **Agent Rollbacks**: Instructed `implementer.md` to automatically `git restore .` and revert the working tree to a clean state if the healing loop fails 3 times.
+- **Peer Review Loop**: Added an explicit step in `implementer.md` to invoke the `reviewer` subagent via message before committing.
+
 ## [4.4.13] - 2026-08-19
 
 ### Changed
