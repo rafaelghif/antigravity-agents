@@ -1,0 +1,5 @@
+### Added
+- **Design Skill (`.agents/skills/design/SKILL.md`)**: Added explicit UI/UX agent instructions to strictly adhere to CLI-first component generation, framework-specific tooling (Tailwind/Shadcn), mobile-first responsiveness, accessibility (a11y), and proper UI states (Loading/Error/Empty).
+
+### Changed
+- **CLI-First Paradigm**: Added the `[CLI_FIRST]` constraint in `AGENTS.md` and `implementer.md` to outright ban manual boilerplate creation. Agents are now required to use native CLI generators (e.g., `nest g`, `ionic g`, `npx shadcn-ui add`) for structural generation.

@@ -4,6 +4,14 @@ All notable changes to the Antigravity Agent Core (AAC) will be documented in th
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.15] - 2026-08-19
+
+### Added
+- **Design Skill (`.agents/skills/design/SKILL.md`)**: Added explicit UI/UX agent instructions to strictly adhere to CLI-first component generation, framework-specific tooling (Tailwind/Shadcn), mobile-first responsiveness, accessibility (a11y), and proper UI states (Loading/Error/Empty).
+
+### Changed
+- **CLI-First Paradigm**: Added the `[CLI_FIRST]` constraint in `AGENTS.md` and `implementer.md` to outright ban manual boilerplate creation. Agents are now required to use native CLI generators (e.g., `nest g`, `ionic g`, `npx shadcn-ui add`) for structural generation.
+
 ## [4.4.14] - 2026-08-19
 
 ### Changed
