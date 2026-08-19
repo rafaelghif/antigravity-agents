@@ -28,3 +28,4 @@ __pycache__/
 .DS_Store
 release_notes*
 scratch/
+.agents/inbox/

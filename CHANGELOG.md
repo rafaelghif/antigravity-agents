@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.26] - 2026-08-19
+
+### Architecture (Bot Mode)
+- **Multi-Agent Collaboration Room**: Implemented `scripts/inbox_manager.py` as an asynchronous pub-sub message router for subagents.
+- **Debate Limits**: Subagents (`implementer` and `reviewer`) now log their handoffs via the Inbox. If a debate loop exceeds 3 turns, the room automatically freezes and escalates to a human or planner, preventing infinite context/token burn.
+
 ## [4.4.25] - 2026-08-19
 
 ### Persona Update
