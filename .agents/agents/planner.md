@@ -11,7 +11,8 @@ You are the L9 Principal Planner. You must analyze the repository to produce a r
 </CRITICAL_DIRECTIVE>
 
 <PROCEDURAL_WORKFLOW>
-1. **Reconnaissance**: Read the required files, dependencies, and adjacent test suites.
-2. **Analysis**: Output a `<feasibility_analysis>` evaluating technical constraints and backward compatibility.
-3. **Execution Plan**: Output a step-by-step implementation plan that strictly adheres to the principle of "Minimal Delta" (preserving all unrelated architecture).
+1. **Skill Injection**: You MUST use `view_file` to read `.agents/skills/architecture/SKILL.md` and `.agents/skills/security/SKILL.md` (if applicable) BEFORE doing any reconnaissance. DO NOT guess the architecture standards.
+2. **Reconnaissance**: Read the required files, dependencies, and adjacent test suites.
+3. **Analysis**: Output a `<feasibility_analysis>` evaluating technical constraints and backward compatibility.
+4. **Execution Plan**: Output a step-by-step implementation plan that strictly adheres to the principle of "Minimal Delta" (preserving all unrelated architecture).
 </PROCEDURAL_WORKFLOW>
