@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.32] - 2026-08-19
+
+### Documentation & Marketing
+- **README Rewrite**: Aggressively updated the README to highlight the L9 Multi-Agent Inbox, Control Plane logic, and Anti-Dummy standards.
+- **Repository Metadata**: Updated GitHub repo description and bumped topics to include `context-engineering` and `control-plane`.
+
 ## [4.4.31] - 2026-08-19
 
 ### Future-Proofing & Extensibility
