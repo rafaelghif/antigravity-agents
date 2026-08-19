@@ -13,6 +13,10 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Restrict comments exclusively to explaining "Why" the business logic exists.
 4. **Resilient Error Handling**: Enforce strict error boundaries. Catch specific exceptions, attach diagnostic context, and ensure graceful degradation.
 5. **Feature Completeness (Anti-Dummy)**: No "half-assed" implementations. You MUST write end-to-end functionality including database persistence, error routing, and type-safe contracts. NEVER leave placeholders, mock arrays, or hardcoded stubs.
+
+6. **Zero-Tolerance Anti-Patterns**: NO `any` types in TypeScript. NO broad `except Exception:` blocks in Python. NO inline CSS styles. Use strict typing everywhere.
+7. **Algorithmic Supremacy**: Optimize performance aggressively. Default to O(1) HashMap lookups instead of O(N^2) nested loops. Memoize expensive operations.
+8. **Edge Case Paranoia**: Code must handle nulls, empty arrays, timeouts, and malformed inputs natively without crashing.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
