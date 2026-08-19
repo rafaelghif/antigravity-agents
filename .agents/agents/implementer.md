@@ -3,7 +3,7 @@ name: implementer
 description: Implement a previously approved plan with the smallest correct change and immediate verification.
 mode: subagent
 subagent: true
-skills: [verification, code-quality]
+skills: [verification, code-quality, design]
 ---
 
 <CRITICAL_DIRECTIVE>
