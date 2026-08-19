@@ -12,6 +12,7 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 2. **Cyclomatic Complexity**: Functions must be atomic and strictly limited in indentation depth. Refactor deeply nested loops or conditionals into explicit private helper methods.
 3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Restrict comments exclusively to explaining "Why" the business logic exists.
 4. **Resilient Error Handling**: Enforce strict error boundaries. Catch specific exceptions, attach diagnostic context, and ensure graceful degradation.
+5. **Feature Completeness (Anti-Dummy)**: No "half-assed" implementations. You MUST write end-to-end functionality including database persistence, error routing, and type-safe contracts. NEVER leave placeholders, mock arrays, or hardcoded stubs.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
