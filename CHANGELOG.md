@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.37] - 2026-08-20
+
+### Agentic Autonomy 2026 Breakthroughs
+- **Live Telemetry (Agent Observability)**: Agents are now mandated to emit `<telemetry>` tags inside the `inbox_manager` stream to provide real-time insight into their reasoning and non-deterministic behavior during long-running tasks.
+- **Model-as-a-Judge Eval Pipeline**: Added `tests/agent_eval.py` to automatically benchmark the framework's anti-dummy compliance and security loading, eliminating the need for manual agent behavior testing.
+- **Strict Shell Isolation**: Upgraded the `.agents/skills/security/SKILL.md` to establish absolute boundaries for terminal execution (forbidding `sudo`, `rm -rf /`, and global package manipulations).
+
 ## [4.4.36] - 2026-08-20
 
 ### Context Engineering Upgrades
