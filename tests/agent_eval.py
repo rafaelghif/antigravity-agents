@@ -2,7 +2,7 @@ import pytest
 import subprocess
 from pathlib import Path
 
-# 2026 Automated AI Eval Pipeline (Model-as-a-Judge Mock)
+# 2026 Automated CI Pipeline (Static Security & Quality Eval)
 def test_anti_dummy_compliance():
     # Ensures no test file or implementation file contains mock tokens
     forbidden_tokens = ["// TODO", "mock_", "dummy_", "passw" + "ord123"]
