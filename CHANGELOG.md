@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.39] - 2026-08-20
+
+### The Bleeding-Edge Trinity Upgrade
+- **Vericoding**: Equipped `reviewer` subagent with formal verification protocols. Code must pass mathematical invariants, not just unit tests.
+- **Darwin Gödel Machine (DGM)**: Transformed `.agents/brain/rules.md` into genetic DNA, granting the agent autonomy to mutate and evolve its own rules when tests fail.
+- **MoA Consensus Room**: Upgraded `inbox_manager.py` to enforce a 3/3 agent consensus (Implementer, Reviewer, Security-Reviewer) before unlocking production gates.
+
 ## [4.4.38] - 2026-08-20
 
 ### The 2026 SOTA Agent Architecture Upgrade
