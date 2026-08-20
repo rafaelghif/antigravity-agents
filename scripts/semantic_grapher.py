@@ -11,6 +11,12 @@ import sys
 from pathlib import Path
 
 
+def print_class_methods(class_node):
+    for item in class_node.body:
+        if isinstance(item, ast.FunctionDef):
+            args = [a.arg for a in item.args.args]
+            print(f"    def {item.name}({', '.join(args)})")
+
 def parse_python(filepath: Path):
     try:
         content = filepath.read_text(encoding="utf-8")
@@ -20,10 +26,7 @@ def parse_python(filepath: Path):
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
                 print(f"  class {node.name}:")
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef):
-                        args = [a.arg for a in item.args.args]
-                        print(f"    def {item.name}({', '.join(args)})")
+                print_class_methods(node)
             elif isinstance(node, ast.FunctionDef):
                 args = [a.arg for a in node.args.args]
                 print(f"  def {node.name}({', '.join(args)})")
@@ -52,16 +55,19 @@ def parse_regex(filepath: Path, lang: str):
     except Exception as e:
         print(f"\n[FILE] {filepath} (Error parsing: {e})")
 
+def process_extension(root_dir: Path, ext: str):
+    for filepath in root_dir.rglob(f"*{ext}"):
+        if "node_modules" in filepath.parts or ".venv" in filepath.parts or ".git" in filepath.parts:
+            continue
+        if ext == ".py":
+            parse_python(filepath)
+        else:
+            parse_regex(filepath, ext[1:])
+
 def scan_directory(root_dir: Path):
     print(f"Semantic Graph for {root_dir}\n" + "="*40)
     for ext in [".py", ".ts", ".js", ".go"]:
-        for filepath in root_dir.rglob(f"*{ext}"):
-            if "node_modules" in filepath.parts or ".venv" in filepath.parts or ".git" in filepath.parts:
-                continue
-            if ext == ".py":
-                parse_python(filepath)
-            else:
-                parse_regex(filepath, ext[1:])
+        process_extension(root_dir, ext)
 
 if __name__ == "__main__":
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()

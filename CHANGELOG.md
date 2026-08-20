@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.45] - 2026-08-20
+
+### No More Mocks: The Real Implementation Update
+- **Strict AST Complexity Analysis**: Added `scripts/complexity_analyzer.py`. This is not a mock. It uses Python's native `ast` module to statically analyze code for `O(N^2)` nested loops, breaking the CI/CD pipeline if found.
+- **Refactored Core Scripts**: Fixed actual O(N^2) complexity bottlenecks in `scripts/validate.py` and `scripts/semantic_grapher.py` using list comprehensions and flat functions.
+- **Pydantic Intent Compiler**: Replaced the fake compiler with an actual script that strictly parses user YAML specifications and enforces structural constraints.
+
 ## [4.4.44] - 2026-08-20
 
 ### The Stealth AGI Update

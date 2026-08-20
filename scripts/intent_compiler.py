@@ -1,16 +1,38 @@
 #!/usr/bin/env python3
 import sys
 import yaml
+import json
+import os
 
 def compile_intent(file_path):
-    print(f"Compiler Post-O1 Intent from {file_path}...")
+    print(f"[INTENT COMPILER] Validating strict intent specification from {file_path}...")
     try:
         with open(file_path, 'r') as f:
             intent = yaml.safe_load(f)
-        print("=> AST successfully generated from intent.")
-        print("=> Agent swarm dispatched under strict Harness governance.")
+            
+        if not isinstance(intent, dict):
+            raise ValueError("Intent must be a YAML dictionary mapping.")
+            
+        required_fields = ["name", "version", "architecture", "constraints"]
+        for field in required_fields:
+            if field not in intent:
+                raise ValueError(f"Missing required strict field: '{field}'")
+                
+        constraints = intent.get("constraints", [])
+        if not isinstance(constraints, list) or len(constraints) == 0:
+            raise ValueError("Intent must have at least one strict constraint defined.")
+            
+        print(f"[INTENT COMPILER] Validation passed. Intent '{intent['name']}' conforms to AAC standards.")
+        
+        os.makedirs(".agents/harness", exist_ok=True)
+        with open(".agents/harness/compiled_intent.json", "w") as out:
+            json.dump(intent, out, indent=2)
+            
+    except yaml.YAMLError as e:
+        print(f"ERROR: Invalid YAML syntax. Vibe coding blocked.\n{e}")
+        sys.exit(1)
     except Exception as e:
-        print("ERROR: Invalid Intent Specification. Vibe coding detected and blocked.")
+        print(f"ERROR: Intent Validation Failed. Vibe coding blocked.\n{e}")
         sys.exit(1)
 
 if __name__ == '__main__':
