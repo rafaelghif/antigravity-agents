@@ -1,5 +1,5 @@
 {
-  "core_version": "4.4.35",
+  "core_version": "4.4.36",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
