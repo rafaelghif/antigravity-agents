@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.43] - 2026-08-20
+
+### Professional Documentation & Feature Alignment
+- **Docs Update**: Rewrote `README.md` to professionally highlight AAC's core capabilities (Multi-Agent Inbox, Intent Compilation, MCP, and Agentic CI/CD) without relying on speculative or experimental AI terminology.
+- **Code Cleanup**: Removed experimental/mocked scripts (`latent_router.py`, `rsi_loop.yml`) and reverted experimental TTC outputs to ensure repository code reflects production-ready implementations.
+
 ## [4.4.42] - 2026-08-20
 
 ### The AGI Trajectory (2027 Frontier)
