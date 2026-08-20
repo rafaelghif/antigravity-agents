@@ -47,9 +47,23 @@ def extract_telemetry(content):
     return re.sub(r'<telemetry>.*?</telemetry>', '', content, flags=re.DOTALL)
 
 
+
+def check_consensus(data):
+    if len(data["messages"]) < 3: return False
+    recent_msgs = [m["content"].lower() for m in data["messages"][-3:]]
+    # Check if implementer, reviewer, and security-reviewer all agree
+    approvals = sum(1 for m in recent_msgs if "lgtm" in m or "approve" in m or "consensus reached" in m)
+    if approvals >= 3:
+        data["status"] = "consensus_reached"
+        print("[MoA] 3/3 Consensus Reached. Unlocking production gates.")
+        check_consensus(data)
+    return True
+    return False
+
 def add_message(sender, recipient, content):
     data = load_inbox()
     content_clean = extract_telemetry(content)
+
 
     
     # Check debate limits if this is a back-and-forth between implementer and reviewer
@@ -74,6 +88,7 @@ def add_message(sender, recipient, content):
         
     save_inbox(data)
     print(f"Message from {sender} to {recipient} appended to Inbox.")
+    check_consensus(data)
     return True
 
 def view_recent():
