@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.40/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.4.41/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.4.40"
+$AacRef = "v4.4.41"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
