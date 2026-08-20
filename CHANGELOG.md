@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.35] - 2026-08-20
+
+### Absolute Anti-Dummy & Zero Trust Enforcement
+- **Implementer Overhaul**: Injected the `security` skill directly into the `implementer`'s context. Added a strict **ZERO-TOLERANCE ANTI-DUMMY POLICY** to completely forbid half-baked features, `// TODO` stubs, and mock variables.
+- **Hardcoded Secrets Ban**: `implementer` is now explicitly commanded to use real environment variables and actual Database constraints instead of dummy role-checks.
+- **Reviewer Auto-Reject**: Upgraded the `reviewer` subagent's gatekeeping logic. It will now automatically REJECT and bounce code back if it detects *any* hardcoded credentials or mock data.
+
 ## [4.4.34] - 2026-08-19
 
 ### Advanced Engineering Upgrades

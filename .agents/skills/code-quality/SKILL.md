@@ -17,6 +17,8 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 6. **Zero-Tolerance Anti-Patterns**: NO `any` types in TypeScript. NO broad `except Exception:` blocks in Python. NO inline CSS styles. Use strict typing everywhere.
 7. **Algorithmic Supremacy**: Optimize performance aggressively. Default to O(1) HashMap lookups instead of O(N^2) nested loops. Memoize expensive operations.
 8. **Edge Case Paranoia**: Code must handle nulls, empty arrays, timeouts, and malformed inputs natively without crashing.
+5. **100% Feature Completeness**: DO NOT write placeholders, `pass`, `// TODO: implement later`, or mock data. If you are asked to build a feature, write the complete, production-ready code.
+6. **No Hardcoded Secrets**: All keys, passwords, and tokens MUST be fetched from environment variables or secure vaults.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
