@@ -41,8 +41,7 @@ def extract_telemetry(content):
         for t in telemetry:
             msg = f"[{datetime.utcnow().isoformat() + 'Z'}] TELEMETRY: {t.strip()}"
             print(f"[LIVE TELEMETRY] {t.strip()}")
-            f.write(msg + "
-")
+            f.write(msg + "\n")
             
     return re.sub(r'<telemetry>.*?</telemetry>', '', content, flags=re.DOTALL)
 

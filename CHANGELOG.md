@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.47] - 2026-08-20
+
+### Absolute Zero Bug Policy
+- **Syntax Bug Fix**: Patched a critical `SyntaxError: unterminated string literal` in `scripts/inbox_manager.py` that would cause the system to crash during execution.
+- **Prompt Sterilization**: Purged all remaining references to hypothetical "AGI/Test-Time Compute/MCTS" concepts from `.agents/agents/planner.md` and `AGENTS.md`. The orchestration engine is now fully grounded in realistic, static-analysis driven engineering.
+
 ## [4.4.46] - 2026-08-20
 
 ### Absolute Code Purity
