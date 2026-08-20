@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.42] - 2026-08-20
+
+### The AGI Trajectory (2027 Frontier)
+- **Continuous Latent Action Space (CLAS)**: Bypassed autoregressive token generation. Agents now map tasks to high-dimensional latent manifolds via `scripts/latent_router.py` for instant, non-linear code assembly.
+- **Recursive Self-Improvement (RSI)**: Added `.agents/harness/rsi_loop.yml`. Agents are now authorized to autonomously write, compile, and attach new tools to their own neural structure if they detect capability gaps.
+- **Post-Transformer SSM**: Switched mental models from $O(n^2)$ Attention to Mamba/SSM-based linear infinite-context tracking.
+
 ## [4.4.41] - 2026-08-20
 
 ### The Post-o1 "Harness & Intent" Paradigm

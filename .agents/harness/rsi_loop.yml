@@ -1,0 +1,5 @@
+# Recursive Self-Improvement (RSI) Matrix 2027
+rsi_enabled: true
+superalignment_check: true
+mutation_rate: 0.05
+allow_autonomous_tool_creation: true
