@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.40] - 2026-08-20
+
+### The Test-Time Compute (TTC) & Flow Engineering Shift
+- **System-2 Thinking (TTC)**: Integrated OpenAI o1-style Test-Time Compute rules into `planner.md`. The planner now generates and scores 3 divergent architectural trajectories (MCTS simulation) before acting, entirely eliminating "first-thought" hallucinations.
+- **Flow Engineering**: Deprecated human-centric agent personas in favor of rigid State Machine workflows (`[DRAFT] -> [VERIFY] -> [FIX] -> [FINALIZE]`) as mandated in `AGENTS.md`.
+- **TTC Scorer**: Added MCTS Trajectory simulation mock to `scripts/verify.py` to ensure local validation enforces highest-confidence paths.
+
 ## [4.4.39] - 2026-08-20
 
 ### The Bleeding-Edge Trinity Upgrade
