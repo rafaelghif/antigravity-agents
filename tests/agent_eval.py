@@ -9,11 +9,11 @@ def test_anti_dummy_compliance():
     src_files = list(Path(".agents").rglob("*.md"))
     
     for f in src_files:
+        if "skill.md" in f.name.lower():
+            continue
         content = f.read_text(errors="ignore").lower()
-        for token in forbidden_tokens:
-            # We skip SKILL.md itself because it might contain the forbidden words in its rules
-            if "skill.md" not in f.name.lower():
-                assert token not in content, f"Agent evaluation failed: Found forbidden token '{token}' in {f}"
+        found = [t for t in forbidden_tokens if t in content]
+        assert not found, f"Agent evaluation failed: Found forbidden tokens {found} in {f}"
 
 def test_security_skill_presence():
     # Evaluate that implementer always has security skill

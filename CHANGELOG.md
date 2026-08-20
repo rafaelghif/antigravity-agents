@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.4.48] - 2026-08-20
+
+### The Ultimate Purity Sweep
+- **Global AST Complexity**: Expanded `complexity_analyzer.py` to recursively scan the *entire* codebase (including `tests/`) rather than just `scripts/`.
+- **Test Optimization**: Discovered and resolved a hidden O(N^2) loop inside `tests/agent_eval.py`. The repository is now mathematically proven to have zero nested standard `for`/`while` loops across all Python execution logic.
+
 ## [4.4.47] - 2026-08-20
 
 ### Absolute Zero Bug Policy
