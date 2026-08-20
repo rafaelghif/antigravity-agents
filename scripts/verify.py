@@ -57,6 +57,10 @@ def main() -> int:
     if structural.is_file():
         checks.append(("validate", "AAC", f"python3 {structural}"))
         
+    complexity = ROOT / "scripts" / "complexity_analyzer.py"
+    if complexity.is_file():
+        checks.append(("complexity_check", "AAC", f"python3 {complexity}"))
+        
     if not checks:
         print("- application stack: not detected")
         print("- project tests/formatters/linters: not available")

@@ -99,9 +99,9 @@ def validate_markdown_metadata(directory: str, expected_count: int, required_fie
         if not match:
             fail(f"{path.relative_to(ROOT)} is missing YAML frontmatter")
         frontmatter = match.group("frontmatter")
-        for field in required_fields:
-            if not re.search(rf"^{field}:\s*\S+", frontmatter, re.MULTILINE):
-                fail(f"{path.relative_to(ROOT)} is missing frontmatter {field}")
+        missing = [f for f in required_fields if not re.search(rf"^{f}:\s*\S+", frontmatter, re.MULTILINE)]
+        if missing:
+            fail(f"{path.relative_to(ROOT)} is missing frontmatter: {', '.join(missing)}")
         if len(content.split()) > 700:
             fail(f"{path.relative_to(ROOT)} exceeds the 700-word instruction budget")
 
