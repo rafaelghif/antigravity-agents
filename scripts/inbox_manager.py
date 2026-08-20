@@ -51,6 +51,15 @@ def extract_telemetry(content):
 def check_consensus(data):
     if len(data["messages"]) < 3: return False
     recent_msgs = [m["content"].lower() for m in data["messages"][-3:]]
+    approvals = sum(1 for m in recent_msgs if "lgtm" in m or "approve" in m or "consensus reached" in m)
+    if approvals >= 3:
+        if data["status"] != "consensus_reached":
+            data["status"] = "consensus_reached"
+            print("[MoA] 3/3 Consensus Reached. Production gates unlocked.")
+            save_inbox(data)
+        return True
+    return False
+    recent_msgs = [m["content"].lower() for m in data["messages"][-3:]]
     # Check if implementer, reviewer, and security-reviewer all agree
     approvals = sum(1 for m in recent_msgs if "lgtm" in m or "approve" in m or "consensus reached" in m)
     if approvals >= 3:
