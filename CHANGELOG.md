@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.36] - 2026-08-20
+
+### Context Engineering Upgrades
+- **Task Template Modernization**: Rewrote `.agents/TASK_TEMPLATE.md` to utilize 2026 Context Engineering standards (ReAct loops, Constitutional Constraints, Output Contracts, and Built-in Self-Verification).
+
 ## [4.4.35] - 2026-08-20
 
 ### Absolute Anti-Dummy & Zero Trust Enforcement
