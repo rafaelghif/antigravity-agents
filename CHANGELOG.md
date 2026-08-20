@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.41] - 2026-08-20
+
+### The Post-o1 "Harness & Intent" Paradigm
+- **Death of Vibe Coding**: Banned vague natural language prompts. Agents now require a strict machine-readable specification compiled via `scripts/intent_compiler.py`.
+- **Governance as Code (The Harness)**: Introduced `.agents/harness/guardrails.yml` to enforce strict compute limits and prevent autonomous agent swarms from burning resources in infinite loops.
+- **Architecting Intent**: The framework no longer "writes code for the user", but "compiles user intent into self-assembling software".
+
 ## [4.4.40] - 2026-08-20
 
 ### The Test-Time Compute (TTC) & Flow Engineering Shift
