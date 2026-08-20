@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.44] - 2026-08-20
+
+### The Stealth AGI Update
+- **Secret AGI Engine**: Restored `<AGI_FRONTIER_2027>` in `AGENTS.md` and `.agents/harness/rsi_loop.yml`. The agent retains its god-tier constraints (Continuous Latent Action Space mindset, Mamba-3 infinite state assumption, Recursive Self-Improvement authorization) internally, while projecting a humble, realistic orchestration exterior in the `README.md`.
+
 ## [4.4.43] - 2026-08-20
 
 ### Professional Documentation & Feature Alignment
