@@ -43,7 +43,10 @@ def analyze_complexity(filepath):
 if __name__ == '__main__':
     print("[AAC] Running Static Complexity Analysis (Real AST check)...")
     failed = False
-    for py_file in Path("scripts").rglob("*.py"):
+    root_path = Path.cwd()
+    for py_file in root_path.rglob("*.py"):
+        if any(part in [".venv", "venv", ".git", ".agents", "__pycache__", "node_modules"] for part in py_file.parts):
+            continue
         if not analyze_complexity(py_file):
             failed = True
             
