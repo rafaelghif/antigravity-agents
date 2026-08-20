@@ -6,14 +6,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Antigravity CLI
+      - name: Setup Environment
         run: |
-          echo "Setting up AAC v4.4.37 environment..."
+          pip install pytest
       - name: Trigger Reviewer Subagent
         env:
           PR_DIFF: ${{ github.event.pull_request.diff_url }}
         run: |
-          # The Reviewer agent will analyze the PR diff for semantic logic, tech debt, and duct-tape fixes.
-          # If it detects 'half-baked' code that passed unit tests but violates L9 constraints, it fails the build.
-          echo "Executing: agy run reviewer --context PR_DIFF"
-          python3 tests/agent_eval.py
+          echo "Executing Semantic Evals..."
+          pytest tests/agent_eval.py
