@@ -28,8 +28,17 @@ def save_inbox(data):
     with open(INBOX_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
+def extract_telemetry(content):
+    import re
+    telemetry = re.findall(r'<telemetry>(.*?)</telemetry>', content, re.DOTALL)
+    for t in telemetry:
+        print(f"[LIVE TELEMETRY] {t.strip()}")
+    return re.sub(r'<telemetry>.*?</telemetry>', '', content, flags=re.DOTALL)
+
 def add_message(sender, recipient, content):
     data = load_inbox()
+    content_clean = extract_telemetry(content)
+
     
     # Check debate limits if this is a back-and-forth between implementer and reviewer
     if sender in ["implementer", "reviewer"] and recipient in ["implementer", "reviewer"]:
