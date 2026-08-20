@@ -28,12 +28,24 @@ def save_inbox(data):
     with open(INBOX_FILE, 'w') as f:
         json.dump(data, f, indent=2)
 
+
 def extract_telemetry(content):
     import re
+    from datetime import datetime
+    
     telemetry = re.findall(r'<telemetry>(.*?)</telemetry>', content, re.DOTALL)
-    for t in telemetry:
-        print(f"[LIVE TELEMETRY] {t.strip()}")
+    
+    # GitOps Audit Logging
+    audit_file = ".agents/inbox/audit.log"
+    with open(audit_file, "a") as f:
+        for t in telemetry:
+            msg = f"[{datetime.utcnow().isoformat() + 'Z'}] TELEMETRY: {t.strip()}"
+            print(f"[LIVE TELEMETRY] {t.strip()}")
+            f.write(msg + "
+")
+            
     return re.sub(r'<telemetry>.*?</telemetry>', '', content, flags=re.DOTALL)
+
 
 def add_message(sender, recipient, content):
     data = load_inbox()

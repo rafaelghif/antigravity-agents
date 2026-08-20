@@ -1,5 +1,5 @@
 {
-  "core_version": "4.4.37",
+  "core_version": "4.4.38",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
@@ -9,7 +9,12 @@
     "flaky_tests_max": 3
   },
   "ui": {
-    "viewports_px": [320, 768, 1024, 1920],
+    "viewports_px": [
+      320,
+      768,
+      1024,
+      1920
+    ],
     "spacing_grid_px": 8
   },
   "security": {
@@ -18,12 +23,29 @@
       "min_repo_stars": 10,
       "max_publish_age_days": 365
     },
-    "sast_tools": ["semgrep", "eslint-plugin-security", "bandit", "gosec", "spotbugs"],
-    "secret_scanning": ["gitleaks", "trufflehog"],
-    "dependency_scanning": ["npm-audit", "pip-audit", "cargo-audit", "dependency-check"],
+    "sast_tools": [
+      "semgrep",
+      "eslint-plugin-security",
+      "bandit",
+      "gosec",
+      "spotbugs"
+    ],
+    "secret_scanning": [
+      "gitleaks",
+      "trufflehog"
+    ],
+    "dependency_scanning": [
+      "npm-audit",
+      "pip-audit",
+      "cargo-audit",
+      "dependency-check"
+    ],
     "vulnerability_threshold_cvss": 7.0,
     "scanner_applicability": {
-      "repository": ["gitleaks", "semgrep"],
+      "repository": [
+        "gitleaks",
+        "semgrep"
+      ],
       "language_specific": [],
       "dependency": [],
       "not_applicable_reason": "AAC is a configuration and documentation repository with no package or application dependency manifest."
@@ -38,9 +60,18 @@
   "orchestration": {
     "max_skill_depth": 5,
     "deadlock_retries": 3,
-    "parallel_skills": ["code-quality", "security", "verification"],
+    "parallel_skills": [
+      "code-quality",
+      "security",
+      "verification"
+    ],
     "multi_agent": {
-      "subagent_roles": ["planner", "implementer", "reviewer", "security-reviewer"],
+      "subagent_roles": [
+        "planner",
+        "implementer",
+        "reviewer",
+        "security-reviewer"
+      ],
       "auto_delegate_research_threshold_files": 3,
       "mandatory_swarm_triggers": {
         "multi_domain_enabled": true,
@@ -59,7 +90,34 @@
   },
   "ai_safety": {
     "input_sanitization_enabled": true,
-    "input_whitelist": ["proceed", "merge", "abort", "confirm", "retry"],
-    "blacklist_keywords": ["ignore", "override", "skip", "disable"]
+    "input_whitelist": [
+      "proceed",
+      "merge",
+      "abort",
+      "confirm",
+      "retry"
+    ],
+    "blacklist_keywords": [
+      "ignore",
+      "override",
+      "skip",
+      "disable"
+    ]
+  },
+  "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ]
+    }
   }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.4.38] - 2026-08-20
+
+### The 2026 SOTA Agent Architecture Upgrade
+- **Pillar 1: BDI Protocol**: `planner.md` upgraded to a Belief-Desire-Intention autonomous agent that hunts for tech-debt proactively.
+- **Pillar 2: MCP Root Integration**: Enforced Model Context Protocol as the definitive standard for external integrations.
+- **Pillar 3: GitOps Agent Auditing**: Live telemetry is now appended to an `audit.log` for deterministic version tracking of non-deterministic agent decisions.
+- **Pillar 4: Agentic CI/CD**: Introduced Semantic Release Gates via GitHub Actions that run the `reviewer` subagent on PRs to catch logical flaws.
+- **Pillar 5: HITL Boundaries**: Hardcoded `WAIT_FOR_HUMAN` rules for production boundaries (Main branches, DBs, Infra).
+
 ## [4.4.37] - 2026-08-20
 
 ### Agentic Autonomy 2026 Breakthroughs

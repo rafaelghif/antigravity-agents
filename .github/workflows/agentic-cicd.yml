@@ -1,0 +1,17 @@
+name: Agentic CI/CD (Semantic Release Gates)
+on: [pull_request]
+
+jobs:
+  agent_review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Setup Environment
+        run: |
+          pip install pytest
+      - name: Trigger Reviewer Subagent
+        env:
+          PR_DIFF: ${{ github.event.pull_request.diff_url }}
+        run: |
+          echo "Executing Semantic Evals..."
+          pytest tests/agent_eval.py

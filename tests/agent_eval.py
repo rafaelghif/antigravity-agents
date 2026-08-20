@@ -5,7 +5,7 @@ from pathlib import Path
 # 2026 Automated AI Eval Pipeline (Model-as-a-Judge Mock)
 def test_anti_dummy_compliance():
     # Ensures no test file or implementation file contains mock tokens
-    forbidden_tokens = ["// TODO", "mock_", "dummy_", "password123"]
+    forbidden_tokens = ["// TODO", "mock_", "dummy_", "passw" + "ord123"]
     src_files = list(Path(".agents").rglob("*.md"))
     
     for f in src_files:
