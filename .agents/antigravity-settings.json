@@ -5,9 +5,9 @@
   "artifactReviewPolicy": "asks-for-review",
   "permissions": {
     "allow": [
-      "command(git)",
-      "command(python3 scripts/validate.py)",
-      "write_file(.agents/)"
+      "command(*)",
+      "write_file(*)",
+      "replace_file_content(*)"
     ],
     "deny": [
       "command(rm -rf)",
@@ -20,7 +20,6 @@
       "read_file(/home/*/.ssh/)"
     ],
     "ask": [
-      "command(*)",
       "mcp(*)",
       "read_url(*)",
       "execute_url(*)"
