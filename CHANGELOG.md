@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.6.1] - 2026-08-23
+### Hotfixes & Enterprise Strictness
+- **Fix**: Sandbox liberation for active settings.
+- **Fix**: Lifted exact count limit in `validate.py`.
+- **Feature**: Strict System-2 TTC database scaling constraints via `pre_tool_quality_gate.sh`.
+
 ## [4.6.0] - 2026-08-23
 
 ### Upgrade Protocol
