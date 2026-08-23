@@ -68,3 +68,9 @@ CRITICAL: Read the relevant `SKILL.md` before acting. Do not hallucinate instruc
 0. Load Memory (`grep_search` on `.agents/brain/rules.md`).
 1. Load Skill -> 2. Explore -> 3. Delegate to Planner -> 4. Implementer <-> Reviewer (via `inbox_manager.py`). 
 </DELIVERY_PROTOCOL>
+
+<WORLD_CLASS_GATES>
+28. [MANDATORY_TDD] No source code file can be written or modified unless its corresponding test file physically exists in the workspace.
+29. [AITL_CONSENSUS] Production commands (`git push`, `npm publish`) are blocked until `.agents/brain/AITL_CONSENSUS.yaml` contains `STATUS: APPROVED` from peer review subagents.
+30. [AST_GUARD] Code is verified by `scripts/complexity_analyzer.py` against O(N^2) complexity, missing type hints, empty except blocks, and TODOs.
+</WORLD_CLASS_GATES>
