@@ -29,7 +29,8 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
    - Use `invoke_subagent` to spawn BOTH the `implementer` and `reviewer` concurrently.
    - Upon receiving their unique `Conversation ID`s, you MUST use `send_message` to ping the `implementer`, providing it the `reviewer`'s ID and instructing it to send its PR/Diff to the `reviewer` when done.
    - Use `send_message` to ping the `reviewer`, providing it the `implementer`'s ID and instructing it to wait for the code, then debate/reject via `send_message` (Max 3 turns) until perfection, before finally notifying you (the planner).
-   - **HALT EXECUTION**. Wait for the `reviewer` to send you the "Consensus Reached" message before proceeding to Layer 2 tasks or finalizing.
+   - **HALT EXECUTION**. Wait for the `reviewer` to send you the "Consensus Reached" message before proceeding to Layer 2 tasks.
+   - **Memory Consolidation Phase (Self-Learn)**: Once ALL implementations are approved, you MUST execute the final DAG node. Use `invoke_subagent` to spawn the `research` agent with the role `Memory Synthesizer`. Pass it the exact error logs or architectural decisions made during the session, and instruct it to cleanly MERGE these new learnings into `.agents/brain/rules.md` WITHOUT duplicating existing rules. Wait for its success message before finalizing your operation.
 </PROCEDURAL_WORKFLOW>
 
 
