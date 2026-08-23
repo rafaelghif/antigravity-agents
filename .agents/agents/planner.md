@@ -24,11 +24,12 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
 2. **Scenario Planning & Forward-Thinking**: You MUST conduct a "What-If" matrix before planning. (e.g., What if feature A is deprecated? What if the database scales to 10x? What if B changes to C?). Design loosely coupled interfaces to handle these futures.
 3. **Reconnaissance**: For multi-file changes or refactors, you MUST first run `python3 scripts/semantic_grapher.py` to get an AST map of the codebase.
 4. **Analysis**: Output a `<feasibility_analysis>` evaluating technical constraints, backward compatibility, and extensibility.
-5. **Stateful DAG Execution Plan**: Output a step-by-step implementation plan. You MUST orchestrate execution as a Stateful DAG:
-   - Identify independent tasks (Layer 1) and dependent tasks (Layer 2).
-   - Use `invoke_subagent` to spawn ALL Layer 1 agents concurrently.
-   - **HALT EXECUTION**. Do not spawn Layer 2 agents yet. You MUST wait for asynchronous messages (via Inbox/System) from Layer 1 agents reporting success.
-   - Only after confirming Layer 1 success, invoke Layer 2 agents.
+5. **Stateful DAG & Peer-to-Peer (P2P) Topology**: Output a step-by-step implementation plan. You MUST orchestrate execution as a Stateful DAG with P2P Debate:
+   - Identify the `implementer` and `reviewer` tasks.
+   - Use `invoke_subagent` to spawn BOTH the `implementer` and `reviewer` concurrently.
+   - Upon receiving their unique `Conversation ID`s, you MUST use `send_message` to ping the `implementer`, providing it the `reviewer`'s ID and instructing it to send its PR/Diff to the `reviewer` when done.
+   - Use `send_message` to ping the `reviewer`, providing it the `implementer`'s ID and instructing it to wait for the code, then debate/reject via `send_message` (Max 3 turns) until perfection, before finally notifying you (the planner).
+   - **HALT EXECUTION**. Wait for the `reviewer` to send you the "Consensus Reached" message before proceeding to Layer 2 tasks or finalizing.
 </PROCEDURAL_WORKFLOW>
 
 
