@@ -1,5 +1,5 @@
 {
-  "toolPermission": "proceed",
+  "toolPermission": "proceed-in-sandbox",
   "enableTerminalSandbox": true,
   "allowNonWorkspaceAccess": false,
   "artifactReviewPolicy": "asks-for-review",
