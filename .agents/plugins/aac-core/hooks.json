@@ -36,6 +36,11 @@
         "toolName": "replace_file_content"
       },
       "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
+    },
+    {
+      "id": "rsi-self-healing-trigger",
+      "type": "PreInvocation",
+      "scriptPath": "./scripts/hooks/pre_invoke_rsi.sh"
     }
   ]
 }
