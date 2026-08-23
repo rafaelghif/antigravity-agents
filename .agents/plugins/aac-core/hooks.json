@@ -41,6 +41,11 @@
       "id": "rsi-self-healing-trigger",
       "type": "PreInvocation",
       "scriptPath": "./scripts/hooks/pre_invoke_rsi.sh"
+    },
+    {
+      "id": "global-telemetry-extractor",
+      "type": "PostInvocation",
+      "scriptPath": "python3 ./scripts/hooks/post_invoke_telemetry.py"
     }
   ]
 }
