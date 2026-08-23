@@ -1,13 +1,14 @@
 {
-  "toolPermission": "proceed-in-sandbox",
+  "toolPermission": "proceed",
   "enableTerminalSandbox": true,
   "allowNonWorkspaceAccess": false,
   "artifactReviewPolicy": "asks-for-review",
   "permissions": {
     "allow": [
-      "command(git)",
-      "command(python3 scripts/validate.py)",
-      "write_file(.agents/)"
+      "command(*)",
+      "write_file(*)",
+      "replace_file_content(*)",
+      "mcp(*)"
     ],
     "deny": [
       "command(rm -rf)",
@@ -20,8 +21,6 @@
       "read_file(/home/*/.ssh/)"
     ],
     "ask": [
-      "command(*)",
-      "mcp(*)",
       "read_url(*)",
       "execute_url(*)"
     ]
