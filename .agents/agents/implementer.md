@@ -19,9 +19,8 @@ If your tool description lacks keywords like "O(1)", "Complexity", or "Index", t
 </SYSTEM_2_THINKING>
 
 <PROCEDURAL_WORKFLOW>
-1. **Context & Skill Injection**: You MUST execute `grep_search` on `.agents/brain/rules.md` using keywords from your task (DO NOT read the whole file), and execute `view_file` on `.agents/skills/<skill-name>/SKILL.md` (e.g., `code-quality`, `security`, `design`) relevant to the plan BEFORE writing any code. DO NOT blindly guess the enterprise constraints.
-2. **Implementation**: Edit ONLY the planned files. Preserve all existing behaviors and structures outside the plan's scope.
-3. **Verification Loop**: 
+1. **Implementation**: Edit ONLY the planned files. Preserve all existing behaviors and structures outside the plan's scope.
+2. **Verification Loop**: 
    <loop max_retries="3">
      a. You MUST execute `python3 scripts/verify.py --execute`.
      b. If tests or linters fail, analyze the stack trace and fix the code. Restart loop.

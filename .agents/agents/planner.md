@@ -27,7 +27,7 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
 5. **Context Anchoring**: Because your context window will eventually truncate, you MUST actively write your current DAG state and critical architecture context to `.agents/brain/ANCHOR.md` before executing parallel tasks. Use `write_to_file` or `replace_file_content`.
 6. **Stateful DAG & Peer-to-Peer (P2P) Topology**: Output a step-by-step implementation plan. You MUST orchestrate execution as a Stateful DAG with P2P Debate:
    - Identify the `implementer` and `reviewer` tasks.
-   - Use `invoke_subagent` to spawn BOTH the `implementer` and `reviewer` concurrently.
+   - Use `invoke_subagent` to spawn BOTH the `implementer` and `reviewer` concurrently. **CRITICAL OPTIMIZATION**: Spawn `implementer` with Model `flash` (cost-efficiency) and `reviewer` with Model `pro` (deep reasoning).
    - Upon receiving their unique `Conversation ID`s, you MUST use `send_message` to ping the `implementer`, providing it the `reviewer`'s ID and instructing it to send its PR/Diff to the `reviewer` when done.
    - Use `send_message` to ping the `reviewer`, providing it the `implementer`'s ID and instructing it to wait for the code, then debate/reject via `send_message` (Max 3 turns) until perfection, before finally notifying you (the planner).
    - **HALT EXECUTION**. Wait for the `reviewer` to send you the "Consensus Reached" message before proceeding to Layer 2 tasks.

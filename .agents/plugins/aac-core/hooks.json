@@ -38,9 +38,9 @@
       "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
     },
     {
-      "id": "rsi-self-healing-trigger",
+      "id": "pre-invoke-master-hook",
       "type": "PreInvocation",
-      "scriptPath": "./scripts/hooks/pre_invoke_rsi.sh"
+      "scriptPath": "python3 ./scripts/hooks/pre_invoke_master.py"
     },
     {
       "id": "global-telemetry-extractor",
