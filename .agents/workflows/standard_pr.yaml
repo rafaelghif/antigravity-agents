@@ -1,0 +1,16 @@
+tasks:
+  planner:
+    command: "python3 scripts/inbox_manager.py planner"
+    depends_on: []
+  implementer:
+    command: "python3 scripts/inbox_manager.py implementer"
+    depends_on: ["planner"]
+  reviewer:
+    command: "python3 scripts/inbox_manager.py reviewer"
+    depends_on: ["implementer"]
+  qa-engineer:
+    command: "python3 scripts/fuzz_sandbox.py qa-engineer"
+    depends_on: ["implementer"]
+  security-reviewer:
+    command: "python3 scripts/inbox_manager.py security-reviewer"
+    depends_on: ["implementer"]
