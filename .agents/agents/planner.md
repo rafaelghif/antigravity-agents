@@ -24,7 +24,8 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
 2. **Scenario Planning & Forward-Thinking**: You MUST conduct a "What-If" matrix before planning. (e.g., What if feature A is deprecated? What if the database scales to 10x? What if B changes to C?). Design loosely coupled interfaces to handle these futures.
 3. **Reconnaissance**: For multi-file changes or refactors, you MUST first run `python3 scripts/semantic_grapher.py` to get an AST map of the codebase.
 4. **Analysis**: Output a `<feasibility_analysis>` evaluating technical constraints, backward compatibility, and extensibility.
-5. **Stateful DAG & Peer-to-Peer (P2P) Topology**: Output a step-by-step implementation plan. You MUST orchestrate execution as a Stateful DAG with P2P Debate:
+5. **Context Anchoring**: Because your context window will eventually truncate, you MUST actively write your current DAG state and critical architecture context to `.agents/brain/ANCHOR.md` before executing parallel tasks. Use `write_to_file` or `replace_file_content`.
+6. **Stateful DAG & Peer-to-Peer (P2P) Topology**: Output a step-by-step implementation plan. You MUST orchestrate execution as a Stateful DAG with P2P Debate:
    - Identify the `implementer` and `reviewer` tasks.
    - Use `invoke_subagent` to spawn BOTH the `implementer` and `reviewer` concurrently.
    - Upon receiving their unique `Conversation ID`s, you MUST use `send_message` to ping the `implementer`, providing it the `reviewer`'s ID and instructing it to send its PR/Diff to the `reviewer` when done.
