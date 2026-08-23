@@ -2,7 +2,7 @@
 description: Advanced 2026 Context Engineering Template for Autonomous Subagents
 ---
 
-# 🧠 Agent Task Definition (AAC v4.4.48)
+# 🧠 Agent Task Definition (AAC v4.4.49)
 
 > **[Role Definition]**
 > You are the L9 [Insert Role, e.g., Backend Architect].

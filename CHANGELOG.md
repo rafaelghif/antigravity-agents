@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.4.49] - 2026-08-23
+
+### Cognitive Restoration
+- **Prompt Lobotomy Reversal**: Restored the advanced System-2 Test-Time Compute (TTC) constraints in `.agents/agents/planner.md` and `AGENTS.md`. The removal of these instructions in v4.4.47 accidentally stripped the LLM of its reasoning capabilities. The agent framework is now both mathematically robust (via real Python scripts) AND highly intelligent (via strict prompt constraints).
+
 ## [4.4.48] - 2026-08-20
 
 ### The Ultimate Purity Sweep
