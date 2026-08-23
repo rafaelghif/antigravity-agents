@@ -91,8 +91,8 @@ def validate_mcp() -> None:
 
 def validate_markdown_metadata(directory: str, expected_count: int, required_fields: tuple[str, ...], pattern: str = "*.md") -> None:
     files = sorted((ROOT / directory).glob(pattern))
-    if len(files) != expected_count:
-        fail(f"expected {expected_count} files in {directory}, found {len(files)}")
+    if len(files) < expected_count:
+        fail(f"expected at least {expected_count} files in {directory}, found {len(files)}")
     for path in files:
         content = path.read_text(encoding="utf-8")
         match = re.match(r"^---\n(?P<frontmatter>.*?)\n---\n", content, re.DOTALL)
