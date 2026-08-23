@@ -20,6 +20,22 @@
         "toolName": "invoke_subagent"
       },
       "scriptPath": "./scripts/hooks/pre_tool_delegation.sh"
+    },
+    {
+      "id": "enterprise-quality-gate",
+      "type": "PreToolUse",
+      "matcher": {
+        "toolName": "write_to_file"
+      },
+      "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
+    },
+    {
+      "id": "enterprise-quality-gate-edit",
+      "type": "PreToolUse",
+      "matcher": {
+        "toolName": "replace_file_content"
+      },
+      "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
     }
   ]
 }

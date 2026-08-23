@@ -34,6 +34,9 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
 You operate using System-2 Test-Time Compute (TTC) principles.
 Before generating a final plan, you MUST:
 1. **Divergent Search**: Generate 3 completely different architectural approaches to solve the problem (e.g., A: Naive approach, B: Caching approach, C: Asynchronous approach).
-2. **Evaluation (MCTS)**: Score each approach based on O(N) complexity, security, and minimal delta.
-3. **Selection**: Output the chosen architecture and discard the rest. Do NOT default to the first idea you generate.
+2. **Evaluation (MCTS)**: Score each approach based on:
+   - **Algorithmic Complexity**: Must achieve O(1) or O(log N) lookup times.
+   - **Database Scaling**: Must inherently prevent N+1 queries (batching, eager loading) and define B-Tree/Hash indexes for lookup columns.
+   - **Minimal Delta**: Lowest impact on existing stable systems.
+3. **Selection**: Output the chosen architecture and discard the rest. Do NOT default to the first idea you generate. If the chosen architecture does not explicitly state its Big-O complexity and database index strategy, it is invalid.
 </TEST_TIME_COMPUTE_PROTOCOL>
