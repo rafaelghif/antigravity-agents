@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.7.0] - 2026-08-23
+## [4.7.1] - 2026-08-23
 ### World-Class Agentic Quality Gates
 - **Feature (TDD Gate)**: Agent cannot write source code without a corresponding test file existing.
 - **Feature (AITL Gate)**: Production commands (git push) are blocked unless subagents crytographically approve via `AITL_CONSENSUS.yaml`.
