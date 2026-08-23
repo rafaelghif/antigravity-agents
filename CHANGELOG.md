@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.5.1] - 2026-08-23
+
+### Micro-Task Granularity
+- **Protocol Update (`[MICRO_TASK_SPLIT]`)**: Enhanced the Grill Protocol to explicitly mandate that task breakdowns must be at the "micro-task" level (single-file or single-function granularity). This prevents LLM hallucination and ambiguity by ensuring subagents only execute highly focused, atomic instructions.
+
 ## [4.5.0] - 2026-08-23
 
 ### The Strict Interrogation Protocol
