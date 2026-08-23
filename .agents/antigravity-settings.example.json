@@ -7,8 +7,7 @@
     "allow": [
       "command(*)",
       "write_file(*)",
-      "replace_file_content(*)",
-      "mcp(*)"
+      "replace_file_content(*)"
     ],
     "deny": [
       "command(rm -rf)",
@@ -21,6 +20,7 @@
       "read_file(/home/*/.ssh/)"
     ],
     "ask": [
+      "mcp(*)",
       "read_url(*)",
       "execute_url(*)"
     ]
