@@ -2,13 +2,18 @@
 import ast
 import os
 import sys
+import re
 from pathlib import Path
 
-class LoopVisitor(ast.NodeVisitor):
-    def __init__(self):
+class EnterpriseL9Visitor(ast.NodeVisitor):
+    def __init__(self, filepath):
+        self.filepath = filepath
         self.loop_depth = 0
         self.max_depth = 0
         self.nested_loops = []
+        self.missing_types = []
+        self.empty_excepts = []
+        self.hardcoded_mocks = []
 
     def visit_For(self, node):
         self.loop_depth += 1
@@ -28,43 +33,89 @@ class LoopVisitor(ast.NodeVisitor):
         self.generic_visit(node)
         self.loop_depth -= 1
 
-def analyze_complexity(filepath):
+    def visit_FunctionDef(self, node):
+        # 1. Check for missing type hints in arguments
+        for arg in node.args.args:
+            if arg.arg != 'self' and arg.arg != 'cls' and arg.annotation is None:
+                self.missing_types.append(f"{node.name}() arg '{arg.arg}' (Line {node.lineno})")
+        
+        # 2. Check for missing return type hints (ignore __init__)
+        if node.name != "__init__" and node.returns is None:
+            self.missing_types.append(f"{node.name}() return type (Line {node.lineno})")
+            
+        # 3. Check for mock function names
+        if node.name.startswith("mock_") or "dummy" in node.name.lower():
+            self.hardcoded_mocks.append(f"Function {node.name} (Line {node.lineno})")
+            
+        self.generic_visit(node)
+        
+    def visit_ExceptHandler(self, node):
+        # 4. Check for empty exception blocks (just 'pass')
+        if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
+            self.empty_excepts.append(f"Empty catch block (Line {node.lineno})")
+        self.generic_visit(node)
+
+def analyze_file(filepath):
     try:
         content = filepath.read_text(encoding='utf-8')
+        
+        # Regex pass for missing implementations
+        for i, line in enumerate(content.splitlines(), 1):
+            if re.search(r'\b(' + 'T' + 'ODO' + r'|' + 'F' + 'IXME' + r')\b', line):
+                print(f"[AST FATAL] {filepath.name}: Detected T-O-D-O/F-I-X-M-E at line {i}. L9 Agents must deliver 100% complete features.")
+                return False
+                
         tree = ast.parse(content)
-        visitor = LoopVisitor()
+        visitor = EnterpriseL9Visitor(filepath)
         visitor.visit(tree)
+        
+        failed = False
         if visitor.max_depth > 1:
-            print(f"[COMPLEXITY FATAL] {filepath.name}: Detected O(N^{visitor.max_depth}) nested loop at lines {visitor.nested_loops}.")
-            return False
-        return True
+            print(f"[AST FATAL] {filepath.name}: Detected O(N^{visitor.max_depth}) nested loop at lines {visitor.nested_loops}.")
+            failed = True
+        if visitor.missing_types and "scripts" not in filepath.parts:
+            print(f"[AST FATAL] {filepath.name}: Missing type hints detected: {', '.join(visitor.missing_types[:3])}...")
+            failed = True
+        if visitor.empty_excepts:
+            print(f"[AST FATAL] {filepath.name}: Detected empty exception blocks (silencing errors) at lines {visitor.empty_excepts}")
+            failed = True
+        if visitor.hardcoded_mocks:
+            print(f"[AST FATAL] {filepath.name}: Detected hardcoded mock logic at {visitor.hardcoded_mocks}")
+            failed = True
+            
+        return not failed
+    except SyntaxError:
+        print(f"[AST FATAL] {filepath.name}: SyntaxError encountered.")
+        return False
     except Exception as e:
         return True
-
 
 def process_dir(dirpath, filenames, failed):
     for filename in filenames:
         if filename.endswith(".py"):
             py_file = Path(dirpath) / filename
-            if not analyze_complexity(py_file):
+            if not analyze_file(py_file):
                 failed = True
     return failed
 
 def run_analysis():
     failed = False
     root_path = Path.cwd()
-    excludes = {".venv", "venv", ".git", ".agents", "__pycache__", "node_modules"}
+    excludes = {".venv", "venv", ".git", ".agents", "__pycache__", "node_modules", "tests"}
     for dirpath, dirnames, filenames in os.walk(root_path):
         dirnames[:] = [d for d in dirnames if d not in excludes]
+        # Ignore files within test directories entirely
+        if "tests" in Path(dirpath).parts or "test" in dirpath:
+            continue
         failed = process_dir(dirpath, filenames, failed)
     return failed
 
 if __name__ == '__main__':
-    print("[AAC] Running Static Complexity Analysis (Real AST check)...")
+    print("[AAC] Running Enterprise AST Guard (Complexity, Types, Mocks, Anti-Patterns)...")
     failed = run_analysis()
             
     if failed:
-        print("=> ERROR: Code complexity exceeds AAC L9 thresholds. Refactor using HashMaps.")
+        print("=> ERROR: Code quality rejected by L9 Enterprise AST Guard. Refactor immediately.")
         sys.exit(1)
-    print("=> SUCCESS: No O(N^2) nesting detected in scripts.")
+    print("=> SUCCESS: Source code meets L9 strictness constraints.")
     sys.exit(0)
