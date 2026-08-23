@@ -28,9 +28,9 @@ If your tool description lacks keywords like "O(1)", "Complexity", or "Index", t
      c. If PASS: Break loop.
    </loop>
 4. **Escalation & Rollback**: If the verification loop fails 3 times, you MUST run `git reset --hard HEAD` to revert to a clean state. Report the exact failure block and stop.
-5. **Peer Review**: If verification passes, send a message to the `reviewer` subagent with the current `git diff`.
-   a. If the reviewer rejects, apply the suggested fixes and restart the Verification Loop.
-   b. If the reviewer approves (`STATUS: APPROVED`), proceed to commit.
-6. **Atomic Commit**: Immediately stage your changes (`git add .`) and create a Git commit using Conventional Commits. Return the commit hash to the Manager.
-3. **Bot Mode Handoff**: Once implemented, run `python3 scripts/inbox_manager.py send implementer reviewer "Implementation complete for <task>. Please review."` to hand off to the reviewer.
+5. **Peer Review (P2P Debate Protocol)**: If verification passes, you will have received the `reviewer`'s Conversation ID from the `planner`. You MUST use the `send_message` tool to ping the `reviewer` with your `git diff`.
+   a. **HALT EXECUTION**: Wait for the `reviewer` to message you back.
+   b. If the `reviewer` rejects the diff, apply the suggested fixes, run verification again, and `send_message` the new diff.
+   c. If the `reviewer` approves (`STATUS: APPROVED`), proceed to commit.
+6. **Atomic Commit**: Immediately stage your changes (`git add .`) and create a Git commit using Conventional Commits. The `reviewer` will notify the `planner`. You are done.
 </PROCEDURAL_WORKFLOW>
