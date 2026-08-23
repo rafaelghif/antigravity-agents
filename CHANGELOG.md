@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.5.0] - 2026-08-23
+
+### The Strict Interrogation Protocol
+- **New Feature (`<GRILL_PROTOCOL>`)**: The L9 Agent is now mandated to strictly reject ambiguous coding prompts. It will launch an interactive `/grill-me` session to gather requirements, output an AI-readable task breakdown artifact, and enforce parallel execution by delegating to subagents.
+
 ## [4.4.49] - 2026-08-23
 
 ### Cognitive Restoration
