@@ -1,0 +1,17 @@
+{
+  "hooks": [
+    {
+      "id": "production-gate",
+      "type": "PreToolUse",
+      "matcher": {
+        "toolName": "run_command"
+      },
+      "scriptPath": "./scripts/hooks/pre_tool_hitl.sh"
+    },
+    {
+      "id": "flow-engineering-guard",
+      "type": "PostInvocation",
+      "scriptPath": "./scripts/hooks/post_invoke_verify.sh"
+    }
+  ]
+}
