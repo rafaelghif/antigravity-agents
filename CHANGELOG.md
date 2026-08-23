@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.5.2] - 2026-08-23
+## [4.6.0] - 2026-08-23
 
 ### Upgrade Protocol
 - **Feature (`[UPGRADE_URL]`)**: Added the upstream repository URL to `AGENTS.md` so that the agent and users can easily upgrade or reference the core framework without hallucinating the git origin.
