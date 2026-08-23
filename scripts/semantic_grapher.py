@@ -55,14 +55,20 @@ def parse_regex(filepath: Path, lang: str):
     except Exception as e:
         print(f"\n[FILE] {filepath} (Error parsing: {e})")
 
+def process_files_for_ext(dirpath, filenames, ext):
+    for filename in filenames:
+        if filename.endswith(ext):
+            filepath = Path(dirpath) / filename
+            if ext == ".py":
+                parse_python(filepath)
+            else:
+                parse_regex(filepath, ext[1:])
+
 def process_extension(root_dir: Path, ext: str):
-    for filepath in root_dir.rglob(f"*{ext}"):
-        if "node_modules" in filepath.parts or ".venv" in filepath.parts or ".git" in filepath.parts:
-            continue
-        if ext == ".py":
-            parse_python(filepath)
-        else:
-            parse_regex(filepath, ext[1:])
+    excludes = {"node_modules", ".venv", ".git"}
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        dirnames[:] = [d for d in dirnames if d not in excludes]
+        process_files_for_ext(dirpath, filenames, ext)
 
 def scan_directory(root_dir: Path):
     print(f"Semantic Graph for {root_dir}\n" + "="*40)

@@ -7,6 +7,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import shlex
 import sys
 from pathlib import Path
 
@@ -55,11 +56,11 @@ def main() -> int:
     structural = ROOT / "scripts" / "validate.py"
     
     if structural.is_file():
-        checks.append(("validate", "AAC", f"python3 {structural}"))
+        checks.append(("validate", "AAC", f"python3 {shlex.quote(str(structural))}"))
         
     complexity = ROOT / "scripts" / "complexity_analyzer.py"
     if complexity.is_file():
-        checks.append(("complexity_check", "AAC", f"python3 {complexity}"))
+        checks.append(("complexity_check", "AAC", f"python3 {shlex.quote(str(complexity))}"))
         
     if not checks:
         print("- application stack: not detected")
@@ -72,7 +73,6 @@ def main() -> int:
         print(f"- {stack} {name}: {run} ({status})")
         if args.execute and status == "available":
             print(f"\n=> Executing {stack} {name}...")
-            import shlex
             result = subprocess.run(shlex.split(run), cwd=ROOT)
             if result.returncode != 0:
                 print(f"=> ERROR: {stack} {name} failed with exit code {result.returncode}")

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import ast
+import os
 import sys
 from pathlib import Path
 
@@ -40,15 +41,27 @@ def analyze_complexity(filepath):
     except Exception as e:
         return True
 
-if __name__ == '__main__':
-    print("[AAC] Running Static Complexity Analysis (Real AST check)...")
+
+def process_dir(dirpath, filenames, failed):
+    for filename in filenames:
+        if filename.endswith(".py"):
+            py_file = Path(dirpath) / filename
+            if not analyze_complexity(py_file):
+                failed = True
+    return failed
+
+def run_analysis():
     failed = False
     root_path = Path.cwd()
-    for py_file in root_path.rglob("*.py"):
-        if any(part in [".venv", "venv", ".git", ".agents", "__pycache__", "node_modules"] for part in py_file.parts):
-            continue
-        if not analyze_complexity(py_file):
-            failed = True
+    excludes = {".venv", "venv", ".git", ".agents", "__pycache__", "node_modules"}
+    for dirpath, dirnames, filenames in os.walk(root_path):
+        dirnames[:] = [d for d in dirnames if d not in excludes]
+        failed = process_dir(dirpath, filenames, failed)
+    return failed
+
+if __name__ == '__main__':
+    print("[AAC] Running Static Complexity Analysis (Real AST check)...")
+    failed = run_analysis()
             
     if failed:
         print("=> ERROR: Code complexity exceeds AAC L9 thresholds. Refactor using HashMaps.")
