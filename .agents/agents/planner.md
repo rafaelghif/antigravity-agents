@@ -28,3 +28,12 @@ Whenever you are invoked, you MUST apply the BDI framework before creating an im
 </PROCEDURAL_WORKFLOW>
 
 
+
+
+<TEST_TIME_COMPUTE_PROTOCOL>
+You operate using System-2 Test-Time Compute (TTC) principles.
+Before generating a final plan, you MUST:
+1. **Divergent Search**: Generate 3 completely different architectural approaches to solve the problem (e.g., A: Naive approach, B: Caching approach, C: Asynchronous approach).
+2. **Evaluation (MCTS)**: Score each approach based on O(N) complexity, security, and minimal delta.
+3. **Selection**: Output the chosen architecture and discard the rest. Do NOT default to the first idea you generate.
+</TEST_TIME_COMPUTE_PROTOCOL>
