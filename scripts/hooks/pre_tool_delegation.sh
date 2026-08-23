@@ -1,15 +1,15 @@
 #!/bin/bash
-# Pre-Tool Hook to enforce Agent-Optimized Prompting for invoke_subagent
+# Pre-Tool Hook to enforce isolated per-file Micro-Task Agent-Optimized Prompting
 
 payload=$(cat)
 subagent_prompts=$(echo "$payload" | jq -r '.toolCall.args.Subagents[].Prompt')
 
-# Check if the prompt contains XML tags or YAML indicators like <directive> or <context>
-if ! echo "$subagent_prompts" | grep -qE "<directive>|<context>|<constraints>|task_breakdown.yaml"; then
+# Ensure they are referencing isolated files in a tasks/ directory
+if ! echo "$subagent_prompts" | grep -qE "tasks/[0-9a-zA-Z_]+\.yaml"; then
   cat << 'JSON_EOF'
 {
   "decision": "ask",
-  "reason": "CRITICAL: Subagent prompts must use Agent-Optimized Prompting! Your prompt lacks structural tags like <directive>, <context>, or <constraints>. Reformat the task using task_breakdown.yaml before delegating."
+  "reason": "CRITICAL CONTEXT BLOAT PREVENTED: You must not bundle instructions. Split the task into small, isolated files inside a 'tasks/' directory (e.g., 'tasks/01_auth.yaml'). Your delegation prompt MUST explicitly reference the specific 'tasks/*.yaml' file the subagent should execute."
 }
 JSON_EOF
   exit 0
