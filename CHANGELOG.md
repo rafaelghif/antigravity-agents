@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.7.0] - 2026-08-23
+### World-Class Agentic Quality Gates
+- **Feature (TDD Gate)**: Agent cannot write source code without a corresponding test file existing.
+- **Feature (AITL Gate)**: Production commands (git push) are blocked unless subagents crytographically approve via `AITL_CONSENSUS.yaml`.
+- **Feature (Enterprise AST Guard)**: Refactored complexity analyzer to also block missing type hints, empty except blocks, and TODOs.
+
 ## [4.6.1] - 2026-08-23
 ### Hotfixes & Enterprise Strictness
 - **Fix**: Sandbox liberation for active settings.
