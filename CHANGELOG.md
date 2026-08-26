@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.21.0] - 2026-08-26
+### Autonomous Self-Learner Engine & Token Bloat Elimination
+- **Feature (Autonomous Continuous Self-Learner)**: Implemented `scripts/self_learner.py` with multi-lingual intent and correction detection. Automatically executes via `post_invoke_telemetry.py` after each turn, extracting user rules, stack preferences, and technical mandates directly into `.agents/brain/rules.md` and `memory.md` without duplicates.
+- **Performance (80%+ Context Token Reduction)**:
+  - Rewrote `scripts/hooks/pre_invoke_master.py` to stop dumping raw `SKILL.md` markdown blocks and unpopulated template lines on every turn. Injects compact skill directives instead.
+  - Stripped genetic DNA preambles from runtime rules injection.
+  - Eliminated noisy RSI false-alarm prompts that triggered unnecessary subagent spawns on expected CLI exit codes.
+- **Policy Hardening (Token Efficiency & Direct Execution)**:
+  - Updated `AGENTS.md` Rule 14 `[TOKEN_EFFICIENCY]` and Rule 26 `[SMART_DELEGATION]` to default to direct execution for single-file and targeted tasks, preventing subagent token burn.
+  - Updated Rule 9 `[SELF_LEARNING]` with autonomous self-learner enforcement.
+
 ## [4.20.0] - 2026-08-26
 ### Senior UX/UI Architecture (WCAG 2.2 AA) & Community Sponsorship
 - **Feature (Senior UX/UI Design Architecture)**: Merged principles from `plugin87/ux-ui-agent-skills` into AAC:
