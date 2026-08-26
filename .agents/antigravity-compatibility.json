@@ -1,6 +1,6 @@
 {
   "cli_version": "1.1.10",
-  "aac_version": "4.14.0",
+  "aac_version": "4.15.0",
   "docs_baseline_date": "2026-08-05",
   "official_docs": [
     "https://antigravity.google/docs/cli/best-practices",

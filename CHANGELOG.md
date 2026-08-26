@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.15.0] - 2026-08-26
+### Semantic Knowledge Graph Engine (Graphify Protocol)
+- **Feature (Graphify Knowledge Graph Engine)**: Upgraded `scripts/semantic_grapher.py` into a full-scale GraphRAG knowledge graph generator inspired by `Graphify-Labs/graphify`:
+  - **GraphRAG JSON Export (`--json`)**: Deterministically builds typed nodes (files, classes, functions, methods, modules) and typed edges (defines, imports, calls).
+  - **Blast Radius Analysis (`--blast-radius`)**: Computes transitive BFS reverse dependency chains to show all upstream callers impacted before a refactor.
+  - **Shortest-Path Tracer (`--path-find`)**: Computes BFS shortest dependency path between any two symbols or modules.
+  - **God Nodes Detection**: Automatically identifies the highest-degree architectural hub nodes in the repository.
+- **Skill Upgrade**: Revamped `semantic-graphing/SKILL.md` to guide agents in running blast radius and path tracing before code modifications.
+
 ## [4.14.0] - 2026-08-26
 ### The Senior Ladder & Minimalist Pragmatic Engineering
 - **Feature (The Senior Ladder Decision Engine)**: Incorporated the 7-rung minimalist decision tree inspired by `DietrichGebert/ponytail` across `AGENTS.md`, `code-quality/SKILL.md`, `architecture/SKILL.md`, and `implementer.md`: 1) YAGNI, 2) Codebase reuse, 3) Standard library, 4) Native platform features (e.g. `<input type="date">`), 5) Existing dependencies, 6) One-liner, 7) Minimum working diff.
