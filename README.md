@@ -2,10 +2,11 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>The Enterprise-Grade Agentic Engineering Framework for Google Antigravity</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.19.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.19.0)
+  [![Version](https://img.shields.io/badge/version-4.20.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.20.0)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
-  [![Gates](https://img.shields.io/badge/gates-5%2F5_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-5-hard-technical-gates)
+  [![Gates](https://img.shields.io/badge/gates-6%2F6_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-6-hard-technical-gates)
   [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)
+  [![Sponsor](https://img.shields.io/badge/sponsor-support-ff69b4.svg?style=flat-square)](#-support--sponsorship)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 </div>
 
@@ -13,7 +14,7 @@
 
 **Antigravity Agent Core (AAC)** elevates Google Antigravity AI coding assistants into an autonomous, senior-level software engineering unit. While standard AI models produce superficial "vibe coding" — shallow implementations, duplicate code, fake tests, and uncleaned scratch scripts — AAC enforces **System-2 Test-Time Compute (TTC)**, **Deterministic Flow Engineering**, and **Strict Static AST Verification Gates**.
 
-AAC turns your AI into an engineer that thinks before acting, reuses existing code, tests behavioral outcomes, and leaves zero garbage in your repository.
+AAC turns your AI into an engineer that thinks before acting, reuses existing code, tests behavioral outcomes, adheres to WCAG 2.2 AA accessibility, and leaves zero garbage in your repository.
 
 ---
 
@@ -34,15 +35,16 @@ flowchart TD
 
     Reviewer --> VerifyEngine{🛡️ AAC Verification Engine<br/>scripts/verify.py}
 
-    subgraph Gates [🔒 5 Hard Technical Gates]
+    subgraph Gates [🔒 6 Hard Technical Gates]
         VerifyEngine --> G1[1. Anti-Sham Test Quality Guard]
         VerifyEngine --> G2[2. Native DRY Clone Detector]
         VerifyEngine --> G3[3. L9 AST Complexity Analyzer]
         VerifyEngine --> G4[4. Git Hygiene & Scratch Purger]
         VerifyEngine --> G5[5. Graphify Knowledge Graph]
+        VerifyEngine --> G6[6. UI Hygiene & WCAG 2.2 AA Guard]
     end
 
-    G1 & G2 & G3 & G4 & G5 --> GateCheck{All Passed?}
+    G1 & G2 & G3 & G4 & G5 & G6 --> GateCheck{All Passed?}
     GateCheck -- ❌ Failed --> AutoFix[🔄 Auto-Remediation Loop<br/>Lateral Thinking & Root Cause Fix]
     AutoFix --> Implementer
     GateCheck -- ✅ Passed --> GitCommit[📦 Clean Conventional Commit<br/>AITL Verified & Zero Scratch Files]
@@ -51,7 +53,7 @@ flowchart TD
 
 ---
 
-## 🔒 The 5 Hard Technical Gates
+## 🔒 The 6 Hard Technical Gates
 
 Unlike generic prompt templates, AAC ships with **native, zero-dependency Python tools** that physically inspect and block substandard code before it enters Git:
 
@@ -62,10 +64,18 @@ Unlike generic prompt templates, AAC ships with **native, zero-dependency Python
 | **3. L9 AST Complexity Analyzer** | [`scripts/complexity_analyzer.py`](scripts/complexity_analyzer.py) | **Enforces $O(N)$ efficiency.** Forbids nested loops ($O(N^2)$), empty `except: pass` blocks, missing type annotations, and unhandled anti-patterns at the AST level. |
 | **4. Git Hygiene & Scratch Purger** | [`scripts/git_hygiene_guard.py`](scripts/git_hygiene_guard.py) | **Eliminates Git garbage.** Intercepts `git commit` to block temporary files (`scratch_*.py`, `tmp_*`, `debug_*`, `*.tmp`, `*.bak`). Sweeps and deletes lingering scratch scripts after each turn. |
 | **5. Graphify Knowledge Graph** | [`scripts/semantic_grapher.py`](scripts/semantic_grapher.py) | **Prevents broken refactors.** Computes transitive BFS dependency chains, blast-radius impacts, and exports GraphRAG JSON before touching core modules. |
+| **6. UI Hygiene & a11y Guard** | [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py) | **WCAG 2.2 AA & DTCG Tokens.** Enforces visible focus rings (bans bare `outline-none`), `alt` text on images, explicit `<button>` types, and eliminates hardcoded hex colors in favor of design tokens. Inspired by `plugin87/ux-ui-agent-skills`. |
 
 ---
 
 ## ⚡ Real-World Capabilities
+
+### 🎨 Senior UX/UI Design Architecture (DTCG + WCAG 2.2 AA)
+Inspired by best practices from `ux-ui-agent-skills`, AAC equips agents with:
+- **3-Tier Design Tokens**: Strict separation of Primitive scales, Semantic intent tokens, and Component-scoped tokens. Zero hardcoded hex colors.
+- **Accessible Interactions**: Enforces visible focus rings (`focus-visible:ring-2`), minimum $44\text{px}$ touch targets, screen-reader semantics, and `prefers-reduced-motion` fallbacks.
+- **Complete 6-State Spectrum**: Every interactive component must define Default, Hover, Active, Focus-Visible, Disabled, and Async (Loading Skeleton / Empty State) states.
+- **Anti-AI-Slop Visual Taste**: Banning generic purple gradients, lack of visual hierarchy, and illegible gray-on-dark contrast.
 
 ### 🔌 Model Context Protocol (MCP) Integration
 AAC provides first-class configuration templates for MCP servers (`.agents/mcp_config.json.example`). Your agent can securely interact with:
@@ -130,10 +140,11 @@ Simply type in the chat prompt:
 
 | Task | Command | Description |
 | :--- | :--- | :--- |
-| **Verify Everything** | `python3 scripts/verify.py --execute` | Runs the full 5-gate pipeline (Structural, AST, Anti-Sham, DRY, Git Hygiene). |
+| **Verify Everything** | `python3 scripts/verify.py --execute` | Runs the full verification pipeline (Structural, AST, Anti-Sham, DRY, Git Hygiene, UI a11y). |
 | **Check Upgrades** | `python3 scripts/upgrade.py --check` | Queries GitHub Releases to see if a newer AAC version exists. |
 | **Perform Upgrade** | `python3 scripts/upgrade.py` | One-click upgrade that preserves user memory and rules. |
 | **Audit Duplication** | `python3 scripts/dry_guard.py --check` | Detects cross-file code clones with line numbers and recommendations. |
+| **Audit UI & a11y** | `python3 scripts/ui_hygiene_guard.py --check` | Scans JSX/TSX/Vue/Svelte for WCAG 2.2 AA accessibility and design token violations. |
 | **Purge Scratch Files** | `python3 scripts/git_hygiene_guard.py --clean` | Sweeps and removes untracked scratch/temporary scripts. |
 | **Blast Radius Analysis** | `python3 scripts/semantic_grapher.py --blast-radius <symbol>` | Analyzes all upstream callers impacted by modifying a class/function. |
 | **Export GraphRAG** | `python3 scripts/semantic_grapher.py --json` | Generates deterministic Knowledge Graph JSON for AST analysis. |
@@ -156,12 +167,29 @@ Simply type in the chat prompt:
 │   ├── git_hygiene_guard.py   # Scratch file cleaner & commit blocker
 │   ├── semantic_grapher.py    # GraphRAG knowledge graph & blast radius engine
 │   ├── test_quality_guard.py  # Anti-sham behavioral test quality guard
+│   ├── ui_hygiene_guard.py    # WCAG 2.2 AA accessibility & design token guard
 │   ├── upgrade.py             # 1-command effortless upgrader
 │   ├── validate.py            # Structural framework validator
 │   └── verify.py              # Central verification runner
 ├── AGENTS.md            # The master policy & World-Class Gates constitution
 └── install.sh / install.ps1   # Universal auto-resolving installers
 ```
+
+---
+
+## 💖 Support & Sponsorship
+
+If Antigravity Agent Core (AAC) saves you hours of debugging, cleans up your AI code, or elevates your development workflow, please consider sponsoring or buying a coffee to support ongoing maintenance and autonomous agent research:
+
+<div align="center">
+  <a href="https://github.com/sponsors/rafaelghif"><img src="https://img.shields.io/badge/GitHub_Sponsors-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"/></a>
+  &nbsp;
+  <a href="https://ko-fi.com/rafaelghifari"><img src="https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"/></a>
+  &nbsp;
+  <a href="https://trakteer.id/rafaelghif"><img src="https://img.shields.io/badge/Trakteer-c7254e?style=for-the-badge&logo=trakteer&logoColor=white" alt="Trakteer"/></a>
+  &nbsp;
+  <a href="https://saweria.co/rafaelghif"><img src="https://img.shields.io/badge/Saweria-FFA500?style=for-the-badge&logo=saweria&logoColor=white" alt="Saweria"/></a>
+</div>
 
 ---
 

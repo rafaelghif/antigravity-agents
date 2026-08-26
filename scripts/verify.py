@@ -73,6 +73,10 @@ def main() -> int:
     hygiene_guard = ROOT / "scripts" / "git_hygiene_guard.py"
     if hygiene_guard.is_file():
         checks.append(("git_hygiene_check", "AAC", f"python3 {shlex.quote(str(hygiene_guard))} --check"))
+
+    ui_guard = ROOT / "scripts" / "ui_hygiene_guard.py"
+    if ui_guard.is_file():
+        checks.append(("ui_hygiene_check", "AAC", f"python3 {shlex.quote(str(ui_guard))} --check"))
         
     if not checks:
         print("- application stack: not detected")
