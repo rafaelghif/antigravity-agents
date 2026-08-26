@@ -116,6 +116,32 @@ class CodeGraph:
         sorted_nodes = sorted(degrees.items(), key=lambda item: item[1], reverse=True)
         return sorted_nodes[:top_k]
 
+    def _compute_pagerank_iteration(self, radj: dict, out_degree: dict, scores: dict, nodes: list, damping: float, n_count: int) -> dict:
+        new_scores = {}
+        base_score = (1.0 - damping) / n_count
+        for nid in nodes:
+            predecessors = radj.get(nid, [])
+            incoming = sum(scores[p] / out_degree[p] for p in predecessors if out_degree.get(p, 0) > 0)
+            new_scores[nid] = base_score + (damping * incoming)
+        return new_scores
+
+    def compute_pagerank(self, damping: float = 0.85, max_iter: int = 20) -> dict:
+        """Calculates PageRank centrality over repository symbols (inspired by Aider repo map)."""
+        nodes = list(self.nodes.keys())
+        n_count = len(nodes)
+        if n_count == 0:
+            return {}
+        
+        radj = self.get_reverse_adj()
+        fadj = self.get_forward_adj()
+        out_degree = {nid: len(fadj.get(nid, [])) for nid in nodes}
+        scores = {nid: 1.0 / n_count for nid in nodes}
+        
+        for _ in range(max_iter):
+            scores = self._compute_pagerank_iteration(radj, out_degree, scores, nodes, damping, n_count)
+            
+        return dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+
 def print_class_methods(class_node, filepath: Path, graph: CodeGraph):
     for item in class_node.body:
         if isinstance(item, ast.FunctionDef):
@@ -222,7 +248,8 @@ def main():
     parser.add_argument("path", nargs="?", default=".", help="Directory to scan")
     parser.add_argument("--json", action="store_true", help="Output full graph as JSON")
     parser.add_argument("--path-find", nargs=2, metavar=("SRC", "DST"), help="Find shortest path between two symbols")
-    parser.add_argument("--blast-radius", metavar="NODE", help="Calculate blast radius for a symbol/file")
+    parser.add_argument("--pagerank", action="store_true", help="Calculate PageRank centrality for all symbols")
+    parser.add_argument("--top-central", type=int, default=5, metavar="N", help="Show top N central symbols by PageRank")
     parser.add_argument("--summary", action="store_true", help="Show god nodes and architecture summary")
     args = parser.parse_args()
 
@@ -234,6 +261,16 @@ def main():
         for ext in [".py", ".ts", ".js", ".go"]:
             process_extension(target, ext, graph)
         print(json.dumps(graph.to_dict(), indent=2))
+        return
+
+    if args.pagerank:
+        for ext in [".py", ".ts", ".js", ".go"]:
+            process_extension(target, ext, graph)
+        ranks = graph.compute_pagerank()
+        print(f"📊 Top {args.top_central} PageRank Central Symbols (Repo Map):")
+        for i, (nid, score) in enumerate(list(ranks.items())[:args.top_central], 1):
+            info = graph.nodes.get(nid, {})
+            print(f"  {i}. [{score:.4f}] {nid} ({info.get('type', 'symbol')}) -> {info.get('file', '')}")
         return
 
     if args.path_find:

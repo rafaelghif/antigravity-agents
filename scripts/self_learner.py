@@ -149,15 +149,72 @@ def process_transcript(transcript_path: Path, rules_path: Path, memory_path: Pat
         sys.stderr.write(f"Transcript learning notice: {e}\n")
         return 0
 
+def synthesize_custom_skill(
+    name: str,
+    description: str,
+    directives: list[str],
+    skills_dir: Path = Path(".agents/skills")
+) -> bool:
+    """Synthesizes a new production-ready skill file (inspired by daymade meta-skill)."""
+    sanitized_name = re.sub(r'[^a-zA-Z0-9_-]', '', name.lower().strip().replace(' ', '-'))
+    if not sanitized_name:
+        return False
+    
+    skill_path = skills_dir / sanitized_name / "SKILL.md"
+    if skill_path.exists():
+        return False
+    
+    skill_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    directives_text = "\n".join(f"{i+1}. **{d.split(':', 1)[0]}**: {d.split(':', 1)[1] if ':' in d else d}" for i, d in enumerate(directives)) if directives else "1. **Standard Execution**: Follow strict L9 verification."
+    
+    content = f"""---
+name: {sanitized_name}
+description: {description}
+---
+
+# {sanitized_name.replace('-', ' ').title()} Custom Protocol
+
+<CRITICAL_DIRECTIVE>
+{description}
+</CRITICAL_DIRECTIVE>
+
+<CORE_STANDARDS>
+{directives_text}
+</CORE_STANDARDS>
+
+<PROCEDURAL_WORKFLOW>
+1. **Analyze Requirements**: Understand the target domain tasks.
+2. **Execute Invariants**: Implement clean, enterprise-grade logic.
+3. **Verify**: Run `python3 scripts/verify.py --execute`.
+</PROCEDURAL_WORKFLOW>
+"""
+    temp_path = skill_path.with_suffix('.tmp')
+    temp_path.write_text(content, encoding="utf-8")
+    temp_path.replace(skill_path)
+    return True
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="AAC Autonomous Self-Learner")
     parser.add_argument("rule", nargs="?", help="Direct rule text to learn")
     parser.add_argument("--transcript", help="Path to transcript.jsonl for automatic extraction")
     parser.add_argument("--auto", action="store_true", help="Auto extract from transcript")
+    parser.add_argument("--synthesize-skill", metavar="NAME", help="Synthesize a new custom domain skill")
+    parser.add_argument("--description", default="", help="Description for synthesized skill")
+    parser.add_argument("--directive", action="append", default=[], help="Directive rule for synthesized skill")
     args = parser.parse_args()
 
     rules_path = Path(".agents/brain/rules.md")
     memory_path = Path(".agents/brain/memory.md")
+
+    if args.synthesize_skill:
+        desc = args.description or f"Custom domain protocol for {args.synthesize_skill}"
+        created = synthesize_custom_skill(args.synthesize_skill, desc, args.directive)
+        if created:
+            print(f"=> SUCCESS: Synthesized custom skill '.agents/skills/{args.synthesize_skill}/SKILL.md'")
+        else:
+            print(f"=> NOTICE: Skill '{args.synthesize_skill}' already exists or name invalid.")
+        return
 
     if args.rule:
         saved = save_learned_rule(args.rule, rules_path)
@@ -175,7 +232,7 @@ def main() -> None:
             print("=> No new rules needed extraction.")
         return
 
-    print("Usage: python3 scripts/self_learner.py <rule_text> OR --auto --transcript <path>")
+    print("Usage: python3 scripts/self_learner.py <rule_text> OR --synthesize-skill <name> OR --auto --transcript <path>")
 
 if __name__ == '__main__':
     main()

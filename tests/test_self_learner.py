@@ -68,5 +68,26 @@ class TestSelfLearner(unittest.TestCase):
     def test_normalize_rule(self):
         self.assertEqual(normalize_rule("  Jangan Gunakan Any!  "), "jangan gunakan any")
 
+    def test_synthesize_custom_skill(self):
+        from scripts.self_learner import synthesize_custom_skill
+        skills_dir = Path(self.tmp_dir.name) / "skills"
+        created = synthesize_custom_skill(
+            name="stripe-billing",
+            description="Protocol for Stripe subscription checkout and webhook verification.",
+            directives=["Webhook Signature: Always verify raw request body with construct_event", "Idempotency: Use idempotencyKey on all charges"],
+            skills_dir=skills_dir
+        )
+        self.assertTrue(created)
+        skill_file = skills_dir / "stripe-billing" / "SKILL.md"
+        self.assertTrue(skill_file.exists())
+        content = skill_file.read_text(encoding="utf-8")
+        self.assertIn("name: stripe-billing", content)
+        self.assertIn("Webhook Signature", content)
+        self.assertIn("Idempotency", content)
+
+        # Duplicate attempt should return False
+        dup = synthesize_custom_skill("stripe-billing", "desc", [], skills_dir=skills_dir)
+        self.assertFalse(dup)
+
 if __name__ == '__main__':
     unittest.main()

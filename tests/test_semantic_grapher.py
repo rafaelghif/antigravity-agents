@@ -118,5 +118,12 @@ func (u *User) Save() error {}
         gods = graph.get_god_nodes()
         self.assertTrue(len(gods) > 0)
 
+        # PageRank centrality
+        ranks = graph.compute_pagerank()
+        self.assertTrue(len(ranks) > 0)
+        self.assertIn("DB", ranks)
+        # In a linear chain Controller -> Service -> Repo -> DB, DB has highest in-degree / rank
+        self.assertGreater(ranks["DB"], ranks["Controller"])
+
 if __name__ == '__main__':
     unittest.main()

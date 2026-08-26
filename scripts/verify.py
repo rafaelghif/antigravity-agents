@@ -49,9 +49,9 @@ def detect() -> list[tuple[str, str, str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Detect a repository stack and print or execute safe verification commands.")
     parser.add_argument("--execute", action="store_true", help="Execute the detected commands")
+    parser.add_argument("--terse", "-q", action="store_true", help="ACI Mode: output minimal telegraphic summary")
     args = parser.parse_args()
 
-    print("Stack detection:")
     checks = detect()
     structural = ROOT / "scripts" / "validate.py"
     
@@ -79,22 +79,43 @@ def main() -> int:
         checks.append(("ui_hygiene_check", "AAC", f"python3 {shlex.quote(str(ui_guard))} --check"))
         
     if not checks:
-        print("- application stack: not detected")
-        print("- project tests/formatters/linters: not available")
+        if not args.terse:
+            print("- application stack: not detected")
+            print("- project tests/formatters/linters: not available")
         return 0
 
+    if not args.terse:
+        print("Stack detection:")
+        for name, stack, run in checks:
+            status = "available" if shutil.which(run.split()[0]) else "not available"
+            print(f"- {stack} {name}: {run} ({status})")
+
     exit_code = 0
+    passed_count = 0
     for name, stack, run in checks:
         status = "available" if shutil.which(run.split()[0]) else "not available"
-        print(f"- {stack} {name}: {run} ({status})")
         if args.execute and status == "available":
-            print(f"\n=> Executing {stack} {name}...")
-            result = subprocess.run(shlex.split(run), cwd=ROOT)
+            if not args.terse:
+                print(f"\n=> Executing {stack} {name}...")
+                result = subprocess.run(shlex.split(run), cwd=ROOT)
+            else:
+                result = subprocess.run(shlex.split(run), cwd=ROOT, capture_output=True, text=True)
+            
             if result.returncode != 0:
                 print(f"=> ERROR: {stack} {name} failed with exit code {result.returncode}")
+                if args.terse and result.stderr:
+                    print(result.stderr.strip())
+                elif args.terse and result.stdout:
+                    print(result.stdout.strip())
                 exit_code = result.returncode
             else:
-                print(f"=> SUCCESS: {stack} {name} passed.")
+                passed_count += 1
+                if not args.terse:
+                    print(f"=> SUCCESS: {stack} {name} passed.")
+
+    if args.terse and exit_code == 0:
+        print(f"=> ACI VERIFY: OK ({passed_count}/{len(checks)} gates passed).")
+
     return exit_code
 
 
