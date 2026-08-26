@@ -30,6 +30,14 @@ SKILL_KEYWORDS = {
     ],
     "caveman": [
         "caveman", "cavemen", "hemat token", "token saving", "terse", "singkat", "compress tokens"
+    ],
+    "performance-optimization": [
+        "webperf", "performance", "perf", "core web vitals", "lcp", "inp", "cls",
+        "lazy loading", "bundle size", "tree-shaking", "speed up"
+    ],
+    "code-simplification": [
+        "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
+        "code-simplify", "flatten"
     ]
 }
 

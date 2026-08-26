@@ -2,7 +2,7 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>The Enterprise-Grade Agentic Engineering Framework for Google Antigravity</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.23.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.23.0)
+  [![Version](https://img.shields.io/badge/version-4.24.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.24.0)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![Gates](https://img.shields.io/badge/gates-6%2F6_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-6-hard-technical-gates)
   [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)
@@ -189,6 +189,7 @@ AAC synthesizes battle-tested architectural patterns and token-optimization para
 | **[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)** by Dietrich Gebert | **Senior Ladder & Lazy Developer Philosophy** | "Best code is the code you never wrote." Enforces the 7-step decision ladder (YAGNI -> Codebase Reuse -> Stdlib -> Native Platform -> Existing Deps -> 1-Line -> Minimal Diff) preventing over-engineering. |
 | **[Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify)** by Graphify Labs | **AST Knowledge Graph & Blast-Radius Engine** | Direct architectural inspiration for [`scripts/semantic_grapher.py`](scripts/semantic_grapher.py), enabling transitive caller resolution, blast radius calculation, and GraphRAG dependency extraction. |
 | **[plugin87/ux-ui-agent-skills](https://github.com/plugin87/ux-ui-agent-skills)** by plugin87 | **Senior UX/UI Design & WCAG 2.2 AA Hygiene** | Foundation for `.agents/skills/design/SKILL.md` and [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py), providing 3-tier DTCG tokens, 6-state interactive spectrums, and visible focus ring linters. |
+| **[addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)** by Addy Osmani | **Production Webperf & Code-Simplification** | Foundation for `.agents/skills/performance-optimization/` and `.agents/skills/code-simplification/`, bringing Core Web Vitals (LCP, INP, CLS), metric honesty, bundle tree-shaking, and anti-overengineering to AAC. |
 
 ---
 
