@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.19.0] - 2026-08-26
+### Effortless 1-Command Upgrader & Universal Auto-Resolving Installer
+- **Feature (1-Command AAC Upgrader)**: Implemented `scripts/upgrade.py` allowing users and agents to upgrade AAC with a single command (`python3 scripts/upgrade.py` or `/upgrade`). Automatically queries GitHub Releases for the latest version, shows release highlights, and upgrades without touching user memories (`memory.md`), rules (`rules.md`), or custom skills.
+- **Feature (Universal Dynamic Installer)**: Modernized `install.sh` and `install.ps1` to automatically resolve the latest release tag from GitHub/git remote. Users can install/upgrade from `main` without copying version numbers (`curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash`).
+- **Feature (In-Chat Upgrade Awareness)**: Updated `pre_invoke_master.py` to recognize user upgrade intent and instruct agents to execute `scripts/upgrade.py` directly.
+- **Rules & Protocol Update**: Updated `<UPGRADE_PROTOCOL>` in `AGENTS.md` with effortless 1-command upgrade instructions.
+
 ## [4.18.0] - 2026-08-26
 ### Git Hygiene Guard & Automated Scratch Script Purging
 - **Feature (Git Hygiene Guard)**: Implemented `scripts/git_hygiene_guard.py` to completely eliminate temporary scripts (`scratch_*.py`, `tmp_*.py`, `temp_*.py`, `debug_*.py`, `test_scratch*.py`, `*.tmp`, `*.bak`) from polluting Git. Supports `--check` for CI/commit blocking and `--clean` for instant workspace purging.

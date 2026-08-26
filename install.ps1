@@ -1,9 +1,17 @@
-# Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.18.0/install.ps1 | iex
+# Antigravity Agent Core (AAC) reproducible Windows installer & upgrader.
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.18.0"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
+if (-not $AacRef) {
+    try {
+        $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
+        $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
+        $AacRef = if ($latest) { $latest } else { "v4.19.0" }
+    } catch {
+        $AacRef = "v4.19.0"
+    }
+}
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
 $BackupDir = Join-Path $TargetDir (".agents-backups/" + (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ"))
@@ -77,6 +85,7 @@ try {
     Copy-ManagedFile "$TmpDir/scripts/semantic_grapher.py" "scripts/semantic_grapher.py"
     Copy-ManagedFile "$TmpDir/scripts/dry_guard.py" "scripts/dry_guard.py"
     Copy-ManagedFile "$TmpDir/scripts/git_hygiene_guard.py" "scripts/git_hygiene_guard.py"
+    Copy-ManagedFile "$TmpDir/scripts/upgrade.py" "scripts/upgrade.py"
     Write-Host "AAC $AacRef successfully configured in $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }
