@@ -26,6 +26,17 @@ node_modules/
 __pycache__/
 *.pyc
 .DS_Store
-release_notes*
+# Ephemeral Scratch & Temp Artifacts
 scratch/
+*scratch*
+tmp/
+*tmp_*
+*temp_*
+*debug_*
+*poc_*
+test_scratch*
+test_temp*
+*.tmp
+*.swp
+release_notes*
 .agents/inbox/

@@ -69,6 +69,10 @@ def main() -> int:
     dry_guard = ROOT / "scripts" / "dry_guard.py"
     if dry_guard.is_file():
         checks.append(("dry_check", "AAC", f"python3 {shlex.quote(str(dry_guard))} --check"))
+
+    hygiene_guard = ROOT / "scripts" / "git_hygiene_guard.py"
+    if hygiene_guard.is_file():
+        checks.append(("git_hygiene_check", "AAC", f"python3 {shlex.quote(str(hygiene_guard))} --check"))
         
     if not checks:
         print("- application stack: not detected")

@@ -42,6 +42,21 @@ INNER_EOF
 INNER_EOF
         exit 0
     fi
+
+    # Git Hygiene Check on git commit
+    if echo "$CMD" | grep -qE 'git commit'; then
+        if [ -f "scripts/git_hygiene_guard.py" ]; then
+            if ! python3 scripts/git_hygiene_guard.py --check >/dev/null 2>&1; then
+                cat << 'INNER_EOF'
+{
+  "decision": "reject",
+  "reason": "GIT HYGIENE BLOCKED: Detected scratch/temporary files staged or pending in workspace. Delete scratch scripts or run 'python3 scripts/git_hygiene_guard.py --clean' before committing."
+}
+INNER_EOF
+                exit 0
+            fi
+        fi
+    fi
 fi
 
 cat << 'INNER_EOF'

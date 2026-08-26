@@ -41,6 +41,7 @@ CORE_AGENT_PATHS = (
     "scripts/verify.py",
     "scripts/test_quality_guard.py",
     "scripts/dry_guard.py",
+    "scripts/git_hygiene_guard.py",
 )
 
 REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)

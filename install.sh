@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.17.0/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.18.0/install.sh | bash
 
 set -Eeuo pipefail
 umask 077
 
-readonly AAC_REF="v4.17.0"
+readonly AAC_REF="v4.18.0"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -99,6 +99,7 @@ copy_managed "$TMP_DIR/source/scripts/verify.py" scripts/verify.py
 copy_managed "$TMP_DIR/source/scripts/test_quality_guard.py" scripts/test_quality_guard.py
 copy_managed "$TMP_DIR/source/scripts/semantic_grapher.py" scripts/semantic_grapher.py
 copy_managed "$TMP_DIR/source/scripts/dry_guard.py" scripts/dry_guard.py
+copy_managed "$TMP_DIR/source/scripts/git_hygiene_guard.py" scripts/git_hygiene_guard.py
 
 printf 'AAC %s successfully configured in %s\n' "$AAC_REF" "$TARGET_DIR"
 printf 'Backups, when needed, are stored in %s\n' "$BACKUP_DIR"
