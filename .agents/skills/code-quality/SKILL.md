@@ -4,8 +4,20 @@ description: Use this skill when the user asks to write, refactor, or review app
 ---
 
 <CRITICAL_DIRECTIVE>
-Enforce Staff-level procedural rigor and Enterprise-Grade software architecture during implementation.
+Enforce Staff-level procedural rigor, the Senior Ladder, and Enterprise-Grade software architecture.
 </CRITICAL_DIRECTIVE>
+
+<THE_SENIOR_LADDER>
+The best code is the code never written. Before writing code, stop at the first rung that holds:
+1. **Does this need to exist?** -> Skip it (YAGNI).
+2. **Already in codebase?** -> Reuse existing helper/hook/type/component.
+3. **Stdlib does it?** -> Use standard library.
+4. **Native platform feature?** -> Native HTML5/CSS/DB constraint over heavy libraries (e.g. `<input type="date">` over picker lib).
+5. **Existing dependency?** -> Use installed libraries; never add new dependencies for trivial tasks.
+6. **Can it be one line?** -> One line.
+7. **Only then:** write the minimum code that works.
+*Root-cause fix only: grep all callers and fix at the shared root, never patch leaf symptoms.*
+</THE_SENIOR_LADDER>
 
 <ENTERPRISE_STANDARDS>
 1. **DRY & Single Source of Truth (SSOT)**: Absolutely NO duplicate logic. Re-use existing project hooks, utilities, and components. If logic repeats >= 2 times, extract it to a shared module immediately.
@@ -23,10 +35,11 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 
 <PROCEDURAL_WORKFLOW>
 1. **Pattern Reconnaissance**: Search and read existing sibling files to identify established project patterns (state, API, styling, error handling).
-2. **Reuse Audit**: Check for existing shared components, hooks, or utilities before creating new ones to maintain DRY.
-3. **Context Acquisition**: Understand imports, contracts, and type definitions before modifying code.
-4. **Minimal Delta Enforcement**: Implement ONLY the requested feature with maximum architectural elegance.
-5. **Test Gap Analysis & TDD**: Ensure tests exist and cover all edge cases before modifying implementation.
-6. **Local Verification**: Run stack linter, typecheck, and test runner via `python3 scripts/verify.py --execute`.
-7. **Diff Review**: Verify zero duplicate code, zero pattern deviations, and complete feature coverage.
+2. **Ladder Check**: Evaluate the 7-rung Senior Ladder before adding new code or dependencies.
+3. **Reuse Audit**: Check for existing shared components, hooks, or utilities before creating new ones to maintain DRY.
+4. **Context Acquisition**: Understand imports, contracts, and type definitions before modifying code.
+5. **Minimal Delta Enforcement**: Implement ONLY the requested feature with maximum architectural elegance.
+6. **Test Gap Analysis & TDD**: Ensure tests exist and cover all edge cases before modifying implementation.
+7. **Local Verification**: Run stack linter, typecheck, and test runner via `python3 scripts/verify.py --execute`.
+8. **Diff Review**: Verify zero duplicate code, zero pattern deviations, and complete feature coverage.
 </PROCEDURAL_WORKFLOW>

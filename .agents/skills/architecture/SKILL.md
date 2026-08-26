@@ -15,6 +15,7 @@ You must execute the Principal Architect procedural workflow and enforce Enterpr
 5. **Database Performance & Anti-N+1**: Mandate index utilization for frequent queries. Actively prevent and eliminate N+1 query patterns in ORMs via eager loading/joins.
 6. **Separation of Concerns & DDD**: Maintain strict isolation between controllers, business domain logic, and data access layers. Use abstract repository patterns.
 7. **Extensibility & Polymorphism**: Build plugin-ready architecture. Use polymorphic associations or Strategy Patterns instead of brittle `if/else` ladders.
+8. **Anti-Overengineering (YAGNI)**: No unrequested speculative abstractions. No interface with only one implementation. No factory for a single product. Boring and minimal beats clever and bloated.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
