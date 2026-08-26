@@ -145,6 +145,7 @@ Simply type in the chat prompt:
 | **Perform Upgrade** | `python3 scripts/upgrade.py` | One-click upgrade that preserves user memory and rules. |
 | **Audit Duplication** | `python3 scripts/dry_guard.py --check` | Detects cross-file code clones with line numbers and recommendations. |
 | **Audit UI & a11y** | `python3 scripts/ui_hygiene_guard.py --check` | Scans JSX/TSX/Vue/Svelte for WCAG 2.2 AA accessibility and design token violations. |
+| **Autonomous Learner** | `python3 scripts/self_learner.py "<rule>"` | Persists technical mandates and preferences into procedural memory without duplicates. |
 | **Purge Scratch Files** | `python3 scripts/git_hygiene_guard.py --clean` | Sweeps and removes untracked scratch/temporary scripts. |
 | **Blast Radius Analysis** | `python3 scripts/semantic_grapher.py --blast-radius <symbol>` | Analyzes all upstream callers impacted by modifying a class/function. |
 | **Export GraphRAG** | `python3 scripts/semantic_grapher.py --json` | Generates deterministic Knowledge Graph JSON for AST analysis. |
@@ -158,13 +159,14 @@ Simply type in the chat prompt:
 │   ├── agents/          # Specialized subagent definitions (planner, implementer, reviewer, etc.)
 │   ├── brain/           # Permanent cross-session memory (memory.md, rules.md, ANCHOR.md)
 │   ├── harness/         # Token governance & compute guardrails
-│   ├── skills/          # Domain-specific procedures (architecture, dry, security, design, etc.)
+│   ├── skills/          # Domain-specific procedures (architecture, caveman, dry, security, design, etc.)
 │   └── config.json      # Core framework configuration & version profile
 ├── scripts/
 │   ├── hooks/           # Antigravity lifecycle hooks (pre-invoke context, post-invoke telemetry)
 │   ├── complexity_analyzer.py # Enterprise AST & Big-O analyzer
 │   ├── dry_guard.py           # Native sliding-window clone detector
 │   ├── git_hygiene_guard.py   # Scratch file cleaner & commit blocker
+│   ├── self_learner.py        # Autonomous continuous learner across turns
 │   ├── semantic_grapher.py    # GraphRAG knowledge graph & blast radius engine
 │   ├── test_quality_guard.py  # Anti-sham behavioral test quality guard
 │   ├── ui_hygiene_guard.py    # WCAG 2.2 AA accessibility & design token guard
@@ -174,6 +176,19 @@ Simply type in the chat prompt:
 ├── AGENTS.md            # The master policy & World-Class Gates constitution
 └── install.sh / install.ps1   # Universal auto-resolving installers
 ```
+
+---
+
+## 📚 Standing on the Shoulders of Giants (References & Acknowledgments)
+
+AAC synthesizes battle-tested architectural patterns and token-optimization paradigms from open-source pioneers in the AI agent and developer experience ecosystem. Deep gratitude to:
+
+| Project & Author | Core Inspiration in AAC | Impact |
+| :--- | :--- | :--- |
+| **[JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)** by Julius Brussee | **Caveman Token Compression Protocol** | Enforces *"Mouth smaller, not brain smaller"*. Strips conversational fluff and pleasantries to cut output tokens by 60%+ while keeping code and commands 100% byte-exact. |
+| **[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)** by Dietrich Gebert | **Senior Ladder & Lazy Developer Philosophy** | "Best code is the code you never wrote." Enforces the 7-step decision ladder (YAGNI -> Codebase Reuse -> Stdlib -> Native Platform -> Existing Deps -> 1-Line -> Minimal Diff) preventing over-engineering. |
+| **[Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify)** by Graphify Labs | **AST Knowledge Graph & Blast-Radius Engine** | Direct architectural inspiration for [`scripts/semantic_grapher.py`](scripts/semantic_grapher.py), enabling transitive caller resolution, blast radius calculation, and GraphRAG dependency extraction. |
+| **[plugin87/ux-ui-agent-skills](https://github.com/plugin87/ux-ui-agent-skills)** by plugin87 | **Senior UX/UI Design & WCAG 2.2 AA Hygiene** | Foundation for `.agents/skills/design/SKILL.md` and [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py), providing 3-tier DTCG tokens, 6-state interactive spectrums, and visible focus ring linters. |
 
 ---
 
