@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.12.0/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.13.0/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.12.0"
+$AacRef = "v4.13.0"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -36,9 +36,12 @@ try {
         Write-Host "=> Initiating AAC Clean Install of $AacRef..."
     }
 
-    $RulesBak = Join-Path $TmpDir "rules.md.bak"
-    if (Test-Path -LiteralPath "$TargetDir/.agents/brain/rules.md") {
-        Copy-Item -LiteralPath "$TargetDir/.agents/brain/rules.md" -Destination $RulesBak
+    $BrainFiles = @("rules.md", "memory.md", "ANCHOR.md")
+    foreach ($file in $BrainFiles) {
+        $srcPath = Join-Path "$TargetDir/.agents/brain" $file
+        if (Test-Path -LiteralPath $srcPath) {
+            Copy-Item -LiteralPath $srcPath -Destination (Join-Path $TmpDir "$file.bak") -Force
+        }
     }
 
     git clone --depth 1 --branch $AacRef $Repository $TmpDir | Out-Null
@@ -58,8 +61,11 @@ try {
     Copy-ManagedFile "$TmpDir/.agents/mcp_config.json.example" ".agents/mcp_config.json.example"
     Copy-ManagedFile "$TmpDir/.agents/brain" ".agents/brain"
 
-    if (Test-Path -LiteralPath $RulesBak) {
-        Copy-Item -LiteralPath $RulesBak -Destination "$TargetDir/.agents/brain/rules.md" -Force
+    foreach ($file in $BrainFiles) {
+        $bakPath = Join-Path $TmpDir "$file.bak"
+        if (Test-Path -LiteralPath $bakPath) {
+            Copy-Item -LiteralPath $bakPath -Destination (Join-Path "$TargetDir/.agents/brain" $file) -Force
+        }
     }
 
     Copy-ManagedFile "$TmpDir/.agents/common" ".agents/common"
