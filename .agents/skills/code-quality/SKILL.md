@@ -8,23 +8,25 @@ Enforce Staff-level procedural rigor and Enterprise-Grade software architecture 
 </CRITICAL_DIRECTIVE>
 
 <ENTERPRISE_STANDARDS>
-1. **SOLID Principles**: Enforce Single Responsibility (SRP) and Dependency Inversion (DIP). Classes and functions must have precisely one reason to change.
-2. **Cyclomatic Complexity**: Functions must be atomic and strictly limited in indentation depth. Refactor deeply nested loops or conditionals into explicit private helper methods.
-3. **Self-Documenting Code**: Mandate descriptive, domain-driven variable and function names. Restrict comments exclusively to explaining "Why" the business logic exists.
-4. **Resilient Error Handling**: Enforce strict error boundaries. Catch specific exceptions, attach diagnostic context, and ensure graceful degradation.
-5. **Feature Completeness (Anti-Dummy)**: No "half-assed" implementations. You MUST write end-to-end functionality including database persistence, error routing, and type-safe contracts. NEVER leave placeholders, mock arrays, or hardcoded stubs.
-
-6. **Zero-Tolerance Anti-Patterns**: NO `any` types in TypeScript. NO broad `except Exception:` blocks in Python. NO inline CSS styles. Use strict typing everywhere.
-7. **Algorithmic Supremacy**: Optimize performance aggressively. Default to O(1) HashMap lookups instead of O(N^2) nested loops. Memoize expensive operations.
-8. **Edge Case Paranoia**: Code must handle nulls, empty arrays, timeouts, and malformed inputs natively without crashing.
-5. **100% Feature Completeness**: DO NOT write placeholders, `pass`, `// TODO: implement later`, or mock data. If you are asked to build a feature, write the complete, production-ready code.
-6. **No Hardcoded Secrets**: All keys, passwords, and tokens MUST be fetched from environment variables or secure vaults.
+1. **DRY & Single Source of Truth (SSOT)**: Absolutely NO duplicate logic. Re-use existing project hooks, utilities, and components. If logic repeats >= 2 times, extract it to a shared module immediately.
+2. **Project Pattern Harmony**: NEVER introduce pattern schizophrenia. Before coding, inspect existing sibling files. Strictly adhere to the project's established conventions for state management, data-fetching, error handling, directory structure, and styling.
+3. **SOLID & Clean Architecture**: Enforce Single Responsibility (SRP) and Dependency Inversion (DIP). Maintain strict isolation between UI presentation, domain business logic, and infrastructure/data access.
+4. **Senior Defensive Engineering**: 
+   - Prevent race conditions and memory leaks (clean up event listeners, timers, abort stale requests with AbortController).
+   - Strict runtime data validation (Zod, Pydantic) on all external inputs, APIs, and route params.
+   - Comprehensive error boundaries with structured domain errors (no silent failures or ad-hoc console.log).
+5. **Cyclomatic Complexity & Algorithmic Supremacy**: Keep functions atomic with shallow indentation. Default to O(1) lookups instead of O(N^2) loops. Memoize expensive operations.
+6. **Zero-Tolerance Anti-Patterns**: NO `any` types in TypeScript. NO broad `except Exception:` blocks in Python. NO inline CSS styles or ad-hoc duplicate UI primitives.
+7. **Feature Completeness (Anti-Dummy)**: 100% complete production implementations. NO placeholders, mock arrays, or `// TODO` stubs. Handle loading, empty, and error states gracefully.
+8. **Security & Secrets**: All credentials, tokens, and sensitive configs MUST come from environment variables.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Context Acquisition**: You must fully read and understand a file's content and imports prior to executing any modifications.
-2. **Minimal Delta Enforcement**: Only apply the exact changes requested. Strip out speculative or unrelated refactorings from your plan.
-3. **Test Gap Analysis**: Check the adjacent test file. If the modified behavior is uncovered, you MUST write the corresponding test case.
-4. **Local Verification**: Run the stack's linter and test runner (via `python3 scripts/verify.py --execute` or native commands).
-5. **Diff Review**: Inspect your own diff. Ensure no debugging statements or residual dead code remains.
+1. **Pattern Reconnaissance**: Search and read existing sibling files to identify established project patterns (state, API, styling, error handling).
+2. **Reuse Audit**: Check for existing shared components, hooks, or utilities before creating new ones to maintain DRY.
+3. **Context Acquisition**: Understand imports, contracts, and type definitions before modifying code.
+4. **Minimal Delta Enforcement**: Implement ONLY the requested feature with maximum architectural elegance.
+5. **Test Gap Analysis & TDD**: Ensure tests exist and cover all edge cases before modifying implementation.
+6. **Local Verification**: Run stack linter, typecheck, and test runner via `python3 scripts/verify.py --execute`.
+7. **Diff Review**: Verify zero duplicate code, zero pattern deviations, and complete feature coverage.
 </PROCEDURAL_WORKFLOW>

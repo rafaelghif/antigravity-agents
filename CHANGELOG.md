@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.12.0] - 2026-08-26
+### Senior Engineering Quality & Pattern Harmony
+- **Fix (Consumer Validation)**: `scripts/validate.py` is now workspace-aware. It no longer fails on consumer projects by demanding framework-specific files (`install.sh`, `install.ps1`, AAC release notes in project `README.md`/`CHANGELOG.md`).
+- **Feature (DRY & SSOT Gate)**: Enforced `[DRY_MANDATE]` across `AGENTS.md`, `code-quality/SKILL.md`, `implementer.md`, and `reviewer.md` to prevent duplicate code, copy-paste components, and ad-hoc primitives.
+- **Feature (Project Pattern Harmony)**: Mandated `[PATTERN_HARMONY]` requiring agents to inspect sibling modules and strictly adhere to established project conventions (state management, API clients, error boundaries, styling).
+- **Feature (Senior Defensive Engineering)**: Upgraded skills and reviewer triggers to enforce race condition prevention (AbortControllers), memory leak cleanup, schema validation (Zod/Pydantic), and full lifecycle states (loading/empty/error).
+
 ## [4.11.0] - 2026-08-23
 ### World-Class Agentic Quality Gates
 - **Feature (TDD Gate)**: Agent cannot write source code without a corresponding test file existing.

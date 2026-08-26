@@ -41,6 +41,28 @@ REQUIRED_PATHS = (
     "scripts/verify.py",
 )
 
+CONSUMER_REQUIRED_PATHS = (
+    "AGENTS.md",
+    "GEMINI.md",
+    ".agents/config.json",
+    ".agents/TASK_TEMPLATE.md",
+    ".agents/mcp_config.json.example",
+    ".agents/antigravity-settings.example.json",
+    ".agents/antigravity-compatibility.json",
+    ".agents/agents/planner.md",
+    ".agents/agents/implementer.md",
+    ".agents/agents/reviewer.md",
+    ".agents/agents/security-reviewer.md",
+    ".agents/skills/code-quality/SKILL.md",
+    ".agents/skills/verification/SKILL.md",
+    ".agents/skills/security/SKILL.md",
+    ".agents/skills/architecture/SKILL.md",
+    ".agents/skills/design/SKILL.md",
+    ".agents/skills/semantic-graphing/SKILL.md",
+    "scripts/validate.py",
+    "scripts/verify.py",
+)
+
 OPTIONAL_PATHS = (
     ".agents/brain/soul.md",
     ".agents/brain/rules.md",
@@ -48,6 +70,19 @@ OPTIONAL_PATHS = (
     ".agents/brain/env-required.json",
     ".agents/common/utils.md",
 )
+
+
+def is_framework_repo() -> bool:
+    """Check if running directly inside the upstream AAC framework repository."""
+    install_sh = ROOT / "install.sh"
+    if install_sh.is_file():
+        try:
+            content = install_sh.read_text(encoding="utf-8")
+            if "antigravity-agents.git" in content:
+                return True
+        except (OSError, UnicodeDecodeError) as exc:
+            sys.stderr.write(f"Notice: Failed to read install.sh: {exc}\n")
+    return False
 
 
 def fail(message: str) -> None:
@@ -107,6 +142,9 @@ def validate_markdown_metadata(directory: str, expected_count: int, required_fie
 
 
 def validate_instruction_budget() -> None:
+    if not is_framework_repo():
+        # In consumer projects, do not fail on custom project instructions in AGENTS.md / GEMINI.md
+        return
     for relative_path, maximum in (("AGENTS.md", 600), ("GEMINI.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
         words = (ROOT / relative_path).read_text(encoding="utf-8").split()
         if len(words) > maximum:
@@ -182,7 +220,8 @@ def validate_scanner_applicability() -> None:
 
 
 def validate_manifest() -> None:
-    for relative_path in REQUIRED_PATHS:
+    required = REQUIRED_PATHS if is_framework_repo() else CONSUMER_REQUIRED_PATHS
+    for relative_path in required:
         if not (ROOT / relative_path).is_file():
             fail(f"missing required file: {relative_path}")
 
@@ -192,6 +231,9 @@ def validate_version() -> None:
     version = config.get("core_version")
     if not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version):
         fail("config.json core_version must be semantic version text")
+    if not is_framework_repo():
+        # Consumer project: do not lock consumer's README.md, CHANGELOG.md, install.sh to AAC version
+        return
     markers = {
         "AGENTS.md": f"AAC v{version}",
         "README.md": f"version-{version}",
