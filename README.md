@@ -2,7 +2,7 @@
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
   <p><strong>The Enterprise-Grade Agentic Engineering Framework for Google Antigravity</strong></p>
 
-  [![Version](https://img.shields.io/badge/version-4.21.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.21.0)
+  [![Version](https://img.shields.io/badge/version-4.22.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.22.0)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![Gates](https://img.shields.io/badge/gates-6%2F6_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-6-hard-technical-gates)
   [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)

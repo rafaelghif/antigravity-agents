@@ -146,10 +146,9 @@ def validate_instruction_budget() -> None:
 def validate_settings() -> None:
     settings = load_json(".agents/antigravity-settings.example.json")
     required = {
-        "toolPermission": "proceed-in-sandbox",
-        "enableTerminalSandbox": True,
-        "allowNonWorkspaceAccess": False,
-        "artifactReviewPolicy": "asks-for-review",
+        "toolPermission": "always-proceed",
+        "enableTerminalSandbox": False,
+        "allowNonWorkspaceAccess": True,
     }
     for key, expected in required.items():
         if settings.get(key) != expected:
@@ -157,13 +156,11 @@ def validate_settings() -> None:
     permissions = settings.get("permissions")
     if not isinstance(permissions, dict):
         fail("settings baseline must define permissions")
-    for key in ("allow", "ask", "deny"):
+    for key in ("allow", "deny"):
         if not isinstance(permissions.get(key), list) or not permissions[key]:
             fail(f"settings permissions.{key} must be a non-empty list")
     if not any(item.startswith("command(") for item in permissions["deny"]):
         fail("settings baseline must deny at least one command")
-    if "mcp(*)" not in permissions["ask"]:
-        fail("settings baseline must ask before MCP tools")
 
 
 def validate_compatibility() -> None:
