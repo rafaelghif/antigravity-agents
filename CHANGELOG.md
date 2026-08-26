@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.27.0] - 2026-08-26
+### Hierarchical Cross-Session Memory Engine & Zero-Amnesia Memory Bank
+- **Feature (Hierarchical Memory Consolidator Engine)**:
+  - Implemented `scripts/memory_consolidator.py` inspired by MemGPT/Letta tiered memory and Cline/Roo Memory Bank.
+  - Automatically captures, updates, and synchronizes active working context (`.agents/brain/active_context.md`) across conversation turns and session switches.
+  - Provides atomic state updates, transcript intent parsing, milestone extraction, and CLI management (`--update-focus`, `--sync-transcript`, `--show`).
+- **Feature (Deterministic Cross-Session Auto-Injection)**:
+  - Enhanced `scripts/hooks/pre_invoke_master.py` to auto-inject active session working context, permanent memory, and procedural rules on every turn.
+  - Enhanced `scripts/hooks/post_invoke_telemetry.py` to continuously consolidate transcript state after every invocation.
+- **Ecosystem References & Architecture Alignment**:
+  - Populated permanent knowledge anchor in `.agents/brain/memory.md` with complete project architecture, runtime invariants, and user profile.
+  - Added `letta-ai/letta` and `cline/cline` to `README.md` references table.
+
 ## [4.26.0] - 2026-08-26
 ### L9 Principal Engineering Suite: Distributed Resilience, Zero-Downtime DB Migrations & API Governance
 - **Feature (Resilience Engineering Skill)**:

@@ -9,9 +9,10 @@ from scripts.hooks import pre_invoke_master, post_invoke_telemetry
 
 class TestMemoryEngine(unittest.TestCase):
     def test_get_context_loads_memory(self):
-        # Ensure get_context includes memory, anchor, and rules when available
+        # Ensure get_context includes active context, memory, anchor, and rules when available
         context = pre_invoke_master.get_context(None)
         self.assertIsInstance(context, str)
+        self.assertIn("ACTIVE SESSION WORKING CONTEXT", context)
 
     def test_skill_detection_logic(self):
         # Test keyword matching for skill auto-injection
