@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.18.0] - 2026-08-26
+### Git Hygiene Guard & Automated Scratch Script Purging
+- **Feature (Git Hygiene Guard)**: Implemented `scripts/git_hygiene_guard.py` to completely eliminate temporary scripts (`scratch_*.py`, `tmp_*.py`, `temp_*.py`, `debug_*.py`, `test_scratch*.py`, `*.tmp`, `*.bak`) from polluting Git. Supports `--check` for CI/commit blocking and `--clean` for instant workspace purging.
+- **Pre-Commit Hard Gate**: Updated `pre_tool_hitl.sh` hook to intercept and reject any `git commit` command if scratch/temporary files are staged or pending in the workspace.
+- **Autonomous Post-Turn Cleanup**: Updated `post_invoke_telemetry.py` to automatically sweep and purge lingering scratch files from `.agents/scratch/` and the workspace after each invocation.
+- **Strict .gitignore Scaffolding**: Hardened `.gitignore` with comprehensive wildcards (`*scratch*`, `*tmp_*`, `*temp_*`, `*debug_*`, `*poc_*`, `test_scratch*`) to prevent accidental git tracking.
+- **Policy & Reviewer Gate**: Added Gate 35 `[ZERO_SCRATCH_IN_GIT]` in `AGENTS.md` and Trigger 10 in `reviewer.md` to auto-reject PRs containing scratch artifacts.
+
 ## [4.17.0] - 2026-08-26
 ### Native DRY Anti-Duplication Guard & Deduplication Skill
 - **Feature (Native DRY Anti-Duplication Guard)**: Implemented `scripts/dry_guard.py` using rolling-window hashing (inspired by `dry-deduplicator` & `jscpd`) in pure standard Python. Detects copy-pasted code blocks (>= 6 lines) across all project files without external dependencies.

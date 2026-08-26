@@ -96,6 +96,12 @@ if __name__ == '__main__':
                 extract_telemetry(transcript)
         # Consolidate project memory
         update_project_memory()
+        # Auto-clean lingering scratch files
+        try:
+            from scripts.git_hygiene_guard import clean_scratch_files
+            clean_scratch_files(Path('.'))
+        except Exception as e:
+            sys.stderr.write(f"Scratch auto-clean notice: {str(e)}\n")
     except Exception as e:
         sys.stderr.write(f"Hook wrapper failed: {str(e)}\n")
     
