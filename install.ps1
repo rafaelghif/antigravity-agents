@@ -1,8 +1,8 @@
 # Antigravity Agent Core (AAC) reproducible Windows installer.
-# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.15.0/install.ps1 | iex
+# Usage: iwr -useb https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.16.0/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
-$AacRef = "v4.15.0"
+$AacRef = "v4.16.0"
 $Repository = "https://github.com/rafaelghif/antigravity-agents.git"
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
@@ -73,6 +73,8 @@ try {
     Copy-ManagedFile "$TmpDir/.agents/skills" ".agents/skills"
     Copy-ManagedFile "$TmpDir/scripts/validate.py" "scripts/validate.py"
     Copy-ManagedFile "$TmpDir/scripts/verify.py" "scripts/verify.py"
+    Copy-ManagedFile "$TmpDir/scripts/test_quality_guard.py" "scripts/test_quality_guard.py"
+    Copy-ManagedFile "$TmpDir/scripts/semantic_grapher.py" "scripts/semantic_grapher.py"
     Write-Host "AAC $AacRef successfully configured in $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }
