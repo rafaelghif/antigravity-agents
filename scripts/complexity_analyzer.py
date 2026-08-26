@@ -15,21 +15,20 @@ class EnterpriseL9Visitor(ast.NodeVisitor):
         self.empty_excepts = []
         self.hardcoded_mocks = []
 
-    def visit_For(self, node):
+    def _track_loop_enter(self, node):
         self.loop_depth += 1
         if self.loop_depth > self.max_depth:
             self.max_depth = self.loop_depth
         if self.loop_depth > 1:
             self.nested_loops.append(node.lineno)
+
+    def visit_For(self, node):
+        self._track_loop_enter(node)
         self.generic_visit(node)
         self.loop_depth -= 1
 
     def visit_While(self, node):
-        self.loop_depth += 1
-        if self.loop_depth > self.max_depth:
-            self.max_depth = self.loop_depth
-        if self.loop_depth > 1:
-            self.nested_loops.append(node.lineno)
+        self._track_loop_enter(node)
         self.generic_visit(node)
         self.loop_depth -= 1
 

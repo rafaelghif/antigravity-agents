@@ -65,6 +65,10 @@ def main() -> int:
     test_guard = ROOT / "scripts" / "test_quality_guard.py"
     if test_guard.is_file():
         checks.append(("anti_sham_check", "AAC", f"python3 {shlex.quote(str(test_guard))}"))
+
+    dry_guard = ROOT / "scripts" / "dry_guard.py"
+    if dry_guard.is_file():
+        checks.append(("dry_check", "AAC", f"python3 {shlex.quote(str(dry_guard))} --check"))
         
     if not checks:
         print("- application stack: not detected")

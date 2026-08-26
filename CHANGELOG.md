@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.17.0] - 2026-08-26
+### Native DRY Anti-Duplication Guard & Deduplication Skill
+- **Feature (Native DRY Anti-Duplication Guard)**: Implemented `scripts/dry_guard.py` using rolling-window hashing (inspired by `dry-deduplicator` & `jscpd`) in pure standard Python. Detects copy-pasted code blocks (>= 6 lines) across all project files without external dependencies.
+- **Dedicated DRY Skill**: Created `.agents/skills/dry/SKILL.md` to guide agents during DRY audits and codebase refactoring.
+- **Pipeline Integration**: Added `AAC dry_check` to `scripts/verify.py`. Automated verification rejects any PR or build containing duplicate code blocks.
+- **Automatic Keyword Auto-Injection**: Updated `scripts/hooks/pre_invoke_master.py` with `dry`, `duplicate`, `deduplicate`, and `clone` keyword triggers to inject DRY standards into context on-the-fly.
+- **Self-Refactoring & Zero Duplication**: Refactored `scripts/validate.py` and `scripts/complexity_analyzer.py` to achieve 100% DRY compliance across the repository.
+
 ## [4.16.0] - 2026-08-26
 ### Anti-Sham Test Quality Guard & Behavioral Testing Mandate
 - **Feature (Anti-Sham Test Quality Guard)**: Implemented `scripts/test_quality_guard.py` using AST analysis to permanently eradicate lazy LLM unit tests. Strictly rejects tautological tests that only assert `callable(fn)`, `hasattr(mod, fn)`, `fn is not None`, or `expect(fn).toBeDefined()` without testing inputs, outputs, edge cases, and exceptions.

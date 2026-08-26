@@ -18,7 +18,7 @@ VERSION_FILES = (
     ".agents/TASK_TEMPLATE.md",
     ".github/workflows/agent-gates.yml",
 )
-REQUIRED_PATHS = (
+CORE_AGENT_PATHS = (
     "AGENTS.md",
     "GEMINI.md",
     ".agents/config.json",
@@ -36,34 +36,15 @@ REQUIRED_PATHS = (
     ".agents/skills/architecture/SKILL.md",
     ".agents/skills/design/SKILL.md",
     ".agents/skills/semantic-graphing/SKILL.md",
-    "scripts/semantic_grapher.py",
+    ".agents/skills/dry/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
     "scripts/test_quality_guard.py",
+    "scripts/dry_guard.py",
 )
 
-CONSUMER_REQUIRED_PATHS = (
-    "AGENTS.md",
-    "GEMINI.md",
-    ".agents/config.json",
-    ".agents/TASK_TEMPLATE.md",
-    ".agents/mcp_config.json.example",
-    ".agents/antigravity-settings.example.json",
-    ".agents/antigravity-compatibility.json",
-    ".agents/agents/planner.md",
-    ".agents/agents/implementer.md",
-    ".agents/agents/reviewer.md",
-    ".agents/agents/security-reviewer.md",
-    ".agents/skills/code-quality/SKILL.md",
-    ".agents/skills/verification/SKILL.md",
-    ".agents/skills/security/SKILL.md",
-    ".agents/skills/architecture/SKILL.md",
-    ".agents/skills/design/SKILL.md",
-    ".agents/skills/semantic-graphing/SKILL.md",
-    "scripts/validate.py",
-    "scripts/verify.py",
-    "scripts/test_quality_guard.py",
-)
+REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)
+CONSUMER_REQUIRED_PATHS = CORE_AGENT_PATHS
 
 OPTIONAL_PATHS = (
     ".agents/brain/soul.md",
