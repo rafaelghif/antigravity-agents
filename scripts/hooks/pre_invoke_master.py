@@ -103,6 +103,14 @@ def get_context(transcript_path: str | None = None) -> str:
         if skill_path.exists():
             msgs.append(f"=== AUTO-INJECTED SKILL: {skill} ===\n{skill_path.read_text(encoding='utf-8').strip()}")
 
+    # 5. Upgrade Intent Mandate
+    if transcript_path and Path(transcript_path).exists():
+        try:
+            if any(term in recent_text.lower() for term in ["upgrade", "update agent", "/upgrade", "versi baru", "update framework"]):
+                msgs.append("=== UPGRADE MANDATE ===\nUser requested an upgrade/update of AAC. Run 'python3 scripts/upgrade.py' via run_command to automatically check and apply the latest release while preserving user memory and rules.")
+        except Exception as e:
+            sys.stderr.write(f"Upgrade check notice: {e}\n")
+
     return "\n\n".join(msgs)
 
 def check_rsi(transcript_path: str | None = None) -> bool:
