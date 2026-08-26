@@ -8,19 +8,21 @@ Enforce expert-level Frontend Architecture and strict design consistency during 
 </CRITICAL_DIRECTIVE>
 
 <ENTERPRISE_STANDARDS>
-1. **CLI-First**: DO NOT write boilerplate manually. You MUST use native framework CLIs (e.g., `nest g`, `ionic g page`, `npx shadcn-ui add`) for structural generation.
-2. **Framework Tooling**: Strictly use utility classes (e.g., Tailwind CSS) or standard module scoping. Ban custom global CSS overrides unless explicitly required.
-3. **Responsive Design**: Follow Mobile-First design strictly. Base styles apply to mobile; use `sm:`, `md:`, `lg:` exclusively for larger viewports.
-4. **State Management**: Every component MUST account for "Unhappy Paths": Loading states (Skeletons/Spinners), Empty states (visual fallbacks), and Error states (graceful degradation/toasts).
-5. **Accessibility (a11y)**: All interactive elements MUST be keyboard navigable. Mandate the use of semantic HTML, ARIA labels, and explicit form associations.
+1. **Design System & Component SSOT (Strict DRY)**: MUST reuse existing project UI components (`Button`, `Card`, `Input`, `Dialog`, `Table`). Strictly FORBID writing one-off ad-hoc styled HTML elements across different pages.
+2. **Frontend Pattern Harmony**: Maintain 100% consistency across pages for state management (e.g. Zustand, TanStack Query), data-fetching hooks, error boundaries, and toast notifications.
+3. **CLI-First Scaffolding**: Use native framework CLIs (e.g. `npx shadcn-ui add`, `nest g`, `ionic g page`) for component generation rather than writing raw boilerplate.
+4. **Utility & Theming Consistency**: Strictly use the project's styling utility (e.g. Tailwind classes with `cn()` merge utility). Ban conflicting inline styles or arbitrary hardcoded color hex codes.
+5. **Mobile-First Responsive Design**: Base styles apply to mobile; use `sm:`, `md:`, `lg:` exclusively for larger viewports. No fragile absolute positioning hacks.
+6. **Complete State Spectrum**: Every view MUST account for the full lifecycle: Loading states (Skeletons/Shimmers), Empty states (visual fallbacks + CTAs), Error states (toast/banner with retry), and Success states.
+7. **Accessibility (a11y)**: All interactive elements MUST be keyboard navigable. Mandate semantic HTML, ARIA attributes, explicit label associations, and WCAG AA contrast.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Design Context Acquisition**: Identify the project's styling framework before writing code to prevent framework collision.
-2. **Component Scaffold**: Run the corresponding framework CLI tool to scaffold the requested component.
-3. **Implementation**: Edit the scaffolded file and strictly apply the `ENTERPRISE_STANDARDS`.
-4. **Visual Testing**: If visual regression or integration testing tools exist, use them to verify your implementation.
-5. **Diff Review**: Inspect your diff to ensure no hardcoded colors, missing accessibility attributes, or forgotten empty/error states remain.
+1. **Design System Discovery**: Search for existing UI component libraries and styling patterns in the project (`grep_search` in `components/`, `ui/`, `hooks/`).
+2. **Component Reuse Check**: Audit if existing primitives or hooks can satisfy the requirement before creating new files.
+3. **Scaffold & Implement**: Use CLI where appropriate and implement adhering strictly to `ENTERPRISE_STANDARDS`.
+4. **Visual & Interaction Verification**: Verify responsiveness, keyboard navigation, and loading/empty/error states.
+5. **Diff Review**: Inspect diff for zero hardcoded styles, zero duplicated UI primitives, and 100% a11y compliance.
 </PROCEDURAL_WORKFLOW>
 
 
