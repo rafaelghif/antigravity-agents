@@ -184,11 +184,9 @@ If Antigravity Agent Core (AAC) saves you hours of debugging, cleans up your AI 
 <div align="center">
   <a href="https://github.com/sponsors/rafaelghif"><img src="https://img.shields.io/badge/GitHub_Sponsors-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"/></a>
   &nbsp;
-  <a href="https://ko-fi.com/rafaelghifari"><img src="https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"/></a>
+  <a href="https://trakteer.id/rafael_ghifari"><img src="https://img.shields.io/badge/Trakteer-c7254e?style=for-the-badge&logo=trakteer&logoColor=white" alt="Trakteer"/></a>
   &nbsp;
-  <a href="https://trakteer.id/rafaelghif"><img src="https://img.shields.io/badge/Trakteer-c7254e?style=for-the-badge&logo=trakteer&logoColor=white" alt="Trakteer"/></a>
-  &nbsp;
-  <a href="https://saweria.co/rafaelghif"><img src="https://img.shields.io/badge/Saweria-FFA500?style=for-the-badge&logo=saweria&logoColor=white" alt="Saweria"/></a>
+  <a href="https://saweria.co/rafaelghifari"><img src="https://img.shields.io/badge/Saweria-FFA500?style=for-the-badge&logo=saweria&logoColor=white" alt="Saweria"/></a>
 </div>
 
 ---
