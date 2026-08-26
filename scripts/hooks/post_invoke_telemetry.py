@@ -94,6 +94,11 @@ if __name__ == '__main__':
             transcript = payload.get('transcriptPath')
             if transcript and Path(transcript).exists():
                 extract_telemetry(transcript)
+                try:
+                    from scripts.self_learner import process_transcript
+                    process_transcript(Path(transcript), Path('.agents/brain/rules.md'), Path('.agents/brain/memory.md'))
+                except Exception as e:
+                    sys.stderr.write(f"Self-learning hook notice: {e}\n")
         # Consolidate project memory
         update_project_memory()
         # Auto-clean lingering scratch files

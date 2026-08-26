@@ -52,41 +52,42 @@ def detect_skills_from_text(text: str) -> list:
 def get_context(transcript_path: str | None = None) -> str:
     msgs = []
     
-    # 1. Cross-Session Project Memory
+    # 1. Cross-Session Project Memory (only populated lines to conserve tokens)
     memory_path = Path('.agents/brain/memory.md')
     if memory_path.exists():
-        text = memory_path.read_text(encoding='utf-8').strip()
-        if text:
-            msgs.append(f"=== PERMANENT CROSS-SESSION PROJECT MEMORY ===\n{text}")
+        raw_lines = memory_path.read_text(encoding='utf-8').splitlines()
+        populated = [l for l in raw_lines if not l.endswith('Auto-detected by agent') and l.strip()]
+        if populated:
+            msgs.append("=== CROSS-SESSION MEMORY ===\n" + "\n".join(populated))
             
-    # 2. Long-Term DAG Anchor
+    # 2. Long-Term DAG Anchor (only if active)
     anchor_path = Path('.agents/brain/ANCHOR.md')
     if anchor_path.exists():
         text = anchor_path.read_text(encoding='utf-8').strip()
         if text and text != "(No context yet)":
-            msgs.append(f"=== LONG-TERM DAG ANCHOR ===\n{text}")
+            msgs.append(f"=== DAG ANCHOR ===\n{text}")
             
-    # 3. Self-Learned Rules & DNA
+    # 3. Self-Learned Rules (only active bullet rules, omit header to save tokens)
     rules_path = Path('.agents/brain/rules.md')
     if rules_path.exists():
-        text = rules_path.read_text(encoding='utf-8').strip()
-        if text:
-            msgs.append(f"=== SELF-LEARNED RULES ===\n{text}")
+        raw_rules = rules_path.read_text(encoding='utf-8').splitlines()
+        active_rules = [l for l in raw_rules if l.startswith('- ')]
+        if active_rules:
+            msgs.append("=== PROCEDURAL RULES ===\n" + "\n".join(active_rules))
             
-    # 4. Dynamic Skill Injection (Eliminates Skill Amnesia)
+    # 4. Compact Skill Directives (Eliminates token bloat by avoiding full markdown dump)
     skills_to_inject = set()
+    recent_text = ""
     if transcript_path and Path(transcript_path).exists():
         try:
             with open(transcript_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
-            # Check for subagent YAML frontmatter in initial steps
             for line in lines[:3]:
                 data = json.loads(line)
                 content = str(data.get('content', ''))
                 yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
                 if yaml_match:
                     skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
-            # Scan last user message for task-relevant skill keywords
             recent_text = " ".join(
                 str(json.loads(line).get('content', ''))
                 for line in lines[-5:]
@@ -97,41 +98,15 @@ def get_context(transcript_path: str | None = None) -> str:
         except Exception as e:
             sys.stderr.write(f"Context extraction notice: {str(e)}\n")
 
-    # Inject detected skills
-    for skill in sorted(skills_to_inject):
-        skill_path = Path(f'.agents/skills/{skill}/SKILL.md')
-        if skill_path.exists():
-            msgs.append(f"=== AUTO-INJECTED SKILL: {skill} ===\n{skill_path.read_text(encoding='utf-8').strip()}")
+    if skills_to_inject:
+        skill_list = ", ".join(sorted(skills_to_inject))
+        msgs.append(f"=== ACTIVE SKILLS: [{skill_list}] ===\n(Use view_file on relevant .agents/skills/<skill>/SKILL.md if implementing related tasks)")
 
     # 5. Upgrade Intent Mandate
-    if transcript_path and Path(transcript_path).exists():
-        try:
-            if any(term in recent_text.lower() for term in ["upgrade", "update agent", "/upgrade", "versi baru", "update framework"]):
-                msgs.append("=== UPGRADE MANDATE ===\nUser requested an upgrade/update of AAC. Run 'python3 scripts/upgrade.py' via run_command to automatically check and apply the latest release while preserving user memory and rules.")
-        except Exception as e:
-            sys.stderr.write(f"Upgrade check notice: {e}\n")
+    if recent_text and any(term in recent_text.lower() for term in ["upgrade", "update agent", "/upgrade", "versi baru", "update framework"]):
+        msgs.append("=== UPGRADE MANDATE ===\nUser requested AAC upgrade. Execute 'python3 scripts/upgrade.py' via run_command.")
 
     return "\n\n".join(msgs)
-
-def check_rsi(transcript_path: str | None = None) -> bool:
-    if not transcript_path or not Path(transcript_path).exists():
-        return False
-        
-    try:
-        with open(transcript_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            if not lines:
-                return False
-            last_line = lines[-1]
-            data = json.loads(last_line)
-            
-            if data.get('type') == 'TOOL_RESPONSE':
-                content = str(data.get('content', '')).lower()
-                if re.search(r'failed with exit code|error:|exception:|traceback|exit status', content):
-                    return True
-    except Exception as e:
-        sys.stderr.write(f"RSI check notice: {str(e)}\n")
-    return False
 
 def main() -> None:
     try:
@@ -144,18 +119,10 @@ def main() -> None:
         transcript_path = payload.get('transcriptPath')
         
         inject_steps = []
-        
-        # 1. Context Auto-Injection (Memory + Skills + Anchor)
         context_str = get_context(transcript_path)
         if context_str:
             inject_steps.append({
-                "ephemeralMessage": f"SYSTEM MEMORY & SKILL INJECTION (Directly loaded into context to prevent amnesia and ensure L9 execution):\n\n{context_str}"
-            })
-            
-        # 2. RSI Self-Healing
-        if check_rsi(transcript_path):
-            inject_steps.append({
-                "ephemeralMessage": "🚨 RSI PROTOCOL TRIGGERED 🚨: The previous command failed! DO NOT guess the solution. You MUST immediately call `invoke_subagent` to spawn a `reviewer` subagent to analyze the root cause and provide a patch."
+                "ephemeralMessage": f"SYSTEM MEMORY & DIRECTIVES (Compact token footprint):\n\n{context_str}"
             })
             
         if inject_steps:
