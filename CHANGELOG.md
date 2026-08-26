@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.24.0] - 2026-08-26
+### Webperf & Code-Simplification: Addy Osmani Production Engineering Suite
+- **Feature (Performance Optimization Skill)**: Implemented `.agents/skills/performance-optimization/SKILL.md` directly adopting Addy Osmani's web-performance principles:
+  - **Metric Honesty**: Strict requirement to never claim code is optimized without measurement.
+  - **Core Web Vitals**: Auditing for LCP (<= 2.5s hero preloading, font-display swap), INP (<= 200ms main-thread chunking, debouncing), and CLS (<= 0.1 explicit dimensions on images and dynamic content slots).
+  - **Resource Hygiene**: Strict tree-shaking rules banning library barrel imports and enforcing dynamic imports for heavy components.
+- **Feature (Code Simplification Skill)**: Implemented `.agents/skills/code-simplification/SKILL.md`:
+  - Enforces "clarity over cleverness" and behavioral invariance.
+  - Flattens deep conditional nesting into early-return guard clauses.
+  - Inlines redundant intermediate single-use variables and removes premature factory abstractions while protecting `/* PERF_CRITICAL */` blocks.
+- **Auto-Injection & Ecosystem References**:
+  - Registered keywords in `scripts/hooks/pre_invoke_master.py` (`webperf`, `performance`, `cls`, `lcp`, `inp`, `simplify`, `code-simplify`).
+  - Added `addyosmani/agent-skills` to the Standing on the Shoulders of Giants references table in `README.md`.
+
 ## [4.23.0] - 2026-08-26
 ### Caveman Token Compression Protocol: 60%+ Verbosity Slashed
 - **Feature (Caveman Skill Protocol)**: Implemented `.agents/skills/caveman/SKILL.md` adopting the core philosophy *"Mouth smaller, not brain smaller"*:
