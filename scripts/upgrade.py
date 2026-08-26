@@ -9,9 +9,9 @@ import os
 import sys
 import json
 import re
-import urllib.request
 import subprocess
 import argparse
+import tempfile
 from pathlib import Path
 
 GITHUB_API_URL = "https://api.github.com/repos/rafaelghif/antigravity-agents/releases/latest"
@@ -39,12 +39,15 @@ def get_current_version(root_dir: Path) -> str:
 
 def get_latest_github_release() -> tuple:
     try:
-        req = urllib.request.Request(
-            GITHUB_API_URL,
-            headers={"User-Agent": "AAC-Upgrader"}
+        res = subprocess.run(
+            ["curl", "-s", "-H", "User-Agent: AAC-Upgrader", GITHUB_API_URL],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=5
         )
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode("utf-8"))
+        if res.returncode == 0 and res.stdout:
+            data = json.loads(res.stdout)
             tag = data.get("tag_name", "")
             title = data.get("name", tag)
             body = data.get("body", "")
@@ -71,7 +74,7 @@ def get_latest_github_release() -> tuple:
     except Exception as e:
         sys.stderr.write(f"Git remote tags notice: {e}\n")
 
-    return ("v4.18.0", "v4.18.0", "Fallback version.")
+    return ("v4.19.0", "v4.19.0", "Fallback version.")
 
 def check_update_status(root_dir: Path) -> dict:
     current = get_current_version(root_dir)
@@ -89,9 +92,26 @@ def run_upgrade(root_dir: Path, target_version: str) -> bool:
     print(f"\n=> Downloading and applying AAC {target_version}...")
     install_url = f"https://raw.githubusercontent.com/rafaelghif/antigravity-agents/{target_version}/install.sh"
     try:
-        cmd = f"curl -fsSL {install_url} | bash"
-        res = subprocess.run(cmd, shell=True, cwd=root_dir)
-        return res.returncode == 0
+        with tempfile.NamedTemporaryFile(suffix=".sh", delete=False) as tmp_file:
+            tmp_path = Path(tmp_file.name)
+        
+        dl_res = subprocess.run(
+            ["curl", "-fsSL", install_url, "-o", str(tmp_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if dl_res.returncode != 0:
+            print(f"=> Download failed: {dl_res.stderr}")
+            return False
+
+        exec_res = subprocess.run(
+            ["bash", str(tmp_path)],
+            cwd=root_dir
+        )
+        if tmp_path.exists():
+            tmp_path.unlink()
+        return exec_res.returncode == 0
     except Exception as e:
         print(f"=> ERROR running upgrade: {e}")
         return False
