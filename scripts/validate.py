@@ -39,6 +39,7 @@ REQUIRED_PATHS = (
     "scripts/semantic_grapher.py",
     "scripts/validate.py",
     "scripts/verify.py",
+    "scripts/test_quality_guard.py",
 )
 
 CONSUMER_REQUIRED_PATHS = (
@@ -61,6 +62,7 @@ CONSUMER_REQUIRED_PATHS = (
     ".agents/skills/semantic-graphing/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
+    "scripts/test_quality_guard.py",
 )
 
 OPTIONAL_PATHS = (

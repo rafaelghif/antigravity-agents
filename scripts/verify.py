@@ -61,6 +61,10 @@ def main() -> int:
     complexity = ROOT / "scripts" / "complexity_analyzer.py"
     if complexity.is_file():
         checks.append(("complexity_check", "AAC", f"python3 {shlex.quote(str(complexity))}"))
+
+    test_guard = ROOT / "scripts" / "test_quality_guard.py"
+    if test_guard.is_file():
+        checks.append(("anti_sham_check", "AAC", f"python3 {shlex.quote(str(test_guard))}"))
         
     if not checks:
         print("- application stack: not detected")

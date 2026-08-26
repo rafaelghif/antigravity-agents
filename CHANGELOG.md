@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.16.0] - 2026-08-26
+### Anti-Sham Test Quality Guard & Behavioral Testing Mandate
+- **Feature (Anti-Sham Test Quality Guard)**: Implemented `scripts/test_quality_guard.py` using AST analysis to permanently eradicate lazy LLM unit tests. Strictly rejects tautological tests that only assert `callable(fn)`, `hasattr(mod, fn)`, `fn is not None`, or `expect(fn).toBeDefined()` without testing inputs, outputs, edge cases, and exceptions.
+- **Pipeline Integration**: Added `AAC anti_sham_check` to `scripts/verify.py`. Automated test suites instantly fail if any sham test is detected.
+- **Rules & Skills Alignment**:
+  - Updated Gate 28 in `AGENTS.md` to mandate behavioral tests and ban sham testing.
+  - Updated `verification/SKILL.md` to mandate input/output behavioral testing and edge cases.
+  - Added Trigger 9 to `reviewer.md` to auto-reject PRs with tautological tests.
+  - Updated `install.sh` and `install.ps1` to distribute `scripts/test_quality_guard.py`.
+
 ## [4.15.0] - 2026-08-26
 ### Semantic Knowledge Graph Engine (Graphify Protocol)
 - **Feature (Graphify Knowledge Graph Engine)**: Upgraded `scripts/semantic_grapher.py` into a full-scale GraphRAG knowledge graph generator inspired by `Graphify-Labs/graphify`:
@@ -7,7 +17,7 @@
   - **Blast Radius Analysis (`--blast-radius`)**: Computes transitive BFS reverse dependency chains to show all upstream callers impacted before a refactor.
   - **Shortest-Path Tracer (`--path-find`)**: Computes BFS shortest dependency path between any two symbols or modules.
   - **God Nodes Detection**: Automatically identifies the highest-degree architectural hub nodes in the repository.
-- **Skill Upgrade**: Revamped `semantic-graphing/SKILL.md` to guide agents in running blast radius and path tracing before code modifications.
+  - **Skill Upgrade**: Revamped `semantic-graphing/SKILL.md` to guide agents in running blast radius and path tracing before code modifications.
 
 ## [4.14.0] - 2026-08-26
 ### The Senior Ladder & Minimalist Pragmatic Engineering
