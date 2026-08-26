@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.20.0] - 2026-08-26
+### Senior UX/UI Architecture (WCAG 2.2 AA) & Community Sponsorship
+- **Feature (Senior UX/UI Design Architecture)**: Merged principles from `plugin87/ux-ui-agent-skills` into AAC:
+  - **DTCG 3-Tier Design Tokens**: Strict separation of Primitive scales, Semantic intent tokens, and Component-scoped tokens.
+  - **WCAG 2.2 Level AA Accessibility**: Enforced contrast ratios ($\ge 4.5:1$), minimum $44\text{px}$ touch targets, screen-reader attributes, and `prefers-reduced-motion` fallbacks.
+  - **Anti-AI-Slop Visual Taste Doctrine**: Banned generic purple gradients, cramped negative space, and low-contrast text.
+  - **Complete 6-State Spectrum**: Mandatory definitions for Default, Hover, Active, Focus-Visible, Disabled, and Async states (Loading Skeletons, Empty States).
+  - Upgraded `.agents/skills/design/SKILL.md` with comprehensive UX/UI directives.
+- **Feature (UI Hygiene & a11y Guard)**: Implemented `scripts/ui_hygiene_guard.py` to automatically detect missing `alt` on `<img>`, naked `outline-none` lacking `focus-visible`, missing `<button>` types, and raw hardcoded hex colors in JSX/TSX/Vue/Svelte. Added `AAC ui_hygiene_check` to `scripts/verify.py`.
+- **Feature (Community Sponsorship & Backing)**: Configured `.github/FUNDING.yml` and added a clean **💖 Support & Sponsorship** section in `README.md` supporting GitHub Sponsors, Ko-fi, Trakteer, and Saweria.
+
 ## [4.19.0] - 2026-08-26
 ### Effortless 1-Command Upgrader & Universal Auto-Resolving Installer
 - **Feature (1-Command AAC Upgrader)**: Implemented `scripts/upgrade.py` allowing users and agents to upgrade AAC with a single command (`python3 scripts/upgrade.py` or `/upgrade`). Automatically queries GitHub Releases for the latest version, shows release highlights, and upgrades without touching user memories (`memory.md`), rules (`rules.md`), or custom skills.

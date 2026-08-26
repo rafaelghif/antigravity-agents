@@ -7,9 +7,9 @@ if (-not $AacRef) {
     try {
         $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
-        $AacRef = if ($latest) { $latest } else { "v4.19.0" }
+        $AacRef = if ($latest) { $latest } else { "v4.20.0" }
     } catch {
-        $AacRef = "v4.19.0"
+        $AacRef = "v4.20.0"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
@@ -86,6 +86,7 @@ try {
     Copy-ManagedFile "$TmpDir/scripts/dry_guard.py" "scripts/dry_guard.py"
     Copy-ManagedFile "$TmpDir/scripts/git_hygiene_guard.py" "scripts/git_hygiene_guard.py"
     Copy-ManagedFile "$TmpDir/scripts/upgrade.py" "scripts/upgrade.py"
+    Copy-ManagedFile "$TmpDir/scripts/ui_hygiene_guard.py" "scripts/ui_hygiene_guard.py"
     Write-Host "AAC $AacRef successfully configured in $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }
