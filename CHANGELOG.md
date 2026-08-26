@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.14.0] - 2026-08-26
+### The Senior Ladder & Minimalist Pragmatic Engineering
+- **Feature (The Senior Ladder Decision Engine)**: Incorporated the 7-rung minimalist decision tree inspired by `DietrichGebert/ponytail` across `AGENTS.md`, `code-quality/SKILL.md`, `architecture/SKILL.md`, and `implementer.md`: 1) YAGNI, 2) Codebase reuse, 3) Standard library, 4) Native platform features (e.g. `<input type="date">`), 5) Existing dependencies, 6) One-liner, 7) Minimum working diff.
+- **Feature (Root-Cause Bug Fixing Mandate)**: Banned symptom patching in leaf callers. Enforced root-cause fixes at the single shared origin where all callers route through.
+- **Feature (Anti-Overengineering Gate)**: Upgraded `reviewer.md` auto-reject triggers to block PRs that install unnecessary packages or build complex custom components when platform-native or stdlib primitives exist.
+
 ## [4.13.0] - 2026-08-26
 ### Dynamic Skill Auto-Injection & Cross-Session Memory Engine
 - **Feature (Skill Auto-Injection Engine)**: Upgraded `pre_invoke_master.py` with automatic keyword-to-skill detection. Skills are now automatically injected into context as raw text on every turn, completely solving the "agent doesn't read skills" issue without wasting tool calls.
