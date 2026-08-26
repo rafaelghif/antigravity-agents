@@ -66,6 +66,8 @@ CONSUMER_REQUIRED_PATHS = (
 OPTIONAL_PATHS = (
     ".agents/brain/soul.md",
     ".agents/brain/rules.md",
+    ".agents/brain/memory.md",
+    ".agents/brain/ANCHOR.md",
     ".agents/brain/schema.md",
     ".agents/brain/env-required.json",
     ".agents/common/utils.md",

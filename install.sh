@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Antigravity Agent Core (AAC) reproducible installer.
-# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.12.0/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/v4.13.0/install.sh | bash
 
 set -Eeuo pipefail
 umask 077
 
-readonly AAC_REF="v4.12.0"
+readonly AAC_REF="v4.13.0"
 readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -63,9 +63,11 @@ else
   printf "=> Initiating AAC Clean Install of %s...\n" "$AAC_REF"
 fi
 
-if [[ -f "$TARGET_DIR/.agents/brain/rules.md" ]]; then
-  cp -- "$TARGET_DIR/.agents/brain/rules.md" "$TMP_DIR/rules.md.bak"
-fi
+for brain_file in rules.md memory.md ANCHOR.md; do
+  if [[ -f "$TARGET_DIR/.agents/brain/$brain_file" ]]; then
+    cp -- "$TARGET_DIR/.agents/brain/$brain_file" "$TMP_DIR/${brain_file}.bak"
+  fi
+done
 
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
 
@@ -83,9 +85,11 @@ copy_managed "$TMP_DIR/source/.agents/antigravity-compatibility.json" .agents/an
 copy_managed "$TMP_DIR/source/.agents/mcp_config.json.example" .agents/mcp_config.json.example
 copy_managed "$TMP_DIR/source/.agents/brain" .agents/brain
 
-if [[ -f "$TMP_DIR/rules.md.bak" ]]; then
-  cp -- "$TMP_DIR/rules.md.bak" "$TARGET_DIR/.agents/brain/rules.md"
-fi
+for brain_file in rules.md memory.md ANCHOR.md; do
+  if [[ -f "$TMP_DIR/${brain_file}.bak" ]]; then
+    cp -- "$TMP_DIR/${brain_file}.bak" "$TARGET_DIR/.agents/brain/$brain_file"
+  fi
+done
 
 copy_managed "$TMP_DIR/source/.agents/common" .agents/common
 copy_managed "$TMP_DIR/source/.agents/agents" .agents/agents

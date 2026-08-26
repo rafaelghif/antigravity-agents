@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.0] - 2026-08-26
+### Dynamic Skill Auto-Injection & Cross-Session Memory Engine
+- **Feature (Skill Auto-Injection Engine)**: Upgraded `pre_invoke_master.py` with automatic keyword-to-skill detection. Skills are now automatically injected into context as raw text on every turn, completely solving the "agent doesn't read skills" issue without wasting tool calls.
+- **Feature (Permanent Cross-Session Memory)**: Introduced `.agents/brain/memory.md` for persistent cross-session architecture profiles, design system conventions, and user preferences.
+- **Feature (Auto-Consolidating Stack Profiler)**: `post_invoke_telemetry.py` automatically detects project dependencies (`package.json`, `pyproject.toml`, etc.) and records the project tech stack profile into `memory.md`.
+- **Feature (Installer Memory Preservation)**: `install.sh` and `install.ps1` updated to back up and restore `memory.md`, `rules.md`, and `ANCHOR.md` during framework upgrades.
+
 ## [4.12.0] - 2026-08-26
 ### Senior Engineering Quality & Pattern Harmony
 - **Fix (Consumer Validation)**: `scripts/validate.py` is now workspace-aware. It no longer fails on consumer projects by demanding framework-specific files (`install.sh`, `install.ps1`, AAC release notes in project `README.md`/`CHANGELOG.md`).
