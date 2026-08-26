@@ -27,6 +27,9 @@ SKILL_KEYWORDS = {
     "verification": [
         "test", "tests", "testing", "pytest", "jest", "unit", "e2e", "assert",
         "coverage", "spec", "mock", "integration"
+    ],
+    "caveman": [
+        "caveman", "cavemen", "hemat token", "token saving", "terse", "singkat", "compress tokens"
     ]
 }
 

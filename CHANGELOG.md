@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.23.0] - 2026-08-26
+### Caveman Token Compression Protocol: 60%+ Verbosity Slashed
+- **Feature (Caveman Skill Protocol)**: Implemented `.agents/skills/caveman/SKILL.md` adopting the core philosophy *"Mouth smaller, not brain smaller"*:
+  - Eliminates conversational filler, greetings, pleasantries, and polite hedging to slash output token usage by 60%+.
+  - Enforces telegraphic high-density communication (`[Target] -> [Action] -> [Result]`).
+  - **Byte-Exact Immutability**: All source code, commands, diffs, and file paths remain 100% byte-exact and untouched.
+- **Inter-Agent Telegraphic Messaging**:
+  - Upgraded subagents (`implementer.md`, `reviewer.md`) to communicate via `send_message` in pure telegraphic payloads (`[DIFF] <files> <summary>`, `CONSENSUS_REACHED: APPROVED`), removing hundreds of tokens per debate round.
+- **Policy & Auto-Detection**:
+  - Etched `[CAVEMAN_TOKEN_ECONOMY]` into `rules.md` and updated `AGENTS.md` Rule 14 (`[CAVEMAN_EFFICIENCY]`).
+  - Added caveman keyword triggers (`caveman`, `hemat token`, `compress tokens`, `terse`) to `scripts/hooks/pre_invoke_master.py`.
+
 ## [4.22.0] - 2026-08-26
 ### Subagent Liberation: Complete Sandbox Removal & Unrestricted Permissions
 - **Feature (Subagent Sandbox Removal)**: Liberated subagents from isolated OS containers and restricted worktrees:
