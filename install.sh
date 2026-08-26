@@ -9,9 +9,9 @@ readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 
 if [[ -z "${AAC_REF:-}" ]]; then
   AAC_REF="$(git ls-remote --tags --refs "$REPOSITORY" 2>/dev/null | cut -d/ -f3 | sort -V | tail -n 1 || echo "")"
-  AAC_REF="${AAC_REF:-v4.25.0}"
+  AAC_REF="${AAC_REF:-v4.26.0}"
 fi
-# Version marker for validation:  AAC_REF="v4.25.0"
+# Version marker for validation:  AAC_REF="v4.26.0"
 readonly AAC_REF
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"

@@ -34,6 +34,15 @@ class TestMemoryEngine(unittest.TestCase):
         skills_simp = pre_invoke_master.detect_skills_from_text("please simplify this over-engineered code")
         self.assertIn("code-simplification", skills_simp)
 
+        skills_res = pre_invoke_master.detect_skills_from_text("ensure idempotency and add circuit breaker retry backoff")
+        self.assertIn("resilience-engineering", skills_res)
+
+        skills_mig = pre_invoke_master.detect_skills_from_text("perform zero downtime schema migration with lock timeout")
+        self.assertIn("zero-downtime-migrations", skills_mig)
+
+        skills_api = pre_invoke_master.detect_skills_from_text("check api contract and prevent breaking change with rfc 7807")
+        self.assertIn("api-contracts", skills_api)
+
     def test_update_project_memory_runs_safely(self):
         # Ensure memory consolidation runs without errors
         post_invoke_telemetry.update_project_memory()
