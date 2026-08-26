@@ -2,7 +2,6 @@
 import sys
 import json
 import re
-import yaml
 from pathlib import Path
 
 SKILL_KEYWORDS = {
@@ -27,6 +26,13 @@ SKILL_KEYWORDS = {
         "coverage", "spec", "mock", "integration"
     ]
 }
+
+def parse_skills_from_frontmatter(frontmatter_str: str) -> list:
+    inline_match = re.search(r'skills:\s*\[(.*?)\]', frontmatter_str)
+    if inline_match:
+        return [s.strip().strip("'\"") for s in inline_match.group(1).split(',') if s.strip()]
+    list_match = re.findall(r'^\s*-\s*([a-zA-Z0-9_-]+)', frontmatter_str, re.MULTILINE)
+    return list_match
 
 def detect_skills_from_text(text: str) -> list:
     if not text:
@@ -76,9 +82,7 @@ def get_context(transcript_path: str | None = None) -> str:
                 content = str(data.get('content', ''))
                 yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
                 if yaml_match:
-                    frontmatter = yaml.safe_load(yaml_match.group(1))
-                    if isinstance(frontmatter, dict):
-                        skills_to_inject.update(frontmatter.get('skills', []))
+                    skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
             # Scan last user message for task-relevant skill keywords
             recent_text = " ".join(
                 str(json.loads(line).get('content', ''))
