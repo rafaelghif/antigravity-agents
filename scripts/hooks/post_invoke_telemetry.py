@@ -99,6 +99,11 @@ if __name__ == '__main__':
                     process_transcript(Path(transcript), Path('.agents/brain/rules.md'), Path('.agents/brain/memory.md'))
                 except Exception as e:
                     sys.stderr.write(f"Self-learning hook notice: {e}\n")
+                try:
+                    from scripts.memory_consolidator import sync_transcript_to_memory
+                    sync_transcript_to_memory(Path(transcript))
+                except Exception as e:
+                    sys.stderr.write(f"Memory consolidator hook notice: {e}\n")
         # Consolidate project memory
         update_project_memory()
         # Auto-clean lingering scratch files

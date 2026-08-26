@@ -45,6 +45,7 @@ CORE_AGENT_PATHS = (
     "scripts/upgrade.py",
     "scripts/ui_hygiene_guard.py",
     "scripts/self_learner.py",
+    "scripts/memory_consolidator.py",
 )
 
 REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)
@@ -54,6 +55,7 @@ OPTIONAL_PATHS = (
     ".agents/brain/soul.md",
     ".agents/brain/rules.md",
     ".agents/brain/memory.md",
+    ".agents/brain/active_context.md",
     ".agents/brain/ANCHOR.md",
     ".agents/brain/schema.md",
     ".agents/brain/env-required.json",

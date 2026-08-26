@@ -3,7 +3,7 @@
   <p><strong>The Enterprise-Grade Agentic Engineering Framework for Google Antigravity</strong></p>
 
   <a href="https://github.com/rafaelghif/antigravity-agents/releases"><img src="https://img.shields.io/github/v/release/rafaelghif/antigravity-agents?color=0052CC&label=release&logo=github" alt="Release"/></a>
-  [![Version](https://img.shields.io/badge/version-4.26.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.26.0)
+  [![Version](https://img.shields.io/badge/version-4.27.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.27.0)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![Gates](https://img.shields.io/badge/gates-6%2F6_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-6-hard-technical-gates)
   [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)
@@ -153,6 +153,7 @@ Simply type in the chat prompt:
 | **Export GraphRAG** | `python3 scripts/semantic_grapher.py --json` | Generates deterministic Knowledge Graph JSON for AST analysis. |
 | **Synthesize Skill** | `python3 scripts/self_learner.py --synthesize-skill <name>` | Synthesizes a new custom skill for the workspace on-the-fly. |
 | **Terse ACI Verify** | `python3 scripts/verify.py --execute --terse` | Runs all 6 verification gates quietly with a high-density 1-line summary. |
+| **Active Memory Sync** | `python3 scripts/memory_consolidator.py --show` | Displays current active working memory (`active_context.md`). |
 
 ---
 
@@ -161,7 +162,7 @@ Simply type in the chat prompt:
 ```text
 ├── .agents/
 │   ├── agents/          # Specialized subagent definitions (planner, implementer, reviewer, etc.)
-│   ├── brain/           # Permanent cross-session memory (memory.md, rules.md, ANCHOR.md)
+│   ├── brain/           # Permanent cross-session memory (memory.md, active_context.md, rules.md, ANCHOR.md)
 │   ├── harness/         # Token governance & compute guardrails
 │   ├── skills/          # Domain-specific procedures (architecture, caveman, dry, security, design, etc.)
 │   └── config.json      # Core framework configuration & version profile
@@ -170,6 +171,7 @@ Simply type in the chat prompt:
 │   ├── complexity_analyzer.py # Enterprise AST & Big-O analyzer
 │   ├── dry_guard.py           # Native sliding-window clone detector
 │   ├── git_hygiene_guard.py   # Scratch file cleaner & commit blocker
+│   ├── memory_consolidator.py # Hierarchical cross-session memory synchronizer
 │   ├── self_learner.py        # Autonomous continuous learner across turns
 │   ├── semantic_grapher.py    # GraphRAG knowledge graph & blast radius engine
 │   ├── test_quality_guard.py  # Anti-sham behavioral test quality guard
@@ -202,6 +204,7 @@ AAC synthesizes battle-tested architectural patterns and token-optimization para
 | **[temporalio/temporal](https://github.com/temporalio/temporal)** by Temporal Technologies | **Distributed Resilience & Idempotency Engine** | Foundation for `.agents/skills/resilience-engineering/`, enforcing idempotency keys, transactional outbox, and exponential backoff with full jitter. |
 | **[planetscale](https://github.com/planetscale)** & **[pgroll](https://github.com/xataio/pgroll)** | **Zero-Downtime Database Schema Evolution** | Foundation for `.agents/skills/zero-downtime-migrations/`, enforcing 3-phase expand/contract lifecycles and non-blocking concurrent DDL. |
 | **[bufbuild/buf](https://github.com/bufbuild/buf)** & **[OpenAPI/Spectral](https://github.com/stoplightio/spectral)** | **API Contract Governance & Backward Compatibility** | Foundation for `.agents/skills/api-contracts/`, enforcing non-breaking API evolution, runtime schema validation, and RFC 7807 problem details. |
+| **[letta-ai/letta](https://github.com/letta-ai/letta)** (MemGPT) & **[cline/cline](https://github.com/cline/cline)** | **Hierarchical Memory Bank & Cross-Session Persistence** | Architectural foundation for `.agents/brain/active_context.md` and [`scripts/memory_consolidator.py`](scripts/memory_consolidator.py), eliminating session amnesia via tiered working memory and deterministic auto-injection. |
 
 ---
 

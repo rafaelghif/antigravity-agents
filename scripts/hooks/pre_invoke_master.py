@@ -75,6 +75,14 @@ def detect_skills_from_text(text: str) -> list:
 def get_context(transcript_path: str | None = None) -> str:
     msgs = []
     
+    # 0. Active Session Context & Working Memory (P0 bootstrap)
+    active_path = Path('.agents/brain/active_context.md')
+    if active_path.exists():
+        raw_active = active_path.read_text(encoding='utf-8').splitlines()
+        active_lines = [l for l in raw_active if not l.startswith('> ') and not l.startswith('# ⚡') and l.strip()]
+        if active_lines:
+            msgs.append("=== ACTIVE SESSION WORKING CONTEXT ===\n" + "\n".join(active_lines))
+
     # 1. Cross-Session Project Memory (only populated lines to conserve tokens)
     memory_path = Path('.agents/brain/memory.md')
     if memory_path.exists():
