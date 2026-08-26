@@ -25,6 +25,9 @@ class TestMemoryEngine(unittest.TestCase):
         skills_arch = pre_invoke_master.detect_skills_from_text("design database schema migration for orders")
         self.assertIn("architecture", skills_arch)
 
+        skills_cave = pre_invoke_master.detect_skills_from_text("tolong hemat token dengan gaya caveman")
+        self.assertIn("caveman", skills_cave)
+
     def test_update_project_memory_runs_safely(self):
         # Ensure memory consolidation runs without errors
         post_invoke_telemetry.update_project_memory()
