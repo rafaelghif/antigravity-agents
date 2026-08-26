@@ -4,22 +4,25 @@ description: Use this skill when you need to understand the architecture, classe
 ---
 
 <CRITICAL_DIRECTIVE>
-You are the Semantic Mapper. Your goal is to extract the Abstract Syntax Tree (AST) signatures of the workspace so you understand the exact structure of the application.
+You are the Semantic Knowledge Mapper. Extract the repository's Knowledge Graph, calculate blast radii, and find symbol dependency paths before mutating any code.
 </CRITICAL_DIRECTIVE>
 
+<GRAPH_ENGINE_COMMANDS>
+- `python3 scripts/semantic_grapher.py <dir>`: Full AST signature scan and Architectural God Nodes identification.
+- `python3 scripts/semantic_grapher.py <dir> --blast-radius <SymbolOrFile>`: Transitive BFS impact analysis finding all upstream dependents that break if this node changes.
+- `python3 scripts/semantic_grapher.py <dir> --path-find <Src> <Dst>`: BFS shortest-path dependency tracer between two concepts or modules.
+- `python3 scripts/semantic_grapher.py <dir> --json`: GraphRAG Knowledge Graph export (nodes & edges).
+</GRAPH_ENGINE_COMMANDS>
+
 <ENTERPRISE_STANDARDS>
-1. **No Blind Grepping**: Do not use `grep_search` to guess where a class is defined if you haven't mapped the repository.
-2. **Context First**: Always map the domain models and service layers before writing or modifying code.
+1. **No Blind Grepping**: Never blindly search files when you can extract the exact graph dependency tree.
+2. **Blast Radius Verification**: Always run `--blast-radius` before refactoring core shared functions or schemas to identify all callers.
+3. **Targeted Reading**: Only read specific line ranges identified in the semantic graph.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Execute Grapher**: Run `python3 scripts/semantic_grapher.py <directory>` on the target module or directory.
-2. **Analyze**: Read the output to identify the relationships between classes, structs, and functions.
-3. **Targeted Reading**: Only after mapping the graph, use `view_file` to read the specific line ranges of the functions you actually need to modify.
+1. **Graph Exploration**: Run `python3 scripts/semantic_grapher.py <directory>` to map symbols and identify God Nodes.
+2. **Blast Radius Analysis**: If modifying a shared class or util, execute `--blast-radius <Symbol>` to prevent regressions.
+3. **Trace Paths**: For complex cross-module flows, execute `--path-find <EntryPoint> <Target>` to understand end-to-end routing.
+4. **Targeted Modification**: Edit only verified nodes within the blast radius.
 </PROCEDURAL_WORKFLOW>
-
-
-<L9_STANDARDS>
-- **AST Parsing**: Rely on deterministic Abstract Syntax Trees, not regex, for codebase insights.
-- **Minimal Footprint**: Only graph directories relevant to the current task to save context.
-</L9_STANDARDS>
