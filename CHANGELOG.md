@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.25.0] - 2026-08-26
+### Agentic Ecosystem Convergence: PageRank Centrality, Dynamic Skill Synthesis & ACI Terse Verification
+- **Feature (PageRank AST Centrality Ranking)**:
+  - Added PageRank algorithm (`compute_pagerank()`) to `scripts/semantic_grapher.py` inspired by Aider's Repo Map and Graphify.
+  - Computes probability distribution over graph nodes where incoming caller references transfer structural weight.
+  - Added `--pagerank` and `--top-central <N>` CLI flags to instantly identify the most critical architectural hubs in any repository.
+- **Feature (Autonomous Dynamic Custom Skill Synthesis)**:
+  - Added `synthesize_custom_skill()` to `scripts/self_learner.py` inspired by daymade's skill creator meta-skill.
+  - Allows autonomous on-demand generation of modular domain skills (`.agents/skills/<name>/SKILL.md`) with valid frontmatter, strict directives, and built-in duplicate rejection.
+- **Feature (Agent-Computer Interface Terse Verification)**:
+  - Added `--terse` / `-q` ACI mode to `scripts/verify.py` inspired by Princeton NLP's SWE-agent.
+  - Runs all 6 verification gates quietly and outputs a single telegraphic line (`=> ACI VERIFY: OK (6/6 gates passed)`) to eliminate context token clutter during automated subagent execution.
+- **Standing on the Shoulders of Giants**:
+  - Added `princeton-nlp/SWE-agent`, `Aider-AI/aider`, `RooVetGit/Roo-Code`, and `daymade/claude-code-skills` to `README.md` references table.
+  - Added `[PR_BRANCH_AUTO_CLEAN]` rule to `.agents/brain/rules.md` to permanently prevent git branch clutter.
+
 ## [4.24.0] - 2026-08-26
 ### Webperf & Code-Simplification: Addy Osmani Production Engineering Suite
 - **Feature (Performance Optimization Skill)**: Implemented `.agents/skills/performance-optimization/SKILL.md` directly adopting Addy Osmani's web-performance principles:
