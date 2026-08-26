@@ -39,7 +39,7 @@ def extract_file_windows(filepath: Path, min_lines: int, hashes: dict) -> None:
     for i in range(len(cleaned) - min_lines + 1):
         window = cleaned[i : i + min_lines]
         chunk = "\n".join([w[0] for w in window])
-        h = hashlib.sha1(chunk.encode("utf-8")).hexdigest()
+        h = hashlib.sha256(chunk.encode("utf-8")).hexdigest()
         start_line = window[0][1]
         end_line = window[-1][1]
         hashes[h].append((filepath, start_line, end_line, chunk))
