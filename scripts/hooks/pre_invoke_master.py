@@ -38,6 +38,18 @@ SKILL_KEYWORDS = {
     "code-simplification": [
         "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
         "code-simplify", "flatten"
+    ],
+    "resilience-engineering": [
+        "idempotency", "idempotent", "retry", "backoff", "jitter", "circuit breaker",
+        "outbox", "saga", "distributed", "deadlock", "concurrency", "race condition"
+    ],
+    "zero-downtime-migrations": [
+        "zero downtime", "expand contract", "concurrent index", "lock timeout",
+        "non-blocking migration", "schema evolution", "backfill"
+    ],
+    "api-contracts": [
+        "api contract", "breaking change", "backward compatibility", "rfc 7807",
+        "problem details", "zod validation", "pydantic validation", "dto"
     ]
 }
 

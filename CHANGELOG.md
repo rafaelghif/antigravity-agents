@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.26.0] - 2026-08-26
+### L9 Principal Engineering Suite: Distributed Resilience, Zero-Downtime DB Migrations & API Governance
+- **Feature (Resilience Engineering Skill)**:
+  - Implemented `.agents/skills/resilience-engineering/SKILL.md` inspired by Temporal Technologies and Martin Fowler.
+  - Enforces mandatory idempotency keys on mutations, exponential backoff with full randomized jitter, transactional outbox pattern for async events, circuit breakers with graceful fallbacks, and deterministic deadlock prevention.
+- **Feature (Zero-Downtime Migrations Skill)**:
+  - Implemented `.agents/skills/zero-downtime-migrations/SKILL.md` inspired by PlanetScale and pgroll.
+  - Enforces 3-phase expand/contract schema evolution, non-blocking `CREATE INDEX CONCURRENTLY`, strict 2s lock timeouts, and safe chunked backfills.
+- **Feature (API Contract Governance Skill)**:
+  - Implemented `.agents/skills/api-contracts/SKILL.md` inspired by Buf and OpenAPI/Spectral.
+  - Enforces strict backward compatibility (append-only enums, non-breaking schema evolution), schema-first runtime input validation (Zod/Pydantic), and standardized RFC 7807 problem details.
+- **Ecosystem References & Auto-Injection**:
+  - Registered auto-detection keywords for all 3 skills in `scripts/hooks/pre_invoke_master.py`.
+  - Added `temporalio/temporal`, `planetscale` / `pgroll`, and `bufbuild/buf` to `README.md` references table.
+
 ## [4.25.0] - 2026-08-26
 ### Agentic Ecosystem Convergence: PageRank Centrality, Dynamic Skill Synthesis & ACI Terse Verification
 - **Feature (PageRank AST Centrality Ranking)**:
