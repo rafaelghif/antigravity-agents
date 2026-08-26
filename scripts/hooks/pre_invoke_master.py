@@ -11,7 +11,10 @@ SKILL_KEYWORDS = {
     ],
     "code-quality": [
         "code", "refactor", "function", "class", "method", "bug", "fix", "feature",
-        "typescript", "python", "javascript", "dry", "solid", "optimization", "clean"
+        "typescript", "python", "javascript", "solid", "optimization", "clean"
+    ],
+    "dry": [
+        "dry", "duplicate", "duplication", "deduplicate", "copy-paste", "clone", "redundant", "dedup"
     ],
     "security": [
         "auth", "login", "jwt", "token", "password", "secret", "permission", "rbac",
