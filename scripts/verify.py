@@ -54,29 +54,28 @@ def main() -> int:
 
     checks = detect()
     structural = ROOT / "scripts" / "validate.py"
-    
     if structural.is_file():
-        checks.append(("validate", "AAC", f"python3 {shlex.quote(str(structural))}"))
+        checks.append(("validate", "AAC", "python3 scripts/validate.py"))
         
     complexity = ROOT / "scripts" / "complexity_analyzer.py"
     if complexity.is_file():
-        checks.append(("complexity_check", "AAC", f"python3 {shlex.quote(str(complexity))}"))
+        checks.append(("complexity_check", "AAC", "python3 scripts/complexity_analyzer.py"))
 
     test_guard = ROOT / "scripts" / "test_quality_guard.py"
     if test_guard.is_file():
-        checks.append(("anti_sham_check", "AAC", f"python3 {shlex.quote(str(test_guard))}"))
+        checks.append(("anti_sham_check", "AAC", "python3 scripts/test_quality_guard.py"))
 
     dry_guard = ROOT / "scripts" / "dry_guard.py"
     if dry_guard.is_file():
-        checks.append(("dry_check", "AAC", f"python3 {shlex.quote(str(dry_guard))} --check"))
+        checks.append(("dry_check", "AAC", "python3 scripts/dry_guard.py --check"))
 
     hygiene_guard = ROOT / "scripts" / "git_hygiene_guard.py"
     if hygiene_guard.is_file():
-        checks.append(("git_hygiene_check", "AAC", f"python3 {shlex.quote(str(hygiene_guard))} --check"))
+        checks.append(("git_hygiene_check", "AAC", "python3 scripts/git_hygiene_guard.py --check"))
 
     ui_guard = ROOT / "scripts" / "ui_hygiene_guard.py"
     if ui_guard.is_file():
-        checks.append(("ui_hygiene_check", "AAC", f"python3 {shlex.quote(str(ui_guard))} --check"))
+        checks.append(("ui_hygiene_check", "AAC", "python3 scripts/ui_hygiene_guard.py --check"))
         
     if not checks:
         if not args.terse:

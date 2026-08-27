@@ -9,9 +9,9 @@ readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 
 if [[ -z "${AAC_REF:-}" ]]; then
   AAC_REF="$(git ls-remote --tags --refs "$REPOSITORY" 2>/dev/null | cut -d/ -f3 | sort -V | tail -n 1 || echo "")"
-  AAC_REF="${AAC_REF:-v4.27.0}"
+  AAC_REF="${AAC_REF:-v4.28.0}"
 fi
-# Version marker for validation:  AAC_REF="v4.27.0"
+# Version marker for validation:  AAC_REF="v4.28.0"
 readonly AAC_REF
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -69,7 +69,7 @@ else
   printf "=> Initiating AAC Clean Install of %s...\n" "$AAC_REF"
 fi
 
-for brain_file in rules.md memory.md ANCHOR.md; do
+for brain_file in rules.md memory.md ANCHOR.md active_context.md soul.md schema.md; do
   if [[ -f "$TARGET_DIR/.agents/brain/$brain_file" ]]; then
     cp -- "$TARGET_DIR/.agents/brain/$brain_file" "$TMP_DIR/${brain_file}.bak"
   fi
@@ -81,34 +81,17 @@ python3 "$TMP_DIR/source/scripts/validate.py"
 
 copy_managed "$TMP_DIR/source/AGENTS.md" AGENTS.md
 copy_managed "$TMP_DIR/source/GEMINI.md" GEMINI.md
-if [[ ! -e "$TARGET_DIR/.env.example" ]]; then
+if [[ ! -e "$TARGET_DIR/.env.example" && -f "$TMP_DIR/source/.env.example" ]]; then
   cp -- "$TMP_DIR/source/.env.example" "$TARGET_DIR/.env.example"
 fi
-copy_managed "$TMP_DIR/source/.agents/config.json" .agents/config.json
-copy_managed "$TMP_DIR/source/.agents/TASK_TEMPLATE.md" .agents/TASK_TEMPLATE.md
-copy_managed "$TMP_DIR/source/.agents/antigravity-settings.example.json" .agents/antigravity-settings.example.json
-copy_managed "$TMP_DIR/source/.agents/antigravity-compatibility.json" .agents/antigravity-compatibility.json
-copy_managed "$TMP_DIR/source/.agents/mcp_config.json.example" .agents/mcp_config.json.example
-copy_managed "$TMP_DIR/source/.agents/brain" .agents/brain
+copy_managed "$TMP_DIR/source/.agents" .agents
+copy_managed "$TMP_DIR/source/scripts" scripts
 
-for brain_file in rules.md memory.md ANCHOR.md; do
+for brain_file in rules.md memory.md ANCHOR.md active_context.md soul.md schema.md; do
   if [[ -f "$TMP_DIR/${brain_file}.bak" ]]; then
     cp -- "$TMP_DIR/${brain_file}.bak" "$TARGET_DIR/.agents/brain/$brain_file"
   fi
 done
-
-copy_managed "$TMP_DIR/source/.agents/common" .agents/common
-copy_managed "$TMP_DIR/source/.agents/agents" .agents/agents
-copy_managed "$TMP_DIR/source/.agents/skills" .agents/skills
-copy_managed "$TMP_DIR/source/scripts/validate.py" scripts/validate.py
-copy_managed "$TMP_DIR/source/scripts/verify.py" scripts/verify.py
-copy_managed "$TMP_DIR/source/scripts/test_quality_guard.py" scripts/test_quality_guard.py
-copy_managed "$TMP_DIR/source/scripts/semantic_grapher.py" scripts/semantic_grapher.py
-copy_managed "$TMP_DIR/source/scripts/dry_guard.py" scripts/dry_guard.py
-copy_managed "$TMP_DIR/source/scripts/git_hygiene_guard.py" scripts/git_hygiene_guard.py
-copy_managed "$TMP_DIR/source/scripts/upgrade.py" scripts/upgrade.py
-copy_managed "$TMP_DIR/source/scripts/ui_hygiene_guard.py" scripts/ui_hygiene_guard.py
-copy_managed "$TMP_DIR/source/scripts/self_learner.py" scripts/self_learner.py
 
 printf 'AAC %s successfully configured in %s\n' "$AAC_REF" "$TARGET_DIR"
 printf 'Backups, when needed, are stored in %s\n' "$BACKUP_DIR"

@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- Implement cross-session hierarchical memory engine (MemGPT / Memory Bank architecture) to eliminate session amnesia.
+- Ready for user's next tasks and feature requests
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).
@@ -13,6 +13,7 @@
 - 6 World-Class Gates and 31+ unit tests must stay 100% passing.
 
 ## 🚀 Recent Accomplishments
+- Released AAC v4.27.0 with Hierarchical Cross-Session Memory Engine (scripts/memory_consolidator.py & active_context.md)
 - Released AAC v4.26.0 with `resilience-engineering`, `zero-downtime-migrations`, and `api-contracts` skills.
 - Implemented PageRank AST centrality in `semantic_grapher.py`.
 - Implemented autonomous skill synthesis in `self_learner.py`.
