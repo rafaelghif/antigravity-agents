@@ -1,4 +1,4 @@
-name: AAC v4.28.0 Security & Quality Gates
+name: AAC v4.29.0 Security & Quality Gates
 
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ permissions:
 jobs:
   validate:
     name: Structural Validation (JSON + Version Consistency)
+    if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -91,6 +92,7 @@ jobs:
 
   security-and-quality:
     name: SAST + Secret Scanning
+    if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

@@ -9,9 +9,9 @@ readonly REPOSITORY="https://github.com/rafaelghif/antigravity-agents.git"
 
 if [[ -z "${AAC_REF:-}" ]]; then
   AAC_REF="$(git ls-remote --tags --refs "$REPOSITORY" 2>/dev/null | cut -d/ -f3 | sort -V | tail -n 1 || echo "")"
-  AAC_REF="${AAC_REF:-v4.28.0}"
+  AAC_REF="${AAC_REF:-v4.29.0}"
 fi
-# Version marker for validation:  AAC_REF="v4.28.0"
+# Version marker for validation:  AAC_REF="v4.29.0"
 readonly AAC_REF
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -86,6 +86,12 @@ if [[ ! -e "$TARGET_DIR/.env.example" && -f "$TMP_DIR/source/.env.example" ]]; t
 fi
 copy_managed "$TMP_DIR/source/.agents" .agents
 copy_managed "$TMP_DIR/source/scripts" scripts
+
+# Exclude internal AAC workflows and ensure upstream GitHub Actions workflows do not pollute target project
+rm -rf -- "$TARGET_DIR/.agents/workflows"
+rm -f -- "$TARGET_DIR/.github/workflows/agent-gates.yml" "$TARGET_DIR/.github/workflows/agentic-cicd.yml"
+rmdir "$TARGET_DIR/.github/workflows" 2>/dev/null || true
+rmdir "$TARGET_DIR/.github" 2>/dev/null || true
 
 for brain_file in rules.md memory.md ANCHOR.md active_context.md soul.md schema.md; do
   if [[ -f "$TMP_DIR/${brain_file}.bak" ]]; then
