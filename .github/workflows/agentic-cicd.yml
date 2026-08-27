@@ -3,6 +3,7 @@ on: [pull_request]
 
 jobs:
   agent_review:
+    if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

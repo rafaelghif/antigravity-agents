@@ -7,9 +7,9 @@ if (-not $AacRef) {
     try {
         $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
-        $AacRef = if ($latest) { $latest } else { "v4.28.0" }
+        $AacRef = if ($latest) { $latest } else { "v4.29.0" }
     } catch {
-        $AacRef = "v4.28.0"
+        $AacRef = "v4.29.0"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
@@ -84,6 +84,25 @@ try {
     }
     Copy-ManagedFile "$SourceDir/.agents" ".agents"
     Copy-ManagedFile "$SourceDir/scripts" "scripts"
+
+    # Exclude internal AAC workflows and ensure upstream GitHub Actions workflows do not pollute target project
+    if (Test-Path -LiteralPath "$TargetDir/.agents/workflows") {
+        Remove-Item -LiteralPath "$TargetDir/.agents/workflows" -Recurse -Force
+    }
+    foreach ($wf in @("agent-gates.yml", "agentic-cicd.yml")) {
+        $wfPath = Join-Path "$TargetDir/.github/workflows" $wf
+        if (Test-Path -LiteralPath $wfPath) {
+            Remove-Item -LiteralPath $wfPath -Force
+        }
+    }
+    $ghWfDir = Join-Path "$TargetDir/.github" "workflows"
+    if ((Test-Path -LiteralPath $ghWfDir) -and ((Get-ChildItem -LiteralPath $ghWfDir -Force | Measure-Object).Count -eq 0)) {
+        Remove-Item -LiteralPath $ghWfDir -Force
+    }
+    $ghDir = Join-Path "$TargetDir" ".github"
+    if ((Test-Path -LiteralPath $ghDir) -and ((Get-ChildItem -LiteralPath $ghDir -Force | Measure-Object).Count -eq 0)) {
+        Remove-Item -LiteralPath $ghDir -Force
+    }
 
     foreach ($file in $BrainFiles) {
         $bakPath = Join-Path $BackupStore "$file.bak"
