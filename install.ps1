@@ -14,29 +14,48 @@ if (-not $AacRef) {
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
 $TmpDir = Join-Path $env:TEMP ([System.Guid]::NewGuid().ToString())
+$SourceDir = Join-Path $TmpDir "source"
+$BackupStore = Join-Path $TmpDir "brain_backup"
 $BackupDir = Join-Path $TargetDir (".agents-backups/" + (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ"))
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw "Required command not found: git" }
-if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw "Required command not found: python" }
+
+$PythonCmd = $null
+foreach ($cmd in @("python3", "python", "py")) {
+    if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+        $PythonCmd = $cmd
+        break
+    }
+}
+if (-not $PythonCmd) { throw "Required command not found: python (or python3/py)" }
 
 function Copy-ManagedFile($Source, $RelativeDestination) {
     $Destination = Join-Path $TargetDir $RelativeDestination
     if (Test-Path -LiteralPath $Destination) {
         $BackupDestination = Join-Path $BackupDir $RelativeDestination
-        New-Item -ItemType Directory -Force -Path (Split-Path $BackupDestination) | Out-Null
+        $BackupParent = Split-Path $BackupDestination -Parent
+        if ($BackupParent -and -not (Test-Path -LiteralPath $BackupParent)) {
+            New-Item -ItemType Directory -Force -Path $BackupParent | Out-Null
+        }
         Copy-Item -LiteralPath $Destination -Destination $BackupDestination -Recurse -Force
     }
-    New-Item -ItemType Directory -Force -Path (Split-Path $Destination) | Out-Null
     if (Test-Path -LiteralPath $Source -PathType Container) {
-        New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-        Get-ChildItem -LiteralPath $Source | Copy-Item -Destination $Destination -Recurse -Force
+        if (-not (Test-Path -LiteralPath $Destination)) {
+            New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+        }
+        Get-ChildItem -LiteralPath $Source -Force | Copy-Item -Destination $Destination -Recurse -Force
     } else {
+        $DestParent = Split-Path $Destination -Parent
+        if ($DestParent -and -not (Test-Path -LiteralPath $DestParent)) {
+            New-Item -ItemType Directory -Force -Path $DestParent | Out-Null
+        }
         Copy-Item -LiteralPath $Source -Destination $Destination -Force
     }
 }
 
 try {
     New-Item -ItemType Directory -Force -Path "$TargetDir/.agents/incidents", "$TargetDir/.agents/locks", "$TargetDir/.agents/plans", "$TargetDir/.agents/scratch", "$TargetDir/scripts" | Out-Null
+    New-Item -ItemType Directory -Force -Path $BackupStore | Out-Null
     
     if (Test-Path -LiteralPath "$TargetDir/.agents/config.json") {
         Write-Host "=> Initiating AAC Upgrade to $AacRef..."
@@ -48,25 +67,26 @@ try {
     foreach ($file in $BrainFiles) {
         $srcPath = Join-Path "$TargetDir/.agents/brain" $file
         if (Test-Path -LiteralPath $srcPath) {
-            Copy-Item -LiteralPath $srcPath -Destination (Join-Path $TmpDir "$file.bak") -Force
+            Copy-Item -LiteralPath $srcPath -Destination (Join-Path $BackupStore "$file.bak") -Force
         }
     }
 
-    git clone --depth 1 --branch $AacRef $Repository $TmpDir | Out-Null
+    git clone --depth 1 --branch $AacRef $Repository $SourceDir | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
-    python "$TmpDir/scripts/validate.py"
+    
+    & $PythonCmd "$SourceDir/scripts/validate.py"
     if ($LASTEXITCODE -ne 0) { throw "python validation failed" }
 
-    Copy-ManagedFile "$TmpDir/AGENTS.md" "AGENTS.md"
-    Copy-ManagedFile "$TmpDir/GEMINI.md" "GEMINI.md"
-    if (-not (Test-Path -LiteralPath "$TargetDir/.env.example") -and (Test-Path -LiteralPath "$TmpDir/.env.example")) {
-        Copy-Item -LiteralPath "$TmpDir/.env.example" -Destination "$TargetDir/.env.example"
+    Copy-ManagedFile "$SourceDir/AGENTS.md" "AGENTS.md"
+    Copy-ManagedFile "$SourceDir/GEMINI.md" "GEMINI.md"
+    if (-not (Test-Path -LiteralPath "$TargetDir/.env.example") -and (Test-Path -LiteralPath "$SourceDir/.env.example")) {
+        Copy-Item -LiteralPath "$SourceDir/.env.example" -Destination "$TargetDir/.env.example"
     }
-    Copy-ManagedFile "$TmpDir/.agents" ".agents"
-    Copy-ManagedFile "$TmpDir/scripts" "scripts"
+    Copy-ManagedFile "$SourceDir/.agents" ".agents"
+    Copy-ManagedFile "$SourceDir/scripts" "scripts"
 
     foreach ($file in $BrainFiles) {
-        $bakPath = Join-Path $TmpDir "$file.bak"
+        $bakPath = Join-Path $BackupStore "$file.bak"
         if (Test-Path -LiteralPath $bakPath) {
             Copy-Item -LiteralPath $bakPath -Destination (Join-Path "$TargetDir/.agents/brain" $file) -Force
         }

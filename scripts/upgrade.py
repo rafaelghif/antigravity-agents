@@ -90,9 +90,12 @@ def check_update_status(root_dir: Path) -> dict:
 
 def run_upgrade(root_dir: Path, target_version: str) -> bool:
     print(f"\n=> Downloading and applying AAC {target_version}...")
-    install_url = f"https://raw.githubusercontent.com/rafaelghif/antigravity-agents/{target_version}/install.sh"
+    is_windows = sys.platform.startswith("win")
+    script_name = "install.ps1" if is_windows else "install.sh"
+    install_url = f"https://raw.githubusercontent.com/rafaelghif/antigravity-agents/{target_version}/{script_name}"
     try:
-        with tempfile.NamedTemporaryFile(suffix=".sh", delete=False) as tmp_file:
+        suffix = ".ps1" if is_windows else ".sh"
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
             tmp_path = Path(tmp_file.name)
         
         dl_res = subprocess.run(
@@ -105,10 +108,12 @@ def run_upgrade(root_dir: Path, target_version: str) -> bool:
             print(f"=> Download failed: {dl_res.stderr}")
             return False
 
-        exec_res = subprocess.run(
-            ["bash", str(tmp_path)],
-            cwd=root_dir
-        )
+        if is_windows:
+            cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(tmp_path)]
+        else:
+            cmd = ["bash", str(tmp_path)]
+
+        exec_res = subprocess.run(cmd, cwd=root_dir)
         if tmp_path.exists():
             tmp_path.unlink()
         return exec_res.returncode == 0
