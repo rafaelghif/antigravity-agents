@@ -7,9 +7,9 @@ if (-not $AacRef) {
     try {
         $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
-        $AacRef = if ($latest) { $latest } else { "v4.27.0" }
+        $AacRef = if ($latest) { $latest } else { "v4.28.0" }
     } catch {
-        $AacRef = "v4.27.0"
+        $AacRef = "v4.28.0"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
@@ -44,7 +44,7 @@ try {
         Write-Host "=> Initiating AAC Clean Install of $AacRef..."
     }
 
-    $BrainFiles = @("rules.md", "memory.md", "ANCHOR.md")
+    $BrainFiles = @("rules.md", "memory.md", "ANCHOR.md", "active_context.md", "soul.md", "schema.md")
     foreach ($file in $BrainFiles) {
         $srcPath = Join-Path "$TargetDir/.agents/brain" $file
         if (Test-Path -LiteralPath $srcPath) {
@@ -59,15 +59,11 @@ try {
 
     Copy-ManagedFile "$TmpDir/AGENTS.md" "AGENTS.md"
     Copy-ManagedFile "$TmpDir/GEMINI.md" "GEMINI.md"
-    if (-not (Test-Path -LiteralPath "$TargetDir/.env.example")) {
+    if (-not (Test-Path -LiteralPath "$TargetDir/.env.example") -and (Test-Path -LiteralPath "$TmpDir/.env.example")) {
         Copy-Item -LiteralPath "$TmpDir/.env.example" -Destination "$TargetDir/.env.example"
     }
-    Copy-ManagedFile "$TmpDir/.agents/config.json" ".agents/config.json"
-    Copy-ManagedFile "$TmpDir/.agents/TASK_TEMPLATE.md" ".agents/TASK_TEMPLATE.md"
-    Copy-ManagedFile "$TmpDir/.agents/antigravity-settings.example.json" ".agents/antigravity-settings.example.json"
-    Copy-ManagedFile "$TmpDir/.agents/antigravity-compatibility.json" ".agents/antigravity-compatibility.json"
-    Copy-ManagedFile "$TmpDir/.agents/mcp_config.json.example" ".agents/mcp_config.json.example"
-    Copy-ManagedFile "$TmpDir/.agents/brain" ".agents/brain"
+    Copy-ManagedFile "$TmpDir/.agents" ".agents"
+    Copy-ManagedFile "$TmpDir/scripts" "scripts"
 
     foreach ($file in $BrainFiles) {
         $bakPath = Join-Path $TmpDir "$file.bak"
@@ -76,18 +72,6 @@ try {
         }
     }
 
-    Copy-ManagedFile "$TmpDir/.agents/common" ".agents/common"
-    Copy-ManagedFile "$TmpDir/.agents/agents" ".agents/agents"
-    Copy-ManagedFile "$TmpDir/.agents/skills" ".agents/skills"
-    Copy-ManagedFile "$TmpDir/scripts/validate.py" "scripts/validate.py"
-    Copy-ManagedFile "$TmpDir/scripts/verify.py" "scripts/verify.py"
-    Copy-ManagedFile "$TmpDir/scripts/test_quality_guard.py" "scripts/test_quality_guard.py"
-    Copy-ManagedFile "$TmpDir/scripts/semantic_grapher.py" "scripts/semantic_grapher.py"
-    Copy-ManagedFile "$TmpDir/scripts/dry_guard.py" "scripts/dry_guard.py"
-    Copy-ManagedFile "$TmpDir/scripts/git_hygiene_guard.py" "scripts/git_hygiene_guard.py"
-    Copy-ManagedFile "$TmpDir/scripts/upgrade.py" "scripts/upgrade.py"
-    Copy-ManagedFile "$TmpDir/scripts/ui_hygiene_guard.py" "scripts/ui_hygiene_guard.py"
-    Copy-ManagedFile "$TmpDir/scripts/self_learner.py" "scripts/self_learner.py"
     Write-Host "AAC $AacRef successfully configured in $TargetDir"
     Write-Host "Copy .agents/antigravity-settings.example.json into the global Antigravity CLI settings profile."
 }

@@ -40,6 +40,7 @@ CORE_AGENT_PATHS = (
     "scripts/validate.py",
     "scripts/verify.py",
     "scripts/test_quality_guard.py",
+    "scripts/complexity_analyzer.py",
     "scripts/dry_guard.py",
     "scripts/git_hygiene_guard.py",
     "scripts/upgrade.py",

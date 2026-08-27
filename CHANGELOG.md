@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.28.0] - 2026-08-27
+### Fix Installer Directory Copying & Eliminate Temp Path Leakage
+- **Fix (Universal Installer & Upgrader)**:
+  - Refactored `install.sh` and `install.ps1` to copy complete `.agents/` and `scripts/` directories instead of an incomplete hardcoded file list.
+  - Fixes missing script errors (`complexity_analyzer.py`, `memory_consolidator.py`, `hooks/`, `plugins/`, `workflows/`) during clean installs in consumer workspaces.
+  - Fully preserves user brain files (`rules.md`, `memory.md`, `ANCHOR.md`, `active_context.md`, `soul.md`, `schema.md`) during upgrades.
+- **Fix (Verify Output Relative Pathing)**:
+  - Updated `scripts/verify.py` to use clean relative commands (`python3 scripts/validate.py`, etc.) instead of printing absolute temp directory paths in stack detection.
+
 ## [4.27.0] - 2026-08-26
 ### Hierarchical Cross-Session Memory Engine & Zero-Amnesia Memory Bank
 - **Feature (Hierarchical Memory Consolidator Engine)**:

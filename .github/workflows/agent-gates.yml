@@ -1,4 +1,4 @@
-name: AAC v4.27.0 Security & Quality Gates
+name: AAC v4.28.0 Security & Quality Gates
 
 on:
   workflow_dispatch:
