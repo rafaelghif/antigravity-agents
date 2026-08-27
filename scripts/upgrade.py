@@ -15,7 +15,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urllib.request
 from pathlib import Path
 
 GITHUB_API_URL = "https://api.github.com/repos/rafaelghif/antigravity-agents/releases/latest"
@@ -45,38 +44,25 @@ def get_current_version(root_dir: Path) -> str:
     return "0.0.0"
 
 
-def fetch_url_bytes(url: str, timeout: int = 10) -> bytes | None:
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "AAC-Upgrader"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.read()
-    except Exception:
-        try:
-            res = subprocess.run(
-                ["curl", "-fsSL", url],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=timeout,
-            )
-            if res.returncode == 0:
-                return res.stdout
-        except Exception:
-            return None
-    return None
-
-
 def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
-    payload = fetch_url_bytes(GITHUB_API_URL, timeout=6)
-    if payload:
-        try:
-            data = json.loads(payload.decode("utf-8"))
+    curl_bin = shutil.which("curl") or "curl"
+    try:
+        res = subprocess.run(
+            [curl_bin, "-s", "-H", "User-Agent: AAC-Upgrader", GITHUB_API_URL],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=8,
+        )
+        if res.returncode == 0 and res.stdout:
+            data = json.loads(res.stdout)
             tag = data.get("tag_name", "")
             title = data.get("name", tag)
             body = data.get("body", "")
             if tag:
                 return (tag, title, body)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            pass
+    except Exception as exc:
+        sys.stderr.write(f"GitHub API release notice: {exc}\n")
 
     try:
         res = subprocess.run(
@@ -133,11 +119,16 @@ def run_upgrade(root_dir: Path, target_version: str) -> bool:
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
             tmp_path = Path(tmp_file.name)
 
-        script_bytes = fetch_url_bytes(install_url, timeout=15)
-        if not script_bytes:
+        curl_bin = shutil.which("curl") or "curl"
+        dl_res = subprocess.run(
+            [curl_bin, "-fsSL", install_url, "-o", str(tmp_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=15,
+        )
+        if dl_res.returncode != 0:
             print("=> Download failed: unable to fetch installer script.")
             return False
-        tmp_path.write_bytes(script_bytes)
 
         env = {
             **os.environ,
@@ -161,8 +152,8 @@ def run_upgrade(root_dir: Path, target_version: str) -> bool:
         if tmp_path and tmp_path.exists():
             try:
                 tmp_path.unlink()
-            except OSError:
-                pass
+            except OSError as err:
+                sys.stderr.write(f"Notice: unable to remove temporary file {tmp_path}: {err}\n")
 
 
 def main() -> None:
