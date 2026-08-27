@@ -87,8 +87,7 @@ fi
 copy_managed "$TMP_DIR/source/.agents" .agents
 copy_managed "$TMP_DIR/source/scripts" scripts
 
-# Exclude internal AAC workflows and ensure upstream GitHub Actions workflows do not pollute target project
-rm -rf -- "$TARGET_DIR/.agents/workflows"
+# Ensure upstream GitHub Actions workflows do not pollute target project
 rm -f -- "$TARGET_DIR/.github/workflows/agent-gates.yml" "$TARGET_DIR/.github/workflows/agentic-cicd.yml"
 rmdir "$TARGET_DIR/.github/workflows" 2>/dev/null || true
 rmdir "$TARGET_DIR/.github" 2>/dev/null || true
