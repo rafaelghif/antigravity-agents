@@ -85,10 +85,7 @@ try {
     Copy-ManagedFile "$SourceDir/.agents" ".agents"
     Copy-ManagedFile "$SourceDir/scripts" "scripts"
 
-    # Exclude internal AAC workflows and ensure upstream GitHub Actions workflows do not pollute target project
-    if (Test-Path -LiteralPath "$TargetDir/.agents/workflows") {
-        Remove-Item -LiteralPath "$TargetDir/.agents/workflows" -Recurse -Force
-    }
+    # Ensure upstream GitHub Actions workflows do not pollute target project
     foreach ($wf in @("agent-gates.yml", "agentic-cicd.yml")) {
         $wfPath = Join-Path "$TargetDir/.github/workflows" $wf
         if (Test-Path -LiteralPath $wfPath) {

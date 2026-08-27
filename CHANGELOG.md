@@ -1,11 +1,11 @@
 # Changelog
 
 ## [4.29.0] - 2026-08-27
-### Exclude Upstream & Internal Workflows from Consumer Projects
+### Isolate GitHub CI/CD Workflows & Preserve Agent Workflows
 - **Feature (Zero CI/CD Pollution in Consumer Repositories)**:
   - Added repository condition (`if: github.repository == 'rafaelghif/antigravity-agents'`) across all GitHub Actions workflows (`agent-gates.yml`, `agentic-cicd.yml`) so that cloned, templated, or forked consumer projects never trigger unwanted AAC CI/CD runs.
-- **Fix (Installer Workflow Exclusion)**:
-  - Updated `install.sh` and `install.ps1` to explicitly remove `.agents/workflows` and purge any upstream `.github/workflows` (`agent-gates.yml`, `agentic-cicd.yml`) from target projects during clean installs and upgrades.
+- **Fix (GitHub Actions Upstream Purge)**:
+  - Updated `install.sh` and `install.ps1` to purge any upstream `.github/workflows/` (`agent-gates.yml`, `agentic-cicd.yml`) from target projects during clean installs and upgrades, while fully preserving internal agent workflows in `.agents/workflows/`.
 
 ## [4.28.0] - 2026-08-27
 ### Fix Installer Directory Copying & Eliminate Temp Path Leakage
