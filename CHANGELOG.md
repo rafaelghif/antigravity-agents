@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.33.0] - 2026-08-30
+### Added
+- **Physical Delegation Guard**: Added `.agents/hooks.json` intercepting `PreToolUse` for `replace_file_content` and `write_to_file`.
+- Strict enforcement preventing the Primary Agent from modifying application code directly, forcing explicit delegation to L9 Personas.
+
+### Fixed
+- Restored the `auto-verify` hook that ensures tests run automatically post-modification.
+
 ## [4.32.0] - 2026-08-30
 ### Added
 - MARCH (Multi-Agent Reinforced self-Check) Protocol to `AGENTS.md` and `scrum-master.md`.
