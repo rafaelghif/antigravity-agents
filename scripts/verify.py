@@ -76,6 +76,10 @@ def main() -> int:
     ui_guard = ROOT / "scripts" / "ui_hygiene_guard.py"
     if ui_guard.is_file():
         checks.append(("ui_hygiene_check", "AAC", "python3 scripts/ui_hygiene_guard.py --check"))
+
+    neuro_engine = ROOT / "scripts" / "neurosymbolic_engine.py"
+    if neuro_engine.is_file() and (ROOT / "handoff.json").is_file():
+        checks.append(("neurosymbolic_validation", "AAC", "python3 scripts/neurosymbolic_engine.py handoff.json"))
         
     if not checks:
         if not args.terse:
