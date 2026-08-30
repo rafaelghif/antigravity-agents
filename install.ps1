@@ -9,7 +9,7 @@ if (-not $AacRef) {
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
         $AacRef = if ($latest) { $latest } else { "v4.30.0" }
     } catch {
-        $AacRef = "v4.34.0"
+        $AacRef = "v4.35.0"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
