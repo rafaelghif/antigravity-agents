@@ -40,7 +40,7 @@
       "cargo-audit",
       "dependency-check"
     ],
-    "vulnerability_threshold_cvss": 7.0,
+    "vulnerability_threshold_cvss": 4.0,
     "scanner_applicability": {
       "repository": [
         "gitleaks",

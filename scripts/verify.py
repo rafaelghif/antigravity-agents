@@ -55,32 +55,27 @@ def main() -> int:
     # L9 Hard Boundaries for Agent Compliance are now handled by intent_guard.py
     checks = detect()
     
-    intent_guard = ROOT / "scripts" / "intent_guard.py"
-    if intent_guard.is_file():
-        checks.insert(0, ("intent_lifecycle_check", "AAC", "python3 scripts/intent_guard.py"))
-    structural = ROOT / "scripts" / "validate.py"
-    if structural.is_file():
-        checks.append(("validate", "AAC", "python3 scripts/validate.py"))
-        
-    complexity = ROOT / "scripts" / "complexity_analyzer.py"
-    if complexity.is_file():
-        checks.append(("complexity_check", "AAC", "python3 scripts/complexity_analyzer.py"))
+    script_checks = [
+        ("intent_guard.py", "intent_lifecycle_check", "", True),
+        ("validate.py", "validate", "", False),
+        ("complexity_analyzer.py", "complexity_check", "", False),
+        ("test_quality_guard.py", "anti_sham_check", "", False),
+        ("dry_guard.py", "dry_check", "--check", False),
+        ("git_hygiene_guard.py", "git_hygiene_check", "--check", False),
+        ("ui_hygiene_guard.py", "ui_hygiene_check", "--check", False),
+    ]
 
-    test_guard = ROOT / "scripts" / "test_quality_guard.py"
-    if test_guard.is_file():
-        checks.append(("anti_sham_check", "AAC", "python3 scripts/test_quality_guard.py"))
-
-    dry_guard = ROOT / "scripts" / "dry_guard.py"
-    if dry_guard.is_file():
-        checks.append(("dry_check", "AAC", "python3 scripts/dry_guard.py --check"))
-
-    hygiene_guard = ROOT / "scripts" / "git_hygiene_guard.py"
-    if hygiene_guard.is_file():
-        checks.append(("git_hygiene_check", "AAC", "python3 scripts/git_hygiene_guard.py --check"))
-
-    ui_guard = ROOT / "scripts" / "ui_hygiene_guard.py"
-    if ui_guard.is_file():
-        checks.append(("ui_hygiene_check", "AAC", "python3 scripts/ui_hygiene_guard.py --check"))
+    for script, check_name, extra_args, at_start in script_checks:
+        script_path = ROOT / "scripts" / script
+        if script_path.is_file():
+            cmd = f"python3 scripts/{script}"
+            if extra_args:
+                cmd += f" {extra_args}"
+            item = (check_name, "AAC", cmd)
+            if at_start:
+                checks.insert(0, item)
+            else:
+                checks.append(item)
 
     neuro_engine = ROOT / "scripts" / "neurosymbolic_engine.py"
     if neuro_engine.is_file():
