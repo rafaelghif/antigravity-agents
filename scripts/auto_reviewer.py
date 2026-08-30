@@ -47,5 +47,15 @@ def main():
     else:
         print("Review submitted successfully.")
         
+    # Auto-merge if approved
+    if event == "APPROVE":
+        print("Attempting to auto-merge the PR...")
+        merge_api_cmd = ["gh", "api", "-X", "PUT", f"repos/{repo}/pulls/{pr_num}/merge", "-f", "merge_method=squash"]
+        m_res, m_out, m_err = run_cmd(merge_api_cmd)
+        if m_res == 0:
+            print("PR successfully merged!")
+        else:
+            print(f"Failed to merge PR: {m_err}")
+            
 if __name__ == "__main__":
     main()
