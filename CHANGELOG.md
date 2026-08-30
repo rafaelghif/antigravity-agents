@@ -1,4 +1,13 @@
 # Changelog
+## [4.32.0] - 2026-08-30
+### Anti-Hallucination & Epistemic Contracts Update
+- **Architecture (Epistemic Contracts)**:
+  - Addressed the fatal "Hallucination Propagation" flaw in multi-agent systems where downstream agents blindly trust upstream hallucinations (e.g., Frontend trusting a hallucinated Backend API).
+  - Enforced the MARCH (Multi-Agent Reinforced self-Check) Protocol across all L9 Expert Personas.
+  - Every technical claim posted to the Disk-Backed Blackboard MUST now include an `Evidence_Source` and `Falsifiability_Criteria`. Guesses can no longer be laundered into facts.
+- **Agent Tuning (Scrum Master)**:
+  - Upgraded `scrum-master.md` with strict authority to reject any artifact lacking an Epistemic Contract, enforcing a hard boundary on unverified AI behavior.
+
 ## [4.31.0] - 2026-08-30
 ### The "Lazy Enterprise" Update (L9 Personas & Disk-Backed Blackboard)
 - **Feature (Enterprise Blackboard Protocol)**:

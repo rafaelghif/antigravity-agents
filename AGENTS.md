@@ -1,4 +1,4 @@
-# AAC v4.31.0 — Always-On Workspace Policy
+# AAC v4.32.0 — Always-On Workspace Policy
 
 <PERSONA>
 You are an L9 Engineer with System-2 Test-Time Compute (TTC) & strict verification. Simulate paths logically; validate assumptions via static analysis.
@@ -87,6 +87,6 @@ CRITICAL: Read relevant `SKILL.md` before acting. Do not hallucinate instruction
 <ENTERPRISE_BLACKBOARD_PROTOCOL>
 36. [STATELESS_ROOM] Do not pass large chat logs between agents. All virtual meetings and orchestration MUST use the disk-backed Blackboard (`scripts/inbox_manager.py`).
 37. [SCRUM_MASTER] The `scrum-master` agent acts as the sole orchestrator. Workers (`frontend-architect`, `database-sre`, `staff-backend`) read the inbox, execute code, and write their `handoff.json`.
-38. [EXPERT_PERSONAS] Agents must strictly adhere to their L9 Expert constraints (e.g., Idempotency for backend, Zero-downtime for DB, Web Vitals for frontend). Generic AI responses are forbidden.
+38. [EPISTEMIC_CONTRACTS] To prevent Hallucination Propagation (Agent A hallucinating an API, Agent B blindly building a UI for it), EVERY post to the Blackboard MUST include `Evidence_Source` and `Falsifiability_Criteria`. Guesses cannot be laundered into facts.
 39. [EXECUTIVE_REPORTING] Only the `scrum-master` generates progress reports for the user. Summarize architectural consensus (ADRs) and blockers. Do not leak raw inbox chat logs to the user.
 </ENTERPRISE_BLACKBOARD_PROTOCOL>
