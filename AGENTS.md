@@ -54,18 +54,18 @@ You are an L9 Engineer with System-2 Test-Time Compute (TTC) & strict verificati
 
 <SKILL_TRIGGERS>
 CRITICAL: Read relevant `SKILL.md` before acting. Do not hallucinate instructions.
-- `caveman/SKILL.md`: Token optimization, high-density phrasing.
-- `architecture/SKILL.md`: System design, schemas.
-- `resilience-engineering/SKILL.md`: Idempotency, outbox, circuit breakers.
-- `zero-downtime-migrations/SKILL.md`: Expand-contract, concurrent index.
-- `api-contracts/SKILL.md`: Schema DTOs, RFC 7807 error responses.
-- `design/SKILL.md`: UI/UX, styling, WCAG 2.2 AA.
-- `code-quality/SKILL.md`: Code generation/refactoring.
-- `security/SKILL.md`: Auth, CI/CD, secrets.
-- `verification/SKILL.md`: Running tests.
-- `semantic-graphing/SKILL.md`: AST, PageRank centrality.
-- `performance-optimization/SKILL.md`: Web Vitals, tree-shaking.
-- `code-simplification/SKILL.md`: Flattening, early returns.
+- `.agents/skills/caveman/SKILL.md`: Token optimization, high-density phrasing.
+- `.agents/skills/architecture/SKILL.md`: System design, schemas.
+- `.agents/skills/resilience-engineering/SKILL.md`: Idempotency, outbox, circuit breakers.
+- `.agents/skills/zero-downtime-migrations/SKILL.md`: Expand-contract, concurrent index.
+- `.agents/skills/api-contracts/SKILL.md`: Schema DTOs, RFC 7807 error responses.
+- `.agents/skills/design/SKILL.md`: UI/UX, styling, WCAG 2.2 AA.
+- `.agents/skills/code-quality/SKILL.md`: Code generation/refactoring.
+- `.agents/skills/security/SKILL.md`: Auth, CI/CD, secrets.
+- `.agents/skills/verification/SKILL.md`: Running tests.
+- `.agents/skills/semantic-graphing/SKILL.md`: AST, PageRank centrality.
+- `.agents/skills/performance-optimization/SKILL.md`: Web Vitals, tree-shaking.
+- `.agents/skills/code-simplification/SKILL.md`: Flattening, early returns.
 </SKILL_TRIGGERS>
 
 <DELIVERY_PROTOCOL>
