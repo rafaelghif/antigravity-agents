@@ -88,10 +88,23 @@ copy_managed "$TMP_DIR/source/.agents" .agents
 copy_managed "$TMP_DIR/source/scripts" scripts
 
 if [[ -d "$TMP_DIR/source/.githooks" ]]; then
-  copy_managed "$TMP_DIR/source/.githooks" .githooks
   if [ -d ".git" ]; then
-    git config core.hooksPath .githooks
-    printf "=> L9 Git Hooks installed and configured.\n"
+    current_hooks=$(git config core.hooksPath || echo "")
+    if [[ -n "$current_hooks" && "$current_hooks" != ".githooks" ]]; then
+      printf "=> WARNING: core.hooksPath is already set to '%s'. Skipping AAC Git Hook installation to prevent breaking existing hooks (e.g. Husky). Please manually add 'python3 scripts/verify.py' to your pre-commit hook.\n" "$current_hooks"
+    elif [[ -f ".git/hooks/pre-commit" && ! -f ".githooks/pre-commit" ]]; then
+      printf "=> WARNING: .git/hooks/pre-commit already exists. Skipping AAC Git Hook installation. Please manually add 'python3 scripts/verify.py' to your hook.\n"
+    else
+      # Safe to install or update our own .githooks directory
+      mkdir -p .githooks
+      if [[ ! -f ".githooks/pre-commit" ]]; then
+        cp -- "$TMP_DIR/source/.githooks/pre-commit" ".githooks/pre-commit"
+        git config core.hooksPath .githooks
+        printf "=> L9 Git Hooks installed safely.\n"
+      elif ! grep -q "verify.py" ".githooks/pre-commit"; then
+        printf "=> WARNING: .githooks/pre-commit exists but doesn't contain verify.py. Please add it manually.\n"
+      fi
+    fi
   fi
 fi
 
