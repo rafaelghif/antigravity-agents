@@ -8,6 +8,15 @@
           "command": "python3 scripts/strict_delegation_guard.py"
         }
       ]
+    },
+    {
+      "matcher": "view_file|grep_search|list_dir|find_by_name",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 scripts/manager_blindfold.py"
+        }
+      ]
     }
   ],
   "auto-verify": {

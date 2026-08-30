@@ -4,6 +4,7 @@ description: Staff Frontend Architect. Specializes in UI/UX, Web Vitals, accessi
 mode: subagent
 subagent: true
 skills: [design, performance-optimization, code-quality]
+enable_write_tools: true
 ---
 
 <CRITICAL_DIRECTIVE>
