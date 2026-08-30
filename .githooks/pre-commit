@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Antigravity L9 Enforcer: Auto-runs verify.py before every commit.
+echo "[L9 Enforcer] Intercepting commit to run verify.py..."
+python3 scripts/verify.py
+if [ $? -ne 0 ]; then
+    echo "[L9 FATAL] verify.py failed! Commit aborted. Fix the flaws first."
+    exit 1
+fi
