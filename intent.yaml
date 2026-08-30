@@ -1,4 +1,5 @@
 name: "Antigravity Agent Core (AAC)"
+status: IN_PROGRESS
 description: "L9 Enterprise Multi-Agent Framework"
 architecture: "Hermes Manager-Worker DAG"
 rules:
