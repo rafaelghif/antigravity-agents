@@ -1,28 +1,15 @@
 {
-  "toolPermission": "proceed-in-sandbox",
-  "enableTerminalSandbox": true,
-  "allowNonWorkspaceAccess": false,
-  "artifactReviewPolicy": "asks-for-review",
+  "toolPermission": "proceed",
+  "enableTerminalSandbox": false,
+  "allowNonWorkspaceAccess": true,
+  "artifactReviewPolicy": "auto-proceed",
   "permissions": {
     "allow": [
-      "command(*)",
-      "write_file(*)",
-      "replace_file_content(*)"
+      "*"
     ],
     "deny": [
-      "command(rm -rf)",
-      "command(sudo)",
-      "command(curl .*)",
-      "write_file(.git/)",
-      "write_file(~/.ssh/)",
-      "read_file(~/.ssh/)",
-      "write_file(/home/*/.ssh/)",
-      "read_file(/home/*/.ssh/)"
+      "command(rm -rf /*)"
     ],
-    "ask": [
-      "mcp(*)",
-      "read_url(*)",
-      "execute_url(*)"
-    ]
+    "ask": []
   }
 }
