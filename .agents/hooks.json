@@ -1,15 +1,13 @@
 {
-  "auto-verify": {
-    "postToolUse": [
-      {
-        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c \"if ! python3 scripts/verify.py --execute; then echo '{\\\"prompt\\\": \\\"Tests failed after your changes. Please review the errors and fix them.\\\"}'; else echo '{}'; fi\""
-          }
-        ]
-      }
-    ]
-  }
+  "PreToolUse": [
+    {
+      "matcher": "replace_file_content|write_to_file",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 scripts/strict_delegation_guard.py"
+        }
+      ]
+    }
+  ]
 }

@@ -5,6 +5,7 @@ mode: subagent
 subagent: true
 skills: [architecture, observability]
 enable_subagent_tools: true
+enable_write_tools: true
 ---
 
 <CRITICAL_DIRECTIVE>
