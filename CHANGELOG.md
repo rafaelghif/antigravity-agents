@@ -1,4 +1,18 @@
 # Changelog
+## [4.31.0] - 2026-08-30
+### The "Lazy Enterprise" Update (L9 Personas & Disk-Backed Blackboard)
+- **Feature (Enterprise Blackboard Protocol)**:
+  - Introduced a 100% crash-resilient, zero-amnesia, token-efficient coordination system (`inbox_manager.py`).
+  - Eradicated linear chat bloat. Agents now communicate strictly through disk-backed artifact payloads and JSON states.
+- **Feature (L9 Expert Personas & Full SDLC Coverage)**:
+  - Retired generic implementer/reviewer roles.
+  - Deployed highly specialized executive agents: `scrum-master.md`, `frontend-architect.md`, `staff-backend.md`, `database-sre.md`, `devsecops-principal.md`, `qa-automation-lead.md`, and `product-manager.md`.
+- **Feature (Lazy Investor Protocol)**:
+  - `intent.yaml` is no longer manually demanded from humans. 
+  - `product-manager` agent actively conducts `/grill-me` interviews to auto-generate requirements and autonomously splinters architecture into `tasks/` atomic blueprints.
+- **Feature (100% AITL Autonomous Mode)**:
+  - Eliminated Human-In-The-Loop (HITL) friction. Agent-In-The-Loop (AITL) consensus determines production readiness.
+
 
 ## [4.30.0] - 2026-08-30
 ### Hermes Architecture (Manager-Worker) & Absolute Sandbox Escape
