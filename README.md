@@ -111,6 +111,12 @@ curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/
 irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
 ```
 
+### Cross-Platform (Python)
+If you prefer a Python-native installer that leverages GitHub APIs to perfectly resolve the latest version:
+```bash
+curl -fsSL -O https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py && python3 install.py
+```
+
 > **Zero Destruction Guarantee**: The installer creates an automated timestamped backup in `.agents-backups/` and preserves your existing `.env`, source code, and configurations.
 
 ---

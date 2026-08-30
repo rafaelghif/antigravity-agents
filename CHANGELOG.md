@@ -9,6 +9,8 @@
 - **Feature (Zero-Friction Sandbox Liberation)**:
   - Stripped restrictive tool permissions across the framework.
   - Subagents and managers now run unrestricted by default (`"toolPermission": "proceed"`, `"enableTerminalSandbox": false`) providing 100% full read/write, terminal execution, and non-workspace access to maximize autonomous effectiveness without prompting for trivial actions.
+- **Feature (Universal Python Installer)**:
+  - Added `install.py` as an alternative cross-platform bootstrap script that hits the GitHub Release API to seamlessly discover and download the absolute latest tag, replicating `upgrade.py` logic for fresh installs.
 
 ## [4.29.0] - 2026-08-27
 ### Isolate GitHub CI/CD Workflows & Preserve Agent Workflows
