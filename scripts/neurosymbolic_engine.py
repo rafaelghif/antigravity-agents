@@ -1,37 +1,12 @@
 #!/usr/bin/env python3
 """
 Neurosymbolic Validation Engine for Hermes SCL (Structured Cognitive Loop).
-Validates agent handoff JSON payloads strictly using Pydantic.
+Validates agent handoff JSON payloads strictly using Python Standard Library.
+Dependency-Free for Consumer Projects.
 """
 import sys
 import json
 from pathlib import Path
-from typing import List, Optional
-
-try:
-    from pydantic import BaseModel, Field, ValidationError
-except ImportError:
-    print("FATAL: pydantic is not installed. Run 'pip install pydantic' first.")
-    sys.exit(1)
-
-class CodeModification(BaseModel):
-    filepath: str = Field(..., description="Absolute or relative path to the modified file")
-    change_type: str = Field(..., description="Type of change: CREATE, UPDATE, DELETE")
-    description: str = Field(..., description="Short explanation of what was changed")
-
-class TestResult(BaseModel):
-    test_command: str = Field(..., description="The command used to test the changes")
-    status: str = Field(..., description="Status of the test: PASSED, FAILED")
-    output_snippet: str = Field(..., description="Short snippet of the test output proving it passed/failed")
-
-class HandoffPayload(BaseModel):
-    task_id: str = Field(..., description="The ID or name of the task completed")
-    worker_role: str = Field(..., description="The role of the subagent (e.g. implementer, reviewer)")
-    summary: str = Field(..., description="Detailed summary of the work done and decisions made")
-    modifications: List[CodeModification] = Field(default_factory=list, description="List of all files changed")
-    tests: List[TestResult] = Field(default_factory=list, description="List of tests executed to verify the code")
-    confidence_score: float = Field(ge=0.0, le=1.0, description="Worker's confidence score between 0.0 and 1.0")
-    requires_human: bool = Field(default=False, description="True if the agent is stuck and requires human lateral thinking")
 
 def validate_handoff(json_path: Path) -> bool:
     if not json_path.exists():
@@ -45,27 +20,41 @@ def validate_handoff(json_path: Path) -> bool:
         print(f"=> ERROR: Handoff file {json_path} is not valid JSON. {e}")
         return False
 
-    try:
-        # Validate against the Pydantic schema
-        payload = HandoffPayload(**data)
-        print("✅ SUCCESS: Neurosymbolic Validation Passed.")
-        print(f"Task: {payload.task_id} | Role: {payload.worker_role} | Confidence: {payload.confidence_score}")
-        print(f"Modifications: {len(payload.modifications)} files | Tests: {len(payload.tests)} run")
-        
-        # Enforce business logic on top of syntax
-        if not payload.requires_human and len(payload.modifications) > 0 and len(payload.tests) == 0:
-            print("=> FATAL LOGIC ERROR: Modifications were made but NO tests were run! [MANDATORY_TDD Rule Violated]")
+    # Standard Library Neurosymbolic Schema Validation
+    required_keys = {"task_id": str, "worker_role": str, "summary": str, "modifications": list, "tests": list, "confidence_score": (int, float), "requires_human": bool}
+    
+    for key, expected_type in required_keys.items():
+        if key not in data:
+            print(f"=> ERROR: Neurosymbolic Validation Failed. Missing required key: '{key}'")
+            return False
+        if not isinstance(data[key], expected_type):
+            print(f"=> ERROR: Type mismatch for '{key}'. Expected {expected_type}, got {type(data[key])}")
             return False
 
-        if payload.confidence_score < 0.7 and not payload.requires_human:
-            print("=> WARNING: Confidence is too low (<0.7) but human intervention wasn't requested. Reviewer must scrutinize.")
+    # Validate Nested Objects
+    for mod in data["modifications"]:
+        if not all(k in mod and isinstance(mod[k], str) for k in ("filepath", "change_type", "description")):
+            print("=> ERROR: Invalid schema in 'modifications'. Expected filepath, change_type, description (all strings).")
+            return False
 
-        return True
+    for test in data["tests"]:
+        if not all(k in test and isinstance(test[k], str) for k in ("test_command", "status", "output_snippet")):
+            print("=> ERROR: Invalid schema in 'tests'. Expected test_command, status, output_snippet (all strings).")
+            return False
 
-    except ValidationError as e:
-        print("=> ERROR: Neurosymbolic Schema Validation Failed.")
-        print(e.json())
+    print("✅ SUCCESS: Neurosymbolic Validation Passed.")
+    print(f"Task: {data['task_id']} | Role: {data['worker_role']} | Confidence: {data['confidence_score']}")
+    print(f"Modifications: {len(data['modifications'])} files | Tests: {len(data['tests'])} run")
+    
+    # Enforce Business Logic
+    if not data["requires_human"] and len(data["modifications"]) > 0 and len(data["tests"]) == 0:
+        print("=> FATAL LOGIC ERROR: Modifications were made but NO tests were run! [MANDATORY_TDD Rule Violated]")
         return False
+
+    if data["confidence_score"] < 0.7 and not data["requires_human"]:
+        print("=> WARNING: Confidence is too low (<0.7) but human intervention wasn't requested. Reviewer must scrutinize.")
+
+    return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
