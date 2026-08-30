@@ -52,15 +52,12 @@ def main() -> int:
     parser.add_argument("--terse", "-q", action="store_true", help="ACI Mode: output minimal telegraphic summary")
     args = parser.parse_args()
 
-    # L9 Hard Boundaries for Agent Compliance
-    if not (ROOT / "intent.yaml").is_file():
-        print("=> FATAL: intent.yaml is missing! Vibe coding is forbidden. Rule [INTENT_ARCHITECTURE] violated.")
-        return 1
-    if not (ROOT / "tasks").is_dir() or not any((ROOT / "tasks").iterdir()):
-        print("=> FATAL: tasks/ directory is missing or empty! Rule [MICRO_TASK_SPLIT] violated.")
-        return 1
-
+    # L9 Hard Boundaries for Agent Compliance are now handled by intent_guard.py
     checks = detect()
+    
+    intent_guard = ROOT / "scripts" / "intent_guard.py"
+    if intent_guard.is_file():
+        checks.insert(0, ("intent_lifecycle_check", "AAC", "python3 scripts/intent_guard.py"))
     structural = ROOT / "scripts" / "validate.py"
     if structural.is_file():
         checks.append(("validate", "AAC", "python3 scripts/validate.py"))
