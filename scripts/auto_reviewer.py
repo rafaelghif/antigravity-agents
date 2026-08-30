@@ -49,11 +49,12 @@ def main():
         
     # Auto-merge if approved
     if event == "APPROVE":
-        print("Attempting to auto-merge the PR...")
-        merge_api_cmd = ["gh", "api", "-X", "PUT", f"repos/{repo}/pulls/{pr_num}/merge", "-f", "merge_method=squash"]
-        m_res, m_out, m_err = run_cmd(merge_api_cmd)
+        print("Attempting to auto-merge the PR and clean up branch...")
+        # Use gh pr merge to squash and auto-delete branch to prevent PR/branch spam
+        merge_cmd = ["gh", "pr", "merge", pr_num, "--repo", repo, "--squash", "--delete-branch", "--admin"]
+        m_res, m_out, m_err = run_cmd(merge_cmd)
         if m_res == 0:
-            print("PR successfully merged!")
+            print("PR successfully merged and branch deleted!")
         else:
             print(f"Failed to merge PR: {m_err}")
             
