@@ -4,8 +4,8 @@ import subprocess
 import json
 import sys
 
-def run_cmd(cmd):
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+def run_cmd(cmd_args):
+    result = subprocess.run(cmd_args, capture_output=True, text=True)
     return result.returncode, result.stdout, result.stderr
 
 def main():
@@ -17,7 +17,7 @@ def main():
     print(f"🤖 Hermes Reviewer triggered for PR #{pr_num}")
     
     # Run our strict L9 verification gates
-    retcode, stdout, stderr = run_cmd("python3 scripts/verify.py --execute --terse")
+    retcode, stdout, stderr = run_cmd([sys.executable, "scripts/verify.py", "--execute", "--terse"])
     
     if retcode == 0:
         print("✅ Code is L9 Perfect. Approving PR.")
@@ -39,7 +39,7 @@ def main():
     
     # Submit Review
     repo = os.environ.get("GITHUB_REPOSITORY", "rafaelghif/antigravity-agents")
-    api_cmd = f"gh api -X POST repos/{repo}/pulls/{pr_num}/reviews --input review_payload.json"
+    api_cmd = ["gh", "api", "-X", "POST", f"repos/{repo}/pulls/{pr_num}/reviews", "--input", "review_payload.json"]
     
     res, out, err = run_cmd(api_cmd)
     if res != 0:
