@@ -12,18 +12,18 @@ import argparse
 from pathlib import Path
 
 SCRATCH_PATTERNS = [
-    r'^scratch\.(py|sh|js|ts|txt|md|json)$',
+    r'^scratch(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*_scratch\.(py|sh|js|ts|txt|md|json)$',
-    r'^tmp\.(py|sh|js|ts|txt|md|json)$',
+    r'^tmp(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*_tmp\.(py|sh|js|ts|txt|md|json)$',
-    r'^temp\.(py|sh|js|ts|txt|md|json)$',
+    r'^temp(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*_temp\.(py|sh|js|ts|txt|md|json)$',
-    r'^debug\.(py|sh|js|ts|txt|md|json)$',
+    r'^debug(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*_debug\.(py|sh|js|ts|txt|md|json)$',
-    r'^poc\.(py|sh|js|ts|txt|md|json)$',
+    r'^poc(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*_poc\.(py|sh|js|ts|txt|md|json)$',
-    r'^test_scratch\.(py|sh|js|ts|txt|md|json)$',
-    r'^test_temp\.(py|sh|js|ts|txt|md|json)$',
+    r'^test_scratch(_.*)?\.(py|sh|js|ts|txt|md|json)$',
+    r'^test_temp(_.*)?\.(py|sh|js|ts|txt|md|json)$',
     r'.*\.(tmp|bak|swp)$',
     r'^release_notes_.*\.txt$',
 ]
