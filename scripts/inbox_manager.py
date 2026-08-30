@@ -71,8 +71,8 @@ def add_message(sender, recipient, content):
 
 
     
-    # Check debate limits if this is a back-and-forth between implementer and reviewer
-    if sender in ["implementer", "reviewer"] and recipient in ["implementer", "reviewer"]:
+    # Check debate limits if this is a back-and-forth between any two agents
+    if sender != "scrum-master" and recipient != "scrum-master" and sender != recipient:
         data["debate_turn_count"] += 1
     
     if data["debate_turn_count"] >= 3:
