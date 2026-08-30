@@ -75,9 +75,9 @@ def add_message(sender, recipient, content):
     if sender != "scrum-master" and recipient != "scrum-master" and sender != recipient:
         data["debate_turn_count"] += 1
     
-    if data["debate_turn_count"] >= 3:
+    if data["debate_turn_count"] >= 10:
         data["status"] = "blocked"
-        print("ERROR: Debate limit reached (3 turns). Room is blocked. Escalating to @user or @planner.")
+        print("ERROR: Debate limit reached (10 turns). Room is blocked. Escalating to @user or @planner.")
         save_inbox(data)
         return False
         
