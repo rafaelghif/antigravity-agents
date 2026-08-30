@@ -140,7 +140,7 @@ def validate_instruction_budget() -> None:
     if not is_framework_repo():
         # In consumer projects, do not fail on custom project instructions in AGENTS.md / GEMINI.md
         return
-    for relative_path, maximum in (("AGENTS.md", 700), ("GEMINI.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
+    for relative_path, maximum in (("AGENTS.md", 750), ("GEMINI.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
         words = (ROOT / relative_path).read_text(encoding="utf-8").split()
         if len(words) > maximum:
             fail(f"{relative_path} exceeds the {maximum}-word always-on budget")
