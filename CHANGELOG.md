@@ -5,17 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [4.35.0] - 2026-08-30
-### Fully Agentic Looping System
-- **feat(orchestration)**: Implemented `autonomous_loop.py` daemon for zero-human-intervention (O(1) file monitoring).
-- **feat(orchestration)**: Added `meeting_coordinator.py` for automated cron-based standups and blackboard synchronization.
-- **feat(security)**: Enhanced `manager_blindfold.py` with execution timeouts (>900s), strict reversion of stuck tasks, and unauthorized IO blocking.
+### Added
+- Implemented `autonomous_loop.py` daemon for zero-human-intervention (O(1) file monitoring).
+- Added `meeting_coordinator.py` for automated cron-based standups and blackboard synchronization.
+
+### Changed
+- Enhanced `manager_blindfold.py` with execution timeouts (>900s), strict reversion of stuck tasks, and unauthorized IO blocking.
 
 ## [4.34.0] - 2026-08-30
-### Epic Orchestration & Epistemic Fixes
-- **feat(orchestration)**: Enforced RBAC Blindfold (`manager_blindfold.py`) via OS hooks to physically prevent the Scrum Master from bypassing delegation.
-- **feat(brain)**: Hardcoded `[OBLIGATORY_MEETING_PROTOCOL]` into `rules.md` (Procedural DNA) to ensure multi-agent meetings are never hallucinated across fresh installs.
-- **fix(docs)**: Corrected broken paths to `SKILL.md` triggers in `AGENTS.md` and injected `enable_write_tools` & `<EPISTEMIC_HUMILITY>` into all L9 personas.
-- **fix(orchestration)**: Expanded the Blackboard (`inbox_manager.py`) debate limit from 3 to 10 rounds to prevent premature blockages and forced hallucination.
+### Added
+- Enforced RBAC Blindfold (`manager_blindfold.py`) via OS hooks to physically prevent the Scrum Master from bypassing delegation.
+- Hardcoded `[OBLIGATORY_MEETING_PROTOCOL]` into `rules.md` (Procedural DNA) to ensure multi-agent meetings are never hallucinated across fresh installs.
+
+### Fixed
+- Corrected broken paths to `SKILL.md` triggers in `AGENTS.md` and injected `enable_write_tools` & `<EPISTEMIC_HUMILITY>` into all L9 personas.
+- Expanded the Blackboard (`inbox_manager.py`) debate limit from 3 to 10 rounds to prevent premature blockages and forced hallucination.
 
 ## [4.33.0] - 2026-08-30
 ### Added
