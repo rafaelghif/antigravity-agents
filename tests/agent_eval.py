@@ -16,6 +16,6 @@ def test_anti_dummy_compliance():
         assert not found, f"Agent evaluation failed: Found forbidden tokens {found} in {f}"
 
 def test_security_skill_presence():
-    # Evaluate that implementer always has security skill
-    impl_content = Path(".agents/agents/implementer.md").read_text()
-    assert "security" in impl_content, "Implementer is missing mandatory security context."
+    # Evaluate that backend always has security skill
+    impl_content = Path(".agents/agents/staff-backend.md").read_text()
+    assert "security" in impl_content, "Backend is missing mandatory security context."

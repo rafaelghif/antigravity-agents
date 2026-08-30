@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.34.0] - 2026-08-30
+### Epic Orchestration & Epistemic Fixes
+- **feat(orchestration)**: Enforced RBAC Blindfold (`manager_blindfold.py`) via OS hooks to physically prevent the Scrum Master from bypassing delegation.
+- **feat(brain)**: Hardcoded `[OBLIGATORY_MEETING_PROTOCOL]` into `rules.md` (Procedural DNA) to ensure multi-agent meetings are never hallucinated across fresh installs.
+- **fix(docs)**: Corrected broken paths to `SKILL.md` triggers in `AGENTS.md` and injected `enable_write_tools` & `<EPISTEMIC_HUMILITY>` into all L9 personas.
+- **fix(orchestration)**: Expanded the Blackboard (`inbox_manager.py`) debate limit from 3 to 10 rounds to prevent premature blockages and forced hallucination.
+
 ## [4.33.0] - 2026-08-30
 ### Added
 - **Physical Delegation Guard**: Added `.agents/hooks.json` intercepting `PreToolUse` for `replace_file_content` and `write_to_file`.
