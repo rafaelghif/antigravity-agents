@@ -1,51 +1,40 @@
 # Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [4.32.0] - 2026-08-30
-### Anti-Hallucination & Epistemic Contracts Update
-- **Architecture (Epistemic Contracts)**:
-  - Addressed the fatal "Hallucination Propagation" flaw in multi-agent systems where downstream agents blindly trust upstream hallucinations (e.g., Frontend trusting a hallucinated Backend API).
-  - Enforced the MARCH (Multi-Agent Reinforced self-Check) Protocol across all L9 Expert Personas.
-  - Every technical claim posted to the Disk-Backed Blackboard MUST now include an `Evidence_Source` and `Falsifiability_Criteria`. Guesses can no longer be laundered into facts.
-- **Agent Tuning (Scrum Master)**:
-  - Upgraded `scrum-master.md` with strict authority to reject any artifact lacking an Epistemic Contract, enforcing a hard boundary on unverified AI behavior.
+### Added
+- MARCH (Multi-Agent Reinforced self-Check) Protocol to `AGENTS.md` and `scrum-master.md`.
+- Epistemic Contracts requirement for all Blackboard communications (`Evidence_Source` and `Falsifiability_Criteria`).
+
+### Changed
+- `scrum-master` agent updated with strict authority to reject artifacts lacking Epistemic Contracts, preventing hallucination propagation.
 
 ## [4.31.0] - 2026-08-30
-### The "Lazy Enterprise" Update (L9 Personas & Disk-Backed Blackboard)
-- **Feature (Enterprise Blackboard Protocol)**:
-  - Introduced a 100% crash-resilient, zero-amnesia, token-efficient coordination system (`inbox_manager.py`).
-  - Eradicated linear chat bloat. Agents now communicate strictly through disk-backed artifact payloads and JSON states.
-- **Feature (L9 Expert Personas & Full SDLC Coverage)**:
-  - Retired generic implementer/reviewer roles.
-  - Deployed highly specialized executive agents: `scrum-master.md`, `frontend-architect.md`, `staff-backend.md`, `database-sre.md`, `devsecops-principal.md`, `qa-automation-lead.md`, and `product-manager.md`.
-- **Feature (Lazy Investor Protocol)**:
-  - `intent.yaml` is no longer manually demanded from humans. 
-  - `product-manager` agent actively conducts `/grill-me` interviews to auto-generate requirements and autonomously splinters architecture into `tasks/` atomic blueprints.
-- **Feature (100% AITL Autonomous Mode)**:
-  - Eliminated Human-In-The-Loop (HITL) friction. Agent-In-The-Loop (AITL) consensus determines production readiness.
+### Added
+- Enterprise Blackboard Protocol (`inbox_manager.py`) for 100% crash-resilient, zero-amnesia coordination.
+- L9 Expert Personas: `scrum-master.md`, `frontend-architect.md`, `staff-backend.md`, `database-sre.md`, `devsecops-principal.md`, `qa-automation-lead.md`, and `product-manager.md`.
+- Lazy Investor Protocol enabling `product-manager` to auto-generate `intent.yaml` and autonomously splinter tasks into atomic blueprints.
 
+### Changed
+- Shifted framework from Human-In-The-Loop (HITL) to 100% Agent-In-The-Loop (AITL) Autonomous Mode.
+- Replaced linear chat bloat with strictly disk-backed artifact payloads and JSON states.
+
+### Removed
+- Deprecated generic agents (`implementer.md`, `reviewer.md`, `planner.md`, `qa-engineer.md`, `security-reviewer.md`, `manager.md`).
 
 ## [4.30.0] - 2026-08-30
-### Hermes Architecture (Manager-Worker) & Absolute Sandbox Escape
-- **Feature (Hermes Orchestration Architecture)**:
-  - Established a definitive "Manager-Worker" multi-agent protocol via the new `manager.md` subagent configuration.
-  - Replaced linear/DAG models with an iterative, deep-review control flow. The Hermes Manager independently delegates tasks to Workers (Implementer, Reviewer, QA) and rigorously orchestrates revisions until absolute L9 Enterprise perfection is achieved.
-  - Updated `<DELIVERY_PROTOCOL>` in `AGENTS.md` to reflect the Hermes multi-agent hierarchy.
-- **Feature (Zero-Friction Sandbox Liberation)**:
-  - Stripped restrictive tool permissions across the framework.
-  - Subagents and managers now run unrestricted by default (`"toolPermission": "proceed"`, `"enableTerminalSandbox": false`) providing 100% full read/write, terminal execution, and non-workspace access to maximize autonomous effectiveness without prompting for trivial actions.
-- **Feature (Universal Python Installer)**:
-  - Added `install.py` as an alternative cross-platform bootstrap script that hits the GitHub Release API to seamlessly discover and download the absolute latest tag, replicating `upgrade.py` logic for fresh installs.
-- **Feature (Hermes Auto-Pilot Reviewer)**:
-  - Added `scripts/auto_reviewer.py` integrated directly into `.github/workflows/agentic-cicd.yml`.
-  - Automatically evaluates PRs against the L9 DRY/Complexity guards and submits official APPROVED/REQUEST CHANGES reviews using a repository-level PAT to bypass strict branch protection.
-- **Feature (Dependency-Free Neurosymbolic Validation Engine)**:
-  - Introduced `scripts/neurosymbolic_engine.py` to eradicate LLM "hallucination snowballing" in multi-agent workflows.
-  - Enforces strict Structured Cognitive Loops (SCL) via JSON `handoff_template.json` payload validation.
-  - Built purely with Python standard libraries, ensuring zero dependency bloat for consumer projects.
-  - Wired directly into `verify.py` and GitHub Actions CI pipelines for unbreakable guardrails.
-- **Feature (L9 Orchestration Optimizations & Anti-Stuck Protocols)**:
-  - Implemented `[CONCURRENCY_WORKTREES]` enforcing `Workspace: branch` for parallel subagents to eliminate race conditions.
-  - Added `[ANTI_STUCK_PROTOCOL]` utilizing `/schedule` timers as liveness checks to auto-kill hung tasks.
-  - Established `[CIRCUIT_BREAKER]` limiting worker-manager debates to a maximum of 3 iterations to prevent infinite token loops.
+### Added
+- Hermes Orchestration Architecture (Manager-Worker protocol) for iterative, deep-review control flow.
+- Universal Python Installer (`install.py`) to discover and download the latest tag via GitHub Release API.
+- Hermes Auto-Pilot Reviewer (`scripts/auto_reviewer.py`) for automated PR evaluation against L9 DRY/Complexity guards.
+- Dependency-Free Neurosymbolic Validation Engine (`scripts/neurosymbolic_engine.py`) to enforce Structured Cognitive Loops (SCL).
+
+### Changed
+- Stripped restrictive tool permissions across the framework (`"toolPermission": "proceed"`, `"enableTerminalSandbox": false`).
+- Updated `<DELIVERY_PROTOCOL>` in `AGENTS.md` to reflect the Hermes multi-agent hierarchy.
 
 ## [4.29.0] - 2026-08-27
 ### Isolate GitHub CI/CD Workflows & Preserve Agent Workflows
