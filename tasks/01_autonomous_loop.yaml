@@ -1,0 +1,11 @@
+id: "01_autonomous_loop"
+title: "Implement Autonomous Orchestrator Daemon"
+status: "DONE"
+description: >
+  Create `scripts/autonomous_loop.py`. This daemon must continuously monitor `intent.yaml` and the `tasks/` directory.
+  It must spawn the scrum-master or specific agents in a while-loop until all tasks are marked as DONE.
+acceptance_criteria:
+  - "Daemon runs continuously without human trigger."
+  - "Implements O(1) checks (e.g., using file modification hashes) to detect task updates."
+  - "Spawns agents asynchronously and monitors their PID/status."
+  - "Idempotent execution: does not spawn duplicate agents for the same in-progress task."

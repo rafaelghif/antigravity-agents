@@ -1,0 +1,10 @@
+id: "02_cron_integration"
+title: "Implement Automated Meeting/Sync Coordinator"
+status: "DONE"
+description: >
+  Create `scripts/meeting_coordinator.py` to enforce strict agent coordination.
+  This script acts as the automated "standup", forcing running agents to dump their status to the blackboard (`scripts/inbox_manager.py`).
+acceptance_criteria:
+  - "Runs on a strict cron schedule or timer loop (e.g., every 5 minutes)."
+  - "Haults or queries agents if they fail to report status."
+  - "Parses blackboard outputs to detect blocked agents and resolves dependencies."
