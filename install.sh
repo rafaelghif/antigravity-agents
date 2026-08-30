@@ -87,6 +87,14 @@ fi
 copy_managed "$TMP_DIR/source/.agents" .agents
 copy_managed "$TMP_DIR/source/scripts" scripts
 
+if [[ -f "$TARGET_DIR/.gitignore" ]]; then
+  if ! grep -q "\.agents/scratch/" "$TARGET_DIR/.gitignore"; then
+    printf "\n# Antigravity AAC Scratch Directory\n.agents/scratch/\n" >> "$TARGET_DIR/.gitignore"
+  fi
+else
+  printf "# Antigravity AAC Scratch Directory\n.agents/scratch/\n" > "$TARGET_DIR/.gitignore"
+fi
+
 if [[ -d "$TMP_DIR/source/.githooks" ]]; then
   if [ -d ".git" ]; then
     current_hooks=$(git config core.hooksPath || echo "")
