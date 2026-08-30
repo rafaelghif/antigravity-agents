@@ -1,0 +1,21 @@
+{
+  "task_id": "TASK-001",
+  "worker_role": "implementer",
+  "summary": "Implemented feature X and refactored Y.",
+  "modifications": [
+    {
+      "filepath": "scripts/example.py",
+      "change_type": "UPDATE",
+      "description": "Added new neurosymbolic engine import."
+    }
+  ],
+  "tests": [
+    {
+      "test_command": "pytest tests/test_example.py",
+      "status": "PASSED",
+      "output_snippet": "1 passed in 0.12s"
+    }
+  ],
+  "confidence_score": 0.95,
+  "requires_human": false
+}

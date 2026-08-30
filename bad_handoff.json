@@ -1,0 +1,15 @@
+{
+  "task_id": "TASK-123",
+  "worker_role": "implementer",
+  "summary": "Fixed a bug",
+  "modifications": [
+    {
+      "filepath": "main.py",
+      "change_type": "UPDATE",
+      "description": "Fix bug"
+    }
+  ],
+  "tests": [],
+  "confidence_score": 0.9,
+  "requires_human": false
+}

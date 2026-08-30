@@ -1,0 +1,6 @@
+name: "Antigravity Agent Core (AAC)"
+description: "L9 Enterprise Multi-Agent Framework"
+architecture: "Hermes Manager-Worker DAG"
+rules:
+  - "No Vibe Coding"
+  - "Strict TDD"

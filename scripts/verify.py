@@ -52,6 +52,14 @@ def main() -> int:
     parser.add_argument("--terse", "-q", action="store_true", help="ACI Mode: output minimal telegraphic summary")
     args = parser.parse_args()
 
+    # L9 Hard Boundaries for Agent Compliance
+    if not (ROOT / "intent.yaml").is_file():
+        print("=> FATAL: intent.yaml is missing! Vibe coding is forbidden. Rule [INTENT_ARCHITECTURE] violated.")
+        return 1
+    if not (ROOT / "tasks").is_dir() or not any((ROOT / "tasks").iterdir()):
+        print("=> FATAL: tasks/ directory is missing or empty! Rule [MICRO_TASK_SPLIT] violated.")
+        return 1
+
     checks = detect()
     structural = ROOT / "scripts" / "validate.py"
     if structural.is_file():
@@ -78,7 +86,10 @@ def main() -> int:
         checks.append(("ui_hygiene_check", "AAC", "python3 scripts/ui_hygiene_guard.py --check"))
 
     neuro_engine = ROOT / "scripts" / "neurosymbolic_engine.py"
-    if neuro_engine.is_file() and (ROOT / "handoff.json").is_file():
+    if neuro_engine.is_file():
+        if not (ROOT / "handoff.json").is_file():
+            print("=> FATAL: handoff.json is missing! Rule [HANDOFF_CONTRACTS] violated. Subagents must deliver a structured handoff payload.")
+            return 1
         checks.append(("neurosymbolic_validation", "AAC", "python3 scripts/neurosymbolic_engine.py handoff.json"))
         
     if not checks:
