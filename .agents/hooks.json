@@ -6,6 +6,10 @@
         {
           "type": "command",
           "command": "python3 scripts/strict_delegation_guard.py"
+        },
+        {
+          "type": "command",
+          "command": "python3 scripts/manager_blindfold.py"
         }
       ]
     },

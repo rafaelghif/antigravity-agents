@@ -1,0 +1,10 @@
+id: "03_strict_enforcement"
+title: "Enhance Manager Blindfold for Strict Agent Enforcement"
+status: "DONE"
+description: >
+  Update `scripts/manager_blindfold.py` to enforce the rules of the autonomous loop.
+  It must kill rogue agents, restart stuck tasks, and enforce strict execution time limits.
+acceptance_criteria:
+  - "Agents exceeding their execution time limit are killed and their task is reset to TODO."
+  - "Ensures no agent modifies `intent.yaml` unauthorized."
+  - "Logs all enforcement actions to the blackboard."

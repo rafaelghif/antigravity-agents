@@ -1,7 +1,10 @@
-name: "Antigravity Agent Core (AAC)"
-status: IN_PROGRESS
-description: "L9 Enterprise Multi-Agent Framework"
-architecture: "Hermes Manager-Worker DAG"
-rules:
-  - "No Vibe Coding"
-  - "Strict TDD"
+name: "Antigravity Fully Agentic Looping System"
+description: "A strict, zero-human-intervention, fully agentic looping orchestration framework."
+core_philosophy:
+  - "No human intervention: 100% automated execution and coordination."
+  - "Strict execution: Tasks must be atomic, verifiable, and strictly enforced."
+  - "Efficient meetings: Automated syncs via blackboard without idle waiting."
+objectives:
+  - Implement a daemon (`scripts/autonomous_loop.py`) to continuously orchestrate tasks.
+  - Integrate cron/scheduling for automated agent meetings and syncs.
+  - Enforce strict timeouts and idempotency for all agent actions.
