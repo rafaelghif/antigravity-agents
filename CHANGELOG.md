@@ -14,6 +14,15 @@
 - **Feature (Hermes Auto-Pilot Reviewer)**:
   - Added `scripts/auto_reviewer.py` integrated directly into `.github/workflows/agentic-cicd.yml`.
   - Automatically evaluates PRs against the L9 DRY/Complexity guards and submits official APPROVED/REQUEST CHANGES reviews using a repository-level PAT to bypass strict branch protection.
+- **Feature (Dependency-Free Neurosymbolic Validation Engine)**:
+  - Introduced `scripts/neurosymbolic_engine.py` to eradicate LLM "hallucination snowballing" in multi-agent workflows.
+  - Enforces strict Structured Cognitive Loops (SCL) via JSON `handoff_template.json` payload validation.
+  - Built purely with Python standard libraries, ensuring zero dependency bloat for consumer projects.
+  - Wired directly into `verify.py` and GitHub Actions CI pipelines for unbreakable guardrails.
+- **Feature (L9 Orchestration Optimizations & Anti-Stuck Protocols)**:
+  - Implemented `[CONCURRENCY_WORKTREES]` enforcing `Workspace: branch` for parallel subagents to eliminate race conditions.
+  - Added `[ANTI_STUCK_PROTOCOL]` utilizing `/schedule` timers as liveness checks to auto-kill hung tasks.
+  - Established `[CIRCUIT_BREAKER]` limiting worker-manager debates to a maximum of 3 iterations to prevent infinite token loops.
 
 ## [4.29.0] - 2026-08-27
 ### Isolate GitHub CI/CD Workflows & Preserve Agent Workflows
