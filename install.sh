@@ -75,7 +75,7 @@ for brain_file in rules.md memory.md ANCHOR.md active_context.md soul.md schema.
   fi
 done
 
-git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null
+git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null 2>&1
 
 python3 "$TMP_DIR/source/scripts/validate.py"
 

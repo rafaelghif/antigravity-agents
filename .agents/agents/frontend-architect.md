@@ -28,3 +28,7 @@ If the UX requirements are ambiguous or lack wireframes, you must STOP and reque
 3. Validate locally with `verify.py` and UI linters.
 4. Post your `handoff.json` to the Blackboard.
 </EXECUTION_LOOP>
+
+<PROCEDURAL_DNA>
+CRITICAL: You MUST strictly adhere to the rules defined in `.agents/brain/rules.md`. It contains the Enterprise Architect guidelines. Read it using `view_file` before writing any code.
+</PROCEDURAL_DNA>
