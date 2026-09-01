@@ -169,9 +169,29 @@ class HermesEngine:
             return "qa-automation-lead"
         return "staff-backend"
 
+    def _load_persona_skills(self, persona: str) -> str:
+        persona_file = Path(f".agents/agents/{persona}.md")
+        if not persona_file.exists():
+            return ""
+        
+        skill_texts = []
+        try:
+            content = persona_file.read_text(encoding="utf-8")
+            match = re.search(r"skills:\s*\[(.*?)\]", content)
+            if match:
+                skill_names = [s.strip() for s in match.group(1).split(",") if s.strip()]
+                for sname in skill_names:
+                    skill_path = Path(f".agents/skills/{sname}/SKILL.md")
+                    if skill_path.exists():
+                        skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
+        except Exception as e:
+            sys.stderr.write(f"Skill loading notice: {e}\n")
+            
+        return "\n".join(skill_texts)
+
     def execute_agent(self, persona: str, prompt: str, timeout_seconds: int = 900) -> Tuple[int, str, str]:
-        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}'...")
-        cmd = ["agy", "--agent", persona, "--dangerously-skip-permissions", "-p", prompt]
+        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' (High Reasoning Effort)...")
+        cmd = ["agy", "--agent", persona, "--effort", "high", "--dangerously-skip-permissions", "-p", prompt]
         try:
             proc = subprocess.run(
                 cmd,
@@ -264,22 +284,29 @@ class HermesEngine:
             falsifiability=f"Check git status for task {task_id}"
         )
 
+        # Load domain skills dynamically
+        injected_skills = self._load_persona_skills(persona)
+
         while iteration <= max_iterations:
             print(f"\n🔄 [Iteration {iteration}/{max_iterations}] Dispatching Worker...")
             self.checkpoint.set_in_progress(task_id, persona, iteration)
 
             worker_prompt = (
-                f"You are the {persona}. You have been assigned the following task:\n"
+                f"You are the {persona} (L9 Staff/Principal Engineer).\n"
                 f"TASK ID: {task_id}\n"
                 f"TITLE: {title}\n"
                 f"DESCRIPTION: {desc}\n"
                 f"ITERATION: {iteration}/{max_iterations}\n"
                 f"FEEDBACK CONTEXT: {feedback_context}\n\n"
-                f"MANDATE:\n"
-                f"1. Read `.agents/brain/rules.md` to ensure full compliance.\n"
-                f"2. Implement the required changes directly into the repository.\n"
-                f"3. Write comprehensive tests (no sham tests).\n"
-                f"4. Do NOT ask for human confirmation. Execute completely."
+                f"================ L9 EXPERT PLAYBOOK & DOMAIN SKILLS ================\n"
+                f"{injected_skills}\n"
+                f"====================================================================\n\n"
+                f"L9 ARCHITECTURAL MANDATES:\n"
+                f"1. ZERO JUNIOR CODE: No untyped dicts, no 'any', no bare exceptions, no sham tests.\n"
+                f"2. CONTRACT-FIRST: Strict schema validation (DTOs/types) on all boundaries.\n"
+                f"3. RESILIENCE: Handle failures, retries with jitter, idempotency, and edge cases.\n"
+                f"4. ATOMIC TDD: Write complete unit and boundary tests before finalizing.\n"
+                f"5. EXECUTE: Read `.agents/brain/rules.md` and write production code directly."
             )
 
             ret, stdout, stderr = self.execute_agent(persona, worker_prompt)
