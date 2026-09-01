@@ -36,11 +36,27 @@ def load_tasks():
 
 active_processes = {}
 
-def spawn_agent(task_id, task_file):
-    print(f'Spawning agent for task: {task_id}')
-    cmd = ['python3', 'scripts/inbox_manager.py', 'send', 'scrum-master', f'agent-{task_id}', f'Assigning task {task_id}']
-    proc = subprocess.Popen(cmd)
+def spawn_agent(task_id, task_file, task_data):
+    print(f'Spawning actual agent via CLI for task: {task_id}')
+    
+    # Determine the agent to spawn based on the task name or description
+    agent_type = "scrum-master"
+    if "backend" in task_data.get('description', '').lower() or "backend" in task_data.get('title', '').lower():
+        agent_type = "staff-backend"
+    elif "frontend" in task_data.get('description', '').lower() or "ui" in task_data.get('title', '').lower():
+        agent_type = "frontend-architect"
+    elif "security" in task_data.get('description', '').lower() or "blindfold" in task_data.get('title', '').lower():
+        agent_type = "devsecops-principal"
+    elif "database" in task_data.get('description', '').lower() or "schema" in task_data.get('title', '').lower():
+        agent_type = "database-sre"
+        
+    prompt = f"Execute task {task_id} defined in {task_file}. You must read .agents/brain/rules.md first to ensure compliance. Once the code is written, spawn the qa-automation-lead subagent to REVIEW your code before you mark the task as DONE. Do not mark it DONE until qa-automation-lead approves."
+    
+    # Run the agent in the background using agy CLI
+    cmd = ['agy', '--agent', agent_type, '--dangerously-skip-permissions', '-p', prompt]
+    proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     active_processes[task_id] = proc
+    print(f'-> Dispatched {agent_type} (PID: {proc.pid})')
 
 def check_processes():
     completed = []
@@ -52,7 +68,7 @@ def check_processes():
         del active_processes[tid]
 
 def daemon_loop():
-    print('Starting Autonomous Loop Daemon...')
+    print('Starting Autonomous Loop Daemon (v2 - True Agent Spawning)...')
     last_mtimes = {}
     while True:
         current_mtimes = get_file_mtimes()
@@ -66,7 +82,7 @@ def daemon_loop():
                 status = tinfo['status']
                 if status in ('TODO', 'IN_PROGRESS'):
                     if tid not in active_processes:
-                        spawn_agent(tid, tinfo['file'])
+                        spawn_agent(tid, tinfo['file'], tinfo['data'])
                         
             if all(t['status'] == 'DONE' for t in tasks.values()) and len(tasks) > 0:
                 print('All tasks are DONE. Idling...')
