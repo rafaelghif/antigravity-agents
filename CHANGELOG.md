@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.35.1] - 2026-09-01
+### Fixed
+- Enforced genuine agent spawning in `autonomous_loop.py` via CLI (`agy`) instead of faking it on the blackboard.
+- Injected `<PROCEDURAL_DNA>` into all agent markdown definitions to physically force them to read `rules.md`.
+- Suppressed detached HEAD warnings during `install.sh` that falsely appeared as errors.
+
 ## [4.35.0] - 2026-08-30
 ### Added
 - Implemented `autonomous_loop.py` daemon for zero-human-intervention (O(1) file monitoring).
