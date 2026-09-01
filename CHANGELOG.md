@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.37.0] - 2026-09-01
+### Added
+- Overhauled all L9 Expert Personas (`staff-backend`, `frontend-architect`, `database-sre`, `devsecops-principal`, `qa-automation-lead`) with strict architectural invariants and anti-pattern bans.
+- Implemented dynamic skill auto-injection in Hermes Dispatcher (`_load_persona_skills`) to prime workers with domain-specific playbook constraints.
+- Enabled high reasoning effort (`--effort high`) on all subagent CLI executions for System-2 test-time compute.
+
 ## [4.36.0] - 2026-09-01
 ### Added
 - Implemented Enterprise Hermes Orchestrator Engine v5.0.0 (`hermes_manager.py`) with deterministic DAG resolution (`graphlib.TopologicalSorter`).
