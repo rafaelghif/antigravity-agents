@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 L9 Intent & Task Lifecycle Guard.
-Enforces that intent.yaml is kept updated and tasks are properly managed/deleted when completed.
+Enforces that intent.yaml is kept updated and tasks are properly managed when completed.
 Dependency-free (uses pure Python regex).
 """
 import sys
@@ -30,14 +30,19 @@ def main():
     status = status_match.group(2)
 
     if status == "DONE":
-        # If DONE, there should be no pending tasks
+        # When intent is marked DONE, ensure all task files in tasks/ have status: DONE
         if tasks_dir.is_dir():
-            pending_tasks = list(tasks_dir.glob("*.yaml"))
-            if pending_tasks:
-                print(f"=> FATAL: intent.yaml is marked DONE, but there are still {len(pending_tasks)} pending tasks in tasks/!")
-                print("Agents must delete task files when completed. Clean up tasks/ before marking DONE.")
-                sys.exit(1)
-        print("✅ Intent is DONE and all tasks are cleared. Ready for final release.")
+            task_files = list(tasks_dir.glob("*.yaml"))
+            for tf in task_files:
+                try:
+                    t_content = tf.read_text(encoding="utf-8")
+                    if not re.search(r'status:\s*(["\']?)DONE\1', t_content):
+                        print(f"=> FATAL: intent.yaml is marked DONE, but task '{tf.name}' is not marked as DONE!")
+                        sys.exit(1)
+                except Exception as e:
+                    print(f"=> FATAL: Failed to read task {tf.name}: {e}")
+                    sys.exit(1)
+        print("✅ Intent is DONE and all tasks are completed. Ready for final release.")
     
     elif status == "IN_PROGRESS":
         if not tasks_dir.is_dir() or not list(tasks_dir.glob("*.yaml")):
