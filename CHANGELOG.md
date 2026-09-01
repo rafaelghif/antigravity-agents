@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.38.0] - 2026-09-01
+### Added
+- Realigned lifecycle hooks (`hooks.json`) with official Google Antigravity named hook schemas (`aac-delegation-guard`, `aac-auto-verify`).
+- Created native path-agnostic script resolution in `.agents/` hooks for 100% platform portability.
+
+### Changed
+- Updated `README.md` documentation and badges reflecting native Google Antigravity (AGY) runtime compliance.
+
 ## [4.37.0] - 2026-09-01
 ### Added
 - Overhauled all L9 Expert Personas (`staff-backend`, `frontend-architect`, `database-sre`, `devsecops-principal`, `qa-automation-lead`) with strict architectural invariants and anti-pattern bans.
