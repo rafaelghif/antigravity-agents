@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.38.1] - 2026-09-01
+### Fixed
+- Fixed fatal crash in `scripts/semantic_grapher.py` by adding missing `--blast-radius` argument to CLI parser.
+- Fixed worker subagent permission blocking in `scripts/strict_delegation_guard.py` to allow editing application code in `/src/`, `/app/`, `/lib/`.
+- Fixed stdout leaking and JSON unmarshaling corruptions in `scripts/manager_blindfold.py` by silencing blackboard logs.
+- Fixed verification false positive in `scripts/verify.py` by adding automatic Python `unittest` discovery fallback when `pytest` is not installed.
+- Fixed module import resolution in `scripts/hooks/post_invoke_telemetry.py` by properly inserting project root to `sys.path`.
+- Fixed verification bypass in `scripts/hooks/post_invoke_verify.sh` by adding `--execute --terse` flags.
+- Fixed task lifecycle validation in `scripts/intent_guard.py` to inspect all YAML task files in `tasks/`.
+- Removed sham random mock failure branch in `scripts/fuzz_sandbox.py` in compliance with Rule 10 `[ANTI-DUMMY]`.
+- Anchored blackboard directory path in `scripts/inbox_manager.py` to prevent nested `.agents/.agents/` directory creation.
+- Realigned lifecycle hooks in `.agents/plugins/aac-core/hooks.json` to resolve project root dynamically.
+
 ## [4.38.0] - 2026-09-01
 ### Added
 - Realigned lifecycle hooks (`hooks.json`) with official Google Antigravity named hook schemas (`aac-delegation-guard`, `aac-auto-verify`).
@@ -798,10 +811,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [4.1.3] - 2026-07-23
 
+
 ### Fixed
 - **Supply Chain Security**: Pinned GitHub Actions (`actions/checkout` and `gitleaks-action`) to full 40-character commit SHAs instead of mutable tags (`@v4`, `@v2`) to resolve Semgrep SAST blocking findings.
 
 ## [4.1.2] - 2026-07-23
+
 
 ### Added
 - **Server-Side Enforcement**: Scaffolding for GitHub Actions `.github/workflows/agent-gates.yml` to enforce CI/CD checks (Gitleaks, Semgrep) at the server level, preventing manual bypasses.
@@ -812,10 +827,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [4.1.1] - 2026-07-23
 
+
 ### Fixed
 - **Security Baseline Compliance**: Created missing `.agents/brain/env-required.json` to formally document environment variables and resolve architecture/security auditor warnings.
 
 ## [4.1.0] - 2026-07-23
+
 
 ### Added
 - **New Agentic Skills**: Introduced `test-engineer`, `documentation-engineer`, and `performance-profiler` for comprehensive lifecycle management.
@@ -843,6 +860,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Clarified UI responsiveness automated checks requiring `Puppeteer/Playwright` and fixed blind spots in consumer vs. admin review criteria.
 
 ## [4.0.0] - 2026-07-22
+
 
 ### Added
 - **Supreme `AGENTS.md` Constitution**: A single source of truth that governs all sub-agents and operations, strictly superseding any individual skill configurations.
