@@ -99,31 +99,52 @@ func (u *User) Save() error {}
         graph.add_node("Repo", "UserRepository", "class")
         graph.add_node("Service", "UserService", "class")
         graph.add_node("Controller", "UserController", "class")
-
         graph.add_edge("Controller", "Service", "calls")
         graph.add_edge("Service", "Repo", "calls")
         graph.add_edge("Repo", "DB", "queries")
 
-        # Shortest path from Controller to DB
         path = graph.find_shortest_path("Controller", "DB")
         self.assertEqual(path, ["Controller", "Service", "Repo", "DB"])
 
-        # Blast radius of DB (all upstream callers)
         blast = graph.get_blast_radius("DB")
         self.assertIn("Repo", blast)
         self.assertIn("Service", blast)
         self.assertIn("Controller", blast)
 
-        # God nodes
         gods = graph.get_god_nodes()
         self.assertTrue(len(gods) > 0)
 
-        # PageRank centrality
         ranks = graph.compute_pagerank()
         self.assertTrue(len(ranks) > 0)
         self.assertIn("DB", ranks)
-        # In a linear chain Controller -> Service -> Repo -> DB, DB has highest in-degree / rank
         self.assertGreater(ranks["DB"], ranks["Controller"])
+
+    def test_main_cli_execution(self):
+        from scripts.semantic_grapher import main
+        test_py = Path(self.temp_dir.name) / "sample.py"
+        test_py.write_text("class TestClass:\n    def sample_func(self):\n        pass\n")
+
+        orig_argv = sys.argv
+        try:
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--blast-radius", "TestClass"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("Blast Radius for [TestClass]", f.getvalue())
+
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--json"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("nodes", f.getvalue())
+
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--pagerank"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("PageRank Central Symbols", f.getvalue())
+        finally:
+            sys.argv = orig_argv
 
 if __name__ == '__main__':
     unittest.main()
