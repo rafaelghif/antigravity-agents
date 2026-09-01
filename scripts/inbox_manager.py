@@ -3,8 +3,10 @@ import json
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 
-INBOX_DIR = ".agents/inbox"
+ROOT = Path(__file__).resolve().parents[1]
+INBOX_DIR = str(ROOT / ".agents" / "inbox")
 INBOX_FILE = os.path.join(INBOX_DIR, "state.json")
 
 def init_inbox():
