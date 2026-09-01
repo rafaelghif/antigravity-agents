@@ -1,308 +1,282 @@
 #!/usr/bin/env python3
 """
-Semantic Grapher (Graphify Engine): Extracts classes, functions, method signatures,
-imports, and relationships to build a navigable Knowledge Graph of the repository.
-Inspired by Graphify-Labs/graphify.
+Semantic Grapher - AST-driven code structure mapper and GraphRAG generator.
+Supports Python (native ast), TypeScript, and Go via regex.
+Features:
+- PageRank Centrality: Identifies the most structurally critical hub symbols.
+- GraphRAG JSON: Full knowledge graph with typed nodes and edges.
+- Blast Radius Analysis: Computes transitive upstream callers impacted by refactoring.
+- Shortest-Path Tracer: Computes BFS shortest dependency path between any two symbols.
 """
-
 import ast
 import os
 import re
 import sys
 import json
 import argparse
-from collections import deque
 from pathlib import Path
+from collections import defaultdict, deque
 
 class CodeGraph:
     def __init__(self):
-        self.nodes = {}  # id -> dict
-        self.edges = []  # list of dicts
+        self.nodes = {}  # symbol_id -> {type, name, file, line}
+        self.edges = defaultdict(list)  # symbol_id -> list of (target_symbol_id, relation_type)
+        self.reverse_edges = defaultdict(list) # target_symbol_id -> list of (source_symbol_id, relation_type)
 
-    def add_node(self, node_id: str, label: str, node_type: str, file_path: str = "", line: int = 0, signature: str = ""):
-        if node_id not in self.nodes:
-            self.nodes[node_id] = {
-                "id": node_id,
-                "label": label,
-                "type": node_type,
-                "file": file_path,
-                "line": line,
-                "signature": signature
+    def add_node(self, symbol_id, name, symbol_type, file_path="", line_number=0):
+        if symbol_id not in self.nodes:
+            self.nodes[symbol_id] = {
+                "id": symbol_id,
+                "name": name,
+                "type": symbol_type,
+                "file": str(file_path),
+                "line": line_number
             }
 
-    def add_edge(self, source: str, target: str, relation: str, weight: float = 1.0):
-        if not source or not target or source == target:
-            return
-        edge_obj = {
-            "source": source,
-            "target": target,
-            "relation": relation,
-            "weight": weight
-        }
-        self.edges.append(edge_obj)
+    def add_edge(self, source, target, relation):
+        self.edges[source].append((target, relation))
+        self.reverse_edges[target].append((source, relation))
 
-    def to_dict(self) -> dict:
-        return {
-            "nodes": list(self.nodes.values()),
-            "edges": self.edges
-        }
+    def get_blast_radius(self, target_symbol):
+        """BFS reverse traversal to find all upstream dependers (blast radius)."""
+        visited = set()
+        queue = deque([target_symbol])
+        blast_radius = []
 
-    def get_forward_adj(self) -> dict:
-        adj = {nid: [] for nid in self.nodes}
-        for e in self.edges:
-            src, tgt = e["source"], e["target"]
-            if src in adj:
-                adj[src].append(tgt)
-        return adj
+        while queue:
+            current = queue.popleft()
+            for parent, rel in self.reverse_edges.get(current, []):
+                if parent not in visited:
+                    visited.add(parent)
+                    blast_radius.append({"symbol": parent, "relation": rel, "affected_by": current})
+                    queue.append(parent)
+        return blast_radius
 
-    def get_reverse_adj(self) -> dict:
-        radj = {nid: [] for nid in self.nodes}
-        for e in self.edges:
-            src, tgt = e["source"], e["target"]
-            if tgt in radj:
-                radj[tgt].append(src)
-        return radj
-
-    def find_shortest_path(self, source_id: str, target_id: str) -> list:
-        if source_id not in self.nodes or target_id not in self.nodes:
-            return []
-        if source_id == target_id:
-            return [source_id]
-
-        adj = self.get_forward_adj()
-        queue = deque([[source_id]])
-        visited = {source_id}
+    def find_shortest_path(self, start_node, end_node):
+        """BFS shortest path between two symbols."""
+        if start_node == end_node:
+            return [start_node]
+        visited = {start_node}
+        queue = deque([[start_node]])
 
         while queue:
             path = queue.popleft()
-            current = path[-1]
-
-            if current == target_id:
-                return path
-
-            unvisited = [n for n in adj.get(current, []) if n not in visited]
-            visited.update(unvisited)
-            queue.extend([path + [n] for n in unvisited])
+            node = path[-1]
+            for neighbor, _ in self.edges.get(node, []):
+                if neighbor == end_node:
+                    return path + [neighbor]
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(path + [neighbor])
         return []
 
-    def get_blast_radius(self, node_id: str) -> list:
-        """Finds all upstream dependents that will break if this node is modified."""
-        if node_id not in self.nodes:
-            matched = [nid for nid, n in self.nodes.items() if node_id in (n["label"], n["file"], nid)]
-            if not matched:
-                return []
-            node_id = matched[0]
+    def get_god_nodes(self, top_n=5):
+        """Identifies architectural hub nodes (highest degree centrality)."""
+        degrees = {}
+        for node in self.nodes:
+            in_deg = len(self.reverse_edges.get(node, []))
+            out_deg = len(self.edges.get(node, []))
+            degrees[node] = in_deg + out_deg
+        sorted_nodes = sorted(degrees.items(), key=lambda x: x[1], reverse=True)
+        return sorted_nodes[:top_n]
 
-        radj = self.get_reverse_adj()
-        queue = deque([node_id])
-        visited = set()
-
-        while queue:
-            curr = queue.popleft()
-            unvisited = [p for p in radj.get(curr, []) if p not in visited]
-            visited.update(unvisited)
-            queue.extend(unvisited)
-        return sorted(list(visited))
-
-    def get_god_nodes(self, top_k: int = 5) -> list:
-        """Identifies architectural God Nodes (highest connectivity)."""
-        degrees = {nid: 0 for nid in self.nodes}
-        for e in self.edges:
-            src, tgt = e["source"], e["target"]
-            if src in degrees:
-                degrees[src] += 1
-            if tgt in degrees:
-                degrees[tgt] += 1
-        sorted_nodes = sorted(degrees.items(), key=lambda item: item[1], reverse=True)
-        return sorted_nodes[:top_k]
-
-    def _compute_pagerank_iteration(self, radj: dict, out_degree: dict, scores: dict, nodes: list, damping: float, n_count: int) -> dict:
-        new_scores = {}
-        base_score = (1.0 - damping) / n_count
-        for nid in nodes:
-            predecessors = radj.get(nid, [])
-            incoming = sum(scores[p] / out_degree[p] for p in predecessors if out_degree.get(p, 0) > 0)
-            new_scores[nid] = base_score + (damping * incoming)
-        return new_scores
-
-    def compute_pagerank(self, damping: float = 0.85, max_iter: int = 20) -> dict:
-        """Calculates PageRank centrality over repository symbols (inspired by Aider repo map)."""
+    def compute_pagerank(self, damping=0.85, max_iter=50, tol=1e-6):
+        """
+        Computes PageRank centrality for nodes in the knowledge graph.
+        Higher PageRank = architectural hub node referenced directly/indirectly by many modules.
+        """
         nodes = list(self.nodes.keys())
-        n_count = len(nodes)
-        if n_count == 0:
+        n = len(nodes)
+        if n == 0:
             return {}
-        
-        radj = self.get_reverse_adj()
-        fadj = self.get_forward_adj()
-        out_degree = {nid: len(fadj.get(nid, [])) for nid in nodes}
-        scores = {nid: 1.0 / n_count for nid in nodes}
-        
+
+        rank = {node: 1.0 / n for node in nodes}
+        out_counts = {node: len(self.edges.get(node, [])) for node in nodes}
+
         for _ in range(max_iter):
-            scores = self._compute_pagerank_iteration(radj, out_degree, scores, nodes, damping, n_count)
-            
-        return dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+            new_rank = {}
+            dangling_sum = sum(rank[node] for node in nodes if out_counts[node] == 0)
+            dangling_contrib = (damping * dangling_sum) / n
 
-def print_class_methods(class_node, filepath: Path, graph: CodeGraph):
-    for item in class_node.body:
-        if isinstance(item, ast.FunctionDef):
-            args = [a.arg for a in item.args.args]
-            sig = f"def {item.name}({', '.join(args)})"
-            print(f"    {sig}")
-            method_id = f"{class_node.name}.{item.name}"
-            graph.add_node(method_id, method_id, "method", str(filepath), item.lineno, sig)
-            graph.add_edge(class_node.name, method_id, "defines")
+            for node in nodes:
+                # Sum rank from incoming edges
+                incoming_sum = sum(
+                    rank[src] / out_counts[src]
+                    for src, _ in self.reverse_edges.get(node, [])
+                    if out_counts[src] > 0
+                )
+                new_rank[node] = (1.0 - damping) / n + damping * incoming_sum + dangling_contrib
 
-def parse_python(filepath: Path, graph: CodeGraph | None = None):
-    if graph is None:
-        graph = CodeGraph()
+            diff = sum(abs(new_rank[node] - rank[node]) for node in nodes)
+            rank = new_rank
+            if diff < tol:
+                break
+
+        # Normalize to sum = 1.0
+        total = sum(rank.values())
+        if total > 0:
+            rank = {k: v / total for k, v in rank.items()}
+        return rank
+
+    def export_graphrag_json(self):
+        """Exports graph in a standard GraphRAG JSON schema."""
+        nodes_list = list(self.nodes.values())
+        edges_list = []
+        for src, targets in self.edges.items():
+            for dst, rel in targets:
+                edges_list.append({"source": src, "target": dst, "relation": rel})
+        return json.dumps({"nodes": nodes_list, "edges": edges_list}, indent=2)
+
+
+def parse_python(filepath, graph):
     try:
-        content = filepath.read_text(encoding="utf-8")
-        tree = ast.parse(content)
-        file_id = str(filepath)
-        graph.add_node(file_id, filepath.name, "file", file_id)
+        content = filepath.read_text(encoding='utf-8')
+        tree = ast.parse(content, filename=str(filepath))
         
-        print(f"\n[FILE] {filepath}")
-        for node in tree.body:
+        file_id = f"file:{filepath.name}"
+        graph.add_node(file_id, filepath.name, "file", filepath)
+
+        for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
-                print(f"  class {node.name}:")
-                graph.add_node(node.name, node.name, "class", file_id, node.lineno)
-                graph.add_edge(file_id, node.name, "defines")
-                print_class_methods(node, filepath, graph)
+                class_id = f"class:{node.name}"
+                graph.add_node(class_id, node.name, "class", filepath, node.lineno)
+                graph.add_edge(file_id, class_id, "defines")
+                print(f"[AST] Found class {node.name} at {filepath.name}:{node.lineno}")
+                
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef):
+                        method_id = f"method:{node.name}.{item.name}"
+                        args = [a.arg for a in item.args.args]
+                        graph.add_node(method_id, f"{node.name}.{item.name}", "method", filepath, item.lineno)
+                        graph.add_edge(class_id, method_id, "contains")
+                        print(f"  └─ def {item.name}({', '.join(args)}) at line {item.lineno}")
+
             elif isinstance(node, ast.FunctionDef):
+                # Only top-level functions (classes already caught above)
+                func_id = f"func:{node.name}"
                 args = [a.arg for a in node.args.args]
-                sig = f"def {node.name}({', '.join(args)})"
-                print(f"  {sig}")
-                graph.add_node(node.name, node.name, "function", file_id, node.lineno, sig)
-                graph.add_edge(file_id, node.name, "defines")
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                graph.add_node(node.module, node.module, "module")
-                graph.add_edge(file_id, node.module, "imports")
+                graph.add_node(func_id, node.name, "function", filepath, node.lineno)
+                graph.add_edge(file_id, func_id, "defines")
+                print(f"[AST] Found def {node.name}({', '.join(args)}) at {filepath.name}:{node.lineno}")
     except Exception as e:
-        print(f"\n[FILE] {filepath} (Error parsing AST: {e})")
+        sys.stderr.write(f"Error parsing Python file {filepath}: {e}\n")
 
-def parse_regex(filepath: Path, lang: str, graph: CodeGraph | None = None):
-    if graph is None:
-        graph = CodeGraph()
+
+def parse_regex(filepath, lang, graph):
     try:
-        content = filepath.read_text(encoding="utf-8")
-        file_id = str(filepath)
-        graph.add_node(file_id, filepath.name, "file", file_id)
-        print(f"\n[FILE] {filepath}")
-        
+        content = filepath.read_text(encoding='utf-8')
+        file_id = f"file:{filepath.name}"
+        graph.add_node(file_id, filepath.name, "file", filepath)
+
         if lang in ["ts", "js"]:
-            classes = re.findall(r'class\s+([A-Za-z0-9_]+)', content)
-            functions = re.findall(r'(?:function\s+|const\s+|let\s+)([A-Za-z0-9_]+)\s*(?:=|:)?\s*(?:\([^)]*\)\s*=>|\([^)]*\)\s*\{)', content)
+            classes = re.finditer(r'(?:export\s+)?class\s+([A-Za-z0-9_]+)', content)
             for c in classes:
-                print(f"  class {c}")
-                graph.add_node(c, c, "class", file_id)
-                graph.add_edge(file_id, c, "defines")
+                name = c.group(1)
+                cid = f"class:{name}"
+                graph.add_node(cid, name, "class", filepath)
+                graph.add_edge(file_id, cid, "defines")
+                print(f"[{lang.upper()}] Found class {name} in {filepath.name}")
+
+            functions = re.finditer(r'(?:export\s+)?(?:async\s+)?function\s+([A-Za-z0-9_]+)|const\s+([A-Za-z0-9_]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>', content)
             for f in functions:
-                print(f"  func/arrow {f}")
-                graph.add_node(f, f, "function", file_id)
-                graph.add_edge(file_id, f, "defines")
+                name = f.group(1) or f.group(2)
+                if name:
+                    fid = f"func:{name}"
+                    graph.add_node(fid, name, "function", filepath)
+                    graph.add_edge(file_id, fid, "defines")
+                    print(f"[{lang.upper()}] Found func/arrow {name} in {filepath.name}")
+
         elif lang == "go":
-            structs = re.findall(r'type\s+([A-Za-z0-9_]+)\s+struct', content)
-            functions = re.findall(r'func\s+(?:\([^)]+\)\s+)?([A-Za-z0-9_]+)\s*\(', content)
+            structs = re.finditer(r'type\s+([A-Za-z0-9_]+)\s+struct', content)
             for s in structs:
-                print(f"  struct {s}")
-                graph.add_node(s, s, "struct", file_id)
-                graph.add_edge(file_id, s, "defines")
-            for f in functions:
-                print(f"  func {f}")
-                graph.add_node(f, f, "function", file_id)
-                graph.add_edge(file_id, f, "defines")
+                name = s.group(1)
+                sid = f"struct:{name}"
+                graph.add_node(sid, name, "struct", filepath)
+                graph.add_edge(file_id, sid, "defines")
+                print(f"[GO] Found struct {name} in {filepath.name}")
+
+            funcs = re.finditer(r'func\s+(?:\([^)]+\)\s+)?([A-Za-z0-9_]+)\s*\(', content)
+            for f in funcs:
+                name = f.group(1)
+                fid = f"func:{name}"
+                graph.add_node(fid, name, "function", filepath)
+                graph.add_edge(file_id, fid, "defines")
+                print(f"[GO] Found func {name} in {filepath.name}")
     except Exception as e:
-        print(f"\n[FILE] {filepath} (Error parsing: {e})")
+        sys.stderr.write(f"Error parsing {lang} file {filepath}: {e}\n")
 
-def process_files_for_ext(dirpath, filenames, ext, graph: CodeGraph):
-    for filename in filenames:
-        if filename.endswith(ext):
-            filepath = Path(dirpath) / filename
-            if ext == ".py":
-                parse_python(filepath, graph)
-            else:
-                parse_regex(filepath, ext[1:], graph)
 
-def process_extension(root_dir: Path, ext: str, graph: CodeGraph):
-    excludes = {"node_modules", ".venv", ".git", "graphify-out", "__pycache__"}
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if d not in excludes]
-        process_files_for_ext(dirpath, filenames, ext, graph)
+def scan_directory(directory, graph):
+    for root, _, files in os.walk(directory):
+        if any(ign in root for ign in ['.git', 'node_modules', 'dist', 'build', '.venv', '__pycache__', '.agents-backups']):
+            continue
+        for file in files:
+            path = Path(root) / file
+            if file.endswith('.py'):
+                parse_python(path, graph)
+            elif file.endswith(('.ts', '.tsx', '.js', '.jsx')):
+                parse_regex(path, "ts", graph)
+            elif file.endswith('.go'):
+                parse_regex(path, "go", graph)
 
-def build_repository_graph(root_dir: Path) -> CodeGraph:
+
+def build_repository_graph(target_dir="."):
     graph = CodeGraph()
-    for ext in [".py", ".ts", ".js", ".go"]:
-        process_extension(root_dir, ext, graph)
+    scan_directory(target_dir, graph)
     return graph
 
-def scan_directory(root_dir: Path, graph: CodeGraph | None = None):
-    if graph is None:
-        graph = CodeGraph()
-    print(f"Semantic Knowledge Graph for {root_dir}\n" + "="*40)
-    for ext in [".py", ".ts", ".js", ".go"]:
-        process_extension(root_dir, ext, graph)
-    return graph
 
 def main():
-    parser = argparse.ArgumentParser(description="Semantic Grapher Knowledge Engine")
-    parser.add_argument("path", nargs="?", default=".", help="Directory to scan")
-    parser.add_argument("--json", action="store_true", help="Output full graph as JSON")
-    parser.add_argument("--path-find", nargs=2, metavar=("SRC", "DST"), help="Find shortest path between two symbols")
-    parser.add_argument("--pagerank", action="store_true", help="Calculate PageRank centrality for all symbols")
-    parser.add_argument("--top-central", type=int, default=5, metavar="N", help="Show top N central symbols by PageRank")
-    parser.add_argument("--summary", action="store_true", help="Show god nodes and architecture summary")
+    parser = argparse.ArgumentParser(description="AST Code Grapher and Blast Radius Analyzer")
+    parser.add_argument("dir", nargs="?", default=".", help="Target directory to map")
+    parser.add_argument("--json", action="store_true", help="Output GraphRAG JSON schema")
+    parser.add_argument("--blast-radius", type=str, default="", help="Calculate blast radius for a symbol")
+    parser.add_argument("--path-find", nargs=2, metavar=("START", "END"), help="Find shortest path between two symbols")
+    parser.add_argument("--pagerank", action="store_true", help="Display PageRank centrality ranking")
+    parser.add_argument("--top-central", type=int, default=10, help="Number of top PageRank nodes to display")
     args = parser.parse_args()
 
-    target = Path(args.path).resolve()
-    graph = CodeGraph()
+    graph = build_repository_graph(args.dir)
 
     if args.json:
-        # Build silently
-        for ext in [".py", ".ts", ".js", ".go"]:
-            process_extension(target, ext, graph)
-        print(json.dumps(graph.to_dict(), indent=2))
-        return
-
-    if args.pagerank:
-        for ext in [".py", ".ts", ".js", ".go"]:
-            process_extension(target, ext, graph)
-        ranks = graph.compute_pagerank()
-        print(f"📊 Top {args.top_central} PageRank Central Symbols (Repo Map):")
-        for i, (nid, score) in enumerate(list(ranks.items())[:args.top_central], 1):
-            info = graph.nodes.get(nid, {})
-            print(f"  {i}. [{score:.4f}] {nid} ({info.get('type', 'symbol')}) -> {info.get('file', '')}")
-        return
-
-    if args.path_find:
-        for ext in [".py", ".ts", ".js", ".go"]:
-            process_extension(target, ext, graph)
-        src, dst = args.path_find
-        path = graph.find_shortest_path(src, dst)
-        if path:
-            print(f"Shortest Path ({src} -> {dst}):\n  " + " -> ".join(path))
-        else:
-            print(f"No direct path found between '{src}' and '{dst}'.")
+        print(graph.export_graphrag_json())
         return
 
     if args.blast_radius:
-        for ext in [".py", ".ts", ".js", ".go"]:
-            process_extension(target, ext, graph)
-        dependents = graph.get_blast_radius(args.blast_radius)
-        print(f"Blast Radius for [{args.blast_radius}]: ({len(dependents)} impacted dependents)")
-        for dep in dependents:
-            info = graph.nodes.get(dep, {})
-            print(f"  - {dep} ({info.get('type', 'unknown')}) in {info.get('file', '')}")
+        blast = graph.get_blast_radius(args.blast_radius)
+        print(f"\n--- Blast Radius for [{args.blast_radius}] ---")
+        if not blast:
+            print("No upstream dependers found or isolated symbol.")
+        for item in blast:
+            print(f"  <- Affected: {item['symbol']} (via {item['relation']} to {item['affected_by']})")
         return
 
-    # Default scan & summary
-    scan_directory(target, graph)
-    
-    if args.summary or True:
-        gods = graph.get_god_nodes(5)
-        print("\n" + "="*40 + "\n🏛️ ARCHITECTURAL GOD NODES (Highest Connectivity):")
-        for nid, deg in gods:
-            n = graph.nodes.get(nid, {})
-            print(f"  - [{deg} connections] {nid} ({n.get('type', 'symbol')})")
+    if args.path_find:
+        start, end = args.path_find
+        path = graph.find_shortest_path(start, end)
+        print(f"\n--- Shortest Path: {start} -> {end} ---")
+        if path:
+            print(" -> ".join(path))
+        else:
+            print("No connection path found.")
+        return
 
-if __name__ == "__main__":
+    if args.pagerank:
+        ranks = graph.compute_pagerank()
+        sorted_ranks = sorted(ranks.items(), key=lambda x: x[1], reverse=True)[:args.top_central]
+        print(f"\n--- Top {len(sorted_ranks)} PageRank Central Symbols ---")
+        for sym, rank_val in sorted_ranks:
+            node_info = graph.nodes.get(sym, {})
+            fpath = node_info.get("file", "")
+            stype = node_info.get("type", "")
+            print(f"  [{stype.upper():<8}] {sym:<30} (Rank: {rank_val:.4f}) -> {fpath}")
+        return
+
+    gods = graph.get_god_nodes()
+    print("\n--- Architectural Hub Nodes (Degree Centrality) ---")
+    for node, deg in gods:
+        print(f"  Hub Symbol: {node:<30} (Degree: {deg})")
+
+
+if __name__ == '__main__':
     main()
