@@ -11,7 +11,7 @@ if [[ -z "${AAC_REF:-}" ]]; then
   AAC_REF="$(git ls-remote --tags --refs "$REPOSITORY" 2>/dev/null | cut -d/ -f3 | sort -V | tail -n 1 || echo "")"
   AAC_REF="${AAC_REF:-v4.30.0}"
 fi
-# Version marker for validation:  AAC_REF="v4.35.1"
+# Version marker for validation:  AAC_REF="v4.36.0"
 readonly AAC_REF
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"

@@ -12,6 +12,7 @@ opencode.json
 !.agents/incidents/.gitkeep
 .agents/brain/audit.jsonl
 .agents-backups/
+.agents/state/
 
 # Local plan backups
 *.bak
