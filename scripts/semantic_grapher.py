@@ -37,6 +37,13 @@ class CodeGraph:
         self.edges[source].append((target, relation))
         self.reverse_edges[target].append((source, relation))
 
+    def _process_blast_radius_neighbors(self, current, visited, blast_radius, queue):
+        for parent, rel in self.reverse_edges.get(current, []):
+            if parent not in visited:
+                visited.add(parent)
+                blast_radius.append({"symbol": parent, "relation": rel, "affected_by": current})
+                queue.append(parent)
+
     def get_blast_radius(self, target_symbol):
         """BFS reverse traversal to find all upstream dependers (blast radius)."""
         visited = set()
@@ -45,12 +52,17 @@ class CodeGraph:
 
         while queue:
             current = queue.popleft()
-            for parent, rel in self.reverse_edges.get(current, []):
-                if parent not in visited:
-                    visited.add(parent)
-                    blast_radius.append({"symbol": parent, "relation": rel, "affected_by": current})
-                    queue.append(parent)
+            self._process_blast_radius_neighbors(current, visited, blast_radius, queue)
         return blast_radius
+
+    def _process_shortest_path_neighbors(self, node, end_node, visited, queue, path):
+        for neighbor, _ in self.edges.get(node, []):
+            if neighbor == end_node:
+                return path + [neighbor]
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(path + [neighbor])
+        return None
 
     def find_shortest_path(self, start_node, end_node):
         """BFS shortest path between two symbols."""
@@ -62,12 +74,9 @@ class CodeGraph:
         while queue:
             path = queue.popleft()
             node = path[-1]
-            for neighbor, _ in self.edges.get(node, []):
-                if neighbor == end_node:
-                    return path + [neighbor]
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append(path + [neighbor])
+            res = self._process_shortest_path_neighbors(node, end_node, visited, queue, path)
+            if res:
+                return res
         return []
 
     def get_god_nodes(self, top_n=5):
@@ -79,6 +88,17 @@ class CodeGraph:
             degrees[node] = in_deg + out_deg
         sorted_nodes = sorted(degrees.items(), key=lambda x: x[1], reverse=True)
         return sorted_nodes[:top_n]
+
+    def _compute_pagerank_step(self, nodes, rank, out_counts, damping, dangling_contrib, n):
+        new_rank = {}
+        for node in nodes:
+            incoming_sum = sum(
+                rank[src] / out_counts[src]
+                for src, _ in self.reverse_edges.get(node, [])
+                if out_counts[src] > 0
+            )
+            new_rank[node] = (1.0 - damping) / n + damping * incoming_sum + dangling_contrib
+        return new_rank
 
     def compute_pagerank(self, damping=0.85, max_iter=50, tol=1e-6):
         """
@@ -94,25 +114,16 @@ class CodeGraph:
         out_counts = {node: len(self.edges.get(node, [])) for node in nodes}
 
         for _ in range(max_iter):
-            new_rank = {}
             dangling_sum = sum(rank[node] for node in nodes if out_counts[node] == 0)
             dangling_contrib = (damping * dangling_sum) / n
 
-            for node in nodes:
-                # Sum rank from incoming edges
-                incoming_sum = sum(
-                    rank[src] / out_counts[src]
-                    for src, _ in self.reverse_edges.get(node, [])
-                    if out_counts[src] > 0
-                )
-                new_rank[node] = (1.0 - damping) / n + damping * incoming_sum + dangling_contrib
+            new_rank = self._compute_pagerank_step(nodes, rank, out_counts, damping, dangling_contrib, n)
 
             diff = sum(abs(new_rank[node] - rank[node]) for node in nodes)
             rank = new_rank
             if diff < tol:
                 break
 
-        # Normalize to sum = 1.0
         total = sum(rank.values())
         if total > 0:
             rank = {k: v / total for k, v in rank.items()}
@@ -121,12 +132,24 @@ class CodeGraph:
     def export_graphrag_json(self):
         """Exports graph in a standard GraphRAG JSON schema."""
         nodes_list = list(self.nodes.values())
-        edges_list = []
-        for src, targets in self.edges.items():
-            for dst, rel in targets:
-                edges_list.append({"source": src, "target": dst, "relation": rel})
+        
+        edges_list = [
+            {"source": src, "target": dst, "relation": rel}
+            for src, targets in self.edges.items()
+            for dst, rel in targets
+        ]
+        
         return json.dumps({"nodes": nodes_list, "edges": edges_list}, indent=2)
 
+
+def _parse_python_methods(node, class_id, filepath, graph):
+    for item in node.body:
+        if isinstance(item, ast.FunctionDef):
+            method_id = f"method:{node.name}.{item.name}"
+            args = [a.arg for a in item.args.args]
+            graph.add_node(method_id, f"{node.name}.{item.name}", "method", filepath, item.lineno)
+            graph.add_edge(class_id, method_id, "contains")
+            print(f"  └─ def {item.name}({', '.join(args)}) at line {item.lineno}")
 
 def parse_python(filepath, graph):
     try:
@@ -143,13 +166,7 @@ def parse_python(filepath, graph):
                 graph.add_edge(file_id, class_id, "defines")
                 print(f"[AST] Found class {node.name} at {filepath.name}:{node.lineno}")
                 
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef):
-                        method_id = f"method:{node.name}.{item.name}"
-                        args = [a.arg for a in item.args.args]
-                        graph.add_node(method_id, f"{node.name}.{item.name}", "method", filepath, item.lineno)
-                        graph.add_edge(class_id, method_id, "contains")
-                        print(f"  └─ def {item.name}({', '.join(args)}) at line {item.lineno}")
+                _parse_python_methods(node, class_id, filepath, graph)
 
             elif isinstance(node, ast.FunctionDef):
                 # Only top-level functions (classes already caught above)
@@ -206,18 +223,21 @@ def parse_regex(filepath, lang, graph):
         sys.stderr.write(f"Error parsing {lang} file {filepath}: {e}\n")
 
 
+def _scan_files_in_dir(root, files, graph):
+    for file in files:
+        path = Path(root) / file
+        if file.endswith('.py'):
+            parse_python(path, graph)
+        elif file.endswith(('.ts', '.tsx', '.js', '.jsx')):
+            parse_regex(path, "ts", graph)
+        elif file.endswith('.go'):
+            parse_regex(path, "go", graph)
+
 def scan_directory(directory, graph):
     for root, _, files in os.walk(directory):
         if any(ign in root for ign in ['.git', 'node_modules', 'dist', 'build', '.venv', '__pycache__', '.agents-backups']):
             continue
-        for file in files:
-            path = Path(root) / file
-            if file.endswith('.py'):
-                parse_python(path, graph)
-            elif file.endswith(('.ts', '.tsx', '.js', '.jsx')):
-                parse_regex(path, "ts", graph)
-            elif file.endswith('.go'):
-                parse_regex(path, "go", graph)
+        _scan_files_in_dir(root, files, graph)
 
 
 def build_repository_graph(target_dir="."):
