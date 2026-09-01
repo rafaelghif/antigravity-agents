@@ -8,7 +8,7 @@ import re
 
 def log_to_blackboard(msg):
     try:
-        subprocess.run(["python3", "scripts/inbox_manager.py", "send", "manager_blindfold", "all", msg], check=True)
+        subprocess.run(["python3", "scripts/inbox_manager.py", "send", "manager_blindfold", "all", msg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
     except Exception as e:
         sys.stderr.write(f"Blindfold log error: {e}\n")
 
@@ -49,57 +49,75 @@ def enforce_timeouts():
     kill_rogue_processes()
     reset_stuck_tasks()
 
-def check_is_manager(transcript_path):
+def get_agent_role(transcript_path: str) -> str:
     if not transcript_path or not os.path.exists(transcript_path):
-        return False
+        return "primary"
     try:
-        with open(transcript_path, 'r') as f:
-            first_line = f.readline()
-            return "Principal Agile Orchestrator" in first_line or "Scrum Master" in first_line
+        with open(transcript_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                entry = json.loads(line)
+                if entry.get("type") == "USER_INPUT":
+                    content = entry.get("content", "")
+                    if "Principal Agile Orchestrator" in content or "scrum-master" in content or "Scrum Master" in content:
+                        return "scrum-master"
+                    if "Principal Product Manager" in content or "product-manager" in content:
+                        return "product-manager"
+                    if any(worker in content for worker in ["staff-backend", "frontend-architect", "database-sre", "devsecops-principal", "qa-automation-lead"]):
+                        return "worker"
+                break
     except Exception as e:
         sys.stderr.write(f"Transcript read notice: {e}\n")
-        return False
+    return "primary"
 
 def main():
     payload = sys.stdin.read()
     if not payload:
+        print(json.dumps({"decision": "allow"}))
         return
         
-    data = json.loads(payload)
+    try:
+        data = json.loads(payload)
+    except Exception:
+        print(json.dumps({"decision": "allow"}))
+        return
+
     tool_call = data.get("toolCall", {})
     tool_name = tool_call.get("name", "")
     tool_args = tool_call.get("args", {})
     transcript_path = data.get("transcriptPath", "")
 
     enforce_timeouts()
-    is_manager = check_is_manager(transcript_path)
+    role = get_agent_role(transcript_path)
 
-    # Ensures no agent modifies intent.yaml unauthorized.
+    # Ensures worker agents do not modify intent.yaml directly
     if tool_name in ["replace_file_content", "write_to_file", "multi_replace_file_content"]:
         target_path = tool_args.get("TargetFile", "") or tool_args.get("AbsolutePath", "")
         if "intent.yaml" in target_path:
-            if not is_manager:
-                log_to_blackboard("Enforcement: Blocked unauthorized modification of intent.yaml by non-manager")
+            if role == "worker":
+                log_to_blackboard("Enforcement: Blocked unauthorized modification of intent.yaml by worker agent")
                 print(json.dumps({
                     "decision": "deny",
-                    "reason": "STRICT ENFORCEMENT: Only the Scrum Master can modify intent.yaml."
+                    "reason": "STRICT ENFORCEMENT: Workers cannot modify intent.yaml. Only the Product Manager or Scrum Master can modify intent."
                 }))
                 return
 
-    # Only blindfold specific read tools
+    # Only blindfold specific read tools for Scrum Master
     if tool_name not in ["view_file", "grep_search", "list_dir", "find_by_name"]:
         print(json.dumps({"decision": "allow"}))
         return
 
-    if is_manager:
+    if role == "scrum-master":
         target_path = ""
         if tool_name == "view_file":
             target_path = tool_args.get("AbsolutePath", "")
         elif tool_name == "grep_search":
             target_path = tool_args.get("SearchPath", "")
             
-        # The Scrum Master is ONLY allowed to read the Blackboard (state.json)
-        if "state.json" not in target_path and "inbox" not in target_path:
+        # The Scrum Master is allowed to inspect orchestration, blackboard, intent, tasks, and memory
+        allowed_paths = ["state.json", "inbox", "tasks", "intent.yaml", "handoff", ".agents/brain", ".agents/plans", "audit.log"]
+        if not any(ap in target_path for ap in allowed_paths):
             print(json.dumps({
                 "decision": "deny",
                 "reason": "RBAC BLINDFOLD: As the Scrum Master, you are strictly forbidden from reading source code directly. You MUST spawn a sub-agent (e.g. staff-backend or devsecops-principal) to read and analyze these files for you, and coordinate with them via the Blackboard."
