@@ -5,7 +5,7 @@ description: Advanced 2026 Context Engineering Template for Autonomous Subagents
 <!--
 CRITICAL: All dynamic and static tasks in .agents/tasks/ MUST adhere strictly to this template.
 -->
-# 🧠 Agent Task Definition (AAC v4.38.0)
+# 🧠 Agent Task Definition (AAC v4.38.1)
 
 > **[Role Definition]**
 > You are the L9 [Insert Role, e.g., Backend Architect].
@@ -18,20 +18,31 @@ CRITICAL: All dynamic and static tasks in .agents/tasks/ MUST adhere strictly to
 
 > **[Constitutional Constraints]**
 > - You MUST NEVER use dummy data, `// TODO`, or hardcoded secrets.
-> - You MUST preserve all existing functionality outside this scope.
-> - [Insert task-specific constraint, e.g., "Must be O(1) time complexity"]
+> - Zero SHAM tests: Every single code change must be accompanied by non-tautological tests.
+> - O(1) HashMaps > O(N^2) loops: Optimize every data lookup.
+> - Strict DRY: Reuse existing code instead of inventing duplicates.
 
-> **[Task Instructions] (ReAct Pattern)**
-> 1. **Reason**: Analyze the file structure and explain your approach in a `<thinking>` block.
-> 2. **Act**: Execute the changes step-by-step.
-> 3. **Observe**: Run verification (`verify.py`).
-> 4. **Reflect**: If verification fails, analyze the stack trace and change your approach (Lateral Thinking).
+> **[Task Deliverable]**
+> - Input: [Describe Inputs]
+> - Output: [Describe Expected Outputs / Modifications]
+> - Target Files:
+>   - `[file_to_modify_1]`
+>   - `[file_to_modify_2]`
 
-> **[Output Contract]**
-> Once complete, output the following structured response:
-> - `<status>`: SUCCESS or ESCALATED
-> - `<summary>`: What was changed
-> - `<rework_count>`: How many verification loops were needed
+> **[Verification Gate (TDD)]**
+> Execute the following verification command before reporting task completion:
+> ```bash
+> python3 scripts/verify.py --execute
+> ```
 
-> **[Verification Loop]**
-> *Before* concluding your task, double-check your own code against the Constitutional Constraints. If you violated a constraint, fix it before returning.
+> **[Handoff Contract]**
+> Output the JSON handoff payload upon completion to `.agents/brain/handoff.json`:
+> ```json
+> {
+>   "task_id": "TASK-XXX",
+>   "status": "DONE",
+>   "modified_files": [],
+>   "tests_run": [],
+>   "epistemic_evidence": "Verification output logs proving zero regressions."
+> }
+> ```
