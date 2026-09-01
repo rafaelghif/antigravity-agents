@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.36.0] - 2026-09-01
+### Added
+- Implemented Enterprise Hermes Orchestrator Engine v5.0.0 (`hermes_manager.py`) with deterministic DAG resolution (`graphlib.TopologicalSorter`).
+- Added Dual-Gate Verification Pipeline (Deterministic AST Gate 1 + Cognitive QA Lead Gate 2).
+- Integrated crash-resilient state checkpointing (`.agents/state/checkpoint.json`).
+
+### Changed
+- Refactored `autonomous_loop.py` to seamlessly delegate task lifecycles to the Hermes Engine.
+- Enhanced `dry_guard.py` to safely exclude `.agents-backups/` from duplication checks.
+- Fixed all AST complexity violations and flattened loop depths across all orchestration scripts.
+
 ## [4.35.1] - 2026-09-01
 ### Fixed
 - Enforced genuine agent spawning in `autonomous_loop.py` via CLI (`agy`) instead of faking it on the blackboard.
