@@ -36,23 +36,18 @@ def fuzz_loop(target_script, iterations=10):
         
         if target_script:
             try:
-                if target_script == "mock":
-                    # Mock execution - random failure chance 10%
-                    if random.random() < 0.1:
-                        raise subprocess.CalledProcessError(1, "mock_command")
-                else:
-                    process = subprocess.Popen(
-                        ["python3", target_script],
-                        stdin=subprocess.PIPE,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True
-                    )
-                    stdout, stderr = process.communicate(input=input_json, timeout=5)
+                process = subprocess.Popen(
+                    ["python3", target_script],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                stdout, stderr = process.communicate(input=input_json, timeout=5)
+                
+                if process.returncode != 0:
+                    raise subprocess.CalledProcessError(process.returncode, target_script, output=stdout, stderr=stderr)
                     
-                    if process.returncode != 0:
-                        raise subprocess.CalledProcessError(process.returncode, target_script, output=stdout, stderr=stderr)
-                        
                 success_count += 1
             except subprocess.TimeoutExpired:
                 print(f"Iteration {i+1} FAILED: Timeout")
@@ -77,13 +72,11 @@ def fuzz_loop(target_script, iterations=10):
 def main():
     parser = argparse.ArgumentParser(description="Fuzzing Sandbox Wrapper")
     parser.add_argument("role", nargs="?", default="qa-engineer", help="Role (usually qa-engineer)")
-    parser.add_argument("--target", type=str, default="", help="Target python script to fuzz (use 'mock' for simulated fuzzing)")
+    parser.add_argument("--target", type=str, default="", help="Target python script to fuzz")
     parser.add_argument("--iterations", type=int, default=5, help="Number of fuzzing iterations")
     args = parser.parse_args()
 
-    target = args.target if args.target else "mock"
-    
-    sys.exit(fuzz_loop(target, args.iterations))
+    sys.exit(fuzz_loop(args.target, args.iterations))
 
 if __name__ == "__main__":
     main()

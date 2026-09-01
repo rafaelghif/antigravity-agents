@@ -36,7 +36,12 @@ def detect() -> list[tuple[str, str, str]]:
             if name in scripts:
                 checks.append((name, manager, command(manager, "run", name)))
     if (ROOT / "pyproject.toml").is_file() or (ROOT / "pytest.ini").is_file():
-        checks.append(("test", "python", "pytest"))
+        if shutil.which("pytest"):
+            checks.append(("test", "python", "pytest"))
+        elif (ROOT / "tests").is_dir():
+            checks.append(("test", "python", "python3 -m unittest discover tests"))
+    elif (ROOT / "tests").is_dir():
+        checks.append(("test", "python", "python3 -m unittest discover tests"))
     if (ROOT / "Cargo.toml").is_file():
         checks.append(("test", "rust", "cargo test"))
     if (ROOT / "go.mod").is_file():

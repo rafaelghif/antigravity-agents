@@ -43,11 +43,11 @@ def my_func():
             parse_python(filepath, graph)
         
         result = f.getvalue()
-        self.assertIn("class MyClass", result)
+        self.assertIn("Found class MyClass", result)
         self.assertIn("def my_method(self, arg1)", result)
-        self.assertIn("def my_func()", result)
-        self.assertIn("MyClass", graph.nodes)
-        self.assertIn("my_func", graph.nodes)
+        self.assertIn("Found def my_func()", result)
+        self.assertIn("class:MyClass", graph.nodes)
+        self.assertIn("func:my_func", graph.nodes)
 
     def test_parse_regex_ts(self):
         content = """
@@ -66,10 +66,10 @@ function regularFunc() {}
             parse_regex(filepath, "ts", graph)
         
         result = f.getvalue()
-        self.assertIn("class UserService", result)
-        self.assertIn("func/arrow myArrowFunc", result)
-        self.assertIn("func/arrow regularFunc", result)
-        self.assertIn("UserService", graph.nodes)
+        self.assertIn("Found class UserService", result)
+        self.assertIn("Found func/arrow myArrowFunc", result)
+        self.assertIn("Found func/arrow regularFunc", result)
+        self.assertIn("class:UserService", graph.nodes)
 
     def test_parse_regex_go(self):
         content = """
@@ -88,10 +88,10 @@ func (u *User) Save() error {}
             parse_regex(filepath, "go", graph)
         
         result = f.getvalue()
-        self.assertIn("struct User", result)
-        self.assertIn("func GetUser", result)
-        self.assertIn("func Save", result)
-        self.assertIn("User", graph.nodes)
+        self.assertIn("Found struct User", result)
+        self.assertIn("Found func GetUser", result)
+        self.assertIn("Found func Save", result)
+        self.assertIn("struct:User", graph.nodes)
 
     def test_graph_path_and_blast_radius(self):
         graph = CodeGraph()
@@ -99,31 +99,53 @@ func (u *User) Save() error {}
         graph.add_node("Repo", "UserRepository", "class")
         graph.add_node("Service", "UserService", "class")
         graph.add_node("Controller", "UserController", "class")
-
         graph.add_edge("Controller", "Service", "calls")
         graph.add_edge("Service", "Repo", "calls")
         graph.add_edge("Repo", "DB", "queries")
 
-        # Shortest path from Controller to DB
         path = graph.find_shortest_path("Controller", "DB")
         self.assertEqual(path, ["Controller", "Service", "Repo", "DB"])
 
-        # Blast radius of DB (all upstream callers)
         blast = graph.get_blast_radius("DB")
-        self.assertIn("Repo", blast)
-        self.assertIn("Service", blast)
-        self.assertIn("Controller", blast)
+        blast_symbols = [b["symbol"] for b in blast]
+        self.assertIn("Repo", blast_symbols)
+        self.assertIn("Service", blast_symbols)
+        self.assertIn("Controller", blast_symbols)
 
-        # God nodes
         gods = graph.get_god_nodes()
         self.assertTrue(len(gods) > 0)
 
-        # PageRank centrality
         ranks = graph.compute_pagerank()
         self.assertTrue(len(ranks) > 0)
         self.assertIn("DB", ranks)
-        # In a linear chain Controller -> Service -> Repo -> DB, DB has highest in-degree / rank
         self.assertGreater(ranks["DB"], ranks["Controller"])
+
+    def test_main_cli_execution(self):
+        from scripts.semantic_grapher import main
+        test_py = Path(self.temp_dir.name) / "sample.py"
+        test_py.write_text("class TestClass:\n    def sample_func(self):\n        pass\n")
+
+        orig_argv = sys.argv
+        try:
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--blast-radius", "TestClass"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("Blast Radius for [TestClass]", f.getvalue())
+
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--json"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("nodes", f.getvalue())
+
+            sys.argv = ["semantic_grapher.py", self.temp_dir.name, "--pagerank"]
+            f = StringIO()
+            with redirect_stdout(f):
+                main()
+            self.assertIn("PageRank Central Symbols", f.getvalue())
+        finally:
+            sys.argv = orig_argv
 
 if __name__ == '__main__':
     unittest.main()

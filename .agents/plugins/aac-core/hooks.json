@@ -1,51 +1,65 @@
 {
-  "hooks": [
-    {
-      "id": "production-gate",
-      "type": "PreToolUse",
-      "matcher": {
-        "toolName": "run_command"
-      },
-      "scriptPath": "./scripts/hooks/pre_tool_hitl.sh"
-    },
-    {
-      "id": "flow-engineering-guard",
-      "type": "PostInvocation",
-      "scriptPath": "./scripts/hooks/post_invoke_verify.sh"
-    },
-    {
-      "id": "strict-delegation-gate",
-      "type": "PreToolUse",
-      "matcher": {
-        "toolName": "invoke_subagent"
-      },
-      "scriptPath": "./scripts/hooks/pre_tool_delegation.sh"
-    },
-    {
-      "id": "enterprise-quality-gate",
-      "type": "PreToolUse",
-      "matcher": {
-        "toolName": "write_to_file"
-      },
-      "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
-    },
-    {
-      "id": "enterprise-quality-gate-edit",
-      "type": "PreToolUse",
-      "matcher": {
-        "toolName": "replace_file_content"
-      },
-      "scriptPath": "./scripts/hooks/pre_tool_quality_gate.sh"
-    },
-    {
-      "id": "pre-invoke-master-hook",
-      "type": "PreInvocation",
-      "scriptPath": "python3 ./scripts/hooks/pre_invoke_master.py"
-    },
-    {
-      "id": "global-telemetry-extractor",
-      "type": "PostInvocation",
-      "scriptPath": "python3 ./scripts/hooks/post_invoke_telemetry.py"
-    }
-  ]
+  "aac-production-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_hitl.sh'"
+          }
+        ]
+      }
+    ]
+  },
+  "aac-delegation-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "invoke_subagent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_delegation.sh'"
+          }
+        ]
+      }
+    ]
+  },
+  "aac-quality-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_quality_gate.sh'"
+          }
+        ]
+      }
+    ]
+  },
+  "aac-pre-invoke-master": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_invoke_master.py'"
+      }
+    ]
+  },
+  "aac-post-invoke-telemetry": {
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_telemetry.py'"
+      }
+    ]
+  },
+  "aac-post-invoke-verify": {
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/post_invoke_verify.sh'"
+      }
+    ]
+  }
 }

@@ -5,6 +5,10 @@ import re
 from pathlib import Path
 from datetime import datetime
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 def update_project_memory():
     memory_path = Path('.agents/brain/memory.md')
     if not memory_path.exists():
