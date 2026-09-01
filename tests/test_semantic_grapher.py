@@ -43,11 +43,11 @@ def my_func():
             parse_python(filepath, graph)
         
         result = f.getvalue()
-        self.assertIn("class MyClass", result)
+        self.assertIn("Found class MyClass", result)
         self.assertIn("def my_method(self, arg1)", result)
-        self.assertIn("def my_func()", result)
-        self.assertIn("MyClass", graph.nodes)
-        self.assertIn("my_func", graph.nodes)
+        self.assertIn("Found def my_func()", result)
+        self.assertIn("class:MyClass", graph.nodes)
+        self.assertIn("func:my_func", graph.nodes)
 
     def test_parse_regex_ts(self):
         content = """
@@ -66,10 +66,10 @@ function regularFunc() {}
             parse_regex(filepath, "ts", graph)
         
         result = f.getvalue()
-        self.assertIn("class UserService", result)
-        self.assertIn("func/arrow myArrowFunc", result)
-        self.assertIn("func/arrow regularFunc", result)
-        self.assertIn("UserService", graph.nodes)
+        self.assertIn("Found class UserService", result)
+        self.assertIn("Found func/arrow myArrowFunc", result)
+        self.assertIn("Found func/arrow regularFunc", result)
+        self.assertIn("class:UserService", graph.nodes)
 
     def test_parse_regex_go(self):
         content = """
@@ -88,10 +88,10 @@ func (u *User) Save() error {}
             parse_regex(filepath, "go", graph)
         
         result = f.getvalue()
-        self.assertIn("struct User", result)
-        self.assertIn("func GetUser", result)
-        self.assertIn("func Save", result)
-        self.assertIn("User", graph.nodes)
+        self.assertIn("Found struct User", result)
+        self.assertIn("Found func GetUser", result)
+        self.assertIn("Found func Save", result)
+        self.assertIn("struct:User", graph.nodes)
 
     def test_graph_path_and_blast_radius(self):
         graph = CodeGraph()
@@ -107,9 +107,10 @@ func (u *User) Save() error {}
         self.assertEqual(path, ["Controller", "Service", "Repo", "DB"])
 
         blast = graph.get_blast_radius("DB")
-        self.assertIn("Repo", blast)
-        self.assertIn("Service", blast)
-        self.assertIn("Controller", blast)
+        blast_symbols = [b["symbol"] for b in blast]
+        self.assertIn("Repo", blast_symbols)
+        self.assertIn("Service", blast_symbols)
+        self.assertIn("Controller", blast_symbols)
 
         gods = graph.get_god_nodes()
         self.assertTrue(len(gods) > 0)
