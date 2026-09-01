@@ -7,9 +7,9 @@ if (-not $AacRef) {
     try {
         $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
-        $AacRef = if ($latest) { $latest } else { "v4.38.1" }
+        $AacRef = if ($latest) { $latest } else { "v4.38.2" }
     } catch {
-        $AacRef = "v4.38.1"
+        $AacRef = "v4.38.2"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
