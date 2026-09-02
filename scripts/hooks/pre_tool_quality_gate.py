@@ -1,12 +1,12 @@
 import sys, json
 import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from hook_utils import read_hook_payload, json, re
+from hook_utils import read_hook_payload
+import re
+from pathlib import Path
 
 def main():
-        sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
-        print(json.dumps({"decision": "allow"}))
-        return
+    payload = read_hook_payload()
         
     tool_name = payload.get("toolCall", {}).get("name", "")
     if tool_name not in ["write_to_file", "replace_file_content"]:
@@ -34,9 +34,13 @@ def main():
             ext = Path(target_file).suffix[1:]
             
             test_exists = False
+            try:
+                for f in Path(".").rglob(f"*{name_without_ext}*"):
+                    if re.search(r"test_|spec\.|\.test\.|Test", f.name):
+                        test_exists = True
                         break
-            except Exception:
-                pass
+            except Exception as e:
+                sys.stderr.write(f"Error: {e}\n")
             
             if not test_exists:
                 print(json.dumps({
