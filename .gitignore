@@ -41,3 +41,4 @@ test_temp*
 *.swp
 release_notes*
 .agents/inbox/
+.agents/plugins/aac-core/.agents

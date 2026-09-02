@@ -1,0 +1,17 @@
+title: "OS Hooks Execution Chaos Test Harness"
+description: >
+  Deep audit of test suite reveals missing OS hook execution crash tests.
+  This task proposes a chaos test harness to validate resilience against OS-level 
+  anomalies, Windows CRLF mismatches, and missing dependencies.
+acceptance_criteria:
+  - Implement property-based boundary testing for OS hooks (Null/None, empty args, Unicode special paths).
+  - Simulate cross-platform edge cases: Windows CRLF execution in Unix containers.
+  - Implement concurrent hook execution simulations to prevent race conditions.
+  - Mock external OS-level dependencies simulating missing execution binaries.
+  - No time.sleep(); implement deterministic state polling.
+tests:
+  - test_os_hook_crlf_mismatch
+  - test_os_hook_missing_dependency
+  - test_os_hook_concurrency_race
+  - test_os_hook_special_unicode_paths
+  - test_os_hook_null_env_vars
