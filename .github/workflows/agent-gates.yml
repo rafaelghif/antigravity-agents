@@ -13,7 +13,6 @@ permissions:
 jobs:
   validate:
     name: Structural Validation (JSON + Version Consistency)
-    if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest==8.0.0
           python3 scripts/validate.py
           pytest tests/
 
@@ -95,7 +94,6 @@ jobs:
 
   security-and-quality:
     name: SAST + Secret Scanning
-    if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

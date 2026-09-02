@@ -1,7 +1,7 @@
 import sys
 import json
 
-def read_hook_payload():
+def read_hook_payload() -> dict:
     raw_input = sys.stdin.buffer.read().decode('utf-8', errors='replace').strip()
     if not raw_input:
         print(json.dumps({"decision": "allow"}))

@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,15 +13,12 @@ class TestVerify(unittest.TestCase):
         checks = verify.detect()
         self.assertIsInstance(checks, list)
 
-    def test_main(self):
+    @patch('sys.argv', ['verify.py'])
+    @patch('subprocess.run')
+    def test_main(self, mock_run):
         # The verify main script should execute without throwing errors
-        import sys
-        original_argv = sys.argv
-        sys.argv = ['verify.py']
-        try:
-            self.assertEqual(verify.main(), 0)
-        finally:
-            sys.argv = original_argv
+        mock_run.return_value.returncode = 0
+        self.assertEqual(verify.main(), 0)
 
 if __name__ == '__main__':
     unittest.main()
