@@ -4,7 +4,7 @@ import subprocess
 import os
 import sys
 
-print("🚀 Starting Fully Automated Agentic Looping System (v4.42.0 Unleashed)")
+print("🚀 Starting Fully Automated Agentic Looping System (v4.42.1 Unleashed)")
 print("Scanning for tasks...")
 time.sleep(1)
 

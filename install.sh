@@ -11,7 +11,7 @@ if [[ -z "${AAC_REF:-}" ]]; then
   AAC_REF="$(git ls-remote --tags --refs "$REPOSITORY" 2>/dev/null | cut -d/ -f3 | sort -V | tail -n 1 || echo "")"
   AAC_REF="${AAC_REF:-v4.30.0}"
 fi
-# Version marker for validation:  AAC_REF="v4.42.0"
+# Version marker for validation:  AAC_REF="v4.42.1"
 readonly AAC_REF
 readonly TARGET_DIR="${AAC_TARGET_DIR:-$PWD}"
 readonly TMP_DIR="$(mktemp -d)"
@@ -66,9 +66,6 @@ else
   printf 'Required command not found: python3 or python\n' >&2
   exit 1
 fi
-require_command curl
-require_command jq
-require_command gh
 
 mkdir -p -- "$TARGET_DIR/.agents" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \
