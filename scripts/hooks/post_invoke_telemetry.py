@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-def update_project_memory():
+def update_project_memory() -> None:
     memory_path = Path('.agents/brain/memory.md')
     if not memory_path.exists():
         return
@@ -49,13 +49,13 @@ def update_project_memory():
         except Exception as e:
             sys.stderr.write(f"Memory update notice: {str(e)}\n")
 
-def extract_telemetry(transcript_path):
+def extract_telemetry(transcript_path: str) -> None:
     audit_log = Path('.agents/brain/global_audit.log')
     audit_log.parent.mkdir(parents=True, exist_ok=True)
     
     try:
         content_buffer = []
-        with open(transcript_path, 'r', encoding='utf-8') as f:
+        with open(transcript_path, 'r', encoding='utf-8', newline='') as f:
             lines = f.readlines()
             
         def process_line(line_str):
@@ -74,12 +74,12 @@ def extract_telemetry(transcript_path):
         
         last_line = ""
         if audit_log.exists():
-            with audit_log.open('r', encoding='utf-8') as lf:
+            with audit_log.open('r', encoding='utf-8', newline='') as lf:
                 exist_lines = lf.readlines()
                 if exist_lines:
                     last_line = exist_lines[-1]
                     
-        with audit_log.open('a', encoding='utf-8') as af:
+        with audit_log.open('a', encoding='utf-8', newline='') as af:
             for match in matches:
                 clean_match = match.strip().replace('\n', ' ')
                 if clean_match in last_line:

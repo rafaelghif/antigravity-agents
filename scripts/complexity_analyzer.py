@@ -87,6 +87,8 @@ def analyze_file(filepath):
         print(f"[AST FATAL] {filepath.name}: SyntaxError encountered.")
         return False
     except Exception as e:
+        import sys
+        sys.stderr.write(f"[AST FATAL] {filepath.name}: Analysis failed: {e}\n")
         return True
 
 def process_dir(dirpath, filenames, failed):

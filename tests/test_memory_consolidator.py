@@ -84,5 +84,15 @@ class TestMemoryConsolidator(unittest.TestCase):
         sections = load_active_context(self.active_path)
         self.assertTrue(any("auth JWT" in item for item in sections["focus"]))
 
+    def test_sync_transcript_to_memory_malformed(self):
+        transcript_file = Path(self.tmp_dir.name) / "transcript_bad.jsonl"
+        with transcript_file.open("w", encoding="utf-8") as f:
+            f.write("not a valid json\n")
+            f.write("{}\n")
+            f.write(json.dumps({"type": "USER_INPUT", "content": ""}) + "\n")
+        
+        synced = sync_transcript_to_memory(transcript_file, active_path=self.active_path, memory_path=self.memory_path)
+        self.assertFalse(synced)
+
 if __name__ == '__main__':
     unittest.main()

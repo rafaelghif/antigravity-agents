@@ -22,6 +22,15 @@ class TestFunctionVisitor(ast.NodeVisitor):
     def visit_Assert(self, node: ast.Assert):
         self.assertions_count += 1
         test_str = ast.unparse(node.test) if hasattr(ast, "unparse") else ""
+        if isinstance(node.test, ast.Constant):
+            self.sham_assertions.append(f"assert {test_str}")
+        elif isinstance(node.test, ast.Compare):
+            left_str = ast.unparse(node.test.left) if hasattr(ast, "unparse") else ""
+            if all(ast.unparse(c) == left_str for c in node.test.comparators):
+                self.sham_assertions.append(f"assert {test_str}")
+            elif isinstance(node.test.left, ast.Constant) and all(isinstance(c, ast.Constant) for c in node.test.comparators):
+                self.sham_assertions.append(f"assert {test_str}")
+        
         if re.search(r'\bcallable\b|\bhasattr\b|\bis not None\b|\btype\(.*?\)\s*==', test_str):
             self.sham_assertions.append(f"assert {test_str}")
         self.generic_visit(node)
@@ -39,10 +48,15 @@ class TestFunctionVisitor(ast.NodeVisitor):
             call_str = ast.unparse(node) if hasattr(ast, "unparse") else ""
             if "callable(" in call_str or "hasattr(" in call_str or "is not None" in call_str:
                 self.sham_assertions.append(call_str)
-            elif func_name in ("assertIsNotNone", "assertTrue") and len(node.args) == 1:
+            elif func_name in ("assertIsNotNone", "assertTrue", "assertFalse") and len(node.args) == 1:
                 arg_str = ast.unparse(node.args[0]) if hasattr(ast, "unparse") else ""
-                if "callable(" in arg_str or "hasattr(" in arg_str or "(" not in arg_str:
+                if "callable(" in arg_str or "hasattr(" in arg_str or "(" not in arg_str or isinstance(node.args[0], ast.Constant):
                     self.sham_assertions.append(f"{func_name}({arg_str})")
+            elif func_name == "assertEqual" and len(node.args) >= 2:
+                arg1_str = ast.unparse(node.args[0]) if hasattr(ast, "unparse") else ""
+                arg2_str = ast.unparse(node.args[1]) if hasattr(ast, "unparse") else ""
+                if arg1_str == arg2_str or (isinstance(node.args[0], ast.Constant) and isinstance(node.args[1], ast.Constant)):
+                    self.sham_assertions.append(f"{func_name}({arg1_str}, {arg2_str})")
         elif func_name not in INSPECTION_BUILTINS:
             self.behavioral_calls += 1
 

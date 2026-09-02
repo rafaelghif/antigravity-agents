@@ -36,6 +36,8 @@ def main():
             test_exists = False
             try:
                 for f in Path(".").rglob(f"*{name_without_ext}*"):
+                    if "node_modules" in f.parts or ".venv" in f.parts or ".git" in f.parts:
+                        continue
                     if re.search(r"test_|spec\.|\.test\.|Test", f.name):
                         test_exists = True
                         break

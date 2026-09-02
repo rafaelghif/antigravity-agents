@@ -3,7 +3,6 @@ on: [pull_request]
 
 jobs:
   agent_review:
-    if: github.repository == 'rafaelghif/antigravity-agents'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -19,7 +18,7 @@ jobs:
       - name: Setup Environment
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest==8.0.0
       - name: Trigger Hermes Auto-Pilot Reviewer
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}

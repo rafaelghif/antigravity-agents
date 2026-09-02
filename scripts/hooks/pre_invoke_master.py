@@ -53,14 +53,14 @@ SKILL_KEYWORDS = {
     ]
 }
 
-def parse_skills_from_frontmatter(frontmatter_str: str) -> list:
+def parse_skills_from_frontmatter(frontmatter_str: str) -> list[str]:
     inline_match = re.search(r'skills:\s*\[(.*?)\]', frontmatter_str)
     if inline_match:
         return [s.strip().strip("'\"") for s in inline_match.group(1).split(',') if s.strip()]
     list_match = re.findall(r'^\s*-\s*([a-zA-Z0-9_-]+)', frontmatter_str, re.MULTILINE)
     return list_match
 
-def detect_skills_from_text(text: str) -> list:
+def detect_skills_from_text(text: str) -> list[str]:
     if not text:
         return ["code-quality"]
     lower_text = text.lower()

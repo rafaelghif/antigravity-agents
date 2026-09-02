@@ -4,9 +4,7 @@
   "allowNonWorkspaceAccess": true,
   "artifactReviewPolicy": "auto-proceed",
   "permissions": {
-    "allow": [
-      "*"
-    ],
+    "allow": [],
     "deny": [
       "command(rm -rf /*)"
     ],
