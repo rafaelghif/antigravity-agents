@@ -12,24 +12,6 @@ def log_to_blackboard(msg):
     except Exception as e:
         sys.stderr.write(f"Blindfold log error: {e}\n")
 
-def kill_rogue_processes():
-    cmd = "ps -eo pid,etimes,cmd | grep cortex | grep -v grep"
-    try:
-        output = subprocess.check_output(cmd, shell=True, timeout=10).decode()
-        for line in output.strip().splitlines():
-            if not line:
-                continue
-            parts = line.split(None, 2)
-            if len(parts) < 3:
-                continue
-            pid = int(parts[0])
-            etimes = int(parts[1])
-            if etimes > 900:
-                os.kill(pid, 9)
-                log_to_blackboard(f"Enforcement: Killed rogue agent PID {pid} (exceeded time limit of 900s)")
-    except Exception as e:
-        sys.stderr.write(f"Process check notice: {e}\n")
-
 def reset_stuck_tasks():
     for task_file in glob.glob("tasks/*.yaml"):
         try:
@@ -46,7 +28,6 @@ def reset_stuck_tasks():
             sys.stderr.write(f"Task check notice: {e}\n")
 
 def enforce_timeouts():
-    kill_rogue_processes()
     reset_stuck_tasks()
 
 def get_agent_role(transcript_path: str) -> str:
@@ -60,11 +41,11 @@ def get_agent_role(transcript_path: str) -> str:
                 entry = json.loads(line)
                 if entry.get("type") == "USER_INPUT":
                     content = entry.get("content", "")
-                    if "Principal Agile Orchestrator" in content or "scrum-master" in content or "Scrum Master" in content:
+                    if re.search(r"You are the.*?Scrum Master", content, re.IGNORECASE) or re.search(r"You are the.*?Agile Orchestrator", content, re.IGNORECASE):
                         return "scrum-master"
-                    if "Principal Product Manager" in content or "product-manager" in content:
+                    if re.search(r"You are the.*?Product Manager", content, re.IGNORECASE):
                         return "product-manager"
-                    if any(worker in content for worker in ["staff-backend", "frontend-architect", "database-sre", "devsecops-principal", "qa-automation-lead"]):
+                    if any(re.search(f"You are the.*?{worker}", content, re.IGNORECASE) for worker in ["Staff Backend", "Frontend", "Database SRE", "DevSecOps", "QA "]):
                         return "worker"
                 break
     except Exception as e:
