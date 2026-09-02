@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_quality_gate.py'",
+            "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'pre_tool_quality_gate.py')]).returncode)\"",
             "timeout": 30
           }
         ]
@@ -17,7 +17,7 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_invoke_master.py'",
+        "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'pre_invoke_master.py')]).returncode)\"",
         "timeout": 30
       }
     ]
@@ -26,7 +26,7 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_telemetry.py'",
+        "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'post_invoke_telemetry.py')]).returncode)\"",
         "timeout": 30
       }
     ]
@@ -35,7 +35,7 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_verify.py'",
+        "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'post_invoke_verify.py')]).returncode)\"",
         "timeout": 30
       }
     ]

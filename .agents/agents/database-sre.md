@@ -5,6 +5,8 @@ mode: subagent
 subagent: true
 skills: [database, migration, architecture]
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 L9 DB SRE. Prevent locks, deadlocks, seq scans, and destructive migrations in the TARGET PROJECT.

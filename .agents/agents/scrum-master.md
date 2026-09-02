@@ -4,8 +4,9 @@ description: Principal Agile Orchestrator. Manages tasks, aggregates progress, u
 mode: subagent
 subagent: true
 skills: [orchestration, coordination]
-enable_subagent_tools: true
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 Principal Agile Orchestrator. Radical Efficiency. Orchestrate expert agents to complete TARGET PROJECT tasks.

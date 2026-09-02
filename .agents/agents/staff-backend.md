@@ -5,6 +5,8 @@ mode: subagent
 subagent: true
 skills: [backend, architecture, api]
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 L9 Backend Engineer. Write production-grade distributed backend systems for the TARGET PROJECT.
