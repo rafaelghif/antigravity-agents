@@ -3,7 +3,6 @@ import time
 import subprocess
 import os
 import sys
-import shlex
 
 print("🚀 Starting Fully Automated Agentic Looping System (v4.42.0 Unleashed)")
 print("Scanning for tasks...")
@@ -15,19 +14,19 @@ if not tasks:
     exit(0)
 
 # Check if agy is available in path, else fallback to module execution
-agy_cmd = "agy"
+cmd_prefix = ["agy"]
 try:
     subprocess.run(["agy", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
 except Exception:
-    agy_cmd = "python3 -m antigravity_cli"
+    cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
 
 for task in tasks:
     print(f"Assigning task {task} to Scrum Master for orchestration...")
     # Execute the agent natively without sandbox
-    cmd = f"{agy_cmd} run --agent scrum-master --print \"Execute task {task} from tasks directory.\""
-    print(f"-> Executing: {cmd}")
+    cmd_args = cmd_prefix + ["run", "--agent", "scrum-master", "--print", f"Execute task {task} from tasks directory."]
+    print(f"-> Executing: {' '.join(cmd_args)}")
     try:
-        subprocess.run(shlex.split(cmd), check=True)
+        subprocess.run(cmd_args, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Task {task} failed with exit code {e.returncode}.")
     print(f"Task {task} orchestrated successfully.")

@@ -4,7 +4,6 @@ import subprocess
 import json
 import os
 import sys
-import shlex
 
 INBOX_FILE = '.agents/inbox/state.json'
 MEETING_NOTES = 'tasks/meeting_notes.md'
@@ -32,15 +31,15 @@ def save_blackboard(data):
 def run_scrum_master(prompt):
     """Invokes the Scrum Master natively via agy to perform real cognitive tasks."""
     print(f"[MEETING] Invoking Scrum Master: {prompt}")
-    agy_cmd = "agy"
+    cmd_prefix = ["agy"]
     try:
         subprocess.run(["agy", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
     except Exception:
-        agy_cmd = f"{sys.executable} -m antigravity_cli"
+        cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
         
-    cmd = f'{agy_cmd} run --agent scrum-master --print "{prompt}"'
+    cmd_args = cmd_prefix + ["run", "--agent", "scrum-master", "--print", prompt]
     try:
-        subprocess.run(shlex.split(cmd), check=True)
+        subprocess.run(cmd_args, check=True)
     except Exception as e:
         sys.stderr.write(f"[MEETING ERROR] Failed to invoke Scrum Master: {e}\n")
 
