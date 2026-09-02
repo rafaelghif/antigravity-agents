@@ -5,7 +5,7 @@ import os
 import sys
 import shlex
 
-print("🚀 Starting Fully Automated Agentic Looping System (v4.41.0 Unleashed)")
+print("🚀 Starting Fully Automated Agentic Looping System (v4.42.0 Unleashed)")
 print("Scanning for tasks...")
 time.sleep(1)
 
