@@ -90,3 +90,5 @@ CRITICAL: Read relevant `SKILL.md` before acting. Do not hallucinate instruction
 38. [EPISTEMIC_CONTRACTS] To prevent Hallucination Propagation (Agent A hallucinating an API, Agent B blindly building a UI for it), EVERY post to the Blackboard MUST include `Evidence_Source` and `Falsifiability_Criteria`. Guesses cannot be laundered into facts.
 39. [EXECUTIVE_REPORTING] Only the `scrum-master` generates progress reports for the user. Summarize architectural consensus (ADRs) and blockers. Do not leak raw inbox chat logs to the user.
 </ENTERPRISE_BLACKBOARD_PROTOCOL>
+
+40. [ZERO_SANDBOX] ALWAYS use Workspace: 'inherit' & ensure `enable_write_tools: true`.
