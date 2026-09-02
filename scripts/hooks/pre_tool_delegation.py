@@ -1,12 +1,12 @@
 import sys, json
 import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from hook_utils import read_hook_payload, json, re
+from hook_utils import read_hook_payload
+import re
+from pathlib import Path
 
 def main():
-        sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
-        print(json.dumps({"decision": "allow"}))
-        return
+    payload = read_hook_payload()
         
     subagents = payload.get("toolCall", {}).get("args", {}).get("Subagents", [])
     if not subagents:
