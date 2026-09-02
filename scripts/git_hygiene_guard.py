@@ -76,7 +76,8 @@ def check_staged_git_files(root_dir: Path) -> list:
             cwd=root_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            timeout=60
         )
         if res.returncode == 0:
             lines = res.stdout.splitlines()

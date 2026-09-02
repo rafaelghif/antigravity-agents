@@ -23,7 +23,7 @@ def ping_agents(agents):
         if agent != 'scrum-master':
             cmd = ['python3', 'scripts/inbox_manager.py', 'send', 'scrum-master', agent, 'Status report requested. Respond immediately.']
             try:
-                subprocess.run(cmd, check=True)
+                subprocess.run(cmd, check=True, timeout=30)
             except Exception as e:
                 sys.stderr.write(f"Ping error for {agent}: {e}\n")
 
@@ -37,7 +37,7 @@ def handle_coordination_cycle(data):
         print('Detected blocked agents in blackboard. Resolving dependencies...')
         cmd = ['python3', 'scripts/inbox_manager.py', 'send', 'scrum-master', 'all', 'Unblocking agents. Resetting debate count.']
         try:
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, timeout=30)
         except Exception as e:
             sys.stderr.write(f"Unblock error: {e}\n")
     else:

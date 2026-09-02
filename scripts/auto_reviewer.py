@@ -5,7 +5,7 @@ import json
 import sys
 
 def run_cmd(cmd_args):
-    result = subprocess.run(cmd_args, capture_output=True, text=True)
+    result = subprocess.run(cmd_args, capture_output=True, text=True, timeout=300)
     return result.returncode, result.stdout, result.stderr
 
 def format_github_review(retcode, stdout, stderr):
