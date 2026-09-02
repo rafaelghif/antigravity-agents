@@ -1,32 +1,4 @@
 {
-  "aac-production-gate": {
-    "PreToolUse": [
-      {
-        "matcher": "run_command",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_hitl.py'",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  },
-  "aac-delegation-gate": {
-    "PreToolUse": [
-      {
-        "matcher": "invoke_subagent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_delegation.py'",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  },
   "aac-quality-gate": {
     "PreToolUse": [
       {
