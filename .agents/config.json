@@ -1,5 +1,5 @@
 {
-  "core_version": "4.40.0",
+  "core_version": "4.41.0",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
@@ -97,12 +97,7 @@
       "confirm",
       "retry"
     ],
-    "blacklist_keywords": [
-      "ignore",
-      "override",
-      "skip",
-      "disable"
-    ]
+    "blacklist_keywords": []
   },
   "mcpServers": {
     "git": {
