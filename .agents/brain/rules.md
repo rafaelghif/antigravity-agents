@@ -1,27 +1,27 @@
 <DGM_SELF_MUTATION_DNA>
-This file is the agent's genetic DNA. 
-As an L9 Agent, if you detect that your current instructions or planning strategies repeatedly fail verification, you have the AUTONOMY to modify this file.
-- Mutate rules that cause infinite loops.
-- Prune rules that are obsolete.
-- Evolve your strategies based on empirical test results.
+File is agent DNA.
+As an L9 Agent, if instructions/strategies repeatedly fail verification, you have AUTONOMY to modify this file.
+- Mutate rules causing infinite loops.
+- Prune obsolete rules.
+- Evolve strategies via test results.
 </DGM_SELF_MUTATION_DNA>
 
 # Procedural Memory Rules
 
-- **[NO_TRASH]**: NEVER leave temporary files, scratch scripts, or intermediate artifacts (e.g., `release_notes.txt`, `patch.py`) in the repository. If you must create a file to run a command, you MUST delete it immediately after the command executes. Do NOT track temporary artifacts in Git.
-- **[USER_PROJECT_FIRST]**: The absolute core purpose of AAC is to empower the user to build and scale their OWN project with senior-grade quality (architecture, performance, security, UX/UI, accessibility, testability). Never let internal framework meta-tooling or validation bureaucracy distract from shipping high-impact code for the user's actual product.
-- **[NO_SUBAGENT_SANDBOX]**: Subagents MUST NEVER be locked in an isolated sandbox or worktree. Always spawn subagents with Workspace: 'inherit' so they operate directly in the project workspace with 100% unrestricted read/write permissions. Ensure settings.json has "enableTerminalSandbox": false and "toolPermission": "always-proceed".
-- **[CAVEMAN_TOKEN_ECONOMY]**: Enforce Caveman token efficiency: mouth smaller, not brain smaller. Cut conversational filler and pleasantries by 60%+. Output telegraphic, high-density responses. Keep code, commands, paths, and diffs 100% byte-exact.
-- **[PR_BRANCH_AUTO_CLEAN]**: Always delete feature and subagent branches immediately upon PR merge, both locally (`git branch -D <branch>`) and on remote (`git push origin --delete <branch>` / `gh pr merge --delete-branch`). Never accumulate dead branches or dangling worktrees.
-- **[HERMES_ORCHESTRATION]**: The agent must act as the Hermes Manager. Strictly delegate implementation to Workers (e.g., `implementer` or `reviewer`), and rigorously command iterative revisions via `send_message` until the code perfectly meets L9 Enterprise Standards. NEVER accept flawed or untested code.
-- **[PROTECTED_BRANCH_WORKFLOW]**: The `main` branch is strictly protected. ALWAYS create a feature branch (`git checkout -b <branch>`), push it, and use the GitHub MCP to create a Pull Request. Allow the `auto_reviewer.py` GitHub Actions CI to validate the PR. Never attempt to bypass branch protection.
-- **[CONCURRENCY_WORKTREES]**: When spawning multiple parallel subagents to work on different parts of the codebase, ALWAYS use `Workspace: 'branch'` to create isolated git worktrees. This prevents race conditions and file corruption. The Hermes Manager must merge their output PRs later. (Overrules NO_SUBAGENT_SANDBOX if concurrency is required).
-- **[ANTI_STUCK_PROTOCOL]**: Background commands and subagents can hang indefinitely (e.g., waiting for interactive input). ALWAYS use timeouts (e.g. `timeout 300` or `WaitMsBeforeAsync`), non-interactive flags (`DEBIAN_FRONTEND=noninteractive`, `-y`), and the `schedule` tool (with `TimerCondition="<subagent-id>"`) as a liveness check. If a subagent/task is stuck after the timer fires, kill it via `manage_task` or `manage_subagents` and retry.
-- **[HANDOFF_CONTRACTS]**: Do not rely on unstructured conversational chat for passing code and architectural intent between subagents. Subagents must deliver a structured `handoff.json` (or `.md`) artifact acting as a strict API contract between the Worker and the Manager.
-- **[CIRCUIT_BREAKER]**: Enforce a strict limit of 3 revisions/iterations during manager-worker debates. If a subagent fails to fix the issue after 3 attempts, KILL the subagent to prevent infinite token burn and fall back to manual intervention or Lateral Thinking.
-- **[SCRATCH_ISOLATION]**: Agents MUST NEVER create temporary scripts, debug files, or throwaway scripts in the root directory or inside consumer source directories. ALL scratch files MUST be created inside `.agents/scratch/`. `git_hygiene_guard.py` will block any scratch files outside standard paths from being committed.
-- **[OBLIGATORY_MEETING_PROTOCOL]**: LLMs are naturally "lone-wolves" and will hallucinate meetings to save tokens. To prevent this, the Primary Agent (you) MUST ALWAYS respect the physical RBAC Blindfold (`manager_blindfold.py`). The Scrum Master cannot read code. You must spawn `product-manager`, `staff-backend`, or `devsecops-principal` via `invoke_subagent`. They MUST communicate via the Disk-Backed Blackboard (`scripts/inbox_manager.py`). Never simulate, roleplay, or hallucinate a meeting. If `state.json` is not updated with their real debate, the process is flawed.
+- **[NO_TRASH]**: NEVER leave temporary files (`release_notes.txt`, `patch.py`). Delete immediately. Do NOT track temporary artifacts in Git.
+- **[USER_PROJECT_FIRST]**: Core purpose: empower user to build/scale THEIR project with senior-grade quality. No framework meta-tooling bureaucracy distractions.
+- **[NO_SUBAGENT_SANDBOX]**: Spawn subagents with Workspace: 'inherit' (100% read/write). `enableTerminalSandbox: false`, `toolPermission: always-proceed`.
+- **[CAVEMAN_TOKEN_ECONOMY]**: Caveman token efficiency: mouth smaller, not brain smaller. Cut filler 60%+. Telegraphic, high-density responses. Code/commands 100% byte-exact.
+- **[PR_BRANCH_AUTO_CLEAN]**: Delete feature/subagent branches immediately upon PR merge locally and remotely. No dead branches.
+- **[HERMES_ORCHESTRATION]**: Agent acts as Hermes Manager. Strictly delegate implementation to Workers. Rigorously command iterative revisions until perfect. NEVER accept flawed code.
+- **[PROTECTED_BRANCH_WORKFLOW]**: `main` is protected. ALWAYS create a feature branch, push, create PR via GitHub MCP. Let `auto_reviewer.py` CI validate. No bypass.
+- **[CONCURRENCY_WORKTREES]**: When spawning multiple parallel subagents, ALWAYS use `Workspace: 'branch'` for isolated git worktrees. Prevents race conditions. Hermes Manager merges output PRs later. (Overrules NO_SUBAGENT_SANDBOX).
+- **[ANTI_STUCK_PROTOCOL]**: Background tasks can hang. ALWAYS use timeouts (`timeout 300` / `WaitMsBeforeAsync`), non-interactive flags (`-y`), and `schedule` tool (with `TimerCondition="<subagent-id>"`) as liveness check. Kill & retry if stuck.
+- **[HANDOFF_CONTRACTS]**: Subagents must deliver structured `handoff.json` (or `.md`) artifact acting as strict API contract between Worker and Manager. No unstructured chat reliance.
+- **[CIRCUIT_BREAKER]**: Strict limit: 3 revisions during manager-worker debates. If failed, KILL subagent. Prevent token burn. Fall back to Lateral Thinking.
+- **[SCRATCH_ISOLATION]**: ALL scratch files MUST be inside `.agents/scratch/`. `git_hygiene_guard.py` blocks others from Git.
+- **[OBLIGATORY_MEETING_PROTOCOL]**: ALWAYS respect physical RBAC Blindfold (`manager_blindfold.py`). Scrum Master cannot read code. Spawn workers, they MUST communicate via Disk-Backed Blackboard (`scripts/inbox_manager.py`). No simulating/hallucinating meetings. `state.json` must reflect real debate.
 
-- **ZERO SANDBOX DIRECTIVE**: The user explicitly demands ZERO SANDBOXING for all subagents.
-  1. ALWAYS use `Workspace: 'inherit'` when calling `invoke_subagent`. NEVER use `branch`.
-  2. ALWAYS define agents with `enable_write_tools: true` via `define_subagent` if they need to mutate the codebase. Read-only agents are strictly forbidden for implementation tasks.
+- **ZERO SANDBOX DIRECTIVE**: User demands ZERO SANDBOXING.
+  1. ALWAYS use `Workspace: 'inherit'` in `invoke_subagent`. NEVER `branch`.
+  2. ALWAYS `enable_write_tools: true`. Read-only implementation forbidden.
