@@ -15,6 +15,9 @@ jobs:
     name: Structural Validation (JSON + Version Consistency)
     if: github.repository == 'rafaelghif/antigravity-agents'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

@@ -7,7 +7,11 @@ import os
 import sys
 import time
 import json
-import yaml
+try:
+    import yaml
+except ImportError:
+    print("Error: 'yaml' module not found. Please install it using: pip install pyyaml", file=sys.stderr)
+    sys.exit(1)
 import glob
 import re
 import shlex

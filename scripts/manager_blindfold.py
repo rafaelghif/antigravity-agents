@@ -8,7 +8,7 @@ import re
 
 def log_to_blackboard(msg):
     try:
-        subprocess.run(["python3", "scripts/inbox_manager.py", "send", "manager_blindfold", "all", msg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=15)
+        subprocess.run([sys.executable, "scripts/inbox_manager.py", "send", "manager_blindfold", "all", msg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=15)
     except Exception as e:
         sys.stderr.write(f"Blindfold log error: {e}\n")
 
@@ -16,7 +16,7 @@ def kill_rogue_processes():
     cmd = "ps -eo pid,etimes,cmd | grep cortex | grep -v grep"
     try:
         output = subprocess.check_output(cmd, shell=True, timeout=10).decode()
-        for line in output.strip().split('\n'):
+        for line in output.strip().splitlines():
             if not line:
                 continue
             parts = line.split(None, 2)

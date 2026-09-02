@@ -39,9 +39,9 @@ def detect() -> list[tuple[str, str, str]]:
         if shutil.which("pytest"):
             checks.append(("test", "python", "pytest"))
         elif (ROOT / "tests").is_dir():
-            checks.append(("test", "python", "python3 -m unittest discover tests"))
+            checks.append(("test", "python", f'"{sys.executable}" -m unittest discover tests'))
     elif (ROOT / "tests").is_dir():
-        checks.append(("test", "python", "python3 -m unittest discover tests"))
+        checks.append(("test", "python", f'"{sys.executable}" -m unittest discover tests'))
     if (ROOT / "Cargo.toml").is_file():
         checks.append(("test", "rust", "cargo test"))
     if (ROOT / "go.mod").is_file():
@@ -73,7 +73,7 @@ def main() -> int:
     for script, check_name, extra_args, at_start in script_checks:
         script_path = ROOT / "scripts" / script
         if script_path.is_file():
-            cmd = f"python3 scripts/{script}"
+            cmd = f'"{sys.executable}" scripts/{script}'
             if extra_args:
                 cmd += f" {extra_args}"
             item = (check_name, "AAC", cmd)
@@ -87,7 +87,7 @@ def main() -> int:
         if not (ROOT / "handoff.json").is_file():
             print("=> FATAL: handoff.json is missing! Rule [HANDOFF_CONTRACTS] violated. Subagents must deliver a structured handoff payload.")
             return 1
-        checks.append(("neurosymbolic_validation", "AAC", "python3 scripts/neurosymbolic_engine.py handoff.json"))
+        checks.append(("neurosymbolic_validation", "AAC", f'"{sys.executable}" scripts/neurosymbolic_engine.py handoff.json'))
         
     if not checks:
         if not args.terse:
@@ -98,13 +98,13 @@ def main() -> int:
     if not args.terse:
         print("Stack detection:")
         for name, stack, run in checks:
-            status = "available" if shutil.which(run.split()[0]) else "not available"
+            status = "available" if shutil.which(shlex.split(run)[0]) else "not available"
             print(f"- {stack} {name}: {run} ({status})")
 
     exit_code = 0
     passed_count = 0
     for name, stack, run in checks:
-        status = "available" if shutil.which(run.split()[0]) else "not available"
+        status = "available" if shutil.which(shlex.split(run)[0]) else "not available"
         if args.execute and status == "available":
             if not args.terse:
                 print(f"\n=> Executing {stack} {name}...")

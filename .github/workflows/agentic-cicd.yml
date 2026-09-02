@@ -4,7 +4,13 @@ on: [pull_request]
 jobs:
   agent_review:
     if: github.repository == 'rafaelghif/antigravity-agents'
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     permissions:
       pull-requests: write
       contents: read
@@ -17,7 +23,8 @@ jobs:
       - name: Trigger Hermes Auto-Pilot Reviewer
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Executing Hermes Manager Review..."
           pytest tests/agent_eval.py
-          python3 scripts/auto_reviewer.py
+          PYTHONIOENCODING=utf-8 python scripts/auto_reviewer.py

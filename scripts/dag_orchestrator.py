@@ -1,6 +1,11 @@
 import asyncio
 import graphlib
-import yaml
+try:
+    import yaml
+except ImportError:
+    import sys
+    print("Error: 'yaml' module not found. Please install it using: pip install pyyaml", file=sys.stderr)
+    sys.exit(1)
 import sys
 import argparse
 from pathlib import Path

@@ -37,7 +37,7 @@ def fuzz_loop(target_script, iterations=10):
         if target_script:
             try:
                 process = subprocess.Popen(
-                    ["python3", target_script],
+                    [sys.executable, target_script],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,

@@ -56,7 +56,19 @@ copy_managed() {
 require_command git
 require_command cp
 require_command mktemp
-require_command python3
+
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_CMD="python"
+else
+  printf 'Required command not found: python3 or python\n' >&2
+  exit 1
+fi
+require_command curl
+require_command jq
+require_command gh
 
 mkdir -p -- "$TARGET_DIR/.agents" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \
@@ -77,7 +89,7 @@ done
 
 git clone --depth 1 --branch "$AAC_REF" "$REPOSITORY" "$TMP_DIR/source" >/dev/null 2>&1
 
-python3 "$TMP_DIR/source/scripts/validate.py"
+"$PYTHON_CMD" "$TMP_DIR/source/scripts/validate.py"
 
 copy_managed "$TMP_DIR/source/AGENTS.md" AGENTS.md
 copy_managed "$TMP_DIR/source/GEMINI.md" GEMINI.md
