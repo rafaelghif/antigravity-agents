@@ -19,10 +19,10 @@ def start_loop():
     print("Starting background meeting coordinator...")
     # On Windows, we use CREATE_NEW_PROCESS_GROUP to detach if necessary
     if platform.system() == "Windows":
-        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        CREATE_NEW_PROCESS_GROUP = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0x00000200)
         coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, creationflags=CREATE_NEW_PROCESS_GROUP)
     else:
-        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, preexec_fn=os.setsid)
+        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, start_new_session=True)
         
     print(f"Meeting coordinator started (PID: {coordinator_proc.pid}).")
     time.sleep(1) # Give it a second to initialize
