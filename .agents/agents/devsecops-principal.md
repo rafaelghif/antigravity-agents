@@ -5,6 +5,8 @@ mode: subagent
 subagent: true
 skills: [security, devops, ci-cd]
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 L9 DevSecOps. Eliminate secrets, container root privs, and supply chain vulnerabilities in the TARGET PROJECT.

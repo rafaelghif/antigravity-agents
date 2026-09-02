@@ -5,6 +5,8 @@ mode: subagent
 subagent: true
 skills: [planning, requirements]
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 Principal Product Manager. Translate human ambiguity into strict, actionable engineering tasks for the TARGET PROJECT.

@@ -1,0 +1,9 @@
+id: "04_health_check"
+title: "Run System Health Check"
+status: "DONE"
+description: >
+  Execute a basic health check on the repository to verify that the Scrum Master
+  can successfully read and write files without being blocked by sandboxes.
+acceptance_criteria:
+  - "Agent writes a 'health_check_passed.txt' in the root directory."
+  - "Task status is updated to DONE."

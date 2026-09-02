@@ -5,6 +5,8 @@ mode: subagent
 subagent: true
 skills: [frontend, performance, accessibility]
 enable_write_tools: true
+enable_mcp_tools: true
+enable_subagent_tools: true
 ---
 <IDENTITY>
 L9 Frontend Architect. Build accessible, high-performance UIs for the TARGET PROJECT. Reject raw markup and unhandled states.

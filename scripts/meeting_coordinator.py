@@ -4,8 +4,10 @@ import subprocess
 import json
 import os
 import sys
+import shlex
 
 INBOX_FILE = '.agents/inbox/state.json'
+MEETING_NOTES = 'tasks/meeting_notes.md'
 CRON_INTERVAL = 300 # 5 minutes
 
 def load_blackboard():
@@ -18,38 +20,69 @@ def load_blackboard():
         sys.stderr.write(f"Blackboard read error: {e}\n")
         return None
 
-def ping_agents(agents):
-    for agent in agents:
-        if agent != 'scrum-master':
-            cmd = [sys.executable, 'scripts/inbox_manager.py', 'send', 'scrum-master', agent, 'Status report requested. Respond immediately.']
-            try:
-                subprocess.run(cmd, check=True, timeout=30)
-            except Exception as e:
-                sys.stderr.write(f"Ping error for {agent}: {e}\n")
+def save_blackboard(data):
+    # Safe atomic write similar to inbox_manager
+    import tempfile
+    dirname = os.path.dirname(INBOX_FILE)
+    fd, temp_path = tempfile.mkstemp(dir=dirname, text=True)
+    with os.fdopen(fd, 'w') as f:
+        json.dump(data, f, indent=2)
+    os.replace(temp_path, INBOX_FILE)
 
-def handle_coordination_cycle(data):
-    if not data:
-        return
-    agents = data.get('active_agents', [])
-    status = data.get('status', 'active')
-    
-    if status == 'blocked':
-        print('Detected blocked agents in blackboard. Resolving dependencies...')
-        cmd = [sys.executable, 'scripts/inbox_manager.py', 'send', 'scrum-master', 'all', 'Unblocking agents. Resetting debate count.']
-        try:
-            subprocess.run(cmd, check=True, timeout=30)
-        except Exception as e:
-            sys.stderr.write(f"Unblock error: {e}\n")
-    else:
-        print('Pinging agents for status...')
-        ping_agents(agents)
+def run_scrum_master(prompt):
+    """Invokes the Scrum Master natively via agy to perform real cognitive tasks."""
+    print(f"[MEETING] Invoking Scrum Master: {prompt}")
+    agy_cmd = "agy"
+    try:
+        subprocess.run(["agy", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    except Exception:
+        agy_cmd = f"{sys.executable} -m antigravity_cli"
+        
+    cmd = f'{agy_cmd} run --agent scrum-master --print "{prompt}"'
+    try:
+        subprocess.run(shlex.split(cmd), check=True)
+    except Exception as e:
+        sys.stderr.write(f"[MEETING ERROR] Failed to invoke Scrum Master: {e}\n")
+
+def handle_preventive_action(data):
+    """Detects if agents are debating too much and warns them before they get blocked."""
+    turns = data.get('debate_turn_count', 0)
+    if 7 <= turns < 10:
+        print("[PREVENTIVE ACTION] High debate count detected. Warning agents.")
+        subprocess.run([sys.executable, 'scripts/inbox_manager.py', 'send', 'scrum-master', 'all', 
+                        'PREVENTIVE WARNING: You are nearing the debate limit. Reach a consensus or escalate immediately.'])
+
+def handle_corrective_action(data):
+    """Unblocks the room and forces the Scrum Master to intervene."""
+    if data.get('status') == 'blocked':
+        print("[CORRECTIVE ACTION] Room is blocked. Resetting state and forcing Scrum Master intervention.")
+        data['status'] = 'active'
+        data['debate_turn_count'] = 0
+        save_blackboard(data)
+        
+        # Force Scrum Master to resolve the conflict
+        run_scrum_master("The agents have reached the debate limit and the room was blocked. Review the inbox and make a final executive decision to unblock them.")
+
+def run_standup_meeting():
+    """Compiles a meeting digest."""
+    print("[STANDUP MEETING] Orchestrating team standup...")
+    run_scrum_master(f"Read the last 10 messages from {INBOX_FILE}. Compile a structured Markdown meeting digest into {MEETING_NOTES} summarizing progress, blockers, and next action items. Do not hallucinate.")
 
 def coordinator_loop():
-    print('Starting Automated Meeting Coordinator...')
+    print('Starting L9 Enterprise Meeting Coordinator...')
+    cycles = 0
     while True:
         data = load_blackboard()
-        handle_coordination_cycle(data)
+        if data:
+            handle_preventive_action(data)
+            handle_corrective_action(data)
+            
+            # Every 3rd cycle (e.g., 15 mins), run a formal standup meeting
+            if cycles > 0 and cycles % 3 == 0:
+                run_standup_meeting()
+                
         time.sleep(CRON_INTERVAL)
+        cycles += 1
 
 if __name__ == '__main__':
     coordinator_loop()

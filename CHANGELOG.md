@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.42.0] - 2026-09-02
+### Omni-God Mode Unlock & L9 Orchestrator Refactor
+- **God Mode Enabled**: All subagents and co-workers universally upgraded to expert status with `enable_write_tools`, `enable_mcp_tools`, and `enable_subagent_tools`. Agents can now search the internet, modify files natively, and spawn their own worker subagents.
+- **Enterprise Cognitive Meetings**: Completely rewrote `meeting_coordinator.py`. It no longer just sends "ping" messages. It natively invokes the `scrum-master` to cognitively read the blackboard and compile real standup meeting notes into `tasks/meeting_notes.md`.
+- **Advanced Corrective/Preventive Action**: Coordinator now warns agents nearing debate limits (Preventive) and resets state while forcing Scrum Master intervention if blocked (Corrective).
+- **Cross-Platform Purity**: Removed all `bash -c` dependencies in hooks. Hook gates now use pure Python subprocesses, ensuring 100% flawless execution on Windows CMD, PowerShell, Linux, and Mac.
+- **Deadlock Eradication**: Erased all residual restrictive sandboxing files globally.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
