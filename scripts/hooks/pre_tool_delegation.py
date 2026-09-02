@@ -3,8 +3,10 @@ from pathlib import Path
 
 def main():
     try:
-        payload = json.loads(sys.stdin.read().strip())
-    except:
+        raw_input = sys.stdin.buffer.read().decode('utf-8', errors='replace').strip()
+        payload = json.loads(raw_input) if raw_input else {}
+    except Exception as e:
+        sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
         print(json.dumps({"decision": "allow"}))
         return
         

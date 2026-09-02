@@ -3,8 +3,10 @@ from pathlib import Path
 
 def main():
     try:
-        payload = json.loads(sys.stdin.read().strip())
-    except:
+        raw_input = sys.stdin.buffer.read().decode('utf-8', errors='replace').strip()
+        payload = json.loads(raw_input) if raw_input else {}
+    except Exception as e:
+        sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
         print(json.dumps({"decision": "allow"}))
         return
         
@@ -31,8 +33,8 @@ def main():
                     "reason": "PRODUCTION GATE BLOCKED: The AITL_CONSENSUS.yaml file exists but lacks 'STATUS: APPROVED'. The peer agents did not approve this deployment."
                 }))
                 return
-        except Exception:
-            pass
+        except Exception as e:
+            sys.stderr.write(f"[hook] Guard execution failed safely: {e}\n")
             
         print(json.dumps({
             "decision": "allow",
@@ -44,7 +46,7 @@ def main():
         guard_script = Path("scripts/git_hygiene_guard.py")
         if guard_script.is_file():
             try:
-                res = subprocess.run(["python3", str(guard_script), "--check"], capture_output=True)
+                res = subprocess.run(["python3", str(guard_script), "--check"], capture_output=True, text=True, timeout=15)
                 if res.returncode != 0:
                     print(json.dumps({
                         "decision": "reject",
