@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_hitl.sh'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_hitl.py'"
           }
         ]
       }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_delegation.sh'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_delegation.py'"
           }
         ]
       }
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/pre_tool_quality_gate.sh'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_quality_gate.py'"
           }
         ]
       }
@@ -58,7 +58,7 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); bash $ROOT/scripts/hooks/post_invoke_verify.sh'"
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_verify.py'"
       }
     ]
   }

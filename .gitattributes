@@ -1,0 +1,6 @@
+* text=auto
+
+# Enforce LF for shell scripts and Python scripts to prevent syntax errors on Windows (WSL/Git Bash)
+*.sh text eol=lf
+*.py text eol=lf
+*.json text eol=lf
