@@ -57,6 +57,9 @@ require_command git
 require_command cp
 require_command mktemp
 require_command python3
+require_command curl
+require_command jq
+require_command gh
 
 mkdir -p -- "$TARGET_DIR/.agents" \
   "$TARGET_DIR/.agents/incidents" "$TARGET_DIR/.agents/locks" "$TARGET_DIR/.agents/plans" \

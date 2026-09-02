@@ -19,6 +19,9 @@ $BackupStore = Join-Path $TmpDir "brain_backup"
 $BackupDir = Join-Path $TargetDir (".agents-backups/" + (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ"))
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw "Required command not found: git" }
+if (-not (Get-Command curl -ErrorAction SilentlyContinue)) { throw "Required command not found: curl" }
+if (-not (Get-Command jq -ErrorAction SilentlyContinue)) { throw "Required command not found: jq" }
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw "Required command not found: gh" }
 
 $PythonCmd = $null
 foreach ($cmd in @("python3", "python", "py")) {
