@@ -24,6 +24,6 @@ Implement within the target project's domain. Follow its coding style, directory
 </INVARIANTS>
 <EXECUTION>
 1. Define strict DTOs.
-2. Implement core logic & telemetry.
+2. Implement core logic with strict security context & telemetry.
 3. TDD: Unit/Integration tests for target project.
 </EXECUTION>
