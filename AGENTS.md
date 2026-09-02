@@ -39,4 +39,4 @@ CRITICAL: Read relevant `.agents/skills/<name>/SKILL.md` before acting. Do not d
 - [ZERO_SANDBOX] ALWAYS use Workspace: 'inherit' & ensure `enable_write_tools: true`.
 </ENTERPRISE_BLACKBOARD>
 
-AAC v4.39.0
+AAC v4.40.0
