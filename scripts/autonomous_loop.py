@@ -3,6 +3,7 @@ import time
 import subprocess
 import os
 import sys
+import shlex
 
 print("🚀 Starting Fully Automated Agentic Looping System (v4.41.0 Unleashed)")
 print("Scanning for tasks...")
@@ -26,7 +27,7 @@ for task in tasks:
     cmd = f"{agy_cmd} run --agent scrum-master --print \"Execute task {task} from tasks directory.\""
     print(f"-> Executing: {cmd}")
     try:
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(shlex.split(cmd), check=True)
     except subprocess.CalledProcessError as e:
         print(f"Task {task} failed with exit code {e.returncode}.")
     print(f"Task {task} orchestrated successfully.")
