@@ -10,6 +10,10 @@ import os
 
 def compile_intent(file_path):
     print(f"[INTENT COMPILER] Validating strict intent specification from {file_path}...")
+    if not os.path.exists(file_path):
+        print(f"ERROR: Intent Validation Failed. File '{file_path}' does not exist. Vibe coding blocked.")
+        sys.exit(1)
+        
     try:
         with open(file_path, 'r') as f:
             intent = yaml.safe_load(f)
