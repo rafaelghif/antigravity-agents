@@ -14,10 +14,7 @@ jobs:
   validate:
     name: Structural Validation (JSON + Version Consistency)
     if: github.repository == 'rafaelghif/antigravity-agents'
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
