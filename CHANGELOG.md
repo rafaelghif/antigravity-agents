@@ -1,6 +1,9 @@
 # Changelog
 
-## [4.42.0] - 2026-09-02
+## [4.42.1] - 2026-09-02
+### Hotfix: Installer Dependencies
+- **Dependency Fix**: Removed hallucinated requirements (`jq`, `gh`, `curl`) from `install.sh` and `install.ps1` that were blocking fresh installations on environments like Windows PowerShell.
+## [4.42.1] - 2026-09-02
 ### Omni-God Mode Unlock & L9 Orchestrator Refactor
 - **God Mode Enabled**: All subagents and co-workers universally upgraded to expert status with `enable_write_tools`, `enable_mcp_tools`, and `enable_subagent_tools`. Agents can now search the internet, modify files natively, and spawn their own worker subagents.
 - **Enterprise Cognitive Meetings**: Completely rewrote `meeting_coordinator.py`. It no longer just sends "ping" messages. It natively invokes the `scrum-master` to cognitively read the blackboard and compile real standup meeting notes into `tasks/meeting_notes.md`.

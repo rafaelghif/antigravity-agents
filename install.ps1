@@ -7,9 +7,9 @@ if (-not $AacRef) {
     try {
         $tags = (git ls-remote --tags --refs $Repository 2>$null | ForEach-Object { $_.Split('/')[-1] })
         $latest = $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' } | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1
-        $AacRef = if ($latest) { $latest } else { "v4.42.0" }
+        $AacRef = if ($latest) { $latest } else { "v4.42.1" }
     } catch {
-        $AacRef = "v4.42.0"
+        $AacRef = "v4.42.1"
     }
 }
 $TargetDir = if ($env:AAC_TARGET_DIR) { $env:AAC_TARGET_DIR } else { (Get-Location).Path }
@@ -19,9 +19,6 @@ $BackupStore = Join-Path $TmpDir "brain_backup"
 $BackupDir = Join-Path $TargetDir (".agents-backups/" + (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ"))
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw "Required command not found: git" }
-if (-not (Get-Command curl -ErrorAction SilentlyContinue)) { throw "Required command not found: curl" }
-if (-not (Get-Command jq -ErrorAction SilentlyContinue)) { throw "Required command not found: jq" }
-if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw "Required command not found: gh" }
 
 $PythonCmd = $null
 foreach ($cmd in @("python3", "python", "py")) {
