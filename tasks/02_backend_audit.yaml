@@ -5,3 +5,4 @@ tasks:
   - Fix malformed `sys.stdin` reads by adding robust JSON error handling and safe string decoding.
   - Fix `subprocess.run` calls by adding explicit `timeout` arguments to prevent hanging processes.
   - Fix file reads on Windows by enforcing `encoding="utf-8"` everywhere.
+status: "DONE"

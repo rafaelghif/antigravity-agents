@@ -1,9 +1,14 @@
-import sys, json
+import json
 import os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from hook_utils import read_hook_payload
 import re
+import sys
 from pathlib import Path
+
+# Insert local hook_utils directory to path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+from hook_utils import read_hook_payload
 
 def main():
     payload = read_hook_payload()
