@@ -1,11 +1,9 @@
-import sys, json, re
-from pathlib import Path
+import sys, json
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from hook_utils import read_hook_payload, json, re
 
 def main():
-    try:
-        raw_input = sys.stdin.buffer.read().decode('utf-8', errors='replace').strip()
-        payload = json.loads(raw_input) if raw_input else {}
-    except Exception as e:
         sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
         print(json.dumps({"decision": "allow"}))
         return
@@ -36,10 +34,6 @@ def main():
             ext = Path(target_file).suffix[1:]
             
             test_exists = False
-            try:
-                for p in Path('.').rglob(f"*.{ext}"):
-                    if "test" in p.name.lower() and name_without_ext.lower() in p.name.lower():
-                        test_exists = True
                         break
             except Exception:
                 pass

@@ -1,21 +1,15 @@
 import sys, json
-from pathlib import Path
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from hook_utils import read_hook_payload, json
 
 def main():
-    try:
-        raw_input = sys.stdin.buffer.read().decode('utf-8', errors='replace').strip()
-        payload = json.loads(raw_input) if raw_input else {}
-    except Exception as e:
         sys.stderr.write(f"[hook] Error parsing stdin: {e}\n")
         print(json.dumps({}))
         return
         
     transcript_path = payload.get("transcriptPath", "")
     if transcript_path and Path(transcript_path).is_file():
-        try:
-            with open(transcript_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-            if lines:
                 last_step = lines[-1]
                 if "TOOL_RESPONSE" in last_step and ("failed with exit code" in last_step.lower() or "error:" in last_step.lower() or "exception:" in last_step.lower() or "exit status" in last_step.lower()):
                     print(json.dumps({
