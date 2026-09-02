@@ -49,7 +49,7 @@ def main():
                 res = subprocess.run(["python3", str(guard_script), "--check"], capture_output=True, text=True, timeout=15)
                 if res.returncode != 0:
                     print(json.dumps({
-                        "decision": "reject",
+                        "decision": "deny",
                         "reason": "GIT HYGIENE BLOCKED: Detected scratch/temporary files staged or pending in workspace. Delete scratch scripts or run 'python3 scripts/git_hygiene_guard.py --clean' before committing."
                     }))
                     return

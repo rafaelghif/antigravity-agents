@@ -40,7 +40,7 @@ class EpistemicBlackboard:
                 [sys.executable, str(BLACKBOARD_SCRIPT), "send", sender, recipient, payload],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=15
             )
         except Exception as e:
             sys.stderr.write(f"[Blackboard Error] {e}\n")
@@ -215,7 +215,8 @@ class HermesEngine:
         res = subprocess.run(
             [sys.executable, str(VERIFY_SCRIPT), "--execute", "--terse"],
             capture_output=True,
-            text=True
+            text=True,
+            timeout=180
         )
         if res.returncode == 0:
             return True, res.stdout

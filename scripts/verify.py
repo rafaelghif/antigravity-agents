@@ -108,9 +108,9 @@ def main() -> int:
         if args.execute and status == "available":
             if not args.terse:
                 print(f"\n=> Executing {stack} {name}...")
-                result = subprocess.run(shlex.split(run), cwd=ROOT)
+                result = subprocess.run(shlex.split(run), cwd=ROOT, timeout=300)
             else:
-                result = subprocess.run(shlex.split(run), cwd=ROOT, capture_output=True, text=True)
+                result = subprocess.run(shlex.split(run), cwd=ROOT, capture_output=True, text=True, timeout=300)
             
             if result.returncode != 0:
                 print(f"=> ERROR: {stack} {name} failed with exit code {result.returncode}")

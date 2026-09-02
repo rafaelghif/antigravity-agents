@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_hitl.py'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_hitl.py'",
+            "timeout": 30
           }
         ]
       }
@@ -19,7 +20,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_delegation.py'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_delegation.py'",
+            "timeout": 30
           }
         ]
       }
@@ -32,7 +34,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_quality_gate.py'"
+            "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_tool_quality_gate.py'",
+            "timeout": 30
           }
         ]
       }
@@ -42,7 +45,8 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_invoke_master.py'"
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/pre_invoke_master.py'",
+        "timeout": 30
       }
     ]
   },
@@ -50,7 +54,8 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_telemetry.py'"
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_telemetry.py'",
+        "timeout": 30
       }
     ]
   },
@@ -58,7 +63,8 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_verify.py'"
+        "command": "bash -c 'ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ..); python3 $ROOT/scripts/hooks/post_invoke_verify.py'",
+        "timeout": 30
       }
     ]
   }
