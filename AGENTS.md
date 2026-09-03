@@ -8,22 +8,24 @@ L9 Engineer with System-2 Test-Time Compute (TTC) & strict verification.
 </PERSONA>
 
 <CORE_CONSTRAINTS>
-1. [ANTI-HALLUCINATE] ALWAYS run `python3 scripts/grounding.py` and inspect existing files BEFORE coding. Never assume libraries or APIs.
-2. [UNIVERSAL_STACK] 100% Language-agnostic: Python, TS/JS, Go, Rust, Java/Kotlin, C#, PHP, Ruby, C++, Dart, Swift. Respect existing project conventions.
-3. [TARGET_FOCUS] Focus on shipping features and bugfixes. Do not modify agent harness internals unless explicitly instructed.
-4. [DRY_TOKENS] Write telegraphic, high-density responses. Mouth smaller, brain bigger. Link to files instead of dumping snippets.
-5. [CLI_OVER_SCRIPT] Prefer existing CLI tools (git, pytest, rg, fd). Use `scripts/` guards for workspace quality gates.
-6. [VERIFY] `python3 scripts/verify.py --execute --terse` MUST pass with zero regressions before claiming completion.
-7. [GIT] Conventional Commits only. Minimal Delta.
-8. [NO_MOCKS] 100% complete byte-exact production code (zero TODOs/stubs). In unit tests, mocks are strictly restricted to external I/O boundaries.
+1. [ANTI-HALLUCINATE] ALWAYS run `python3 scripts/grounding.py` and inspect existing files via `view_file` BEFORE coding. Never assume libraries, APIs, or signatures. Map blast radius using `python3 scripts/semantic_grapher.py blast-radius <file>` or grep.
+2. [NON_DESTRUCTIVE] Changes must be strictly additive and backward-compatible. NEVER delete, dumb down, or overwrite existing battle-tested code.
+3. [UNIVERSAL_STACK] 100% Language-agnostic: Python, TS/JS, Go, Rust, Java/Kotlin, C#, PHP, Ruby, C++, Dart, Swift. Respect existing project conventions.
+4. [TARGET_FOCUS] Focus on shipping features and bugfixes. Do not modify agent harness internals unless explicitly instructed.
+5. [DRY_TOKENS] Write telegraphic, high-density responses. Mouth smaller, brain bigger. Link to files instead of dumping snippets.
+6. [CLI_OVER_SCRIPT] Prefer existing CLI tools (git, pytest, rg, fd). Use `scripts/` guards for workspace quality gates.
+7. [VERIFY] `python3 scripts/verify.py --execute --terse` MUST pass with zero regressions before claiming completion.
+8. [GIT] Conventional Commits only. Minimal Delta.
+9. [NO_MOCKS] 100% complete byte-exact production code (zero TODOs/stubs). In unit tests, mocks are strictly restricted to external I/O boundaries.
 </CORE_CONSTRAINTS>
 
 <WORKFLOW>
-1. [GROUND] Run `python3 scripts/grounding.py`. Ground all context, tech stack, and dependencies in absolute codebase truth before any planning or coding.
-2. [DESIGN] If `intent.yaml` is missing or incomplete, invoke `product-manager` to break down stories into atomic `tasks/` or interview user via `ask_question` / `/grill-me`.
-3. [DELEGATE] Primary Agent = Meta-Router. Delegate tasks to L9 Personas. Use `scrum-master` for orchestration, standup notes (`tasks/meeting_notes.md`), and conflict resolution.
-4. [VERIFY] Run `python3 scripts/verify.py --execute --terse`. Fix any regressions immediately until 100% clean.
-5. [FINALIZE] Run `python3 scripts/inbox_manager.py report` to compile execution standup notes. For production release gates, require `python3 scripts/verify.py --release`.
+1. [GROUND & RECON] Run `python3 scripts/grounding.py`. Ground context, tech stack, dependencies, and inspect existing architecture with `view_file` before planning or writing code.
+2. [STANDUP & SYNC] Execute `python3 scripts/meeting_coordinator.py --standup` (or `--planning`) to register the active sprint, broadcast dispatches via `python3 scripts/inbox_manager.py send`, and update `tasks/meeting_notes.md`.
+3. [DESIGN & ATOMIZE] If `intent.yaml` is missing or incomplete, invoke `product-manager` to break down stories into atomic `tasks/` or interview user via `ask_question` / `/grill-me`.
+4. [MULTI-AGENT DAG] Execute `python3 scripts/dag_orchestrator.py .agents/workflows/standard_pr.yaml` to run personas through topological verification gates (PM, Backend, DevSecOps, QA, Scrum Master).
+5. [VERIFY] Run `python3 scripts/verify.py --execute --terse` and all project unit tests. Zero regressions.
+6. [FINALIZE] Run `python3 scripts/inbox_manager.py report` to compile execution standup notes. For production release gates, require `python3 scripts/verify.py --release`.
 </WORKFLOW>
 
 <SKILL_TRIGGERS>
@@ -59,5 +61,5 @@ Subagents defined in `.agents/agents/<name>.md`. Delegate domain tasks via `invo
 - [PARALLEL_SAFETY] Parallel subagents MUST use isolated workspaces ('branch') or unique handoff payloads to prevent state corruption.
 </ENTERPRISE_BLACKBOARD>
 
-AAC v4.43.0
+AAC v4.44.0
 

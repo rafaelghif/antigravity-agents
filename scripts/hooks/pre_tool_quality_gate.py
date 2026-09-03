@@ -48,6 +48,22 @@ def main() -> None:
             }))
             return
 
+    # 3. Anti-Regression Guard: Prevent blind overwriting of existing non-empty files
+    if tool_name == "write_to_file" and args.get("Overwrite") is True:
+        target_path = Path(target_file)
+        if target_path.is_file() and target_path.stat().st_size > 200:
+            new_code = str(args.get("CodeContent", ""))
+            try:
+                old_code = target_path.read_text(encoding="utf-8", errors="replace")
+                if len(new_code.splitlines()) < (len(old_code.splitlines()) * 0.3):
+                    print(json.dumps({
+                        "decision": "ask",
+                        "reason": f"ANTI-REGRESSION GUARD: Target '{target_path.name}' has {len(old_code.splitlines())} lines, but new content only has {len(new_code.splitlines())} lines. Blind overwriting risks destroying battle-tested code. Use replace_file_content for surgical edits."
+                    }))
+                    return
+            except Exception as exc:
+                sys.stderr.write(f"Pre-tool check notice: {exc}\n")
+
     print(json.dumps({"decision": "allow"}))
 
 if __name__ == "__main__":
