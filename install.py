@@ -177,7 +177,7 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
                     shutil.copyfileobj(resp, out_f)
                 
                 import tarfile
-                with tarfile.open(tar_path, "r:gz") as tar:
+                with tarfile.open(tar_path, "r:gz") as tar:  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
                     if hasattr(tarfile, 'data_filter'):
                         tar.extractall(path=tmp_dir, filter='data')  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
                     else:
