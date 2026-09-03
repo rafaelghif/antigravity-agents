@@ -10,13 +10,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 def update_project_memory() -> None:
-    memory_path = Path('.agents/brain/memory.md')
+    memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if not memory_path.exists():
         return
     
     stack = []
     # Node detection
-    pkg_path = Path('package.json')
+    pkg_path = ROOT / 'package.json'
     if pkg_path.exists():
         try:
             data = json.loads(pkg_path.read_text(encoding='utf-8'))
@@ -33,7 +33,7 @@ def update_project_memory() -> None:
             sys.stderr.write(f"Package.json analysis notice: {str(e)}\n")
 
     # Python detection
-    if Path('pyproject.toml').exists() or Path('requirements.txt').exists():
+    if (ROOT / 'pyproject.toml').exists() or (ROOT / 'requirements.txt').exists():
         stack.append('Python')
 
     if stack:
@@ -50,8 +50,15 @@ def update_project_memory() -> None:
             sys.stderr.write(f"Memory update notice: {str(e)}\n")
 
 def extract_telemetry(transcript_path: str) -> None:
-    audit_log = Path('.agents/brain/global_audit.log')
+    audit_log = ROOT / '.agents' / 'brain' / 'global_audit.log'
     audit_log.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Cap log size to 1MB to prevent runaway file size
+    if audit_log.exists() and audit_log.stat().st_size > 1_000_000:
+        try:
+            audit_log.write_text("", encoding='utf-8')
+        except OSError as e:
+            sys.stderr.write(f"Log truncation notice: {e}\n")
     
     try:
         content_buffer = []
@@ -100,7 +107,7 @@ if __name__ == '__main__':
                 extract_telemetry(transcript)
                 try:
                     from scripts.self_learner import process_transcript
-                    process_transcript(Path(transcript), Path('.agents/brain/rules.md'), Path('.agents/brain/memory.md'))
+                    process_transcript(Path(transcript), ROOT / '.agents' / 'brain' / 'rules.md', ROOT / '.agents' / 'brain' / 'memory.md')
                 except Exception as e:
                     sys.stderr.write(f"Self-learning hook notice: {e}\n")
                 try:
@@ -113,7 +120,7 @@ if __name__ == '__main__':
         # Auto-clean lingering scratch files
         try:
             from scripts.git_hygiene_guard import clean_scratch_files
-            clean_scratch_files(Path('.'))
+            clean_scratch_files(ROOT)
         except Exception as e:
             sys.stderr.write(f"Scratch auto-clean notice: {str(e)}\n")
     except Exception as e:

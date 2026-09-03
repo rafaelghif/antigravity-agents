@@ -37,7 +37,7 @@ def run_scrum_master(prompt):
     except Exception:
         cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
         
-    cmd_args = cmd_prefix + ["run", "--agent", "scrum-master", "--print", prompt]
+    cmd_args = cmd_prefix + ["--agent", "scrum-master", "--print", prompt]
     try:
         subprocess.run(cmd_args, check=True)
     except Exception as e:

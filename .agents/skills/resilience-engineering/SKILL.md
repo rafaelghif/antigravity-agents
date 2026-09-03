@@ -1,6 +1,7 @@
 ---
 name: resilience-engineering
-description: Enforce distributed systems resiliency, idempotency keys, transactional outbox pattern, circuit breakers, and deadlock-free concurrency.
+description: >-
+  Use this skill when designing or implementing distributed systems to enforce resiliency, idempotency keys, transactional outbox pattern, circuit breakers, and deadlock-free concurrency.
 ---
 
 # Resilience Engineering Protocol

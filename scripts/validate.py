@@ -16,7 +16,6 @@ VERSION_FILES = (
     "install.sh",
     "install.ps1",
     ".agents/TASK_TEMPLATE.md",
-    ".github/workflows/agent-gates.yml",
 )
 CORE_AGENT_PATHS = (
     "AGENTS.md",
@@ -63,7 +62,6 @@ OPTIONAL_PATHS = (
     ".agents/brain/ANCHOR.md",
     ".agents/brain/schema.md",
     ".agents/brain/env-required.json",
-    ".agents/common/utils.md",
 )
 
 
@@ -232,7 +230,6 @@ def validate_version() -> None:
         "install.sh": f' AAC_REF="v{version}"',
         "install.ps1": f'$AacRef = "v{version}"',
         ".agents/TASK_TEMPLATE.md": f"AAC v{version}",
-        ".github/workflows/agent-gates.yml": f"AAC v{version}",
     }
     for relative_path, marker in markers.items():
         content = (ROOT / relative_path).read_text(encoding="utf-8")

@@ -1,16 +1,16 @@
 tasks:
-  planner:
-    command: "python3 scripts/inbox_manager.py planner"
+  product-manager:
+    command: "python3 scripts/inbox_manager.py product-manager"
     depends_on: []
-  implementer:
-    command: "python3 scripts/inbox_manager.py implementer"
-    depends_on: ["planner"]
-  reviewer:
-    command: "python3 scripts/inbox_manager.py reviewer"
-    depends_on: ["implementer"]
-  qa-engineer:
-    command: "python3 scripts/fuzz_sandbox.py qa-engineer"
-    depends_on: ["implementer"]
-  security-reviewer:
-    command: "python3 scripts/inbox_manager.py security-reviewer"
-    depends_on: ["implementer"]
+  staff-backend:
+    command: "python3 scripts/inbox_manager.py staff-backend"
+    depends_on: ["product-manager"]
+  frontend-architect:
+    command: "python3 scripts/inbox_manager.py frontend-architect"
+    depends_on: ["staff-backend"]
+  qa-automation-lead:
+    command: "python3 scripts/inbox_manager.py qa-automation-lead"
+    depends_on: ["frontend-architect"]
+  devsecops-principal:
+    command: "python3 scripts/inbox_manager.py devsecops-principal"
+    depends_on: ["frontend-architect"]

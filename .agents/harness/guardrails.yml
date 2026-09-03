@@ -1,5 +1,0 @@
-# Post-O1 Governance as Code
-energy_per_token_limit: 0.5  # Reject inefficient reasoning loops
-require_machine_readable_intent: true
-allow_vibe_coding: false
-strict_ast_validation: true

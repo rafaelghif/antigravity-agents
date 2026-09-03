@@ -1,6 +1,7 @@
 ---
 name: zero-downtime-migrations
-description: Enforce zero-downtime database schema migrations, expand-contract patterns, concurrent indexing, and non-blocking table alterations.
+description: >-
+  Use this skill when creating or modifying database schemas, writing DDL migrations, creating indexes concurrently, or performing non-blocking table alterations.
 ---
 
 # Zero-Downtime Database Migration Protocol

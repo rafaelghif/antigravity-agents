@@ -1,6 +1,7 @@
 ---
 name: performance-optimization
-description: Audit and optimize web performance and runtime efficiency: Core Web Vitals (LCP, INP, CLS), lazy loading, tree-shaking, and bundle size reduction.
+description: >-
+  Use this skill when auditing or optimizing web performance and runtime efficiency, including Core Web Vitals (LCP, INP, CLS), lazy loading, tree-shaking, and bundle size reduction.
 ---
 
 # Performance Optimization Protocol

@@ -1,6 +1,7 @@
 ---
 name: api-contracts
-description: Enforce API contract governance, strict backward compatibility, schema validation, and standardized RFC 7807 error responses.
+description: >-
+  Use this skill when designing, reviewing, or modifying APIs to enforce contract governance, strict backward compatibility, schema validation, and standardized RFC 7807 error responses.
 ---
 
 # API Contract Governance Protocol

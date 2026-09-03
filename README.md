@@ -5,7 +5,7 @@
   <a href="https://github.com/rafaelghif/antigravity-agents/releases"><img src="https://img.shields.io/github/v/release/rafaelghif/antigravity-agents?color=0052CC&label=release&logo=github" alt="Release"/></a>
   [![Version](https://img.shields.io/badge/version-4.42.1-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.42.1)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
-  [![Gates](https://img.shields.io/badge/gates-6%2F6_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-6-hard-technical-gates)
+  [![Gates](https://img.shields.io/badge/gates-9%2F9_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-9-hard-technical-gates)
   [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)
   [![Sponsor](https://img.shields.io/badge/sponsor-support-ff69b4.svg?style=flat-square)](#-support--sponsorship)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
@@ -28,44 +28,51 @@ flowchart TD
     User([👤 User Prompt / Task]) --> PreHook[⚡ Pre-Invoke Hook<br/>Auto-Inject Memory & Relevant Skills]
     PreHook --> Router{CLAS Router}
     
-    subgraph MultiAgent [🤖 Multi-Agent Inbox & Consensus]
-        Router --> Planner[🎯 Planner Subagent<br/>Architectural Blueprint & DAG Tasks]
-        Planner --> Implementer[💻 Implementer Subagent<br/>Minimal Delta & Mandatory TDD]
-        Implementer <--> Reviewer[🔍 Peer Reviewer & Security Architect<br/>Diff Audit & Vulnerability Check]
+    subgraph MultiAgent [🤖 L9 Multi-Agent Orchestration & Personas]
+        Router --> ScrumMaster[🎯 Scrum Master<br/>Agile Orchestrator & Task DAG]
+        ScrumMaster --> ProductManager[📋 Product Manager<br/>PRD, Specs & Atomic Stories]
+        ScrumMaster --> DevTeam[💻 Engineering Personas<br/>staff-backend, frontend-architect, database-sre, devsecops]
+        DevTeam <--> QALead[🔍 QA Automation Lead<br/>Cognitive Gate 2 Review & Boundary Tests]
     end
 
-    Reviewer --> VerifyEngine{🛡️ AAC Verification Engine<br/>scripts/verify.py}
+    QALead --> VerifyEngine{🛡️ AAC Verification Engine<br/>scripts/verify.py}
 
-    subgraph Gates [🔒 6 Hard Technical Gates]
-        VerifyEngine --> G1[1. Anti-Sham Test Quality Guard]
-        VerifyEngine --> G2[2. Native DRY Clone Detector]
-        VerifyEngine --> G3[3. L9 AST Complexity Analyzer]
-        VerifyEngine --> G4[4. Git Hygiene & Scratch Purger]
-        VerifyEngine --> G5[5. Graphify Knowledge Graph]
-        VerifyEngine --> G6[6. UI Hygiene & WCAG 2.2 AA Guard]
+    subgraph Gates [🔒 9 Hard Technical Gates]
+        VerifyEngine --> G1[1. Intent Lifecycle Guard]
+        VerifyEngine --> G2[2. Project Test Suite]
+        VerifyEngine --> G3[3. Structural Validator]
+        VerifyEngine --> G4[4. L9 AST Complexity Analyzer]
+        VerifyEngine --> G5[5. Anti-Sham Test Guard]
+        VerifyEngine --> G6[6. Native DRY Clone Detector]
+        VerifyEngine --> G7[7. Git Hygiene & Scratch Purger]
+        VerifyEngine --> G8[8. UI Hygiene & WCAG 2.2 AA Guard]
+        VerifyEngine --> G9[9. Neurosymbolic Handoff Engine]
     end
 
-    G1 & G2 & G3 & G4 & G5 & G6 --> GateCheck{All Passed?}
+    G1 & G2 & G3 & G4 & G5 & G6 & G7 & G8 & G9 --> GateCheck{All Passed?}
     GateCheck -- ❌ Failed --> AutoFix[🔄 Auto-Remediation Loop<br/>Lateral Thinking & Root Cause Fix]
-    AutoFix --> Implementer
+    AutoFix --> DevTeam
     GateCheck -- ✅ Passed --> GitCommit[📦 Clean Conventional Commit<br/>AITL Verified & Zero Scratch Files]
     GitCommit --> Done([🚀 Verified PR / Production Ready])
 ```
 
 ---
 
-## 🔒 The 6 Hard Technical Gates
+## 🔒 The 9 Hard Technical Gates
 
 Unlike generic prompt templates, AAC ships with **native, zero-dependency Python tools** that physically inspect and block substandard code before it enters Git:
 
 | Gate | Tool | What It Enforces |
 | :--- | :--- | :--- |
-| **1. Anti-Sham Test Guard** | [`scripts/test_quality_guard.py`](scripts/test_quality_guard.py) | **Blocks tautological/fake unit tests.** Inspects AST to reject tests that only assert `callable(fn)`, `hasattr(mod, fn)`, `is not None`, or `expect(fn).toBeDefined()`. Mandates testing real inputs, outputs, exceptions, and edge cases. |
-| **2. Native DRY Clone Detector** | [`scripts/dry_guard.py`](scripts/dry_guard.py) | **Blocks code duplication.** Uses normalized rolling-window SHA-256 hashing to find cross-file copy-paste blocks ($\ge 6$ lines) and demands extraction into shared hooks/helpers. |
-| **3. L9 AST Complexity Analyzer** | [`scripts/complexity_analyzer.py`](scripts/complexity_analyzer.py) | **Enforces $O(N)$ efficiency.** Forbids nested loops ($O(N^2)$), empty `except: pass` blocks, missing type annotations, and unhandled anti-patterns at the AST level. |
-| **4. Git Hygiene & Scratch Purger** | [`scripts/git_hygiene_guard.py`](scripts/git_hygiene_guard.py) | **Eliminates Git garbage.** Intercepts `git commit` to block temporary files (`scratch_*.py`, `tmp_*`, `debug_*`, `*.tmp`, `*.bak`). Sweeps and deletes lingering scratch scripts after each turn. |
-| **5. Graphify Knowledge Graph** | [`scripts/semantic_grapher.py`](scripts/semantic_grapher.py) | **Prevents broken refactors.** Computes transitive BFS dependency chains, blast-radius impacts, and exports GraphRAG JSON before touching core modules. |
-| **6. UI Hygiene & a11y Guard** | [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py) | **WCAG 2.2 AA & DTCG Tokens.** Enforces visible focus rings (bans bare `outline-none`), `alt` text on images, explicit `<button>` types, and eliminates hardcoded hex colors in favor of design tokens. Inspired by `plugin87/ux-ui-agent-skills`. |
+| **1. Intent Lifecycle Guard** | [`scripts/intent_guard.py`](scripts/intent_guard.py) | **Keeps requirements fresh.** Enforces `intent.yaml` lifecycle state (`IN_PROGRESS`/`DONE`) and guarantees all micro-tasks in `tasks/` match before release. |
+| **2. Project Test Suite** | Native `pytest` / `unittest` | **Exercises real behavior.** Automatically detects and executes repository test suites across multiple frameworks. |
+| **3. Structural Validator** | [`scripts/validate.py`](scripts/validate.py) | **Zero-drift configuration.** Validates JSON schema integrity, version consistency, and required path contracts. |
+| **4. L9 AST Complexity Analyzer** | [`scripts/complexity_analyzer.py`](scripts/complexity_analyzer.py) | **Enforces $O(N)$ efficiency.** Forbids nested loops ($O(N^2)$), empty `except: pass` blocks, missing type annotations, and unhandled anti-patterns at the AST level. |
+| **5. Anti-Sham Test Guard** | [`scripts/test_quality_guard.py`](scripts/test_quality_guard.py) | **Blocks tautological/fake unit tests.** Inspects AST to reject tests that only assert `callable(fn)`, `hasattr(mod, fn)`, `is not None`, or `expect(fn).toBeDefined()`. |
+| **6. Native DRY Clone Detector** | [`scripts/dry_guard.py`](scripts/dry_guard.py) | **Blocks code duplication.** Uses normalized rolling-window SHA-256 hashing to find cross-file copy-paste blocks ($\ge 6$ lines) and demands shared helpers. |
+| **7. Git Hygiene & Scratch Purger** | [`scripts/git_hygiene_guard.py`](scripts/git_hygiene_guard.py) | **Eliminates Git garbage.** Intercepts `git commit` to block temporary files (`scratch_*.py`, `tmp_*`, `debug_*`, `*.tmp`, `*.bak`). Sweeps lingering scratch scripts. |
+| **8. UI Hygiene & a11y Guard** | [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py) | **WCAG 2.2 AA & DTCG Tokens.** Enforces visible focus rings (bans bare `outline-none`), `alt` text on images, explicit `<button>` types, and design tokens. |
+| **9. Neurosymbolic Handoff Engine** | [`scripts/neurosymbolic_engine.py`](scripts/neurosymbolic_engine.py) | **Strict subagent contract.** Validates `handoff.json` payloads and enforces mandatory TDD (modifications without tests are rejected). |
 
 ---
 
@@ -101,21 +108,21 @@ Context window bloat is eliminated. AAC monitors conversational intent in real-t
 
 Install the AAC Control Plane into any new or existing workspace with a single command:
 
-### Linux / macOS / WSL
+### 🐍 Universal (Recommended: Linux, macOS, Windows)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+python3 install.py
 ```
+Or run directly via one-liner without cloning:
+- **Linux / macOS / WSL**:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py | python3
+  ```
+- **Windows (PowerShell / CMD)**:
+  ```powershell
+  irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py | python
+  ```
 
-### Windows (PowerShell)
-```powershell
-irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
-```
-
-### Cross-Platform (Python)
-If you prefer a Python-native installer that leverages GitHub APIs to perfectly resolve the latest version:
-```bash
-curl -fsSL -O https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py && python3 install.py
-```
+*(Bootstrap shims `curl .../install.sh | bash` and `irm .../install.ps1 | iex` are also available and delegate to Python).*
 
 > **Zero Destruction Guarantee**: The installer creates an automated timestamped backup in `.agents-backups/` and preserves your existing `.env`, source code, and configurations.
 
@@ -158,7 +165,7 @@ Simply type in the chat prompt:
 | **PageRank Centrality** | `python3 scripts/semantic_grapher.py --pagerank` | Computes PageRank centrality to identify core architectural hubs. |
 | **Export GraphRAG** | `python3 scripts/semantic_grapher.py --json` | Generates deterministic Knowledge Graph JSON for AST analysis. |
 | **Synthesize Skill** | `python3 scripts/self_learner.py --synthesize-skill <name>` | Synthesizes a new custom skill for the workspace on-the-fly. |
-| **Terse ACI Verify** | `python3 scripts/verify.py --execute --terse` | Runs all 6 verification gates quietly with a high-density 1-line summary. |
+| **Terse ACI Verify** | `python3 scripts/verify.py --execute --terse` | Runs all 9 verification gates quietly with a high-density 1-line summary. |
 | **Active Memory Sync** | `python3 scripts/memory_consolidator.py --show` | Displays current active working memory (`active_context.md`). |
 
 ---
@@ -167,7 +174,7 @@ Simply type in the chat prompt:
 
 ```text
 ├── .agents/
-│   ├── agents/          # Specialized subagent definitions (planner, implementer, reviewer, etc.)
+│   ├── agents/          # 7 L9 Expert Subagents (scrum-master, backend, frontend, db-sre, devsecops, qa, pm)
 │   ├── brain/           # Permanent cross-session memory (memory.md, active_context.md, rules.md, ANCHOR.md)
 │   ├── harness/         # Token governance & compute guardrails
 │   ├── skills/          # Domain-specific procedures (architecture, caveman, dry, security, design, etc.)

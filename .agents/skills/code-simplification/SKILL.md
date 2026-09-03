@@ -1,6 +1,7 @@
 ---
 name: code-simplification
-description: Simplify over-engineered code while preserving exact behavior: flatten unnecessary abstractions, apply early-return guard clauses, and eliminate indirection.
+description: >-
+  Use this skill to simplify over-engineered code while preserving exact behavior, flattening unnecessary abstractions, applying early-return guard clauses, and eliminating indirection.
 ---
 
 # Code Simplification Protocol

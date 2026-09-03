@@ -1,6 +1,7 @@
 ---
 name: caveman
-description: Cut token consumption by 60%+ using terse, high-density telegraphic responses ("Mouth smaller, not brain smaller") while keeping technical code and commands 100% byte-exact.
+description: >-
+  Use this skill to minimize token consumption by 60%+ using terse, high-density telegraphic responses ("Mouth smaller, not brain smaller") while keeping technical code and commands 100% byte-exact.
 ---
 
 # Caveman Token Compression Protocol

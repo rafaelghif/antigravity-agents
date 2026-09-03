@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
-DEFAULT_ACTIVE_PATH = Path(".agents/brain/active_context.md")
-DEFAULT_MEMORY_PATH = Path(".agents/brain/memory.md")
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ACTIVE_PATH = ROOT / ".agents/brain/active_context.md"
+DEFAULT_MEMORY_PATH = ROOT / ".agents/brain/memory.md"
 
 HEADER_MAP: dict[str, str] = {
     "current goal": "focus",

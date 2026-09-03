@@ -20,8 +20,8 @@ As an L9 Agent, if instructions/strategies repeatedly fail verification, you hav
 - **[HANDOFF_CONTRACTS]**: Subagents must deliver structured `handoff.json` (or `.md`) artifact acting as strict API contract between Worker and Manager. No unstructured chat reliance.
 - **[CIRCUIT_BREAKER]**: Strict limit: 3 revisions during manager-worker debates. If failed, KILL subagent. Prevent token burn. Fall back to Lateral Thinking.
 - **[SCRATCH_ISOLATION]**: ALL scratch files MUST be inside `.agents/scratch/`. `git_hygiene_guard.py` blocks others from Git.
-- **[OBLIGATORY_MEETING_PROTOCOL]**: ALWAYS respect physical RBAC Blindfold (`manager_blindfold.py`). Scrum Master cannot read code. Spawn workers, they MUST communicate via Disk-Backed Blackboard (`scripts/inbox_manager.py`). No simulating/hallucinating meetings. `state.json` must reflect real debate.
+- **[OBLIGATORY_MEETING_PROTOCOL]**: Scrum Master orchestrates meetings and delegates tasks. Workers communicate via Disk-Backed Blackboard (`scripts/inbox_manager.py`). No simulating/hallucinating meetings. `state.json` must reflect real debate.
 
-- **ZERO SANDBOX DIRECTIVE**: User demands ZERO SANDBOXING.
-  1. ALWAYS use `Workspace: 'inherit'` in `invoke_subagent`. NEVER `branch`.
+- **ZERO SANDBOX DIRECTIVE**: Real production environments demand fully empowered agents.
+  1. Use `Workspace: 'inherit'` for sequential work and `Workspace: 'branch'` for parallel work.
   2. ALWAYS `enable_write_tools: true`. Read-only implementation forbidden.

@@ -105,9 +105,19 @@ def view_recent():
     for msg in data["messages"][-5:]:
         print(f"[{msg['timestamp']}] {msg['sender']} -> {msg['recipient']}: {msg['content']}")
 
+def handle_workflow_step(role: str):
+    init_inbox()
+    print(f"[INBOX] Orchestrating workflow stage for role: {role}")
+    add_message(
+        sender="dag-orchestrator",
+        recipient=role,
+        content=f"Workflow step '{role}' activated and staged for execution."
+    )
+    print(f"✅ Workflow step for '{role}' registered in blackboard.")
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: inbox_manager.py [init|view|send <sender> <recipient> <message>]")
+        print("Usage: inbox_manager.py [init|view|send <sender> <recipient> <message>|<role>]")
         sys.exit(1)
         
     cmd = sys.argv[1]
@@ -117,6 +127,8 @@ if __name__ == "__main__":
         view_recent()
     elif cmd == "send" and len(sys.argv) >= 5:
         add_message(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif not cmd.startswith("-"):
+        handle_workflow_step(cmd)
     else:
         print("Invalid command.")
         sys.exit(1)

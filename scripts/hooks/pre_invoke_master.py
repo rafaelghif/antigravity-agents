@@ -50,6 +50,21 @@ SKILL_KEYWORDS = {
     "api-contracts": [
         "api contract", "breaking change", "backward compatibility", "rfc 7807",
         "problem details", "zod validation", "pydantic validation", "dto"
+    ],
+    "data-engineering": [
+        "etl", "elt", "pipeline", "data engineering", "batch processing", "cdc", "debezium", "kafka", "backfill", "partitioning"
+    ],
+    "devops": [
+        "docker", "dockerfile", "container", "kubernetes", "k8s", "ci/cd", "terraform", "iac", "helm", "deployment", "sre"
+    ],
+    "mcp-setup": [
+        "mcp", "model context protocol", "mcp server", "mcp setup", "mcp config"
+    ],
+    "observability": [
+        "logging", "metrics", "tracing", "opentelemetry", "otel", "telemetry", "monitor", "alerting", "grafana", "prometheus"
+    ],
+    "semantic-graphing": [
+        "semantic graph", "knowledge graph", "blast radius", "call graph", "dependency tree", "ast scan", "pagerank"
     ]
 }
 
@@ -72,11 +87,13 @@ def detect_skills_from_text(text: str) -> list[str]:
         matched.append("code-quality")
     return matched
 
+ROOT = Path(__file__).resolve().parents[2]
+
 def get_context(transcript_path: str | None = None) -> str:
     msgs = []
     
     # 0. Active Session Context & Working Memory (P0 bootstrap)
-    active_path = Path('.agents/brain/active_context.md')
+    active_path = ROOT / '.agents' / 'brain' / 'active_context.md'
     if active_path.exists():
         raw_active = active_path.read_text(encoding='utf-8').splitlines()
         active_lines = [l for l in raw_active if not l.startswith('> ') and not l.startswith('# ⚡') and l.strip()]
@@ -84,7 +101,7 @@ def get_context(transcript_path: str | None = None) -> str:
             msgs.append("=== ACTIVE SESSION WORKING CONTEXT ===\n" + "\n".join(active_lines))
 
     # 1. Cross-Session Project Memory (only populated lines to conserve tokens)
-    memory_path = Path('.agents/brain/memory.md')
+    memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if memory_path.exists():
         raw_lines = memory_path.read_text(encoding='utf-8').splitlines()
         populated = [l for l in raw_lines if not l.endswith('Auto-detected by agent') and l.strip()]
@@ -92,14 +109,14 @@ def get_context(transcript_path: str | None = None) -> str:
             msgs.append("=== CROSS-SESSION MEMORY ===\n" + "\n".join(populated))
             
     # 2. Long-Term DAG Anchor (only if active)
-    anchor_path = Path('.agents/brain/ANCHOR.md')
+    anchor_path = ROOT / '.agents' / 'brain' / 'ANCHOR.md'
     if anchor_path.exists():
         text = anchor_path.read_text(encoding='utf-8').strip()
         if text and text != "(No context yet)":
             msgs.append(f"=== DAG ANCHOR ===\n{text}")
             
     # 3. Self-Learned Rules (only active bullet rules, omit header to save tokens)
-    rules_path = Path('.agents/brain/rules.md')
+    rules_path = ROOT / '.agents' / 'brain' / 'rules.md'
     if rules_path.exists():
         raw_rules = rules_path.read_text(encoding='utf-8').splitlines()
         active_rules = [l for l in raw_rules if l.startswith('- ')]
