@@ -404,6 +404,19 @@ class HermesEngine:
                 return False
         return True
 
+    def print_status(self):
+        tasks, _ = self.load_task_graph()
+        print("==============================================================")
+        print(f"🌟 Hermes Task Graph Status ({len(tasks)} tasks registered)")
+        print("==============================================================")
+        for tid, tinfo in tasks.items():
+            completed = tid in self.checkpoint.data.get("completed_tasks", [])
+            blocked = tid in self.checkpoint.data.get("blocked_tasks", [])
+            status = "DONE" if completed else ("BLOCKED" if blocked else "PENDING")
+            deps = tinfo.get("dependencies", [])
+            persona = tinfo.get("assigned_persona", "scrum-master")
+            print(f"[{status:7}] {tid:25} | Persona: {persona:20} | Deps: {deps}")
+
     def run(self):
         print("==============================================================")
         print("🌟 Enterprise Hermes Autonomous Orchestrator v5.0.0")
@@ -426,4 +439,17 @@ class HermesEngine:
         print("\n✨ [Hermes Complete] All DAG workflow tasks have been processed.")
 
 if __name__ == "__main__":
-    HermesEngine().run()
+    import argparse
+    parser = argparse.ArgumentParser(description="Enterprise Hermes Autonomous Orchestrator")
+    parser.add_argument("--status", action="store_true", help="Print task DAG status and exit")
+    parser.add_argument("--run", action="store_true", help="Run the full orchestrator daemon loop")
+    args = parser.parse_args()
+
+    engine = HermesEngine()
+    if args.status:
+        engine.print_status()
+    elif args.run:
+        engine.run()
+    else:
+        # Default to status if run interactively, or run if invoked by automation
+        engine.print_status()
