@@ -26,27 +26,27 @@ class TestNeurosymbolicEngine(unittest.TestCase):
         }
 
     def test_valid_handoff_passes(self):
-        with tempfile.NamedTemporaryFile('w', suffix='.json') as tf:
-            json.dump(self.valid_payload, tf)
-            tf.flush()
-            self.assertTrue(validate_handoff(Path(tf.name)))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(self.valid_payload), encoding="utf-8")
+            self.assertTrue(validate_handoff(tf_path))
 
     def test_missing_required_key_fails(self):
         payload = dict(self.valid_payload)
         del payload['worker_role']
-        with tempfile.NamedTemporaryFile('w', suffix='.json') as tf:
-            json.dump(payload, tf)
-            tf.flush()
-            self.assertFalse(validate_handoff(Path(tf.name)))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
 
     def test_missing_file_fails(self):
         self.assertFalse(validate_handoff(Path('/non/existent/path/handoff.json')))
 
     def test_invalid_json_fails(self):
-        with tempfile.NamedTemporaryFile('w', suffix='.json') as tf:
-            tf.write('{invalid_json: true')
-            tf.flush()
-            self.assertFalse(validate_handoff(Path(tf.name)))
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text('{invalid_json: true', encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
 
 if __name__ == '__main__':
     unittest.main()
