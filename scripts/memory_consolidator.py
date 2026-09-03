@@ -141,14 +141,18 @@ def update_active_state(
 
 
 def parse_latest_user_intent(lines: list[str]) -> str | None:
-    """Extracts the latest meaningful user input from transcript lines."""
+    """Extracts the latest meaningful user input from transcript lines, stripping XML metadata."""
     for line in reversed(lines):
         try:
             data = json.loads(line)
             if "USER_INPUT" in str(data.get("type", "")):
                 content = str(data.get("content", "")).strip()
                 if len(content) > 5 and not content.startswith("/"):
-                    return content
+                    clean = re.sub(r'<USER_REQUEST>\s*', '', content)
+                    clean = re.sub(r'\s*</USER_REQUEST>.*', '', clean, flags=re.DOTALL)
+                    clean = re.sub(r'<[^>]+>', '', clean).strip()
+                    if clean and len(clean) > 5:
+                        return clean
         except Exception:
             continue
     return None

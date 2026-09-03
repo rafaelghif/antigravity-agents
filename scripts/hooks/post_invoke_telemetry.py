@@ -106,11 +106,6 @@ if __name__ == '__main__':
             if transcript and Path(transcript).exists():
                 extract_telemetry(transcript)
                 try:
-                    from scripts.self_learner import process_transcript
-                    process_transcript(Path(transcript), ROOT / '.agents' / 'brain' / 'rules.md', ROOT / '.agents' / 'brain' / 'memory.md')
-                except Exception as e:
-                    sys.stderr.write(f"Self-learning hook notice: {e}\n")
-                try:
                     from scripts.memory_consolidator import sync_transcript_to_memory
                     sync_transcript_to_memory(Path(transcript))
                 except Exception as e:
