@@ -1,38 +1,55 @@
 <div align="center">
   <h1>🚀 Antigravity Agent Core (AAC)</h1>
-  <p><strong>The Enterprise-Grade Agentic Engineering Framework for Google Antigravity</strong></p>
+  <p><strong>The Enterprise-Grade Multi-Agent Engineering Framework for Google Antigravity</strong></p>
 
   <a href="https://github.com/rafaelghif/antigravity-agents/releases"><img src="https://img.shields.io/github/v/release/rafaelghif/antigravity-agents?color=0052CC&label=release&logo=github" alt="Release"/></a>
   [![Version](https://img.shields.io/badge/version-4.43.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.43.0)
-  [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
-  [![Gates](https://img.shields.io/badge/gates-9%2F9_AST_%26_Test_Passed-brightgreen.svg?style=flat-square)](#-the-9-hard-technical-gates)
-  [![MCP](https://img.shields.io/badge/MCP-Ready-orange.svg?style=flat-square)](https://modelcontextprotocol.io/)
-  [![Sponsor](https://img.shields.io/badge/sponsor-support-ff69b4.svg?style=flat-square)](#-support--sponsorship)
+  [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI_%26_IDE-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
+  [![Personas](https://img.shields.io/badge/personas-8_L9_Subagents-0052CC.svg?style=flat-square)](#-the-8-l9-expert-personas)
+  [![Skills](https://img.shields.io/badge/skills-11_Consolidated-success.svg?style=flat-square)](#-the-11-core-enterprise-skills)
+  [![Gates](https://img.shields.io/badge/gates-9%2F9_AST_%26_Release_Passed-brightgreen.svg?style=flat-square)](#-the-9-hard-technical-gates)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+  [![Sponsor](https://img.shields.io/badge/sponsor-support-ff69b4.svg?style=flat-square)](#-support--sponsorship)
 </div>
 
 ---
 
-**Antigravity Agent Core (AAC)** elevates Google Antigravity AI coding assistants into an autonomous, senior-level software engineering unit. While standard AI models produce superficial "vibe coding" — shallow implementations, duplicate code, fake tests, and uncleaned scratch scripts — AAC enforces **System-2 Test-Time Compute (TTC)**, **Deterministic Flow Engineering**, and **Strict Static AST Verification Gates**.
+**Antigravity Agent Core (AAC)** elevates Google Antigravity AI coding assistants into an autonomous, senior-level software engineering organization. Standard AI models default to superficial "vibe coding" — hallucinating non-existent libraries, duplicating logic, generating hollow placeholder tests, and leaving behind cluttered scratch files. 
 
-AAC turns your AI into an engineer that thinks before acting, reuses existing code, tests behavioral outcomes, adheres to WCAG 2.2 AA accessibility, and leaves zero garbage in your repository.
+AAC enforces **System-2 Test-Time Compute (TTC)**, **Epistemic Codebase Grounding**, **Deterministic DAG Orchestration**, and **9 Strict Static AST Verification Gates**.
+
+AAC turns your AI into an engineering unit that verifies ground truth before planning, reuses existing code, enforces behavioral TDD, respects accessibility standards, and leaves zero garbage in your repository.
 
 ---
 
-## 🏗️ Architecture & Execution Flow
+## 🌟 Key Architectural Pillars
 
-AAC operates as a deterministic State Machine, coordinating specialized subagents through an asynchronous inbox and strict verification pipeline:
+- 🧠 **Epistemic Grounding (Anti-Hallucination)**: Inspects real manifests, active package managers, and layout truth via [`scripts/grounding.py`](scripts/grounding.py) before writing any code. Never guesses APIs or installs redundant packages.
+- 🤖 **8 L9 Expert Personas**: Specialization beats generalization. Discrete subagents for Scrum Master, Product Manager, Researcher, Frontend, Backend, DB SRE, DevSecOps, and QA Lead.
+- 📚 **11 Consolidated Core Skills**: Replaced fragmented micro-skills with 11 battle-tested, authoritative engineering playbooks.
+- ⚡ **Multi-Agent DAG Pipeline**: Deterministic topological execution pipeline ([`.agents/workflows/standard_pr.yaml`](.agents/workflows/standard_pr.yaml)) executing real technical validation gates across personas.
+- 🔒 **9 Hard Technical Gates**: Static AST checks, Big-O loop guards, anti-sham test inspectors, rolling SHA-256 DRY clone detectors, and neurosymbolic contracts.
+- 🌐 **Full Browsing & Epistemic Research**: Unrestricted search and web reading capabilities enabling autonomous fact-checking against official docs.
+- 🤝 **Multi-Mode Team Meetings**: On-demand agile orchestration ([`scripts/meeting_coordinator.py`](scripts/meeting_coordinator.py)) for standups, architectural planning, reviews, and conflict resolution.
+- 🌍 **100% Language & Platform Agnostic**: Zero-dependency pure Python engine supporting Python, TypeScript/JavaScript, Go, Rust, Java/Kotlin, C#, PHP, Ruby, C++, Dart, Swift on Linux, macOS, and Windows.
+
+---
+
+## 🏗️ Architecture & Multi-Agent Execution Flow
+
+AAC operates as an epistemic state machine, coordinating specialized subagents through a disk-backed Blackboard and strict verification pipeline:
 
 ```mermaid
 flowchart TD
-    User([👤 User Prompt / Task]) --> PreHook[⚡ Pre-Invoke Hook<br/>Auto-Inject Memory & Relevant Skills]
-    PreHook --> Router{CLAS Router}
-    
-    subgraph MultiAgent [🤖 L9 Multi-Agent Orchestration & Personas]
-        Router --> ScrumMaster[🎯 Scrum Master<br/>Agile Orchestrator & Task DAG]
-        ScrumMaster --> ProductManager[📋 Product Manager<br/>PRD, Specs & Atomic Stories]
-        ScrumMaster --> DevTeam[💻 Engineering Personas<br/>staff-backend, frontend-architect, database-sre, devsecops]
-        DevTeam <--> QALead[🔍 QA Automation Lead<br/>Cognitive Gate 2 Review & Boundary Tests]
+    User([👤 User Task / Feature Request]) --> Ground[🔍 Epistemic Grounding Engine<br/>scripts/grounding.py]
+    Ground --> PreHook[⚡ Pre-Invoke Hook<br/>Context & Skill Auto-Injection]
+    PreHook --> ScrumMaster[🎯 Scrum Master<br/>DAG Orchestrator & Standup Notes]
+
+    subgraph Swarm [🤖 L9 Multi-Agent Swarm]
+        ScrumMaster --> PM[📋 Product Manager<br/>PRDs & Intent Lifecycle Guard]
+        ScrumMaster --> Research[🔎 Staff Researcher<br/>Official Docs Lookup & API Contracts]
+        ScrumMaster --> DevTeam[💻 Implementation Specialists<br/>staff-backend • frontend-architect • database-sre • devsecops]
+        DevTeam <--> QALead[🧪 QA Automation Lead<br/>Anti-Sham Tests & Boundary Verification]
     end
 
     QALead --> VerifyEngine{🛡️ AAC Verification Engine<br/>scripts/verify.py}
@@ -49,24 +66,62 @@ flowchart TD
         VerifyEngine --> G9[9. Neurosymbolic Handoff Engine]
     end
 
-    G1 & G2 & G3 & G4 & G5 & G6 & G7 & G8 & G9 --> GateCheck{All Passed?}
-    GateCheck -- ❌ Failed --> AutoFix[🔄 Auto-Remediation Loop<br/>Lateral Thinking & Root Cause Fix]
+    G1 & G2 & G3 & G4 & G5 & G6 & G7 & G8 & G9 --> GateCheck{All 9 Passed?}
+    GateCheck -- ❌ Regressions Detected --> AutoFix[🔄 Lateral Auto-Remediation<br/>Targeted Root Cause Fix]
     AutoFix --> DevTeam
-    GateCheck -- ✅ Passed --> GitCommit[📦 Clean Conventional Commit<br/>AITL Verified & Zero Scratch Files]
-    GitCommit --> Done([🚀 Verified PR / Production Ready])
+    GateCheck -- ✅ All Clear --> Blackboard[📋 Blackboard Standup Report<br/>tasks/meeting_notes.md]
+    Blackboard --> GitCommit[📦 Byte-Exact Git Commit<br/>Conventional Commits & Clean Workspace]
+    GitCommit --> Production([🚀 Production Ready])
 ```
+
+---
+
+## 🤖 The 8 L9 Expert Personas
+
+Subagents are defined in `.agents/agents/<name>.md`. The Meta-Router delegates domain tasks to specialized personas:
+
+| Persona | Role | Key Responsibilities |
+| :--- | :--- | :--- |
+| **`scrum-master`** | Principal Agile Orchestrator | Task DAG management, blocker resolution, cross-agent coordination, standup reporting ([`tasks/meeting_notes.md`](tasks/meeting_notes.md)). |
+| **`product-manager`** | Principal Product Manager | User stories, acceptance criteria, PRD generation, and intent verification via [`scripts/intent_guard.py`](scripts/intent_guard.py). |
+| **`researcher`** | Staff Technical Researcher | Epistemic web research, official documentation lookup, external API contract verification, and anti-hallucination fact checks. |
+| **`frontend-architect`** | Staff Frontend Architect | UI components, DTCG design tokens, WCAG 2.2 AA accessibility, responsive UX, and Core Web Vitals (LCP, INP, CLS). |
+| **`staff-backend`** | Staff Backend Engineer | Distributed architecture, RFC 7807 problem details, idempotency keys, transactional outbox resilience, and API contracts. |
+| **`database-sre`** | Principal Database SRE | Zero-downtime expand-contract schema migrations, concurrent non-blocking indexing, and query optimization. |
+| **`devsecops-principal`** | Principal DevSecOps | Zero-Trust security, Docker containerization, CI/CD pipelines, secret scanning, and MCP toolchain configuration. |
+| **`qa-automation-lead`** | Staff QA Automation Lead | Behavioral end-to-end testing, property-based testing, boundary validation, and anti-sham test enforcement. |
+
+---
+
+## 📚 The 11 Core Enterprise Skills
+
+All engineering capabilities are consolidated into 11 authoritative, cross-referenced playbooks in `.agents/skills/`:
+
+| Skill | Playbook File | Focus & Operational Domain |
+| :--- | :--- | :--- |
+| **`architecture`** | [`.agents/skills/architecture/SKILL.md`](.agents/skills/architecture/SKILL.md) | Distributed system design, RFC 7807 contracts, idempotency, transactional outbox, and circuit breakers. |
+| **`code-quality`** | [`.agents/skills/code-quality/SKILL.md`](.agents/skills/code-quality/SKILL.md) | SOLID principles, clean architecture, early returns, DRY deduplication, and anti-overengineering. |
+| **`data-engineering`** | [`.agents/skills/data-engineering/SKILL.md`](.agents/skills/data-engineering/SKILL.md) | Zero-downtime expand-contract migrations, concurrent DDL, ETL/ELT pipelines, and streaming CDC. |
+| **`deep-research`** | [`.agents/skills/deep-research/SKILL.md`](.agents/skills/deep-research/SKILL.md) | Epistemic 3-step research loop: targeted search, deep extraction, and local truth synthesis. |
+| **`design`** | [`.agents/skills/design/SKILL.md`](.agents/skills/design/SKILL.md) | UI components, 3-tier DTCG design tokens, WCAG 2.2 AA accessibility, and Core Web Vitals optimization. |
+| **`devops`** | [`.agents/skills/devops/SKILL.md`](.agents/skills/devops/SKILL.md) | Docker, Kubernetes, CI/CD pipelines, Infrastructure as Code (Terraform), and MCP toolchains. |
+| **`observability`** | [`.agents/skills/observability/SKILL.md`](.agents/skills/observability/SKILL.md) | Structured logging, Prometheus metrics, and OpenTelemetry distributed tracing. |
+| **`security`** | [`.agents/skills/security/SKILL.md`](.agents/skills/security/SKILL.md) | Zero-Trust architecture, secret management, PBAC/RBAC, and input sanitization. |
+| **`semantic-graphing`** | [`.agents/skills/semantic-graphing/SKILL.md`](.agents/skills/semantic-graphing/SKILL.md) | AST knowledge graph, transitive caller resolution, PageRank centrality, and blast radius analysis. |
+| **`verification`** | [`.agents/skills/verification/SKILL.md`](.agents/skills/verification/SKILL.md) | TDD, boundary validation, property-based tests, and anti-sham test hygiene. |
+| **`caveman`** | [`.agents/skills/caveman/SKILL.md`](.agents/skills/caveman/SKILL.md) | High-density token compression ("Mouth smaller, not brain smaller") cutting token usage by 60%+. |
 
 ---
 
 ## 🔒 The 9 Hard Technical Gates
 
-Unlike generic prompt templates, AAC ships with **native, zero-dependency Python tools** that physically inspect and block substandard code before it enters Git:
+Unlike superficial prompt instructions, AAC runs **native, zero-dependency Python gates** that physically inspect and validate code before every commit:
 
-| Gate | Tool | What It Enforces |
+| Gate | Guard Script | What It Strictly Enforces |
 | :--- | :--- | :--- |
 | **1. Intent Lifecycle Guard** | [`scripts/intent_guard.py`](scripts/intent_guard.py) | **Keeps requirements fresh.** Enforces `intent.yaml` lifecycle state (`IN_PROGRESS`/`DONE`) and guarantees all micro-tasks in `tasks/` match before release. |
-| **2. Project Test Suite** | Native `pytest` / `unittest` | **Exercises real behavior.** Automatically detects and executes repository test suites across multiple frameworks. |
-| **3. Structural Validator** | [`scripts/validate.py`](scripts/validate.py) | **Zero-drift configuration.** Validates JSON schema integrity, version consistency, and required path contracts. |
+| **2. Project Test Suite** | Native test runner | **Exercises real behavior.** Automatically detects and executes repository test suites across multiple frameworks with zero regressions. |
+| **3. Structural Validator** | [`scripts/validate.py`](scripts/validate.py) | **Zero-drift configuration.** Validates JSON schema integrity, version consistency across manifests, and required path contracts. |
 | **4. L9 AST Complexity Analyzer** | [`scripts/complexity_analyzer.py`](scripts/complexity_analyzer.py) | **Enforces $O(N)$ efficiency.** Forbids nested loops ($O(N^2)$), empty `except: pass` blocks, missing type annotations, and unhandled anti-patterns at the AST level. |
 | **5. Anti-Sham Test Guard** | [`scripts/test_quality_guard.py`](scripts/test_quality_guard.py) | **Blocks tautological/fake unit tests.** Inspects AST to reject tests that only assert `callable(fn)`, `hasattr(mod, fn)`, `is not None`, or `expect(fn).toBeDefined()`. |
 | **6. Native DRY Clone Detector** | [`scripts/dry_guard.py`](scripts/dry_guard.py) | **Blocks code duplication.** Uses normalized rolling-window SHA-256 hashing to find cross-file copy-paste blocks ($\ge 6$ lines) and demands shared helpers. |
@@ -78,41 +133,37 @@ Unlike generic prompt templates, AAC ships with **native, zero-dependency Python
 
 ## ⚡ Real-World Capabilities
 
-### 🎨 Senior UX/UI Design Architecture (DTCG + WCAG 2.2 AA)
-Inspired by best practices from `ux-ui-agent-skills`, AAC equips agents with:
-- **3-Tier Design Tokens**: Strict separation of Primitive scales, Semantic intent tokens, and Component-scoped tokens. Zero hardcoded hex colors.
-- **Accessible Interactions**: Enforces visible focus rings (`focus-visible:ring-2`), minimum $44\text{px}$ touch targets, screen-reader semantics, and `prefers-reduced-motion` fallbacks.
-- **Complete 6-State Spectrum**: Every interactive component must define Default, Hover, Active, Focus-Visible, Disabled, and Async (Loading Skeleton / Empty State) states.
-- **Anti-AI-Slop Visual Taste**: Banning generic purple gradients, lack of visual hierarchy, and illegible gray-on-dark contrast.
+### 🔍 Epistemic Grounding (Zero Hallucination)
+Before planning or touching code, AAC runs [`scripts/grounding.py`](scripts/grounding.py). It detects:
+- **Active Ecosystems**: Node/TS, Python, Go, Rust, Java, C#, PHP, Ruby, etc.
+- **True Dependencies**: Reads `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, `pom.xml`, etc.
+- **Actual Directory Layout**: Identifies source roots, test suites, and configuration baselines.
+- **Manifest Synthesis**: Writes an absolute ground truth snapshot to `.agents/brain/active_context.md`.
 
-### 🔌 Model Context Protocol (MCP) Integration
-AAC provides first-class configuration templates for MCP servers (`.agents/mcp_config.json.example`). Your agent can securely interact with:
-- **Relational Databases**: PostgreSQL, MySQL via native MCP protocol.
-- **Browser & E2E Testing**: Headless automation via Puppeteer / Playwright.
-- **External Tools**: GitHub Copilot MCP, custom CLI tools, and secure APIs without writing boilerplate connectors.
+### 🤝 Multi-Mode Agile Meeting Coordinator
+Run targeted agile ceremonies on demand via [`scripts/meeting_coordinator.py`](scripts/meeting_coordinator.py):
+- `--standup`: Compiles current blockers, ongoing PR tasks, and completed deliverables.
+- `--planning "<topic>"`: Initiates architectural alignment and requirements breakdown.
+- `--review`: Performs peer review and verification audit on recent handoffs.
+- `--sync`: Reconciles agent state, resolves deadlocks, and updates [`tasks/meeting_notes.md`](tasks/meeting_notes.md).
 
-### 💻 Native Git CLI & AITL Consensus
-- **Conventional Commits**: Automates clean, standardized commit history (`feat(...)`, `fix(...)`, `refactor(...)`).
-- **AITL (Agent-In-The-Loop) Production Gate**: Destructive actions (`git push`, `npm publish`) require verified consensus from peer review subagents recorded in `.agents/brain/AITL_CONSENSUS.yaml`.
-
-### 🧠 Zero-Amnesia Cross-Session Memory
-- **Persistent Context**: Automatically discovers stack dependencies (Next.js, Prisma, Tailwind, Python, Go, etc.) and stores preferences in [`.agents/brain/memory.md`](.agents/brain/memory.md).
-- **Self-Learned Rules**: Adapts to project constraints and logs critical lessons into [`.agents/brain/rules.md`](.agents/brain/rules.md) so the agent never repeats past mistakes.
-
-### 🎯 Dynamic Skill Auto-Injection
-Context window bloat is eliminated. AAC monitors conversational intent in real-time and injects only the relevant skill instructions (`design`, `architecture`, `security`, `dry`, `code-quality`, `verification`) on-the-fly via [`scripts/hooks/pre_invoke_master.py`](scripts/hooks/pre_invoke_master.py).
+### 🔌 Model Context Protocol (MCP) & Full Browsing
+AAC provides complete, unrestricted permissions in `.agents/antigravity-settings.example.json` for:
+- **Live Browsing & Epistemic Research**: `search_web`, `read_url_content`, and `read_browser_page`.
+- **Subagent Swarms**: `invoke_subagent`, `send_message`, `manage_subagents`, `define_subagent`.
+- **Database & External MCPs**: PostgreSQL, MySQL, Puppeteer, GitHub Copilot MCP, and custom tools.
 
 ---
 
 ## 🚀 Quick Start & Installation
 
-Install the AAC Control Plane into any new or existing workspace with a single command:
+Install AAC into any target project in seconds using the universal installer:
 
-### 🐍 Universal (Recommended: Linux, macOS, Windows)
+### 🐍 Universal (Linux, macOS, Windows)
 ```bash
 python3 install.py
 ```
-Or run directly via one-liner without cloning:
+Or run directly without cloning:
 - **Linux / macOS / WSL**:
   ```bash
   curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py | python3
@@ -122,17 +173,17 @@ Or run directly via one-liner without cloning:
   irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py | python
   ```
 
-*(Bootstrap shims `curl .../install.sh | bash` and `irm .../install.ps1 | iex` are also available and delegate to Python).*
+*(Legacy bootstrap shims `curl .../install.sh | bash` and `irm .../install.ps1 | iex` automatically delegate to Python).*
 
-> **Zero Destruction Guarantee**: The installer creates an automated timestamped backup in `.agents-backups/` and preserves your existing `.env`, source code, and configurations.
+> **Zero Destruction Guarantee**: The installer creates an automated timestamped backup in `.agents-backups/`, preserves your existing `.env`, source code, memory files, and will **never** pollute your project with external CI/CD workflows.
 
 ---
 
 ## 🔄 Effortless 1-Command Upgrader
 
-Keep your agent framework permanently up-to-date with upstream capabilities:
+Keep your agent framework permanently synchronized with upstream releases:
 
-### Option A: From Terminal
+### From Terminal
 ```bash
 # Check if a new version is available
 python3 scripts/upgrade.py --check
@@ -141,12 +192,12 @@ python3 scripts/upgrade.py --check
 python3 scripts/upgrade.py
 ```
 
-### Option B: Directly in Antigravity Chat
+### In Antigravity Chat
 Simply type in the chat prompt:
 ```text
 /upgrade
 ```
-*or ask the agent: "upgrade agent"* — The agent will autonomously check GitHub Releases, apply the latest update, run validation, and report the new features.
+*or ask the agent: "upgrade agent"* — AAC will autonomously query GitHub Releases, apply updates, run verification, and summarize new capabilities.
 
 ---
 
@@ -154,19 +205,20 @@ Simply type in the chat prompt:
 
 | Task | Command | Description |
 | :--- | :--- | :--- |
-| **Verify Everything** | `python3 scripts/verify.py --execute` | Runs the full verification pipeline (Structural, AST, Anti-Sham, DRY, Git Hygiene, UI a11y). |
-| **Check Upgrades** | `python3 scripts/upgrade.py --check` | Queries GitHub Releases to see if a newer AAC version exists. |
-| **Perform Upgrade** | `python3 scripts/upgrade.py` | One-click upgrade that preserves user memory and rules. |
-| **Audit Duplication** | `python3 scripts/dry_guard.py --check` | Detects cross-file code clones with line numbers and recommendations. |
-| **Audit UI & a11y** | `python3 scripts/ui_hygiene_guard.py --check` | Scans JSX/TSX/Vue/Svelte for WCAG 2.2 AA accessibility and design token violations. |
-| **Autonomous Learner** | `python3 scripts/self_learner.py "<rule>"` | Persists technical mandates and preferences into procedural memory without duplicates. |
-| **Purge Scratch Files** | `python3 scripts/git_hygiene_guard.py --clean` | Sweeps and removes untracked scratch/temporary scripts. |
-| **Blast Radius Analysis** | `python3 scripts/semantic_grapher.py --blast-radius <symbol>` | Analyzes all upstream callers impacted by modifying a class/function. |
-| **PageRank Centrality** | `python3 scripts/semantic_grapher.py --pagerank` | Computes PageRank centrality to identify core architectural hubs. |
-| **Export GraphRAG** | `python3 scripts/semantic_grapher.py --json` | Generates deterministic Knowledge Graph JSON for AST analysis. |
-| **Synthesize Skill** | `python3 scripts/self_learner.py --synthesize-skill <name>` | Synthesizes a new custom skill for the workspace on-the-fly. |
-| **Terse ACI Verify** | `python3 scripts/verify.py --execute --terse` | Runs all 9 verification gates quietly with a high-density 1-line summary. |
-| **Active Memory Sync** | `python3 scripts/memory_consolidator.py --show` | Displays current active working memory (`active_context.md`). |
+| **Ground Workspace** | `python3 scripts/grounding.py` | Discovers true project stack, dependencies, and layout. |
+| **Verify Everything** | `python3 scripts/verify.py --execute` | Runs the full 9-gate verification pipeline. |
+| **Terse ACI Verify** | `python3 scripts/verify.py --execute --terse` | High-density 1-line verification summary for CI/agents. |
+| **Production Release Gate** | `python3 scripts/verify.py --release` | Strict pre-release gate enforcing tests and git hygiene. |
+| **Run DAG Pipeline** | `python3 scripts/dag_orchestrator.py <dag.yaml>` | Executes multi-agent topological task workflow. |
+| **Team Standup Meeting** | `python3 scripts/meeting_coordinator.py --standup` | Compiles team progress into `tasks/meeting_notes.md`. |
+| **Architecture Planning** | `python3 scripts/meeting_coordinator.py --planning "<topic>"` | Conducts architectural planning ceremony. |
+| **Audit Duplication** | `python3 scripts/dry_guard.py --check` | Detects cross-file code clones with line numbers. |
+| **Audit UI & a11y** | `python3 scripts/ui_hygiene_guard.py --check` | Scans UI code for WCAG 2.2 AA and token compliance. |
+| **Blast Radius Analysis** | `python3 scripts/semantic_grapher.py --blast-radius <symbol>` | Analyzes all upstream callers impacted by code changes. |
+| **PageRank Centrality** | `python3 scripts/semantic_grapher.py --pagerank` | Computes PageRank to identify core architectural hubs. |
+| **Purge Scratch Files** | `python3 scripts/git_hygiene_guard.py --clean` | Sweeps and removes untracked temporary scratch files. |
+| **Check Upgrades** | `python3 scripts/upgrade.py --check` | Queries GitHub Releases for newer AAC versions. |
+| **Perform Upgrade** | `python3 scripts/upgrade.py` | 1-click update preserving all brain memory and rules. |
 
 ---
 
@@ -174,17 +226,25 @@ Simply type in the chat prompt:
 
 ```text
 ├── .agents/
-│   ├── agents/          # 7 L9 Expert Subagents (scrum-master, backend, frontend, db-sre, devsecops, qa, pm)
+│   ├── agents/          # 8 L9 Expert Subagents (scrum-master, pm, researcher, backend, frontend, db-sre, devsecops, qa)
 │   ├── brain/           # Permanent cross-session memory (memory.md, active_context.md, rules.md, ANCHOR.md)
 │   ├── harness/         # Token governance & compute guardrails
-│   ├── skills/          # Domain-specific procedures (architecture, caveman, dry, security, design, etc.)
+│   ├── skills/          # 11 Consolidated Playbooks (architecture, code-quality, deep-research, design, devops, etc.)
+│   ├── workflows/       # Multi-agent topological DAG workflows (standard_pr.yaml)
 │   └── config.json      # Core framework configuration & version profile
 ├── scripts/
-│   ├── hooks/           # Antigravity lifecycle hooks (pre-invoke context, post-invoke telemetry)
+│   ├── hooks/           # Lifecycle hooks (pre-invoke context, post-invoke telemetry, pre-tool gate)
 │   ├── complexity_analyzer.py # Enterprise AST & Big-O analyzer
+│   ├── dag_orchestrator.py    # Multi-agent topological DAG execution engine
 │   ├── dry_guard.py           # Native sliding-window clone detector
 │   ├── git_hygiene_guard.py   # Scratch file cleaner & commit blocker
+│   ├── grounding.py           # Epistemic codebase stack & layout discovery engine
+│   ├── hermes_manager.py      # Subagent dispatch & prompt compiler
+│   ├── inbox_manager.py       # Disk-backed Blackboard communication & standup reporter
+│   ├── intent_guard.py        # Lifecycle state & PR acceptance criteria validator
+│   ├── meeting_coordinator.py # Multi-mode agile meeting ceremony coordinator
 │   ├── memory_consolidator.py # Hierarchical cross-session memory synchronizer
+│   ├── neurosymbolic_engine.py# Subagent handoff contract & TDD validator
 │   ├── self_learner.py        # Autonomous continuous learner across turns
 │   ├── semantic_grapher.py    # GraphRAG knowledge graph & blast radius engine
 │   ├── test_quality_guard.py  # Anti-sham behavioral test quality guard
@@ -192,8 +252,13 @@ Simply type in the chat prompt:
 │   ├── upgrade.py             # 1-command effortless upgrader
 │   ├── validate.py            # Structural framework validator
 │   └── verify.py              # Central verification runner
+├── tasks/               # Atomic tasks, handover notes & meeting_notes.md
+├── tests/               # Cross-platform unit tests (Linux, macOS, Windows)
 ├── AGENTS.md            # The master policy & World-Class Gates constitution
-└── install.sh / install.ps1   # Universal auto-resolving installers
+├── GEMINI.md            # Workspace bootstrap & anti-hallucination directive
+├── install.py           # Cross-platform pure stdlib installer & engine
+├── install.sh           # Linux / macOS shell bootstrap shim
+└── install.ps1          # Windows PowerShell bootstrap shim
 ```
 
 ---
@@ -204,8 +269,8 @@ AAC synthesizes battle-tested architectural patterns and token-optimization para
 
 | Project & Author | Core Inspiration in AAC | Impact |
 | :--- | :--- | :--- |
-| **[JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)** by Julius Brussee | **Caveman Token Compression Protocol** | Enforces *"Mouth smaller, not brain smaller"*. Strips conversational fluff and pleasantries to cut output tokens by 60%+ while keeping code and commands 100% byte-exact. |
-| **[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)** by Dietrich Gebert | **Senior Ladder & Lazy Developer Philosophy** | "Best code is the code you never wrote." Enforces the 7-step decision ladder (YAGNI -> Codebase Reuse -> Stdlib -> Native Platform -> Existing Deps -> 1-Line -> Minimal Diff) preventing over-engineering. |
+| **[JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)** by Julius Brussee | **Caveman Token Compression Protocol** | Enforces *"Mouth smaller, not brain smaller"*. Strips conversational fluff to cut output tokens by 60%+ while keeping code and commands 100% byte-exact. |
+| **[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)** by Dietrich Gebert | **Senior Ladder & Lazy Developer Philosophy** | "Best code is the code you never wrote." Enforces the 7-step decision ladder (YAGNI -> Codebase Reuse -> Stdlib -> Native Platform -> Existing Deps -> 1-Line -> Minimal Diff). |
 | **[Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify)** by Graphify Labs | **AST Knowledge Graph & Blast-Radius Engine** | Direct architectural inspiration for [`scripts/semantic_grapher.py`](scripts/semantic_grapher.py), enabling transitive caller resolution, blast radius calculation, and GraphRAG dependency extraction. |
 | **[plugin87/ux-ui-agent-skills](https://github.com/plugin87/ux-ui-agent-skills)** by plugin87 | **Senior UX/UI Design & WCAG 2.2 AA Hygiene** | Foundation for `.agents/skills/design/SKILL.md` and [`scripts/ui_hygiene_guard.py`](scripts/ui_hygiene_guard.py), providing 3-tier DTCG tokens, 6-state interactive spectrums, and visible focus ring linters. |
 | **[addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)** by Addy Osmani | **Production Webperf & Code-Simplification** | Foundation for Web Vitals in `.agents/skills/design/` and anti-overengineering in `.agents/skills/code-quality/`, bringing Core Web Vitals (LCP, INP, CLS), metric honesty, and bundle tree-shaking to AAC. |
