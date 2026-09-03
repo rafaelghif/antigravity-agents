@@ -7,6 +7,9 @@ except ImportError:
     sys.exit(1)
 import json
 import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
 
 def compile_intent(file_path):
     print(f"[INTENT COMPILER] Validating strict intent specification from {file_path}...")
@@ -38,8 +41,9 @@ def compile_intent(file_path):
 
         print(f"[INTENT COMPILER] Validation passed. Intent '{intent['name']}' (status: {status}) conforms to AAC standards.")
         
-        os.makedirs(".agents/harness", exist_ok=True)
-        with open(".agents/harness/compiled_intent.json", "w") as out:
+        out_dir = ROOT / ".agents" / "harness"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        with open(out_dir / "compiled_intent.json", "w", encoding="utf-8") as out:
             json.dump(intent, out, indent=2)
             
     except yaml.YAMLError as e:

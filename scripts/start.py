@@ -36,7 +36,7 @@ def start_loop():
     loop_cmd = [sys.executable, str(ROOT / "scripts" / "autonomous_loop.py")]
     
     try:
-        result = subprocess.run(loop_cmd)
+        result = subprocess.run(loop_cmd, cwd=str(ROOT))
         sys.exit(result.returncode)
     except KeyboardInterrupt:
         print("\n[L9 SYSTEM] Loop interrupted. Stopping meeting coordinator...")
