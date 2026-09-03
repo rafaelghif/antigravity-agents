@@ -1,69 +1,92 @@
 #!/usr/bin/env python3
+"""
+L9 Automated Code & PR Reviewer:
+Evaluates code diffs, runs static AST verification gates,
+and generates structured Markdown review verdicts locally or submits to GitHub PRs via gh CLI.
+"""
 import os
-import subprocess
-import json
 import sys
+import json
+import tempfile
+import argparse
+import subprocess
+from pathlib import Path
 
-def run_cmd(cmd_args):
-    result = subprocess.run(cmd_args, capture_output=True, text=True, timeout=300)
+ROOT = Path(__file__).resolve().parents[1]
+
+def run_cmd(cmd_args: list[str]) -> tuple[int, str, str]:
+    result = subprocess.run(cmd_args, capture_output=True, text=True, timeout=300, cwd=ROOT)
     return result.returncode, result.stdout, result.stderr
 
-def format_github_review(retcode, stdout, stderr):
+def format_review(retcode: int, stdout: str, stderr: str, diff_summary: str = "") -> tuple[str, str]:
     if retcode == 0:
-        print("✅ Code is L9 Perfect. Approving PR.")
-        body = "### 🤖 Hermes Manager Auto-Review\n\n**Verdict:** `APPROVED` ✅\n\nCode has passed all static AST analysis, complexity checks, and semantic evaluation gates. Ready for production."
+        body = (
+            "### 🤖 L9 Autonomous Quality Review\n\n"
+            "**Verdict:** `APPROVED` ✅\n\n"
+            "Code has passed all 9 technical gates (AST Complexity, Anti-Sham Testing, DRY Clone Detection, Git Hygiene, WCAG 2.2 AA).\n"
+        )
+        if diff_summary:
+            body += f"\n```text\n{diff_summary}\n```\n"
         event = "APPROVE"
     else:
-        print("❌ Flaws detected. Requesting changes.")
-        body = f"### 🤖 Hermes Manager Auto-Review\n\n**Verdict:** `REQUEST CHANGES` ❌\n\nCode violates L9 Enterprise standards. Please fix the following issues:\n\n```text\n{stdout}\n{stderr}\n```"
+        err_text = (stderr.strip() or stdout.strip())
+        body = (
+            "### 🤖 L9 Autonomous Quality Review\n\n"
+            "**Verdict:** `REQUEST CHANGES` ❌\n\n"
+            "Code violates L9 Enterprise Quality Standards. The following issues were detected:\n\n"
+            f"```text\n{err_text}\n```\n"
+        )
         event = "REQUEST_CHANGES"
     return body, event
 
-def submit_review(pr_num, body, event):
-    payload = {
-        "body": body,
-        "event": event
-    }
-    
-    with open("review_payload.json", "w") as f:
-        json.dump(payload, f)
-    
-    repo = os.environ.get("GITHUB_REPOSITORY", "rafaelghif/antigravity-agents")
-    api_cmd = ["gh", "api", "-X", "POST", f"repos/{repo}/pulls/{pr_num}/reviews", "--input", "review_payload.json"]
-    
-    res, out, err = run_cmd(api_cmd)
-    if res != 0:
-        print(f"Failed to submit review: {err}")
-    else:
-        print("Review submitted successfully.")
-    return res, repo
+def submit_github_review(pr_num: str, repo: str, body: str, event: str) -> bool:
+    payload = {"body": body, "event": event}
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tf:
+        json.dump(payload, tf)
+        tmp_name = tf.name
 
-def auto_merge_pr(pr_num, repo):
-    print("Attempting to auto-merge the PR and clean up branch...")
-    merge_cmd = ["gh", "pr", "merge", pr_num, "--repo", repo, "--squash", "--delete-branch", "--admin"]
-    m_res, m_out, m_err = run_cmd(merge_cmd)
-    if m_res == 0:
-        print("PR successfully merged and branch deleted!")
-    else:
-        print(f"Failed to merge PR: {m_err}")
+    try:
+        api_cmd = ["gh", "api", "-X", "POST", f"repos/{repo}/pulls/{pr_num}/reviews", "--input", tmp_name]
+        res, out, err = run_cmd(api_cmd)
+        if res != 0:
+            sys.stderr.write(f"Failed to submit GitHub review: {err.strip()}\n")
+            return False
+        print(f"✅ Review successfully submitted to PR #{pr_num} ({event}).")
+        return True
+    finally:
+        if os.path.exists(tmp_name):
+            os.remove(tmp_name)
 
-def main():
-    pr_num = os.environ.get("PR_NUMBER")
-    if not pr_num:
-        print("No PR_NUMBER provided. Skipping auto-review.")
-        sys.exit(0)
-    
-    print(f"🤖 Hermes Reviewer triggered for PR #{pr_num}")
-    
-    # Run our strict L9 verification gates
+def get_git_diff_summary() -> str:
+    res, out, _ = run_cmd(["git", "diff", "--stat"])
+    return out.strip() if res == 0 else ""
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="L9 Automated Code & PR Reviewer")
+    parser.add_argument("--pr", type=str, default=os.environ.get("PR_NUMBER", ""), help="GitHub PR number to review")
+    parser.add_argument("--repo", type=str, default=os.environ.get("GITHUB_REPOSITORY", ""), help="Target GitHub repository (e.g. owner/repo)")
+    parser.add_argument("--submit", action="store_true", help="Submit review via gh CLI (requires gh authentication)")
+    parser.add_argument("--terse", action="store_true", help="Output terse review summary")
+    args = parser.parse_args()
+
+    print("=" * 60)
+    print("🔍 Running L9 Autonomous Verification Gates...")
+    print("=" * 60)
     retcode, stdout, stderr = run_cmd([sys.executable, "scripts/verify.py", "--execute", "--terse"])
     
-    body, event = format_github_review(retcode, stdout, stderr)
-    res, repo = submit_review(pr_num, body, event)
-        
-    # Auto-merge if approved
-    if event == "APPROVE" and res == 0:
-        auto_merge_pr(pr_num, repo)
-            
+    diff_summary = get_git_diff_summary()
+    body, event = format_review(retcode, stdout, stderr, diff_summary)
+
+    print("\n" + body)
+
+    if args.pr:
+        if args.submit:
+            repo = args.repo or "rafaelghif/antigravity-agents"
+            submit_github_review(args.pr, repo, body, event)
+        else:
+            print("💡 Tip: Add --submit to automatically post this review to GitHub via gh CLI.")
+
+    sys.exit(retcode)
+
 if __name__ == "__main__":
     main()

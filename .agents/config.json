@@ -1,5 +1,5 @@
 {
-  "core_version": "4.42.1",
+  "core_version": "4.43.0",
   "timeouts": {
     "abort_minutes": 5,
     "remediation_timebox_minutes": 30
@@ -67,10 +67,13 @@
     ],
     "multi_agent": {
       "subagent_roles": [
-        "planner",
-        "implementer",
-        "reviewer",
-        "security-reviewer"
+        "scrum-master",
+        "product-manager",
+        "frontend-architect",
+        "staff-backend",
+        "database-sre",
+        "devsecops-principal",
+        "qa-automation-lead"
       ],
       "auto_delegate_research_threshold_files": 3,
       "mandatory_swarm_triggers": {

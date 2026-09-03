@@ -25,5 +25,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Executing Hermes Manager Review..."
-          pytest tests/agent_eval.py
+          pytest tests/test_agent_eval.py
           PYTHONIOENCODING=utf-8 python scripts/auto_reviewer.py

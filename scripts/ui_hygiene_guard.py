@@ -11,7 +11,11 @@ import re
 import argparse
 from pathlib import Path
 
-UI_EXTENSIONS = {".tsx", ".jsx", ".vue", ".svelte", ".html"}
+UI_EXTENSIONS = {
+    ".tsx", ".jsx", ".vue", ".svelte", ".html",
+    ".razor", ".blade.php", ".jinja", ".jinja2", ".j2",
+    ".erb", ".ejs", ".hbs"
+}
 
 def is_ui_file(filepath: Path) -> bool:
     return filepath.suffix.lower() in UI_EXTENSIONS

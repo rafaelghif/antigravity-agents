@@ -1,10 +1,12 @@
 ---
 name: design
-description: Use this skill when the user asks to modify or create UI components, apply CSS styling, manage frontend architectures, or debug visual issues.
+description: Use this skill for UI/UX components, CSS/Tailwind styling, WCAG 2.2 AA accessibility, design tokens, and Core Web Vitals performance optimization.
 ---
 
+# UI Design, Accessibility & Web Performance Protocol
+
 <CRITICAL_DIRECTIVE>
-Enforce Senior UX/UI Design Architecture (inspired by DTCG tokens, WCAG 2.2 AA, and anti-slop doctrine). Reject generic AI visual tropes, enforce strict design tokens, and guarantee accessible, production-grade components.
+Enforce Senior UX/UI Design Architecture, WCAG 2.2 AA accessibility, and Core Web Vitals runtime performance. Reject generic AI visual tropes, enforce 3-tier DTCG design tokens, and eliminate layout shifts.
 </CRITICAL_DIRECTIVE>
 
 <ENTERPRISE_STANDARDS>
@@ -12,39 +14,26 @@ Enforce Senior UX/UI Design Architecture (inspired by DTCG tokens, WCAG 2.2 AA, 
    - **Tier 1 (Primitive)**: Raw palette and scales (`colors.slate.900`, `spacing.4`).
    - **Tier 2 (Semantic)**: Intent-driven tokens (`color.bg.surface`, `color.text.muted`, `action.primary.hover`).
    - **Tier 3 (Component)**: Scoped component tokens (`button.primary.bg`, `input.border.focus`).
-   - **Zero Hardcoded Values**: Strictly ban raw color hex codes (e.g. `#3b82f6`) or arbitrary pixel values in component files. Map everything to design tokens or Tailwind semantic utility classes.
-
+   - Strictly ban raw color hex codes or arbitrary pixel margins in component files. Map to tokens or Tailwind theme classes.
 2. **WCAG 2.2 Level AA Accessibility (a11y)**:
-   - **Contrast Ratio**: $\ge 4.5:1$ for normal text, $\ge 3:1$ for large text ($\ge 18\text{pt}$ / $14\text{pt}$ bold) and UI components.
-   - **Focus Visible**: NEVER use `outline-none` or `outline: none` without an explicit focus indicator (e.g. `focus-visible:ring-2 focus-visible:ring-offset-2`). Auto-checked by `scripts/ui_hygiene_guard.py`.
-   - **Minimum Touch Target**: Interactive elements must meet minimum $44 \times 44\text{ px}$ target size on mobile.
-   - **Semantic & ARIA Standards**: All `<img>` MUST have informative `alt` text. Interactive controls must declare `type="button"`, `aria-expanded`, `aria-controls`, and `role` appropriately. Decorative icons must have `aria-hidden="true"`.
-   - **Reduced Motion**: Respect user preferences; provide `motion-reduce:transition-none` or `@media (prefers-reduced-motion: reduce)` fallbacks.
-
-3. **Anti-AI-Slop Visual Taste Doctrine**:
-   - **Ban AI Tropes**: Forbid generic purple/indigo gradients everywhere, low-contrast gray text on dark backgrounds (`#6B7280` on `#111827`), and over-blurred backdrop filters.
-   - **Visual Hierarchy & Typography**: Enforce clear scale contrasts between Headings, Body, and Captions. Use intentional whitespace and consistent 8px grid spacing.
-   - **Micro-Interactions**: Smooth state transitions ($150\text{ms}$ - $250\text{ms}$ ease-out), tactile active states, and non-jarring hover feedback.
-
-4. **Complete 6-State Spectrum**:
-   Every interactive component MUST define all 6 lifecycle states:
-   1) **Default**, 2) **Hover**, 3) **Active/Pressed**, 4) **Focus-Visible**, 5) **Disabled** (`aria-disabled`), and 6) **Async States** (Skeleton/Shimmer loading, Empty state with actionable CTA, and Error recovery banner).
-
-5. **Nielsen's Heuristics & UX Writing**:
-   - Instant feedback on every user interaction (loading states, toast confirmation).
-   - Actionable error copy formula: `[What happened]` + `[Why it occurred]` + `[Action to resolve]`. Never output "Something went wrong".
+   - **Contrast**: $\ge 4.5:1$ for normal text, $\ge 3:1$ for large text and interactive boundaries.
+   - **Focus Visible**: NEVER use `outline-none` without an explicit focus ring (`focus-visible:ring-2`). Auto-checked by `ui_hygiene_guard.py`.
+   - **Touch Target**: Interactive elements must meet minimum $44 \times 44\text{ px}$ target size on touch viewports.
+   - **Semantics**: All `<img>` must have `alt` text; buttons require explicit `type="button"`; decorative icons use `aria-hidden="true"`.
+3. **Core Web Vitals & Web Performance**:
+   - **LCP ($\le 2.5\text{s}$)**: Prioritize hero images (`fetchpriority="high"`, `priority`). Self-host fonts with `font-display: swap`. Avoid client-side rendering waterfalls.
+   - **INP ($\le 200\text{ms}$)**: Break tasks $> 50\text{ms}$ using `scheduler.yield()` or microtask chunking. Debounce/throttle scroll and resize events.
+   - **CLS ($\le 0.1$)**: Always declare explicit `width` and `height` or CSS `aspect-ratio` on all `<img>`, `<video>`, and dynamic containers to prevent layout jumps.
+4. **Bundle Hygiene & Code-Splitting**:
+   - Ban barrel imports that pull entire libraries. Use path imports (`import debounce from 'lodash/debounce'`).
+   - Lazy load heavy modals and visualization charts via dynamic `import()` or `React.lazy()`.
+5. **Complete 6-State Interactive Spectrum**:
+   - Interactive components must define: 1) Default, 2) Hover, 3) Active/Pressed, 4) Focus-Visible, 5) Disabled (`aria-disabled`), and 6) Async States (Skeleton/Loading, Empty CTA, Error recovery).
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Design System & Token Discovery**: Inspect existing tokens and UI libraries (`grep_search` in `components/`, `ui/`, `styles/`, `tailwind.config.*`).
-2. **Component Reuse & Atomic Fit**: Reuse existing project primitives (`Button`, `Dialog`, `Input`, `Card`). Do NOT write duplicate one-off primitives.
-3. **Scaffold with Accessible Semantics**: Build using semantic HTML, explicit button types, and keyboard navigability.
-4. **Interactive State & Contrast Audit**: Verify focus rings, contrast ratios, and touch targets. Run `python3 scripts/ui_hygiene_guard.py --check`.
-5. **Diff Review**: Ensure zero hardcoded hex styles, zero outline-none regressions, and 100% token consistency.
+1. **Token & Component Discovery**: Inspect existing design tokens and reusable UI primitives.
+2. **Scaffold with Semantics**: Build using semantic HTML, explicit button types, and keyboard navigability.
+3. **Performance Audit**: Ensure explicit image dimensions, path imports, and lazy loading.
+4. **Verification**: Run `python3 scripts/ui_hygiene_guard.py --check` and `python3 scripts/verify.py --execute`.
 </PROCEDURAL_WORKFLOW>
-
-<L9_STANDARDS>
-- **Component Reusability**: Extract repetitive UI into atomic components.
-- **Design Tokens**: 3-tier hierarchy (Primitive -> Semantic -> Component). No hardcoded hex.
-- **Accessibility (a11y)**: WCAG 2.2 AA compliance, visible focus rings, and screen-reader semantics are non-negotiable.
-</L9_STANDARDS>

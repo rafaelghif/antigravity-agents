@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 
-DEFAULT_ACTIVE_PATH = Path(".agents/brain/active_context.md")
-DEFAULT_MEMORY_PATH = Path(".agents/brain/memory.md")
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ACTIVE_PATH = ROOT / ".agents/brain/active_context.md"
+DEFAULT_MEMORY_PATH = ROOT / ".agents/brain/memory.md"
 
 HEADER_MAP: dict[str, str] = {
     "current goal": "focus",
@@ -140,14 +141,18 @@ def update_active_state(
 
 
 def parse_latest_user_intent(lines: list[str]) -> str | None:
-    """Extracts the latest meaningful user input from transcript lines."""
+    """Extracts the latest meaningful user input from transcript lines, stripping XML metadata."""
     for line in reversed(lines):
         try:
             data = json.loads(line)
             if "USER_INPUT" in str(data.get("type", "")):
                 content = str(data.get("content", "")).strip()
                 if len(content) > 5 and not content.startswith("/"):
-                    return content
+                    clean = re.sub(r'<USER_REQUEST>\s*', '', content)
+                    clean = re.sub(r'\s*</USER_REQUEST>.*', '', clean, flags=re.DOTALL)
+                    clean = re.sub(r'<[^>]+>', '', clean).strip()
+                    if clean and len(clean) > 5:
+                        return clean
         except Exception:
             continue
     return None

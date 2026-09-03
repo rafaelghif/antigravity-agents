@@ -2,15 +2,11 @@
 .agents/mcp_config.json
 opencode.json
 
-# Ephemeral Agent State, Plans, Incidents, and Scratchpad
+# Ephemeral Agent State and Scratchpad
 .agents/scratch/*
 !.agents/scratch/.gitkeep
-.agents/plans/*
-!.agents/plans/.gitkeep
-!.agents/plans/*.md
-.agents/incidents/*
-!.agents/incidents/.gitkeep
 .agents/brain/audit.jsonl
+.agents/brain/global_audit.log
 .agents-backups/
 .agents/state/
 
@@ -41,4 +37,4 @@ test_temp*
 *.swp
 release_notes*
 .agents/inbox/
-.agents/plugins/aac-core/.agents
+.agents/harness/

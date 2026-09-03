@@ -19,6 +19,14 @@ This document manages all domain-specific `.agents/skills/<name>/SKILL.md` files
 
 ## Available Skills
 Always consult the specific folder inside `.agents/skills/` for execution details.
-- [Caveman Protocol](file://.agents/skills/caveman/SKILL.md) -> Token optimization & exact outputs.
-- [Verification](file://.agents/skills/verification/SKILL.md) -> Testing strategies.
-- [Architecture](file://.agents/skills/architecture/SKILL.md) -> System design rules.
+- [architecture](file://.agents/skills/architecture/SKILL.md) -> System design, domain boundaries, RFC 7807 contracts, outbox resilience & idempotency.
+- [caveman](file://.agents/skills/caveman/SKILL.md) -> Token optimization & exact telegraphic outputs.
+- [code-quality](file://.agents/skills/code-quality/SKILL.md) -> Enterprise maintainability, clean code, SOLID principles, early returns, DRY deduplication.
+- [data-engineering](file://.agents/skills/data-engineering/SKILL.md) -> Database schemas, zero-downtime expand-contract migrations, concurrent DDL, ETL/CDC.
+- [deep-research](file://.agents/skills/deep-research/SKILL.md) -> Epistemic web research, official documentation lookup, API contract verification.
+- [design](file://.agents/skills/design/SKILL.md) -> UI components, styling, WCAG 2.2 AA accessibility, DTCG tokens, Core Web Vitals.
+- [devops](file://.agents/skills/devops/SKILL.md) -> Docker, Kubernetes, CI/CD, Infrastructure as Code, Model Context Protocol (MCP).
+- [observability](file://.agents/skills/observability/SKILL.md) -> Logging, metrics, distributed tracing, audit trails.
+- [security](file://.agents/skills/security/SKILL.md) -> Authentication, RBAC/PBAC, secret scanning, least privilege.
+- [semantic-graphing](file://.agents/skills/semantic-graphing/SKILL.md) -> Codebase AST parsing, blast radius, and architecture mapping.
+- [verification](file://.agents/skills/verification/SKILL.md) -> Test-driven validation, anti-sham testing strategies.

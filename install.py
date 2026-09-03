@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-AAC Upgrade Engine: One-command effortless upgrading of Antigravity Agent Core.
-Auto-discovers the latest GitHub release, preserves memories/rules, updates files,
-and validates the upgraded workspace.
+AAC Installer & Upgrade Engine: Cross-Platform Universal Bootstrap for Antigravity Agent Core.
+Runs seamlessly on Linux, macOS, and Windows with Zero Platform Lock-in.
+Automatically resolves releases, preserves brain context and memory, and validates workspace.
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -15,10 +16,23 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 from pathlib import Path
 
 GITHUB_API_URL = "https://api.github.com/repos/rafaelghif/antigravity-agents/releases/latest"
 REMOTE_REPO = "https://github.com/rafaelghif/antigravity-agents.git"
+TARBALL_URL_TEMPLATE = "https://github.com/rafaelghif/antigravity-agents/archive/refs/tags/{tag}.tar.gz"
+
+BRAIN_PRESERVE_FILES = (
+    "rules.md",
+    "memory.md",
+    "ANCHOR.md",
+    "active_context.md",
+    "soul.md",
+    "schema.md",
+    "AITL_CONSENSUS.yaml",
+    "env-required.json",
+)
 
 
 def parse_semver(v_str: str) -> tuple[int, int, int]:
@@ -45,25 +59,23 @@ def get_current_version(root_dir: Path) -> str:
 
 
 def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
-    curl_bin = shutil.which("curl") or "curl"
+    # 1. Primary: Standard library urllib
     try:
-        res = subprocess.run(
-            [curl_bin, "-s", "-H", "User-Agent: AAC-Upgrader", GITHUB_API_URL],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            timeout=8,
+        req = urllib.request.Request(
+            GITHUB_API_URL,
+            headers={"User-Agent": "AAC-Installer", "Accept": "application/vnd.github.v3+json"}
         )
-        if res.returncode == 0 and res.stdout:
-            data = json.loads(res.stdout)
+        with urllib.request.urlopen(req, timeout=6) as resp:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+            data = json.loads(resp.read().decode("utf-8"))
             tag = data.get("tag_name", "")
             title = data.get("name", tag)
             body = data.get("body", "")
             if tag:
                 return (tag, title, body)
     except Exception as exc:
-        sys.stderr.write(f"GitHub API release notice: {exc}\n")
+        sys.stderr.write(f"GitHub API release notice (urllib): {exc}\n")
 
+    # 2. Fallback: Git ls-remote
     try:
         res = subprocess.run(
             ["git", "ls-remote", "--tags", "--refs", REMOTE_REPO],
@@ -82,7 +94,7 @@ def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
     except Exception as exc:
         sys.stderr.write(f"Git remote tags notice: {exc}\n")
 
-    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.30.0"
+    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.43.0"
     return (fallback_tag, fallback_tag, "Fallback version.")
 
 
@@ -99,61 +111,167 @@ def check_update_status(root_dir: Path) -> dict[str, object]:
     }
 
 
-def find_powershell_binary() -> str:
-    for candidate in ("pwsh", "powershell", "powershell.exe"):
-        found = shutil.which(candidate)
-        if found:
-            return found
-    return "powershell"
+def copy_managed_item(src: Path, dst: Path, backup_dir: Path) -> None:
+    """Safely backs up existing target item before copying managed source item."""
+    if dst.exists():
+        rel = dst.name
+        backup_dst = backup_dir / rel
+        if dst.is_dir():
+            shutil.copytree(dst, backup_dst, dirs_exist_ok=True)
+        else:
+            backup_dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(dst, backup_dst)
+
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if src.is_dir():
+        shutil.copytree(src, dst, dirs_exist_ok=True)
+    else:
+        shutil.copy2(src, dst)
+
+
+def install_aac(root_dir: Path, target_version: str) -> bool:
+    print(f"\n=> Installing Antigravity Agent Core ({target_version}) to: {root_dir}")
+    
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup_dir = root_dir / ".agents-backups" / timestamp
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 1. Preserve existing custom brain context
+    preserved_brain: dict[str, str] = {}
+    brain_dir = root_dir / ".agents" / "brain"
+    if brain_dir.is_dir():
+        for bf in BRAIN_PRESERVE_FILES:
+            target_bf = brain_dir / bf
+            if target_bf.is_file():
+                try:
+                    preserved_brain[bf] = target_bf.read_text(encoding="utf-8")
+                except Exception as e:
+                    sys.stderr.write(f"Notice reading {bf}: {e}\n")
+
+    # 2. Acquire release source in a temporary directory
+    with tempfile.TemporaryDirectory() as tmp_dir_str:
+        tmp_dir = Path(tmp_dir_str)
+        source_dir = tmp_dir / "source"
+        
+        cloned = False
+        # Try git clone first
+        if shutil.which("git"):
+            try:
+                res = subprocess.run(
+                    ["git", "clone", "--depth", "1", "--branch", target_version, REMOTE_REPO, str(source_dir)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=30,
+                )
+                cloned = res.returncode == 0
+            except Exception as e:
+                sys.stderr.write(f"Git clone notice: {e}\n")
+
+        # Fallback to downloading tarball via urllib
+        if not cloned or not source_dir.exists():
+            tarball_url = TARBALL_URL_TEMPLATE.format(tag=target_version)
+            tar_path = tmp_dir / "release.tar.gz"
+            try:
+                req = urllib.request.Request(tarball_url, headers={"User-Agent": "AAC-Installer"})
+                with urllib.request.urlopen(req, timeout=20) as resp, open(tar_path, "wb") as out_f:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+                    shutil.copyfileobj(resp, out_f)
+                
+                import tarfile
+                with tarfile.open(tar_path, "r:gz") as tar:  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                    if hasattr(tarfile, 'data_filter'):
+                        tar.extractall(path=tmp_dir, filter='data')  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                    else:
+                        tar.extractall(path=tmp_dir)  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                extracted_dirs = [d for d in tmp_dir.iterdir() if d.is_dir() and d != source_dir]
+                if extracted_dirs:
+                    source_dir = extracted_dirs[0]
+                    cloned = True
+            except Exception as e:
+                sys.stderr.write(f"Tarball download notice: {e}\n")
+
+        if not cloned or not source_dir.exists():
+            print("=> ERROR: Unable to acquire release sources from GitHub.")
+            return False
+
+        # 3. Validate source structure
+        validate_script = source_dir / "scripts" / "validate.py"
+        if validate_script.is_file():
+            val_res = subprocess.run([sys.executable, str(validate_script)], cwd=source_dir)
+            if val_res.returncode != 0:
+                print("=> ERROR: Source validation failed. Aborting installation.")
+                return False
+
+        # 4. Copy managed files to target workspace
+        (root_dir / ".agents" / "scratch").mkdir(parents=True, exist_ok=True)
+        (root_dir / "tasks").mkdir(parents=True, exist_ok=True)
+        (root_dir / "scripts").mkdir(parents=True, exist_ok=True)
+
+        copy_managed_item(source_dir / "AGENTS.md", root_dir / "AGENTS.md", backup_dir)
+        copy_managed_item(source_dir / "GEMINI.md", root_dir / "GEMINI.md", backup_dir)
+        copy_managed_item(source_dir / ".agents", root_dir / ".agents", backup_dir)
+        copy_managed_item(source_dir / "scripts", root_dir / "scripts", backup_dir)
+        
+        if (source_dir / ".githooks").is_dir():
+            copy_managed_item(source_dir / ".githooks", root_dir / ".githooks", backup_dir)
+
+        env_example_src = source_dir / ".env.example"
+        env_example_dst = root_dir / ".env.example"
+        if env_example_src.is_file() and not env_example_dst.exists():
+            shutil.copy2(env_example_src, env_example_dst)
+
+        # 5. Restore preserved brain files
+        for bf, content in preserved_brain.items():
+            bf_path = root_dir / ".agents" / "brain" / bf
+            bf_path.parent.mkdir(parents=True, exist_ok=True)
+            bf_path.write_text(content, encoding="utf-8")
+
+        # 6. Ensure .gitignore has scratch rule
+        gitignore_path = root_dir / ".gitignore"
+        try:
+            if gitignore_path.is_file():
+                gi_text = gitignore_path.read_text(encoding="utf-8")
+                if ".agents/scratch/" not in gi_text:
+                    gitignore_path.write_text(gi_text.rstrip() + "\n\n# Antigravity Scratch Directory\n.agents/scratch/\n", encoding="utf-8")
+            else:
+                gitignore_path.write_text("# Antigravity Scratch Directory\n.agents/scratch/\n", encoding="utf-8")
+        except Exception as e:
+            sys.stderr.write(f"Gitignore update notice: {e}\n")
+
+        # 7. Configure Git Hooks safely if .git exists
+        if (root_dir / ".git").is_dir() and (root_dir / ".githooks" / "pre-commit").is_file():
+            try:
+                hooks_res = subprocess.run(
+                    ["git", "config", "core.hooksPath"],
+                    cwd=root_dir,
+                    capture_output=True,
+                    text=True
+                )
+                current_hooks = hooks_res.stdout.strip()
+                if not current_hooks or current_hooks == ".githooks":
+                    subprocess.run(["git", "config", "core.hooksPath", ".githooks"], cwd=root_dir, check=True)
+                    print("=> L9 Git Hooks configured (.githooks).")
+            except Exception as e:
+                sys.stderr.write(f"Git hook setup notice: {e}\n")
+
+        # 8. Clean up accidental workflow directories in target project
+        wf_dir = root_dir / ".github" / "workflows"
+        if wf_dir.is_dir():
+            for f in ("agent-gates.yml", "agentic-cicd.yml"):
+                wf_file = wf_dir / f
+                if wf_file.is_file():
+                    wf_file.unlink()
+            try:
+                wf_dir.rmdir()
+                (root_dir / ".github").rmdir()
+            except OSError as err:
+                sys.stderr.write(f"Notice: .github cleanup: {err}\n")
+
+        return True
 
 
 def run_upgrade(root_dir: Path, target_version: str) -> bool:
-    print(f"\n=> Downloading and installing AAC {target_version}...")
-    is_windows = sys.platform.startswith("win")
-    script_name = "install.ps1" if is_windows else "install.sh"
-    install_url = f"https://raw.githubusercontent.com/rafaelghif/antigravity-agents/{target_version}/{script_name}"
-
-    tmp_path: Path | None = None
-    try:
-        suffix = ".ps1" if is_windows else ".sh"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
-            tmp_path = Path(tmp_file.name)
-
-        curl_bin = shutil.which("curl") or "curl"
-        dl_res = subprocess.run(
-            [curl_bin, "-fsSL", install_url, "-o", str(tmp_path)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=15,
-        )
-        if dl_res.returncode != 0:
-            print("=> Download failed: unable to fetch installer script.")
-            return False
-
-        env = {
-            **os.environ,
-            "AAC_TARGET_DIR": str(root_dir),
-            "AAC_REF": target_version,
-        }
-
-        if is_windows:
-            ps_bin = find_powershell_binary()
-            cmd = [ps_bin, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(tmp_path)]
-        else:
-            bash_bin = shutil.which("bash") or "bash"
-            cmd = [bash_bin, str(tmp_path)]
-
-        exec_res = subprocess.run(cmd, cwd=root_dir, env=env)
-        return exec_res.returncode == 0
-    except Exception as exc:
-        print(f"=> ERROR running upgrade: {exc}")
-        return False
-    finally:
-        if tmp_path and tmp_path.exists():
-            try:
-                tmp_path.unlink()
-            except OSError as err:
-                sys.stderr.write(f"Notice: unable to remove temporary file {tmp_path}: {err}\n")
+    """Delegates to native cross-platform installation."""
+    return install_aac(root_dir, target_version)
 
 
 def main() -> None:
@@ -188,7 +306,7 @@ def main() -> None:
         print("\nRun 'python3 install.py' to apply this configuration effortlessly.")
         return
 
-    success = run_upgrade(root_dir, str(status["latest_version"]))
+    success = install_aac(root_dir, str(status["latest_version"]))
     if success:
         print("\n" + "=" * 60)
         print(f"✅ AAC successfully configured to {status['latest_version']}!")
@@ -205,3 +323,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

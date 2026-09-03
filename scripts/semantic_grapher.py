@@ -179,6 +179,15 @@ def parse_python(filepath, graph):
         sys.stderr.write(f"Error parsing Python file {filepath}: {e}\n")
 
 
+def _register_class_nodes(matches, file_id, filepath, graph, lang_label=""):
+    for c in matches:
+        name = c.group(1)
+        cid = f"class:{name}"
+        graph.add_node(cid, name, "class", filepath)
+        graph.add_edge(file_id, cid, "defines")
+        if lang_label:
+            print(f"[{lang_label}] Found class {name} in {filepath.name}")
+
 def parse_regex(filepath, lang, graph):
     try:
         content = filepath.read_text(encoding='utf-8')
@@ -187,12 +196,7 @@ def parse_regex(filepath, lang, graph):
 
         if lang in ["ts", "js"]:
             classes = re.finditer(r'(?:export\s+)?class\s+([A-Za-z0-9_]+)', content)
-            for c in classes:
-                name = c.group(1)
-                cid = f"class:{name}"
-                graph.add_node(cid, name, "class", filepath)
-                graph.add_edge(file_id, cid, "defines")
-                print(f"[{lang.upper()}] Found class {name} in {filepath.name}")
+            _register_class_nodes(classes, file_id, filepath, graph, lang.upper())
 
             functions = re.finditer(r'(?:export\s+)?(?:async\s+)?function\s+([A-Za-z0-9_]+)|const\s+([A-Za-z0-9_]+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>', content)
             for f in functions:
@@ -219,6 +223,57 @@ def parse_regex(filepath, lang, graph):
                 graph.add_node(fid, name, "function", filepath)
                 graph.add_edge(file_id, fid, "defines")
                 print(f"[GO] Found func {name} in {filepath.name}")
+
+        elif lang == "rust":
+            items = re.finditer(r'(?:pub\s+)?(?:struct|enum)\s+([A-Za-z0-9_]+)', content)
+            for it in items:
+                name = it.group(1)
+                sid = f"type:{name}"
+                graph.add_node(sid, name, "type", filepath)
+                graph.add_edge(file_id, sid, "defines")
+                print(f"[RUST] Found type {name} in {filepath.name}")
+
+            funcs = re.finditer(r'(?:pub\s+)?(?:async\s+)?fn\s+([A-Za-z0-9_]+)\s*\(', content)
+            for f in funcs:
+                name = f.group(1)
+                fid = f"func:{name}"
+                graph.add_node(fid, name, "function", filepath)
+                graph.add_edge(file_id, fid, "defines")
+                print(f"[RUST] Found fn {name} in {filepath.name}")
+
+        elif lang in ["java", "csharp", "kotlin"]:
+            classes = re.finditer(r'(?:public|private|protected|internal)?\s*(?:class|interface|record)\s+([A-Za-z0-9_]+)', content)
+            _register_class_nodes(classes, file_id, filepath, graph, lang.upper())
+
+            methods = re.finditer(r'(?:public|private|protected)?\s+(?:static\s+)?[A-Za-z0-9_<>[\]]+\s+([A-Za-z0-9_]+)\s*\([^)]*\)\s*[{;]', content)
+            for m in methods:
+                name = m.group(1)
+                if name not in ("if", "for", "while", "switch", "catch"):
+                    fid = f"method:{name}"
+                    graph.add_node(fid, name, "method", filepath)
+                    graph.add_edge(file_id, fid, "defines")
+
+        elif lang == "php":
+            classes = re.finditer(r'class\s+([A-Za-z0-9_]+)', content)
+            _register_class_nodes(classes, file_id, filepath, graph)
+
+            funcs = re.finditer(r'function\s+([A-Za-z0-9_]+)\s*\(', content)
+            for f in funcs:
+                name = f.group(1)
+                fid = f"func:{name}"
+                graph.add_node(fid, name, "function", filepath)
+                graph.add_edge(file_id, fid, "defines")
+
+        elif lang == "ruby":
+            classes = re.finditer(r'class\s+([A-Za-z0-9_:]+)', content)
+            _register_class_nodes(classes, file_id, filepath, graph)
+
+            funcs = re.finditer(r'def\s+([A-Za-z0-9_!?]+)', content)
+            for f in funcs:
+                name = f.group(1)
+                fid = f"func:{name}"
+                graph.add_node(fid, name, "function", filepath)
+                graph.add_edge(file_id, fid, "defines")
     except Exception as e:
         sys.stderr.write(f"Error parsing {lang} file {filepath}: {e}\n")
 
@@ -232,6 +287,16 @@ def _scan_files_in_dir(root, files, graph):
             parse_regex(path, "ts", graph)
         elif file.endswith('.go'):
             parse_regex(path, "go", graph)
+        elif file.endswith('.rs'):
+            parse_regex(path, "rust", graph)
+        elif file.endswith(('.java', '.kt')):
+            parse_regex(path, "java", graph)
+        elif file.endswith('.cs'):
+            parse_regex(path, "csharp", graph)
+        elif file.endswith('.php'):
+            parse_regex(path, "php", graph)
+        elif file.endswith('.rb'):
+            parse_regex(path, "ruby", graph)
 
 def scan_directory(directory, graph):
     for root, _, files in os.walk(directory):

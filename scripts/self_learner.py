@@ -46,11 +46,21 @@ def contains_learning_signal(text: str) -> bool:
 def extract_learning_from_user_input(text: str) -> str | None:
     if not text or len(text.strip()) < 8:
         return None
-    if not contains_learning_signal(text):
+    
+    # Strip XML tags and wrappers like <USER_REQUEST>, <ADDITIONAL_METADATA>
+    cleaned = re.sub(r'<USER_REQUEST>\s*', '', text)
+    cleaned = re.sub(r'\s*</USER_REQUEST>.*', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(r'<[^>]+>', '', cleaned).strip()
+    
+    # Questions, inquiries, or task instructions are NOT permanent rules
+    if '?' in cleaned or any(w in cleaned.lower() for w in ['kenapa', 'mengapa', 'why', 'check', 'review', 'tolong']):
+        return None
+        
+    if not contains_learning_signal(cleaned):
         return None
     
-    cleaned = text.strip().replace('\n', ' ')
-    cleaned = re.sub(r'\s+', ' ', cleaned)
+    cleaned = cleaned.replace('\n', ' ')
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     if len(cleaned) > 280:
         cleaned = cleaned[:277] + "..."
     return cleaned
@@ -141,8 +151,7 @@ def process_transcript(transcript_path: Path, rules_path: Path, memory_path: Pat
         for u_text in user_inputs:
             learning = extract_learning_from_user_input(u_text)
             if learning:
-                tag = "USER_MANDATE" if any(w in learning.lower() for w in ["fokus", "tujuan", "ingat", "jangan"]) else "LEARNED_RULE"
-                if save_learned_rule(learning, rules_path, tag=tag):
+                if save_project_preference(learning, memory_path):
                     saved_count += 1
         return saved_count
     except Exception as e:

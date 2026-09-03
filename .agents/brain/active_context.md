@@ -5,12 +5,12 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- Ready for user's next tasks and feature requests
+- commit, push main, releases, tag. ingat nama releasesnyna standard `v4.xx.xx`
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).
 - Keep Git pristine: auto-clean PR branches locally and remotely.
-- 6 World-Class Gates and 31+ unit tests must stay 100% passing.
+- 9 World-Class Gates and 36+ unit tests must stay 100% passing.
 
 ## 🚀 Recent Accomplishments
 - Released AAC v4.27.0 with Hierarchical Cross-Session Memory Engine (scripts/memory_consolidator.py & active_context.md)
@@ -25,4 +25,4 @@
 - Verify and release AAC v4.27.0.
 
 ## ⚠️ Blockers & Known Issues
-- None. All 6 gates and tests currently green.
+- None. All 9 gates and tests currently green.

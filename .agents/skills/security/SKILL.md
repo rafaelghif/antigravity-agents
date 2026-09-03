@@ -19,8 +19,8 @@ Execute strict AppSec procedural audits and mandate ZERO-TOLERANCE for dummy aut
 3. **Boundary Audit**: If you added a new input vector (API endpoint, CLI argument), verify that a strict validation schema sits at the immediate boundary.
 4. **Execution Context**: If modifying Dockerfiles or CI workflows, verify that execution privileges are explicitly dropped (`USER nonroot`).
 5. **Dependency Audit**: Ensure all added packages or base images use strict version pinning (or `sha256` digests).
-7. **Shell Isolation (Terminal-First Security)**: You are FORBIDDEN from executing global installs (`npm i -g`, `sudo`), modifying SSH keys, or running destructive recursive commands (`rm -rf /`). All shell execution MUST be isolated to the project workspace.
-6. **Reporting**: Output a `<security_audit>` block confirming these checks are complete.
+6. **Shell Isolation (Terminal-First Security)**: You are FORBIDDEN from executing global installs (`npm i -g`, `sudo`), modifying SSH keys, or running destructive recursive commands (`rm -rf /`). All shell execution MUST be isolated to the project workspace.
+7. **Reporting**: Output a `<security_audit>` block confirming these checks are complete.
 </PROCEDURAL_WORKFLOW>
 
 

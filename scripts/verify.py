@@ -48,6 +48,34 @@ def detect() -> list[tuple[str, str, str]]:
         checks.append(("test", "go", "go test ./..."))
     if (ROOT / "composer.json").is_file():
         checks.append(("test", "php", "composer test"))
+    # Java & Kotlin (Maven / Gradle)
+    if (ROOT / "pom.xml").is_file():
+        mvn = "./mvnw" if (ROOT / "mvnw").is_file() else "mvn"
+        checks.append(("test", "java", f"{mvn} test"))
+    if (ROOT / "build.gradle").is_file() or (ROOT / "build.gradle.kts").is_file():
+        gradle = "./gradlew" if (ROOT / "gradlew").is_file() else "gradle"
+        checks.append(("test", "java", f"{gradle} test"))
+    # .NET / C#
+    if list(ROOT.glob("*.csproj")) or list(ROOT.glob("*.sln")):
+        checks.append(("test", "dotnet", "dotnet test"))
+    # C / C++
+    if (ROOT / "CMakeLists.txt").is_file():
+        checks.append(("test", "cpp", "ctest --output-on-failure"))
+    elif (ROOT / "Makefile").is_file():
+        checks.append(("test", "make", "make test"))
+    # Ruby
+    if (ROOT / "Gemfile").is_file():
+        checks.append(("test", "ruby", "bundle exec rspec" if shutil.which("rspec") else "rake test"))
+    # Dart / Flutter
+    if (ROOT / "pubspec.yaml").is_file():
+        runner = "flutter test" if shutil.which("flutter") else "dart test"
+        checks.append(("test", "dart", runner))
+    # Elixir
+    if (ROOT / "mix.exs").is_file():
+        checks.append(("test", "elixir", "mix test"))
+    # Swift
+    if (ROOT / "Package.swift").is_file():
+        checks.append(("test", "swift", "swift test"))
     return checks
 
 
@@ -55,7 +83,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Detect a repository stack and print or execute safe verification commands.")
     parser.add_argument("--execute", action="store_true", help="Execute the detected commands")
     parser.add_argument("--terse", "-q", action="store_true", help="ACI Mode: output minimal telegraphic summary")
+    parser.add_argument("--release", action="store_true", help="Enforce production release gate: requires .agents/brain/AITL_CONSENSUS.yaml approval")
     args = parser.parse_args()
+
+    if args.release:
+        aitl_file = ROOT / ".agents" / "brain" / "AITL_CONSENSUS.yaml"
+        if not aitl_file.is_file():
+            print("=> FATAL: Production release gate failed! .agents/brain/AITL_CONSENSUS.yaml is missing.")
+            return 1
+        try:
+            aitl_text = aitl_file.read_text(encoding="utf-8")
+            if "STATUS: APPROVED" not in aitl_text:
+                print("=> FATAL: Production release gate failed! AITL_CONSENSUS.yaml does not have STATUS: APPROVED.")
+                return 1
+            if not args.terse:
+                print("✅ AITL Consensus Verified (.agents/brain/AITL_CONSENSUS.yaml: APPROVED)")
+        except Exception as e:
+            print(f"=> FATAL: Error reading AITL_CONSENSUS.yaml: {e}")
+            return 1
 
     # L9 Hard Boundaries for Agent Compliance are now handled by intent_guard.py
     checks = detect()

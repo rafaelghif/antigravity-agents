@@ -7,22 +7,28 @@ from pathlib import Path
 SKILL_KEYWORDS = {
     "design": [
         "ui", "ux", "component", "page", "styling", "css", "tailwind", "html",
-        "frontend", "view", "button", "modal", "layout", "responsive", "screen"
+        "frontend", "view", "button", "modal", "layout", "responsive", "screen",
+        "webperf", "performance", "perf", "core web vitals", "lcp", "inp", "cls",
+        "lazy loading", "bundle size", "tree-shaking", "speed up", "a11y", "accessibility"
     ],
     "code-quality": [
         "code", "refactor", "function", "class", "method", "bug", "fix", "feature",
-        "typescript", "python", "javascript", "solid", "optimization", "clean"
-    ],
-    "dry": [
-        "dry", "duplicate", "duplication", "deduplicate", "copy-paste", "clone", "redundant", "dedup"
+        "typescript", "python", "javascript", "solid", "optimization", "clean",
+        "dry", "duplicate", "duplication", "deduplicate", "copy-paste", "clone", "redundant", "dedup",
+        "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
+        "code-simplify", "flatten"
     ],
     "security": [
         "auth", "login", "jwt", "token", "password", "secret", "permission", "rbac",
         "security", "sanitize", "encryption", "hash", "session", "oauth"
     ],
     "architecture": [
-        "database", "db", "schema", "migration", "table", "model", "orm", "prisma",
-        "drizzle", "api", "endpoint", "controller", "service", "repository", "system"
+        "database", "db", "schema", "table", "model", "orm", "prisma",
+        "drizzle", "api", "endpoint", "controller", "service", "repository", "system",
+        "idempotency", "idempotent", "retry", "backoff", "jitter", "circuit breaker",
+        "outbox", "saga", "distributed", "deadlock", "concurrency", "race condition",
+        "api contract", "breaking change", "backward compatibility", "rfc 7807",
+        "problem details", "zod validation", "pydantic validation", "dto"
     ],
     "verification": [
         "test", "tests", "testing", "pytest", "jest", "unit", "e2e", "assert",
@@ -31,25 +37,24 @@ SKILL_KEYWORDS = {
     "caveman": [
         "caveman", "cavemen", "hemat token", "token saving", "terse", "singkat", "compress tokens"
     ],
-    "performance-optimization": [
-        "webperf", "performance", "perf", "core web vitals", "lcp", "inp", "cls",
-        "lazy loading", "bundle size", "tree-shaking", "speed up"
+    "data-engineering": [
+        "etl", "elt", "pipeline", "data engineering", "batch processing", "cdc", "debezium",
+        "kafka", "backfill", "partitioning", "zero downtime", "expand contract",
+        "concurrent index", "lock timeout", "non-blocking migration", "schema evolution"
     ],
-    "code-simplification": [
-        "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
-        "code-simplify", "flatten"
+    "devops": [
+        "docker", "dockerfile", "container", "kubernetes", "k8s", "ci/cd", "terraform",
+        "iac", "helm", "deployment", "sre", "mcp", "model context protocol", "mcp server", "mcp setup", "mcp config"
     ],
-    "resilience-engineering": [
-        "idempotency", "idempotent", "retry", "backoff", "jitter", "circuit breaker",
-        "outbox", "saga", "distributed", "deadlock", "concurrency", "race condition"
+    "observability": [
+        "logging", "metrics", "tracing", "opentelemetry", "otel", "telemetry", "monitor", "alerting", "grafana", "prometheus"
     ],
-    "zero-downtime-migrations": [
-        "zero downtime", "expand contract", "concurrent index", "lock timeout",
-        "non-blocking migration", "schema evolution", "backfill"
+    "semantic-graphing": [
+        "semantic graph", "knowledge graph", "blast radius", "call graph", "dependency tree", "ast scan", "pagerank"
     ],
-    "api-contracts": [
-        "api contract", "breaking change", "backward compatibility", "rfc 7807",
-        "problem details", "zod validation", "pydantic validation", "dto"
+    "deep-research": [
+        "research", "search web", "browse", "documentation", "docs", "lookup", "rfc",
+        "investigate", "latest version", "official guide", "api reference"
     ]
 }
 
@@ -72,19 +77,39 @@ def detect_skills_from_text(text: str) -> list[str]:
         matched.append("code-quality")
     return matched
 
+ROOT = Path(__file__).resolve().parents[2]
+
 def get_context(transcript_path: str | None = None) -> str:
     msgs = []
     
     # 0. Active Session Context & Working Memory (P0 bootstrap)
-    active_path = Path('.agents/brain/active_context.md')
+    active_path = ROOT / '.agents' / 'brain' / 'active_context.md'
     if active_path.exists():
         raw_active = active_path.read_text(encoding='utf-8').splitlines()
         active_lines = [l for l in raw_active if not l.startswith('> ') and not l.startswith('# ⚡') and l.strip()]
         if active_lines:
             msgs.append("=== ACTIVE SESSION WORKING CONTEXT ===\n" + "\n".join(active_lines))
 
+    # 0.5. Codebase Epistemic Grounding (Prevent Hallucinations)
+    try:
+        sys.path.insert(0, str(ROOT))
+        from scripts.grounding import ground_workspace
+        grounding_data = ground_workspace(ROOT)
+        eco = list(grounding_data.get("ecosystems", {}).keys())
+        eco_str = ", ".join(eco) if eco else "Generic / Multi-language"
+        deps = []
+        for e, dl in grounding_data.get("dependencies", {}).items():
+            if dl:
+                deps.append(f"{e}: {', '.join(dl[:10])}")
+        ground_lines = [f"Ecosystem: [{eco_str}]"]
+        if deps:
+            ground_lines.append("Confirmed Dependencies: " + " | ".join(deps))
+        msgs.append("=== CODEBASE GROUNDING BASELINE ===\n" + "\n".join(ground_lines))
+    except Exception as exc:
+        sys.stderr.write(f"Grounding hook notice: {exc}\n")
+
     # 1. Cross-Session Project Memory (only populated lines to conserve tokens)
-    memory_path = Path('.agents/brain/memory.md')
+    memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if memory_path.exists():
         raw_lines = memory_path.read_text(encoding='utf-8').splitlines()
         populated = [l for l in raw_lines if not l.endswith('Auto-detected by agent') and l.strip()]
@@ -92,14 +117,14 @@ def get_context(transcript_path: str | None = None) -> str:
             msgs.append("=== CROSS-SESSION MEMORY ===\n" + "\n".join(populated))
             
     # 2. Long-Term DAG Anchor (only if active)
-    anchor_path = Path('.agents/brain/ANCHOR.md')
+    anchor_path = ROOT / '.agents' / 'brain' / 'ANCHOR.md'
     if anchor_path.exists():
         text = anchor_path.read_text(encoding='utf-8').strip()
         if text and text != "(No context yet)":
             msgs.append(f"=== DAG ANCHOR ===\n{text}")
             
     # 3. Self-Learned Rules (only active bullet rules, omit header to save tokens)
-    rules_path = Path('.agents/brain/rules.md')
+    rules_path = ROOT / '.agents' / 'brain' / 'rules.md'
     if rules_path.exists():
         raw_rules = rules_path.read_text(encoding='utf-8').splitlines()
         active_rules = [l for l in raw_rules if l.startswith('- ')]
@@ -114,16 +139,23 @@ def get_context(transcript_path: str | None = None) -> str:
             with open(transcript_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             for line in lines[:3]:
-                data = json.loads(line)
-                content = str(data.get('content', ''))
-                yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
-                if yaml_match:
-                    skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
-            recent_text = " ".join(
-                str(json.loads(line).get('content', ''))
-                for line in lines[-5:]
-                if 'USER_INPUT' in str(json.loads(line).get('type', ''))
-            )
+                try:
+                    data = json.loads(line)
+                    content = str(data.get('content', ''))
+                    yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
+                    if yaml_match:
+                        skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
+                except Exception:
+                    continue
+            recent_inputs = []
+            for line in lines[-5:]:
+                try:
+                    data = json.loads(line)
+                    if 'USER_INPUT' in str(data.get('type', '')):
+                        recent_inputs.append(str(data.get('content', '')))
+                except Exception:
+                    continue
+            recent_text = " ".join(recent_inputs)
             if recent_text:
                 skills_to_inject.update(detect_skills_from_text(recent_text))
         except Exception as e:

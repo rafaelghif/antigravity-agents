@@ -16,7 +16,6 @@ VERSION_FILES = (
     "install.sh",
     "install.ps1",
     ".agents/TASK_TEMPLATE.md",
-    ".github/workflows/agent-gates.yml",
 )
 CORE_AGENT_PATHS = (
     "AGENTS.md",
@@ -39,7 +38,7 @@ CORE_AGENT_PATHS = (
     ".agents/skills/architecture/SKILL.md",
     ".agents/skills/design/SKILL.md",
     ".agents/skills/semantic-graphing/SKILL.md",
-    ".agents/skills/dry/SKILL.md",
+    ".agents/skills/deep-research/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
     "scripts/test_quality_guard.py",
@@ -63,20 +62,20 @@ OPTIONAL_PATHS = (
     ".agents/brain/ANCHOR.md",
     ".agents/brain/schema.md",
     ".agents/brain/env-required.json",
-    ".agents/common/utils.md",
 )
 
 
 def is_framework_repo() -> bool:
     """Check if running directly inside the upstream AAC framework repository."""
-    install_sh = ROOT / "install.sh"
-    if install_sh.is_file():
-        try:
-            content = install_sh.read_text(encoding="utf-8")
-            if "antigravity-agents.git" in content:
-                return True
-        except (OSError, UnicodeDecodeError) as exc:
-            sys.stderr.write(f"Notice: Failed to read install.sh: {exc}\n")
+    for script_name in ("install.py", "install.sh"):
+        candidate = ROOT / script_name
+        if candidate.is_file():
+            try:
+                content = candidate.read_text(encoding="utf-8")
+                if "antigravity-agents" in content:
+                    return True
+            except (OSError, UnicodeDecodeError) as exc:
+                sys.stderr.write(f"Notice: Failed to read {script_name}: {exc}\n")
     return False
 
 
@@ -232,7 +231,6 @@ def validate_version() -> None:
         "install.sh": f' AAC_REF="v{version}"',
         "install.ps1": f'$AacRef = "v{version}"',
         ".agents/TASK_TEMPLATE.md": f"AAC v{version}",
-        ".github/workflows/agent-gates.yml": f"AAC v{version}",
     }
     for relative_path, marker in markers.items():
         content = (ROOT / relative_path).read_text(encoding="utf-8")

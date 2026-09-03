@@ -101,7 +101,7 @@ def process_dir(dirpath, filenames, failed):
 
 def run_analysis():
     failed = False
-    root_path = Path.cwd()
+    root_path = Path(__file__).resolve().parents[1]
     excludes = {".venv", "venv", ".git", ".agents", "__pycache__", "node_modules", "tests"}
     for dirpath, dirnames, filenames in os.walk(root_path):
         dirnames[:] = [d for d in dirnames if d not in excludes]

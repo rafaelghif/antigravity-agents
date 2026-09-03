@@ -5,34 +5,38 @@ import os
 import time
 import platform
 
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
 def start_loop():
     print("[L9 SYSTEM] Starting Enterprise Agentic Loop (Cross-Platform)...")
     
     # 1. Start the meeting coordinator in the background
-    # Cross-platform background process
-    coordinator_cmd = [sys.executable, os.path.join("scripts", "meeting_coordinator.py")]
+    coordinator_cmd = [sys.executable, str(ROOT / "scripts" / "meeting_coordinator.py")]
     
     # Ensure .agents/inbox directory exists
-    os.makedirs(os.path.join(".agents", "inbox"), exist_ok=True)
-    log_file = open(os.path.join(".agents", "inbox", "coordinator.log"), "a")
+    inbox_dir = ROOT / ".agents" / "inbox"
+    inbox_dir.mkdir(parents=True, exist_ok=True)
+    log_file = open(inbox_dir / "coordinator.log", "a", encoding="utf-8")
     
     print("Starting background meeting coordinator...")
     # On Windows, we use CREATE_NEW_PROCESS_GROUP to detach if necessary
     if platform.system() == "Windows":
         CREATE_NEW_PROCESS_GROUP = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0x00000200)
-        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, creationflags=CREATE_NEW_PROCESS_GROUP)
+        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, cwd=str(ROOT), creationflags=CREATE_NEW_PROCESS_GROUP)
     else:
-        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, start_new_session=True)
+        coordinator_proc = subprocess.Popen(coordinator_cmd, stdout=log_file, stderr=subprocess.STDOUT, cwd=str(ROOT), start_new_session=True)
         
     print(f"Meeting coordinator started (PID: {coordinator_proc.pid}).")
     time.sleep(1) # Give it a second to initialize
 
     # 2. Run the autonomous loop manager in the foreground
     print("Starting autonomous task loop...")
-    loop_cmd = [sys.executable, os.path.join("scripts", "autonomous_loop.py")]
+    loop_cmd = [sys.executable, str(ROOT / "scripts" / "autonomous_loop.py")]
     
     try:
-        result = subprocess.run(loop_cmd)
+        result = subprocess.run(loop_cmd, cwd=str(ROOT))
         sys.exit(result.returncode)
     except KeyboardInterrupt:
         print("\n[L9 SYSTEM] Loop interrupted. Stopping meeting coordinator...")

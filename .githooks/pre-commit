@@ -1,8 +1,24 @@
-#!/usr/bin/env bash
-# Antigravity L9 Enforcer: Auto-runs verify.py before every commit.
-echo "[L9 Enforcer] Intercepting commit to run verify.py..."
-python3 scripts/verify.py
-if [ $? -ne 0 ]; then
-    echo "[L9 FATAL] verify.py failed! Commit aborted. Fix the flaws first."
+#!/bin/sh
+# Antigravity L9 Enforcer: Cross-platform pre-commit hook (Linux, macOS, Windows)
+
+PYTHON=""
+for candidate in python3 python py; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        PYTHON="$candidate"
+        break
+    fi
+done
+
+if [ -z "$PYTHON" ]; then
+    echo "[L9 FATAL] Python interpreter not found! Install Python 3 to enable pre-commit checks." >&2
+    exit 1
+fi
+
+echo "[L9 Enforcer] Intercepting commit to run verify.py via $PYTHON..."
+"$PYTHON" scripts/verify.py --execute --terse
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    echo "[L9 FATAL] verify.py failed! Commit aborted. Fix the flaws first." >&2
     exit 1
 fi

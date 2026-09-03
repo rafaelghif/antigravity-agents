@@ -7,6 +7,9 @@ except ImportError:
     sys.exit(1)
 import json
 import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
 
 def compile_intent(file_path):
     print(f"[INTENT COMPILER] Validating strict intent specification from {file_path}...")
@@ -21,19 +24,26 @@ def compile_intent(file_path):
         if not isinstance(intent, dict):
             raise ValueError("Intent must be a YAML dictionary mapping.")
             
-        required_fields = ["name", "version", "architecture", "constraints"]
+        required_fields = ["name", "status"]
         for field in required_fields:
             if field not in intent:
                 raise ValueError(f"Missing required strict field: '{field}'")
                 
-        constraints = intent.get("constraints", [])
-        if not isinstance(constraints, list) or len(constraints) == 0:
-            raise ValueError("Intent must have at least one strict constraint defined.")
-            
-        print(f"[INTENT COMPILER] Validation passed. Intent '{intent['name']}' conforms to AAC standards.")
+        status = str(intent.get("status", "")).upper()
+        if status not in ("IN_PROGRESS", "DONE"):
+            raise ValueError(f"Status must be 'IN_PROGRESS' or 'DONE', got '{status}'")
+
+        # Validate list structures if present
+        for list_key in ("objectives", "constraints", "core_philosophy"):
+            items = intent.get(list_key)
+            if items is not None and not isinstance(items, list):
+                raise ValueError(f"Field '{list_key}' must be a list if defined.")
+
+        print(f"[INTENT COMPILER] Validation passed. Intent '{intent['name']}' (status: {status}) conforms to AAC standards.")
         
-        os.makedirs(".agents/harness", exist_ok=True)
-        with open(".agents/harness/compiled_intent.json", "w") as out:
+        out_dir = ROOT / ".agents" / "harness"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        with open(out_dir / "compiled_intent.json", "w", encoding="utf-8") as out:
             json.dump(intent, out, indent=2)
             
     except yaml.YAMLError as e:
