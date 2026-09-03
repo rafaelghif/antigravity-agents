@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost saya butuh kamu deeply review lagi agent kita, linked antar files. workflow, dan kualitasnya, saya tidak ingin jadi bahan tertawaan e
+- /boost gw mau lu lebih deeply review, dan fixing lagi agent kita. linked antara script dan md. terus multi-agent, meeting dan lainnya sampai
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).

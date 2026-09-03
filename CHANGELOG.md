@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.44.0] - 2026-09-03
+### Anti-Hallucination Reconnaissance Protocol, Standup Sync & Pre-Tool Overwrite Guard
+- **Strict Anti-Hallucination Protocol**: Implemented mandatory Phase 0 Reconnaissance (`python3 scripts/grounding.py`, full file inspection via `view_file`, and blast-radius tracing) across all 8 L9 subagent personas in `.agents/agents/*.md`.
+- **Pre-Tool Anti-Regression Guard**: Enhanced `scripts/hooks/pre_tool_quality_gate.py` to intercept and block blind destructive `write_to_file(Overwrite=True)` on existing non-empty files, eliminating accidental overwrites.
+- **Automated Standup Synchronization**: Extended `scripts/meeting_coordinator.py --standup` to dynamically evaluate active sprint tasks and log structured standup events directly to the blackboard and `tasks/meeting_notes.md`.
+- **Master Workspace Policy Upgrades**: Updated `AGENTS.md` and `GEMINI.md` to establish non-destructive code preservation, epistemic grounding, and topological multi-agent DAG orchestration as non-negotiable core invariants.
+
 ## [4.43.0] - 2026-09-03
 ### Multi-Agent Pipeline Operationalization, Browsing, Epistemic Grounding & System Hardening
 - **Consolidated 11 Core Enterprise Skills**: Refactored and consolidated 18 fragmented micro-skills down to 11 authoritative playbooks (`architecture`, `code-quality`, `data-engineering`, `deep-research`, `design`, `devops`, `observability`, `security`, `semantic-graphing`, `verification`, `caveman`).

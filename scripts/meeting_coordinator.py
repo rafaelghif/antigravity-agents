@@ -70,13 +70,31 @@ def handle_corrective_action(data):
         run_scrum_master("The agents have reached the debate limit and the room was blocked. Review the inbox and make a final executive decision to unblock them.")
 
 def run_standup_meeting():
-    """Compiles a meeting digest."""
+    """Compiles a meeting digest with active task and sprint inspection."""
     print("[STANDUP MEETING] Orchestrating team standup...")
+    tasks_dir = ROOT / "tasks"
+    pending = 0
+    done = 0
+    if tasks_dir.is_dir():
+        for tf in tasks_dir.glob("*.yaml"):
+            try:
+                content = tf.read_text(encoding="utf-8")
+                if "status: DONE" in content or 'status: "DONE"' in content:
+                    done += 1
+                else:
+                    pending += 1
+            except Exception as exc:
+                sys.stderr.write(f"Notice reading task file: {exc}\n")
+
+    msg = f"STANDUP SYNC: Active sprint sync conducted. Tasks: {done} completed, {pending} pending. Governance status: ACTIVE. Evidence_Source: tasks/ Falsifiability_Criteria: Check tasks/*.yaml"
+    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'inbox_manager.py'), 'send', 'scrum-master', '@all', msg], cwd=str(ROOT))
     subprocess.run([sys.executable, str(ROOT / 'scripts' / 'inbox_manager.py'), 'report'], cwd=str(ROOT))
 
 def run_planning_meeting(topic: str):
     """Orchestrates a sprint planning meeting between Product Manager and Scrum Master."""
     print(f"[MEETING] Orchestrating Sprint Planning on: '{topic}'...")
+    msg = f"PLANNING MEETING: Sprint planning initiated for '{topic}'. Product Manager analyzing requirements. Evidence_Source: intent.yaml Falsifiability_Criteria: Check tasks/"
+    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'inbox_manager.py'), 'send', 'scrum-master', 'product-manager', msg], cwd=str(ROOT))
     prompt = (
         f"SPRINT PLANNING MEETING: Topic: '{topic}'. "
         "Break down this topic into atomic user stories with acceptance criteria in tasks/."
