@@ -100,6 +100,24 @@ def get_context(transcript_path: str | None = None) -> str:
         if active_lines:
             msgs.append("=== ACTIVE SESSION WORKING CONTEXT ===\n" + "\n".join(active_lines))
 
+    # 0.5. Codebase Epistemic Grounding (Prevent Hallucinations)
+    try:
+        sys.path.insert(0, str(ROOT))
+        from scripts.grounding import ground_workspace
+        grounding_data = ground_workspace(ROOT)
+        eco = list(grounding_data.get("ecosystems", {}).keys())
+        eco_str = ", ".join(eco) if eco else "Generic / Multi-language"
+        deps = []
+        for e, dl in grounding_data.get("dependencies", {}).items():
+            if dl:
+                deps.append(f"{e}: {', '.join(dl[:10])}")
+        ground_lines = [f"Ecosystem: [{eco_str}]"]
+        if deps:
+            ground_lines.append("Confirmed Dependencies: " + " | ".join(deps))
+        msgs.append("=== CODEBASE GROUNDING BASELINE ===\n" + "\n".join(ground_lines))
+    except Exception as exc:
+        sys.stderr.write(f"Grounding hook notice: {exc}\n")
+
     # 1. Cross-Session Project Memory (only populated lines to conserve tokens)
     memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if memory_path.exists():

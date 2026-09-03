@@ -48,6 +48,34 @@ def detect() -> list[tuple[str, str, str]]:
         checks.append(("test", "go", "go test ./..."))
     if (ROOT / "composer.json").is_file():
         checks.append(("test", "php", "composer test"))
+    # Java & Kotlin (Maven / Gradle)
+    if (ROOT / "pom.xml").is_file():
+        mvn = "./mvnw" if (ROOT / "mvnw").is_file() else "mvn"
+        checks.append(("test", "java", f"{mvn} test"))
+    if (ROOT / "build.gradle").is_file() or (ROOT / "build.gradle.kts").is_file():
+        gradle = "./gradlew" if (ROOT / "gradlew").is_file() else "gradle"
+        checks.append(("test", "java", f"{gradle} test"))
+    # .NET / C#
+    if list(ROOT.glob("*.csproj")) or list(ROOT.glob("*.sln")):
+        checks.append(("test", "dotnet", "dotnet test"))
+    # C / C++
+    if (ROOT / "CMakeLists.txt").is_file():
+        checks.append(("test", "cpp", "ctest --output-on-failure"))
+    elif (ROOT / "Makefile").is_file():
+        checks.append(("test", "make", "make test"))
+    # Ruby
+    if (ROOT / "Gemfile").is_file():
+        checks.append(("test", "ruby", "bundle exec rspec" if shutil.which("rspec") else "rake test"))
+    # Dart / Flutter
+    if (ROOT / "pubspec.yaml").is_file():
+        runner = "flutter test" if shutil.which("flutter") else "dart test"
+        checks.append(("test", "dart", runner))
+    # Elixir
+    if (ROOT / "mix.exs").is_file():
+        checks.append(("test", "elixir", "mix test"))
+    # Swift
+    if (ROOT / "Package.swift").is_file():
+        checks.append(("test", "swift", "swift test"))
     return checks
 
 

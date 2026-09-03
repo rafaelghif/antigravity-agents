@@ -87,5 +87,16 @@ def coordinator_loop():
         time.sleep(CRON_INTERVAL)
         cycles += 1
 
+def run_single_cycle():
+    print("[MEETING COORDINATOR] Executing single-cycle sync...")
+    data = load_blackboard()
+    if data:
+        handle_preventive_action(data)
+        handle_corrective_action(data)
+    subprocess.run([sys.executable, str(ROOT / 'scripts' / 'inbox_manager.py'), 'report'], cwd=str(ROOT))
+
 if __name__ == '__main__':
-    coordinator_loop()
+    if "--once" in sys.argv:
+        run_single_cycle()
+    else:
+        coordinator_loop()

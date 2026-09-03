@@ -12,7 +12,11 @@ import argparse
 from pathlib import Path
 from collections import defaultdict
 
-SUPPORTED_EXTENSIONS = {".py", ".ts", ".js", ".tsx", ".jsx", ".go", ".java", ".rs", ".php"}
+SUPPORTED_EXTENSIONS = {
+    ".py", ".ts", ".js", ".tsx", ".jsx", ".go", ".java", ".rs", ".php",
+    ".cs", ".cpp", ".c", ".h", ".hpp", ".rb", ".swift", ".kt", ".kts",
+    ".dart", ".scala", ".ex", ".exs", ".lua"
+}
 
 def clean_file_lines(filepath: Path) -> list:
     """Strips comments, blank lines, and whitespace while tracking original line numbers."""
@@ -24,7 +28,7 @@ def clean_file_lines(filepath: Path) -> list:
             stripped = line.strip()
             if not stripped:
                 continue
-            if stripped.startswith(("#", "//", "/*", "*", "<!--")):
+            if stripped.startswith(("#", "//", "/*", "*", "<!--", "--")):
                 continue
             norm = re.sub(r'\s+', ' ', stripped)
             cleaned.append((norm, idx))

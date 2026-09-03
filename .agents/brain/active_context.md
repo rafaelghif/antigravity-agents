@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- okey kamu jangan mudah untuk puas, saya ingin kamu deeply checking lagi, pasti ada banyak kesalahan, saya yakin itu, tidak sesuai standard i
+- saya rasa workflow kita masih salah. kan seharusnya ada manager sub agent, product manager, dan banyak hal lainnya. tapi itu tidak jalan, in
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).
