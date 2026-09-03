@@ -1,7 +1,7 @@
 # Antigravity Agent Core (AAC) Universal Windows Bootstrap
 # Delegates installation to cross-platform pure Python engine (install.py)
 # Version marker for validation:
-$AacRef = "v4.44.1"
+$AacRef = "v4.44.2"
 
 $Python = $null
 foreach ($candidate in @("python3", "python", "py")) {

@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost oke patch, saya lihat sub agent, maupun agentnya sendiri, manager masih ada batasan. lepas semua batasan itu, jadikan god mode
+- /boost pastikan lagi semuanya baik script, md, meeting, dan lainnya semua berjalan lancar. jangan mudah puas, deeply checking lagi, saya tid
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).

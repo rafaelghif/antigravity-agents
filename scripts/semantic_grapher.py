@@ -319,6 +319,13 @@ def main():
     parser.add_argument("--path-find", nargs=2, metavar=("START", "END"), help="Find shortest path between two symbols")
     parser.add_argument("--pagerank", action="store_true", help="Display PageRank centrality ranking")
     parser.add_argument("--top-central", type=int, default=10, help="Number of top PageRank nodes to display")
+    
+    # Support positional subcommands like 'blast-radius <symbol>' or 'scan'
+    if len(sys.argv) > 2 and sys.argv[1] == "blast-radius":
+        sys.argv = [sys.argv[0], "--blast-radius", sys.argv[2]]
+    elif len(sys.argv) > 1 and sys.argv[1] == "scan":
+        sys.argv = [sys.argv[0], "."]
+        
     args = parser.parse_args()
 
     graph = build_repository_graph(args.dir)
