@@ -1,7 +1,11 @@
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts.grounding import detect_ecosystems, extract_dependencies, ground_workspace, inspect_project_layout
 
