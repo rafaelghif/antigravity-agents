@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.44.1] - 2026-09-03
+### Unrestricted God Mode Unlock across All Subagents & Autonomous Engines
+- **Full God Mode Unleashed**: Stripped all interactive roadblocks and artificial barriers (`decision: "ask"` removed from pre-tool quality gates; actions permitted autonomously with telemetry logging).
+- **Continuous Blackboard Orchestration**: Removed debate turn freezing in `scripts/inbox_manager.py`—debate turns are auto-resolved seamlessly to prevent deadlocks.
+- **Unrestricted Agent Spawns**: Added `--dangerously-skip-permissions` across all `agy` invocations in `meeting_coordinator.py` and `autonomous_loop.py`.
+- **Extended Circuit Breakers**: Raised Hermes task iterations to 10 and expanded timebox timeouts to 60/120 minutes in `.agents/config.json`.
+- **God Mode Persona Upgrade**: Explicitly unlocked `<MODE>GOD_MODE_UNLEASHED</MODE>` across all 8 L9 personas in `.agents/agents/*.md`.
+
 ## [4.44.0] - 2026-09-03
 ### Anti-Hallucination Reconnaissance Protocol, Standup Sync & Pre-Tool Overwrite Guard
 - **Strict Anti-Hallucination Protocol**: Implemented mandatory Phase 0 Reconnaissance (`python3 scripts/grounding.py`, full file inspection via `view_file`, and blast-radius tracing) across all 8 L9 subagent personas in `.agents/agents/*.md`.

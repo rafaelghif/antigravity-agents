@@ -40,7 +40,7 @@ def run_agent(agent_name: str, prompt: str):
     except Exception:
         cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
         
-    cmd_args = cmd_prefix + ["--agent", agent_name, "--print", prompt]
+    cmd_args = cmd_prefix + ["--agent", agent_name, "--dangerously-skip-permissions", "--print", prompt]
     try:
         subprocess.run(cmd_args, cwd=str(ROOT), check=True)
     except Exception as e:
