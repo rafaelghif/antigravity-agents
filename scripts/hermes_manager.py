@@ -8,10 +8,9 @@ import sys
 import time
 import json
 try:
-    import yaml
+    from scripts.yaml_loader import load_yaml
 except ImportError:
-    print("Error: 'yaml' module not found. Please install it using: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
+    from yaml_loader import load_yaml
 import glob
 import re
 import shlex
@@ -114,7 +113,7 @@ class HermesEngine:
         for task_file in sorted(TASKS_DIR.glob("*.yaml")):
             try:
                 with open(task_file, "r", encoding="utf-8") as f:
-                    data = yaml.safe_load(f)
+                    data = load_yaml(f.read())
                     if not data or "id" not in data:
                         continue
                     task_id = str(data["id"])

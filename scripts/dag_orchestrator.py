@@ -1,11 +1,9 @@
 import asyncio
 import graphlib
 try:
-    import yaml
+    from scripts.yaml_loader import load_yaml
 except ImportError:
-    import sys
-    print("Error: 'yaml' module not found. Please install it using: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
+    from yaml_loader import load_yaml
 import sys
 import argparse
 from pathlib import Path
@@ -75,10 +73,10 @@ async def main():
         print(f"Error: {workflow_path} not found.")
         sys.exit(1)
 
-    with open(workflow_path, 'r') as f:
+    with open(workflow_path, 'r', encoding='utf-8') as f:
         try:
-            workflow = yaml.safe_load(f)
-        except yaml.YAMLError as e:
+            workflow = load_yaml(f.read())
+        except Exception as e:
             print(f"Error parsing YAML: {e}")
             sys.exit(1)
 

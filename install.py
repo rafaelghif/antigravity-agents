@@ -219,6 +219,12 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
         if env_example_src.is_file() and not env_example_dst.exists():
             shutil.copy2(env_example_src, env_example_dst)
 
+        # Bootstrap contracts for verification gates (only if missing in target)
+        if (source_dir / "intent.yaml").is_file() and not (root_dir / "intent.yaml").exists():
+            copy_managed_item(source_dir / "intent.yaml", root_dir / "intent.yaml", backup_dir)
+        if (source_dir / "handoff.json").is_file() and not (root_dir / "handoff.json").exists():
+            copy_managed_item(source_dir / "handoff.json", root_dir / "handoff.json", backup_dir)
+
         # 5. Restore preserved brain files
         for bf, content in preserved_brain.items():
             bf_path = root_dir / ".agents" / "brain" / bf
