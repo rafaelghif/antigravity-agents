@@ -140,7 +140,7 @@ def check_file_list(filenames: list[str], dirpath: str, all_errors: list[str]):
 
 def run_guard() -> bool:
     all_errors = []
-    root_path = Path.cwd()
+    root_path = Path(__file__).resolve().parents[1]
     excludes = {".venv", "venv", ".git", "__pycache__", "node_modules", "graphify-out"}
     
     for dirpath, dirnames, filenames in os.walk(root_path):

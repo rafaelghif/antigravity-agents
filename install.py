@@ -30,6 +30,8 @@ BRAIN_PRESERVE_FILES = (
     "active_context.md",
     "soul.md",
     "schema.md",
+    "AITL_CONSENSUS.yaml",
+    "env-required.json",
 )
 
 
