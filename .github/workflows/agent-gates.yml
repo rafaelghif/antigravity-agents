@@ -1,0 +1,141 @@
+name: AAC v4.43.0 Security & Quality Gates
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Structural Validation (JSON + Version Consistency)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate JSON files
+        run: |
+          set -e
+          for f in .agents/config.json .agents/mcp_config.json.example .agents/brain/env-required.json; do
+            if [ -f "$f" ]; then
+              python3 -m json.tool "$f" > /dev/null
+              echo "OK: $f"
+            fi
+          done
+
+      - name: Validate shell installer syntax
+        run: bash -n install.sh
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest==8.0.0
+          python3 scripts/validate.py
+          pytest tests/
+
+      - name: Detect verification commands
+        run: python3 scripts/verify.py
+
+      - name: Validate release and scanner applicability
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('.agents/config.json').read_text())
+          declared = set(config['security']['sast_tools']) | set(config['security']['secret_scanning'])
+          configured = set(config['security']['scanner_applicability']['repository'])
+          if not configured <= declared:
+              raise SystemExit('scanner applicability contains undeclared tools')
+          if configured != {'gitleaks', 'semgrep'}:
+              raise SystemExit('repository scanner applicability does not match CI')
+          print('release and scanner applicability: OK')
+          PY
+
+      - name: Version consistency check
+        run: |
+          set -e
+          CORE=$(python3 -c "import json;print(json.load(open('.agents/config.json'))['core_version'])")
+          echo "core_version=$CORE"
+          fail=0
+          for f in AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml; do
+            if [ -f "$f" ]; then
+              if ! grep -qF "$CORE" "$f"; then
+                echo "MISSING version $CORE in $f"
+                fail=1
+              fi
+            fi
+          done
+          # Reject stale versions
+          if grep -En "V4\.3\.[0-3]|v4\.3\.[0-3]|V4\.1\.2|v4\.1\.2" AGENTS.md README.md install.sh install.ps1 .agents/TASK_TEMPLATE.md .github/workflows/agent-gates.yml 2>/dev/null; then
+            echo "STALE version string detected"
+            fail=1
+          fi
+          # Reject wrong Prisma filename
+          if grep -rn "prisma\.schema" .agents/ AGENTS.md README.md 2>/dev/null; then
+            echo "Wrong Prisma filename (prisma.schema) detected"
+            fail=1
+          fi
+          exit $fail
+
+  security-and-quality:
+    name: SAST + Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks (Secret Scanning)
+        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Semgrep (SAST)
+        run: |
+          python3 -m pip install pipx==1.6.0
+          pipx install semgrep==1.138.0
+          semgrep scan --config auto --error
+
+  windows-installer:
+    name: Windows Installer Syntax
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Parse PowerShell installer
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/install.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | Format-List | Out-String | Write-Error
+            exit 1
+          }
+          Write-Output "PowerShell syntax: OK"
