@@ -44,7 +44,7 @@ def extract_telemetry(content):
     telemetry = re.findall(r'<telemetry>(.*?)</telemetry>', content, re.DOTALL)
     
     # GitOps Audit Logging
-    audit_file = ".agents/inbox/audit.log"
+    audit_file = str(ROOT / ".agents" / "inbox" / "audit.log")
     with open(audit_file, "a") as f:
         for t in telemetry:
             msg = f"[{datetime.utcnow().isoformat() + 'Z'}] TELEMETRY: {t.strip()}"

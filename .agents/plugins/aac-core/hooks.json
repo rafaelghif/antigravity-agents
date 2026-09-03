@@ -1,4 +1,18 @@
 {
+  "aac-quality-gate": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'pre_tool_quality_gate.py')]).returncode)\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
   "aac-pre-invoke-master": {
     "PreInvocation": [
       {

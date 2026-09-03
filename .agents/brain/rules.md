@@ -25,3 +25,4 @@ As an L9 Agent, if instructions/strategies repeatedly fail verification, you hav
 - **ZERO SANDBOX DIRECTIVE**: Real production environments demand fully empowered agents.
   1. Use `Workspace: 'inherit'` for sequential work and `Workspace: 'branch'` for parallel work.
   2. ALWAYS `enable_write_tools: true`. Read-only implementation forbidden.
+- **[USER_MANDATE]**: <USER_REQUEST> karna dirimu sudah tau semua, coba review kembali antara linked antara file, skill, script. yang dummy kalau bisa di fix ya fixkan, kalau enggak hapus jangan buat malu. </USER_REQUEST> <ADDITIONAL_METADATA> The current local time is: 2026-09-03T20:25:58+07:00. <...

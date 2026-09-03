@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- <USER_REQUEST> commit dulu </USER_REQUEST> <ADDITIONAL_METADATA> The current local time is: 2026-09-03T20:24:47+07:00. </ADDITIONAL_METADATA
+- <USER_REQUEST> karna dirimu sudah tau semua, coba review kembali antara linked antara file, skill, script. yang dummy kalau bisa di fix ya f
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).
