@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- review lagi skill-skill terlalu banyak. mungkin butuh direfactor/merger, saya peduli kualitas bukan kuantitas. dan pastikan lagi setelah di 
+- commit, push main, releases, tag. ingat nama releasesnyna standard `v4.xx.xx`
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).

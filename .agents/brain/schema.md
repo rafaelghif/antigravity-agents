@@ -1,4 +1,4 @@
-# AAC v4.42.1 State Contracts
+# AAC v4.43.0 State Contracts
 
 ## Architecture & Task Lifecycle
 

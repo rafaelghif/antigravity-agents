@@ -59,5 +59,5 @@ Subagents defined in `.agents/agents/<name>.md`. Delegate domain tasks via `invo
 - [PARALLEL_SAFETY] Parallel subagents MUST use isolated workspaces ('branch') or unique handoff payloads to prevent state corruption.
 </ENTERPRISE_BLACKBOARD>
 
-AAC v4.42.1
+AAC v4.43.0
 

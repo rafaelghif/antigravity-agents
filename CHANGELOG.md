@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.43.0] - 2026-09-03
+### Multi-Agent Pipeline Operationalization, Browsing & Epistemic Grounding
+- **Consolidated 11 Core Enterprise Skills**: Refactored and consolidated 18 fragmented micro-skills down to 11 authoritative playbooks (`architecture`, `code-quality`, `data-engineering`, `deep-research`, `design`, `devops`, `observability`, `security`, `semantic-graphing`, `verification`, `caveman`).
+- **Epistemic Grounding Engine**: Created pure stdlib `scripts/grounding.py` that discovers actual languages, dependencies, frameworks, and manifests before coding, eliminating API hallucinations.
+- **Operationalized Multi-Agent DAG**: Wired authentic verification gates to personas in `.agents/workflows/standard_pr.yaml` (PM intent lifecycle, Backend verification gates, QA test suite, DevSecOps hygiene, Scrum Master standup reporting).
+- **Full Browsing & Search Permissions**: Granted unrestricted permissions for `search_web`, `read_url_content`, and `read_browser_page` in `.agents/antigravity-settings.example.json`.
+- **Multi-Mode Meeting Orchestration**: Extended `scripts/meeting_coordinator.py` with `--standup`, `--planning`, `--review`, and `--sync` on-demand meeting modes.
+- **Dedicated Researcher Persona**: Created `.agents/agents/researcher.md` backed by the `deep-research` skill.
+- **Expanded Unit Test Suite**: Total passing unit tests grew from 36 to 52 across 10 test modules.
+
 ## [4.42.1] - 2026-09-02
 ### Hotfix: Installer Dependencies
 - **Dependency Fix**: Removed hallucinated requirements (`jq`, `gh`, `curl`) from `install.sh` and `install.ps1` that were blocking fresh installations on environments like Windows PowerShell.

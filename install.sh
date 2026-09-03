@@ -1,7 +1,7 @@
 #!/bin/sh
 # Antigravity Agent Core (AAC) Universal POSIX Bootstrap
 # Delegates installation to cross-platform pure Python engine (install.py)
-# Version marker for validation:  AAC_REF="v4.42.1"
+# Version marker for validation:  AAC_REF="v4.43.0"
 
 set -e
 
