@@ -131,16 +131,23 @@ def get_context(transcript_path: str | None = None) -> str:
             with open(transcript_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
             for line in lines[:3]:
-                data = json.loads(line)
-                content = str(data.get('content', ''))
-                yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
-                if yaml_match:
-                    skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
-            recent_text = " ".join(
-                str(json.loads(line).get('content', ''))
-                for line in lines[-5:]
-                if 'USER_INPUT' in str(json.loads(line).get('type', ''))
-            )
+                try:
+                    data = json.loads(line)
+                    content = str(data.get('content', ''))
+                    yaml_match = re.search(r'---\n(.*?)\n---', content, re.DOTALL)
+                    if yaml_match:
+                        skills_to_inject.update(parse_skills_from_frontmatter(yaml_match.group(1)))
+                except Exception:
+                    continue
+            recent_inputs = []
+            for line in lines[-5:]:
+                try:
+                    data = json.loads(line)
+                    if 'USER_INPUT' in str(data.get('type', '')):
+                        recent_inputs.append(str(data.get('content', '')))
+                except Exception:
+                    continue
+            recent_text = " ".join(recent_inputs)
             if recent_text:
                 skills_to_inject.update(detect_skills_from_text(recent_text))
         except Exception as e:

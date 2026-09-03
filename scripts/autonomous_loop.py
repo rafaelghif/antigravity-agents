@@ -11,7 +11,8 @@ time.sleep(1)
 import re
 from pathlib import Path
 
-tasks_dir = Path("tasks")
+ROOT = Path(__file__).resolve().parents[1]
+tasks_dir = ROOT / "tasks"
 pending_tasks = []
 if tasks_dir.exists():
     for tf in sorted(tasks_dir.glob("*.yaml")):

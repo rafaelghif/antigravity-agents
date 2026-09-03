@@ -4,9 +4,11 @@ import subprocess
 import json
 import os
 import sys
+from pathlib import Path
 
-INBOX_FILE = '.agents/inbox/state.json'
-MEETING_NOTES = 'tasks/meeting_notes.md'
+ROOT = Path(__file__).resolve().parents[1]
+INBOX_FILE = str(ROOT / ".agents" / "inbox" / "state.json")
+MEETING_NOTES = str(ROOT / "tasks" / "meeting_notes.md")
 CRON_INTERVAL = 300 # 5 minutes
 
 def load_blackboard():
@@ -23,6 +25,7 @@ def save_blackboard(data):
     # Safe atomic write similar to inbox_manager
     import tempfile
     dirname = os.path.dirname(INBOX_FILE)
+    os.makedirs(dirname, exist_ok=True)
     fd, temp_path = tempfile.mkstemp(dir=dirname, text=True)
     with os.fdopen(fd, 'w') as f:
         json.dump(data, f, indent=2)
@@ -39,7 +42,7 @@ def run_scrum_master(prompt):
         
     cmd_args = cmd_prefix + ["--agent", "scrum-master", "--print", prompt]
     try:
-        subprocess.run(cmd_args, check=True)
+        subprocess.run(cmd_args, cwd=str(ROOT), check=True)
     except Exception as e:
         sys.stderr.write(f"[MEETING ERROR] Failed to invoke Scrum Master: {e}\n")
 
@@ -48,8 +51,9 @@ def handle_preventive_action(data):
     turns = data.get('debate_turn_count', 0)
     if 7 <= turns < 10:
         print("[PREVENTIVE ACTION] High debate count detected. Warning agents.")
-        subprocess.run([sys.executable, 'scripts/inbox_manager.py', 'send', 'scrum-master', 'all', 
-                        'PREVENTIVE WARNING: You are nearing the debate limit. Reach a consensus or escalate immediately.'])
+        subprocess.run([sys.executable, str(ROOT / 'scripts' / 'inbox_manager.py'), 'send', 'scrum-master', 'all', 
+                        'PREVENTIVE WARNING: You are nearing the debate limit. Reach a consensus or escalate immediately.'],
+                       cwd=str(ROOT))
 
 def handle_corrective_action(data):
     """Unblocks the room and forces the Scrum Master to intervene."""

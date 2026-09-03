@@ -20,11 +20,12 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 
-TASKS_DIR = Path("tasks")
-STATE_DIR = Path(".agents/state")
+ROOT = Path(__file__).resolve().parents[1]
+TASKS_DIR = ROOT / "tasks"
+STATE_DIR = ROOT / ".agents" / "state"
 CHECKPOINT_FILE = STATE_DIR / "checkpoint.json"
-BLACKBOARD_SCRIPT = Path("scripts/inbox_manager.py")
-VERIFY_SCRIPT = Path("scripts/verify.py")
+BLACKBOARD_SCRIPT = ROOT / "scripts" / "inbox_manager.py"
+VERIFY_SCRIPT = ROOT / "scripts" / "verify.py"
 
 # Ensure State Directory exists
 STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -174,7 +175,7 @@ class HermesEngine:
         return "staff-backend"
 
     def _load_persona_skills(self, persona: str) -> str:
-        persona_file = Path(f".agents/agents/{persona}.md")
+        persona_file = ROOT / ".agents" / "agents" / f"{persona}.md"
         if not persona_file.exists():
             return ""
         
@@ -185,7 +186,7 @@ class HermesEngine:
             if match:
                 skill_names = [s.strip() for s in match.group(1).split(",") if s.strip()]
                 for sname in skill_names:
-                    skill_path = Path(f".agents/skills/{sname}/SKILL.md")
+                    skill_path = ROOT / ".agents" / "skills" / sname / "SKILL.md"
                     if skill_path.exists():
                         skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
         except Exception as e:
@@ -195,7 +196,12 @@ class HermesEngine:
 
     def execute_agent(self, persona: str, prompt: str, timeout_seconds: int = 900) -> Tuple[int, str, str]:
         print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' (High Reasoning Effort)...")
-        cmd = ["agy", "--agent", persona, "--effort", "high", "--dangerously-skip-permissions", "-p", prompt]
+        cmd_prefix = ["agy"]
+        try:
+            subprocess.run(["agy", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        except Exception:
+            cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
+        cmd = cmd_prefix + ["--agent", persona, "--effort", "high", "--dangerously-skip-permissions", "-p", prompt]
         try:
             proc = subprocess.run(
                 cmd,

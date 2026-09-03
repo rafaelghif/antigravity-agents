@@ -67,14 +67,15 @@ OPTIONAL_PATHS = (
 
 def is_framework_repo() -> bool:
     """Check if running directly inside the upstream AAC framework repository."""
-    install_sh = ROOT / "install.sh"
-    if install_sh.is_file():
-        try:
-            content = install_sh.read_text(encoding="utf-8")
-            if "antigravity-agents.git" in content:
-                return True
-        except (OSError, UnicodeDecodeError) as exc:
-            sys.stderr.write(f"Notice: Failed to read install.sh: {exc}\n")
+    for script_name in ("install.py", "install.sh"):
+        candidate = ROOT / script_name
+        if candidate.is_file():
+            try:
+                content = candidate.read_text(encoding="utf-8")
+                if "antigravity-agents" in content:
+                    return True
+            except (OSError, UnicodeDecodeError) as exc:
+                sys.stderr.write(f"Notice: Failed to read {script_name}: {exc}\n")
     return False
 
 

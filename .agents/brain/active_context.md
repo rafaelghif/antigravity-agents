@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- check @[.agents/brain/rules.md] , kenapa prompt saya masuk kesana? itu kan seharusnya tempat rules atau self-learn
+- menurut saya masih banyak yang perlu lu review, butuh deeply review semuanya terutama di @[scripts]
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).

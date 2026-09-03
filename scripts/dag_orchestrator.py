@@ -11,6 +11,8 @@ import argparse
 from pathlib import Path
 import shlex
 
+ROOT = Path(__file__).resolve().parents[1]
+
 async def run_task(task_id, task_info):
     command = task_info.get("command", "")
     if not command:
@@ -19,11 +21,14 @@ async def run_task(task_id, task_info):
     
     print(f"[{task_id}] Starting: {command}")
     cmd_parts = shlex.split(command)
+    if cmd_parts and cmd_parts[0] in ("python", "python3"):
+        cmd_parts[0] = sys.executable
     
     process = await asyncio.create_subprocess_exec(
         *cmd_parts,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.PIPE,
+        cwd=str(ROOT)
     )
     
     stdout, stderr = await process.communicate()
