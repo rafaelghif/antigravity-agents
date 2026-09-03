@@ -36,13 +36,27 @@ CRITICAL: All dynamic and static tasks in .agents/tasks/ MUST adhere strictly to
 > ```
 
 > **[Handoff Contract]**
-> Output the JSON handoff payload upon completion to `.agents/brain/handoff.json`:
+> Output the structured JSON handoff payload upon completion to `handoff.json`:
 > ```json
 > {
 >   "task_id": "TASK-XXX",
->   "status": "DONE",
->   "modified_files": [],
->   "tests_run": [],
->   "epistemic_evidence": "Verification output logs proving zero regressions."
+>   "worker_role": "staff-backend",
+>   "summary": "Completed feature implementation with zero regressions.",
+>   "modifications": [
+>     {
+>       "filepath": "path/to/file.py",
+>       "change_type": "UPDATE",
+>       "description": "Implemented core business logic."
+>     }
+>   ],
+>   "tests": [
+>     {
+>       "test_command": "python3 -m unittest discover tests",
+>       "status": "PASSED",
+>       "output_snippet": "All tests passed."
+>     }
+>   ],
+>   "confidence_score": 0.95,
+>   "requires_human": false
 > }
 > ```
