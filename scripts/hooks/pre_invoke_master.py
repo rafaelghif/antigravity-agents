@@ -65,6 +65,10 @@ SKILL_KEYWORDS = {
     ],
     "semantic-graphing": [
         "semantic graph", "knowledge graph", "blast radius", "call graph", "dependency tree", "ast scan", "pagerank"
+    ],
+    "deep-research": [
+        "research", "search web", "browse", "documentation", "docs", "lookup", "rfc",
+        "investigate", "latest version", "official guide", "api reference"
     ]
 }
 

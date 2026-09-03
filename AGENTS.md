@@ -36,13 +36,14 @@ CRITICAL: Read relevant `.agents/skills/<name>/SKILL.md` before acting. Do not d
 - `security`: Zero-Trust, secrets, PBAC | `devops`: Docker, K8s, CI/CD, IaC
 - `design`: UI components, DTCG, a11y | `performance-optimization`: Web Vitals, tree-shaking
 - `observability`: Metrics, tracing, logs | `semantic-graphing`: Blast radius & GraphRAG
-- `mcp-setup`: Model Context Protocol configuration
+- `deep-research`: Web research & docs lookup | `mcp-setup`: Model Context Protocol
 </SKILL_TRIGGERS>
 
 <L9_PERSONAS>
 Subagents defined in `.agents/agents/<name>.md`. Delegate domain tasks via `invoke_subagent`:
 - `scrum-master`: Orchestration, task tracking, blocker resolution, meetings.
 - `product-manager`: Requirements, story breakdown, PRDs, acceptance criteria.
+- `researcher`: Technical research, official documentation lookup, API contracts.
 - `frontend-architect`: UI, components, CSS/Tailwind, WCAG 2.2 AA, Web Vitals.
 - `staff-backend`: Distributed systems, APIs, RFC 7807 contracts, resilience.
 - `database-sre`: Zero-downtime expand-contract migrations, indexing, concurrency.

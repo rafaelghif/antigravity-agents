@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- saya butuh kamu beneran deep review lagi, masih banyak yang missing, dan banyak yang tidak dijalankan
+- ingat jangan mudah puas. pastikan lagi semuanya. apalagi di meeting, hak akses, kemampuan browsing (searching) dan lainnya masih banyak seka
 
 ## 📌 Key Decisions & Invariants
 - Enforce strict Caveman token economy (terse communication, byte-exact code).
