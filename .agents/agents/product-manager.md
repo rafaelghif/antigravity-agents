@@ -3,7 +3,7 @@ name: product-manager
 description: Principal Product Manager. PRDs, story mapping, atomic task breakdown.
 mode: subagent
 subagent: true
-skills: [api-contracts, architecture, caveman]
+skills: [architecture, caveman]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

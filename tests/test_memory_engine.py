@@ -30,19 +30,22 @@ class TestMemoryEngine(unittest.TestCase):
         self.assertIn("caveman", skills_cave)
 
         skills_perf = pre_invoke_master.detect_skills_from_text("audit webperf and improve core web vitals LCP")
-        self.assertIn("performance-optimization", skills_perf)
+        self.assertIn("design", skills_perf)
 
         skills_simp = pre_invoke_master.detect_skills_from_text("please simplify this over-engineered code")
-        self.assertIn("code-simplification", skills_simp)
+        self.assertIn("code-quality", skills_simp)
 
         skills_res = pre_invoke_master.detect_skills_from_text("ensure idempotency and add circuit breaker retry backoff")
-        self.assertIn("resilience-engineering", skills_res)
+        self.assertIn("architecture", skills_res)
 
         skills_mig = pre_invoke_master.detect_skills_from_text("perform zero downtime schema migration with lock timeout")
-        self.assertIn("zero-downtime-migrations", skills_mig)
+        self.assertIn("data-engineering", skills_mig)
 
         skills_api = pre_invoke_master.detect_skills_from_text("check api contract and prevent breaking change with rfc 7807")
-        self.assertIn("api-contracts", skills_api)
+        self.assertIn("architecture", skills_api)
+
+        skills_resr = pre_invoke_master.detect_skills_from_text("lookup documentation and search web for official rfc")
+        self.assertIn("deep-research", skills_resr)
 
     def test_update_project_memory_runs_safely(self):
         # Ensure memory consolidation runs without errors

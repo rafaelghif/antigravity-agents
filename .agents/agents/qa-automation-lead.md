@@ -3,7 +3,7 @@ name: qa-automation-lead
 description: Staff QA Automation Lead. End-to-end testing, property-based testing, chaos engineering.
 mode: subagent
 subagent: true
-skills: [verification, code-quality, dry]
+skills: [verification, code-quality]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

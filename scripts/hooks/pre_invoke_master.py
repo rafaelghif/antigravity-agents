@@ -7,22 +7,28 @@ from pathlib import Path
 SKILL_KEYWORDS = {
     "design": [
         "ui", "ux", "component", "page", "styling", "css", "tailwind", "html",
-        "frontend", "view", "button", "modal", "layout", "responsive", "screen"
+        "frontend", "view", "button", "modal", "layout", "responsive", "screen",
+        "webperf", "performance", "perf", "core web vitals", "lcp", "inp", "cls",
+        "lazy loading", "bundle size", "tree-shaking", "speed up", "a11y", "accessibility"
     ],
     "code-quality": [
         "code", "refactor", "function", "class", "method", "bug", "fix", "feature",
-        "typescript", "python", "javascript", "solid", "optimization", "clean"
-    ],
-    "dry": [
-        "dry", "duplicate", "duplication", "deduplicate", "copy-paste", "clone", "redundant", "dedup"
+        "typescript", "python", "javascript", "solid", "optimization", "clean",
+        "dry", "duplicate", "duplication", "deduplicate", "copy-paste", "clone", "redundant", "dedup",
+        "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
+        "code-simplify", "flatten"
     ],
     "security": [
         "auth", "login", "jwt", "token", "password", "secret", "permission", "rbac",
         "security", "sanitize", "encryption", "hash", "session", "oauth"
     ],
     "architecture": [
-        "database", "db", "schema", "migration", "table", "model", "orm", "prisma",
-        "drizzle", "api", "endpoint", "controller", "service", "repository", "system"
+        "database", "db", "schema", "table", "model", "orm", "prisma",
+        "drizzle", "api", "endpoint", "controller", "service", "repository", "system",
+        "idempotency", "idempotent", "retry", "backoff", "jitter", "circuit breaker",
+        "outbox", "saga", "distributed", "deadlock", "concurrency", "race condition",
+        "api contract", "breaking change", "backward compatibility", "rfc 7807",
+        "problem details", "zod validation", "pydantic validation", "dto"
     ],
     "verification": [
         "test", "tests", "testing", "pytest", "jest", "unit", "e2e", "assert",
@@ -31,34 +37,14 @@ SKILL_KEYWORDS = {
     "caveman": [
         "caveman", "cavemen", "hemat token", "token saving", "terse", "singkat", "compress tokens"
     ],
-    "performance-optimization": [
-        "webperf", "performance", "perf", "core web vitals", "lcp", "inp", "cls",
-        "lazy loading", "bundle size", "tree-shaking", "speed up"
-    ],
-    "code-simplification": [
-        "simplify", "simplification", "clean code", "over-engineered", "refactor simple",
-        "code-simplify", "flatten"
-    ],
-    "resilience-engineering": [
-        "idempotency", "idempotent", "retry", "backoff", "jitter", "circuit breaker",
-        "outbox", "saga", "distributed", "deadlock", "concurrency", "race condition"
-    ],
-    "zero-downtime-migrations": [
-        "zero downtime", "expand contract", "concurrent index", "lock timeout",
-        "non-blocking migration", "schema evolution", "backfill"
-    ],
-    "api-contracts": [
-        "api contract", "breaking change", "backward compatibility", "rfc 7807",
-        "problem details", "zod validation", "pydantic validation", "dto"
-    ],
     "data-engineering": [
-        "etl", "elt", "pipeline", "data engineering", "batch processing", "cdc", "debezium", "kafka", "backfill", "partitioning"
+        "etl", "elt", "pipeline", "data engineering", "batch processing", "cdc", "debezium",
+        "kafka", "backfill", "partitioning", "zero downtime", "expand contract",
+        "concurrent index", "lock timeout", "non-blocking migration", "schema evolution"
     ],
     "devops": [
-        "docker", "dockerfile", "container", "kubernetes", "k8s", "ci/cd", "terraform", "iac", "helm", "deployment", "sre"
-    ],
-    "mcp-setup": [
-        "mcp", "model context protocol", "mcp server", "mcp setup", "mcp config"
+        "docker", "dockerfile", "container", "kubernetes", "k8s", "ci/cd", "terraform",
+        "iac", "helm", "deployment", "sre", "mcp", "model context protocol", "mcp server", "mcp setup", "mcp config"
     ],
     "observability": [
         "logging", "metrics", "tracing", "opentelemetry", "otel", "telemetry", "monitor", "alerting", "grafana", "prometheus"

@@ -3,7 +3,7 @@ name: frontend-architect
 description: Staff Frontend Architect. Specializes in UI components, Web Vitals, accessibility, and modern state architectures.
 mode: subagent
 subagent: true
-skills: [design, performance-optimization, code-quality, dry]
+skills: [design, code-quality]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

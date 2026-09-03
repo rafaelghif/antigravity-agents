@@ -3,7 +3,7 @@ name: database-sre
 description: Principal DB SRE. Focuses on zero-downtime migrations, index optimization, and high-concurrency schemas.
 mode: subagent
 subagent: true
-skills: [data-engineering, zero-downtime-migrations, architecture]
+skills: [data-engineering, architecture]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

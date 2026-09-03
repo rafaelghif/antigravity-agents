@@ -1,37 +1,38 @@
 ---
 name: architecture
-description: Use this skill when the user asks for system design, database schema alterations, API contract changes, or cross-module refactoring.
+description: Use this skill for system design, distributed architecture, strict RFC 7807 API contracts, and resilience engineering (idempotency, outbox, circuit breaker).
 ---
 
+# Enterprise Architecture & Distributed Systems Protocol
+
 <CRITICAL_DIRECTIVE>
-You must execute the Principal Architect procedural workflow and enforce Enterprise Scale before mutating any code.
+Execute Principal Architect procedural rigor. Enforce clear domain boundaries, strict backward-compatible API contracts, and fault-tolerant distributed resilience.
 </CRITICAL_DIRECTIVE>
 
 <ENTERPRISE_STANDARDS>
-1. **Architectural Harmony**: All modules must conform to the project's established architectural style (Clean Architecture, Hexagonal, Layered MVC, or Feature-Sliced). Never introduce architectural dissonance.
-2. **DRY Abstractions & Shared Services**: Extract shared domain rules, cross-cutting concerns (logging, auth, metrics), and database transactions into unified service layers.
-3. **Scalability (Big-O)**: Rigorously analyze time and space complexity of loops, database queries, and caching strategies. Ensure operations scale linearly or logarithmically.
-4. **Statelessness & Idempotency**: Application service layers must be strictly stateless and horizontally scalable. Write idempotent mutations for retriable operations.
-5. **Database Performance & Anti-N+1**: Mandate index utilization for frequent queries. Actively prevent and eliminate N+1 query patterns in ORMs via eager loading/joins.
-6. **Separation of Concerns & DDD**: Maintain strict isolation between controllers, business domain logic, and data access layers. Use abstract repository patterns.
-7. **Extensibility & Polymorphism**: Build plugin-ready architecture. Use polymorphic associations or Strategy Patterns instead of brittle `if/else` ladders.
-8. **Anti-Overengineering (YAGNI)**: No unrequested speculative abstractions. No interface with only one implementation. No factory for a single product. Boring and minimal beats clever and bloated.
+1. **Architectural Style & DDD**:
+   - Strictly conform to project's established style (Clean Architecture, Hexagonal, MVC, or Modular).
+   - Domain isolation: separate controllers, domain business logic, and repository data layers.
+   - Boring and minimal beats clever and bloated (YAGNI). Speculative generic wrappers are forbidden.
+2. **API Contract Governance & Backward Compatibility**:
+   - APIs are permanent public contracts. Field deletion or renaming is BANNED without major version bumps.
+   - Enums are append-only. New request fields MUST be optional with sensible defaults.
+   - Standardized RFC 7807 Problem Details: All HTTP error responses must return structured JSON (`type`, `title`, `status`, `detail`, `code`). Never leak raw stack traces.
+   - Schema-First Validation: Validate all input payloads through strict DTO schemas (Zod, Pydantic, Protobuf).
+3. **Distributed Resilience & Fault Tolerance**:
+   - **Idempotency Keys**: All state-mutating endpoints (payments, order placement, credits) require an `Idempotency-Key` header with cached response re-delivery.
+   - **Full Jitter Exponential Backoff**: Never use fixed sleep. Apply randomized exponential backoff:
+     $$T_{\text{sleep}} = \text{random}(0, \min(T_{\text{max}}, T_{\text{base}} \times 2^{\text{attempt}}))$$
+   - **Transactional Outbox Pattern**: Never write to DB and message broker directly. Write events to an `outbox` table in the same DB transaction; dispatch via dedicated CDC/worker.
+   - **Circuit Breakers**: Wrap external network calls in circuit breakers (trip open on >50% failure window; serve graceful cached/queued fallbacks).
+   - **Deadlock Prevention**: Acquire locks in globally sorted order (by entity ID/UUID). Prefer optimistic version locking.
+4. **Database Performance & Anti-N+1**:
+   - Mandate index utilization for frequent queries. Prevent N+1 query patterns in ORMs via eager loading/joins.
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Architectural Discovery**: Analyze existing project structures using `grep_search` or `scripts/semantic_grapher.py` to identify established conventions.
-2. **Impact & Blast Radius Analysis**: Locate all consumers of the modified schema, interface, or module.
-3. **Draft Unified Contract**: Write the proposed schema/API contract adhering strictly to existing project naming, validation, and DTO standards.
-4. **Review against Constraints**:
-   - Is it backwards compatible?
-   - Does it violate existing bounded contexts in the project?
-   - Does it introduce new stateful dependencies or duplicate logic?
-5. **Approval**: You MUST present an Architecture Decision Record (ADR) detailing the Blast Radius to the user and wait for approval before implementing the changes.
+1. **Discovery & Blast Radius**: Trace affected components using `grep_search` or `scripts/semantic_grapher.py`.
+2. **Contract & Resilience Design**: Define backward-compatible schema, DTO validation, idempotency, and error handling.
+3. **Verify Under Chaos**: Ensure circuit breakers, retries, and outbox tables handle network timeouts and concurrency.
+4. **Approval**: Provide an Architecture Decision Record (ADR) detailing blast radius before executing breaking refactors.
 </PROCEDURAL_WORKFLOW>
-
-
-<L9_STANDARDS>
-- **Micro-services / Event-Driven**: Bias towards decoupled architectures. Use Pub/Sub, queues, or Event Sourcing where applicable.
-- **Statelessness**: REST APIs must be strictly stateless.
-- **Pro-Tier Mandatory**: System design mandates the highest reasoning. Subagents invoking this skill MUST use `Model: pro`.
-</L9_STANDARDS>

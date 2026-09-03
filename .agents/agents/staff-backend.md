@@ -3,7 +3,7 @@ name: staff-backend
 description: Staff Backend Engineer. Distributed systems, APIs, strict contracts.
 mode: subagent
 subagent: true
-skills: [api-contracts, architecture, resilience-engineering, code-quality, observability]
+skills: [architecture, code-quality, observability]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

@@ -1,31 +1,37 @@
 ---
 name: devops
-description: Use this skill when the user asks to create or modify Dockerfiles, Kubernetes manifests, CI/CD pipelines, or Infrastructure as Code (Terraform).
+description: Use this skill for Docker containers, Kubernetes manifests, CI/CD pipelines, Infrastructure as Code (Terraform), and Model Context Protocol (MCP) server setup.
 ---
 
+# Enterprise DevOps, Infrastructure & Toolchain Protocol
+
 <CRITICAL_DIRECTIVE>
-You are the L9 Site Reliability Engineer (SRE). You must enforce zero-downtime deployments, strict security, and cost-aware infrastructure for all DevOps tasks.
+Enforce zero-downtime deployments, immutable container security, least-privilege infrastructure, and deterministic MCP toolchain configuration.
 </CRITICAL_DIRECTIVE>
 
 <ENTERPRISE_STANDARDS>
 1. **Containerization (Docker)**:
    - Always use multi-stage builds to minimize image size and attack surface.
    - Never run containers as `root`. Specify `USER nonroot` explicitly.
-   - Use distroless base images when possible for production workloads.
-2. **Kubernetes (2026 Standards)**:
-   - Mandate the use of the **Gateway API** instead of legacy Ingress controllers.
-   - Enforce strict Resource Quotas (Requests & Limits) for every deployment.
-   - Configure Readiness and Liveness Probes to ensure zero-downtime rolling updates.
-3. **Infrastructure as Code (Terraform/OpenTofu)**:
-   - State files must be encrypted and stored remotely (e.g., S3 with DynamoDB locking).
-   - Use Policy-as-Code (Checkov, OPA) to prevent AI-generated misconfigurations from going live.
-4. **CI/CD Pipelines (GitHub Actions/GitLab)**:
-   - Enforce "Human-in-the-Loop" for production deployments.
-   - Mandate Software Bill of Materials (SBOM) generation and image signing for supply chain security.
+   - Use distroless or alpine base images for production deployments.
+2. **Kubernetes Architecture**:
+   - Enforce the Gateway API standard instead of legacy Ingress controllers.
+   - Mandate strict Resource Quotas (Requests & Limits) on all deployment manifests.
+   - Configure Readiness and Liveness Probes to guarantee zero-downtime rolling updates.
+3. **Infrastructure as Code (Terraform / OpenTofu)**:
+   - Remote encrypted state storage with distributed state locking (e.g. S3 + DynamoDB).
+   - Enforce Policy-as-Code (Checkov, OPA) to prevent misconfigurations from going live.
+4. **CI/CD Pipelines & Supply Chain Security**:
+   - Enforce protected branches and automated verification gates before merge.
+   - Generate Software Bill of Materials (SBOM) and container image provenance signing.
+5. **Model Context Protocol (MCP) Toolchain Configuration**:
+   - Store configurations in `.agents/mcp_config.json` adhering to the official MCP JSON schema.
+   - Security First: NEVER hardcode raw API tokens in tracked files. Inject secrets exclusively via environment variables.
+   - Least Privilege: Expose only the required database schemas, read scopes, or tools.
 </ENTERPRISE_STANDARDS>
 
-<L9_STANDARDS>
-- **Agentic Workloads**: If deploying AI agents, treat them as Stateful, Bursty workloads. Use Worker Pools behind a message queue, NOT standard stateless web services.
-- **FinOps Guardrails**: Ensure auto-scaling groups have hard limits to prevent runaway compute costs.
-- **Pro-Tier Mandatory**: Subagents invoking this skill MUST use `Model: pro`.
-</L9_STANDARDS>
+<PROCEDURAL_WORKFLOW>
+1. **Inspect Infrastructure**: Check existing Dockerfiles, CI workflows, and MCP configurations.
+2. **Apply Hardened Manifests**: Implement multi-stage builds, non-root users, and secret parameterization.
+3. **Verify Compliance**: Run `python3 scripts/verify.py --execute` and validate container builds locally.
+</PROCEDURAL_WORKFLOW>

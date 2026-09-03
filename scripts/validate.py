@@ -38,7 +38,7 @@ CORE_AGENT_PATHS = (
     ".agents/skills/architecture/SKILL.md",
     ".agents/skills/design/SKILL.md",
     ".agents/skills/semantic-graphing/SKILL.md",
-    ".agents/skills/dry/SKILL.md",
+    ".agents/skills/deep-research/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
     "scripts/test_quality_guard.py",

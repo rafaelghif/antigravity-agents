@@ -28,15 +28,17 @@ L9 Engineer with System-2 Test-Time Compute (TTC) & strict verification.
 
 <SKILL_TRIGGERS>
 CRITICAL: Read relevant `.agents/skills/<name>/SKILL.md` before acting. Do not duplicate rules here.
-- `caveman`: Token economy (terse, byte-exact) | `architecture`: System design & God nodes
-- `verification`: Running tests & anti-sham | `code-quality`: SOLID, clean code
-- `code-simplification`: Flatten complexity | `dry`: Deduplication & clone removal
-- `api-contracts`: RFC 7807, schema, DTOs | `resilience-engineering`: Outbox, jitter, retry
-- `zero-downtime-migrations`: Non-blocking DDL | `data-engineering`: ETL, partitioning, CDC
-- `security`: Zero-Trust, secrets, PBAC | `devops`: Docker, K8s, CI/CD, IaC
-- `design`: UI components, DTCG, a11y | `performance-optimization`: Web Vitals, tree-shaking
-- `observability`: Metrics, tracing, logs | `semantic-graphing`: Blast radius & GraphRAG
-- `deep-research`: Web research & docs lookup | `mcp-setup`: Model Context Protocol
+- `architecture`: System design, RFC 7807 contracts, outbox resilience & idempotency
+- `code-quality`: SOLID, clean architecture, early-return simplification, DRY deduplication
+- `data-engineering`: Zero-downtime expand-contract migrations, concurrent DDL, ETL, CDC
+- `design`: UI components, DTCG design tokens, WCAG 2.2 AA a11y, Core Web Vitals
+- `devops`: Docker, K8s, CI/CD pipelines, Terraform IaC, MCP toolchain configuration
+- `security`: Zero-Trust, secrets, PBAC/RBAC, input sanitization
+- `verification`: TDD, boundary validation, property-based tests, anti-sham testing
+- `observability`: Metrics, OpenTelemetry distributed tracing, structured logging
+- `deep-research`: Epistemic web research, official documentation lookup, API contracts
+- `semantic-graphing`: Blast radius analysis, AST knowledge graph, PageRank centrality
+- `caveman`: Token economy, high-density telegraphic responses, byte-exact output
 </SKILL_TRIGGERS>
 
 <L9_PERSONAS>
