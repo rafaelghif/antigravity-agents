@@ -13,32 +13,11 @@ def update_project_memory() -> None:
     memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if not memory_path.exists():
         return
-    
-    stack = []
-    # Node detection
-    pkg_path = ROOT / 'package.json'
-    if pkg_path.exists():
-        try:
-            data = json.loads(pkg_path.read_text(encoding='utf-8'))
-            deps = {**data.get('dependencies', {}), **data.get('devDependencies', {})}
-            if 'next' in deps: stack.append('Next.js')
-            elif 'react' in deps: stack.append('React')
-            elif 'vue' in deps: stack.append('Vue')
-            if 'tailwindcss' in deps: stack.append('Tailwind CSS')
-            if '@tanstack/react-query' in deps or 'react-query' in deps: stack.append('TanStack Query')
-            if 'zustand' in deps: stack.append('Zustand')
-            if 'prisma' in deps or '@prisma/client' in deps: stack.append('Prisma ORM')
-            if 'drizzle-orm' in deps: stack.append('Drizzle ORM')
-        except Exception as e:
-            sys.stderr.write(f"Package.json analysis notice: {str(e)}\n")
-
-    # Python detection
-    if (ROOT / 'pyproject.toml').exists() or (ROOT / 'requirements.txt').exists():
-        stack.append('Python')
-
-    if stack:
-        stack_str = ", ".join(stack)
-        try:
+    try:
+        from scripts.grounding import detect_ecosystems
+        ecosystems = detect_ecosystems(ROOT)
+        if ecosystems:
+            stack_str = ", ".join(sorted(ecosystems.keys()))
             content = memory_path.read_text(encoding='utf-8')
             if 'Auto-detected by agent' in content:
                 content = content.replace(
@@ -46,8 +25,8 @@ def update_project_memory() -> None:
                     f'- Stack Profile: {stack_str}'
                 )
                 memory_path.write_text(content, encoding='utf-8')
-        except Exception as e:
-            sys.stderr.write(f"Memory update notice: {str(e)}\n")
+    except Exception as e:
+        sys.stderr.write(f"Memory update notice: {str(e)}\n")
 
 def extract_telemetry(transcript_path: str) -> None:
     audit_log = ROOT / '.agents' / 'brain' / 'global_audit.log'

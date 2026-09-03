@@ -30,8 +30,8 @@ def main() -> None:
     args = tool_call.get("args", {})
     target_file = str(args.get("TargetFile", ""))
     
-    # 1. Protect Git repository internals from accidental corruption
-    if "/.git/" in target_file or target_file.startswith(".git/"):
+    norm_target = target_file.replace("\\", "/")
+    if "/.git/" in norm_target or norm_target.startswith(".git/"):
         print(json.dumps({
             "decision": "ask",
             "reason": "SECURITY GUARD: Modifying .git internal repository files directly is forbidden."

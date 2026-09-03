@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import sys
 try:
-    import yaml
+    from scripts.yaml_loader import load_yaml
 except ImportError:
-    print("Error: 'yaml' module not found. Please install it using: pip install pyyaml", file=sys.stderr)
-    sys.exit(1)
+    from yaml_loader import load_yaml
 import json
 import os
 from pathlib import Path
@@ -18,8 +17,8 @@ def compile_intent(file_path):
         sys.exit(1)
         
     try:
-        with open(file_path, 'r') as f:
-            intent = yaml.safe_load(f)
+        with open(file_path, 'r', encoding='utf-8') as f:
+            intent = load_yaml(f.read())
             
         if not isinstance(intent, dict):
             raise ValueError("Intent must be a YAML dictionary mapping.")
