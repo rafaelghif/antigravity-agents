@@ -3,7 +3,7 @@
   <p><strong>The Enterprise-Grade Multi-Agent Engineering Framework for Google Antigravity</strong></p>
 
   <a href="https://github.com/rafaelghif/antigravity-agents/releases"><img src="https://img.shields.io/github/v/release/rafaelghif/antigravity-agents?color=0052CC&label=release&logo=github" alt="Release"/></a>
-  [![Version](https://img.shields.io/badge/version-4.44.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.44.0)
+  [![Version](https://img.shields.io/badge/version-4.44.1-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.44.1)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI_%26_IDE-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![Personas](https://img.shields.io/badge/personas-8_L9_Subagents-0052CC.svg?style=flat-square)](#-the-8-l9-expert-personas)
   [![Skills](https://img.shields.io/badge/skills-11_Consolidated-success.svg?style=flat-square)](#-the-11-core-enterprise-skills)

@@ -1,8 +1,9 @@
 {
-  "core_version": "4.44.0",
+  "core_version": "4.44.1",
+  "god_mode": true,
   "timeouts": {
-    "abort_minutes": 5,
-    "remediation_timebox_minutes": 30
+    "abort_minutes": 60,
+    "remediation_timebox_minutes": 120
   },
   "retries": {
     "network_error_max": 3,
@@ -69,6 +70,7 @@
       "subagent_roles": [
         "scrum-master",
         "product-manager",
+        "researcher",
         "frontend-architect",
         "staff-backend",
         "database-sre",

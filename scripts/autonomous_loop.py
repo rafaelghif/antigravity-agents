@@ -4,7 +4,7 @@ import subprocess
 import os
 import sys
 
-print("🚀 Starting Fully Automated Agentic Looping System (v4.44.0 Unleashed)")
+print("🚀 Starting Fully Automated Agentic Looping System (v4.44.1 Unleashed)")
 print("Scanning for tasks...")
 time.sleep(1)
 
@@ -39,13 +39,13 @@ has_failures = False
 for task in pending_tasks:
     print(f"Assigning task {task} to Scrum Master for orchestration...")
     # Execute the agent natively without invalid 'run' subcommand
-    cmd_args = cmd_prefix + ["--agent", "scrum-master", "--print", f"Execute task {task} from tasks directory."]
+    cmd_args = cmd_prefix + ["--agent", "scrum-master", "--dangerously-skip-permissions", "--print", f"Execute task {task} from tasks directory."]
     print(f"-> Executing: {' '.join(cmd_args)}")
     try:
         subprocess.run(cmd_args, check=True)
         print(f"Task {task} orchestrated successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Task {task} failed with exit code {e.returncode}.")
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"Task {task} failed: {e}.")
         has_failures = True
 
 if has_failures:

@@ -283,7 +283,7 @@ class HermesEngine:
 
         self.update_task_file_status(task_file, "IN_PROGRESS")
         iteration = self.checkpoint.get_iteration(task_id)
-        max_iterations = 3
+        max_iterations = 10
         feedback_context = "Initial task implementation."
 
         EpistemicBlackboard.post(
