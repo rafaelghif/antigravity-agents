@@ -105,6 +105,54 @@ class TestHooks(unittest.TestCase):
             out = json.loads(mock_stdout.getvalue().strip())
             self.assertEqual(out.get("decision"), "allow")
 
+    def test_pre_tool_quality_gate_denies_git_without_trailing_slash(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        for target in (".git", "/repo/.git", "./.git", "submodule/.git"):
+            payload = json.dumps({
+                "toolCall": {
+                    "name": "write_to_file",
+                    "args": {"TargetFile": target, "CodeContent": "bad"}
+                }
+            }).encode("utf-8")
+            with patch("sys.stdin.buffer.read", return_value=payload), \
+                 patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                pre_tool_quality_gate.main()
+                out = json.loads(mock_stdout.getvalue().strip())
+                self.assertEqual(out.get("decision"), "deny", f"Failed to deny target: {target}")
+
+    def test_pre_tool_quality_gate_denies_pkcs8_and_api_keys(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        test_secrets = [
+            "-----" + "BEGIN PRIVATE " + "KEY-----\nMIIE...",
+            "-----" + "BEGIN ENCRYPTED PRIVATE " + "KEY-----\nMIIE...",
+            "AI" + "za" + "SyD-Xxxx1234567890abcdefghijklmn",
+            "github_" + "pat_" + "11AAAAAAA01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+            "sk-" + "proj-" + "1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdef",
+            "sk-" + "ant-" + "1234567890abcdefghijklmnopqrstuvwxyz12",
+        ]
+        for sec in test_secrets:
+            payload = json.dumps({
+                "toolCall": {
+                    "name": "write_to_file",
+                    "args": {"TargetFile": "/repo/src/config.py", "CodeContent": sec}
+                }
+            }).encode("utf-8")
+            with patch("sys.stdin.buffer.read", return_value=payload), \
+                 patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                pre_tool_quality_gate.main()
+                out = json.loads(mock_stdout.getvalue().strip())
+                self.assertEqual(out.get("decision"), "deny", f"Failed to deny secret: {sec}")
+
+    def test_pre_invoke_master_omits_unpopulated_dag_anchor(self):
+        ctx = pre_invoke_master.get_context(None)
+        self.assertNotIn("=== DAG ANCHOR ===", ctx)
+
     def test_pre_invoke_master_main_uses_ephemeral_message(self):
         from unittest.mock import patch
         import io

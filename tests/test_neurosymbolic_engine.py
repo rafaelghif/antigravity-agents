@@ -62,5 +62,45 @@ class TestNeurosymbolicEngine(unittest.TestCase):
             tf_path.write_text(json.dumps(payload), encoding="utf-8")
             self.assertFalse(validate_handoff(tf_path))
 
+    def test_string_confidence_score_fails_type_check(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = "0.95"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
+    def test_low_float_confidence_score_warns_without_error(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = 0.5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertTrue(validate_handoff(tf_path))
+
+    def test_non_numeric_confidence_score_fails_cleanly(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = "invalid_score"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
+    def test_none_confidence_score_fails_cleanly(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = None
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
+    def test_nan_confidence_score_fails_cleanly(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = float("nan")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
 if __name__ == '__main__':
     unittest.main()

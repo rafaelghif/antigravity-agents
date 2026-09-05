@@ -13,9 +13,15 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from hook_utils import read_hook_payload
 
 SECRET_PATTERNS = [
-    r'-----BEGIN\s+(?:RSA|OPENSSH|EC|DSA)\s+PRIVATE\s+KEY-----',
-    r'ghp_[a-zA-Z0-9]{36}',
+    r'-----BEGIN\s+(?:[A-Z0-9_-]+\s+)?(?:ENCRYPTED\s+)?PRIVATE\s+KEY-----',
+    r'gh[pousr]_[a-zA-Z0-9_]{36,}',
+    r'github_pat_[a-zA-Z0-9_]{82}',
     r'AKIA[0-9A-Z]{16}',
+    r'AIza[0-9A-Za-z\-_]{30,40}',
+    r'sk-[a-zA-Z0-9]{20,}',
+    r'sk-proj-[a-zA-Z0-9_-]{40,}',
+    r'sk-ant-[a-zA-Z0-9_-]{30,}',
+    r'xox[baprs]-[0-9a-zA-Z]{10,48}',
 ]
 
 def main() -> None:
@@ -30,8 +36,9 @@ def main() -> None:
     args = tool_call.get("args", {})
     target_file = str(args.get("TargetFile", ""))
     
-    norm_target = target_file.replace("\\", "/")
-    if "/.git/" in norm_target or norm_target.startswith(".git/"):
+    norm_target = target_file.replace("\\", "/").rstrip("/")
+    path_parts = [p for p in norm_target.split("/") if p and p != "."]
+    if ".git" in path_parts:
         sys.stderr.write("[DEVSECOPS AUDIT] Direct .git modification detected in payload.\n")
         print(json.dumps({"decision": "deny", "reason": "Direct modification of .git directory is strictly prohibited."}))
         return

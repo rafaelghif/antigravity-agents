@@ -52,15 +52,25 @@ def validate_handoff(json_path: Path) -> bool:
     print(f"Modifications: {len(data['modifications'])} files | Tests: {len(data['tests'])} run")
     
     # Enforce Business Logic
-    if not (0.0 <= float(data["confidence_score"]) <= 1.0):
-        print(f"=> ERROR: Confidence score must be between 0.0 and 1.0, got {data['confidence_score']}")
+    import math
+    try:
+        raw_score = data.get("confidence_score")
+        if raw_score is None:
+            print("=> ERROR: Missing 'confidence_score' in handoff.")
+            return False
+        conf_score = float(raw_score)
+        if math.isnan(conf_score) or not (0.0 <= conf_score <= 1.0):
+            print(f"=> ERROR: Confidence score must be between 0.0 and 1.0, got {raw_score}")
+            return False
+    except (ValueError, TypeError):
+        print(f"=> ERROR: Confidence score must be a valid numeric float, got {data.get('confidence_score')}")
         return False
 
     if not data["requires_human"] and len(data["modifications"]) > 0 and len(data["tests"]) == 0:
         print("=> FATAL LOGIC ERROR: Modifications were made but NO tests were run! [MANDATORY_TDD Rule Violated]")
         return False
 
-    if data["confidence_score"] < 0.7 and not data["requires_human"]:
+    if conf_score < 0.7 and not data["requires_human"]:
         print("=> WARNING: Confidence is too low (<0.7) but human intervention wasn't requested. Reviewer must scrutinize.")
 
     return True

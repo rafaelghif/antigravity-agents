@@ -133,24 +133,36 @@ def get_context(transcript_path: str | None = None) -> str:
     memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if memory_path.exists():
         raw_lines = memory_path.read_text(encoding='utf-8').splitlines()
-        populated = [l for l in raw_lines if not l.endswith('Auto-detected by agent') and l.strip()]
+        populated = [
+            l for l in raw_lines
+            if l.strip().startswith('- ')
+            and not l.endswith('Auto-detected by agent')
+        ]
         if populated:
-            msgs.append("=== CROSS-SESSION MEMORY ===\n" + "\n".join(populated))
+            msgs.append("=== CROSS-SESSION MEMORY ===\n" + "\n".join(populated[:6]))
             
     # 2. Long-Term DAG Anchor (only if active)
     anchor_path = ROOT / '.agents' / 'brain' / 'ANCHOR.md'
     if anchor_path.exists():
         text = anchor_path.read_text(encoding='utf-8').strip()
-        if text and text != "(No context yet)":
+        if text and "(No context yet)" not in text and "- Phase: NONE" not in text:
             msgs.append(f"=== DAG ANCHOR ===\n{text}")
             
     # 3. Self-Learned Rules (only active bullet rules, omit header to save tokens)
     rules_path = ROOT / '.agents' / 'brain' / 'rules.md'
     if rules_path.exists():
         raw_rules = rules_path.read_text(encoding='utf-8').splitlines()
-        active_rules = [l for l in raw_rules if l.startswith('- ')]
+        active_rules = [
+            l for l in raw_rules
+            if l.startswith('- ')
+            and not l.startswith('- Mutate')
+            and not l.startswith('- Prune')
+            and not l.startswith('- Evolve')
+            and 'NO_SUBAGENT_SANDBOX' not in l
+            and 'ZERO SANDBOX' not in l
+        ]
         if active_rules:
-            msgs.append("=== PROCEDURAL RULES ===\n" + "\n".join(active_rules))
+            msgs.append("=== PROCEDURAL RULES ===\n" + "\n".join(active_rules[:8]))
             
     # 4. Compact Skill Directives (Eliminates token bloat by avoiding full markdown dump)
     skills_to_inject = set()
