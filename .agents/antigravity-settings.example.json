@@ -1,8 +1,10 @@
 {
-  "toolPermission": "always-proceed",
-  "enableTerminalSandbox": false,
+  "agentMode": "accept-edits",
   "allowNonWorkspaceAccess": true,
   "artifactReviewPolicy": "auto",
+  "colorScheme": "tokyo night",
+  "enableTerminalSandbox": false,
+  "model": "Gemini 3.8 Flash (High)",
   "permissions": {
     "allow": [
       "command(*)",
@@ -34,5 +36,10 @@
       "command(rm -rf /)"
     ],
     "ask": []
-  }
+  },
+  "toolPermission": "always-proceed",
+  "trustedWorkspaces": [
+    "/path/to/your/workspace"
+  ],
+  "verbosity": "low"
 }

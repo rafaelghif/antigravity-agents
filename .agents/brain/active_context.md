@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- **Task**: /boost btw @[.agents/antigravity-compatibility.json] ini kan gemini 3.8 flash kok pakai low? kan ada high, pakai high semua biar...
+- **Task**: /boost check lagi example dan actual, sangat-sangat berbeda, pastikan example dan actual sama pergi (kecuali value karna itukan...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
@@ -14,6 +14,7 @@
 - Strict word budgets and zero regressions across all 9 gates.
 
 ## 🚀 Recent Accomplishments
+- Synchronized schemas, servers, keys, and permissions across example and actual config files, hardened validate.py and health_check.py, and added test_config_alignment.py
 - Upgraded Gemini execution model and all 8 agent personas to high reasoning effort
 - Built scripts/health_check.py (14 health dimensions, --json, --repair) and hardened memory_consolidator with concurrency locking
 - Hardened install.py lifecycle (--version, --status, --repair, --rollback, --uninstall) and SHA256 install manifest
@@ -23,7 +24,6 @@
 - Implemented 5 missing OS hook chaos test cases in `tests/test_hooks.py` (`test_os_hook_crlf_mismatch`, `test_os_hook_missing_dependency`, `test_os_hook_concurrency_race`, `test_os_hook_special_unicode_paths`, `test_os_hook_null_env_vars`), satisfying all acceptance criteria in `tasks/03_qa_audit.yaml`.
 - Hardened `install.py` with `--source-dir` and local checkout fallback for air-gapped / offline installations and ensured `.agents-backups/` is added to consumer `.gitignore`.
 - Ported hook execution commands in `.agents/plugins/aac-core/hooks.json` to use `sys.executable` in subprocesses.
-- Centralized safe standard input decoding in `scripts/hooks/hook_utils.py` (`read_safe_stdin`), ensuring UTF-8 and mock compatibility across Linux and Windows while maintaining DRY guard compliance.
 
 ## ⏳ Next Immediate Steps
 - Deliver final completion report to caller.

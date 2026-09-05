@@ -403,19 +403,20 @@ class HealthChecker:
 
     def check_permission_mismatch(self) -> bool:
         issues = []
-        settings_file = self.root / ".agents" / "antigravity-settings.example.json"
-        if settings_file.is_file():
-            try:
-                data = json.loads(settings_file.read_text(encoding="utf-8"))
-                perms = data.get("permissions")
-                if not isinstance(perms, dict) or "allow" not in perms or "deny" not in perms:
-                    issues.append("permissions object missing allow/deny lists")
-            except Exception as e:
-                issues.append(f"antigravity-settings.example.json error: {e}")
+        for sf_name in ("antigravity-settings.example.json", "antigravity-settings.json"):
+            settings_file = self.root / ".agents" / sf_name
+            if settings_file.is_file():
+                try:
+                    data = json.loads(settings_file.read_text(encoding="utf-8"))
+                    perms = data.get("permissions")
+                    if not isinstance(perms, dict) or "allow" not in perms or "deny" not in perms:
+                        issues.append(f"{sf_name} permissions object missing allow/deny lists")
+                except Exception as e:
+                    issues.append(f"{sf_name} error: {e}")
 
         passed = len(issues) == 0
         if not passed:
-            self.record_issue("permission_mismatch", f"Permission issues: {issues}", str(settings_file), "Settings file invalid", "Yes, restore settings template", "python3 scripts/validate.py")
+            self.record_issue("permission_mismatch", f"Permission issues: {issues}", str(self.root / ".agents" / "antigravity-settings.example.json"), "Settings file invalid", "Yes, restore settings template", "python3 scripts/validate.py")
         self.results["permission_mismatch"] = {"passed": passed, "issues": issues}
         return passed
 

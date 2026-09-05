@@ -1,5 +1,6 @@
 # Sensitive Agent Configurations
 .agents/mcp_config.json
+.agents/antigravity-settings.json
 opencode.json
 
 # Ephemeral Agent State and Scratchpad

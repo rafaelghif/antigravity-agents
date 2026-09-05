@@ -144,9 +144,16 @@ def validate_mcp_config_dict(config: dict, file_label: str) -> None:
 
 
 def validate_mcp() -> None:
-    validate_mcp_config_dict(load_json(".agents/mcp_config.json.example"), ".agents/mcp_config.json.example")
-    if (ROOT / ".agents" / "mcp_config.json").is_file():
-        validate_mcp_config_dict(load_json(".agents/mcp_config.json"), ".agents/mcp_config.json")
+    example_config = load_json(".agents/mcp_config.json.example")
+    validate_mcp_config_dict(example_config, ".agents/mcp_config.json.example")
+    actual_path = ROOT / ".agents" / "mcp_config.json"
+    if actual_path.is_file():
+        actual_config = load_json(".agents/mcp_config.json")
+        validate_mcp_config_dict(actual_config, ".agents/mcp_config.json")
+        ex_servers = set(example_config.get("mcpServers", {}).keys())
+        act_servers = set(actual_config.get("mcpServers", {}).keys())
+        if ex_servers != act_servers:
+            fail(f"mcpServers key mismatch between example and actual: {ex_servers ^ act_servers}")
 
 
 
@@ -182,8 +189,8 @@ def validate_instruction_budget() -> None:
         fail("GEMINI.md must bootstrap AGENTS.md")
 
 
-def validate_settings() -> None:
-    settings = load_json(".agents/antigravity-settings.example.json")
+def validate_single_settings_file(target: str) -> None:
+    settings = load_json(target)
     required = {
         "toolPermission": "always-proceed",
         "enableTerminalSandbox": False,
@@ -191,15 +198,23 @@ def validate_settings() -> None:
     }
     for key, expected in required.items():
         if settings.get(key) != expected:
-            fail(f"settings baseline must set {key}={expected!r}")
+            fail(f"{target} baseline must set {key}={expected!r}")
     permissions = settings.get("permissions")
     if not isinstance(permissions, dict):
-        fail("settings baseline must define permissions")
+        fail(f"{target} baseline must define permissions")
     for key in ("allow", "deny"):
         if not isinstance(permissions.get(key), list) or not permissions[key]:
-            fail(f"settings permissions.{key} must be a non-empty list")
+            fail(f"{target} permissions.{key} must be a non-empty list")
     if not any(item.startswith("command(") for item in permissions["deny"]):
-        fail("settings baseline must deny at least one command")
+        fail(f"{target} baseline must deny at least one command")
+
+
+def validate_settings() -> None:
+    targets = [".agents/antigravity-settings.example.json"]
+    if (ROOT / ".agents" / "antigravity-settings.json").is_file():
+        targets.append(".agents/antigravity-settings.json")
+    for target in targets:
+        validate_single_settings_file(target)
 
 
 def validate_compatibility() -> None:
