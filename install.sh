@@ -5,6 +5,9 @@
 
 set -e
 
+export PYTHONIOENCODING="utf-8"
+export PYTHONUTF8="1"
+
 PYTHON=""
 for candidate in python3 python py; do
   if command -v "$candidate" >/dev/null 2>&1; then

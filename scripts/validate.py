@@ -8,7 +8,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILES = (
     "AGENTS.md",
@@ -61,6 +60,15 @@ CORE_AGENT_PATHS = (
     "scripts/ui_hygiene_guard.py",
     "scripts/self_learner.py",
     "scripts/memory_consolidator.py",
+    "scripts/auto_reviewer.py",
+    "scripts/autonomous_loop.py",
+    "scripts/hermes_manager.py",
+    "scripts/intent_compiler.py",
+    "scripts/start.py",
+    "scripts/hooks/hook_utils.py",
+    "scripts/hooks/post_invoke_telemetry.py",
+    "scripts/hooks/pre_invoke_master.py",
+    "scripts/hooks/pre_tool_quality_gate.py",
 )
 
 REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)

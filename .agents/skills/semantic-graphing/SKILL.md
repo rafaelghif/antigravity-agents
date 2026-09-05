@@ -10,6 +10,7 @@ You are the Semantic Knowledge Mapper. Extract the repository's Knowledge Graph,
 <GRAPH_ENGINE_COMMANDS>
 - `python3 scripts/semantic_grapher.py <dir>`: Full AST signature scan and Architectural God Nodes identification.
 - `python3 scripts/semantic_grapher.py <dir> --blast-radius <SymbolOrFile>`: Transitive BFS impact analysis finding all upstream dependents that break if this node changes.
+- `python3 scripts/semantic_grapher.py <dir> --pagerank --top-central 10`: PageRank centrality ranking of architectural hub symbols.
 - `python3 scripts/semantic_grapher.py <dir> --path-find <Src> <Dst>`: BFS shortest-path dependency tracer between two concepts or modules.
 - `python3 scripts/semantic_grapher.py <dir> --json`: GraphRAG Knowledge Graph export (nodes & edges).
 </GRAPH_ENGINE_COMMANDS>

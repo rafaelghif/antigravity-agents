@@ -15,7 +15,7 @@ def load_blackboard():
     if not os.path.exists(INBOX_FILE):
         return None
     try:
-        with open(INBOX_FILE, 'r') as f:
+        with open(INBOX_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
         sys.stderr.write(f"Blackboard read error: {e}\n")
@@ -27,24 +27,33 @@ def save_blackboard(data):
     dirname = os.path.dirname(INBOX_FILE)
     os.makedirs(dirname, exist_ok=True)
     fd, temp_path = tempfile.mkstemp(dir=dirname, text=True)
-    with os.fdopen(fd, 'w') as f:
+    with os.fdopen(fd, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     os.replace(temp_path, INBOX_FILE)
 
+import shutil
+
 def run_agent(agent_name: str, prompt: str):
-    """Invokes an agent natively via agy to perform real cognitive tasks."""
+    """Invokes an agent via agy CLI if available, with automatic blackboard dispatch."""
     print(f"[MEETING] Invoking {agent_name}: {prompt}")
-    cmd_prefix = ["agy"]
+    # Always record dispatch on disk-backed blackboard
+    sub_env = os.environ.copy()
+    sub_env["PYTHONIOENCODING"] = "utf-8"
+    sub_env["PYTHONUTF8"] = "1"
     try:
-        subprocess.run(["agy", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-    except Exception:
-        cmd_prefix = [sys.executable, "-m", "antigravity_cli"]
-        
-    cmd_args = cmd_prefix + ["--agent", agent_name, "--dangerously-skip-permissions", "--print", prompt]
-    try:
-        subprocess.run(cmd_args, cwd=str(ROOT), check=True)
-    except Exception as e:
-        sys.stderr.write(f"[MEETING ERROR] Failed to invoke {agent_name}: {e}\n")
+        dispatch_cmd = [sys.executable, str(ROOT / "scripts" / "inbox_manager.py"), "send", "coordinator", agent_name, prompt]
+        subprocess.run(dispatch_cmd, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace", env=sub_env, timeout=20)
+    except Exception as exc:
+        sys.stderr.write(f"Notice dispatching to blackboard: {exc}\n")
+
+    if shutil.which("agy"):
+        cmd_args = ["agy", "--agent", agent_name, "--dangerously-skip-permissions", "--print", prompt]
+        try:
+            subprocess.run(cmd_args, cwd=str(ROOT), env=sub_env, timeout=120, check=True)
+        except Exception as e:
+            sys.stderr.write(f"[MEETING NOTICE] CLI invocation for {agent_name} deferred to blackboard: {e}\n")
+    else:
+        print(f"[MEETING] Task dispatched to {agent_name} via blackboard (.agents/inbox/state.json).")
 
 def run_scrum_master(prompt: str):
     run_agent("scrum-master", prompt)

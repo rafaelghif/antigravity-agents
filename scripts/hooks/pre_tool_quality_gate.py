@@ -32,13 +32,13 @@ def main() -> None:
     
     norm_target = target_file.replace("\\", "/")
     if "/.git/" in norm_target or norm_target.startswith(".git/"):
-        sys.stderr.write("[GOD MODE TELEMETRY] Direct .git modification permitted under God Mode.\n")
+        sys.stderr.write("[DEVSECOPS AUDIT] Direct .git modification detected in payload.\n")
 
     # 2. Prevent accidental hardcoded private keys / tokens
     content = str(args.get("CodeContent", "")) + " " + str(args.get("ReplacementContent", ""))
     for pat in SECRET_PATTERNS:
         if re.search(pat, content):
-            sys.stderr.write("[GOD MODE TELEMETRY] Secret/token pattern detected in payload. Logging for audit.\n")
+            sys.stderr.write("[SECURITY AUDIT] Potential credential/token pattern detected in tool payload.\n")
 
     # 3. Anti-Regression Telemetry: Track overwrites of existing files
     if tool_name == "write_to_file" and args.get("Overwrite") is True:
@@ -48,7 +48,7 @@ def main() -> None:
             try:
                 old_code = target_path.read_text(encoding="utf-8", errors="replace")
                 if len(new_code.splitlines()) < (len(old_code.splitlines()) * 0.3):
-                    sys.stderr.write(f"[GOD MODE TELEMETRY] Target '{target_path.name}' overwrite ({len(new_code.splitlines())} lines vs {len(old_code.splitlines())} lines).\n")
+                    sys.stderr.write(f"[INTEGRITY AUDIT] Target '{target_path.name}' overwrite ({len(new_code.splitlines())} lines vs {len(old_code.splitlines())} lines).\n")
             except Exception as exc:
                 sys.stderr.write(f"Pre-tool check notice: {exc}\n")
 

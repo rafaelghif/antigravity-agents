@@ -19,6 +19,16 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+try:
+    from scripts import platform_guard  # noqa: F401
+except ImportError:
+    for _s in (sys.stdout, sys.stderr):
+        if _s and hasattr(_s, "reconfigure"):
+            try:
+                _s.reconfigure(encoding="utf-8", errors="replace")
+            except Exception as _err:
+                sys.stderr.write(f"Stdio notice: {_err}\n")
+
 GITHUB_API_URL = "https://api.github.com/repos/rafaelghif/antigravity-agents/releases/latest"
 REMOTE_REPO = "https://github.com/rafaelghif/antigravity-agents.git"
 TARBALL_URL_TEMPLATE = "https://github.com/rafaelghif/antigravity-agents/archive/refs/tags/{tag}.tar.gz"
@@ -246,6 +256,8 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
         # 7. Configure Git Hooks safely if .git exists
         if (root_dir / ".git").is_dir() and (root_dir / ".githooks" / "pre-commit").is_file():
             try:
+                if os.name != "nt":
+                    (root_dir / ".githooks" / "pre-commit").chmod(0o755)
                 hooks_res = subprocess.run(
                     ["git", "config", "core.hooksPath"],
                     cwd=root_dir,
@@ -321,7 +333,10 @@ def main() -> None:
         verify_script = root_dir / "scripts" / "verify.py"
         if verify_script.is_file():
             print("\n=> Running post-install verification gates...")
-            subprocess.run([sys.executable, str(verify_script), "--execute", "--terse"], cwd=root_dir)
+            sub_env = os.environ.copy()
+            sub_env["PYTHONIOENCODING"] = "utf-8"
+            sub_env["PYTHONUTF8"] = "1"
+            subprocess.run([sys.executable, str(verify_script), "--execute", "--terse"], cwd=root_dir, env=sub_env)
     else:
         print("\n❌ Installation failed. Check logs above or rollback with .agents-backups/.")
         sys.exit(1)

@@ -1,6 +1,8 @@
 * text=auto
 
-# Enforce LF for shell scripts and Python scripts to prevent syntax errors on Windows (WSL/Git Bash)
+# Enforce LF for shell scripts, git hooks, and Python scripts to prevent syntax errors on Windows (WSL/Git Bash)
 *.sh text eol=lf
 *.py text eol=lf
 *.json text eol=lf
+.githooks/* text eol=lf
+.githooks/** text eol=lf

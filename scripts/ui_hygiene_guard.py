@@ -60,7 +60,11 @@ def scan_files_in_dir(dirpath: str, filenames: list, all_violations: dict) -> No
 
 def scan_workspace(root_dir: Path) -> dict:
     all_violations = {}
-    excludes = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist", ".next", ".nuxt"}
+    excludes = {
+        ".git", ".venv", "venv", "env", ".env", "node_modules", "__pycache__",
+        "build", "dist", "out", ".next", ".nuxt", ".svelte-kit", ".angular",
+        ".astro", ".docusaurus", ".turbo", ".cache"
+    }
     for dirpath, dirnames, filenames in os.walk(root_dir):
         dirnames[:] = [d for d in dirnames if d not in excludes]
         scan_files_in_dir(dirpath, filenames, all_violations)

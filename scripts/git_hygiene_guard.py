@@ -77,6 +77,8 @@ def check_staged_git_files(root_dir: Path) -> list:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=60
         )
         if res.returncode == 0:

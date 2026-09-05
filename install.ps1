@@ -3,6 +3,13 @@
 # Version marker for validation:
 $AacRef = "v4.44.2"
 
+# Enforce UTF-8 console, pipe, and process encoding across Windows
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = "utf-8"
+$env:PYTHONUTF8 = "1"
+
 $Python = $null
 foreach ($candidate in @("python3", "python", "py")) {
     $found = Get-Command $candidate -ErrorAction SilentlyContinue

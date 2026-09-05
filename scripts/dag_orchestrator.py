@@ -5,31 +5,53 @@ try:
 except ImportError:
     from yaml_loader import load_yaml
 import sys
+import os
 import argparse
 from pathlib import Path
 import shlex
 
 ROOT = Path(__file__).resolve().parents[1]
 
-async def run_task(task_id, task_info):
+async def run_task(task_id: str, task_info: dict) -> bool:
     command = task_info.get("command", "")
     if not command:
         print(f"[{task_id}] No command specified.")
         return False
     
     print(f"[{task_id}] Starting: {command}")
-    cmd_parts = shlex.split(command)
-    if cmd_parts and cmd_parts[0] in ("python", "python3"):
+    is_win = sys.platform == "win32"
+    cmd_parts = shlex.split(command, posix=not is_win)
+    if is_win:
+        cmd_parts = [p.strip('"') for p in cmd_parts]
+    if cmd_parts and cmd_parts[0] in ("python", "python3", "py"):
         cmd_parts[0] = sys.executable
     
-    process = await asyncio.create_subprocess_exec(
-        *cmd_parts,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-        cwd=str(ROOT)
-    )
+    timeout_sec = float(task_info.get("timeout", 300))
+    sub_env = os.environ.copy()
+    sub_env["PYTHONIOENCODING"] = "utf-8"
+    sub_env["PYTHONUTF8"] = "1"
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *cmd_parts,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=str(ROOT),
+            env=sub_env
+        )
+    except Exception as exc:
+        print(f"[{task_id}] Process launch failed: {exc}")
+        return False
     
-    stdout, stderr = await process.communicate()
+    try:
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout_sec)
+    except asyncio.TimeoutError:
+        print(f"[{task_id}] Timed out after {timeout_sec}s. Terminating...")
+        try:
+            process.kill()
+            await process.wait()
+        except Exception as k_err:
+            sys.stderr.write(f"Kill notice: {k_err}\n")
+        return False
     
     if process.returncode == 0:
         print(f"[{task_id}] Completed successfully.")
@@ -37,17 +59,17 @@ async def run_task(task_id, task_info):
     else:
         print(f"[{task_id}] Failed with code {process.returncode}.")
         if stdout:
-            print(f"[{task_id}] STDOUT: {stdout.decode().strip()}")
+            print(f"[{task_id}] STDOUT: {stdout.decode('utf-8', errors='replace').strip()}")
         if stderr:
-            print(f"[{task_id}] STDERR: {stderr.decode().strip()}")
+            print(f"[{task_id}] STDERR: {stderr.decode('utf-8', errors='replace').strip()}")
         return False
 
-def check_can_run(node, graph, results):
+def check_can_run(node: str, graph: dict, results: dict) -> bool:
     preds = graph[node]
     successful_preds = [p for p in preds if results.get(p, False)]
     return len(preds) == len(successful_preds)
 
-def process_ready_nodes(ready_nodes, graph, results, ts, running_tasks, worker):
+def process_ready_nodes(ready_nodes: tuple, graph: dict, results: dict, ts: graphlib.TopologicalSorter, running_tasks: set, worker: object) -> None:
     for node in ready_nodes:
         if check_can_run(node, graph, results):
             task = asyncio.create_task(worker(node))
@@ -57,7 +79,7 @@ def process_ready_nodes(ready_nodes, graph, results, ts, running_tasks, worker):
             results[node] = False
             ts.done(node)
 
-def process_done_tasks(done, results, ts):
+def process_done_tasks(done: set, results: dict, ts: graphlib.TopologicalSorter) -> None:
     for task in done:
         task_id, success = task.result()
         results[task_id] = success

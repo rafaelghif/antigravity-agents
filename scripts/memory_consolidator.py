@@ -12,7 +12,6 @@ import json, sys, re, argparse
 from pathlib import Path
 from typing import Dict, List, Optional
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ACTIVE_PATH = ROOT / ".agents/brain/active_context.md"
 DEFAULT_MEMORY_PATH = ROOT / ".agents/brain/memory.md"

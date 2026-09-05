@@ -31,8 +31,8 @@ Execute Principal Architect procedural rigor. Enforce clear domain boundaries, s
 </ENTERPRISE_STANDARDS>
 
 <PROCEDURAL_WORKFLOW>
-1. **Discovery & Blast Radius**: Trace affected components using `grep_search` or `scripts/semantic_grapher.py`.
-2. **Contract & Resilience Design**: Define backward-compatible schema, DTO validation, idempotency, and error handling.
+1. **Discovery & Blast Radius**: Trace affected components using `python3 scripts/semantic_grapher.py blast-radius <symbol>` and inspect hub centrality via `python3 scripts/semantic_grapher.py . --pagerank`.
+2. **Contract & Resilience Design**: Define backward-compatible schema, DTO validation, idempotency, and error handling. Verify architectural task dependencies via `python3 scripts/hermes_manager.py --status`.
 3. **Verify Under Chaos**: Ensure circuit breakers, retries, and outbox tables handle network timeouts and concurrency.
 4. **Approval**: Provide an Architecture Decision Record (ADR) detailing blast radius before executing breaking refactors.
 </PROCEDURAL_WORKFLOW>
