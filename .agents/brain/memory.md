@@ -27,3 +27,8 @@
 - Zero sham tests (enforced by `test_quality_guard.py`).
 - Anti-Hallucination: Never assume APIs, dependencies, or file paths without verifying.
 - Auto-clean PR branches on merge (`git branch -D` + remote delete).
+
+
+## 📌 Learned Rules & User Preferences
+- **Task**: kita refactor lagi @[README.md] jangan mengada" fully refactor semuanya, pastikan semuanya professional untuk public. jangan menambahkan yang memang tidak ada, terus chartnya juga belum betul kayaknya, pastikan lagi sesuai project kita ini. kemudian push, tag, releas...
+- /boost kita refactor lagi @[README.md] jangan mengada" fully refactor semuanya, pastikan semuanya professional untuk public. jangan menambahkan yang memang tidak ada, terus chartnya juga belum betul kayaknya, pastikan lagi sesuai project kita ini. kemudian push, tag, releases
