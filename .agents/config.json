@@ -1,5 +1,5 @@
 {
-  "core_version": "4.44.3",
+  "core_version": "4.45.0",
   "god_mode": true,
   "timeouts": {
     "abort_minutes": 60,

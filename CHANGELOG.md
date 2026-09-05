@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.45.0] - 2026-09-05
+### Autonomous Hardening, Air-Gapped Installation & Hook Cross-Platform Resilience
+- **Hermes Task Graph Resilience**: Added fallback to task filename stem in `scripts/hermes_manager.py` to prevent silent task dropping when YAML declarations omit explicit `id:` keys. Ensured 100% discovery and topological ordering across all sprint tasks.
+- **Air-Gapped & Offline Installation Engine**: Enhanced `install.py` with `--source-dir` flag and automated local repository checkout fallback, enabling deterministic offline installations without GitHub network access. Automated addition of `.agents-backups/` to target project `.gitignore`.
+- **Cross-Platform Hook Execution**: Hardened `.agents/plugins/aac-core/hooks.json` to execute nested subprocesses via `sys.executable`, eliminating Python binary naming discrepancies across Windows and POSIX environments.
+- **Safe Multi-Platform Standard Input Buffering**: Centralized binary standard input decoding in `scripts/hooks/hook_utils.py` (`read_safe_stdin()`), preventing UTF-8 and codepage decoding failures across Windows `cp1252` and Linux while adhering strictly to DRY anti-duplication constraints.
+- **OS Hook Chaos Test Suite**: Implemented 5 rigorous test cases in `tests/test_hooks.py` validating CRLF line endings, missing dependency fallbacks, concurrency races, Unicode path normalization, and null environment handling.
+- **Expanded Test Coverage & Full Release Parity**: Reached 164 passing unit tests across 28 test suites in 0.330s with zero regressions across all 9 technical gates and release consensus verification.
+
 ## [4.44.3] - 2026-09-05
 ### Intent Auto-Decomposition, DAG Wave Planner & Cross-Platform UTF-8 Hardening
 - **Intent Auto-Decomposition Engine**: Added `--decompose`, `--output-dir`, and `--force` CLI flags to `scripts/intent_compiler.py` to compile and parse `objectives` into topologically chained `tasks/XX_<slug>.yaml` micro-tasks with regex-bounded domain/persona routing (`staff-backend`, `frontend-architect`, `database-sre`, `devsecops-principal`, `qa-automation-lead`).
