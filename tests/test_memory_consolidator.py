@@ -112,6 +112,24 @@ class TestMemoryConsolidator(unittest.TestCase):
         self.assertGreater(len(sections["accomplishments"]), 0)
         self.assertTrue(any("Concurrent milestone" in acc for acc in sections["accomplishments"]))
 
+    def test_windows_stale_lock_recovery(self):
+        import time
+        from unittest.mock import patch
+        from scripts.memory_consolidator import file_lock
+
+        target = Path(self.tmp_dir.name) / "test_win_lock.md"
+        lock_path = Path(self.tmp_dir.name) / ".test_win_lock.md.lock"
+        lock_path.write_text("abandoned", encoding="utf-8")
+        stale_time = time.time() - 60
+        os.utime(lock_path, (stale_time, stale_time))
+
+        with patch("sys.platform", "win32"):
+            # Should recover from stale lock immediately during polling without raising TimeoutError
+            acquired = False
+            with file_lock(target, timeout=2.0, poll_interval=0.05):
+                acquired = True
+            self.assertTrue(acquired)
+
 
 if __name__ == '__main__':
     unittest.main()

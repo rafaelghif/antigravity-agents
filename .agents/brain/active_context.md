@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- **Task**: /boost # AAC — ANTIGRAVITY AGENT CORE  # MAJOR EVOLUTION / RE-ENGINEERING PROMPT  Act as a:  * Principal AI Agent Architect *...
+- /boost # AAC — ANTIGRAVITY AGENT CORE  # MAJOR EVOLUTION / RE-ENGINEERING PROMPT  Act as a:  * Principal AI Agent Architect * Google...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
@@ -25,7 +25,7 @@
 - Ported hook execution commands in `.agents/plugins/aac-core/hooks.json` to use `sys.executable` in subprocesses.
 
 ## 🚀 Recent Accomplishments
-
+- Fixed upstream upgrade script execution, rollback orphan pruning, and Windows stale lock recovery
 
 ## ⏳ Next Immediate Steps
 - Deliver final completion report to caller.

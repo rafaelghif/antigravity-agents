@@ -40,7 +40,9 @@ def main() -> None:
         sys.exit(subprocess.call(cmd, cwd=root_dir, env=sub_env))
 
     print("=> Local install.py not found in consumer workspace. Fetching upstream installer engine...")
+    tmp_installer: Path | None = None
     try:
+        import tempfile
         req = urllib.request.Request(
             UPSTREAM_INSTALLER_URL,
             headers={"User-Agent": "AAC-Upgrader"}
@@ -48,11 +50,21 @@ def main() -> None:
         with urllib.request.urlopen(req, timeout=10) as resp:
             script_code = resp.read().decode("utf-8")
         
-        proc = subprocess.run([sys.executable, "-c", script_code] + sys.argv[1:], cwd=root_dir, env=sub_env)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", encoding="utf-8", delete=False) as tmp_f:
+            tmp_f.write(script_code)
+            tmp_installer = Path(tmp_f.name)
+
+        proc = subprocess.run([sys.executable, str(tmp_installer)] + sys.argv[1:], cwd=root_dir, env=sub_env)
         sys.exit(proc.returncode)
     except Exception as exc:
         sys.stderr.write(f"Upgrade failed: {exc}\n")
         sys.exit(1)
+    finally:
+        if tmp_installer and tmp_installer.exists():
+            try:
+                tmp_installer.unlink()
+            except OSError as exc:
+                _ = exc
 
 if __name__ == "__main__":
     main()

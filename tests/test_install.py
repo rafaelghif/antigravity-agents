@@ -103,6 +103,30 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn("# Version 1", (self.target / "AGENTS.md").read_text(encoding="utf-8"))
 
+    def test_rollback_prunes_orphaned_files(self):
+        # 1. First installation (v1)
+        install_aac(self.target, "v4.44.0", source_override=self.src)
+        (self.target / "scripts" / "tool.py").write_text("print('v1')\n", encoding="utf-8")
+
+        # 2. Second installation introduces a new tool
+        (self.src / "scripts" / "new_tool.py").write_text("print('new')\n", encoding="utf-8")
+        install_aac(self.target, "v4.45.0", source_override=self.src)
+        self.assertTrue((self.target / "scripts" / "new_tool.py").is_file())
+
+        # 3. Rollback must prune new_tool.py
+        success = run_rollback(self.target)
+        self.assertTrue(success)
+        self.assertFalse((self.target / "scripts" / "new_tool.py").exists())
+        self.assertTrue((self.target / "scripts" / "tool.py").is_file())
+
+    def test_install_generates_project_tailored_intent(self):
+        install_aac(self.target, "v4.45.0", source_override=self.src)
+        intent_path = self.target / "intent.yaml"
+        self.assertTrue(intent_path.is_file())
+        content = intent_path.read_text(encoding="utf-8")
+        self.assertIn(self.target.name, content)
+        self.assertNotIn("Antigravity Fully Agentic Looping System", content)
+
     def test_uninstall_safely_removes_managed_files(self):
         install_aac(self.target, "v4.45.0", source_override=self.src)
         (self.target / ".agents" / "brain" / "memory.md").write_text("# User Memories\n", encoding="utf-8")

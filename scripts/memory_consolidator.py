@@ -152,13 +152,14 @@ def file_lock(target_path: Path, timeout: float = 10.0, poll_interval: float = 0
                 acquired = True
                 break
             except FileExistsError:
+                try:
+                    if lock_path.exists() and (time.time() - lock_path.stat().st_mtime > 30):
+                        lock_path.unlink(missing_ok=True)
+                        continue
+                except Exception as exc:
+                    _ = exc
                 time.sleep(poll_interval)
         if not acquired:
-            try:
-                if lock_path.exists() and (time.time() - lock_path.stat().st_mtime > 30):
-                    lock_path.unlink(missing_ok=True)
-            except Exception as exc:
-                _ = exc
             raise TimeoutError(f"Timed out waiting for Windows file lock: {lock_path}")
         try:
             yield
