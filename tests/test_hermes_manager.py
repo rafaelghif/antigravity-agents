@@ -109,6 +109,8 @@ Body
             called_cmd = mock_run.call_args[0][0]
             self.assertIn("--model", called_cmd)
             self.assertIn("gemini-3.1-pro-high", called_cmd)
+            self.assertIn("--effort", called_cmd)
+            self.assertIn("high", called_cmd)
 
             engine.execute_agent("scrum-master", "Plan sprint")
             called_cmd2 = mock_run.call_args[0][0]
@@ -116,6 +118,42 @@ Body
             self.assertIn("gemini-3.8-flash-high", called_cmd2)
             self.assertIn("--effort", called_cmd2)
             self.assertIn("high", called_cmd2)
+
+    def test_execute_agent_upgrades_reduced_effort_and_preserves_pro(self):
+        engine = HermesEngine()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmproot = Path(tmpdir)
+            agents_dir = tmproot / ".agents" / "agents"
+            agents_dir.mkdir(parents=True, exist_ok=True)
+            # Create an agent file with explicit low effort
+            (agents_dir / "low-effort-agent.md").write_text(
+                "---\nname: low-effort-agent\nmodel: flash\neffort: low\n---\nBody\n",
+                encoding="utf-8"
+            )
+            # Create an agent file with full pro model name
+            (agents_dir / "full-pro-agent.md").write_text(
+                "---\nname: full-pro-agent\nmodel: gemini-3.1-pro-high\neffort: medium\n---\nBody\n",
+                encoding="utf-8"
+            )
+
+            with patch("scripts.hermes_manager.ROOT", tmproot), \
+                 patch("shutil.which", return_value="/usr/local/bin/agy"), \
+                 patch("subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(returncode=0, stdout="OK", stderr="")
+                
+                # Low effort must be upgraded to high and use gemini-3.8-flash-high
+                engine.execute_agent("low-effort-agent", "Do task")
+                cmd1 = mock_run.call_args[0][0]
+                self.assertIn("gemini-3.8-flash-high", cmd1)
+                self.assertIn("high", cmd1)
+                self.assertNotIn("low", cmd1)
+
+                # Full pro model name must be preserved with gemini-3.1-pro-high and high effort
+                engine.execute_agent("full-pro-agent", "Do pro task")
+                cmd2 = mock_run.call_args[0][0]
+                self.assertIn("gemini-3.1-pro-high", cmd2)
+                self.assertIn("high", cmd2)
+                self.assertNotIn("medium", cmd2)
 
     def test_evaluate_gate2_cognitive_fallback(self):
         engine = HermesEngine()

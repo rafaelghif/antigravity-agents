@@ -42,8 +42,12 @@ def orchestrate_task(task_name: str, root_dir: Path = ROOT) -> bool:
     if shutil.which("agy"):
         cmd_args = [
             "agy",
+            "--model",
+            "gemini-3.8-flash-high",
             "--agent",
             "scrum-master",
+            "--effort",
+            "high",
             "--dangerously-skip-permissions",
             "--print",
             f"Execute task {task_name} from tasks directory."

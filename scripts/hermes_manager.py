@@ -242,6 +242,16 @@ class HermesEngine:
         return "\n".join(skill_texts)
 
     def execute_agent(self, persona: str, prompt: str, timeout_seconds: int = 900) -> Tuple[int, str, str]:
+        # Read default reasoning effort from config.json if available
+        default_effort = "high"
+        config_path = ROOT / ".agents" / "config.json"
+        if config_path.is_file():
+            try:
+                cfg_data = json.loads(config_path.read_text(encoding="utf-8"))
+                default_effort = cfg_data.get("orchestration", {}).get("default_reasoning_effort", "high")
+            except Exception as exc:
+                sys.stderr.write(f"Notice reading config.json in Hermes: {exc}\n")
+
         effort_map = {
             "researcher": "high",
             "staff-backend": "high",
@@ -252,7 +262,7 @@ class HermesEngine:
             "product-manager": "high",
             "scrum-master": "high",
         }
-        effort = effort_map.get(persona, "high")
+        effort = effort_map.get(persona, default_effort)
         
         # Resolve model tier from persona metadata
         model_tier = "flash"
@@ -260,10 +270,10 @@ class HermesEngine:
         if persona_file.is_file():
             try:
                 p_text = persona_file.read_text(encoding="utf-8")
-                m = re.search(r"^model:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
+                m = re.search(r"^model:\s*([a-zA-Z0-9_\-\.]+)", p_text, re.MULTILINE)
                 if m:
                     model_tier = m.group(1).lower()
-                m_effort = re.search(r"^effort:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
+                m_effort = re.search(r"^effort:\s*([a-zA-Z0-9_\-\.]+)", p_text, re.MULTILINE)
                 if m_effort:
                     effort = m_effort.group(1).lower()
             except (OSError, UnicodeDecodeError) as exc:
@@ -271,10 +281,14 @@ class HermesEngine:
         elif persona in ("staff-backend", "database-sre", "researcher"):
             model_tier = "pro"
 
-        if model_tier == "pro":
-            model_flag = f"gemini-3.1-pro-{effort}" if effort in ("high", "low") else "gemini-3.1-pro-high"
+        # Mandatory quality invariant: upgrade any reduced effort configuration to high
+        if effort in ("low", "medium", "default", "none") or not effort:
+            effort = "high"
+
+        if "pro" in model_tier:
+            model_flag = "gemini-3.1-pro-high"
         else:
-            model_flag = f"gemini-3.8-flash-{effort}"
+            model_flag = "gemini-3.8-flash-high"
 
         print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' ({effort.capitalize()} Reasoning Effort, Model: {model_flag})...")
         if not shutil.which("agy"):

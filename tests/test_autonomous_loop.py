@@ -31,6 +31,20 @@ class TestAutonomousLoop(unittest.TestCase):
             args = mock_run.call_args[0][0]
             self.assertIn("inbox_manager.py", args[1])
 
+    def test_orchestrate_task_passes_high_effort_flags(self):
+        with patch("shutil.which", return_value="/usr/local/bin/agy"), \
+             patch("subprocess.run") as mock_run:
+            success = autonomous_loop.orchestrate_task("test_task.yaml", ROOT)
+            self.assertTrue(success)
+            # Find the agy call
+            agy_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "agy"]
+            self.assertTrue(len(agy_calls) > 0)
+            called_cmd = agy_calls[0][0][0]
+            self.assertIn("--model", called_cmd)
+            self.assertIn("gemini-3.8-flash-high", called_cmd)
+            self.assertIn("--effort", called_cmd)
+            self.assertIn("high", called_cmd)
+
     def test_run_loop_idle_when_no_tasks(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             exit_code = autonomous_loop.run_loop(Path(tmp_dir))
