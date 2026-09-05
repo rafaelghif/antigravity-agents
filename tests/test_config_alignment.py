@@ -124,6 +124,12 @@ class TestConfigAlignment(unittest.TestCase):
                 set(cli_settings.keys()),
                 f"CLI settings keys mismatch: {set(ex_settings.keys()) ^ set(cli_settings.keys())}"
             )
+            cli_perms = cli_settings.get("permissions", {})
+            self.assertEqual(set(ex_perms.keys()), set(cli_perms.keys()))
+            self.assertEqual(set(ex_perms["allow"]), set(cli_perms["allow"]))
+            self.assertEqual(ex_perms["deny"], cli_perms["deny"])
+            self.assertEqual(ex_perms["ask"], cli_perms["ask"])
+
             self.assertEqual(cli_settings.get("toolPermission"), "always-proceed")
             self.assertEqual(cli_settings.get("enableTerminalSandbox"), False)
             self.assertEqual(cli_settings.get("allowNonWorkspaceAccess"), True)
