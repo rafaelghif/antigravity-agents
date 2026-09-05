@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost # AAC — ANTIGRAVITY AGENT CORE  # MAJOR EVOLUTION / RE-ENGINEERING PROMPT  Act as a:  * Principal AI Agent Architect * Google...
+- SYSTEM MEMORY & DIRECTIVES (Compact token footprint):  === ACTIVE SESSION WORKING CONTEXT === ## 🎯 Current Goal & Task Focus - okey push...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.

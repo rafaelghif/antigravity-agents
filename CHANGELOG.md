@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.46.0] - 2026-09-05
+
+### Added
+- **Sovereign Consumer Target Independence**: Hardened `install.py` contract bootstrap to generate project-tailored `intent.yaml` matching `root_dir.name` and initialized empty `handoff.json` rather than copying AAC's internal daemon objectives into user repositories.
+- **Rollback Orphan Pruning & Manifest Diffing**: Implemented bidirectional manifest diffing in `install.py --rollback` to dynamically detect and remove newly introduced orphan files and empty directories while strictly restoring historical snapshot assets.
+- **Offline & Air-Gapped Lifecycle Support**: Added automated source version detection from `.agents/config.json` when using `--source-dir`, bypassing all external Git remote and HTTP update checks during offline installations.
+- **Bidirectional Config Alignment & Drift Detection**: Implemented comprehensive negative and positive drift detection suites in `tests/test_config_alignment.py` verifying exact value parity across MCP commands, args, and environment references as well as non-placeholder workspace and global settings.
+- **Windows File Lock Stale Recovery Testing**: Added unit tests in `tests/test_memory_consolidator.py` verifying sub-millisecond detection and eviction of stale lock files (>30s) across multi-process workloads.
+
+### Changed
+- **Resilient Cross-Process Memory Concurrency**: Upgraded Windows file-lock polling in `scripts/memory_consolidator.py` to evaluate and clear stale locks on every polling iteration rather than waiting for full timeout exhaustion.
+- **Robust Upstream Upgrader Execution**: Refactored `scripts/upgrade.py` to write upstream fetched installer code to an isolated temporary `.py` script executed via `sys.executable`, eliminating `NameError: name '__file__' is not defined` and preventing Windows command-line character overflow.
+- **Deep Schema & Non-Placeholder Property Parity**: Enhanced `scripts/validate.py` and `scripts/health_check.py` to validate exact equality of `command`, `args`, and `env` across MCP configurations, and deep parity across scalar settings properties (`agentMode`, `colorScheme`, `model`, `verbosity`, `permissions.allow`, `permissions.deny`, `permissions.ask`).
+- **Comprehensive Test Suite Expansion**: Expanded automated unit test suite to 191 tests across 33 test modules passing with 100% determinism in 0.6s.
+
+### Fixed
+- **Installer NameError Guard**: Guarded `__file__` reference in `install.py` (`local_repo = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()`) to prevent runtime crashes when evaluated in execution contexts lacking module file variables.
+- **Settings Path Validation Resilience**: Enforced non-empty path verification for `trustedWorkspaces` in `scripts/validate.py` and aligned example configurations across workspace and global CLI templates.
+
 ## [4.45.0] - 2026-09-05
 
 ### Added
@@ -135,6 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Antigravity Schema Alignment**: Official Google Antigravity Schema Alignment (`config.json` -> `mcp_config.json`).
 - **Cross-Platform Injection**: Native portability improvements for cross-platform agent injection.
 
+[4.46.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.45.0...v4.46.0
 [4.45.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.3...v4.45.0
 [4.44.3]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.2...v4.44.3
 [4.44.2]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.1...v4.44.2

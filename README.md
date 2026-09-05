@@ -3,7 +3,7 @@
   <p><strong>The Enterprise-Grade Multi-Agent Engineering Framework for Google Antigravity</strong></p>
 
   <a href="https://github.com/rafaelghif/antigravity-agents/releases"><img src="https://img.shields.io/github/v/release/rafaelghif/antigravity-agents?color=0052CC&label=release&logo=github" alt="Release"/></a>
-  [![Version](https://img.shields.io/badge/version-4.45.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.45.0)
+  [![Version](https://img.shields.io/badge/version-4.46.0-blue.svg?style=flat-square)](https://github.com/rafaelghif/antigravity-agents/releases/tag/v4.46.0)
   [![Platform](https://img.shields.io/badge/platform-Antigravity_CLI_%26_IDE-8A2BE2.svg?style=flat-square)](https://antigravity.google/docs/cli/overview)
   [![Personas](https://img.shields.io/badge/personas-8_L9_Subagents-0052CC.svg?style=flat-square)](#-the-8-l9-expert-personas)
   [![Skills](https://img.shields.io/badge/skills-11_Consolidated-success.svg?style=flat-square)](#-the-11-core-enterprise-skills)
@@ -85,7 +85,7 @@ flowchart TD
         GateDecision -- "✅ Passed" --> PRReview["🧐 Autonomous PR Review<br/><code>scripts/auto_reviewer.py</code>"]
         PRReview --> MemorySync["💾 Memory Consolidation & Skill Evolution<br/><code>scripts/memory_consolidator.py</code> • <code>scripts/self_learner.py</code>"]
         MemorySync --> ReleaseGate{"🔒 Production Release Gate<br/><code>scripts/verify.py --release</code><br/><i>Validates AITL_CONSENSUS.yaml</i>"}
-        ReleaseGate -- "✅ Approved" --> ProductionShip["🚀 Production Release & Git Sync<br/>Conventional Commit • PR Merge • Tag v4.45.0 • GitHub Release"]
+        ReleaseGate -- "✅ Approved" --> ProductionShip["🚀 Production Release & Git Sync<br/>Conventional Commit • PR Merge • Tag v4.46.0 • GitHub Release"]
     end
 ```
 
