@@ -2,6 +2,41 @@
   "cli_version": "1.1.27",
   "aac_version": "4.45.0",
   "docs_baseline_date": "2026-09-05",
+  "gemini_models": {
+    "primary_reasoning": "gemini-3.1-pro-high",
+    "primary_execution": "gemini-3.8-flash-low",
+    "supported_models": [
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
+      "gemini-3.1-pro-high",
+      "gemini-3.8-flash-low"
+    ]
+  },
+  "compatibility_matrix": {
+    "antigravity_cli_version": ">=1.0.0",
+    "gemini_model_tier": ["flash", "pro"],
+    "agent_system_version": "4.45.0",
+    "plugin_version": "1.0.0",
+    "skill_version": "1.1.0",
+    "rule_version": "1.0.0",
+    "script_version": "4.45.0",
+    "min_python_version": "3.10.0",
+    "supported_os": [
+      "linux",
+      "darwin",
+      "win32"
+    ]
+  },
+  "incompatible_combinations": [
+    {
+      "condition": "python < 3.10",
+      "reason": "Union type syntax (X | Y) and standard library features require Python 3.10+"
+    },
+    {
+      "condition": "antigravity_cli < 1.0.0",
+      "reason": "Subagent orchestration and hook mechanisms require Antigravity CLI 1.0.0+"
+    }
+  ],
   "official_docs": [
     "https://antigravity.google/docs/cli/best-practices",
     "https://antigravity.google/docs/cli/mcp",

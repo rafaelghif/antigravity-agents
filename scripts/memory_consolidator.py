@@ -105,14 +105,101 @@ def format_active_context(sections: dict[str, list[str]]) -> str:
 """
 
 
+import contextlib
+import os
+import tempfile
+import time
+
+
+@contextlib.contextmanager
+def file_lock(target_path: Path, timeout: float = 10.0, poll_interval: float = 0.05):
+    """Cross-platform advisory file lock to serialize concurrent read-modify-write cycles."""
+    lock_path = target_path.with_name(f".{target_path.name}.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    start_time = time.time()
+    fd = None
+
+    if sys.platform != "win32":
+        try:
+            import fcntl
+            fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o644)
+            while True:
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except (BlockingIOError, OSError):
+                    if time.time() - start_time > timeout:
+                        raise TimeoutError(f"Timed out waiting for file lock: {lock_path}")
+                    time.sleep(poll_interval)
+            yield
+        finally:
+            if fd is not None:
+                try:
+                    import fcntl
+                    fcntl.flock(fd, fcntl.LOCK_UN)
+                except Exception as exc:
+                    _ = exc
+                try:
+                    os.close(fd)
+                except Exception as exc:
+                    _ = exc
+    else:
+        acquired = False
+        lock_fd = None
+        while time.time() - start_time < timeout:
+            try:
+                lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_RDWR)
+                acquired = True
+                break
+            except FileExistsError:
+                time.sleep(poll_interval)
+        if not acquired:
+            try:
+                if lock_path.exists() and (time.time() - lock_path.stat().st_mtime > 30):
+                    lock_path.unlink(missing_ok=True)
+            except Exception as exc:
+                _ = exc
+            raise TimeoutError(f"Timed out waiting for Windows file lock: {lock_path}")
+        try:
+            yield
+        finally:
+            if lock_fd is not None:
+                try:
+                    os.close(lock_fd)
+                except Exception as exc:
+                    _ = exc
+            try:
+                lock_path.unlink(missing_ok=True)
+            except Exception as exc:
+                _ = exc
+
+
 def save_active_context(sections: dict[str, list[str]], path: Path = DEFAULT_ACTIVE_PATH) -> bool:
-    """Atomically writes active context markdown to disk."""
+    """Atomically writes active context markdown to disk using unique tempfile."""
     path.parent.mkdir(parents=True, exist_ok=True)
     content = format_active_context(sections)
-    temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(content, encoding="utf-8")
-    temp_path.replace(path)
-    return True
+    temp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix="active_ctx_",
+            suffix=".tmp",
+            delete=False
+        ) as temp_f:
+            temp_f.write(content)
+            temp_path = Path(temp_f.name)
+        temp_path.replace(path)
+        return True
+    except Exception as exc:
+        if temp_path and temp_path.exists():
+            try:
+                temp_path.unlink()
+            except OSError as err:
+                _ = err
+        sys.stderr.write(f"Save active context notice: {exc}\n")
+        raise
 
 
 def update_active_state(
@@ -122,21 +209,22 @@ def update_active_state(
     blocker: str | None = None,
     path: Path = DEFAULT_ACTIVE_PATH
 ) -> bool:
-    """Updates active working context with new items, maintaining maximum 10 items per section."""
-    sections = load_active_context(path)
+    """Updates active working context with new items under process file lock."""
+    with file_lock(path):
+        sections = load_active_context(path)
 
-    if focus:
-        sections["focus"] = [focus]
-    if accomplishment and accomplishment not in sections["accomplishments"]:
-        sections["accomplishments"].insert(0, accomplishment)
-        sections["accomplishments"] = sections["accomplishments"][:10]
-    if next_step and next_step not in sections["next_steps"]:
-        sections["next_steps"].insert(0, next_step)
-        sections["next_steps"] = sections["next_steps"][:10]
-    if blocker:
-        sections["blockers"] = [blocker]
+        if focus:
+            sections["focus"] = [focus]
+        if accomplishment and accomplishment not in sections["accomplishments"]:
+            sections["accomplishments"].insert(0, accomplishment)
+            sections["accomplishments"] = sections["accomplishments"][:10]
+        if next_step and next_step not in sections["next_steps"]:
+            sections["next_steps"].insert(0, next_step)
+            sections["next_steps"] = sections["next_steps"][:10]
+        if blocker:
+            sections["blockers"] = [blocker]
 
-    return save_active_context(sections, path)
+        return save_active_context(sections, path)
 
 
 def parse_latest_user_intent(lines: list[str]) -> str | None:

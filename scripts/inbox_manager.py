@@ -69,12 +69,51 @@ def check_consensus(data):
         return True
     return False
 
+def format_structured_message(
+    sender: str,
+    recipient: str,
+    task: str,
+    status: str,
+    verified: bool,
+    findings: str = "",
+    files: list[str] | None = None,
+    decisions: list[str] | None = None,
+    blockers: str = "None",
+    validation: str = "",
+    next_action: str = ""
+) -> str:
+    """Formats an inter-agent message according to AAC Section 17 protocol."""
+    files_str = ", ".join(files) if files else "None"
+    decisions_str = "; ".join(decisions) if decisions else "None"
+    verified_str = "YES" if verified else "NO"
+    
+    return (
+        f"FROM: {sender}\n"
+        f"TO: {recipient}\n"
+        f"TASK: {task}\n"
+        f"STATUS: {status}\n"
+        f"VERIFIED: {verified_str}\n"
+        f"FINDINGS: {findings or 'None'}\n"
+        f"FILES: {files_str}\n"
+        f"DECISIONS: {decisions_str}\n"
+        f"BLOCKERS: {blockers}\n"
+        f"VALIDATION: {validation or 'None'}\n"
+        f"NEXT ACTION: {next_action or 'None'}"
+    )
+
+
+def send_structured_message(*args, **kwargs) -> bool:
+    """Dispatches a structured message through the disk-backed blackboard inbox."""
+    body = format_structured_message(*args, **kwargs)
+    sender = kwargs.get("sender") or (args[0] if args else "unknown")
+    recipient = kwargs.get("recipient") or (args[1] if len(args) > 1 else "all")
+    return add_message(sender, recipient, body)
+
+
 def add_message(sender, recipient, content):
     data = load_inbox()
     content_clean = extract_telemetry(content)
 
-
-    
     # Check debate limits if this is a back-and-forth between any two agents
     if sender != "scrum-master" and recipient != "scrum-master" and sender != recipient:
         data["debate_turn_count"] += 1

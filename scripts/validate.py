@@ -51,6 +51,7 @@ CORE_AGENT_PATHS = (
     ".agents/skills/verification/SKILL.md",
     "scripts/validate.py",
     "scripts/verify.py",
+    "scripts/health_check.py",
     "scripts/grounding.py",
     "scripts/dag_orchestrator.py",
     "scripts/yaml_loader.py",
