@@ -246,6 +246,24 @@ def validate_settings() -> None:
         if ex_perms.get("ask") != act_perms.get("ask"):
             fail(f"Permissions ask list mismatch: {ex_perms.get('ask')} vs {act_perms.get('ask')}")
 
+    cli_settings_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
+    if cli_settings_path.is_file():
+        validate_single_settings_file(str(cli_settings_path))
+        cli_settings = load_json(str(cli_settings_path))
+        ex_settings = load_json(example_path)
+        if set(ex_settings.keys()) != set(cli_settings.keys()):
+            fail(f"Settings key mismatch between example and CLI actual: {set(ex_settings.keys()) ^ set(cli_settings.keys())}")
+        ex_perms = ex_settings.get("permissions", {})
+        cli_perms = cli_settings.get("permissions", {})
+        if set(ex_perms.keys()) != set(cli_perms.keys()):
+            fail(f"Permissions key mismatch between example and CLI actual: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
+        if set(ex_perms.get("allow", [])) != set(cli_perms.get("allow", [])):
+            fail(f"Permissions allow list mismatch with CLI actual: {set(ex_perms.get('allow', [])) ^ set(cli_perms.get('allow', []))}")
+        if ex_perms.get("deny") != cli_perms.get("deny"):
+            fail(f"Permissions deny list mismatch with CLI actual: {ex_perms.get('deny')} vs {cli_perms.get('deny')}")
+        if ex_perms.get("ask") != cli_perms.get("ask"):
+            fail(f"Permissions ask list mismatch with CLI actual: {ex_perms.get('ask')} vs {cli_perms.get('ask')}")
+
 
 def validate_env() -> None:
     example_path = ROOT / ".env.example"

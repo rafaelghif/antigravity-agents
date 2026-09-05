@@ -445,6 +445,24 @@ class HealthChecker:
                 if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
                     issues.append(f"Allowed permissions mismatch between example and actual: {set(ex_perms.get('allow', [])) ^ set(act_perms.get('allow', []))}")
 
+        # Check global CLI settings if present
+        cli_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
+        if cli_path.is_file() and "antigravity-settings.example.json" in loaded_settings:
+            try:
+                cli_data = json.loads(cli_path.read_text(encoding="utf-8"))
+                ex_data = loaded_settings["antigravity-settings.example.json"]
+                if set(ex_data.keys()) != set(cli_data.keys()):
+                    issues.append(f"CLI settings top-level key mismatch: {set(ex_data.keys()) ^ set(cli_data.keys())}")
+                ex_perms = ex_data.get("permissions", {})
+                cli_perms = cli_data.get("permissions", {})
+                if isinstance(ex_perms, dict) and isinstance(cli_perms, dict):
+                    if set(ex_perms.keys()) != set(cli_perms.keys()):
+                        issues.append(f"CLI permissions key mismatch: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
+                    if set(ex_perms.get("allow", [])) != set(cli_perms.get("allow", [])):
+                        issues.append(f"CLI allowed permissions mismatch: {set(ex_perms.get('allow', [])) ^ set(cli_perms.get('allow', []))}")
+            except Exception as e:
+                issues.append(f"CLI settings.json error: {e}")
+
         passed = len(issues) == 0
         if not passed:
             self.record_issue("permission_mismatch", f"Permission issues: {issues}", str(self.root / ".agents" / "antigravity-settings.example.json"), "Settings file invalid", "Yes, restore settings template", "python3 scripts/validate.py")
