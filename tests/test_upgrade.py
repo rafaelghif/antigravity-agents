@@ -21,5 +21,33 @@ class TestUpgrade(unittest.TestCase):
         self.assertFalse(is_newer_version("v4.18.0", "4.18.0"))
         self.assertFalse(is_newer_version("v4.17.0", "4.18.0"))
 
+    def test_install_aac_with_local_source_override(self):
+        import tempfile
+        from install import install_aac
+        with tempfile.TemporaryDirectory() as target_dir, tempfile.TemporaryDirectory() as src_dir:
+            target_path = Path(target_dir)
+            src_path = Path(src_dir)
+            
+            # Setup mock minimal source structure
+            (src_path / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
+            (src_path / "GEMINI.md").write_text("# Workspace Bootstrap\nAGENTS.md\n", encoding="utf-8")
+            (src_path / ".agents" / "brain").mkdir(parents=True)
+            (src_path / ".agents" / "config.json").write_text('{"core_version": "4.44.3"}', encoding="utf-8")
+            (src_path / "scripts").mkdir(parents=True)
+            
+            # Run installation with source_override
+            success = install_aac(target_path, "v4.44.3", source_override=src_path)
+            self.assertTrue(success)
+            self.assertTrue((target_path / "AGENTS.md").is_file())
+            self.assertTrue((target_path / "GEMINI.md").is_file())
+            
+            # Verify .gitignore contains both scratch and backup directories
+            gi_path = target_path / ".gitignore"
+            self.assertTrue(gi_path.is_file())
+            gi_content = gi_path.read_text(encoding="utf-8")
+            self.assertIn(".agents/scratch/", gi_content)
+            self.assertIn(".agents-backups/", gi_content)
+
+
 if __name__ == '__main__':
     unittest.main()

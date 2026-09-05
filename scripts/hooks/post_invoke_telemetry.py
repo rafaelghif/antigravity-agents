@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+try:
+    from hook_utils import read_safe_stdin
+except ImportError:
+    from scripts.hooks.hook_utils import read_safe_stdin
+
 def update_project_memory() -> None:
     memory_path = ROOT / '.agents' / 'brain' / 'memory.md'
     if not memory_path.exists():
@@ -78,7 +83,7 @@ def extract_telemetry(transcript_path: str) -> None:
 
 if __name__ == '__main__':
     try:
-        input_data = sys.stdin.read()
+        input_data = read_safe_stdin()
         if input_data:
             payload = json.loads(input_data)
             transcript = payload.get('transcriptPath')

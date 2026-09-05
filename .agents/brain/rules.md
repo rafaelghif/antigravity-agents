@@ -16,4 +16,4 @@ As an L9 Agent, if instructions/strategies repeatedly fail verification, you hav
 - **[HANDOFF_CONTRACTS]**: Subagents must deliver structured `handoff.json` (or `.md`) artifact acting as strict API contract between Worker and Manager. No unstructured chat reliance.
 - **[CIRCUIT_BREAKER]**: Strict limit: 3 revisions during manager-worker debates. If failed, KILL subagent. Prevent token burn. Fall back to Lateral Thinking.
 - **[SCRATCH_ISOLATION]**: ALL scratch files MUST be inside `.agents/scratch/`. `git_hygiene_guard.py` blocks others from Git.
-- **[OBLIGATORY_MEETING_PROTOCOL]**: Scrum Master orchestrates meetings and delegates tasks. Workers communicate via Disk-Backed Blackboard (`scripts/inbox_manager.py`). No simulating/hallucinating meetings. `state.json` must reflect real debate.
+- **[OBLIGATORY_MEETING_PROTOCOL]**: Scrum Master orchestrates meetings and delegates tasks. Workers communicate via Disk-Backed Blackboard (`scripts/inbox_manager.py`). No simulating/hallucinating meetings. `.agents/inbox/state.json` must reflect real debate.

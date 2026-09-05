@@ -139,9 +139,10 @@ class HermesEngine:
             try:
                 with open(task_file, "r", encoding="utf-8") as f:
                     data = load_yaml(f.read())
-                    if not data or "id" not in data:
+                    if not data or not isinstance(data, dict):
                         continue
-                    task_id = str(data["id"])
+                    task_id = str(data.get("id") or task_file.stem)
+                    data["id"] = task_id
                     data["_file"] = str(task_file)
                     tasks[task_id] = data
                     

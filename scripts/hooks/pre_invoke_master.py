@@ -4,6 +4,11 @@ import json
 import re
 from pathlib import Path
 
+try:
+    from hook_utils import read_safe_stdin
+except ImportError:
+    from scripts.hooks.hook_utils import read_safe_stdin
+
 SKILL_KEYWORDS = {
     "design": [
         "ui", "ux", "component", "page", "styling", "css", "tailwind", "html",
@@ -221,7 +226,7 @@ def get_context(transcript_path: str | None = None) -> str:
 
 def main() -> None:
     try:
-        input_data = sys.stdin.read()
+        input_data = read_safe_stdin()
         if not input_data:
             print("{}")
             return

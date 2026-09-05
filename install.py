@@ -138,7 +138,7 @@ def copy_managed_item(src: Path, dst: Path, backup_dir: Path) -> None:
         shutil.copy2(src, dst)
 
 
-def install_aac(root_dir: Path, target_version: str) -> bool:
+def install_aac(root_dir: Path, target_version: str, source_override: Path | None = None) -> bool:
     print(f"\n=> Installing Antigravity Agent Core ({target_version}) to: {root_dir}")
     
     timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -165,49 +165,61 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
         except Exception as e:
             sys.stderr.write(f"Notice reading mcp_config.json: {e}\n")
 
-    # 2. Acquire release source in a temporary directory
+    # 2. Acquire release source in a temporary directory or from local source
     with tempfile.TemporaryDirectory() as tmp_dir_str:
         tmp_dir = Path(tmp_dir_str)
         source_dir = tmp_dir / "source"
-        
         cloned = False
-        # Try git clone first
-        if shutil.which("git"):
-            try:
-                res = subprocess.run(
-                    ["git", "clone", "--depth", "1", "--branch", target_version, REMOTE_REPO, str(source_dir)],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    timeout=30,
-                )
-                cloned = res.returncode == 0
-            except Exception as e:
-                sys.stderr.write(f"Git clone notice: {e}\n")
 
-        # Fallback to downloading tarball via urllib
+        if source_override and Path(source_override).is_dir():
+            source_dir = Path(source_override)
+            cloned = True
+        else:
+            # Try git clone first
+            if shutil.which("git"):
+                try:
+                    res = subprocess.run(
+                        ["git", "clone", "--depth", "1", "--branch", target_version, REMOTE_REPO, str(source_dir)],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        timeout=30,
+                    )
+                    cloned = res.returncode == 0
+                except Exception as e:
+                    sys.stderr.write(f"Git clone notice: {e}\n")
+
+            # Fallback to downloading tarball via urllib
+            if not cloned or not source_dir.exists():
+                tarball_url = TARBALL_URL_TEMPLATE.format(tag=target_version)
+                tar_path = tmp_dir / "release.tar.gz"
+                try:
+                    req = urllib.request.Request(tarball_url, headers={"User-Agent": "AAC-Installer"})
+                    with urllib.request.urlopen(req, timeout=20) as resp, open(tar_path, "wb") as out_f:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+                        shutil.copyfileobj(resp, out_f)
+                    
+                    import tarfile
+                    with tarfile.open(tar_path, "r:gz") as tar:  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                        if hasattr(tarfile, 'data_filter'):
+                            tar.extractall(path=tmp_dir, filter='data')  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                        else:
+                            tar.extractall(path=tmp_dir)  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
+                    extracted_dirs = [d for d in tmp_dir.iterdir() if d.is_dir() and d != source_dir]
+                    if extracted_dirs:
+                        source_dir = extracted_dirs[0]
+                        cloned = True
+                except Exception as e:
+                    sys.stderr.write(f"Tarball download notice: {e}\n")
+
+        # Air-gapped / Local checkout fallback
         if not cloned or not source_dir.exists():
-            tarball_url = TARBALL_URL_TEMPLATE.format(tag=target_version)
-            tar_path = tmp_dir / "release.tar.gz"
-            try:
-                req = urllib.request.Request(tarball_url, headers={"User-Agent": "AAC-Installer"})
-                with urllib.request.urlopen(req, timeout=20) as resp, open(tar_path, "wb") as out_f:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-                    shutil.copyfileobj(resp, out_f)
-                
-                import tarfile
-                with tarfile.open(tar_path, "r:gz") as tar:  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
-                    if hasattr(tarfile, 'data_filter'):
-                        tar.extractall(path=tmp_dir, filter='data')  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
-                    else:
-                        tar.extractall(path=tmp_dir)  # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal
-                extracted_dirs = [d for d in tmp_dir.iterdir() if d.is_dir() and d != source_dir]
-                if extracted_dirs:
-                    source_dir = extracted_dirs[0]
-                    cloned = True
-            except Exception as e:
-                sys.stderr.write(f"Tarball download notice: {e}\n")
+            local_repo = Path(__file__).resolve().parent
+            if (local_repo / "AGENTS.md").is_file() and (local_repo / ".agents").is_dir():
+                print(f"=> Using local repository as installation source: {local_repo}")
+                source_dir = local_repo
+                cloned = True
 
         if not cloned or not source_dir.exists():
-            print("=> ERROR: Unable to acquire release sources from GitHub.")
+            print("=> ERROR: Unable to acquire release sources from GitHub or local repository.")
             return False
 
         # 3. Validate source structure
@@ -262,15 +274,21 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
             except Exception as exc:
                 sys.stderr.write(f"Notice merging mcp_config: {exc}\n")
 
-        # 6. Ensure .gitignore has scratch rule
+        # 6. Ensure .gitignore has scratch and backup rules
         gitignore_path = root_dir / ".gitignore"
         try:
             if gitignore_path.is_file():
                 gi_text = gitignore_path.read_text(encoding="utf-8")
+                updates = []
                 if ".agents/scratch/" not in gi_text:
-                    gitignore_path.write_text(gi_text.rstrip() + "\n\n# Antigravity Scratch Directory\n.agents/scratch/\n", encoding="utf-8")
+                    updates.append(".agents/scratch/")
+                if ".agents-backups/" not in gi_text:
+                    updates.append(".agents-backups/")
+                if updates:
+                    block = "\n\n# Antigravity Managed Directories\n" + "\n".join(updates) + "\n"
+                    gitignore_path.write_text(gi_text.rstrip() + block, encoding="utf-8")
             else:
-                gitignore_path.write_text("# Antigravity Scratch Directory\n.agents/scratch/\n", encoding="utf-8")
+                gitignore_path.write_text("# Antigravity Managed Directories\n.agents/scratch/\n.agents-backups/\n", encoding="utf-8")
         except Exception as e:
             sys.stderr.write(f"Gitignore update notice: {e}\n")
 
@@ -321,6 +339,7 @@ def main() -> None:
     parser.add_argument("path", nargs="?", default=".", help="Project workspace root")
     parser.add_argument("--check", action="store_true", help="Check for latest version without installing")
     parser.add_argument("--force", action="store_true", help="Force re-installation")
+    parser.add_argument("--source-dir", default=None, help="Local source directory to install from (offline / air-gapped)")
     args = parser.parse_args()
 
     root_dir = Path(args.path).resolve()
@@ -332,11 +351,11 @@ def main() -> None:
     print(f"Current Workspace Version: v{status['current_version']}")
     print(f"Latest Upstream Release:   {status['latest_version']}")
 
-    if not status["has_update"] and not args.force and status["current_version"] != "0.0.0":
+    if not status["has_update"] and not args.force and status["current_version"] != "0.0.0" and not args.source_dir:
         print("\n✨ You are already running the latest world-class AAC agent!")
         return
 
-    if status["has_update"] or status["current_version"] == "0.0.0":
+    if status["has_update"] or status["current_version"] == "0.0.0" or args.source_dir:
         action = "Update" if status["current_version"] != "0.0.0" else "Install"
         print(f"\n🎉 Latest {action} Available: {status['latest_version']} ({status['title']})")
         print("\n--- Release Notes Highlight ---")
@@ -348,7 +367,8 @@ def main() -> None:
         print("\nRun 'python3 install.py' to apply this configuration effortlessly.")
         return
 
-    success = install_aac(root_dir, str(status["latest_version"]))
+    source_override = Path(args.source_dir).resolve() if args.source_dir else None
+    success = install_aac(root_dir, str(status["latest_version"]), source_override=source_override)
     if success:
         print("\n" + "=" * 60)
         print(f"✅ AAC successfully configured to {status['latest_version']}!")

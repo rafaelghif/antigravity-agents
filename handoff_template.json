@@ -4,7 +4,7 @@
   "summary": "Implemented feature X and refactored Y.",
   "modifications": [
     {
-      "filepath": "scripts/example.py",
+      "filepath": "scripts/neurosymbolic_engine.py",
       "change_type": "UPDATE",
       "description": "Added new neurosymbolic engine import."
     }

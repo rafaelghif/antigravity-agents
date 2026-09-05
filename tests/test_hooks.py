@@ -1,5 +1,9 @@
+import os
 import sys
+import json
+import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -237,6 +241,87 @@ class TestHooks(unittest.TestCase):
                 ]
                 for tag in banned_tags:
                     self.assertNotIn(tag, ctx)
+
+    def test_os_hook_crlf_mismatch(self):
+        # 1. Stdin buffer reading with \r\n line endings
+        import io
+        from scripts.hooks import hook_utils
+        crlf_payload = b'{\r\n  "toolCall": {\r\n    "name": "view_file",\r\n    "args": {}\r\n  }\r\n}'
+        with patch("sys.stdin", io.TextIOWrapper(io.BytesIO(crlf_payload), encoding="utf-8")):
+            parsed = hook_utils.read_hook_payload()
+            self.assertEqual(parsed.get("toolCall", {}).get("name"), "view_file")
+
+        # 2. Transcript parsing with CRLF line endings
+        with tempfile.TemporaryDirectory() as tmpdir:
+            transcript_file = Path(tmpdir) / "transcript_crlf.jsonl"
+            line1 = json.dumps({"type": "USER_INPUT", "content": "fix button styling with css\r\n"}) + "\r\n"
+            line2 = json.dumps({"thinking": "<telemetry>crlf test trace</telemetry>\r\n"}) + "\r\n"
+            transcript_file.write_bytes((line1 + line2).encode("utf-8"))
+            
+            from scripts.hooks import post_invoke_telemetry
+            with patch.object(post_invoke_telemetry, "ROOT", Path(tmpdir)):
+                post_invoke_telemetry.extract_telemetry(str(transcript_file))
+                audit_file = Path(tmpdir) / ".agents" / "brain" / "global_audit.log"
+                self.assertTrue(audit_file.exists())
+                self.assertIn("crlf test trace", audit_file.read_text(encoding="utf-8"))
+
+    def test_os_hook_missing_dependency(self):
+        # Test hook behavior when external tools (git, agy) are missing
+        from scripts.hooks import pre_invoke_master
+        with patch("shutil.which", return_value=None):
+            ctx = pre_invoke_master.get_context(None)
+            self.assertIsInstance(ctx, str)
+            self.assertIn("=== CODEBASE GROUNDING BASELINE ===", ctx)
+
+    def test_os_hook_concurrency_race(self):
+        # Test concurrent execution of telemetry logging without file corruption
+        import concurrent.futures
+        from scripts.hooks import post_invoke_telemetry
+        with tempfile.TemporaryDirectory() as tmpdir:
+            transcript_file = Path(tmpdir) / "transcript.jsonl"
+            transcript_file.write_text(
+                json.dumps({"content": "concurrent test", "thinking": "<telemetry>thread action</telemetry>"}) + "\n",
+                encoding="utf-8"
+            )
+            with patch.object(post_invoke_telemetry, "ROOT", Path(tmpdir)):
+                def run_extract(idx):
+                    post_invoke_telemetry.extract_telemetry(str(transcript_file))
+                    return idx
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                    futures = [executor.submit(run_extract, i) for i in range(10)]
+                    results = [f.result() for f in futures]
+                self.assertEqual(len(results), 10)
+                audit_file = Path(tmpdir) / ".agents" / "brain" / "global_audit.log"
+                self.assertTrue(audit_file.exists())
+
+    def test_os_hook_special_unicode_paths(self):
+        # Test pre_tool_quality_gate with non-ASCII and special unicode characters in path
+        from scripts.hooks import pre_tool_quality_gate
+        import io
+        special_path = "/tmp/t\u00ebst_f\u00f6lder/sp\u00ebcial pr\u00f6ject [100%]/file.py"
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {
+                    "TargetFile": special_path,
+                    "CodeContent": "print('hello world \u00e4\u00f6\u00fc')"
+                }
+            }
+        })
+        with patch("sys.stdin", io.TextIOWrapper(io.BytesIO(payload.encode("utf-8")), encoding="utf-8")), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "allow")
+
+    def test_os_hook_null_env_vars(self):
+        # Test hook execution when environment variables are cleared or missing
+        from scripts.hooks import pre_invoke_master
+        with patch.dict(os.environ, {}, clear=True):
+            ctx = pre_invoke_master.get_context(None)
+            self.assertIsInstance(ctx, str)
+            self.assertTrue(len(ctx) > 0)
 
 
 if __name__ == "__main__":
