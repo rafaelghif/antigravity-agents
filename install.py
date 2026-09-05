@@ -104,7 +104,7 @@ def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
     except Exception as exc:
         sys.stderr.write(f"Git remote tags notice: {exc}\n")
 
-    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.44.2"
+    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.44.3"
     return (fallback_tag, fallback_tag, "Fallback version.")
 
 

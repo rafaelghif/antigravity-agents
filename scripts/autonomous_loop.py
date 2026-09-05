@@ -60,7 +60,7 @@ def orchestrate_task(task_name: str, root_dir: Path = ROOT) -> bool:
         return True
 
 def run_loop(root_dir: Path = ROOT) -> int:
-    print("🚀 Starting Fully Automated Agentic Looping System (v4.44.2 Unleashed)")
+    print("🚀 Starting Fully Automated Agentic Looping System (v4.44.3 Unleashed)")
     print("Scanning for tasks...")
     
     tasks_dir = root_dir / "tasks"
