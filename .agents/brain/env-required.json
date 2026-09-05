@@ -28,5 +28,53 @@
     "secret": false,
     "platform": "runtime",
     "description": "Application listening port."
+  },
+  "GITHUB_PERSONAL_ACCESS_TOKEN": {
+    "required": false,
+    "secret": true,
+    "platform": "github",
+    "description": "Personal Access Token for stdio GitHub MCP server."
+  },
+  "DB_HOST": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "Database server host address."
+  },
+  "DB_USER": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "Database server username."
+  },
+  "DB_PASSWORD": {
+    "required": false,
+    "secret": true,
+    "platform": "database",
+    "description": "Database server password."
+  },
+  "DB_NAME": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "Target database name."
+  },
+  "DB_PORT_PG": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "PostgreSQL listening port override (default: 5432)."
+  },
+  "DB_PORT_MYSQL": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "MySQL listening port override (default: 3306)."
+  },
+  "DB_PORT_MSSQL": {
+    "required": false,
+    "secret": false,
+    "platform": "database",
+    "description": "MSSQL listening port override (default: 1433)."
   }
 }
