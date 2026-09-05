@@ -49,5 +49,38 @@ class TestUpgrade(unittest.TestCase):
             self.assertIn(".agents-backups/", gi_content)
 
 
+    def test_upgrade_upstream_fallback_uses_temporary_file(self):
+        import io
+        import urllib.request
+        from unittest.mock import patch, MagicMock
+        from scripts import upgrade
+
+        mock_script = "import sys\nprint('upgraded')\nsys.exit(0)\n"
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = mock_script.encode("utf-8")
+        mock_resp.__enter__.return_value = mock_resp
+
+        executed_cmd = []
+
+        def fake_run(cmd, **kwargs):
+            executed_cmd.extend(cmd)
+            res = MagicMock()
+            res.returncode = 0
+            return res
+
+        with patch("pathlib.Path.is_file", return_value=False), \
+             patch("urllib.request.urlopen", return_value=mock_resp), \
+             patch("subprocess.run", side_effect=fake_run), \
+             patch("sys.exit") as mock_exit:
+            upgrade.main()
+            mock_exit.assert_called_with(0)
+
+        # Check that executed command used a .py script path, not -c
+        self.assertGreater(len(executed_cmd), 1)
+        self.assertEqual(executed_cmd[0], sys.executable)
+        self.assertTrue(executed_cmd[1].endswith(".py"), f"Expected .py file, got {executed_cmd[1]}")
+        self.assertNotEqual(executed_cmd[1], "-c")
+
+
 if __name__ == '__main__':
     unittest.main()

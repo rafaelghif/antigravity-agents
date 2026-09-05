@@ -104,7 +104,7 @@ def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
     except Exception as exc:
         sys.stderr.write(f"Git remote tags notice: {exc}\n")
 
-    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.45.0"
+    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.46.0"
     return (fallback_tag, fallback_tag, "Fallback version.")
 
 
@@ -188,7 +188,7 @@ def run_repair(root_dir: Path, source_override: Path | None = None) -> bool:
     if not target_version or target_version == "UNKNOWN" or target_version == "v0.0.0":
         target_version = f"v{get_current_version(root_dir)}"
     if target_version == "v0.0.0":
-        target_version = "v4.45.0"
+        target_version = "v4.46.0"
     print(f"Targeting repair version: {target_version}")
     success = install_aac(root_dir, target_version, source_override=source_override)
     if success:
@@ -220,6 +220,40 @@ def run_rollback(root_dir: Path, target_backup: str | None = None) -> bool:
         selected_backup = available_backups[0]
 
     print(f"\n=> Rolling back AAC workspace using snapshot: {selected_backup.name}")
+
+    # 1. Identify files currently managed to prune newly introduced orphans
+    current_manifest_file = root_dir / ".agents" / "install_manifest.json"
+    current_managed: dict[str, str] = {}
+    if current_manifest_file.is_file():
+        try:
+            current_managed = json.loads(current_manifest_file.read_text(encoding="utf-8")).get("managed_files", {})
+        except Exception:
+            current_managed = {}
+
+    backup_manifest_file = selected_backup / ".agents" / "install_manifest.json"
+    backup_managed: dict[str, str] = {}
+    if backup_manifest_file.is_file():
+        try:
+            backup_managed = json.loads(backup_manifest_file.read_text(encoding="utf-8")).get("managed_files", {})
+        except Exception:
+            backup_managed = {}
+    else:
+        for b_item in selected_backup.rglob("*"):
+            if b_item.is_file():
+                rel = str(b_item.relative_to(selected_backup)).replace("\\", "/")
+                backup_managed[rel] = "KNOWN"
+
+    # Remove any managed file in current workspace that was NOT in the snapshot
+    for rel_path in current_managed:
+        if rel_path not in backup_managed and not (selected_backup / rel_path).exists():
+            target_f = root_dir / rel_path
+            if target_f.is_file():
+                try:
+                    target_f.unlink()
+                except OSError as exc:
+                    _ = exc
+
+    # 2. Restore all files from snapshot
     for item in selected_backup.iterdir():
         dst = root_dir / item.name
         if item.is_dir():
@@ -227,6 +261,19 @@ def run_rollback(root_dir: Path, target_backup: str | None = None) -> bool:
         else:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(item, dst)
+
+    # 3. Clean up empty orphaned directories
+    sub_dirs = [
+        s for d in (root_dir / "scripts", root_dir / ".agents")
+        if d.is_dir() for s in sorted(d.rglob("*"), reverse=True)
+    ]
+    for sub in sub_dirs:
+        if sub.is_dir() and not any(sub.iterdir()):
+            try:
+                sub.rmdir()
+            except OSError as exc:
+                _ = exc
+
     print(f"✅ Rollback successful. Restored state from {selected_backup.name}.")
     return True
 
@@ -410,7 +457,7 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
 
         # Air-gapped / Local checkout fallback
         if not cloned or not source_dir.exists():
-            local_repo = Path(__file__).resolve().parent
+            local_repo = Path(__file__).resolve().parent if "__file__" in globals() else Path.cwd()
             if (local_repo / "AGENTS.md").is_file() and (local_repo / ".agents").is_dir():
                 print(f"=> Using local repository as installation source: {local_repo}")
                 source_dir = local_repo
@@ -449,10 +496,29 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
             shutil.copy2(env_example_src, env_example_dst)
 
         # Bootstrap contracts for verification gates (only if missing in target)
-        if (source_dir / "intent.yaml").is_file() and not (root_dir / "intent.yaml").exists():
-            copy_managed_item(source_dir / "intent.yaml", root_dir / "intent.yaml", backup_dir)
-        if (source_dir / "handoff.json").is_file() and not (root_dir / "handoff.json").exists():
-            copy_managed_item(source_dir / "handoff.json", root_dir / "handoff.json", backup_dir)
+        intent_file = root_dir / "intent.yaml"
+        if not intent_file.exists():
+            default_intent = (
+                f'name: "{root_dir.name}"\n'
+                f'status: "DONE"\n'
+                f'description: "Workspace intent managed by AAC for {root_dir.name}."\n'
+                f'objectives:\n'
+                f'  - "Maintain high-quality, production-ready codebase."\n'
+            )
+            intent_file.write_text(default_intent, encoding="utf-8")
+
+        handoff_file = root_dir / "handoff.json"
+        if not handoff_file.exists():
+            init_contract = {
+                "task_id": "BOOTSTRAP",
+                "worker_role": "scrum-master",
+                "summary": f"Initial contract for {root_dir.name}",
+                "modifications": ["intent.yaml", "handoff.json"],
+                "tests": ["python3 scripts/verify.py --execute --terse"],
+                "confidence_score": 1.0,
+                "requires_human": False,
+            }
+            handoff_file.write_text(json.dumps(init_contract, indent=2), encoding="utf-8")
 
         # 5. Restore preserved brain and MCP configuration files
         for bf, content in preserved_brain.items():
@@ -618,8 +684,21 @@ def main() -> None:
         success = run_repair(root_dir, source_override=source_override)
         sys.exit(0 if success else 1)
 
-    status = check_update_status(root_dir)
-    target_ver = args.version or args.revision or str(status["latest_version"])
+    if source_override and source_override.is_dir():
+        source_ver = get_current_version(source_override)
+        target_ver = args.version or args.revision or (f"v{source_ver}" if source_ver != "0.0.0" else "v4.46.0")
+        current_ver = get_current_version(root_dir)
+        status = {
+            "current_version": current_ver,
+            "latest_version": target_ver,
+            "title": target_ver,
+            "notes": f"Local source directory: {source_override}",
+            "has_update": is_newer_version(target_ver, current_ver) or (target_ver != f"v{current_ver}"),
+        }
+    else:
+        status = check_update_status(root_dir)
+        target_ver = args.version or args.revision or str(status["latest_version"])
+
     if not target_ver.startswith("v") and re.match(r"^\d+\.\d+\.\d+", target_ver):
         target_ver = f"v{target_ver}"
 

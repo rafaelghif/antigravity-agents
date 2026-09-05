@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- **Task**: /boost check lagi example dan actual, sangat-sangat berbeda, pastikan example dan actual sama pergi (kecuali value karna itukan...
+- SYSTEM MEMORY & DIRECTIVES (Compact token footprint):  === ACTIVE SESSION WORKING CONTEXT === ## 🎯 Current Goal & Task Focus - okey push...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
@@ -25,7 +25,7 @@
 - Ported hook execution commands in `.agents/plugins/aac-core/hooks.json` to use `sys.executable` in subprocesses.
 
 ## 🚀 Recent Accomplishments
-
+- Fixed upstream upgrade script execution, rollback orphan pruning, and Windows stale lock recovery
 
 ## ⏳ Next Immediate Steps
 - Deliver final completion report to caller.

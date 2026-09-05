@@ -384,9 +384,13 @@ class HealthChecker:
             for srv in set(act_s.keys()) & set(ex_s.keys()):
                 if set(act_s[srv].keys()) != set(ex_s[srv].keys()):
                     issues.append(f"mcpServers.{srv} property mismatch: {set(act_s[srv].keys()) ^ set(ex_s[srv].keys())}")
+                if act_s[srv].get("command") != ex_s[srv].get("command"):
+                    issues.append(f"mcpServers.{srv}.command mismatch: {act_s[srv].get('command')} vs {ex_s[srv].get('command')}")
+                if act_s[srv].get("args") != ex_s[srv].get("args"):
+                    issues.append(f"mcpServers.{srv}.args mismatch: {act_s[srv].get('args')} vs {ex_s[srv].get('args')}")
                 if "env" in act_s[srv] and "env" in ex_s[srv]:
-                    if set(act_s[srv]["env"].keys()) != set(ex_s[srv]["env"].keys()):
-                        issues.append(f"mcpServers.{srv}.env key mismatch: {set(act_s[srv]['env'].keys()) ^ set(ex_s[srv]['env'].keys())}")
+                    if act_s[srv]["env"] != ex_s[srv]["env"]:
+                        issues.append(f"mcpServers.{srv}.env mismatch: {act_s[srv]['env']} vs {ex_s[srv]['env']}")
 
         passed = len(issues) == 0
         if not passed:
@@ -437,13 +441,22 @@ class HealthChecker:
             act_data = loaded_settings["antigravity-settings.json"]
             if set(ex_data.keys()) != set(act_data.keys()):
                 issues.append(f"Settings top-level key mismatch: {set(ex_data.keys()) ^ set(act_data.keys())}")
+            for k in ex_data:
+                if k in ("trustedWorkspaces", "permissions"):
+                    continue
+                if ex_data[k] != act_data.get(k):
+                    issues.append(f"Settings property '{k}' mismatch: {ex_data[k]} vs {act_data.get(k)}")
             ex_perms = ex_data.get("permissions", {})
             act_perms = act_data.get("permissions", {})
             if isinstance(ex_perms, dict) and isinstance(act_perms, dict):
                 if set(ex_perms.keys()) != set(act_perms.keys()):
                     issues.append(f"Permissions key mismatch: {set(ex_perms.keys()) ^ set(act_perms.keys())}")
-                if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
+                if ex_perms.get("allow", []) != act_perms.get("allow", []):
                     issues.append(f"Allowed permissions mismatch between example and actual: {set(ex_perms.get('allow', [])) ^ set(act_perms.get('allow', []))}")
+                if ex_perms.get("deny", []) != act_perms.get("deny", []):
+                    issues.append(f"Denied permissions mismatch between example and actual: {set(ex_perms.get('deny', [])) ^ set(act_perms.get('deny', []))}")
+                if ex_perms.get("ask", []) != act_perms.get("ask", []):
+                    issues.append(f"Ask permissions mismatch between example and actual: {set(ex_perms.get('ask', [])) ^ set(act_perms.get('ask', []))}")
 
         # Check global CLI settings if present
         cli_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
@@ -453,13 +466,22 @@ class HealthChecker:
                 ex_data = loaded_settings["antigravity-settings.example.json"]
                 if set(ex_data.keys()) != set(cli_data.keys()):
                     issues.append(f"CLI settings top-level key mismatch: {set(ex_data.keys()) ^ set(cli_data.keys())}")
+                for k in ex_data:
+                    if k in ("trustedWorkspaces", "permissions"):
+                        continue
+                    if ex_data[k] != cli_data.get(k):
+                        issues.append(f"CLI settings property '{k}' mismatch: {ex_data[k]} vs {cli_data.get(k)}")
                 ex_perms = ex_data.get("permissions", {})
                 cli_perms = cli_data.get("permissions", {})
                 if isinstance(ex_perms, dict) and isinstance(cli_perms, dict):
                     if set(ex_perms.keys()) != set(cli_perms.keys()):
                         issues.append(f"CLI permissions key mismatch: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
-                    if set(ex_perms.get("allow", [])) != set(cli_perms.get("allow", [])):
+                    if ex_perms.get("allow", []) != cli_perms.get("allow", []):
                         issues.append(f"CLI allowed permissions mismatch: {set(ex_perms.get('allow', [])) ^ set(cli_perms.get('allow', []))}")
+                    if ex_perms.get("deny", []) != cli_perms.get("deny", []):
+                        issues.append(f"CLI denied permissions mismatch: {set(ex_perms.get('deny', [])) ^ set(cli_perms.get('deny', []))}")
+                    if ex_perms.get("ask", []) != cli_perms.get("ask", []):
+                        issues.append(f"CLI ask permissions mismatch: {set(ex_perms.get('ask', [])) ^ set(cli_perms.get('ask', []))}")
             except Exception as e:
                 issues.append(f"CLI settings.json error: {e}")
 
