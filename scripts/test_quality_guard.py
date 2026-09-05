@@ -138,12 +138,16 @@ def check_file_list(filenames: list[str], dirpath: str, all_errors: list[str]):
             if not is_valid:
                 all_errors.extend(errors)
 
-def run_guard() -> bool:
+def run_guard(root_path: Path | None = None) -> bool:
     all_errors = []
-    root_path = Path(__file__).resolve().parents[1]
-    excludes = {".venv", "venv", ".git", "__pycache__", "node_modules", "graphify-out"}
+    target = root_path or Path(__file__).resolve().parents[1]
+    excludes = {
+        ".venv", "venv", "env", ".env", ".git", "__pycache__", "node_modules",
+        "graphify-out", "dist", "build", "out", ".next", ".nuxt",
+        ".svelte-kit", ".angular", ".astro", ".docusaurus", ".turbo", ".cache"
+    }
     
-    for dirpath, dirnames, filenames in os.walk(root_path):
+    for dirpath, dirnames, filenames in os.walk(target):
         dirnames[:] = [d for d in dirnames if d not in excludes]
         check_file_list(filenames, dirpath, all_errors)
 
@@ -157,7 +161,8 @@ def run_guard() -> bool:
 
 if __name__ == '__main__':
     print("[AAC] Running Anti-Sham Test Quality Guard...")
-    if not run_guard():
+    target_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else None
+    if not run_guard(target_dir):
         print("=> ERROR: Unit tests rejected by Anti-Sham Guard. Write real behavioral tests.")
         sys.exit(1)
     print("=> SUCCESS: All unit tests verify real business logic and behavioral assertions.")

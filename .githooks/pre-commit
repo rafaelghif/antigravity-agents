@@ -1,6 +1,9 @@
 #!/bin/sh
 # Antigravity L9 Enforcer: Cross-platform pre-commit hook (Linux, macOS, Windows)
 
+export PYTHONIOENCODING="utf-8"
+export PYTHONUTF8="1"
+
 PYTHON=""
 for candidate in python3 python py; do
     if command -v "$candidate" >/dev/null 2>&1; then

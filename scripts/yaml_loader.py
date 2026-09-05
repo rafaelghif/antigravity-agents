@@ -49,14 +49,30 @@ def _fallback_yaml_load(text: str) -> Any:
         cur_indent, cur_container, parent, pkey = stack[-1]
 
         if stripped.startswith('- '):
-            val = _parse_scalar(stripped[2:])
-            if isinstance(cur_container, dict) and not cur_container and parent is not None and pkey is not None:
-                new_list = [val]
-                parent[pkey] = new_list
-                stack[-1] = (cur_indent, new_list, parent, pkey)
-            elif isinstance(cur_container, list):
-                cur_container.append(val)
-            continue
+            item_raw = stripped[2:].strip()
+            if ':' in item_raw and not (item_raw.startswith('"') or item_raw.startswith("'")):
+                k, _, v = item_raw.partition(':')
+                k = k.strip().strip('"\'')
+                parsed_v = _parse_scalar(v.strip()) if v.strip() else {}
+                new_obj = {k: parsed_v}
+                if isinstance(cur_container, dict) and not cur_container and parent is not None and pkey is not None:
+                    new_list = [new_obj]
+                    parent[pkey] = new_list
+                    stack[-1] = (cur_indent, new_list, parent, pkey)
+                    stack.append((indent + 2, new_obj, new_list, None))
+                elif isinstance(cur_container, list):
+                    cur_container.append(new_obj)
+                    stack.append((indent + 2, new_obj, cur_container, None))
+                continue
+            else:
+                val = _parse_scalar(item_raw)
+                if isinstance(cur_container, dict) and not cur_container and parent is not None and pkey is not None:
+                    new_list = [val]
+                    parent[pkey] = new_list
+                    stack[-1] = (cur_indent, new_list, parent, pkey)
+                elif isinstance(cur_container, list):
+                    cur_container.append(val)
+                continue
 
         if ':' in stripped:
             key, _, val = stripped.partition(':')

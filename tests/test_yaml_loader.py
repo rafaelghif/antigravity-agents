@@ -46,5 +46,21 @@ class TestYamlLoader(unittest.TestCase):
         parsed = _fallback_yaml_load(sample)
         self.assertEqual(parsed.get("objectives"), ["First objective", "Second objective"])
 
+    def test_fallback_list_of_dicts(self):
+        sample = """
+        items:
+          - id: 1
+            name: first
+          - id: 2
+            name: second
+        """
+        parsed = _fallback_yaml_load(sample)
+        self.assertIn("items", parsed)
+        self.assertEqual(len(parsed["items"]), 2)
+        self.assertEqual(parsed["items"][0]["id"], 1)
+        self.assertEqual(parsed["items"][0]["name"], "first")
+        self.assertEqual(parsed["items"][1]["id"], 2)
+        self.assertEqual(parsed["items"][1]["name"], "second")
+
 if __name__ == '__main__':
     unittest.main()

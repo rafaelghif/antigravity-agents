@@ -86,7 +86,11 @@ def process_filenames(dirpath: str, filenames: list, files: list) -> None:
 
 def collect_repo_files(root_dir: Path) -> list:
     files = []
-    excludes = {".git", ".venv", "venv", "node_modules", "__pycache__", "tests", "test", "build", "dist", ".agents", ".agents-backups"}
+    excludes = {
+        ".git", ".venv", "venv", "env", ".env", "node_modules", "__pycache__",
+        "tests", "test", "build", "dist", "out", ".next", ".nuxt", ".svelte-kit",
+        ".angular", ".astro", ".docusaurus", ".turbo", ".cache", ".agents", ".agents-backups"
+    }
     for dirpath, dirnames, filenames in os.walk(root_dir):
         dirnames[:] = [d for d in dirnames if d not in excludes and not d.startswith(".agents-backups")]
         process_filenames(dirpath, filenames, files)

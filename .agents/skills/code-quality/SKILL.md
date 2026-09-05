@@ -41,6 +41,7 @@ Before writing code, stop at the first rung that holds:
    - Comprehensive error boundaries with structured domain errors (no silent `except: pass` or `any` types).
 5. **Cyclomatic Complexity & Algorithmic Supremacy**:
    - Atomic functions with shallow indentation. Default to O(1) hash lookups over O(N^2) nested loops.
+   - Enforce cognitive & cyclomatic complexity bounds via `python3 scripts/complexity_analyzer.py`.
 6. **Feature Completeness (Anti-Dummy)**:
    - 100% complete production implementations. NO placeholders, mock arrays, or `// TODO` stubs.
 </ENTERPRISE_STANDARDS>
@@ -50,5 +51,6 @@ Before writing code, stop at the first rung that holds:
 2. **Ladder & DRY Check**: Stop at the highest rung; check for existing shared functions.
 3. **Refactor In-Place**: Apply guard clauses, inline single-use helpers, and eliminate duplicate logic.
 4. **Local Verification**: Run `python3 scripts/verify.py --execute` to guarantee 100% behavioral equivalence.
-5. **Assert Zero Clones**: Run `python3 scripts/dry_guard.py --check` before completing the task.
+5. **Assert Zero Clones & Low Complexity**: Run `python3 scripts/dry_guard.py --check` and `python3 scripts/complexity_analyzer.py` before completing the task.
+6. **Autonomous Code Review**: Run `python3 scripts/auto_reviewer.py --terse` to verify diff compliance.
 </PROCEDURAL_WORKFLOW>

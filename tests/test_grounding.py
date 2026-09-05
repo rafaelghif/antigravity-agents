@@ -53,6 +53,32 @@ class TestGroundingEngine(unittest.TestCase):
             self.assertNotIn(".git", dirs)
             self.assertNotIn("node_modules", dirs)
 
+    def test_detect_nested_monorepo_ecosystems(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir)
+            (p / "apps" / "web").mkdir(parents=True)
+            (p / "apps" / "web" / "package.json").write_text('{"dependencies": {"vue": "^3.0.0"}}')
+            (p / "services" / "api").mkdir(parents=True)
+            (p / "services" / "api" / "requirements.txt").write_text("fastapi>=0.100.0\n")
+
+            ecos = detect_ecosystems(p)
+            self.assertIn("node", ecos)
+            self.assertIn("python", ecos)
+            deps = extract_dependencies(p, ecos)
+            self.assertIn("vue", deps.get("node", []))
+            self.assertIn("fastapi", deps.get("python", []))
+
+    def test_infer_ecosystem_from_source_files(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir)
+            (p / "src").mkdir()
+            (p / "src" / "main.py").write_text("print('hello')\n")
+
+            ecos = detect_ecosystems(p)
+            self.assertIn("python", ecos)
+            deps = extract_dependencies(p, ecos)
+            self.assertIn("python", deps)
+
     def test_ground_workspace_contract(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             p = Path(tmpdir)
@@ -65,3 +91,4 @@ class TestGroundingEngine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

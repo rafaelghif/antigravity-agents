@@ -8,6 +8,11 @@ import sys
 import json
 from pathlib import Path
 
+try:
+    from scripts import platform_guard  # noqa: F401
+except ImportError:
+    import platform_guard  # noqa: F401
+
 def validate_handoff(json_path: Path) -> bool:
     if not json_path.exists():
         print(f"=> ERROR: Handoff file {json_path} does not exist.")

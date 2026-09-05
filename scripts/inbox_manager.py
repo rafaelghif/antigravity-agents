@@ -12,7 +12,7 @@ INBOX_FILE = os.path.join(INBOX_DIR, "state.json")
 def init_inbox():
     os.makedirs(INBOX_DIR, exist_ok=True)
     if not os.path.exists(INBOX_FILE):
-        with open(INBOX_FILE, 'w') as f:
+        with open(INBOX_FILE, 'w', encoding='utf-8') as f:
             json.dump({
                 "room_id": "default",
                 "active_agents": [],
@@ -23,7 +23,7 @@ def init_inbox():
 
 def load_inbox():
     init_inbox()
-    with open(INBOX_FILE, 'r') as f:
+    with open(INBOX_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 import tempfile
@@ -32,7 +32,7 @@ def save_inbox(data):
     # Atomic write
     dirname = os.path.dirname(INBOX_FILE)
     fd, temp_path = tempfile.mkstemp(dir=dirname, text=True)
-    with os.fdopen(fd, 'w') as f:
+    with os.fdopen(fd, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
     os.replace(temp_path, INBOX_FILE)
 
@@ -45,7 +45,7 @@ def extract_telemetry(content):
     
     # GitOps Audit Logging
     audit_file = str(ROOT / ".agents" / "inbox" / "audit.log")
-    with open(audit_file, "a") as f:
+    with open(audit_file, "a", encoding='utf-8') as f:
         for t in telemetry:
             msg = f"[{datetime.now(timezone.utc).isoformat()}] TELEMETRY: {t.strip()}"
             print(f"[LIVE TELEMETRY] {t.strip()}")
@@ -56,13 +56,15 @@ def extract_telemetry(content):
 
 
 def check_consensus(data):
-    if len(data["messages"]) < 3: return False
-    recent_msgs = [m["content"].lower() for m in data["messages"][-3:]]
-    approvals = sum(1 for m in recent_msgs if "lgtm" in m or "approve" in m or "consensus reached" in m)
-    if approvals >= 3:
+    if len(data["messages"]) < 2:
+        return False
+    recent = data["messages"][-3:]
+    has_evidence = any("evidence_source:" in m.get("content", "").lower() for m in recent)
+    approval_count = sum(1 for m in recent if any(k in m.get("content", "").lower() for k in ("lgtm", "approved", "verified", "passed")))
+    if has_evidence and approval_count >= 2:
         if data["status"] != "consensus_reached":
             data["status"] = "consensus_reached"
-            print("[MoA] 3/3 Consensus Reached. Production gates unlocked.")
+            print("[MoA] Grounded Consensus Reached with Verified Evidence.")
             save_inbox(data)
         return True
     return False
@@ -78,7 +80,7 @@ def add_message(sender, recipient, content):
         data["debate_turn_count"] += 1
     
     if data["debate_turn_count"] >= 10:
-        print("[GOD MODE] Debate threshold reached (10 turns). Auto-resolving and resetting debate count to keep flow unblocked.")
+        print("[CIRCUIT BREAKER] Debate threshold reached (10 turns). Auto-resolving and resetting debate count to keep flow unblocked.")
         data["debate_turn_count"] = 0
         data["status"] = "active"
         

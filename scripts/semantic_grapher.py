@@ -300,7 +300,8 @@ def _scan_files_in_dir(root, files, graph):
 
 def scan_directory(directory, graph):
     for root, _, files in os.walk(directory):
-        if any(ign in root for ign in ['.git', 'node_modules', 'dist', 'build', '.venv', '__pycache__', '.agents-backups']):
+        parts = set(Path(root).parts) | set(root.replace("\\", "/").split("/"))
+        if any(ign in parts for ign in ['.git', 'node_modules', 'dist', 'build', '.venv', '__pycache__', '.agents-backups']):
             continue
         _scan_files_in_dir(root, files, graph)
 

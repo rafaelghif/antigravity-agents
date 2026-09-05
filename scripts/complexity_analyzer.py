@@ -91,7 +91,7 @@ def analyze_file(filepath):
         sys.stderr.write(f"[AST FATAL] {filepath.name}: Analysis failed: {e}\n")
         return True
 
-def process_dir(dirpath, filenames, failed):
+def process_dir(dirpath: str, filenames: list[str], failed: bool) -> bool:
     for filename in filenames:
         if filename.endswith(".py"):
             py_file = Path(dirpath) / filename
@@ -99,11 +99,15 @@ def process_dir(dirpath, filenames, failed):
                 failed = True
     return failed
 
-def run_analysis():
+def run_analysis(root_path: Path | None = None) -> bool:
     failed = False
-    root_path = Path(__file__).resolve().parents[1]
-    excludes = {".venv", "venv", ".git", ".agents", "__pycache__", "node_modules", "tests"}
-    for dirpath, dirnames, filenames in os.walk(root_path):
+    target = root_path or Path(__file__).resolve().parents[1]
+    excludes = {
+        ".venv", "venv", "env", ".env", ".git", ".agents", "__pycache__",
+        "node_modules", "tests", "dist", "build", "out", ".next", ".nuxt",
+        ".svelte-kit", ".angular", ".astro", ".docusaurus", ".turbo", ".cache"
+    }
+    for dirpath, dirnames, filenames in os.walk(target):
         dirnames[:] = [d for d in dirnames if d not in excludes]
         # Ignore files within test directories entirely
         if "tests" in Path(dirpath).parts or "test" in dirpath:
@@ -113,7 +117,8 @@ def run_analysis():
 
 if __name__ == '__main__':
     print("[AAC] Running Enterprise AST Guard (Complexity, Types, Mocks, Anti-Patterns)...")
-    failed = run_analysis()
+    target_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else None
+    failed = run_analysis(target_dir)
             
     if failed:
         print("=> ERROR: Code quality rejected by L9 Enterprise AST Guard. Refactor immediately.")
