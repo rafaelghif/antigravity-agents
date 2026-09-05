@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost check lagi example dan actual, sangat-sangat berbeda, pastikan example dan actual sama pergi (kecuali value karna itukan example...
+- **Task**: /boost # AAC — ANTIGRAVITY AGENT CORE  # MAJOR EVOLUTION / RE-ENGINEERING PROMPT  Act as a:  * Principal AI Agent Architect *...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
