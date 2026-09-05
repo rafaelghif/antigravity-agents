@@ -94,5 +94,24 @@ class TestMemoryConsolidator(unittest.TestCase):
         synced = sync_transcript_to_memory(transcript_file, active_path=self.active_path, memory_path=self.memory_path)
         self.assertFalse(synced)
 
+    def test_concurrent_active_state_updates(self):
+        import concurrent.futures
+        
+        def do_update(idx: int):
+            return update_active_state(
+                accomplishment=f"Concurrent milestone {idx}",
+                path=self.active_path
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(do_update, i) for i in range(10)]
+            results = [f.result() for f in futures]
+
+        self.assertTrue(all(results))
+        sections = load_active_context(self.active_path)
+        self.assertGreater(len(sections["accomplishments"]), 0)
+        self.assertTrue(any("Concurrent milestone" in acc for acc in sections["accomplishments"]))
+
+
 if __name__ == '__main__':
     unittest.main()

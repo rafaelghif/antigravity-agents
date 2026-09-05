@@ -35,6 +35,8 @@ test_scratch*
 test_temp*
 *.tmp
 *.swp
+*.lock
+.*.lock
 release_notes*
 .agents/inbox/
 .agents/harness/

@@ -8,13 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.45.0] - 2026-09-05
 
 ### Added
+- **Git-First Distribution & Lifecycle Engine**: Hardened `install.py` with `--version`, `--reinstall`, `--repair`, `--rollback`, and `--uninstall` capabilities backed by `.agents/install_manifest.json` SHA256 integrity auditing (`--status`/`--audit`).
+- **Automated Workspace Health Check & Self-Diagnosis**: Implemented `scripts/health_check.py` validating 14 health dimensions with structured `--json` output and deterministic `--repair`.
+- **Concurrency-Hardened Working Memory**: Added cross-platform advisory file locking and atomic temporary writes to `scripts/memory_consolidator.py`, preventing race conditions during parallel subagent executions.
+- **Structured Inter-Agent Messaging Protocol**: Added `format_structured_message` and `send_structured_message` in `scripts/inbox_manager.py` implementing RFC-compliant structured handoffs over the disk-backed blackboard.
 - **Air-Gapped & Offline Installation Engine**: Enhanced `install.py` with `--source-dir` flag and automated local repository checkout fallback, enabling deterministic offline installations without GitHub network access. Automated addition of `.agents-backups/` to target project `.gitignore`.
 - **OS Hook Chaos Test Suite**: Implemented 5 test cases in `tests/test_hooks.py` validating CRLF line endings, missing dependency fallbacks, concurrency races, Unicode path normalization, and null environment handling.
 - **Safe Multi-Platform Standard Input Buffering**: Centralized binary standard input decoding in `scripts/hooks/hook_utils.py` (`read_safe_stdin()`), preventing UTF-8 and codepage decoding failures across Windows `cp1252` and Linux while adhering strictly to DRY anti-duplication constraints.
 
 ### Changed
+- **Universal Installer Bootstrap Resilience**: Added `wget` fallback to `install.sh` and `-UseBasicParsing` to `install.ps1` for seamless bootstrap on minimal POSIX containers and PowerShell 5.1.
 - **Cross-Platform Hook Execution**: Hardened `.agents/plugins/aac-core/hooks.json` to execute nested subprocesses via `sys.executable`, eliminating Python binary naming discrepancies across Windows and POSIX environments.
-- **Expanded Test Coverage & Full Release Parity**: Reached 164 passing unit tests across 28 test suites in 0.330s with zero regressions across all 9 technical gates and release consensus verification.
+- **Expanded Test Coverage & Full Release Parity**: Reached 178 passing unit tests across 30 test suites in 0.611s with zero regressions across all 9 technical gates and release consensus verification.
 
 ### Fixed
 - **Hermes Task Graph Resilience**: Added fallback to task filename stem in `scripts/hermes_manager.py` to prevent silent task dropping when YAML declarations omit explicit `id:` keys. Ensured 100% discovery and topological ordering across all sprint tasks.

@@ -33,7 +33,7 @@ if ($ScriptDir -and (Test-Path (Join-Path $ScriptDir "install.py"))) {
 
 # Otherwise, download and run install.py directly
 $TmpFile = [System.IO.Path]::GetTempFileName() + ".py"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py" -OutFile $TmpFile
+Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py" -OutFile $TmpFile
 & $Python $TmpFile $args
 $ret = $LASTEXITCODE
 Remove-Item -Force $TmpFile -ErrorAction SilentlyContinue

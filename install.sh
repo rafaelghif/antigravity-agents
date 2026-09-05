@@ -27,7 +27,17 @@ if [ -f "$SCRIPT_DIR/install.py" ]; then
 fi
 
 TMP_PY="$(mktemp "${TMPDIR:-/tmp}/aac_install_XXXXXX.py" 2>/dev/null || echo "/tmp/aac_install_$$.py")"
-curl -fsSL "https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py" -o "$TMP_PY"
+URL="https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.py"
+
+if command -v curl >/dev/null 2>&1; then
+  curl -fsSL "$URL" -o "$TMP_PY"
+elif command -v wget >/dev/null 2>&1; then
+  wget -qO "$TMP_PY" "$URL"
+else
+  echo "Error: curl or wget is required to download installer." >&2
+  exit 1
+fi
+
 "$PYTHON" "$TMP_PY" "$@"
 ret=$?
 rm -f "$TMP_PY"

@@ -67,5 +67,43 @@ class TestInboxManager(unittest.TestCase):
         has_consensus = inbox_manager.check_consensus(data)
         self.assertFalse(has_consensus)
 
+    def test_format_and_send_structured_message(self):
+        msg = inbox_manager.format_structured_message(
+            sender="staff-backend",
+            recipient="qa-automation-lead",
+            task="TASK-01-AUTH",
+            status="IN_PROGRESS",
+            verified=True,
+            findings="Unit tests pass for JWT validation",
+            files=["tests/test_auth.py", "auth.py"],
+            decisions=["Use RS256 algorithm"],
+            blockers="None",
+            validation="python3 -m unittest tests/test_auth.py",
+            next_action="Perform QA verification"
+        )
+        self.assertIn("FROM: staff-backend", msg)
+        self.assertIn("TO: qa-automation-lead", msg)
+        self.assertIn("VERIFIED: YES", msg)
+        self.assertIn("TASK: TASK-01-AUTH", msg)
+
+        sent = inbox_manager.send_structured_message(
+            sender="staff-backend",
+            recipient="qa-automation-lead",
+            task="TASK-01-AUTH",
+            status="DONE",
+            verified=True,
+            findings="Passed all tests",
+            files=["auth.py"],
+            decisions=["Approved"],
+            blockers="None",
+            validation="All gates green",
+            next_action="Deploy"
+        )
+        self.assertTrue(sent)
+        data = inbox_manager.load_inbox()
+        self.assertEqual(len(data["messages"]), 1)
+        self.assertIn("TASK: TASK-01-AUTH", data["messages"][0]["content"])
+
+
 if __name__ == "__main__":
     unittest.main()
