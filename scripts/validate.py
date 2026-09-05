@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 VERSION_FILES = (
     "AGENTS.md",
     "README.md",
@@ -143,6 +145,18 @@ def validate_mcp_config_dict(config: dict, file_label: str) -> None:
             fail(f"MCP server {name} in {file_label} uses mutable :latest image")
 
 
+def validate_server_properties(srv: str, ex_srv: dict, act_srv: dict) -> None:
+    if set(ex_srv.keys()) != set(act_srv.keys()):
+        fail(f"mcpServers.{srv} property mismatch between example and actual: {set(ex_srv.keys()) ^ set(act_srv.keys())}")
+    if "command" in ex_srv and type(ex_srv["command"]) is not type(act_srv["command"]):
+        fail(f"mcpServers.{srv}.command type mismatch: {type(ex_srv['command'])} vs {type(act_srv['command'])}")
+    if "args" in ex_srv and type(ex_srv["args"]) is not type(act_srv["args"]):
+        fail(f"mcpServers.{srv}.args type mismatch: {type(ex_srv['args'])} vs {type(act_srv['args'])}")
+    if "env" in ex_srv:
+        if "env" not in act_srv or set(ex_srv["env"].keys()) != set(act_srv["env"].keys()):
+            fail(f"mcpServers.{srv}.env key mismatch between example and actual: {set(ex_srv['env'].keys()) ^ set(act_srv.get('env', {}).keys())}")
+
+
 def validate_mcp() -> None:
     example_config = load_json(".agents/mcp_config.json.example")
     validate_mcp_config_dict(example_config, ".agents/mcp_config.json.example")
@@ -154,6 +168,8 @@ def validate_mcp() -> None:
         act_servers = set(actual_config.get("mcpServers", {}).keys())
         if ex_servers != act_servers:
             fail(f"mcpServers key mismatch between example and actual: {ex_servers ^ act_servers}")
+        for srv in ex_servers:
+            validate_server_properties(srv, example_config["mcpServers"][srv], actual_config["mcpServers"][srv])
 
 
 
@@ -210,11 +226,58 @@ def validate_single_settings_file(target: str) -> None:
 
 
 def validate_settings() -> None:
-    targets = [".agents/antigravity-settings.example.json"]
-    if (ROOT / ".agents" / "antigravity-settings.json").is_file():
-        targets.append(".agents/antigravity-settings.json")
-    for target in targets:
-        validate_single_settings_file(target)
+    example_path = ".agents/antigravity-settings.example.json"
+    validate_single_settings_file(example_path)
+    actual_path = ROOT / ".agents" / "antigravity-settings.json"
+    if actual_path.is_file():
+        validate_single_settings_file(".agents/antigravity-settings.json")
+        ex_settings = load_json(example_path)
+        act_settings = load_json(".agents/antigravity-settings.json")
+        if set(ex_settings.keys()) != set(act_settings.keys()):
+            fail(f"Settings key mismatch between example and actual: {set(ex_settings.keys()) ^ set(act_settings.keys())}")
+        ex_perms = ex_settings.get("permissions", {})
+        act_perms = act_settings.get("permissions", {})
+        if set(ex_perms.keys()) != set(act_perms.keys()):
+            fail(f"Permissions key mismatch between example and actual: {set(ex_perms.keys()) ^ set(act_perms.keys())}")
+        if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
+            fail(f"Permissions allow list mismatch: {set(ex_perms.get('allow', [])) ^ set(act_perms.get('allow', []))}")
+        if ex_perms.get("deny") != act_perms.get("deny"):
+            fail(f"Permissions deny list mismatch: {ex_perms.get('deny')} vs {act_perms.get('deny')}")
+        if ex_perms.get("ask") != act_perms.get("ask"):
+            fail(f"Permissions ask list mismatch: {ex_perms.get('ask')} vs {act_perms.get('ask')}")
+
+
+def validate_env() -> None:
+    example_path = ROOT / ".env.example"
+    actual_path = ROOT / ".env"
+    if not example_path.is_file():
+        fail(".env.example must exist")
+
+    def parse_env_keys(p: Path) -> set[str]:
+        keys = set()
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                keys.add(line.split("=", 1)[0])
+        return keys
+
+    ex_keys = parse_env_keys(example_path)
+    if actual_path.is_file():
+        act_keys = parse_env_keys(actual_path)
+        if ex_keys != act_keys:
+            fail(f".env key mismatch between example and actual: {ex_keys ^ act_keys}")
+
+
+def validate_handoff_template() -> None:
+    tpl_path = ROOT / "handoff_template.json"
+    if not tpl_path.is_file():
+        return
+    try:
+        from scripts.neurosymbolic_engine import validate_handoff
+        if not validate_handoff(tpl_path):
+            fail("handoff_template.json failed neurosymbolic validation")
+    except ImportError as exc:
+        fail(f"Could not import neurosymbolic_engine for handoff validation: {exc}")
 
 
 def validate_compatibility() -> None:
@@ -302,6 +365,8 @@ def main() -> int:
         validate_markdown_metadata(".agents/rules", 5, ("name", "description", "trigger"), "*.md")
         validate_instruction_budget()
         validate_settings()
+        validate_env()
+        validate_handoff_template()
         validate_compatibility()
         validate_recovery_state()
         validate_scanner_applicability()

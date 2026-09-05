@@ -357,6 +357,7 @@ class HealthChecker:
         issues = []
         candidates = [self.root / ".agents" / "mcp_config.json", self.root / ".agents" / "mcp_config.json.example"]
         checked = False
+        parsed_configs = {}
         for path in candidates:
             if path.is_file():
                 checked = True
@@ -367,11 +368,25 @@ class HealthChecker:
                         issues.append(f"{path.name} missing mcpServers dict")
                     else:
                         issues.extend(validate_mcp_servers_dict(servers, path.name))
+                        parsed_configs[path.name] = servers
                 except Exception as e:
                     issues.append(f"{path.name} error: {e}")
 
         if not checked:
             issues.append("Neither mcp_config.json nor mcp_config.json.example found")
+
+        # Parity enforcement between example and actual MCP configs
+        if "mcp_config.json" in parsed_configs and "mcp_config.json.example" in parsed_configs:
+            act_s = parsed_configs["mcp_config.json"]
+            ex_s = parsed_configs["mcp_config.json.example"]
+            if set(act_s.keys()) != set(ex_s.keys()):
+                issues.append(f"mcpServers key mismatch between example and actual: {set(act_s.keys()) ^ set(ex_s.keys())}")
+            for srv in set(act_s.keys()) & set(ex_s.keys()):
+                if set(act_s[srv].keys()) != set(ex_s[srv].keys()):
+                    issues.append(f"mcpServers.{srv} property mismatch: {set(act_s[srv].keys()) ^ set(ex_s[srv].keys())}")
+                if "env" in act_s[srv] and "env" in ex_s[srv]:
+                    if set(act_s[srv]["env"].keys()) != set(ex_s[srv]["env"].keys()):
+                        issues.append(f"mcpServers.{srv}.env key mismatch: {set(act_s[srv]['env'].keys()) ^ set(ex_s[srv]['env'].keys())}")
 
         passed = len(issues) == 0
         if not passed:
@@ -403,6 +418,7 @@ class HealthChecker:
 
     def check_permission_mismatch(self) -> bool:
         issues = []
+        loaded_settings = {}
         for sf_name in ("antigravity-settings.example.json", "antigravity-settings.json"):
             settings_file = self.root / ".agents" / sf_name
             if settings_file.is_file():
@@ -411,8 +427,23 @@ class HealthChecker:
                     perms = data.get("permissions")
                     if not isinstance(perms, dict) or "allow" not in perms or "deny" not in perms:
                         issues.append(f"{sf_name} permissions object missing allow/deny lists")
+                    loaded_settings[sf_name] = data
                 except Exception as e:
                     issues.append(f"{sf_name} error: {e}")
+
+        # Parity enforcement between example and actual settings
+        if "antigravity-settings.example.json" in loaded_settings and "antigravity-settings.json" in loaded_settings:
+            ex_data = loaded_settings["antigravity-settings.example.json"]
+            act_data = loaded_settings["antigravity-settings.json"]
+            if set(ex_data.keys()) != set(act_data.keys()):
+                issues.append(f"Settings top-level key mismatch: {set(ex_data.keys()) ^ set(act_data.keys())}")
+            ex_perms = ex_data.get("permissions", {})
+            act_perms = act_data.get("permissions", {})
+            if isinstance(ex_perms, dict) and isinstance(act_perms, dict):
+                if set(ex_perms.keys()) != set(act_perms.keys()):
+                    issues.append(f"Permissions key mismatch: {set(ex_perms.keys()) ^ set(act_perms.keys())}")
+                if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
+                    issues.append(f"Allowed permissions mismatch between example and actual: {set(ex_perms.get('allow', [])) ^ set(act_perms.get('allow', []))}")
 
         passed = len(issues) == 0
         if not passed:
