@@ -38,5 +38,25 @@ class TestMeetingCoordinator(unittest.TestCase):
             args = mock_run.call_args[0][0]
             self.assertIn("report", args)
 
+    def test_run_agent_passes_high_effort_flags(self):
+        with patch("shutil.which", return_value="/usr/local/bin/agy"), \
+             patch("subprocess.run") as mock_run:
+            meeting_coordinator.run_agent("scrum-master", "Plan sprint")
+            agy_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "agy"]
+            self.assertTrue(len(agy_calls) > 0)
+            cmd = agy_calls[0][0][0]
+            self.assertIn("--model", cmd)
+            self.assertIn("gemini-3.8-flash-high", cmd)
+            self.assertIn("--effort", cmd)
+            self.assertIn("high", cmd)
+
+            meeting_coordinator.run_agent("staff-backend", "Write architecture")
+            agy_calls2 = [call for call in mock_run.call_args_list if call[0][0][0] == "agy"]
+            cmd2 = agy_calls2[-1][0][0]
+            self.assertIn("--model", cmd2)
+            self.assertIn("gemini-3.1-pro-high", cmd2)
+            self.assertIn("--effort", cmd2)
+            self.assertIn("high", cmd2)
+
 if __name__ == "__main__":
     unittest.main()

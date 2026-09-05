@@ -47,7 +47,8 @@ def run_agent(agent_name: str, prompt: str):
         sys.stderr.write(f"Notice dispatching to blackboard: {exc}\n")
 
     if shutil.which("agy"):
-        cmd_args = ["agy", "--agent", agent_name, "--dangerously-skip-permissions", "--print", prompt]
+        model_flag = "gemini-3.1-pro-high" if agent_name in ("staff-backend", "database-sre", "researcher") else "gemini-3.8-flash-high"
+        cmd_args = ["agy", "--model", model_flag, "--agent", agent_name, "--effort", "high", "--dangerously-skip-permissions", "--print", prompt]
         try:
             subprocess.run(cmd_args, cwd=str(ROOT), env=sub_env, timeout=120, check=True)
         except Exception as e:

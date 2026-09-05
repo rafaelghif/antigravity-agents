@@ -59,6 +59,8 @@
     "token_budget": 100000
   },
   "orchestration": {
+    "default_reasoning_effort": "high",
+    "default_model_tier": "flash",
     "max_skill_depth": 5,
     "deadlock_retries": 3,
     "parallel_skills": [
