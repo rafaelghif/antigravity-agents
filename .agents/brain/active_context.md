@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- **Task**: /boost check lagi example dan actual, sangat-sangat berbeda, pastikan example dan actual sama pergi (kecuali value karna itukan...
+- /boost check lagi example dan actual, sangat-sangat berbeda, pastikan example dan actual sama pergi (kecuali value karna itukan example...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
