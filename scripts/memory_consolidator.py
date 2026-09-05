@@ -170,7 +170,10 @@ def sync_transcript_to_memory(
         lines = transcript_path.read_text(encoding="utf-8", errors="ignore").splitlines()
         latest_intent = parse_latest_user_intent(lines)
         if latest_intent:
-            clean_intent = latest_intent.replace("\n", " ")[:140]
+            clean_intent = latest_intent.replace("\n", " ").strip()
+            if len(clean_intent) > 140:
+                trimmed = clean_intent[:140].rsplit(" ", 1)[0]
+                clean_intent = (trimmed if trimmed else clean_intent[:140]) + "..."
             update_active_state(focus=clean_intent, path=active_path)
             return True
     except Exception as e:

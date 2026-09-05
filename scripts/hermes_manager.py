@@ -155,19 +155,31 @@ class HermesEngine:
             print(f"[Hermes] Failed to update status in {task_file}: {e}")
 
     def resolve_persona(self, task_data: Dict[str, Any]) -> str:
+        assigned = str(task_data.get("assigned_persona", "")).strip()
+        if assigned:
+            return assigned
         explicit_domain = task_data.get("domain", "").lower()
-        if explicit_domain in ["backend", "api", "database", "frontend", "security", "qa"]:
-            domain_map = {
-                "backend": "staff-backend",
-                "api": "staff-backend",
-                "frontend": "frontend-architect",
-                "ui": "frontend-architect",
-                "database": "database-sre",
-                "security": "devsecops-principal",
-                "qa": "qa-automation-lead"
-            }
-            if explicit_domain in domain_map:
-                return domain_map[explicit_domain]
+        domain_map = {
+            "backend": "staff-backend",
+            "api": "staff-backend",
+            "frontend": "frontend-architect",
+            "ui": "frontend-architect",
+            "database": "database-sre",
+            "db": "database-sre",
+            "security": "devsecops-principal",
+            "devsecops": "devsecops-principal",
+            "devops": "devsecops-principal",
+            "qa": "qa-automation-lead",
+            "testing": "qa-automation-lead",
+            "product": "product-manager",
+            "requirements": "product-manager",
+            "research": "researcher",
+            "docs": "researcher",
+            "scrum": "scrum-master",
+            "orchestration": "scrum-master",
+        }
+        if explicit_domain in domain_map:
+            return domain_map[explicit_domain]
 
         text = (task_data.get("title", "") + " " + task_data.get("description", "")).lower()
         if any(k in text for k in ["frontend", "ui", "css", "component", "tailwind", "react"]):
@@ -178,6 +190,10 @@ class HermesEngine:
             return "devsecops-principal"
         if any(k in text for k in ["test", "fuzz", "qa", "chaos"]):
             return "qa-automation-lead"
+        if any(k in text for k in ["requirement", "prd", "story", "user story", "epic"]):
+            return "product-manager"
+        if any(k in text for k in ["research", "paper", "investigate", "benchmark", "literature"]):
+            return "researcher"
         return "staff-backend"
 
     def _load_persona_skills(self, persona: str) -> str:
@@ -188,13 +204,19 @@ class HermesEngine:
         skill_texts = []
         try:
             content = persona_file.read_text(encoding="utf-8")
-            match = re.search(r"skills:\s*\[(.*?)\]", content)
-            if match:
-                skill_names = [s.strip() for s in match.group(1).split(",") if s.strip()]
-                for sname in skill_names:
-                    skill_path = ROOT / ".agents" / "skills" / sname / "SKILL.md"
-                    if skill_path.exists():
-                        skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
+            skill_names = []
+            inline_match = re.search(r"skills:\s*\[(.*?)\]", content)
+            if inline_match:
+                skill_names.extend([s.strip() for s in inline_match.group(1).split(",") if s.strip()])
+            else:
+                multi_match = re.search(r"skills:\s*\n((?:\s*-\s*[a-zA-Z0-9_\-]+\s*\n?)+)", content)
+                if multi_match:
+                    skill_names.extend(re.findall(r"-\s*([a-zA-Z0-9_\-]+)", multi_match.group(1)))
+
+            for sname in skill_names:
+                skill_path = ROOT / ".agents" / "skills" / sname / "SKILL.md"
+                if skill_path.exists():
+                    skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
         except Exception as e:
             sys.stderr.write(f"Skill loading notice: {e}\n")
             

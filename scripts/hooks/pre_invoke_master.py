@@ -97,11 +97,32 @@ def get_context(transcript_path: str | None = None) -> str:
         grounding_data = ground_workspace(ROOT)
         eco = list(grounding_data.get("ecosystems", {}).keys())
         eco_str = ", ".join(eco) if eco else "Generic / Multi-language"
+        ground_lines = [f"Ecosystem: [{eco_str}]"]
+        env = grounding_data.get("environment", {})
+        if env and env.get("platform"):
+            ground_lines.append(f"OS/Arch: {env.get('platform')} ({env.get('architecture', env.get('machine', 'unknown'))})")
+        pkg_mgrs = []
+        pms_data = grounding_data.get("package_managers", {})
+        if isinstance(pms_data, dict):
+            lock_pms = pms_data.get("lockfile_managed", [])
+            if lock_pms:
+                pkg_mgrs.append(f"Lockfile: {', '.join(lock_pms)}")
+            avail_cli = pms_data.get("available_cli", [])
+            if avail_cli:
+                pkg_mgrs.append(f"CLI: {', '.join(avail_cli[:8])}")
+        if pkg_mgrs:
+            ground_lines.append("Tooling: " + " | ".join(pkg_mgrs))
+        frameworks = grounding_data.get("frameworks", [])
+        if frameworks:
+            fw_names = [f["name"] if isinstance(f, dict) else str(f) for f in frameworks]
+            ground_lines.append("Frameworks: " + ", ".join(fw_names))
+        test_runners = grounding_data.get("testing", []) or grounding_data.get("testing_strategies", [])
+        if test_runners:
+            ground_lines.append("Test Runners: " + ", ".join(test_runners))
         deps = []
         for e, dl in grounding_data.get("dependencies", {}).items():
             if dl:
                 deps.append(f"{e}: {', '.join(dl[:10])}")
-        ground_lines = [f"Ecosystem: [{eco_str}]"]
         if deps:
             ground_lines.append("Confirmed Dependencies: " + " | ".join(deps))
         msgs.append("=== CODEBASE GROUNDING BASELINE ===\n" + "\n".join(ground_lines))

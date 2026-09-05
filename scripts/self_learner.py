@@ -55,6 +55,15 @@ def extract_learning_from_user_input(text: str) -> str | None:
     # Questions, inquiries, or task instructions are NOT permanent rules
     if '?' in cleaned or any(w in cleaned.lower() for w in ['kenapa', 'mengapa', 'why', 'check', 'review', 'tolong']):
         return None
+
+    # Transient/temporary instructions must not be saved as permanent rules
+    transient_signals = [
+        r'\bfor now\b', r'\btemporarily\b', r'\bjust for this\b', r'\btoday\b',
+        r'\bin this task\b', r'\bfor this pr\b', r'\bthis sprint\b',
+        r'\bsementara\b', r'\buntuk sekarang\b',
+    ]
+    if any(re.search(pat, cleaned.lower()) for pat in transient_signals):
+        return None
         
     if not contains_learning_signal(cleaned):
         return None

@@ -44,6 +44,15 @@ class TestSelfLearner(unittest.TestCase):
         learned3 = extract_learning_from_user_input(text3)
         self.assertIsNone(learned3)
 
+        # Transient/temporary instruction - should NOT trigger permanent learning
+        text4 = "avoid touching auth.py for now"
+        learned4 = extract_learning_from_user_input(text4)
+        self.assertIsNone(learned4)
+
+        text5 = "jangan ubah config dulu untuk sekarang"
+        learned5 = extract_learning_from_user_input(text5)
+        self.assertIsNone(learned5)
+
     def test_save_learned_rule_deduplication(self):
         rule = "Dahulukan unit testing sebelum commit"
         # First save should succeed

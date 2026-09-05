@@ -36,10 +36,14 @@ class TestHermesManager(unittest.TestCase):
     def test_resolve_persona_explicit_domain(self):
         engine = HermesEngine()
         self.assertEqual(engine.resolve_persona({"domain": "frontend"}), "frontend-architect")
+        self.assertEqual(engine.resolve_persona({"domain": "ui"}), "frontend-architect")
         self.assertEqual(engine.resolve_persona({"domain": "database"}), "database-sre")
         self.assertEqual(engine.resolve_persona({"domain": "security"}), "devsecops-principal")
         self.assertEqual(engine.resolve_persona({"domain": "qa"}), "qa-automation-lead")
         self.assertEqual(engine.resolve_persona({"domain": "backend"}), "staff-backend")
+        self.assertEqual(engine.resolve_persona({"domain": "product"}), "product-manager")
+        self.assertEqual(engine.resolve_persona({"domain": "research"}), "researcher")
+        self.assertEqual(engine.resolve_persona({"domain": "scrum"}), "scrum-master")
 
     def test_resolve_persona_inferred_from_title(self):
         engine = HermesEngine()
@@ -47,6 +51,33 @@ class TestHermesManager(unittest.TestCase):
         self.assertEqual(engine.resolve_persona({"title": "Add postgres migration for users"}), "database-sre")
         self.assertEqual(engine.resolve_persona({"title": "Fix docker container secret scanning"}), "devsecops-principal")
         self.assertEqual(engine.resolve_persona({"title": "Fuzz testing boundary conditions"}), "qa-automation-lead")
+        self.assertEqual(engine.resolve_persona({"title": "Draft PRD and user story breakdown"}), "product-manager")
+        self.assertEqual(engine.resolve_persona({"title": "Research state of the art papers on diffusion"}), "researcher")
+
+    def test_resolve_persona_assigned_priority(self):
+        engine = HermesEngine()
+        self.assertEqual(engine.resolve_persona({"assigned_persona": "database-sre", "domain": "backend"}), "database-sre")
+        self.assertEqual(engine.resolve_persona({"assigned_persona": "custom-agent"}), "custom-agent")
+
+    def test_load_persona_skills_multiline_yaml(self):
+        engine = HermesEngine()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmproot = Path(tmpdir)
+            agent_dir = tmproot / ".agents" / "agents"
+            agent_dir.mkdir(parents=True)
+            skills_dir = tmproot / ".agents" / "skills" / "architecture"
+            skills_dir.mkdir(parents=True)
+            (skills_dir / "SKILL.md").write_text("# Architecture Skill\n")
+            (agent_dir / "custom-agent.md").write_text("""---
+name: custom-agent
+skills:
+  - architecture
+---
+Body
+""")
+            with patch("scripts.hermes_manager.ROOT", tmproot):
+                loaded = engine._load_persona_skills("custom-agent")
+                self.assertIn("Architecture Skill", loaded)
 
     def test_execute_agent_fallback_when_no_agy(self):
         engine = HermesEngine()
