@@ -1,4 +1,4 @@
 STATUS: APPROVED
 TIMESTAMP: "2026-09-05T09:59:30Z"
 APPROVER: "qa-automation-lead"
-VERIFICATION: "9/9 gates passed with zero regressions across 191 tests for release v4.46.0"
+VERIFICATION: "9/9 gates passed with zero regressions across 191 tests for release v4.47.0"

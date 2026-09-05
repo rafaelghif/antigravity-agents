@@ -29,7 +29,7 @@ class TestInstallLifecycle(unittest.TestCase):
         (self.src / "GEMINI.md").write_text("# Bootstrap\nAGENTS.md\n", encoding="utf-8")
         (self.src / "agent.md").write_text("# Agent\n", encoding="utf-8")
         (self.src / ".agents" / "brain").mkdir(parents=True)
-        (self.src / ".agents" / "config.json").write_text('{"core_version": "4.46.0"}', encoding="utf-8")
+        (self.src / ".agents" / "config.json").write_text('{"core_version": "4.47.0"}', encoding="utf-8")
         (self.src / "scripts").mkdir(parents=True)
         (self.src / "scripts" / "tool.py").write_text("print('ok')\n", encoding="utf-8")
 
@@ -38,14 +38,14 @@ class TestInstallLifecycle(unittest.TestCase):
         self.src_dir.cleanup()
 
     def test_install_generates_manifest(self):
-        success = install_aac(self.target, "v4.46.0", source_override=self.src)
+        success = install_aac(self.target, "v4.47.0", source_override=self.src)
         self.assertTrue(success)
 
         manifest_file = self.target / ".agents" / "install_manifest.json"
         self.assertTrue(manifest_file.is_file())
         mdata = json.loads(manifest_file.read_text(encoding="utf-8"))
-        self.assertEqual(mdata["installed_version"], "4.46.0")
-        self.assertEqual(mdata["source_revision"], "v4.46.0")
+        self.assertEqual(mdata["installed_version"], "4.47.0")
+        self.assertEqual(mdata["source_revision"], "v4.47.0")
         self.assertIn("managed_files", mdata)
         self.assertGreater(len(mdata["managed_files"]), 0)
 
@@ -56,7 +56,7 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertEqual(len(audit["missing_files"]), 0)
 
     def test_audit_detects_tampered_files(self):
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
 
         # Tamper with an installed managed file
         (self.target / "AGENTS.md").write_text("# Tampered Agents content\n", encoding="utf-8")
@@ -66,7 +66,7 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertIn("AGENTS.md", audit["modified_files"])
 
     def test_audit_detects_missing_files(self):
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
 
         # Delete a managed file
         (self.target / "AGENTS.md").unlink()
@@ -76,7 +76,7 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertIn("AGENTS.md", audit["missing_files"])
 
     def test_repair_restores_tampered_files(self):
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
         (self.target / "AGENTS.md").write_text("# Tampered\n", encoding="utf-8")
 
         # Run repair
@@ -95,7 +95,7 @@ class TestInstallLifecycle(unittest.TestCase):
 
         # 2. Second installation (creates backup)
         (self.src / "AGENTS.md").write_text("# Version 2 Content\n", encoding="utf-8")
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
         self.assertIn("# Version 2", (self.target / "AGENTS.md").read_text(encoding="utf-8"))
 
         # 3. Rollback
@@ -110,7 +110,7 @@ class TestInstallLifecycle(unittest.TestCase):
 
         # 2. Second installation introduces a new tool
         (self.src / "scripts" / "new_tool.py").write_text("print('new')\n", encoding="utf-8")
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
         self.assertTrue((self.target / "scripts" / "new_tool.py").is_file())
 
         # 3. Rollback must prune new_tool.py
@@ -120,7 +120,7 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertTrue((self.target / "scripts" / "tool.py").is_file())
 
     def test_install_generates_project_tailored_intent(self):
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
         intent_path = self.target / "intent.yaml"
         self.assertTrue(intent_path.is_file())
         content = intent_path.read_text(encoding="utf-8")
@@ -128,7 +128,7 @@ class TestInstallLifecycle(unittest.TestCase):
         self.assertNotIn("Antigravity Fully Agentic Looping System", content)
 
     def test_uninstall_safely_removes_managed_files(self):
-        install_aac(self.target, "v4.46.0", source_override=self.src)
+        install_aac(self.target, "v4.47.0", source_override=self.src)
         (self.target / ".agents" / "brain" / "memory.md").write_text("# User Memories\n", encoding="utf-8")
         (self.target / "user_code.py").write_text("print('user project')\n", encoding="utf-8")
 
