@@ -14,6 +14,7 @@
 - Strict word budgets and zero regressions across all 9 gates.
 
 ## 🚀 Recent Accomplishments
+- Refactored README.md: authentic 4-phase Mermaid workflow, grounded CLI cheat sheet, linked persona definitions, removed gamer slang, verified 9 gates.
 - Fixed silent task dropping in `scripts/hermes_manager.py` by ensuring all tasks in `tasks/` have valid IDs and adding fallback to filename stem.
 - Replaced dead `scripts/manager_blindfold.py` reference in `tasks/03_strict_enforcement.yaml` with `scripts/hermes_manager.py`.
 - Implemented 5 missing OS hook chaos test cases in `tests/test_hooks.py` (`test_os_hook_crlf_mismatch`, `test_os_hook_missing_dependency`, `test_os_hook_concurrency_race`, `test_os_hook_special_unicode_paths`, `test_os_hook_null_env_vars`), satisfying all acceptance criteria in `tasks/03_qa_audit.yaml`.
