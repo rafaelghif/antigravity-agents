@@ -4,6 +4,7 @@ description: Principal Agile Orchestrator. Manages tasks, aggregates progress, u
 mode: subagent
 subagent: true
 model: flash
+effort: high
 skills: [architecture, verification, caveman]
 tools: [run_command, view_file, write_to_file, replace_file_content, list_dir, grep_search, find_by_name, send_message, manage_task, schedule]
 enable_write_tools: true

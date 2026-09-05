@@ -113,7 +113,9 @@ Body
             engine.execute_agent("scrum-master", "Plan sprint")
             called_cmd2 = mock_run.call_args[0][0]
             self.assertIn("--model", called_cmd2)
-            self.assertIn("gemini-3.8-flash-low", called_cmd2)
+            self.assertIn("gemini-3.8-flash-high", called_cmd2)
+            self.assertIn("--effort", called_cmd2)
+            self.assertIn("high", called_cmd2)
 
     def test_evaluate_gate2_cognitive_fallback(self):
         engine = HermesEngine()

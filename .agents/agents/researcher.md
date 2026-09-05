@@ -4,6 +4,7 @@ description: Staff Technical Researcher. Web research, official documentation lo
 mode: subagent
 subagent: true
 model: pro
+effort: high
 skills: [deep-research, architecture, caveman]
 tools: [search_web, read_url_content, view_file, list_dir, grep_search, find_by_name, call_mcp_tool, list_resources, read_resource, send_message]
 enable_write_tools: true
