@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- okey releases `v.4.45.0`
+- **Task**: kita refactor lagi @[README.md] jangan mengada" fully refactor semuanya, pastikan semuanya professional untuk public. jangan...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
