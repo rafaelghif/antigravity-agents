@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost Act as an Expert Agentic Systems Prompter, Agent Architect, and LLM Reliability Engineer.  Your mission is to fully audit, improve,...
+- Task: # ANTIGRAVITY MASTER WORKSPACE AUDIT, CLEANUP, SYNCHRONIZATION & CONTEXT-SAFE ORCHESTRATION  Act as an:  * Expert Google Antigravity...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.

@@ -33,12 +33,16 @@ def main() -> None:
     norm_target = target_file.replace("\\", "/")
     if "/.git/" in norm_target or norm_target.startswith(".git/"):
         sys.stderr.write("[DEVSECOPS AUDIT] Direct .git modification detected in payload.\n")
+        print(json.dumps({"decision": "deny", "reason": "Direct modification of .git directory is strictly prohibited."}))
+        return
 
     # 2. Prevent accidental hardcoded private keys / tokens
     content = str(args.get("CodeContent", "")) + " " + str(args.get("ReplacementContent", ""))
     for pat in SECRET_PATTERNS:
         if re.search(pat, content):
             sys.stderr.write("[SECURITY AUDIT] Potential credential/token pattern detected in tool payload.\n")
+            print(json.dumps({"decision": "deny", "reason": "Potential secret or private key pattern detected in tool payload."}))
+            return
 
     # 3. Anti-Regression Telemetry: Track overwrites of existing files
     if tool_name == "write_to_file" and args.get("Overwrite") is True:

@@ -88,6 +88,21 @@ Body
             self.assertIn("APPROVED", stdout)
             mock_post.assert_called_once()
 
+    def test_execute_agent_passes_model_flags(self):
+        engine = HermesEngine()
+        with patch("shutil.which", return_value="/usr/local/bin/agy"), \
+             patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0, stdout="OK", stderr="")
+            engine.execute_agent("staff-backend", "Implement feature")
+            called_cmd = mock_run.call_args[0][0]
+            self.assertIn("--model", called_cmd)
+            self.assertIn("gemini-3.1-pro-high", called_cmd)
+
+            engine.execute_agent("scrum-master", "Plan sprint")
+            called_cmd2 = mock_run.call_args[0][0]
+            self.assertIn("--model", called_cmd2)
+            self.assertIn("gemini-3.8-flash-low", called_cmd2)
+
     def test_evaluate_gate2_cognitive_fallback(self):
         engine = HermesEngine()
         with patch("shutil.which", return_value=None):

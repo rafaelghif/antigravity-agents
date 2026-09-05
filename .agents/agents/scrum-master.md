@@ -3,7 +3,9 @@ name: scrum-master
 description: Principal Agile Orchestrator. Manages tasks, aggregates progress, unblocks agents.
 mode: subagent
 subagent: true
+model: flash
 skills: [architecture, verification, caveman]
+tools: [run_command, view_file, write_to_file, replace_file_content, list_dir, grep_search, find_by_name, send_message, manage_task, schedule]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

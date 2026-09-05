@@ -3,7 +3,7 @@ import sys
 import json
 import re
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -70,7 +70,7 @@ def extract_telemetry(transcript_path: str) -> None:
                 clean_match = match.strip().replace('\n', ' ')
                 if clean_match in last_line:
                     continue
-                timestamp = datetime.utcnow().isoformat() + "Z"
+                timestamp = datetime.now(timezone.utc).isoformat()
                 af.write(f"[{timestamp}] [TRACE] {clean_match}\n")
                 
     except Exception as e:

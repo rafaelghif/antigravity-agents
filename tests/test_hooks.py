@@ -51,5 +51,72 @@ class TestHooks(unittest.TestCase):
             self.assertIn("OS/Arch: linux (x86_64)", ctx)
             self.assertIn("Tooling: Lockfile: pnpm | CLI: git, pnpm", ctx)
 
+    def test_pre_tool_quality_gate_denies_git_tampering(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/.git/config", "CodeContent": "bad"}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "deny")
+            self.assertIn("Direct modification of .git", out.get("reason", ""))
+
+    def test_pre_tool_quality_gate_denies_private_key(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        dummy_secret = "-----" + "BEGIN RSA " + "PRIVATE KEY-----" + "\nMIIE..."
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/src/secret.key", "CodeContent": dummy_secret}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "deny")
+            self.assertIn("Potential secret", out.get("reason", ""))
+
+    def test_pre_tool_quality_gate_allows_safe_files(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/src/main.py", "CodeContent": "print('hello world')"}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "allow")
+
+    def test_pre_invoke_master_main_uses_ephemeral_message(self):
+        from unittest.mock import patch
+        import io
+        import json
+        with patch("sys.stdin.read", return_value='{"transcriptPath": null}'), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_invoke_master.main()
+            raw = mock_stdout.getvalue().strip()
+            out = json.loads(raw)
+            self.assertIn("injectSteps", out)
+            self.assertIn("ephemeralMessage", out["injectSteps"][0])
+            self.assertNotIn("silence", out["injectSteps"][0])
+
 if __name__ == "__main__":
     unittest.main()

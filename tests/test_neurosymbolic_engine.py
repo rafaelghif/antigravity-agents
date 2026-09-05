@@ -48,5 +48,19 @@ class TestNeurosymbolicEngine(unittest.TestCase):
             tf_path.write_text('{invalid_json: true', encoding="utf-8")
             self.assertFalse(validate_handoff(tf_path))
 
+    def test_invalid_confidence_range_fails(self):
+        payload = dict(self.valid_payload)
+        payload['confidence_score'] = 1.5
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
+        payload['confidence_score'] = -0.1
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tf_path = Path(tmpdir) / "handoff.json"
+            tf_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertFalse(validate_handoff(tf_path))
+
 if __name__ == '__main__':
     unittest.main()

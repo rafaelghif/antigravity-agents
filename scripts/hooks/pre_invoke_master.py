@@ -206,7 +206,7 @@ def main() -> None:
         context_str = get_context(transcript_path)
         if context_str:
             inject_steps.append({
-                "silence": f"SYSTEM MEMORY & DIRECTIVES (Compact token footprint):\n\n{context_str}"
+                "ephemeralMessage": f"SYSTEM MEMORY & DIRECTIVES (Compact token footprint):\n\n{context_str}"
             })
             
         if inject_steps:

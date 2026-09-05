@@ -146,7 +146,7 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
     backup_dir = root_dir / ".agents-backups" / timestamp
     backup_dir.mkdir(parents=True, exist_ok=True)
     
-    # 1. Preserve existing custom brain context
+    # 1. Preserve existing custom brain context and MCP configurations
     preserved_brain: dict[str, str] = {}
     brain_dir = root_dir / ".agents" / "brain"
     if brain_dir.is_dir():
@@ -157,6 +157,14 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
                     preserved_brain[bf] = target_bf.read_text(encoding="utf-8")
                 except Exception as e:
                     sys.stderr.write(f"Notice reading {bf}: {e}\n")
+
+    preserved_mcp: str | None = None
+    existing_mcp = root_dir / ".agents" / "mcp_config.json"
+    if existing_mcp.is_file():
+        try:
+            preserved_mcp = existing_mcp.read_text(encoding="utf-8")
+        except Exception as e:
+            sys.stderr.write(f"Notice reading mcp_config.json: {e}\n")
 
     # 2. Acquire release source in a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir_str:
@@ -218,6 +226,8 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
 
         copy_managed_item(source_dir / "AGENTS.md", root_dir / "AGENTS.md", backup_dir)
         copy_managed_item(source_dir / "GEMINI.md", root_dir / "GEMINI.md", backup_dir)
+        if (source_dir / "agent.md").is_file():
+            copy_managed_item(source_dir / "agent.md", root_dir / "agent.md", backup_dir)
         copy_managed_item(source_dir / ".agents", root_dir / ".agents", backup_dir)
         copy_managed_item(source_dir / "scripts", root_dir / "scripts", backup_dir)
         
@@ -235,11 +245,23 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
         if (source_dir / "handoff.json").is_file() and not (root_dir / "handoff.json").exists():
             copy_managed_item(source_dir / "handoff.json", root_dir / "handoff.json", backup_dir)
 
-        # 5. Restore preserved brain files
+        # 5. Restore preserved brain and MCP configuration files
         for bf, content in preserved_brain.items():
             bf_path = root_dir / ".agents" / "brain" / bf
             bf_path.parent.mkdir(parents=True, exist_ok=True)
             bf_path.write_text(content, encoding="utf-8")
+
+        if preserved_mcp:
+            mcp_path = root_dir / ".agents" / "mcp_config.json"
+            try:
+                old_data = json.loads(preserved_mcp)
+                new_data = json.loads(mcp_path.read_text(encoding="utf-8")) if mcp_path.is_file() else {}
+                old_servers = old_data.get("mcpServers", {})
+                new_servers = new_data.get("mcpServers", {})
+                new_data["mcpServers"] = {**new_servers, **old_servers}
+                mcp_path.write_text(json.dumps(new_data, indent=2), encoding="utf-8")
+            except Exception as exc:
+                sys.stderr.write(f"Notice merging mcp_config: {exc}\n")
 
         # 6. Ensure .gitignore has scratch rule
         gitignore_path = root_dir / ".gitignore"
@@ -271,7 +293,7 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
             except Exception as e:
                 sys.stderr.write(f"Git hook setup notice: {e}\n")
 
-        # 8. Clean up accidental workflow directories in target project
+        # 8. Clean up accidental workflow files in target project safely
         wf_dir = root_dir / ".github" / "workflows"
         if wf_dir.is_dir():
             for f in ("agent-gates.yml", "agentic-cicd.yml"):
@@ -279,8 +301,11 @@ def install_aac(root_dir: Path, target_version: str) -> bool:
                 if wf_file.is_file():
                     wf_file.unlink()
             try:
-                wf_dir.rmdir()
-                (root_dir / ".github").rmdir()
+                if not any(wf_dir.iterdir()):
+                    wf_dir.rmdir()
+                gh_dir = root_dir / ".github"
+                if not any(gh_dir.iterdir()):
+                    gh_dir.rmdir()
             except OSError as err:
                 sys.stderr.write(f"Notice: .github cleanup: {err}\n")
 

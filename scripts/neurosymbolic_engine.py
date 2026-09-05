@@ -52,6 +52,10 @@ def validate_handoff(json_path: Path) -> bool:
     print(f"Modifications: {len(data['modifications'])} files | Tests: {len(data['tests'])} run")
     
     # Enforce Business Logic
+    if not (0.0 <= float(data["confidence_score"]) <= 1.0):
+        print(f"=> ERROR: Confidence score must be between 0.0 and 1.0, got {data['confidence_score']}")
+        return False
+
     if not data["requires_human"] and len(data["modifications"]) > 0 and len(data["tests"]) == 0:
         print("=> FATAL LOGIC ERROR: Modifications were made but NO tests were run! [MANDATORY_TDD Rule Violated]")
         return False

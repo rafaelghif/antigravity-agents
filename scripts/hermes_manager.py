@@ -223,7 +223,38 @@ class HermesEngine:
         return "\n".join(skill_texts)
 
     def execute_agent(self, persona: str, prompt: str, timeout_seconds: int = 900) -> Tuple[int, str, str]:
-        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' (High Reasoning Effort)...")
+        effort_map = {
+            "researcher": "high",
+            "staff-backend": "high",
+            "database-sre": "high",
+            "frontend-architect": "medium",
+            "qa-automation-lead": "medium",
+            "devsecops-principal": "medium",
+            "product-manager": "medium",
+            "scrum-master": "low",
+        }
+        effort = effort_map.get(persona, "medium")
+        
+        # Resolve model tier from persona metadata
+        model_tier = "flash"
+        persona_file = ROOT / ".agents" / "agents" / f"{persona}.md"
+        if persona_file.is_file():
+            try:
+                p_text = persona_file.read_text(encoding="utf-8")
+                m = re.search(r"^model:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
+                if m:
+                    model_tier = m.group(1).lower()
+            except (OSError, UnicodeDecodeError) as exc:
+                sys.stderr.write(f"Notice reading persona {persona}: {exc}\n")
+        elif persona in ("staff-backend", "database-sre", "researcher"):
+            model_tier = "pro"
+
+        if model_tier == "pro":
+            model_flag = f"gemini-3.1-pro-{effort}" if effort in ("high", "low") else "gemini-3.1-pro-high"
+        else:
+            model_flag = f"gemini-3.8-flash-{effort}"
+
+        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' ({effort.capitalize()} Reasoning Effort, Model: {model_flag})...")
         if not shutil.which("agy"):
             print(f"⚠️ [Hermes Notice] agy CLI not found in PATH. Dispatching '{persona}' via blackboard.")
             EpistemicBlackboard.post(
@@ -238,7 +269,7 @@ class HermesEngine:
         sub_env = os.environ.copy()
         sub_env["PYTHONIOENCODING"] = "utf-8"
         sub_env["PYTHONUTF8"] = "1"
-        cmd = ["agy", "--agent", persona, "--effort", "high", "--dangerously-skip-permissions", "-p", prompt]
+        cmd = ["agy", "--model", model_flag, "--agent", persona, "--effort", effort, "--dangerously-skip-permissions", "-p", prompt]
         try:
             proc = subprocess.run(
                 cmd,
@@ -374,7 +405,7 @@ class HermesEngine:
                 f"2. CONTRACT-FIRST: Strict schema validation (DTOs/types) on all boundaries.\n"
                 f"3. RESILIENCE: Handle failures, retries with jitter, idempotency, and edge cases.\n"
                 f"4. ATOMIC TDD: Write complete unit and boundary tests before finalizing.\n"
-                f"5. EXECUTE: Read `.agents/brain/rules.md` and write production code directly."
+                f"5. EXECUTE: Read `.agents/rules/` and `.agents/brain/rules.md` and write production code directly."
             )
 
             ret, stdout, stderr = self.execute_agent(persona, worker_prompt)
