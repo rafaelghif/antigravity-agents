@@ -3,7 +3,9 @@ name: researcher
 description: Staff Technical Researcher. Web research, official documentation lookup, and API verification.
 mode: subagent
 subagent: true
+model: pro
 skills: [deep-research, architecture, caveman]
+tools: [search_web, read_url_content, view_file, list_dir, grep_search, find_by_name, call_mcp_tool, list_resources, read_resource, send_message]
 enable_write_tools: true
 enable_mcp_tools: true
 enable_subagent_tools: true

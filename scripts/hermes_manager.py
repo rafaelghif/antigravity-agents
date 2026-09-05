@@ -109,6 +109,24 @@ class StateCheckpoint:
 class HermesEngine:
     def __init__(self):
         self.checkpoint = StateCheckpoint(CHECKPOINT_FILE)
+        self.reconcile_checkpoint()
+
+    def reconcile_checkpoint(self):
+        if not TASKS_DIR.exists():
+            return
+        in_prog = self.checkpoint.data.get("in_progress")
+        if in_prog and isinstance(in_prog, dict):
+            tid = in_prog.get("task_id")
+            for tfile in TASKS_DIR.glob("*.yaml"):
+                try:
+                    with open(tfile, "r", encoding="utf-8") as f:
+                        data = load_yaml(f.read())
+                        if data and str(data.get("id")) == str(tid):
+                            if str(data.get("status", "")).upper() == "DONE":
+                                self.checkpoint.mark_completed(tid)
+                            break
+                except Exception as e:
+                    sys.stderr.write(f"Checkpoint reconcile notice: {e}\n")
 
     def load_task_graph(self) -> Tuple[Dict[str, Dict[str, Any]], graphlib.TopologicalSorter]:
         tasks = {}
@@ -121,9 +139,10 @@ class HermesEngine:
             try:
                 with open(task_file, "r", encoding="utf-8") as f:
                     data = load_yaml(f.read())
-                    if not data or "id" not in data:
+                    if not data or not isinstance(data, dict):
                         continue
-                    task_id = str(data["id"])
+                    task_id = str(data.get("id") or task_file.stem)
+                    data["id"] = task_id
                     data["_file"] = str(task_file)
                     tasks[task_id] = data
                     
@@ -155,19 +174,31 @@ class HermesEngine:
             print(f"[Hermes] Failed to update status in {task_file}: {e}")
 
     def resolve_persona(self, task_data: Dict[str, Any]) -> str:
+        assigned = str(task_data.get("assigned_persona", "")).strip()
+        if assigned:
+            return assigned
         explicit_domain = task_data.get("domain", "").lower()
-        if explicit_domain in ["backend", "api", "database", "frontend", "security", "qa"]:
-            domain_map = {
-                "backend": "staff-backend",
-                "api": "staff-backend",
-                "frontend": "frontend-architect",
-                "ui": "frontend-architect",
-                "database": "database-sre",
-                "security": "devsecops-principal",
-                "qa": "qa-automation-lead"
-            }
-            if explicit_domain in domain_map:
-                return domain_map[explicit_domain]
+        domain_map = {
+            "backend": "staff-backend",
+            "api": "staff-backend",
+            "frontend": "frontend-architect",
+            "ui": "frontend-architect",
+            "database": "database-sre",
+            "db": "database-sre",
+            "security": "devsecops-principal",
+            "devsecops": "devsecops-principal",
+            "devops": "devsecops-principal",
+            "qa": "qa-automation-lead",
+            "testing": "qa-automation-lead",
+            "product": "product-manager",
+            "requirements": "product-manager",
+            "research": "researcher",
+            "docs": "researcher",
+            "scrum": "scrum-master",
+            "orchestration": "scrum-master",
+        }
+        if explicit_domain in domain_map:
+            return domain_map[explicit_domain]
 
         text = (task_data.get("title", "") + " " + task_data.get("description", "")).lower()
         if any(k in text for k in ["frontend", "ui", "css", "component", "tailwind", "react"]):
@@ -178,6 +209,10 @@ class HermesEngine:
             return "devsecops-principal"
         if any(k in text for k in ["test", "fuzz", "qa", "chaos"]):
             return "qa-automation-lead"
+        if any(k in text for k in ["requirement", "prd", "story", "user story", "epic"]):
+            return "product-manager"
+        if any(k in text for k in ["research", "paper", "investigate", "benchmark", "literature"]):
+            return "researcher"
         return "staff-backend"
 
     def _load_persona_skills(self, persona: str) -> str:
@@ -188,20 +223,57 @@ class HermesEngine:
         skill_texts = []
         try:
             content = persona_file.read_text(encoding="utf-8")
-            match = re.search(r"skills:\s*\[(.*?)\]", content)
-            if match:
-                skill_names = [s.strip() for s in match.group(1).split(",") if s.strip()]
-                for sname in skill_names:
-                    skill_path = ROOT / ".agents" / "skills" / sname / "SKILL.md"
-                    if skill_path.exists():
-                        skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
+            skill_names = []
+            inline_match = re.search(r"skills:\s*\[(.*?)\]", content)
+            if inline_match:
+                skill_names.extend([s.strip() for s in inline_match.group(1).split(",") if s.strip()])
+            else:
+                multi_match = re.search(r"skills:\s*\n((?:\s*-\s*[a-zA-Z0-9_\-]+\s*\n?)+)", content)
+                if multi_match:
+                    skill_names.extend(re.findall(r"-\s*([a-zA-Z0-9_\-]+)", multi_match.group(1)))
+
+            for sname in skill_names:
+                skill_path = ROOT / ".agents" / "skills" / sname / "SKILL.md"
+                if skill_path.exists():
+                    skill_texts.append(f"### [SKILL: {sname}]\n{skill_path.read_text(encoding='utf-8')}\n")
         except Exception as e:
             sys.stderr.write(f"Skill loading notice: {e}\n")
             
         return "\n".join(skill_texts)
 
     def execute_agent(self, persona: str, prompt: str, timeout_seconds: int = 900) -> Tuple[int, str, str]:
-        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' (High Reasoning Effort)...")
+        effort_map = {
+            "researcher": "high",
+            "staff-backend": "high",
+            "database-sre": "high",
+            "frontend-architect": "medium",
+            "qa-automation-lead": "medium",
+            "devsecops-principal": "medium",
+            "product-manager": "medium",
+            "scrum-master": "low",
+        }
+        effort = effort_map.get(persona, "medium")
+        
+        # Resolve model tier from persona metadata
+        model_tier = "flash"
+        persona_file = ROOT / ".agents" / "agents" / f"{persona}.md"
+        if persona_file.is_file():
+            try:
+                p_text = persona_file.read_text(encoding="utf-8")
+                m = re.search(r"^model:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
+                if m:
+                    model_tier = m.group(1).lower()
+            except (OSError, UnicodeDecodeError) as exc:
+                sys.stderr.write(f"Notice reading persona {persona}: {exc}\n")
+        elif persona in ("staff-backend", "database-sre", "researcher"):
+            model_tier = "pro"
+
+        if model_tier == "pro":
+            model_flag = f"gemini-3.1-pro-{effort}" if effort in ("high", "low") else "gemini-3.1-pro-high"
+        else:
+            model_flag = f"gemini-3.8-flash-{effort}"
+
+        print(f"🤖 [Hermes Dispatcher] Spawning persona '{persona}' ({effort.capitalize()} Reasoning Effort, Model: {model_flag})...")
         if not shutil.which("agy"):
             print(f"⚠️ [Hermes Notice] agy CLI not found in PATH. Dispatching '{persona}' via blackboard.")
             EpistemicBlackboard.post(
@@ -216,7 +288,7 @@ class HermesEngine:
         sub_env = os.environ.copy()
         sub_env["PYTHONIOENCODING"] = "utf-8"
         sub_env["PYTHONUTF8"] = "1"
-        cmd = ["agy", "--agent", persona, "--effort", "high", "--dangerously-skip-permissions", "-p", prompt]
+        cmd = ["agy", "--model", model_flag, "--agent", persona, "--effort", effort, "--dangerously-skip-permissions", "-p", prompt]
         try:
             proc = subprocess.run(
                 cmd,
@@ -352,7 +424,7 @@ class HermesEngine:
                 f"2. CONTRACT-FIRST: Strict schema validation (DTOs/types) on all boundaries.\n"
                 f"3. RESILIENCE: Handle failures, retries with jitter, idempotency, and edge cases.\n"
                 f"4. ATOMIC TDD: Write complete unit and boundary tests before finalizing.\n"
-                f"5. EXECUTE: Read `.agents/brain/rules.md` and write production code directly."
+                f"5. EXECUTE: Read `.agents/rules/` for immutable platform rules and `.agents/brain/rules.md` for dynamic multi-agent coordination contracts, and write production code directly."
             )
 
             ret, stdout, stderr = self.execute_agent(persona, worker_prompt)

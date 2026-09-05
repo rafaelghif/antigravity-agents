@@ -72,5 +72,58 @@ class TestVerify(unittest.TestCase):
             self.assertEqual(parts[1], r'scripts\verify.py')
             self.assertEqual(parts[2], '--terse')
 
+    def test_detect_bun_and_packagemanager(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_root = Path(tmpdir)
+            (tmp_root / "package.json").write_text(json.dumps({
+                "packageManager": "bun@1.1.0",
+                "scripts": {"test": "bun test"}
+            }))
+            (tmp_root / "bun.lockb").write_text("")
+            with patch.object(verify, 'ROOT', tmp_root):
+                checks = verify.detect()
+                self.assertTrue(any("bun run test" in cmd for _, _, cmd in checks))
+
+    @patch('sys.argv', ['verify.py', '--terse'])
+    def test_not_verified_when_no_checks(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            empty_root = Path(tmpdir)
+            with patch.object(verify, 'ROOT', empty_root):
+                from io import StringIO
+                captured = StringIO()
+                with patch('sys.stdout', captured):
+                    code = verify.main()
+                self.assertEqual(code, 0)
+                self.assertIn("NOT VERIFIED", captured.getvalue())
+
+    @patch('sys.argv', ['verify.py', '--execute', '--terse'])
+    def test_not_verified_when_checks_detected_but_tools_missing(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir)
+            (p / "Cargo.toml").write_text("[package]\nname = 'demo'\n")
+            with patch.object(verify, 'ROOT', p):
+                with patch('shutil.which', return_value=None):
+                    from io import StringIO
+                    captured = StringIO()
+                    with patch('sys.stdout', captured):
+                        code = verify.main()
+                    self.assertEqual(code, 1)
+                    output = captured.getvalue()
+                    self.assertIn("NOT VERIFIED", output)
+                    self.assertNotIn("OK", output)
+
+    def test_verify_with_target_path_argument(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p = Path(tmpdir)
+            (p / "go.mod").write_text("module demo\ngo 1.21\n")
+            with patch('sys.argv', ['verify.py', str(p), '--terse']):
+                from io import StringIO
+                captured = StringIO()
+                with patch('sys.stdout', captured):
+                    code = verify.main()
+                self.assertEqual(code, 0)
+                self.assertIn("DRY-RUN", captured.getvalue())
+
 if __name__ == '__main__':
     unittest.main()
+

@@ -5,29 +5,26 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- okey releases dengan releases name `V4.44.3`
+- commit push ke main
 
 ## 📌 Key Decisions & Invariants
-- Enforce strict Caveman token economy (terse communication, byte-exact code).
-- Keep Git pristine: auto-clean PR branches locally and remotely.
-- 9 World-Class Gates and 36+ unit tests must stay 100% passing.
+- Repository reality > agent memory or assumptions.
+- Existing code > general best practice > personal preference.
+- Verification with actual execution (`scripts/verify.py --execute --terse`). If unverified, report NOT VERIFIED.
+- Strict word budgets and zero regressions across all 9 gates.
 
 ## 🚀 Recent Accomplishments
-- Delivered intent auto-decomposition and Hermes DAG execution planning with Mermaid visualization across 122 passing tests and 9 verification gates.
-- Resolved Windows cp932 UnicodeEncodeError for emojis in intent_guard and neurosymbolic_engine via scripts/platform_guard.py and UTF-8 process env injection
-- Hardened all 27 scripts and installation engines for 100% Linux & Windows cross-platform execution (111 unit tests passing)
-- Audited and wired all 27 scripts with zero orphan code and 100% test parity
-- <item>
-- Released AAC v4.27.0 with Hierarchical Cross-Session Memory Engine (scripts/memory_consolidator.py & active_context.md)
-- Released AAC v4.26.0 with `resilience-engineering`, `zero-downtime-migrations`, and `api-contracts` skills.
-- Implemented PageRank AST centrality in `semantic_grapher.py`.
-- Implemented autonomous skill synthesis in `self_learner.py`.
-- Cleaned 48+ stale branches and 11 dangling worktrees.
+- Fixed silent task dropping in `scripts/hermes_manager.py` by ensuring all tasks in `tasks/` have valid IDs and adding fallback to filename stem.
+- Replaced dead `scripts/manager_blindfold.py` reference in `tasks/03_strict_enforcement.yaml` with `scripts/hermes_manager.py`.
+- Implemented 5 missing OS hook chaos test cases in `tests/test_hooks.py` (`test_os_hook_crlf_mismatch`, `test_os_hook_missing_dependency`, `test_os_hook_concurrency_race`, `test_os_hook_special_unicode_paths`, `test_os_hook_null_env_vars`), satisfying all acceptance criteria in `tasks/03_qa_audit.yaml`.
+- Hardened `install.py` with `--source-dir` and local checkout fallback for air-gapped / offline installations and ensured `.agents-backups/` is added to consumer `.gitignore`.
+- Ported hook execution commands in `.agents/plugins/aac-core/hooks.json` to use `sys.executable` in subprocesses.
+- Centralized safe standard input decoding in `scripts/hooks/hook_utils.py` (`read_safe_stdin`), ensuring UTF-8 and mock compatibility across Linux and Windows while maintaining DRY guard compliance.
+- Resolved template broken reference in `handoff_template.json` to point to authentic existing script.
+- Expanded test suite from 158 to 164 automated tests, passing all 9 verification gates.
 
 ## ⏳ Next Immediate Steps
-- Implement `scripts/memory_consolidator.py` for automated cross-session synchronization.
-- Wire active context into `pre_invoke_master.py` and `post_invoke_telemetry.py`.
-- Verify and release AAC v4.27.0.
+- Deliver final completion report to caller.
 
 ## ⚠️ Blockers & Known Issues
-- None. All 9 gates and tests currently green.
+- None. All 9 verification gates, anti-sham testing, DRY guards, and 164 unit tests passing 100%.

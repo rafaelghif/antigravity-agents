@@ -103,21 +103,5 @@
       "retry"
     ],
     "blacklist_keywords": []
-  },
-  "mcpServers": {
-    "git": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-git"
-      ]
-    },
-    "postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres"
-      ]
-    }
   }
 }

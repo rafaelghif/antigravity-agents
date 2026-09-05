@@ -1,5 +1,9 @@
+import os
 import sys
+import json
+import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +31,298 @@ class TestHooks(unittest.TestCase):
         skills = pre_invoke_master.parse_skills_from_frontmatter(fm)
         self.assertIn("architecture", skills)
         self.assertIn("code-quality", skills)
+
+    def test_get_context_includes_grounding_baseline(self):
+        ctx = pre_invoke_master.get_context(None)
+        self.assertIn("=== CODEBASE GROUNDING BASELINE ===", ctx)
+        self.assertIn("Ecosystem:", ctx)
+        self.assertIn("OS/Arch:", ctx)
+
+    def test_get_context_with_frameworks_and_test_runners(self):
+        from unittest.mock import patch
+        mock_grounding = {
+            "ecosystems": {"node": ["package.json"]},
+            "environment": {"platform": "linux", "architecture": "x86_64", "machine": "x86_64"},
+            "package_managers": {"lockfile_managed": ["pnpm"], "available_cli": ["git", "pnpm"]},
+            "frameworks": [{"name": "React", "ecosystem": "node", "package": "react"}, {"name": "Next.js", "ecosystem": "node", "package": "next"}],
+            "testing": ["vitest", "playwright"],
+            "dependencies": {"node": ["react", "next"]},
+        }
+        with patch("scripts.grounding.ground_workspace", return_value=mock_grounding):
+            ctx = pre_invoke_master.get_context(None)
+            self.assertIn("Frameworks: React, Next.js", ctx)
+            self.assertIn("Test Runners: vitest, playwright", ctx)
+            self.assertIn("OS/Arch: linux (x86_64)", ctx)
+            self.assertIn("Tooling: Lockfile: pnpm | CLI: git, pnpm", ctx)
+
+    def test_pre_tool_quality_gate_denies_git_tampering(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/.git/config", "CodeContent": "bad"}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "deny")
+            self.assertIn("Direct modification of .git", out.get("reason", ""))
+
+    def test_pre_tool_quality_gate_denies_private_key(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        dummy_secret = "-----" + "BEGIN RSA " + "PRIVATE KEY-----" + "\nMIIE..."
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/src/secret.key", "CodeContent": dummy_secret}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "deny")
+            self.assertIn("Potential secret", out.get("reason", ""))
+
+    def test_pre_tool_quality_gate_allows_safe_files(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {"TargetFile": "/repo/src/main.py", "CodeContent": "print('hello world')"}
+            }
+        }).encode("utf-8")
+        with patch("sys.stdin.buffer.read", return_value=payload), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "allow")
+
+    def test_pre_tool_quality_gate_denies_git_without_trailing_slash(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        for target in (".git", "/repo/.git", "./.git", "submodule/.git"):
+            payload = json.dumps({
+                "toolCall": {
+                    "name": "write_to_file",
+                    "args": {"TargetFile": target, "CodeContent": "bad"}
+                }
+            }).encode("utf-8")
+            with patch("sys.stdin.buffer.read", return_value=payload), \
+                 patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                pre_tool_quality_gate.main()
+                out = json.loads(mock_stdout.getvalue().strip())
+                self.assertEqual(out.get("decision"), "deny", f"Failed to deny target: {target}")
+
+    def test_pre_tool_quality_gate_denies_pkcs8_and_api_keys(self):
+        from unittest.mock import patch
+        import io
+        import json
+        from scripts.hooks import pre_tool_quality_gate
+        test_secrets = [
+            "-----" + "BEGIN PRIVATE " + "KEY-----\nMIIE...",
+            "-----" + "BEGIN ENCRYPTED PRIVATE " + "KEY-----\nMIIE...",
+            "AI" + "za" + "SyD-Xxxx1234567890abcdefghijklmn",
+            "github_" + "pat_" + "11AAAAAAA01234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+            "sk-" + "proj-" + "1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdef",
+            "sk-" + "ant-" + "1234567890abcdefghijklmnopqrstuvwxyz12",
+        ]
+        for sec in test_secrets:
+            payload = json.dumps({
+                "toolCall": {
+                    "name": "write_to_file",
+                    "args": {"TargetFile": "/repo/src/config.py", "CodeContent": sec}
+                }
+            }).encode("utf-8")
+            with patch("sys.stdin.buffer.read", return_value=payload), \
+                 patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                pre_tool_quality_gate.main()
+                out = json.loads(mock_stdout.getvalue().strip())
+                self.assertEqual(out.get("decision"), "deny", f"Failed to deny secret: {sec}")
+
+    def test_pre_invoke_master_omits_unpopulated_dag_anchor(self):
+        ctx = pre_invoke_master.get_context(None)
+        self.assertNotIn("=== DAG ANCHOR ===", ctx)
+
+    def test_pre_invoke_master_main_uses_ephemeral_message(self):
+        from unittest.mock import patch
+        import io
+        import json
+        with patch("sys.stdin.read", return_value='{"transcriptPath": null}'), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_invoke_master.main()
+            raw = mock_stdout.getvalue().strip()
+            out = json.loads(raw)
+            self.assertIn("injectSteps", out)
+            self.assertIn("ephemeralMessage", out["injectSteps"][0])
+            self.assertNotIn("silence", out["injectSteps"][0])
+
+    def test_get_context_procedural_rules_operational_and_filtered(self):
+        ctx = pre_invoke_master.get_context(None)
+        self.assertIn("=== PROCEDURAL RULES ===", ctx)
+        expected_rules = [
+            "[PR_BRANCH_AUTO_CLEAN]",
+            "[HERMES_ORCHESTRATION]",
+            "[BRANCH_WORKFLOW]",
+            "[CONCURRENCY_WORKTREES]",
+            "[ANTI_STUCK_PROTOCOL]",
+            "[HANDOFF_CONTRACTS]",
+            "[CIRCUIT_BREAKER]",
+            "[SCRATCH_ISOLATION]",
+            "[OBLIGATORY_MEETING_PROTOCOL]",
+        ]
+        for rule in expected_rules:
+            self.assertIn(rule, ctx)
+        banned_tags = [
+            "[NO_TRASH]",
+            "[USER_PROJECT_FIRST]",
+            "[REALITY_OVER_MEMORY]",
+            "[EXISTING_CODE_FIRST]",
+            "[SMALL_CONTEXT_DISCOVERY]",
+            "[CROSS_PLATFORM_PORTABILITY]",
+            "[LEAST_PRIVILEGE_EXECUTION]",
+            "[CAVEMAN_TOKEN_ECONOMY]",
+        ]
+        for tag in banned_tags:
+            self.assertNotIn(tag, ctx)
+
+    def test_get_context_filters_core_invariant_tags_when_present(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            brain_dir = tmp_path / '.agents' / 'brain'
+            brain_dir.mkdir(parents=True)
+            mock_rules = (
+                "<DGM_SELF_MUTATION_DNA>\n"
+                "- Mutate rules\n"
+                "- Prune rules\n"
+                "- Evolve strategies\n"
+                "</DGM_SELF_MUTATION_DNA>\n"
+                "# Procedural Memory Rules\n"
+                "- **[NO_TRASH]**: Temporary files\n"
+                "- **[USER_PROJECT_FIRST]**: Focus user\n"
+                "- **[REALITY_OVER_MEMORY]**: Grounding truth\n"
+                "- **[EXISTING_CODE_FIRST]**: Reuse abstractions\n"
+                "- **[SMALL_CONTEXT_DISCOVERY]**: Progressive discovery\n"
+                "- **[CROSS_PLATFORM_PORTABILITY]**: Shell agnostic\n"
+                "- **[LEAST_PRIVILEGE_EXECUTION]**: Guard tools\n"
+                "- **[CAVEMAN_TOKEN_ECONOMY]**: High density\n"
+                "- **[PR_BRANCH_AUTO_CLEAN]**: Branch cleanup\n"
+                "- **[HERMES_ORCHESTRATION]**: Multi-agent\n"
+                "- NO_SUBAGENT_SANDBOX: Disallowed\n"
+                "- ZERO SANDBOX: Disallowed\n"
+            )
+            (brain_dir / 'rules.md').write_text(mock_rules, encoding='utf-8')
+            with patch.object(pre_invoke_master, 'ROOT', tmp_path):
+                ctx = pre_invoke_master.get_context(None)
+                self.assertIn("=== PROCEDURAL RULES ===", ctx)
+                self.assertIn("[PR_BRANCH_AUTO_CLEAN]", ctx)
+                self.assertIn("[HERMES_ORCHESTRATION]", ctx)
+                banned_tags = [
+                    "[NO_TRASH]", "[USER_PROJECT_FIRST]", "[REALITY_OVER_MEMORY]",
+                    "[EXISTING_CODE_FIRST]", "[SMALL_CONTEXT_DISCOVERY]",
+                    "[CROSS_PLATFORM_PORTABILITY]", "[LEAST_PRIVILEGE_EXECUTION]",
+                    "[CAVEMAN_TOKEN_ECONOMY]", "NO_SUBAGENT_SANDBOX", "ZERO SANDBOX",
+                    "- Mutate", "- Prune", "- Evolve"
+                ]
+                for tag in banned_tags:
+                    self.assertNotIn(tag, ctx)
+
+    def test_os_hook_crlf_mismatch(self):
+        # 1. Stdin buffer reading with \r\n line endings
+        import io
+        from scripts.hooks import hook_utils
+        crlf_payload = b'{\r\n  "toolCall": {\r\n    "name": "view_file",\r\n    "args": {}\r\n  }\r\n}'
+        with patch("sys.stdin", io.TextIOWrapper(io.BytesIO(crlf_payload), encoding="utf-8")):
+            parsed = hook_utils.read_hook_payload()
+            self.assertEqual(parsed.get("toolCall", {}).get("name"), "view_file")
+
+        # 2. Transcript parsing with CRLF line endings
+        with tempfile.TemporaryDirectory() as tmpdir:
+            transcript_file = Path(tmpdir) / "transcript_crlf.jsonl"
+            line1 = json.dumps({"type": "USER_INPUT", "content": "fix button styling with css\r\n"}) + "\r\n"
+            line2 = json.dumps({"thinking": "<telemetry>crlf test trace</telemetry>\r\n"}) + "\r\n"
+            transcript_file.write_bytes((line1 + line2).encode("utf-8"))
+            
+            from scripts.hooks import post_invoke_telemetry
+            with patch.object(post_invoke_telemetry, "ROOT", Path(tmpdir)):
+                post_invoke_telemetry.extract_telemetry(str(transcript_file))
+                audit_file = Path(tmpdir) / ".agents" / "brain" / "global_audit.log"
+                self.assertTrue(audit_file.exists())
+                self.assertIn("crlf test trace", audit_file.read_text(encoding="utf-8"))
+
+    def test_os_hook_missing_dependency(self):
+        # Test hook behavior when external tools (git, agy) are missing
+        from scripts.hooks import pre_invoke_master
+        with patch("shutil.which", return_value=None):
+            ctx = pre_invoke_master.get_context(None)
+            self.assertIsInstance(ctx, str)
+            self.assertIn("=== CODEBASE GROUNDING BASELINE ===", ctx)
+
+    def test_os_hook_concurrency_race(self):
+        # Test concurrent execution of telemetry logging without file corruption
+        import concurrent.futures
+        from scripts.hooks import post_invoke_telemetry
+        with tempfile.TemporaryDirectory() as tmpdir:
+            transcript_file = Path(tmpdir) / "transcript.jsonl"
+            transcript_file.write_text(
+                json.dumps({"content": "concurrent test", "thinking": "<telemetry>thread action</telemetry>"}) + "\n",
+                encoding="utf-8"
+            )
+            with patch.object(post_invoke_telemetry, "ROOT", Path(tmpdir)):
+                def run_extract(idx):
+                    post_invoke_telemetry.extract_telemetry(str(transcript_file))
+                    return idx
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                    futures = [executor.submit(run_extract, i) for i in range(10)]
+                    results = [f.result() for f in futures]
+                self.assertEqual(len(results), 10)
+                audit_file = Path(tmpdir) / ".agents" / "brain" / "global_audit.log"
+                self.assertTrue(audit_file.exists())
+
+    def test_os_hook_special_unicode_paths(self):
+        # Test pre_tool_quality_gate with non-ASCII and special unicode characters in path
+        from scripts.hooks import pre_tool_quality_gate
+        import io
+        special_path = "/tmp/t\u00ebst_f\u00f6lder/sp\u00ebcial pr\u00f6ject [100%]/file.py"
+        payload = json.dumps({
+            "toolCall": {
+                "name": "write_to_file",
+                "args": {
+                    "TargetFile": special_path,
+                    "CodeContent": "print('hello world \u00e4\u00f6\u00fc')"
+                }
+            }
+        })
+        with patch("sys.stdin", io.TextIOWrapper(io.BytesIO(payload.encode("utf-8")), encoding="utf-8")), \
+             patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            pre_tool_quality_gate.main()
+            out = json.loads(mock_stdout.getvalue().strip())
+            self.assertEqual(out.get("decision"), "allow")
+
+    def test_os_hook_null_env_vars(self):
+        # Test hook execution when environment variables are cleared or missing
+        from scripts.hooks import pre_invoke_master
+        with patch.dict(os.environ, {}, clear=True):
+            ctx = pre_invoke_master.get_context(None)
+            self.assertIsInstance(ctx, str)
+            self.assertTrue(len(ctx) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'pre_tool_quality_gate.py')]).returncode)\"",
+            "command": "python3 -c \"import os, sys, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run([sys.executable, os.path.join(root, 'scripts', 'hooks', 'pre_tool_quality_gate.py')]).returncode)\"",
             "timeout": 30
           }
         ]
@@ -17,7 +17,7 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'pre_invoke_master.py')]).returncode)\"",
+        "command": "python3 -c \"import os, sys, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run([sys.executable, os.path.join(root, 'scripts', 'hooks', 'pre_invoke_master.py')]).returncode)\"",
         "timeout": 30
       }
     ]
@@ -26,7 +26,7 @@
     "PostInvocation": [
       {
         "type": "command",
-        "command": "python3 -c \"import os, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run(['python3', os.path.join(root, 'scripts', 'hooks', 'post_invoke_telemetry.py')]).returncode)\"",
+        "command": "python3 -c \"import os, sys, subprocess; root=subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True).stdout.strip() or '.'; exit(subprocess.run([sys.executable, os.path.join(root, 'scripts', 'hooks', 'post_invoke_telemetry.py')]).returncode)\"",
         "timeout": 30
       }
     ]

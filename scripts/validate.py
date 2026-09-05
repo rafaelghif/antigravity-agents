@@ -19,11 +19,17 @@ VERSION_FILES = (
 CORE_AGENT_PATHS = (
     "AGENTS.md",
     "GEMINI.md",
+    "agent.md",
     ".agents/config.json",
     ".agents/TASK_TEMPLATE.md",
     ".agents/mcp_config.json.example",
     ".agents/antigravity-settings.example.json",
     ".agents/antigravity-compatibility.json",
+    ".agents/rules/01-grounding.md",
+    ".agents/rules/02-project-adaptation.md",
+    ".agents/rules/03-token-economy.md",
+    ".agents/rules/04-verification-gates.md",
+    ".agents/rules/05-git-hygiene.md",
     ".agents/agents/scrum-master.md",
     ".agents/agents/product-manager.md",
     ".agents/agents/researcher.md",
@@ -75,7 +81,6 @@ REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)
 CONSUMER_REQUIRED_PATHS = CORE_AGENT_PATHS
 
 OPTIONAL_PATHS = (
-    ".agents/brain/soul.md",
     ".agents/brain/rules.md",
     ".agents/brain/memory.md",
     ".agents/brain/active_context.md",
@@ -117,25 +122,31 @@ def load_json(relative_path: str) -> dict:
     return value
 
 
-def validate_mcp() -> None:
-    config = load_json(".agents/mcp_config.json.example")
+def validate_mcp_config_dict(config: dict, file_label: str) -> None:
     servers = config.get("mcpServers")
     if not isinstance(servers, dict) or not servers:
-        fail("MCP example must define mcpServers")
+        fail(f"{file_label} must define mcpServers")
     for name, server in servers.items():
         if not isinstance(server, dict):
-            fail(f"MCP server {name} must be an object")
+            fail(f"MCP server {name} in {file_label} must be an object")
         if "serverURL" in server:
-            fail(f"MCP server {name} uses deprecated serverURL; use serverUrl")
+            fail(f"MCP server {name} in {file_label} uses deprecated serverURL; use serverUrl")
         if "serverUrl" not in server and "command" not in server:
-            fail(f"MCP server {name} needs serverUrl or command")
+            fail(f"MCP server {name} in {file_label} needs serverUrl or command")
         if server.get("serverUrl") and not str(server["serverUrl"]).startswith("https://"):
-            fail(f"remote MCP server {name} must use HTTPS")
+            fail(f"remote MCP server {name} in {file_label} must use HTTPS")
         args = server.get("args", [])
         if not isinstance(args, list) or any(not isinstance(item, str) for item in args):
-            fail(f"MCP server {name} args must be an array of strings")
+            fail(f"MCP server {name} in {file_label} args must be an array of strings")
         if any(item.endswith(":latest") for item in args):
-            fail(f"MCP server {name} uses mutable :latest image")
+            fail(f"MCP server {name} in {file_label} uses mutable :latest image")
+
+
+def validate_mcp() -> None:
+    validate_mcp_config_dict(load_json(".agents/mcp_config.json.example"), ".agents/mcp_config.json.example")
+    if (ROOT / ".agents" / "mcp_config.json").is_file():
+        validate_mcp_config_dict(load_json(".agents/mcp_config.json"), ".agents/mcp_config.json")
+
 
 
 def validate_markdown_metadata(directory: str, expected_count: int, required_fields: tuple[str, ...], pattern: str = "*.md") -> None:
@@ -159,10 +170,12 @@ def validate_instruction_budget() -> None:
     if not is_framework_repo():
         # In consumer projects, do not fail on custom project instructions in AGENTS.md / GEMINI.md
         return
-    for relative_path, maximum in (("AGENTS.md", 750), ("GEMINI.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
-        words = (ROOT / relative_path).read_text(encoding="utf-8").split()
-        if len(words) > maximum:
-            fail(f"{relative_path} exceeds the {maximum}-word always-on budget")
+    for relative_path, maximum in (("AGENTS.md", 750), ("GEMINI.md", 80), ("agent.md", 80), (".agents/TASK_TEMPLATE.md", 500)):
+        target = ROOT / relative_path
+        if target.is_file():
+            words = target.read_text(encoding="utf-8").split()
+            if len(words) > maximum:
+                fail(f"{relative_path} exceeds the {maximum}-word always-on budget")
     bootstrap = (ROOT / "GEMINI.md").read_text(encoding="utf-8")
     if "AGENTS.md" not in bootstrap:
         fail("GEMINI.md must bootstrap AGENTS.md")
@@ -269,7 +282,8 @@ def main() -> int:
         load_json(".agents/antigravity-compatibility.json")
         validate_mcp()
         validate_markdown_metadata(".agents/skills", 10, ("name", "description"), "*/SKILL.md")
-        validate_markdown_metadata(".agents/agents", 5, ("name", "description", "mode"))
+        validate_markdown_metadata(".agents/agents", 5, ("name", "description", "mode", "model", "tools"))
+        validate_markdown_metadata(".agents/rules", 5, ("name", "description", "trigger"), "*.md")
         validate_instruction_budget()
         validate_settings()
         validate_compatibility()

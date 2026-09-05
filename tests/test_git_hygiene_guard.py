@@ -48,5 +48,25 @@ class TestGitHygieneGuard(unittest.TestCase):
         self.assertFalse(scratch2.exists())
         self.assertTrue(keep_file.exists())
 
+    def test_find_scratch_files_isolated_scratch_exclusion(self):
+        scratch_dir = self.root / ".agents" / "scratch"
+        scratch_dir.mkdir(parents=True)
+        isolated_file = scratch_dir / "temp_experiment.py"
+        isolated_file.write_text("print('test')")
+
+        polluting_file = self.root / "src" / "scratch_work.py"
+        polluting_file.parent.mkdir(parents=True)
+        polluting_file.write_text("print('polluting')")
+
+        # When exclude_isolated_scratch=True, isolated scratch file is allowed in workspace
+        violations = find_scratch_files(self.root, exclude_isolated_scratch=True)
+        self.assertIn(polluting_file, violations)
+        self.assertNotIn(isolated_file, violations)
+
+        # When clean runs (exclude_isolated_scratch=False), all are detected
+        all_scratch = find_scratch_files(self.root, exclude_isolated_scratch=False)
+        self.assertIn(polluting_file, all_scratch)
+        self.assertIn(isolated_file, all_scratch)
+
 if __name__ == '__main__':
     unittest.main()

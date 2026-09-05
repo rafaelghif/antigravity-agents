@@ -33,13 +33,29 @@ class TestHermesManager(unittest.TestCase):
         self.assertIn("TASK-102", self.checkpoint.data["blocked_tasks"])
         self.assertIsNone(self.checkpoint.data["in_progress"])
 
+    def test_reconcile_checkpoint_clears_zombie_task(self):
+        engine = HermesEngine()
+        engine.checkpoint = self.checkpoint
+        self.checkpoint.set_in_progress("01_test_task", "staff-backend", 1)
+        tasks_dir = Path(self.tmp_dir.name) / "tasks"
+        tasks_dir.mkdir()
+        (tasks_dir / "01_test_task.yaml").write_text("id: '01_test_task'\nstatus: 'DONE'\n", encoding="utf-8")
+        with patch("scripts.hermes_manager.TASKS_DIR", tasks_dir):
+            engine.reconcile_checkpoint()
+            self.assertIn("01_test_task", self.checkpoint.data["completed_tasks"])
+            self.assertIsNone(self.checkpoint.data["in_progress"])
+
     def test_resolve_persona_explicit_domain(self):
         engine = HermesEngine()
         self.assertEqual(engine.resolve_persona({"domain": "frontend"}), "frontend-architect")
+        self.assertEqual(engine.resolve_persona({"domain": "ui"}), "frontend-architect")
         self.assertEqual(engine.resolve_persona({"domain": "database"}), "database-sre")
         self.assertEqual(engine.resolve_persona({"domain": "security"}), "devsecops-principal")
         self.assertEqual(engine.resolve_persona({"domain": "qa"}), "qa-automation-lead")
         self.assertEqual(engine.resolve_persona({"domain": "backend"}), "staff-backend")
+        self.assertEqual(engine.resolve_persona({"domain": "product"}), "product-manager")
+        self.assertEqual(engine.resolve_persona({"domain": "research"}), "researcher")
+        self.assertEqual(engine.resolve_persona({"domain": "scrum"}), "scrum-master")
 
     def test_resolve_persona_inferred_from_title(self):
         engine = HermesEngine()
@@ -47,6 +63,33 @@ class TestHermesManager(unittest.TestCase):
         self.assertEqual(engine.resolve_persona({"title": "Add postgres migration for users"}), "database-sre")
         self.assertEqual(engine.resolve_persona({"title": "Fix docker container secret scanning"}), "devsecops-principal")
         self.assertEqual(engine.resolve_persona({"title": "Fuzz testing boundary conditions"}), "qa-automation-lead")
+        self.assertEqual(engine.resolve_persona({"title": "Draft PRD and user story breakdown"}), "product-manager")
+        self.assertEqual(engine.resolve_persona({"title": "Research state of the art papers on diffusion"}), "researcher")
+
+    def test_resolve_persona_assigned_priority(self):
+        engine = HermesEngine()
+        self.assertEqual(engine.resolve_persona({"assigned_persona": "database-sre", "domain": "backend"}), "database-sre")
+        self.assertEqual(engine.resolve_persona({"assigned_persona": "custom-agent"}), "custom-agent")
+
+    def test_load_persona_skills_multiline_yaml(self):
+        engine = HermesEngine()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmproot = Path(tmpdir)
+            agent_dir = tmproot / ".agents" / "agents"
+            agent_dir.mkdir(parents=True)
+            skills_dir = tmproot / ".agents" / "skills" / "architecture"
+            skills_dir.mkdir(parents=True)
+            (skills_dir / "SKILL.md").write_text("# Architecture Skill\n")
+            (agent_dir / "custom-agent.md").write_text("""---
+name: custom-agent
+skills:
+  - architecture
+---
+Body
+""")
+            with patch("scripts.hermes_manager.ROOT", tmproot):
+                loaded = engine._load_persona_skills("custom-agent")
+                self.assertIn("Architecture Skill", loaded)
 
     def test_execute_agent_fallback_when_no_agy(self):
         engine = HermesEngine()
@@ -56,6 +99,21 @@ class TestHermesManager(unittest.TestCase):
             self.assertEqual(retcode, 0)
             self.assertIn("APPROVED", stdout)
             mock_post.assert_called_once()
+
+    def test_execute_agent_passes_model_flags(self):
+        engine = HermesEngine()
+        with patch("shutil.which", return_value="/usr/local/bin/agy"), \
+             patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(returncode=0, stdout="OK", stderr="")
+            engine.execute_agent("staff-backend", "Implement feature")
+            called_cmd = mock_run.call_args[0][0]
+            self.assertIn("--model", called_cmd)
+            self.assertIn("gemini-3.1-pro-high", called_cmd)
+
+            engine.execute_agent("scrum-master", "Plan sprint")
+            called_cmd2 = mock_run.call_args[0][0]
+            self.assertIn("--model", called_cmd2)
+            self.assertIn("gemini-3.8-flash-low", called_cmd2)
 
     def test_evaluate_gate2_cognitive_fallback(self):
         engine = HermesEngine()
@@ -124,6 +182,32 @@ class TestHermesManager(unittest.TestCase):
             val = mock_stdout.getvalue()
             self.assertIn("Hermes DAG Execution Plan", val)
             self.assertIn("```mermaid", val)
+
+    def test_worker_prompt_clarifies_rules_distinction(self):
+        engine = HermesEngine()
+        engine.checkpoint = self.checkpoint
+        task_data = {
+            "id": "task_prompt_test",
+            "title": "Prompt Test",
+            "description": "Verify worker prompt contains rules distinction",
+            "domain": "backend",
+            "_file": Path("/tmp/fake_task.yaml"),
+        }
+        captured_prompts = []
+        def mock_execute_agent(persona, prompt):
+            captured_prompts.append(prompt)
+            return 0, "APPROVED", ""
+
+        import io
+        with patch.object(engine, "update_task_file_status"), \
+             patch.object(engine, "execute_agent", side_effect=mock_execute_agent), \
+             patch.object(engine, "evaluate_gate1_static", return_value=(True, "OK")), \
+             patch.object(engine, "evaluate_gate2_cognitive", return_value=(True, "OK", "falsify", "approved")), \
+             patch("sys.stdout", new_callable=io.StringIO):
+            engine.run_task_lifecycle("task_prompt_test", task_data)
+
+        self.assertTrue(len(captured_prompts) > 0)
+        self.assertIn("Read `.agents/rules/` for immutable platform rules and `.agents/brain/rules.md` for dynamic multi-agent coordination contracts", captured_prompts[0])
 
 if __name__ == "__main__":
     unittest.main()

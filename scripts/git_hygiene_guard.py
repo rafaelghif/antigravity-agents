@@ -49,16 +49,21 @@ def check_file_list(dirpath: str, filenames: list, scratch_files: list) -> None:
         if is_scratch_file(fpath):
             scratch_files.append(fpath)
 
-def find_scratch_files(root_dir: Path) -> list:
+def find_scratch_files(root_dir: Path, exclude_isolated_scratch: bool = False) -> list:
     scratch_files = []
     excludes = {".git", ".venv", "venv", "node_modules", "__pycache__", "build", "dist"}
     for dirpath, dirnames, filenames in os.walk(root_dir):
+        if exclude_isolated_scratch and Path(dirpath).name == "scratch" and Path(dirpath).parent.name == ".agents":
+            dirnames.clear()
+            continue
         dirnames[:] = [d for d in dirnames if d not in excludes]
         check_file_list(dirpath, filenames, scratch_files)
+    if exclude_isolated_scratch:
+        scratch_files = [p for p in scratch_files if ".agents/scratch" not in p.as_posix().lower()]
     return scratch_files
 
 def clean_scratch_files(root_dir: Path) -> list:
-    scratch_files = find_scratch_files(root_dir)
+    scratch_files = find_scratch_files(root_dir, exclude_isolated_scratch=False)
     removed = []
     for fpath in scratch_files:
         try:
@@ -108,7 +113,7 @@ def main() -> None:
         return
 
     staged_scratch = check_staged_git_files(root_dir)
-    workspace_scratch = find_scratch_files(root_dir)
+    workspace_scratch = find_scratch_files(root_dir, exclude_isolated_scratch=True)
 
     all_violations = list(set([str(p) for p in (staged_scratch + workspace_scratch)]))
 

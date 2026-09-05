@@ -1,32 +1,77 @@
 ---
 name: observability
-description: Use this skill when the user asks to implement logging, monitoring, metrics, or distributed tracing in the application.
+description: Use this skill when implementing structured logging, metrics, distributed tracing, OpenTelemetry instrumentation, or system health monitoring.
+license: Apache-2.0
+compatibility: posix, windows, python3
+metadata:
+  author: AAC Antigravity
+  version: "4.44.3"
+  category: observability
+  tags: [opentelemetry, logging, metrics, tracing, prometheus, red-method]
 ---
 
-<CRITICAL_DIRECTIVE>
-You are the L9 Observability Engineer. You must ensure the system is transparent, easily debuggable in production, and emits actionable telemetry.
-</CRITICAL_DIRECTIVE>
+# Observability, Telemetry & Distributed Tracing Protocol
 
-<ENTERPRISE_STANDARDS>
-1. **OpenTelemetry (OTel)**:
-   - Standardize on OpenTelemetry for generating Logs, Metrics, and Traces. Do not use vendor-locked SDKs (e.g., Datadog SDK directly); emit OTLP instead.
-2. **Structured Logging**:
-   - All logs MUST be structured JSON. No arbitrary string concatenation.
-   - Inject Trace IDs and Span IDs into logs automatically to correlate logs with distributed traces.
-3. **Metrics (RED Method)**:
-   - Always expose metrics for HTTP/RPC services based on the RED method: Rate (requests/sec), Errors (error rate), and Duration (latency histograms).
-4. **Security & PII**:
-   - Mask all Personally Identifiable Information (PII) and credentials before they hit stdout or the telemetry pipeline.
-</ENTERPRISE_STANDARDS>
+**Role**: Staff Site Reliability & Observability Engineer.
 
-<PROCEDURAL_WORKFLOW>
-1. **Telemetry & Blackboard Inspection**: Run `python3 scripts/inbox_manager.py report` to trace agent communications, governance state, and sprint progress.
-2. **Distributed Instrumentation**: Implement OpenTelemetry OTLP exporters, span contexts, and structured JSON logs.
-3. **Audit & Memory Trace**: Inspect the agentic audit trail in `.agents/brain/global_audit.log` and active session state via `python3 scripts/memory_consolidator.py --show`.
-4. **Verification**: Run `python3 scripts/verify.py --execute` to guarantee zero regressions.
-</PROCEDURAL_WORKFLOW>
+## Overview & Trigger Conditions
+Activate this skill when implementing application logging, system metrics, distributed tracing, OpenTelemetry (OTel) instrumentation, service health checks, or agentic audit reporting.
 
-<L9_STANDARDS>
-- **AI Agent Observability**: For Agentic systems, standard RED metrics are insufficient. You MUST emit metrics for "Tokens Used", "Debate Turns", and "Hallucination/Rework Rate".
-- **Pro-Tier Mandatory**: Subagents invoking this skill MUST use `Model: pro`.
-</L9_STANDARDS>
+**Trigger Scenarios & Keywords**:
+- Distributed tracing, structured logging, Prometheus metrics, OpenTelemetry, audit logs.
+- Keywords: `logging`, `metrics`, `tracing`, `opentelemetry`, `otel`, `telemetry`, `monitor`, `alerting`, `grafana`, `prometheus`, `red method`.
+
+## Core Standards & Invariants
+
+1. **OpenTelemetry (OTel) Standardization**:
+   - Standardize strictly on OpenTelemetry SDKs and OTLP exporters for Logs, Metrics, and Tracing.
+   - Do NOT bind directly to proprietary, vendor-locked SDKs. Emit vendor-neutral OTLP data over gRPC/HTTP.
+   - Enforce distributed context propagation across HTTP/gRPC boundaries using standard W3C `traceparent` and `tracestate` headers.
+
+2. **Structured JSON Logging**:
+   - All production logs MUST be serialized as structured JSON emitted to stdout/stderr. Arbitrary string concatenation is strictly prohibited.
+   - Mandatory JSON schema fields:
+     `timestamp` (ISO-8601 UTC), `level` (DEBUG/INFO/WARN/ERROR/FATAL), `message`, `service_name`, `trace_id`, `span_id`, and `context`.
+   - Never leak raw stack traces or internal query strings to public error responses; correlate internally via `trace_id`.
+
+3. **RED Metrics Method (Rate, Errors, Duration)**:
+   - For every HTTP endpoint or RPC handler, expose:
+     - **Rate**: Inbound requests per second (`http_requests_total` counter).
+     - **Errors**: Number of failed requests partitioned by HTTP status code (`5xx`, `4xx`).
+     - **Duration**: Latency distributions using exponential histogram buckets (p50, p95, p99).
+   - **Cardinality Protection**: Never include unbounded identifiers (user IDs, emails, order IDs, timestamps) as Prometheus metric tag labels.
+
+4. **Security, Health & Agent Telemetry**:
+   - Redact PII, bearer tokens, passwords, and authorization headers before serialization.
+   - Distinguish between `/healthz` (liveness: process is running) and `/ready` (readiness: DB connections, caches, and queues are healthy).
+   - For agentic systems, record token consumption, tool latencies, debate turns, and verification gate failures.
+
+## Golden Example: Structured JSON Log Event
+```json
+{
+  "timestamp": "2026-09-05T06:42:00Z",
+  "level": "INFO",
+  "message": "Order payment settled",
+  "service_name": "checkout-service",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "context": {
+    "order_id": "ord_9921",
+    "amount_cents": 4500,
+    "currency": "USD"
+  }
+}
+```
+
+## Procedural Workflow
+1. **Telemetry Inspection**: Inspect active agent communication and governance metrics via:
+   `python3 scripts/inbox_manager.py report`
+2. **Instrument Pipeline**: Configure OpenTelemetry Tracer, Meter, and structured JSON formatters.
+3. **Audit Trail Review**: Inspect agent audit records in `.agents/brain/global_audit.log`:
+   `python3 scripts/memory_consolidator.py --show`
+4. **Local Verification**: Run `python3 scripts/verify.py --execute --terse`.
+
+## Anti-Patterns & Common Pitfalls
+- **Ad-hoc Console Output**: Leaving `console.log()` or `print()` statements in production code.
+- **High-Cardinality Metric Labels**: Adding `user_id` or `email` as a label on a Prometheus metric.
+- **Credential Leakage**: Logging full HTTP authorization headers or raw request payloads containing unmasked credentials.

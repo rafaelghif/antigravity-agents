@@ -35,6 +35,24 @@ class TestValidate(unittest.TestCase):
         for path in validate.CONSUMER_REQUIRED_PATHS:
             self.assertIn(path, validate.REQUIRED_PATHS)
 
+    def test_optional_paths_excludes_soul(self):
+        for path in validate.OPTIONAL_PATHS:
+            self.assertNotIn("soul.md", path)
+
+    def test_all_manifest_paths_exclude_soul(self):
+        all_manifest_paths = (
+            validate.OPTIONAL_PATHS
+            + validate.REQUIRED_PATHS
+            + validate.CONSUMER_REQUIRED_PATHS
+            + validate.CORE_AGENT_PATHS
+        )
+        for path in all_manifest_paths:
+            self.assertNotIn("soul.md", path)
+
+    def test_install_brain_preserve_files_excludes_soul(self):
+        import install
+        self.assertNotIn("soul.md", install.BRAIN_PRESERVE_FILES)
+
 if __name__ == '__main__':
     unittest.main()
 

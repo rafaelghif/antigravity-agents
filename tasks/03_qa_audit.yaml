@@ -1,3 +1,4 @@
+id: "03_qa_audit"
 title: "OS Hooks Execution Chaos Test Harness"
 description: >
   Deep audit of test suite reveals missing OS hook execution crash tests.

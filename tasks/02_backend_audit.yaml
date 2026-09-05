@@ -1,4 +1,5 @@
-name: Backend Audit - Hooks and Guards
+id: "02_backend_audit"
+title: "Backend Audit - Hooks and Guards"
 description: Deep audit of Python hooks and guards for edge cases that could crash the OS.
 tasks:
   - Fix bare excepts (`except:` or `except Exception: pass`) across all hooks and guards. Replace with specific exception catching and stderr logging.
