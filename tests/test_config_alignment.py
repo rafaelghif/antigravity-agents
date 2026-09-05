@@ -55,15 +55,13 @@ class TestConfigAlignment(unittest.TestCase):
                     set(act_srv.keys()),
                     f"Property mismatch for server {name}: {set(ex_srv.keys()) ^ set(act_srv.keys())}"
                 )
-                for prop in ("command", "args"):
-                    self.assertEqual(type(ex_srv[prop]), type(act_srv[prop]), f"Type mismatch for {name}.{prop}")
-                    if prop == "args":
-                        self.assertTrue(all(isinstance(a, str) for a in act_srv[prop]))
+                self.assertEqual(ex_srv.get("command"), act_srv.get("command"), f"Command mismatch for server {name}")
+                self.assertEqual(ex_srv.get("args"), act_srv.get("args"), f"Args mismatch for server {name}")
                 if "env" in ex_srv:
                     self.assertEqual(
-                        set(ex_srv["env"].keys()),
-                        set(act_srv["env"].keys()),
-                        f"Env keys mismatch for server {name}"
+                        ex_srv["env"],
+                        act_srv.get("env"),
+                        f"Env mismatch for server {name}"
                     )
 
     def test_antigravity_settings_alignment(self):
@@ -100,18 +98,23 @@ class TestConfigAlignment(unittest.TestCase):
                 f"Workspace settings keys mismatch: {set(ex_settings.keys()) ^ set(act_settings.keys())}"
             )
 
+            # Parity on all non-placeholder properties
+            for k in ex_settings:
+                if k in ("trustedWorkspaces", "permissions"):
+                    continue
+                self.assertEqual(ex_settings[k], act_settings.get(k), f"Property {k} mismatch in workspace settings")
+
             # Permissions parity
             act_perms = act_settings.get("permissions", {})
             self.assertEqual(set(ex_perms.keys()), set(act_perms.keys()))
-            self.assertEqual(set(ex_perms["allow"]), set(act_perms["allow"]))
-            self.assertEqual(ex_perms["deny"], act_perms["deny"])
-            self.assertEqual(ex_perms["ask"], act_perms["ask"])
+            self.assertEqual(ex_perms["allow"], act_perms.get("allow"))
+            self.assertEqual(ex_perms["deny"], act_perms.get("deny"))
+            self.assertEqual(ex_perms["ask"], act_perms.get("ask"))
 
-            # Baseline values
-            self.assertEqual(act_settings.get("toolPermission"), "always-proceed")
-            self.assertEqual(act_settings.get("enableTerminalSandbox"), False)
-            self.assertEqual(act_settings.get("allowNonWorkspaceAccess"), True)
-            self.assertEqual(act_settings.get("artifactReviewPolicy"), "auto")
+            # Baseline trustedWorkspaces validation
+            self.assertIsInstance(act_settings.get("trustedWorkspaces"), list)
+            self.assertTrue(len(act_settings["trustedWorkspaces"]) > 0)
+            self.assertTrue(all(isinstance(w, str) and w for w in act_settings["trustedWorkspaces"]))
 
         # Compare with global CLI settings if present
         cli_settings_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
@@ -124,16 +127,22 @@ class TestConfigAlignment(unittest.TestCase):
                 set(cli_settings.keys()),
                 f"CLI settings keys mismatch: {set(ex_settings.keys()) ^ set(cli_settings.keys())}"
             )
+
+            # Parity on all non-placeholder properties
+            for k in ex_settings:
+                if k in ("trustedWorkspaces", "permissions"):
+                    continue
+                self.assertEqual(ex_settings[k], cli_settings.get(k), f"Property {k} mismatch in CLI settings")
+
             cli_perms = cli_settings.get("permissions", {})
             self.assertEqual(set(ex_perms.keys()), set(cli_perms.keys()))
-            self.assertEqual(set(ex_perms["allow"]), set(cli_perms["allow"]))
-            self.assertEqual(ex_perms["deny"], cli_perms["deny"])
-            self.assertEqual(ex_perms["ask"], cli_perms["ask"])
+            self.assertEqual(ex_perms["allow"], cli_perms.get("allow"))
+            self.assertEqual(ex_perms["deny"], cli_perms.get("deny"))
+            self.assertEqual(ex_perms["ask"], cli_perms.get("ask"))
 
-            self.assertEqual(cli_settings.get("toolPermission"), "always-proceed")
-            self.assertEqual(cli_settings.get("enableTerminalSandbox"), False)
-            self.assertEqual(cli_settings.get("allowNonWorkspaceAccess"), True)
-            self.assertEqual(cli_settings.get("artifactReviewPolicy"), "auto")
+            self.assertIsInstance(cli_settings.get("trustedWorkspaces"), list)
+            self.assertTrue(len(cli_settings["trustedWorkspaces"]) > 0)
+            self.assertTrue(all(isinstance(w, str) and w for w in cli_settings["trustedWorkspaces"]))
 
     def test_env_files_alignment(self):
         example_path = ROOT / ".env.example"
@@ -212,6 +221,78 @@ class TestConfigAlignment(unittest.TestCase):
 
         if validate_handoff is not None:
             self.assertTrue(validate_handoff(tpl_path), "handoff_template.json must pass neurosymbolic validation")
+
+    def test_mcp_server_drift_detection(self):
+        from scripts.validate import validate_server_properties
+        base_ex = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-git"]}
+        
+        # Valid matching actual
+        act_ok = {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-git"]}
+        validate_server_properties("git", base_ex, act_ok)
+
+        # Divergent command
+        act_bad_cmd = {"command": "node", "args": ["-y", "@modelcontextprotocol/server-git"]}
+        with self.assertRaises(ValueError) as ctx:
+            validate_server_properties("git", base_ex, act_bad_cmd)
+        self.assertIn("command mismatch", str(ctx.exception))
+
+        # Divergent args
+        act_bad_args = {"command": "npx", "args": ["-y", "other-pkg"]}
+        with self.assertRaises(ValueError) as ctx:
+            validate_server_properties("git", base_ex, act_bad_args)
+        self.assertIn("args mismatch", str(ctx.exception))
+
+        # Divergent env
+        ex_env = {"command": "npx", "args": [], "env": {"VAR": "${VAR}"}}
+        act_bad_env = {"command": "npx", "args": [], "env": {"VAR": "DIFFERENT"}}
+        with self.assertRaises(ValueError) as ctx:
+            validate_server_properties("env_test", ex_env, act_bad_env)
+        self.assertIn("env value mismatch", str(ctx.exception))
+
+    def test_settings_drift_detection(self):
+        import tempfile
+        from scripts.validate import validate_single_settings_file
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir) / "settings.json"
+
+            # Missing required field
+            bad_data = {
+                "toolPermission": "always-proceed",
+                "enableTerminalSandbox": False,
+                # allowNonWorkspaceAccess missing
+                "permissions": {"allow": ["command(*)"], "deny": ["command(rm -rf /)"], "ask": []},
+                "trustedWorkspaces": ["/tmp"]
+            }
+            tmp_path.write_text(json.dumps(bad_data), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                validate_single_settings_file(str(tmp_path))
+
+            # Missing permissions deny command
+            bad_deny = {
+                "toolPermission": "always-proceed",
+                "enableTerminalSandbox": False,
+                "allowNonWorkspaceAccess": True,
+                "artifactReviewPolicy": "auto",
+                "permissions": {"allow": ["command(*)"], "deny": [], "ask": []},
+                "trustedWorkspaces": ["/tmp"]
+            }
+            tmp_path.write_text(json.dumps(bad_deny), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                validate_single_settings_file(str(tmp_path))
+
+            # Empty trustedWorkspaces
+            bad_workspaces = {
+                "toolPermission": "always-proceed",
+                "enableTerminalSandbox": False,
+                "allowNonWorkspaceAccess": True,
+                "artifactReviewPolicy": "auto",
+                "permissions": {"allow": ["command(*)"], "deny": ["command(rm -rf /)"], "ask": []},
+                "trustedWorkspaces": []
+            }
+            tmp_path.write_text(json.dumps(bad_workspaces), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                validate_single_settings_file(str(tmp_path))
 
 
 if __name__ == '__main__':

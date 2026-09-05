@@ -148,13 +148,17 @@ def validate_mcp_config_dict(config: dict, file_label: str) -> None:
 def validate_server_properties(srv: str, ex_srv: dict, act_srv: dict) -> None:
     if set(ex_srv.keys()) != set(act_srv.keys()):
         fail(f"mcpServers.{srv} property mismatch between example and actual: {set(ex_srv.keys()) ^ set(act_srv.keys())}")
-    if "command" in ex_srv and type(ex_srv["command"]) is not type(act_srv["command"]):
-        fail(f"mcpServers.{srv}.command type mismatch: {type(ex_srv['command'])} vs {type(act_srv['command'])}")
-    if "args" in ex_srv and type(ex_srv["args"]) is not type(act_srv["args"]):
-        fail(f"mcpServers.{srv}.args type mismatch: {type(ex_srv['args'])} vs {type(act_srv['args'])}")
+    if "command" in ex_srv:
+        if ex_srv["command"] != act_srv.get("command"):
+            fail(f"mcpServers.{srv}.command mismatch: {ex_srv['command']} vs {act_srv.get('command')}")
+    if "args" in ex_srv:
+        if ex_srv["args"] != act_srv.get("args"):
+            fail(f"mcpServers.{srv}.args mismatch: {ex_srv['args']} vs {act_srv.get('args')}")
     if "env" in ex_srv:
         if "env" not in act_srv or set(ex_srv["env"].keys()) != set(act_srv["env"].keys()):
             fail(f"mcpServers.{srv}.env key mismatch between example and actual: {set(ex_srv['env'].keys()) ^ set(act_srv.get('env', {}).keys())}")
+        if ex_srv["env"] != act_srv["env"]:
+            fail(f"mcpServers.{srv}.env value mismatch: {ex_srv['env']} vs {act_srv['env']}")
 
 
 def validate_mcp() -> None:
@@ -211,6 +215,7 @@ def validate_single_settings_file(target: str) -> None:
         "toolPermission": "always-proceed",
         "enableTerminalSandbox": False,
         "allowNonWorkspaceAccess": True,
+        "artifactReviewPolicy": "auto",
     }
     for key, expected in required.items():
         if settings.get(key) != expected:
@@ -223,6 +228,9 @@ def validate_single_settings_file(target: str) -> None:
             fail(f"{target} permissions.{key} must be a non-empty list")
     if not any(item.startswith("command(") for item in permissions["deny"]):
         fail(f"{target} baseline must deny at least one command")
+    trusted = settings.get("trustedWorkspaces")
+    if not isinstance(trusted, list) or not trusted or not all(isinstance(w, str) and w for w in trusted):
+        fail(f"{target} trustedWorkspaces must be a non-empty list of paths")
 
 
 def validate_settings() -> None:
@@ -235,12 +243,17 @@ def validate_settings() -> None:
         act_settings = load_json(".agents/antigravity-settings.json")
         if set(ex_settings.keys()) != set(act_settings.keys()):
             fail(f"Settings key mismatch between example and actual: {set(ex_settings.keys()) ^ set(act_settings.keys())}")
+        for k in ex_settings:
+            if k in ("trustedWorkspaces", "permissions"):
+                continue
+            if ex_settings[k] != act_settings.get(k):
+                fail(f"Settings property '{k}' mismatch between example and actual: {ex_settings[k]} vs {act_settings.get(k)}")
         ex_perms = ex_settings.get("permissions", {})
         act_perms = act_settings.get("permissions", {})
         if set(ex_perms.keys()) != set(act_perms.keys()):
             fail(f"Permissions key mismatch between example and actual: {set(ex_perms.keys()) ^ set(act_perms.keys())}")
-        if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
-            fail(f"Permissions allow list mismatch: {set(ex_perms.get('allow', [])) ^ set(act_perms.get('allow', []))}")
+        if ex_perms.get("allow", []) != act_perms.get("allow", []):
+            fail(f"Permissions allow list mismatch: {ex_perms.get('allow')} vs {act_perms.get('allow')}")
         if ex_perms.get("deny") != act_perms.get("deny"):
             fail(f"Permissions deny list mismatch: {ex_perms.get('deny')} vs {act_perms.get('deny')}")
         if ex_perms.get("ask") != act_perms.get("ask"):
@@ -253,12 +266,17 @@ def validate_settings() -> None:
         ex_settings = load_json(example_path)
         if set(ex_settings.keys()) != set(cli_settings.keys()):
             fail(f"Settings key mismatch between example and CLI actual: {set(ex_settings.keys()) ^ set(cli_settings.keys())}")
+        for k in ex_settings:
+            if k in ("trustedWorkspaces", "permissions"):
+                continue
+            if ex_settings[k] != cli_settings.get(k):
+                fail(f"Settings property '{k}' mismatch between example and CLI actual: {ex_settings[k]} vs {cli_settings.get(k)}")
         ex_perms = ex_settings.get("permissions", {})
         cli_perms = cli_settings.get("permissions", {})
         if set(ex_perms.keys()) != set(cli_perms.keys()):
             fail(f"Permissions key mismatch between example and CLI actual: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
-        if set(ex_perms.get("allow", [])) != set(cli_perms.get("allow", [])):
-            fail(f"Permissions allow list mismatch with CLI actual: {set(ex_perms.get('allow', [])) ^ set(cli_perms.get('allow', []))}")
+        if ex_perms.get("allow", []) != cli_perms.get("allow", []):
+            fail(f"Permissions allow list mismatch with CLI actual: {ex_perms.get('allow')} vs {cli_perms.get('allow')}")
         if ex_perms.get("deny") != cli_perms.get("deny"):
             fail(f"Permissions deny list mismatch with CLI actual: {ex_perms.get('deny')} vs {cli_perms.get('deny')}")
         if ex_perms.get("ask") != cli_perms.get("ask"):
