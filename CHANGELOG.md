@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.44.3] - 2026-09-05
+### Intent Auto-Decomposition, DAG Wave Planner & Cross-Platform UTF-8 Hardening
+- **Intent Auto-Decomposition Engine**: Added `--decompose`, `--output-dir`, and `--force` CLI flags to `scripts/intent_compiler.py` to compile and parse `objectives` into topologically chained `tasks/XX_<slug>.yaml` micro-tasks with regex-bounded domain/persona routing (`staff-backend`, `frontend-architect`, `database-sre`, `devsecops-principal`, `qa-automation-lead`).
+- **Topological Wave Execution Planner**: Enhanced `scripts/hermes_manager.py` with `--plan`, `--mermaid`, and `--json` flags to compute parallel execution stages (waves), concurrency limits, and auto-generate Mermaid DAG graphs without nested loop O(N²) overhead.
+- **Cross-Platform UTF-8 Hardening**: Created `scripts/platform_guard.py` to ensure robust `sys.stdout`/`sys.stderr` UTF-8 stream fallback and injected `PYTHONIOENCODING="utf-8"` across all subprocess executions, resolving Windows `cp932`/`cp1252` `UnicodeEncodeError`.
+- **Zero-Regression Full Test Parity**: Expanded unit test suite to 122 tests covering multi-domain decomposition, topological dependency chaining, wave concurrency computation, and cross-platform streams with 100% pass rate.
+
 ## [4.44.2] - 2026-09-03
 ### Deep Verification Polish, Anti-Dummy Audit & CLI Subcommand Ergonomics
 - **Zero Dummy Logic Guarantee**: Conducted repository-wide AST audit across all scripts and personas; verified 100% genuine execution with zero stubs, mocks, or simulations.
