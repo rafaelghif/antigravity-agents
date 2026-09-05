@@ -1,6 +1,6 @@
 {
   "cli_version": "1.1.27",
-  "aac_version": "4.46.0",
+  "aac_version": "4.47.0",
   "docs_baseline_date": "2026-09-05",
   "gemini_models": {
     "primary_reasoning": "gemini-3.1-pro-high",
@@ -15,11 +15,11 @@
   "compatibility_matrix": {
     "antigravity_cli_version": ">=1.0.0",
     "gemini_model_tier": ["flash", "pro"],
-    "agent_system_version": "4.46.0",
+    "agent_system_version": "4.47.0",
     "plugin_version": "1.0.0",
     "skill_version": "1.1.0",
     "rule_version": "1.0.0",
-    "script_version": "4.46.0",
+    "script_version": "4.47.0",
     "min_python_version": "3.10.0",
     "supported_os": [
       "linux",

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.47.0] - 2026-09-05
+
+### Added
+- **Dynamic Manifest Isolation**: Hardened `install.py` manifest generation to exclude dynamic runtime directories (`harness`, `inbox`, `state`) and ephemeral log/lock files, preventing false-positive `Integrity Status: COMPROMISED` on fresh installations.
+- **Consumer State Sanitization**: Enhanced `install.py` to automatically reset and sanitize target workspace runtime artifacts (`inbox/state.json` and `state/checkpoint.json`), ensuring consumer projects start with clean message queues and pristine execution checkpoints.
+
+### Fixed
+- **Bootstrap Neurosymbolic Handoff Schema**: Fixed `install.py` contract initialization to write empty lists `[]` for `modifications` and `tests` rather than string arrays, guaranteeing 100% out-of-the-box compliance with Gate 9 (`neurosymbolic_validation`).
+- **Orphan Fixture Cleanup**: Removed unreferenced root fixture `bad_handoff.json` to maintain 100% tree and reference integrity.
+- **Session Context Test Baseline**: Synchronized active session context test counts to reflect the complete 191 unit test suite.
+
 ## [4.46.0] - 2026-09-05
 
 ### Added
@@ -154,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Antigravity Schema Alignment**: Official Google Antigravity Schema Alignment (`config.json` -> `mcp_config.json`).
 - **Cross-Platform Injection**: Native portability improvements for cross-platform agent injection.
 
+[4.47.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.46.0...v4.47.0
 [4.46.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.45.0...v4.46.0
 [4.45.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.3...v4.45.0
 [4.44.3]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.2...v4.44.3

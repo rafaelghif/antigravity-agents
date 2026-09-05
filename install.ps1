@@ -1,7 +1,7 @@
 # Antigravity Agent Core (AAC) Universal Windows Bootstrap
 # Delegates installation to cross-platform pure Python engine (install.py)
 # Version marker for validation:
-$AacRef = "v4.46.0"
+$AacRef = "v4.47.0"
 
 # Enforce UTF-8 console, pipe, and process encoding across Windows
 $OutputEncoding = [System.Text.Encoding]::UTF8

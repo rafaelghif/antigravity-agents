@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- /boost # AAC — FULL INTEGRITY, LINKAGE, INSTALLATION & ANTIGRAVITY COMPLIANCE AUDIT  Act as a:  * Principal Google Antigravity Architect *...
+- commit,push,tag,releases (title: `V4.47.0`), changelog semver
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.

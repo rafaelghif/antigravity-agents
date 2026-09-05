@@ -5,7 +5,7 @@ license: Apache-2.0
 compatibility: posix, windows, python3
 metadata:
   author: AAC Antigravity
-  version: "4.46.0"
+  version: "4.47.0"
   category: system-design
   tags: [architecture, ddd, rfc7807, idempotency, outbox, circuit-breaker]
 ---
