@@ -377,7 +377,11 @@ def scan_managed_dir(dir_path: Path, root_dir: Path) -> dict[str, str]:
     for sub_file in dir_path.rglob("*"):
         if sub_file.is_file():
             rel = str(sub_file.relative_to(root_dir)).replace("\\", "/")
-            if "brain" in sub_file.parts or "scratch" in sub_file.parts or sub_file.name == "install_manifest.json":
+            if (
+                any(p in sub_file.parts for p in ("brain", "scratch", "harness", "inbox", "state"))
+                or sub_file.name == "install_manifest.json"
+                or sub_file.suffix in (".log", ".lock")
+            ):
                 continue
             files[rel] = compute_sha256(sub_file)
     return files
@@ -513,8 +517,8 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
                 "task_id": "BOOTSTRAP",
                 "worker_role": "scrum-master",
                 "summary": f"Initial contract for {root_dir.name}",
-                "modifications": ["intent.yaml", "handoff.json"],
-                "tests": ["python3 scripts/verify.py --execute --terse"],
+                "modifications": [],
+                "tests": [],
                 "confidence_score": 1.0,
                 "requires_human": False,
             }
@@ -537,6 +541,27 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
                 mcp_path.write_text(json.dumps(new_data, indent=2), encoding="utf-8")
             except Exception as exc:
                 sys.stderr.write(f"Notice merging mcp_config: {exc}\n")
+
+        # Clean runtime state for foreign consumer targets
+        if root_dir != source_dir:
+            inbox_state = root_dir / ".agents" / "inbox" / "state.json"
+            if inbox_state.is_file():
+                inbox_state.write_text(
+                    json.dumps({
+                        "room_id": "default",
+                        "active_agents": [],
+                        "debate_turn_count": 0,
+                        "status": "idle",
+                        "messages": []
+                    }, indent=2),
+                    encoding="utf-8"
+                )
+            checkpoint_f = root_dir / ".agents" / "state" / "checkpoint.json"
+            if checkpoint_f.is_file():
+                checkpoint_f.write_text(
+                    json.dumps({"completed_tasks": [], "last_checkpoint": None}, indent=2),
+                    encoding="utf-8"
+                )
 
         # 6. Ensure .gitignore has scratch and backup rules
         gitignore_path = root_dir / ".gitignore"
