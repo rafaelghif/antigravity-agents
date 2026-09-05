@@ -5,7 +5,7 @@ license: Apache-2.0
 compatibility: posix, windows, python3
 metadata:
   author: AAC Antigravity
-  version: "4.44.3"
+  version: "4.45.0"
   category: devops
   tags: [docker, kubernetes, ci-cd, terraform, mcp, security]
 ---

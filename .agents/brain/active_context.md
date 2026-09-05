@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- commit push ke main
+- okey releases `v.4.45.0`
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
