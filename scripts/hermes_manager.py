@@ -109,6 +109,24 @@ class StateCheckpoint:
 class HermesEngine:
     def __init__(self):
         self.checkpoint = StateCheckpoint(CHECKPOINT_FILE)
+        self.reconcile_checkpoint()
+
+    def reconcile_checkpoint(self):
+        if not TASKS_DIR.exists():
+            return
+        in_prog = self.checkpoint.data.get("in_progress")
+        if in_prog and isinstance(in_prog, dict):
+            tid = in_prog.get("task_id")
+            for tfile in TASKS_DIR.glob("*.yaml"):
+                try:
+                    with open(tfile, "r", encoding="utf-8") as f:
+                        data = load_yaml(f.read())
+                        if data and str(data.get("id")) == str(tid):
+                            if str(data.get("status", "")).upper() == "DONE":
+                                self.checkpoint.mark_completed(tid)
+                            break
+                except Exception as e:
+                    sys.stderr.write(f"Checkpoint reconcile notice: {e}\n")
 
     def load_task_graph(self) -> Tuple[Dict[str, Dict[str, Any]], graphlib.TopologicalSorter]:
         tasks = {}
@@ -405,7 +423,7 @@ class HermesEngine:
                 f"2. CONTRACT-FIRST: Strict schema validation (DTOs/types) on all boundaries.\n"
                 f"3. RESILIENCE: Handle failures, retries with jitter, idempotency, and edge cases.\n"
                 f"4. ATOMIC TDD: Write complete unit and boundary tests before finalizing.\n"
-                f"5. EXECUTE: Read `.agents/rules/` and `.agents/brain/rules.md` and write production code directly."
+                f"5. EXECUTE: Read `.agents/rules/` for immutable platform rules and `.agents/brain/rules.md` for dynamic multi-agent coordination contracts, and write production code directly."
             )
 
             ret, stdout, stderr = self.execute_agent(persona, worker_prompt)

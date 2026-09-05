@@ -81,7 +81,6 @@ REQUIRED_PATHS = CORE_AGENT_PATHS + ("scripts/semantic_grapher.py",)
 CONSUMER_REQUIRED_PATHS = CORE_AGENT_PATHS
 
 OPTIONAL_PATHS = (
-    ".agents/brain/soul.md",
     ".agents/brain/rules.md",
     ".agents/brain/memory.md",
     ".agents/brain/active_context.md",

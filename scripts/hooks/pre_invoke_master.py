@@ -62,8 +62,10 @@ def parse_skills_from_frontmatter(frontmatter_str: str) -> list[str]:
     inline_match = re.search(r'skills:\s*\[(.*?)\]', frontmatter_str)
     if inline_match:
         return [s.strip().strip("'\"") for s in inline_match.group(1).split(',') if s.strip()]
-    list_match = re.findall(r'^\s*-\s*([a-zA-Z0-9_-]+)', frontmatter_str, re.MULTILINE)
-    return list_match
+    multiline_match = re.search(r'(?:^|\n)skills:\s*\n((?:\s*-\s*[^\n]+\n?)+)', frontmatter_str)
+    if multiline_match:
+        return [m.strip() for m in re.findall(r'^\s*-\s*([a-zA-Z0-9_-]+)', multiline_match.group(1), re.MULTILINE) if m.strip()]
+    return []
 
 def detect_skills_from_text(text: str) -> list[str]:
     if not text:
@@ -152,6 +154,12 @@ def get_context(transcript_path: str | None = None) -> str:
     rules_path = ROOT / '.agents' / 'brain' / 'rules.md'
     if rules_path.exists():
         raw_rules = rules_path.read_text(encoding='utf-8').splitlines()
+        CORE_INVARIANT_TAGS = {
+            "[NO_TRASH]", "[USER_PROJECT_FIRST]", "[REALITY_OVER_MEMORY]",
+            "[EXISTING_CODE_FIRST]", "[SMALL_CONTEXT_DISCOVERY]",
+            "[CROSS_PLATFORM_PORTABILITY]", "[LEAST_PRIVILEGE_EXECUTION]",
+            "[CAVEMAN_TOKEN_ECONOMY]"
+        }
         active_rules = [
             l for l in raw_rules
             if l.startswith('- ')
@@ -160,9 +168,10 @@ def get_context(transcript_path: str | None = None) -> str:
             and not l.startswith('- Evolve')
             and 'NO_SUBAGENT_SANDBOX' not in l
             and 'ZERO SANDBOX' not in l
+            and not any(tag in l for tag in CORE_INVARIANT_TAGS)
         ]
         if active_rules:
-            msgs.append("=== PROCEDURAL RULES ===\n" + "\n".join(active_rules[:8]))
+            msgs.append("=== PROCEDURAL RULES ===\n" + "\n".join(active_rules[:12]))
             
     # 4. Compact Skill Directives (Eliminates token bloat by avoiding full markdown dump)
     skills_to_inject = set()
@@ -193,6 +202,12 @@ def get_context(transcript_path: str | None = None) -> str:
                 skills_to_inject.update(detect_skills_from_text(recent_text))
         except Exception as e:
             sys.stderr.write(f"Context extraction notice: {str(e)}\n")
+
+    valid_skill_names = set(SKILL_KEYWORDS.keys())
+    skills_dir = ROOT / ".agents" / "skills"
+    if skills_dir.is_dir():
+        valid_skill_names.update(d.name for d in skills_dir.iterdir() if d.is_dir() and not d.name.startswith("."))
+    skills_to_inject = {s for s in skills_to_inject if s in valid_skill_names}
 
     if skills_to_inject:
         skill_list = ", ".join(sorted(skills_to_inject))

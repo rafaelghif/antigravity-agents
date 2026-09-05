@@ -38,7 +38,6 @@ BRAIN_PRESERVE_FILES = (
     "memory.md",
     "ANCHOR.md",
     "active_context.md",
-    "soul.md",
     "schema.md",
     "AITL_CONSENSUS.yaml",
     "env-required.json",

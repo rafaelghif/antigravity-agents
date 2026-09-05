@@ -166,5 +166,78 @@ class TestHooks(unittest.TestCase):
             self.assertIn("ephemeralMessage", out["injectSteps"][0])
             self.assertNotIn("silence", out["injectSteps"][0])
 
+    def test_get_context_procedural_rules_operational_and_filtered(self):
+        ctx = pre_invoke_master.get_context(None)
+        self.assertIn("=== PROCEDURAL RULES ===", ctx)
+        expected_rules = [
+            "[PR_BRANCH_AUTO_CLEAN]",
+            "[HERMES_ORCHESTRATION]",
+            "[BRANCH_WORKFLOW]",
+            "[CONCURRENCY_WORKTREES]",
+            "[ANTI_STUCK_PROTOCOL]",
+            "[HANDOFF_CONTRACTS]",
+            "[CIRCUIT_BREAKER]",
+            "[SCRATCH_ISOLATION]",
+            "[OBLIGATORY_MEETING_PROTOCOL]",
+        ]
+        for rule in expected_rules:
+            self.assertIn(rule, ctx)
+        banned_tags = [
+            "[NO_TRASH]",
+            "[USER_PROJECT_FIRST]",
+            "[REALITY_OVER_MEMORY]",
+            "[EXISTING_CODE_FIRST]",
+            "[SMALL_CONTEXT_DISCOVERY]",
+            "[CROSS_PLATFORM_PORTABILITY]",
+            "[LEAST_PRIVILEGE_EXECUTION]",
+            "[CAVEMAN_TOKEN_ECONOMY]",
+        ]
+        for tag in banned_tags:
+            self.assertNotIn(tag, ctx)
+
+    def test_get_context_filters_core_invariant_tags_when_present(self):
+        import tempfile
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            brain_dir = tmp_path / '.agents' / 'brain'
+            brain_dir.mkdir(parents=True)
+            mock_rules = (
+                "<DGM_SELF_MUTATION_DNA>\n"
+                "- Mutate rules\n"
+                "- Prune rules\n"
+                "- Evolve strategies\n"
+                "</DGM_SELF_MUTATION_DNA>\n"
+                "# Procedural Memory Rules\n"
+                "- **[NO_TRASH]**: Temporary files\n"
+                "- **[USER_PROJECT_FIRST]**: Focus user\n"
+                "- **[REALITY_OVER_MEMORY]**: Grounding truth\n"
+                "- **[EXISTING_CODE_FIRST]**: Reuse abstractions\n"
+                "- **[SMALL_CONTEXT_DISCOVERY]**: Progressive discovery\n"
+                "- **[CROSS_PLATFORM_PORTABILITY]**: Shell agnostic\n"
+                "- **[LEAST_PRIVILEGE_EXECUTION]**: Guard tools\n"
+                "- **[CAVEMAN_TOKEN_ECONOMY]**: High density\n"
+                "- **[PR_BRANCH_AUTO_CLEAN]**: Branch cleanup\n"
+                "- **[HERMES_ORCHESTRATION]**: Multi-agent\n"
+                "- NO_SUBAGENT_SANDBOX: Disallowed\n"
+                "- ZERO SANDBOX: Disallowed\n"
+            )
+            (brain_dir / 'rules.md').write_text(mock_rules, encoding='utf-8')
+            with patch.object(pre_invoke_master, 'ROOT', tmp_path):
+                ctx = pre_invoke_master.get_context(None)
+                self.assertIn("=== PROCEDURAL RULES ===", ctx)
+                self.assertIn("[PR_BRANCH_AUTO_CLEAN]", ctx)
+                self.assertIn("[HERMES_ORCHESTRATION]", ctx)
+                banned_tags = [
+                    "[NO_TRASH]", "[USER_PROJECT_FIRST]", "[REALITY_OVER_MEMORY]",
+                    "[EXISTING_CODE_FIRST]", "[SMALL_CONTEXT_DISCOVERY]",
+                    "[CROSS_PLATFORM_PORTABILITY]", "[LEAST_PRIVILEGE_EXECUTION]",
+                    "[CAVEMAN_TOKEN_ECONOMY]", "NO_SUBAGENT_SANDBOX", "ZERO SANDBOX",
+                    "- Mutate", "- Prune", "- Evolve"
+                ]
+                for tag in banned_tags:
+                    self.assertNotIn(tag, ctx)
+
+
 if __name__ == "__main__":
     unittest.main()

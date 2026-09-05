@@ -33,6 +33,18 @@ class TestHermesManager(unittest.TestCase):
         self.assertIn("TASK-102", self.checkpoint.data["blocked_tasks"])
         self.assertIsNone(self.checkpoint.data["in_progress"])
 
+    def test_reconcile_checkpoint_clears_zombie_task(self):
+        engine = HermesEngine()
+        engine.checkpoint = self.checkpoint
+        self.checkpoint.set_in_progress("01_test_task", "staff-backend", 1)
+        tasks_dir = Path(self.tmp_dir.name) / "tasks"
+        tasks_dir.mkdir()
+        (tasks_dir / "01_test_task.yaml").write_text("id: '01_test_task'\nstatus: 'DONE'\n", encoding="utf-8")
+        with patch("scripts.hermes_manager.TASKS_DIR", tasks_dir):
+            engine.reconcile_checkpoint()
+            self.assertIn("01_test_task", self.checkpoint.data["completed_tasks"])
+            self.assertIsNone(self.checkpoint.data["in_progress"])
+
     def test_resolve_persona_explicit_domain(self):
         engine = HermesEngine()
         self.assertEqual(engine.resolve_persona({"domain": "frontend"}), "frontend-architect")
@@ -170,6 +182,32 @@ Body
             val = mock_stdout.getvalue()
             self.assertIn("Hermes DAG Execution Plan", val)
             self.assertIn("```mermaid", val)
+
+    def test_worker_prompt_clarifies_rules_distinction(self):
+        engine = HermesEngine()
+        engine.checkpoint = self.checkpoint
+        task_data = {
+            "id": "task_prompt_test",
+            "title": "Prompt Test",
+            "description": "Verify worker prompt contains rules distinction",
+            "domain": "backend",
+            "_file": Path("/tmp/fake_task.yaml"),
+        }
+        captured_prompts = []
+        def mock_execute_agent(persona, prompt):
+            captured_prompts.append(prompt)
+            return 0, "APPROVED", ""
+
+        import io
+        with patch.object(engine, "update_task_file_status"), \
+             patch.object(engine, "execute_agent", side_effect=mock_execute_agent), \
+             patch.object(engine, "evaluate_gate1_static", return_value=(True, "OK")), \
+             patch.object(engine, "evaluate_gate2_cognitive", return_value=(True, "OK", "falsify", "approved")), \
+             patch("sys.stdout", new_callable=io.StringIO):
+            engine.run_task_lifecycle("task_prompt_test", task_data)
+
+        self.assertTrue(len(captured_prompts) > 0)
+        self.assertIn("Read `.agents/rules/` for immutable platform rules and `.agents/brain/rules.md` for dynamic multi-agent coordination contracts", captured_prompts[0])
 
 if __name__ == "__main__":
     unittest.main()
