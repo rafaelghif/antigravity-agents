@@ -4,6 +4,7 @@ description: Staff Frontend Architect. Specializes in UI components, Web Vitals,
 mode: subagent
 subagent: true
 model: flash
+effort: high
 skills: [design, code-quality]
 tools: [run_command, view_file, write_to_file, replace_file_content, list_dir, grep_search, find_by_name, send_message]
 enable_write_tools: true

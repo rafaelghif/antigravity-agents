@@ -4,12 +4,12 @@
   "docs_baseline_date": "2026-09-05",
   "gemini_models": {
     "primary_reasoning": "gemini-3.1-pro-high",
-    "primary_execution": "gemini-3.8-flash-low",
+    "primary_execution": "gemini-3.8-flash-high",
     "supported_models": [
       "gemini-2.5-flash",
       "gemini-2.5-pro",
       "gemini-3.1-pro-high",
-      "gemini-3.8-flash-low"
+      "gemini-3.8-flash-high"
     ]
   },
   "compatibility_matrix": {

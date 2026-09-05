@@ -4,6 +4,7 @@ description: Staff QA Automation Lead. End-to-end testing, property-based testin
 mode: subagent
 subagent: true
 model: flash
+effort: high
 skills: [verification, code-quality]
 tools: [run_command, view_file, write_to_file, replace_file_content, list_dir, grep_search, find_by_name, send_message]
 enable_write_tools: true

@@ -246,13 +246,13 @@ class HermesEngine:
             "researcher": "high",
             "staff-backend": "high",
             "database-sre": "high",
-            "frontend-architect": "medium",
-            "qa-automation-lead": "medium",
-            "devsecops-principal": "medium",
-            "product-manager": "medium",
-            "scrum-master": "low",
+            "frontend-architect": "high",
+            "qa-automation-lead": "high",
+            "devsecops-principal": "high",
+            "product-manager": "high",
+            "scrum-master": "high",
         }
-        effort = effort_map.get(persona, "medium")
+        effort = effort_map.get(persona, "high")
         
         # Resolve model tier from persona metadata
         model_tier = "flash"
@@ -263,6 +263,9 @@ class HermesEngine:
                 m = re.search(r"^model:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
                 if m:
                     model_tier = m.group(1).lower()
+                m_effort = re.search(r"^effort:\s*([a-zA-Z0-9_\-]+)", p_text, re.MULTILINE)
+                if m_effort:
+                    effort = m_effort.group(1).lower()
             except (OSError, UnicodeDecodeError) as exc:
                 sys.stderr.write(f"Notice reading persona {persona}: {exc}\n")
         elif persona in ("staff-backend", "database-sre", "researcher"):
