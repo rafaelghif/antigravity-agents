@@ -5,7 +5,7 @@
 > It holds active task focus, recent milestones, and immediate next steps.
 
 ## 🎯 Current Goal & Task Focus
-- commit,push,tag,releases (title: `V4.47.0`), changelog semver
+- releasesa dan tag. title `V4.47.1` wajib itu titlenya tidak di tambah" embel" lainnya kemudian changelog update menggunakan standard...
 
 ## 📌 Key Decisions & Invariants
 - Repository reality > agent memory or assumptions.
@@ -25,6 +25,7 @@
 - Ported hook execution commands in `.agents/plugins/aac-core/hooks.json` to use `sys.executable` in subprocesses.
 
 ## 🚀 Recent Accomplishments
+- Resolved Antigravity CLI startup crash by fixing artifactReviewPolicy from invalid auto to agent-decides across settings templates, global CLI settings, validator, installer, and health checker
 - Fixed upstream upgrade script execution, rollback orphan pruning, and Windows stale lock recovery
 
 ## ⏳ Next Immediate Steps

@@ -215,7 +215,7 @@ def validate_single_settings_file(target: str) -> None:
         "toolPermission": "always-proceed",
         "enableTerminalSandbox": False,
         "allowNonWorkspaceAccess": True,
-        "artifactReviewPolicy": "auto",
+        "artifactReviewPolicy": "agent-decides",
     }
     for key, expected in required.items():
         if settings.get(key) != expected:

@@ -104,7 +104,7 @@ def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
     except Exception as exc:
         sys.stderr.write(f"Git remote tags notice: {exc}\n")
 
-    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.47.0"
+    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.47.1"
     return (fallback_tag, fallback_tag, "Fallback version.")
 
 
@@ -188,7 +188,7 @@ def run_repair(root_dir: Path, source_override: Path | None = None) -> bool:
     if not target_version or target_version == "UNKNOWN" or target_version == "v0.0.0":
         target_version = f"v{get_current_version(root_dir)}"
     if target_version == "v0.0.0":
-        target_version = "v4.47.0"
+        target_version = "v4.47.1"
     print(f"Targeting repair version: {target_version}")
     success = install_aac(root_dir, target_version, source_override=source_override)
     if success:
@@ -615,7 +615,19 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
             except OSError as err:
                 sys.stderr.write(f"Notice: .github cleanup: {err}\n")
 
-        # 9. Record Installation Manifest for Source Integrity & Audits
+        # 9. Sanitize and ensure valid artifactReviewPolicy across Linux and Windows
+        try:
+            from scripts.health_check import sanitize_artifact_review_policy
+            for target_conf in (
+                root_dir / ".agents" / "antigravity-settings.json",
+                Path.home() / ".gemini" / "antigravity-cli" / "settings.json",
+            ):
+                if sanitize_artifact_review_policy(target_conf):
+                    print(f"=> Sanitized artifactReviewPolicy to 'agent-decides' in {target_conf.name}.")
+        except Exception as exc:
+            sys.stderr.write(f"Settings sanitization notice: {exc}\n")
+
+        # 10. Record Installation Manifest for Source Integrity & Audits
         manifest_files: dict[str, str] = {}
         managed_roots = [
             root_dir / "AGENTS.md",
@@ -711,7 +723,7 @@ def main() -> None:
 
     if source_override and source_override.is_dir():
         source_ver = get_current_version(source_override)
-        target_ver = args.version or args.revision or (f"v{source_ver}" if source_ver != "0.0.0" else "v4.47.0")
+        target_ver = args.version or args.revision or (f"v{source_ver}" if source_ver != "0.0.0" else "v4.47.1")
         current_ver = get_current_version(root_dir)
         status = {
             "current_version": current_ver,

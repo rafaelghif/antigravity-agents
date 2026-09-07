@@ -67,6 +67,25 @@ class TestHealthCheck(unittest.TestCase):
             self.assertTrue((target / ".agents" / "brain" / "env-required.json").is_file())
             self.assertTrue((target / ".gitignore").is_file())
 
+    def test_deterministic_self_repair_artifact_review_policy(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target = Path(tmpdir)
+            settings_dir = target / ".agents"
+            settings_dir.mkdir(parents=True)
+            settings_file = settings_dir / "antigravity-settings.json"
+            settings_file.write_text(json.dumps({
+                "agentMode": "accept-edits",
+                "artifactReviewPolicy": "auto"
+            }), encoding="utf-8")
+
+            checker = HealthChecker(root=target, repair=True)
+            repaired = checker.execute_repairs()
+            self.assertTrue(any("Repaired artifactReviewPolicy" in r for r in repaired))
+
+            # Verify it was sanitized to "agent-decides"
+            updated = json.loads(settings_file.read_text(encoding="utf-8"))
+            self.assertEqual(updated.get("artifactReviewPolicy"), "agent-decides")
+
 
 if __name__ == "__main__":
     unittest.main()

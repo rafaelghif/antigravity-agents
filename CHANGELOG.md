@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.47.1] - 2026-09-07
+
+### Fixed
+- **Antigravity CLI Settings Parity**: Corrected `artifactReviewPolicy` default and validation from invalid `"auto"` to `"agent-decides"`, preventing Antigravity CLI startup crashes (`invalid settings: artifactReviewPolicy: unrecognized value "auto"`).
+- **Cross-Platform Deterministic Self-Repair**: Added `sanitize_artifact_review_policy` in `scripts/health_check.py` and integrated it into `HealthChecker.execute_repairs` and `install.py` to automatically detect and repair invalid `artifactReviewPolicy` in global `~/.gemini/antigravity-cli/settings.json` and local workspace settings across Linux and Windows.
+- **Drift Detection Suite**: Enhanced `tests/test_config_alignment.py` and `scripts/validate.py` with explicit drift detection rejecting unrecognized review policies.
+
 ## [4.47.0] - 2026-09-05
 
 ### Added
@@ -165,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Antigravity Schema Alignment**: Official Google Antigravity Schema Alignment (`config.json` -> `mcp_config.json`).
 - **Cross-Platform Injection**: Native portability improvements for cross-platform agent injection.
 
+[4.47.1]: https://github.com/rafaelghif/antigravity-agents/compare/v4.47.0...v4.47.1
 [4.47.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.46.0...v4.47.0
 [4.46.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.45.0...v4.46.0
 [4.45.0]: https://github.com/rafaelghif/antigravity-agents/compare/v4.44.3...v4.45.0

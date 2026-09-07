@@ -69,6 +69,22 @@ def check_rule_frontmatter(rule_name: str, fm: str) -> str | None:
     return None
 
 
+def sanitize_artifact_review_policy(path: Path) -> bool:
+    """Ensures artifactReviewPolicy is valid ('agent-decides', 'always-proceed', 'ask-for-review'). Returns True if modified."""
+    valid_policies = {"agent-decides", "always-proceed", "ask-for-review"}
+    if not path.is_file():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if data.get("artifactReviewPolicy") not in valid_policies:
+            data["artifactReviewPolicy"] = "agent-decides"
+            path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            return True
+    except Exception as exc:
+        sys.stderr.write(f"Notice reading/updating {path}: {exc}\n")
+    return False
+
+
 def check_task_script_references(task_file: Path, root: Path) -> list[str]:
     broken = []
     try:
@@ -566,6 +582,14 @@ class HealthChecker:
                         repaired.append("Added executable permission to .githooks/pre-commit")
                 except Exception as exc:
                     _ = exc
+
+        # 6. Repair corrupted/invalid artifactReviewPolicy in settings files
+        for s_path in (
+            self.root / ".agents" / "antigravity-settings.json",
+            Path.home() / ".gemini" / "antigravity-cli" / "settings.json",
+        ):
+            if sanitize_artifact_review_policy(s_path):
+                repaired.append(f"Repaired artifactReviewPolicy to 'agent-decides' in {s_path.name}")
 
         self.repaired = repaired
         return repaired
