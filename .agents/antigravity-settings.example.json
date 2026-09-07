@@ -1,7 +1,7 @@
 {
   "agentMode": "accept-edits",
   "allowNonWorkspaceAccess": true,
-  "artifactReviewPolicy": "auto",
+  "artifactReviewPolicy": "agent-decides",
   "colorScheme": "tokyo night",
   "enableTerminalSandbox": false,
   "model": "Gemini 3.8 Flash (High)",

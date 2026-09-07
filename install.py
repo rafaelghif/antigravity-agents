@@ -615,7 +615,19 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
             except OSError as err:
                 sys.stderr.write(f"Notice: .github cleanup: {err}\n")
 
-        # 9. Record Installation Manifest for Source Integrity & Audits
+        # 9. Sanitize and ensure valid artifactReviewPolicy across Linux and Windows
+        try:
+            from scripts.health_check import sanitize_artifact_review_policy
+            for target_conf in (
+                root_dir / ".agents" / "antigravity-settings.json",
+                Path.home() / ".gemini" / "antigravity-cli" / "settings.json",
+            ):
+                if sanitize_artifact_review_policy(target_conf):
+                    print(f"=> Sanitized artifactReviewPolicy to 'agent-decides' in {target_conf.name}.")
+        except Exception as exc:
+            sys.stderr.write(f"Settings sanitization notice: {exc}\n")
+
+        # 10. Record Installation Manifest for Source Integrity & Audits
         manifest_files: dict[str, str] = {}
         managed_roots = [
             root_dir / "AGENTS.md",

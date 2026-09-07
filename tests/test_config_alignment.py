@@ -75,7 +75,7 @@ class TestConfigAlignment(unittest.TestCase):
         self.assertEqual(ex_settings.get("toolPermission"), "always-proceed")
         self.assertEqual(ex_settings.get("enableTerminalSandbox"), False)
         self.assertEqual(ex_settings.get("allowNonWorkspaceAccess"), True)
-        self.assertEqual(ex_settings.get("artifactReviewPolicy"), "auto")
+        self.assertEqual(ex_settings.get("artifactReviewPolicy"), "agent-decides")
 
         ex_perms = ex_settings.get("permissions", {})
         self.assertIsInstance(ex_perms, dict)
@@ -273,7 +273,7 @@ class TestConfigAlignment(unittest.TestCase):
                 "toolPermission": "always-proceed",
                 "enableTerminalSandbox": False,
                 "allowNonWorkspaceAccess": True,
-                "artifactReviewPolicy": "auto",
+                "artifactReviewPolicy": "agent-decides",
                 "permissions": {"allow": ["command(*)"], "deny": [], "ask": []},
                 "trustedWorkspaces": ["/tmp"]
             }
@@ -286,11 +286,24 @@ class TestConfigAlignment(unittest.TestCase):
                 "toolPermission": "always-proceed",
                 "enableTerminalSandbox": False,
                 "allowNonWorkspaceAccess": True,
-                "artifactReviewPolicy": "auto",
+                "artifactReviewPolicy": "agent-decides",
                 "permissions": {"allow": ["command(*)"], "deny": ["command(rm -rf /)"], "ask": []},
                 "trustedWorkspaces": []
             }
             tmp_path.write_text(json.dumps(bad_workspaces), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                validate_single_settings_file(str(tmp_path))
+
+            # Reject invalid artifactReviewPolicy "auto"
+            bad_policy = {
+                "toolPermission": "always-proceed",
+                "enableTerminalSandbox": False,
+                "allowNonWorkspaceAccess": True,
+                "artifactReviewPolicy": "auto",
+                "permissions": {"allow": ["command(*)"], "deny": ["command(rm -rf /)"], "ask": []},
+                "trustedWorkspaces": ["/tmp"]
+            }
+            tmp_path.write_text(json.dumps(bad_policy), encoding="utf-8")
             with self.assertRaises(ValueError):
                 validate_single_settings_file(str(tmp_path))
 
