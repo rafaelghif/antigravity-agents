@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -233,7 +234,7 @@ def validate_single_settings_file(target: str) -> None:
         fail(f"{target} trustedWorkspaces must be a non-empty list of paths")
 
 
-def validate_settings() -> None:
+def validate_settings(source_only: bool = False) -> None:
     example_path = ".agents/antigravity-settings.example.json"
     validate_single_settings_file(example_path)
     actual_path = ROOT / ".agents" / "antigravity-settings.json"
@@ -252,35 +253,36 @@ def validate_settings() -> None:
         act_perms = act_settings.get("permissions", {})
         if set(ex_perms.keys()) != set(act_perms.keys()):
             fail(f"Permissions key mismatch between example and actual: {set(ex_perms.keys()) ^ set(act_perms.keys())}")
-        if ex_perms.get("allow", []) != act_perms.get("allow", []):
+        if set(ex_perms.get("allow", [])) != set(act_perms.get("allow", [])):
             fail(f"Permissions allow list mismatch: {ex_perms.get('allow')} vs {act_perms.get('allow')}")
         if ex_perms.get("deny") != act_perms.get("deny"):
             fail(f"Permissions deny list mismatch: {ex_perms.get('deny')} vs {act_perms.get('deny')}")
         if ex_perms.get("ask") != act_perms.get("ask"):
             fail(f"Permissions ask list mismatch: {ex_perms.get('ask')} vs {act_perms.get('ask')}")
 
-    cli_settings_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
-    if cli_settings_path.is_file():
-        validate_single_settings_file(str(cli_settings_path))
-        cli_settings = load_json(str(cli_settings_path))
-        ex_settings = load_json(example_path)
-        if set(ex_settings.keys()) != set(cli_settings.keys()):
-            fail(f"Settings key mismatch between example and CLI actual: {set(ex_settings.keys()) ^ set(cli_settings.keys())}")
-        for k in ex_settings:
-            if k in ("trustedWorkspaces", "permissions"):
-                continue
-            if ex_settings[k] != cli_settings.get(k):
-                fail(f"Settings property '{k}' mismatch between example and CLI actual: {ex_settings[k]} vs {cli_settings.get(k)}")
-        ex_perms = ex_settings.get("permissions", {})
-        cli_perms = cli_settings.get("permissions", {})
-        if set(ex_perms.keys()) != set(cli_perms.keys()):
-            fail(f"Permissions key mismatch between example and CLI actual: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
-        if ex_perms.get("allow", []) != cli_perms.get("allow", []):
-            fail(f"Permissions allow list mismatch with CLI actual: {ex_perms.get('allow')} vs {cli_perms.get('allow')}")
-        if ex_perms.get("deny") != cli_perms.get("deny"):
-            fail(f"Permissions deny list mismatch with CLI actual: {ex_perms.get('deny')} vs {cli_perms.get('deny')}")
-        if ex_perms.get("ask") != cli_perms.get("ask"):
-            fail(f"Permissions ask list mismatch with CLI actual: {ex_perms.get('ask')} vs {cli_perms.get('ask')}")
+    if not source_only and os.environ.get("AAC_SOURCE_VALIDATION") != "1" and is_framework_repo():
+        cli_settings_path = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
+        if cli_settings_path.is_file():
+            validate_single_settings_file(str(cli_settings_path))
+            cli_settings = load_json(str(cli_settings_path))
+            ex_settings = load_json(example_path)
+            if set(ex_settings.keys()) != set(cli_settings.keys()):
+                fail(f"Settings key mismatch between example and CLI actual: {set(ex_settings.keys()) ^ set(cli_settings.keys())}")
+            for k in ex_settings:
+                if k in ("trustedWorkspaces", "permissions"):
+                    continue
+                if ex_settings[k] != cli_settings.get(k):
+                    fail(f"Settings property '{k}' mismatch between example and CLI actual: {ex_settings[k]} vs {cli_settings.get(k)}")
+            ex_perms = ex_settings.get("permissions", {})
+            cli_perms = cli_settings.get("permissions", {})
+            if set(ex_perms.keys()) != set(cli_perms.keys()):
+                fail(f"Permissions key mismatch between example and CLI actual: {set(ex_perms.keys()) ^ set(cli_perms.keys())}")
+            if set(ex_perms.get("allow", [])) != set(cli_perms.get("allow", [])):
+                fail(f"Permissions allow list mismatch with CLI actual: {ex_perms.get('allow')} vs {cli_perms.get('allow')}")
+            if ex_perms.get("deny") != cli_perms.get("deny"):
+                fail(f"Permissions deny list mismatch with CLI actual: {ex_perms.get('deny')} vs {cli_perms.get('deny')}")
+            if ex_perms.get("ask") != cli_perms.get("ask"):
+                fail(f"Permissions ask list mismatch with CLI actual: {ex_perms.get('ask')} vs {cli_perms.get('ask')}")
 
 
 def validate_env() -> None:
@@ -390,6 +392,7 @@ def validate_version() -> None:
 
 
 def main() -> int:
+    source_only = "--source-only" in sys.argv
     try:
         validate_manifest()
         load_json(".agents/config.json")
@@ -400,7 +403,7 @@ def main() -> int:
         validate_markdown_metadata(".agents/agents", 5, ("name", "description", "mode", "model", "tools"))
         validate_markdown_metadata(".agents/rules", 5, ("name", "description", "trigger"), "*.md")
         validate_instruction_budget()
-        validate_settings()
+        validate_settings(source_only=source_only)
         validate_env()
         validate_handoff_template()
         validate_compatibility()

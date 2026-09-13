@@ -86,6 +86,30 @@ class TestHealthCheck(unittest.TestCase):
             updated = json.loads(settings_file.read_text(encoding="utf-8"))
             self.assertEqual(updated.get("artifactReviewPolicy"), "agent-decides")
 
+    def test_deterministic_self_repair_antigravity_settings(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            target = Path(tmpdir)
+            settings_dir = target / ".agents"
+            settings_dir.mkdir(parents=True)
+            settings_file = settings_dir / "antigravity-settings.json"
+            settings_file.write_text(json.dumps({
+                "agentMode": "accept-edits",
+                "toolPermission": "ask",
+                "enableTerminalSandbox": True
+            }), encoding="utf-8")
+
+            checker = HealthChecker(root=target, repair=True)
+            repaired = checker.execute_repairs()
+            self.assertTrue(any("settings baseline" in r for r in repaired))
+
+            updated = json.loads(settings_file.read_text(encoding="utf-8"))
+            self.assertEqual(updated.get("enableTerminalSandbox"), False)
+            self.assertEqual(updated.get("toolPermission"), "always-proceed")
+            self.assertEqual(updated.get("artifactReviewPolicy"), "agent-decides")
+            self.assertEqual(updated.get("allowNonWorkspaceAccess"), True)
+            self.assertIn("permissions", updated)
+            self.assertIn("command(*)", updated["permissions"]["allow"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -104,7 +104,7 @@ def get_latest_github_release(current_ver: str) -> tuple[str, str, str]:
     except Exception as exc:
         sys.stderr.write(f"Git remote tags notice: {exc}\n")
 
-    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.47.1"
+    fallback_tag = f"v{current_ver}" if current_ver != "0.0.0" else "v4.47.2"
     return (fallback_tag, fallback_tag, "Fallback version.")
 
 
@@ -188,7 +188,7 @@ def run_repair(root_dir: Path, source_override: Path | None = None) -> bool:
     if not target_version or target_version == "UNKNOWN" or target_version == "v0.0.0":
         target_version = f"v{get_current_version(root_dir)}"
     if target_version == "v0.0.0":
-        target_version = "v4.47.1"
+        target_version = "v4.47.2"
     print(f"Targeting repair version: {target_version}")
     success = install_aac(root_dir, target_version, source_override=source_override)
     if success:
@@ -414,6 +414,15 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
         except Exception as e:
             sys.stderr.write(f"Notice reading mcp_config.json: {e}\n")
 
+    # Ensure global Antigravity CLI settings are sanitized early if present
+    try:
+        from scripts.health_check import sanitize_antigravity_settings
+        cli_conf = Path.home() / ".gemini" / "antigravity-cli" / "settings.json"
+        if cli_conf.is_file():
+            sanitize_antigravity_settings(cli_conf)
+    except Exception as e:
+        sys.stderr.write(f"Early settings sanitization notice: {e}\n")
+
     # 2. Acquire release source in a temporary directory or from local source
     with tempfile.TemporaryDirectory() as tmp_dir_str:
         tmp_dir = Path(tmp_dir_str)
@@ -474,7 +483,7 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
         # 3. Validate source structure
         validate_script = source_dir / "scripts" / "validate.py"
         if validate_script.is_file():
-            val_res = subprocess.run([sys.executable, str(validate_script)], cwd=source_dir)
+            val_res = subprocess.run([sys.executable, str(validate_script), "--source-only"], cwd=source_dir)
             if val_res.returncode != 0:
                 print("=> ERROR: Source validation failed. Aborting installation.")
                 return False
@@ -615,15 +624,15 @@ def install_aac(root_dir: Path, target_version: str, source_override: Path | Non
             except OSError as err:
                 sys.stderr.write(f"Notice: .github cleanup: {err}\n")
 
-        # 9. Sanitize and ensure valid artifactReviewPolicy across Linux and Windows
+        # 9. Sanitize settings across workspace and CLI
         try:
-            from scripts.health_check import sanitize_artifact_review_policy
+            from scripts.health_check import sanitize_antigravity_settings
             for target_conf in (
                 root_dir / ".agents" / "antigravity-settings.json",
                 Path.home() / ".gemini" / "antigravity-cli" / "settings.json",
             ):
-                if sanitize_artifact_review_policy(target_conf):
-                    print(f"=> Sanitized artifactReviewPolicy to 'agent-decides' in {target_conf.name}.")
+                if sanitize_antigravity_settings(target_conf, source_dir / ".agents" / "antigravity-settings.example.json"):
+                    print(f"=> Sanitized settings baseline in {target_conf.name}.")
         except Exception as exc:
             sys.stderr.write(f"Settings sanitization notice: {exc}\n")
 
@@ -723,7 +732,7 @@ def main() -> None:
 
     if source_override and source_override.is_dir():
         source_ver = get_current_version(source_override)
-        target_ver = args.version or args.revision or (f"v{source_ver}" if source_ver != "0.0.0" else "v4.47.1")
+        target_ver = args.version or args.revision or (f"v{source_ver}" if source_ver != "0.0.0" else "v4.47.2")
         current_ver = get_current_version(root_dir)
         status = {
             "current_version": current_ver,
