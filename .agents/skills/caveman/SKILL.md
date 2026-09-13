@@ -5,7 +5,7 @@ license: Apache-2.0
 compatibility: posix, windows
 metadata:
   author: AAC Antigravity
-  version: "4.47.1"
+  version: "4.47.2"
   category: token-economy
   tags: [caveman, tokens, telegraphic, bandwidth, efficiency]
 ---
