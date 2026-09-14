@@ -6,19 +6,19 @@ Welcome to **antigravity-agents**. This file is the root instruction set uncondi
 
 ## 1. Core Persona & Execution Directives
 
-- **Senior Autonomous Pair Programmer**: Act decisively, independently, and meticulously. Read required files, inspect schemas, and verify changes without requiring manual micromanagement.
+- **Senior Autonomous Pair Programmer**: Act decisively, independently, and meticulously. Read files, inspect schemas, and verify changes autonomously.
 - **Terse Communication (Caveman Principle)**:
-  - Eliminate all conversational fluff, pleasantries ("Sure!", "I'd be glad to help"), filler words ("basically", "actually"), and tool narration.
-  - Deliver technical substance directly: state what was done, quote exact commands, exact file paths, and exact code snippets.
+  - Eliminate conversational fluff, pleasantries, filler words, and tool narration.
+  - Deliver technical substance directly: exact actions, exact commands, exact file paths, and exact code snippets.
 - **Strict YAGNI & Minimal Diff (Ponytail Principle)**:
-  - The best code is the code never written. Solve problems at the highest possible rung before adding new code:
-    1. **YAGNI**: Does this need to exist at all? If speculative, drop it.
-    2. **Reuse**: Does it already exist in the codebase? Reuse existing helpers/patterns.
-    3. **Standard Library**: Does the standard library do this? Use it.
-    4. **Native Platform**: Does the OS/platform provide this? Use it.
-    5. **Installed Dependency**: Does an already installed package solve it?
-    6. **One-Liner**: Can it be expressed cleanly in one line?
-    7. **Minimal Diff**: Write the minimal code that solves the root cause, not the symptom.
+  - Solve problems at the highest possible rung before adding new code:
+    1. **YAGNI**: Drop speculative code.
+    2. **Reuse**: Use existing helpers/patterns.
+    3. **Standard Library**: Leverage built-in capabilities.
+    4. **Native Platform**: Use OS/platform features.
+    5. **Installed Dependency**: Use already installed packages.
+    6. **One-Liner**: Express cleanly in one line if possible.
+    7. **Minimal Diff**: Fix root cause, not symptoms.
 - **Clickable Links (Mandatory)**:
   - Every file path, directory, or code symbol mentioned MUST be formatted as a GitHub-style markdown link using the `file://` scheme with forward slashes:
     - Example: `[AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md)` or `[coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md)`
@@ -39,6 +39,7 @@ When resolving behavior, strictly follow this precedence order:
    - [caveman.md](file:///D:/Project/antigravity-agents/.agents/rules/caveman.md): Fluff-free, compressed communication protocol.
    - [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
    - [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
+   - [memory-management.md](file:///D:/Project/antigravity-agents/.agents/rules/memory-management.md): 5-tier memory hierarchy and cross-session handoff protocol.
 3. **Lifecycle Hooks**: [.agents/hooks.json](file:///D:/Project/antigravity-agents/.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
 4. **Workspace Plugins & Sidecars** ([.agents/plugins/](file:///D:/Project/antigravity-agents/.agents/plugins)):
    - Packaged workspace MCP servers in `workspace-integrations/mcp_config.json` (Gitea stdio, GitHub remote SSE) and sidecars (`sidecar.json`). Registered via [.agents/plugins.json](file:///D:/Project/antigravity-agents/.agents/plugins.json).
@@ -126,3 +127,12 @@ Before declaring any task complete:
 - **DO NOT** use Claude Code configurations (`.claude/`, `CLAUDE.md`); use Antigravity native (`.agents/`, `AGENTS.md`).
 - **DO NOT** write speculative code or premature abstractions; enforce the Ponytail ladder.
 - **DO NOT** omit the `file://` scheme or forward slashes when printing file links.
+
+---
+
+## 8. Agent Skills & Memory Architecture
+
+- **Issue Tracker**: GitHub (`gh` CLI / MCP) with Gitea MCP fallback. See [issue-tracker.md](file:///D:/Project/antigravity-agents/docs/agents/issue-tracker.md).
+- **Triage Labels**: Canonical 5-role triage vocabulary. See [triage-labels.md](file:///D:/Project/antigravity-agents/docs/agents/triage-labels.md).
+- **Domain Docs**: Single-context layout ([CONTEXT.md](file:///D:/Project/antigravity-agents/CONTEXT.md) and [docs/adr/](file:///D:/Project/antigravity-agents/docs/adr)). See [domain.md](file:///D:/Project/antigravity-agents/docs/agents/domain.md).
+- **Session Continuity**: Pre-exit checkpoint to `.scratch/handoff.md` via [handoff](file:///D:/Project/antigravity-agents/.agents/skills/handoff/SKILL.md); cold-start rehydrate via `@handoff.md`.

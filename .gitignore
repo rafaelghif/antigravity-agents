@@ -1,7 +1,10 @@
-# Antigravity Runtime & Artifacts
+# Antigravity Runtime & Ephemeral State
 .gemini/
 *.log
 *.tmp
+.scratch/*
+!.scratch/.gitkeep
+handoff.md
 
 # Credentials, Secrets & Tokens (MCP, PATs, local environment)
 .agents/mcp_config.json
