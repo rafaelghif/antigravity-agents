@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Coding Standards & Quality Guidelines
 
 These rules apply when writing, modifying, or refactoring code in this repository.

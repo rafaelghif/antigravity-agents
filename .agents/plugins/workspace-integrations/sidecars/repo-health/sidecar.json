@@ -1,0 +1,12 @@
+{
+  "command": "powershell",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "health-check.ps1"
+  ],
+  "restart_policy": "on-failure",
+  "description": "Background repository health check and branch hygiene monitor"
+}

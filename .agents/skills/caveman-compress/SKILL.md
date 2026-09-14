@@ -17,21 +17,18 @@ Compress natural language files (AGENTS.md, rules, todos, preferences) into cave
 
 ## Process
 
-1. The compression scripts live in `scripts/` (adjacent to this SKILL.md). If the path is not immediately available, search for `scripts/__main__.py` next to this SKILL.md.
+### Option A: Direct Antigravity Execution (Recommended)
+The Antigravity agent directly applies the Compression Rules below:
+1. Back up the target file to the out-of-tree backup data directory (`%LOCALAPPDATA%\caveman-compress\backups\<parent-dir-name>\<filename>.original.md` on Windows or `$XDG_DATA_HOME/...` on Unix).
+2. Compress the prose in-place using the Compression Rules, preserving all code blocks, headings, paths, and URLs verbatim.
+3. Validate that headers, links, and code blocks match the original.
 
-2. From the directory containing this SKILL.md, run:
-
+### Option B: Python CLI Runner
+From the directory containing this SKILL.md, run:
+```sh
 python -m scripts <absolute_filepath>
-
-3. The CLI will:
-- detect file type (no tokens)
-- compress content using caveman rules
-- validate output (no tokens)
-- if errors: cherry-pick fix with targeted adjustments
-- retry up to 2 times
-- if still failing after 2 retries: report error to user, leave original file untouched
-
-4. Return result to user
+```
+The script detects file type, compresses content, and validates output.
 
 ## Compression Rules
 

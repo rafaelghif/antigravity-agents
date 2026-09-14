@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Caveman Terse Communication Mode
 
 Respond terse and direct. All technical substance stays. Fluff and conversational filler die.

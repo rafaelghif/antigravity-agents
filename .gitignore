@@ -6,6 +6,8 @@
 # Credentials, Secrets & Tokens (MCP, PATs, local environment)
 .agents/mcp_config.json
 !.agents/mcp_config.example.json
+.agents/plugins/**/mcp_config.json
+!.agents/plugins/**/mcp_config.example.json
 .env
 .env.*
 *.local

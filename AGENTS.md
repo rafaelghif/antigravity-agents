@@ -34,15 +34,17 @@ This repository strictly operates on **workspace-level configurations** within [
 When resolving behavior, strictly follow this precedence order:
 
 1. **Root Instructions**: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) (Highest workspace precedence, limit 12k chars).
-2. **Modular Rules** ([.agents/rules/](file:///D:/Project/antigravity-agents/.agents/rules)):
+2. **Modular Rules** ([.agents/rules/](file:///D:/Project/antigravity-agents/.agents/rules), `trigger: always_on`):
    - [ponytail.md](file:///D:/Project/antigravity-agents/.agents/rules/ponytail.md): 7-rung minimalist code ladder.
    - [caveman.md](file:///D:/Project/antigravity-agents/.agents/rules/caveman.md): Fluff-free, compressed communication protocol.
    - [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
    - [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
 3. **Lifecycle Hooks**: [.agents/hooks.json](file:///D:/Project/antigravity-agents/.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
-4. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.example.json)).
-5. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)):
-   - Progressive disclosure: inspect `SKILL.md` via `view_file` only when a task matches.
+4. **Workspace Plugins & Sidecars** ([.agents/plugins/](file:///D:/Project/antigravity-agents/.agents/plugins)):
+   - Packaged workspace MCP servers in `workspace-integrations/mcp_config.json` (Gitea stdio, GitHub remote SSE) and sidecars (`sidecar.json`). Registered via [.agents/plugins.json](file:///D:/Project/antigravity-agents/.agents/plugins.json).
+5. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.example.json)).
+6. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)):
+   - Progressive disclosure: inspect `SKILL.md` via `view_file` only when a task matches. Registered via [.agents/skills.json](file:///D:/Project/antigravity-agents/.agents/skills.json).
 
 ---
 

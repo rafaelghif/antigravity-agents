@@ -37,10 +37,11 @@ flowchart TD
 
     subgraph Context ["🧠 Context & Rule Precedence"]
         AGENTS["1. AGENTS.md (Root Guidelines, ≤12k chars)"]
-        Rules["2. .agents/rules/*.md (Coding Standards, Git, Ponytail, Caveman)"]
+        Rules["2. .agents/rules/*.md (trigger: always_on)"]
         Hooks["3. .agents/hooks.json (PreToolUse, PostToolUse, Stop)"]
-        MCP["4. .agents/mcp_config.json (GitHub & Gitea Tools)"]
-        Skills["5. .agents/skills/ (Progressive Disclosure Skills)"]
+        Plugins["4. .agents/plugins/ (Packaged MCP & Sidecars via plugins.json)"]
+        MCP["5. .agents/mcp_config.json (GitHub & Gitea Tools)"]
+        Skills["6. .agents/skills/ (Progressive Disclosure via skills.json)"]
     end
 
     Antigravity --> Context
@@ -60,6 +61,13 @@ flowchart TD
     end
 
     Antigravity --> SubagentsEngine
+
+    subgraph SidecarsEngine ["⚙️ Background Sidecars & Scheduled Tasks"]
+        Sidecars["repo-health (Periodic git & branch hygiene monitor)"]
+        CronSchedule["/schedule & schedule tool (One-shot and recurring timers)"]
+    end
+
+    Antigravity --> SidecarsEngine
 ```
 
 ---
@@ -69,9 +77,18 @@ flowchart TD
 ```text
 antigravity-agents/
 ├── .agents/
-│   ├── hooks.json                     # Antigravity lifecycle hooks (PreToolUse, Stop)
-│   ├── mcp_config.example.json        # Template for Gitea and GitHub MCP servers
-│   ├── rules/                         # Workspace-level always-on and glob rules
+│   ├── hooks.json                     # Antigravity lifecycle hooks (PreToolUse matcher on run_command)
+│   ├── hooks/                         # Executable hook scripts (block-dangerous-git.ps1, .js)
+│   ├── plugins.json                   # Explicit workspace plugin registration
+│   ├── skills.json                    # Explicit workspace skills registration
+│   ├── mcp_config.example.json        # Public sanitized template for Gitea and GitHub MCP
+│   ├── plugins/                       # Workspace plugins packaging tools & background processes
+│   │   └── workspace-integrations/    # Workspace integrations bundle
+│   │       ├── plugin.json            # Plugin manifest
+│   │       ├── mcp_config.example.json# Packaged MCP template
+│   │       └── sidecars/              # Background persistent sidecars
+│   │           └── repo-health/       # Repository health and hygiene sidecar (sidecar.json)
+│   ├── rules/                         # Workspace-level rules with 'trigger: always_on'
 │   │   ├── caveman.md                 # Ultra-compressed token communication protocol
 │   │   ├── coding-standards.md        # Quality, SRP, error handling, targeted replacement
 │   │   ├── git-workflow.md            # Conventional Commits and atomic changes

@@ -10,21 +10,21 @@
 
 ---
 
-A Claude Code skill that compresses project memory files (`CLAUDE.md`, todos,
-preferences) into caveman format, reducing repeated input size.
+An Antigravity skill that compresses project memory files (`AGENTS.md`, todos,
+guidelines) into caveman format, reducing repeated input size.
 
-Claude loads `CLAUDE.md` on every session start, so large files add repeated
+Antigravity loads `AGENTS.md` on every turn, so large files add repeated
 input tokens. Caveman shortens supported natural-language files.
 
 ## What It Do
 
 ```
-/caveman-compress CLAUDE.md
+/caveman-compress AGENTS.md
 ```
 
 ```
-CLAUDE.md          ← compressed (Claude reads smaller file each session)
-CLAUDE.original.md ← human-readable backup (you edit this)
+AGENTS.md          ← compressed (Agent reads smaller file each session)
+AGENTS.original.md ← human-readable backup (you edit this)
 ```
 
 Original remains in data directory rather than next to live file, so skill

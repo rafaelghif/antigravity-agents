@@ -20,7 +20,10 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Git Guardrails Hook**: Intercepts `run_command` in Antigravity to block destructive git operations (`push`, `reset --hard`, `clean -f`, `branch -D`) using native PowerShell ([`block-dangerous-git.ps1`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.ps1)) and Node.js ([`block-dangerous-git.js`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.js)).
 - **Autonomous Multi-Agent Subagent Graphs**: Leverages `invoke_subagent` with isolated workspace branches (`Workspace: "branch"` or `"share"`), enabling concurrent implementation of spec task graphs.
 - **Multi-VCS Model Context Protocol (MCP)**: Native workspace configuration for **Gitea MCP** (stdio) and **GitHub Copilot MCP** (remote SSE) in `.agents/mcp_config.json`.
-- **Credential Quarantine**: Added comprehensive `.gitignore` sandboxing for `.agents/mcp_config.json`, `.env`, tokens, keys, and PATs, alongside a sanitized [`mcp_config.example.json`](file:///D:/Project/antigravity-agents/.agents/mcp_config.example.json).
+- **Workspace Plugins Architecture**: Implemented `.agents/plugins/workspace-integrations/` packaging workspace-scoped MCP servers and sidecars, registered via explicit `.agents/plugins.json` and `.agents/skills.json`.
+- **Background Sidecars Engine**: Integrated persistent background runner architecture (`sidecar.json`) with an automated repository health and branch hygiene monitor (`repo-health`).
+- **Rule Progressive Disclosure Triggers**: Configured `trigger: always_on` across modular rules (`caveman.md`, `coding-standards.md`, `git-workflow.md`, `ponytail.md`).
+- **Credential Quarantine**: Added comprehensive `.gitignore` sandboxing for `.agents/mcp_config.json`, `.agents/plugins/**/mcp_config.json`, `.env`, tokens, keys, and PATs, alongside sanitized example templates.
 - **Windows PowerShell 5.1+ Parity**: Fully tested for Windows PowerShell command execution (strictly replacing `&&` with `;`).
 
 ### Changed
