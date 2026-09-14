@@ -24,7 +24,7 @@ function showHelp() {
 Autonomous engineering framework for Google Antigravity
 
 USAGE:
-  npx aac-core <command> [options]
+  npx @rafaelghif/aac-core <command> [options]
   (or: npx github:rafaelghif/antigravity-agents-core <command> [options])
 
 COMMANDS:
@@ -314,7 +314,7 @@ switch (command) {
   case 'version':
   case '-v':
   case '--version':
-    console.log(`aac-core v${VERSION}`);
+    console.log(`@rafaelghif/aac-core v${VERSION}`);
     break;
   case 'help':
   case '-h':
