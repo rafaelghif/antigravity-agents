@@ -52,7 +52,14 @@ Antigravity operates on two complementary mechanisms:
 
 ---
 
-## 4. Execution & Environment (Windows / PowerShell)
+## 4. Cross-Skill & Subagent Resolution
+
+- **Cross-Skill Invocations**: When any skill instruction states `Call the Skill tool with "<name>"` or references another skill (e.g., `/tdd`, `/code-review`, `/grilling`), resolve and execute it autonomously using `view_file` on its `SKILL.md` located under `[<name>](file:///D:/Project/antigravity-agents/.agents/skills/<name>/SKILL.md)`.
+- **Subagent Delegation**: When any skill suggests delegating to a background worker or subagent, use the native `invoke_subagent` tool.
+
+---
+
+## 5. Execution & Environment (Windows / PowerShell)
 
 - **OS Environment**: Windows with default shell **PowerShell**.
 - **Syntax Compatibility**:
@@ -64,7 +71,7 @@ Antigravity operates on two complementary mechanisms:
 
 ---
 
-## 5. Verification Loop
+## 6. Verification Loop
 
 Before concluding any task:
 1. **Verify**: Build, test, or inspect changes to confirm absence of syntax errors or regressions.
