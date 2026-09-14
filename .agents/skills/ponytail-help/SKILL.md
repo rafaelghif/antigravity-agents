@@ -32,39 +32,24 @@ Level sticks until changed or session end.
 | **ponytail-gain** | `/ponytail-gain` | Measured-impact scoreboard: less code, less cost, more speed. |
 | **ponytail-help** | `/ponytail-help` | This card. |
 
-Codex uses `@ponytail`, `@ponytail-review`, and `@ponytail-help`; Claude Code
-and OpenCode use the slash-command forms above (OpenCode ships all six as
-slash commands).
+In Google Antigravity, skills are progressively loaded from `.agents/skills/`. The agent activates them autonomously based on user intent, or you can trigger them directly in conversation.
 
 ## Deactivate
 
-Say "stop ponytail" or "normal mode". Resume anytime with `/ponytail`.
-`/ponytail off` also works.
+Say "stop ponytail" or "normal mode". Resume anytime with `/ponytail` or "use ponytail".
 
 ## Configure Default Mode
 
-Default mode = `full`, auto-active every session. Change it:
+Default mode = `full`, auto-active via `.agents/rules/ponytail.md`. Configure intensity in rule or prompt:
+- `lite`: gentle nudge to standard library & simple code.
+- `full`: (default) 7-rung minimalist ladder, strictly no over-engineering.
+- `ultra`: ruthless brevity and zero speculative abstractions.
 
-**Environment variable** (highest priority):
-```bash
-export PONYTAIL_DEFAULT_MODE=ultra
-```
+Resolution: prompt directive > rule configuration > `full`.
 
-**Config file** (`~/.config/ponytail/config.json`, Windows: `%APPDATA%\ponytail\config.json`):
-```json
-{ "defaultMode": "lite" }
-```
+## Management
 
-Set `"off"` to disable auto-activation on session start, activate manually
-with `/ponytail` when wanted.
-
-Resolution: env var > config file > `full`.
-
-## Update
-
-Enable auto-update once: open `/plugin`, go to Marketplaces, pick ponytail, Enable auto-update. Claude Code then pulls new versions at startup (run `/reload-plugins` when it prompts). Manual refresh: `/plugin marketplace update ponytail` then `/reload-plugins`.
-
-If `/plugin` is not recognized, your Claude Code is out of date. Update it (`npm install -g @anthropic-ai/claude-code@latest`, or `brew upgrade claude-code`) and restart. Other hosts use their own update flow.
+Skills are maintained within your workspace in [`.agents/skills/`](file:///D:/Project/antigravity-agents/.agents/skills). Antigravity automatically discovers and applies workspace skills and rules.
 
 ## More
 

@@ -1,14 +1,14 @@
 {
-  "pre-command-guard": {
-    "enabled": false,
+  "git-guardrails": {
+    "enabled": true,
     "PreToolUse": [
       {
         "matcher": "run_command",
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -Command \"Write-Output '{\"decision\": \"allow\"}'\"",
-            "timeout": 10
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File hooks/block-dangerous-git.ps1",
+            "timeout": 5
           }
         ]
       }
