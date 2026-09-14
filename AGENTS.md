@@ -81,7 +81,7 @@ Do NOT wait for the user to invoke slash commands. Match user intent directly to
 Antigravity operates with specific native tools. Never hallucinate Claude or non-existent tools:
 
 - **Reading Files & Skills**: Use `view_file` (with `StartLine` and `EndLine` for slices).
-  - Inspect `SKILL.md` directly via `view_file` on `[<name>](file:///D:/Project/antigravity-agents/.agents/skills/<name>/SKILL.md)`.
+  - Inspect `SKILL.md` directly via `view_file` (e.g., [.agents/skills/ask-matt/SKILL.md](file:///D:/Project/antigravity-agents/.agents/skills/ask-matt/SKILL.md)).
 - **Editing Files**: Use `replace_file_content` for targeted single contiguous blocks.
   - Never rewrite entire files if only editing a localized section.
 - **Creating Files**: Use `write_to_file` only for brand new files. Set `Overwrite: true` only when intentionally replacing.
@@ -103,7 +103,7 @@ Antigravity operates with specific native tools. Never hallucinate Claude or non
   - Use `;` to chain commands (e.g., `git add . ; git commit -m "feat: message"`).
 - **Path Formatting**:
   - Always quote paths containing spaces or special characters.
-  - Forward slashes are preferred in markdown links: `file:///D:/Project/antigravity-agents/...`.
+  - Forward slashes are preferred in markdown links (e.g., `file:///D:/Project/antigravity-agents/AGENTS.md`).
 - **Safety**:
   - Never execute destructive commands (`rmdir /s`, `Remove-Item -Recurse` without explicit scope, `git reset --hard`, `git push --force`) without user consent.
 
