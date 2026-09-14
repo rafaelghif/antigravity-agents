@@ -16,7 +16,7 @@ const packageRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
-const VERSION = '5.0.0';
+const VERSION = '5.0.1';
 
 function showHelp() {
   console.log(`

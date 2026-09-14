@@ -8,9 +8,9 @@ import os from 'node:os';
 const rootDir = path.resolve('.');
 const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
 
-test('CLI --version prints v5.0.0', () => {
+test('CLI --version prints v5.0.1', () => {
   const output = execSync(`node "${cliPath}" --version`, { encoding: 'utf-8' });
-  assert.match(output, /@rafaelghif\/aac-core v5\.0\.0/);
+  assert.match(output, /@rafaelghif\/aac-core v5\.0\.1/);
 });
 
 test('CLI --help prints usage banner', () => {
