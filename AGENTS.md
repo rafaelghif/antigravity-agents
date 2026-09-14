@@ -40,7 +40,7 @@ When resolving behavior, strictly follow this precedence order:
    - [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
    - [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
 3. **Lifecycle Hooks**: [.agents/hooks.json](file:///D:/Project/antigravity-agents/.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
-4. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers).
+4. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.example.json)).
 5. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)):
    - Progressive disclosure: inspect `SKILL.md` via `view_file` only when a task matches.
 

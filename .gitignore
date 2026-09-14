@@ -3,6 +3,19 @@
 *.log
 *.tmp
 
+# Credentials, Secrets & Tokens (MCP, PATs, local environment)
+.agents/mcp_config.json
+!.agents/mcp_config.example.json
+.env
+.env.*
+*.local
+*.local.*
+*.pat
+*.token
+*.key
+*.pem
+credentials*.json
+
 # OS generated files
 Thumbs.db
 ehthumbs.db
