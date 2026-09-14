@@ -1,8 +1,9 @@
 {
   "name": "antigravity-agents",
   "version": "5.0.0",
-  "description": "The Production-Grade, Autonomous Engineering Framework for Google Antigravity",
+  "description": "Autonomous engineering framework for Google Antigravity",
   "keywords": [
+    "aac",
     "antigravity",
     "google-antigravity",
     "agentic-ai",
@@ -22,7 +23,8 @@
   "type": "module",
   "main": "bin/cli.mjs",
   "bin": {
-    "antigravity-agents": "./bin/cli.mjs"
+    "antigravity-agents": "./bin/cli.mjs",
+    "aac": "./bin/cli.mjs"
   },
   "scripts": {
     "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs",

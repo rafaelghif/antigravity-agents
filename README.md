@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="Antigravity Agents Banner" width="100%" />
+<img src="assets/banner.png" alt="AAC (Antigravity Agent Core) Banner" width="100%" />
 
-# Antigravity Agents
+# AAC (Antigravity Agent Core)
 
-**Production-grade, autonomous engineering framework for Google Antigravity.**  
+**Minimalist autonomous engineering framework for Google Antigravity.**  
 *Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
 
 <p align="center">
@@ -31,7 +31,7 @@
 
 ## ⚡ Overview
 
-**Antigravity Agents v5** is a full-featured autonomous development framework purpose-built for the **Google Antigravity Customization Architecture**. It provides senior-level pair programming, autonomous multi-agent task execution, and progressive context disclosure without token waste or hallucinated tooling.
+**AAC (Antigravity Agent Core)** is a minimalist autonomous engineering framework built for the **Google Antigravity Customization Architecture**. It provides focused pair programming, autonomous multi-agent task execution, and progressive context disclosure without token waste or hallucinated tooling.
 
 <table>
   <tr>
@@ -54,15 +54,16 @@
 
 ## ⚡ Quick Start (Multi-Platform)
 
-Install Antigravity Agents into **any existing project** (Python, Go, Rust, Node, Java, PHP, C++) with a single command:
+Install AAC into **any existing project** (Python, Go, Rust, Node, Java, PHP, C++) with a single command:
 
 ### Option 1: Universal NPX (Any OS with Node.js)
 ```bash
-# Execute directly from GitHub:
+# Directly from GitHub:
 npx github:rafaelghif/antigravity-agents init
 
-# Or via npm registry:
-npx antigravity-agents init
+# Or via npm:
+npx aac init
+# (or: npx antigravity-agents init)
 ```
 
 ### Option 2: Standalone Windows PowerShell (Zero Node.js Prerequisite)
@@ -238,7 +239,7 @@ Skills are loaded into Antigravity via **progressive disclosure**: only names an
 
 ## 🧠 5-Tier Memory Management
 
-To maintain crisp context without attention degradation or token bloat, Antigravity Agents partitions memory across five distinct tiers:
+To maintain crisp context without attention degradation or token bloat, AAC partitions memory across five distinct tiers:
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -264,7 +265,7 @@ To maintain crisp context without attention degradation or token bloat, Antigrav
 
 ## 🛡️ Lifecycle Hooks & Security
 
-Antigravity Agents integrates with the native Antigravity lifecycle hook engine configured in `.agents/hooks.json`:
+AAC integrates with the native Antigravity lifecycle hook engine configured in `.agents/hooks.json`:
 
 ### 1. Git Guardrails (`PreToolUse`)
 Blocks destructive git commands before `run_command` executes:
@@ -297,7 +298,7 @@ Prevents terminating an agent session if automated tests fail:
 
 ## 🔌 Model Context Protocol (MCP)
 
-Antigravity Agents natively supports workspace-scoped MCP servers with credential sandboxing.
+AAC natively supports workspace-scoped MCP servers with credential sandboxing.
 
 Copy `.agents/mcp_config.example.json` to `.agents/mcp_config.json` (gitignored):
 

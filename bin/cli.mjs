@@ -20,10 +20,11 @@ const VERSION = '5.0.0';
 
 function showHelp() {
   console.log(`
-🚀 Antigravity Agents CLI (v${VERSION})
-The Production-Grade Autonomous Engineering Framework for Google Antigravity
+🚀 AAC - Antigravity Agent Core CLI (v${VERSION})
+Autonomous engineering framework for Google Antigravity
 
 USAGE:
+  npx aac <command> [options]
   npx antigravity-agents <command> [options]
 
 COMMANDS:
@@ -43,7 +44,7 @@ OPTIONS:
 function runInit() {
   const targetDir = process.cwd();
   const force = args.includes('--force');
-  console.log(`\n🚀 Initializing Antigravity Agents (v${VERSION}) in:\n   ${targetDir}\n`);
+  console.log(`\n🚀 Initializing AAC (Antigravity Agent Core v${VERSION}) in:\n   ${targetDir}\n`);
 
   if (targetDir === packageRoot) {
     console.log('ℹ️ Current directory is the framework source repository itself.');
