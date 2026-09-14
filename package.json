@@ -1,7 +1,10 @@
 {
-  "name": "antigravity-agents-core",
+  "name": "@rafaelghif/aac",
   "version": "5.0.0",
   "description": "Autonomous engineering framework for Google Antigravity",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "aac",
     "antigravity",
@@ -24,9 +27,9 @@
   "type": "module",
   "main": "bin/cli.mjs",
   "bin": {
-    "antigravity-agents-core": "./bin/cli.mjs",
     "aac": "./bin/cli.mjs",
-    "antigravity-agents": "./bin/cli.mjs"
+    "@rafaelghif/aac": "./bin/cli.mjs",
+    "antigravity-agents-core": "./bin/cli.mjs"
   },
   "scripts": {
     "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs",

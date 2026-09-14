@@ -58,11 +58,11 @@ Install AAC into **any existing project** (Python, Go, Rust, Node, Java, PHP, C+
 
 ### Option 1: Universal NPX (Any OS with Node.js)
 ```bash
-# Directly from GitHub:
-npx github:rafaelghif/antigravity-agents-core init
+# Via npm registry:
+npx @rafaelghif/aac init
 
-# Or via npm (once published):
-npx antigravity-agents-core init
+# Or directly from GitHub:
+npx github:rafaelghif/antigravity-agents-core init
 ```
 
 ### Option 2: Standalone Windows PowerShell (Zero Node.js Prerequisite)

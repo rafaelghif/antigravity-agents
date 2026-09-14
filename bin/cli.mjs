@@ -24,8 +24,8 @@ function showHelp() {
 Autonomous engineering framework for Google Antigravity
 
 USAGE:
-  npx aac <command> [options]
-  npx antigravity-agents <command> [options]
+  npx @rafaelghif/aac <command> [options]
+  (or: npx github:rafaelghif/antigravity-agents-core <command> [options])
 
 COMMANDS:
   init          Scaffold Antigravity workspace (.agents/, AGENTS.md, CONTEXT.md) into current directory
@@ -314,7 +314,7 @@ switch (command) {
   case 'version':
   case '-v':
   case '--version':
-    console.log(`antigravity-agents v${VERSION}`);
+    console.log(`@rafaelghif/aac v${VERSION}`);
     break;
   case 'help':
   case '-h':
