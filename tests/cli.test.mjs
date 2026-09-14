@@ -10,13 +10,13 @@ const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
 
 test('CLI --version prints v5.0.0', () => {
   const output = execSync(`node "${cliPath}" --version`, { encoding: 'utf-8' });
-  assert.match(output, /@rafaelghif\/aac v5\.0\.0/);
+  assert.match(output, /aac-core v5\.0\.0/);
 });
 
 test('CLI --help prints usage banner', () => {
   const output = execSync(`node "${cliPath}" --help`, { encoding: 'utf-8' });
   assert.match(output, /USAGE:/);
-  assert.match(output, /npx @rafaelghif\/aac <command>/);
+  assert.match(output, /npx aac-core <command>/);
   assert.match(output, /init/);
   assert.match(output, /audit/);
   assert.match(output, /doctor/);
