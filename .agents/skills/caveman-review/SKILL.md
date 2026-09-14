@@ -2,7 +2,7 @@
 name: caveman-review
 description: >
   Compressed code review - one line per finding with location, problem and fix.
-  Use for /caveman-review, "review this PR", or "review the diff".
+  Use when requested to review PR, review diff, or /caveman-review.
 ---
 
 Write code review comments terse and actionable. One line per finding. Location, problem, fix. No throat-clearing.

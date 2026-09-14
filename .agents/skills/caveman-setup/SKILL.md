@@ -2,7 +2,7 @@
 name: caveman-setup
 description: >
   Wire a repository through the Caveman Cloud gateway so every LLM request is
-  measured, with no behavior change. Use for "set up caveman" or adding LLM
+  measured, with no behavior change. Use when asked to "set up caveman" or add LLM
   spend observability.
 ---
 
