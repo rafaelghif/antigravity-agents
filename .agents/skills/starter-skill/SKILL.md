@@ -7,31 +7,31 @@ description: >-
 
 # Starter Skill Template
 
-Dokumen ini adalah contoh implementasi resmi Antigravity Skill. Skill berfungsi sebagai runbook atau SOP berorientasi langkah (step-by-step procedure) yang hanya dibaca secara mendalam oleh model ketika relevan (*Progressive Disclosure*).
+This document provides a reference implementation of a Google Antigravity Skill. Skills serve as step-by-step procedural runbooks loaded by the agent on demand (*Progressive Disclosure*).
 
 ---
 
-## Prosedur Kerja
+## Operating Procedure
 
-1. **Persiapan & Analisis Kebutuhan**:
-   - Telusuri konteks file terkait sebelum membuat modifikasi.
-   - Periksa apakah ada dependensi eksternal yang dibutuhkan.
+1. **Context & Requirement Analysis**:
+   - Inspect related files and existing patterns before making changes.
+   - Check whether external dependencies or native alternatives apply.
 
-2. **Eksekusi**:
-   - Jalankan script atau perintah yang diperlukan.
-   - Buat file atau edit kode sesuai spesifikasi.
+2. **Execution**:
+   - Execute necessary commands or helper scripts.
+   - Make precise, targeted file modifications following workspace guidelines.
 
-3. **Verifikasi & Testing**:
-   - Jalankan linter atau test suite untuk memastikan tidak ada regresi:
+3. **Verification & Testing**:
+   - Run linter, compiler, or test suites to ensure zero regressions:
      ```powershell
-     # Contoh: verifikasi status git atau eksekusi test
+     # Example: check git status or run test commands
      git status
      ```
 
 ---
 
-## Praktik Terbaik (Skill Best Practices)
+## Skill Authoring Best Practices
 
-- **Third-Person Description**: Deskripsi pada frontmatter wajib menggunakan sudut pandang orang ketiga dan menjelaskan secara spesifik *kapan* skill ini harus dipicu.
-- **Progressive Disclosure**: Jangan memuat seluruh dokumentasi tebal di `SKILL.md`. Taruh file referensi panjang di folder `references/` dan buat link ke file tersebut.
-- **Executable Helpers**: Taruh script bantuan di folder `scripts/`.
+- **Third-Person Description**: The YAML frontmatter description must be written in third-person and clearly state *what* the skill does and *when* the agent should invoke it.
+- **Progressive Disclosure**: Keep `SKILL.md` concise. Place comprehensive manuals or large reference files into a `references/` subdirectory and link to them.
+- **Executable Helpers**: Place reusable automation or helper scripts in a `scripts/` subdirectory.

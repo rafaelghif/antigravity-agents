@@ -1,23 +1,23 @@
 # Git Workflow & Commit Guidelines
 
-Aturan ini memandu standarisasi riwayat git dan integrasi kode di repositori ini.
+These guidelines standardize git history and branch integration in this repository.
 
 ---
 
 ## 1. Conventional Commits
 
-Gunakan format commit pesan standar:
-- `feat: <deskripsi singkat>`: Fitur baru
-- `fix: <deskripsi singkat>`: Perbaikan bug
-- `docs: <deskripsi singkat>`: Perubahan dokumentasi
-- `refactor: <deskripsi singkat>`: Restrukturisasi kode tanpa mengubah fungsionalitas
-- `chore: <deskripsi singkat>`: Tugas maintenance, build script, konfigurasi
-- `test: <deskripsi singkat>`: Penambahan atau perbaikan unit/integration tests
+Use standard conventional commit prefixes:
+- `feat: <description>`: New features or capabilities
+- `fix: <description>`: Bug fixes and defect corrections
+- `docs: <description>`: Documentation additions or updates
+- `refactor: <description>`: Code restructuring without changing external behavior
+- `chore: <description>`: Maintenance tasks, build scripts, configuration changes
+- `test: <description>`: Unit or integration test additions and updates
 
 ---
 
 ## 2. Atomic Commits
 
-- Buat commit yang bersifat atomik (satu commit menyelesaikan satu konteks logika).
-- Hindari mencampuradukkan perubahan format (beautify) dengan perubahan logika bisnis dalam satu commit yang sama.
-- Pastikan repository selalu dalam keadaan dapat di-build dan dites pada setiap commit.
+- Ensure each commit represents a single logical unit of change.
+- Do not mix cosmetic reformatting with functional logic updates in the same commit.
+- Keep the repository in a compilable, testable state across all commits.

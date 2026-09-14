@@ -1,26 +1,27 @@
 # Coding Standards & Quality Guidelines
 
-Aturan ini berlaku saat melakukan penulisan, modifikasi, atau refactoring kode di repositori ini.
+These rules apply when writing, modifying, or refactoring code in this repository.
 
 ---
 
-## 1. Kualitas Kode (Code Quality)
+## 1. Code Quality & Simplicity
 
-- **Simplicity & Readability**: Kode harus mudah dipahami, memiliki penamaan variabel/fungsi yang jelas dan bermakna (intention-revealing).
-- **Single Responsibility Principle (SRP)**: Setiap fungsi atau modul harus memiliki satu tanggung jawab utama.
-- **Fail Fast & Graceful Error Handling**: Validasi input di awal fungsi dan tangani error dengan jelas tanpa membiarkan exception tersembunyi (*swallowing exceptions*).
-
----
-
-## 2. Integritas Kode & Dokumentasi
-
-- **Preserve Existing Docs**: Jangan menghapus komentar fungsional, lisensi, atau docstrings yang sudah ada.
-- **Self-Documenting Code**: Utamakan kode yang mengekspresikan maksudnya sendiri; tambahkan komentar pada logika kompleks, edge cases, atau *non-obvious rationale*.
+- **Simplicity & Readability**: Code must be clear and self-documenting, with intention-revealing naming for variables and functions.
+- **Single Responsibility Principle (SRP)**: Each function, module, or class must focus on a single responsibility.
+- **Fail Fast & Graceful Handling**: Validate inputs at trust boundaries early and handle errors explicitly. Never swallow exceptions silently.
+- **Standard Library First**: Utilize standard library features before reaching for third-party packages or complex abstractions.
 
 ---
 
-## 3. Tool Calling & File Modifications
+## 2. Documentation Integrity
 
-- Saat melakukan edit file, utamakan penggantian blok terkecil yang presisi (*targeted replacement*).
-- Hindari penulisan ulang seluruh file jika perubahan hanya menyangkut beberapa baris.
-- Pastikan indentation, trailing comma, dan formatting konsisten dengan style yang sudah ada di file terkait.
+- **Preserve Existing Documentation**: Do not remove functional comments, license banners, or docstrings that remain relevant.
+- **Targeted Commentary**: Add comments only for non-obvious rationale, complex domain logic, or edge-case handling.
+
+---
+
+## 3. Tool Usage & File Modifications
+
+- When editing existing files, use targeted replacements on the smallest contiguous code blocks.
+- Avoid full-file rewrites when modifying only a few lines.
+- Preserve existing formatting, indentation style, and quote conventions.
