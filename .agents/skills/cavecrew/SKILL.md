@@ -1,9 +1,6 @@
 ---
 name: cavecrew
-description: >
-  When to delegate to `cavecrew-investigator` (locate code via research subagent), `cavecrew-builder`
-  (1-2 file edit via self subagent) or `cavecrew-reviewer` (diff review via research subagent).
-  Their output is compressed to save main context window.
+description: Guides delegation to specialized subagents (investigator, builder, reviewer) with compressed output contracts to save main context window. Use when delegating tasks to subagents or when compressed agent outputs are needed.
 ---
 
 # Cavecrew: Compressed Subagent Presets for Antigravity
