@@ -31,23 +31,31 @@
 
 ---
 
-## ⚡ Quick Start via `npx`
+## ⚡ Installation & Quick Start (Multi-Platform)
 
-Scaffold, audit, or inspect any repository with a single command:
+Install Antigravity Agents into **any repository** (Python, Go, Rust, Node, PHP, etc.) with **zero `package.json` pollution**:
 
+### Option A: Universal `npx` (Works globally on any machine with Node.js)
 ```bash
-# Scaffold Antigravity (.agents/, AGENTS.md, CONTEXT.md) into any repo
+# Directly from GitHub repository (no cloning needed):
+npx github:rafaelghif/antigravity-agents init
+
+# Or via npm registry:
 npx antigravity-agents init
-
-# Run diagnostic environment health checks
-npx antigravity-agents doctor
-
-# Audit current workspace against Antigravity best practices
-npx antigravity-agents audit
-
-# Browse all 64 available progressive disclosure skills
-npx antigravity-agents list
 ```
+
+### Option B: Standalone Windows PowerShell (Zero Node.js required)
+```powershell
+irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
+```
+
+### Option C: Standalone Linux / macOS (Zero Node.js required)
+```bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+```
+
+> [!IMPORTANT]
+> **Zero Package.json Pollution Guarantee**: The installer will **NEVER** create, overwrite, or mutate `package.json` in your target project. It cleanly scaffolds only `.agents/`, `AGENTS.md`, and `CONTEXT.md`, and safely appends ignore patterns to your `.gitignore`.
 
 ## 🏗️ Architecture Overview
 

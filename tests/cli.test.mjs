@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
 
 const rootDir = path.resolve('.');
 const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
@@ -32,4 +34,16 @@ test('CLI doctor performs environment health checks', () => {
   assert.match(output, /Workspace Scope/);
   assert.match(output, /Skills Integrity/);
   assert.match(output, /Hooks Integrity/);
+});
+
+test('CLI init never creates or overwrites package.json in target directory', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'antigravity-test-'));
+  try {
+    execSync(`node "${cliPath}" init`, { cwd: tempDir, encoding: 'utf-8' });
+    assert.ok(fs.existsSync(path.join(tempDir, '.agents')), '.agents/ must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'AGENTS.md')), 'AGENTS.md must be scaffolded');
+    assert.ok(!fs.existsSync(path.join(tempDir, 'package.json')), 'package.json MUST NEVER BE CREATED in target project');
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });
