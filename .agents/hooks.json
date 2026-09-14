@@ -13,5 +13,15 @@
         ]
       }
     ]
+  },
+  "quality-gate": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File hooks/verify-on-stop.ps1",
+        "timeout": 15
+      }
+    ]
   }
 }

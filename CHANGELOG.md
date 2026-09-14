@@ -12,18 +12,20 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 
 ### Added
 - **Gemini 3.8 Flash (High) Pairing Directives**: Optimized root [`AGENTS.md`](file:///D:/Project/antigravity-agents/AGENTS.md) adhering to the **Caveman Principle** (terse, fluff-free technical precision) and **Ponytail Principle** (7-rung minimalist code ladder).
-- **Progressive Disclosure Skills**: Integrated over 60+ modular skills in `.agents/skills/` across testing, architecture, planning, code review, and token reduction:
+- **Progressive Disclosure Skills**: Integrated all 64 modular skills in `.agents/skills/` across testing, architecture, planning, code review, and token reduction:
   - `ponytail` suite (minimalist code ladder, audit, debt, review).
   - `caveman` suite (ultra-compact token conservation and subagent output).
   - `mattpocock` suite (`ask-matt`, `to-spec`, `to-tickets`, `tdd`, `code-review`, `wayfinder`, `triage`, `grilling`, `domain-modeling`).
-- **Antigravity Native Lifecycle Hooks**: Configured in `.agents/hooks.json` supporting `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, and `Stop` events with protojson camelCase contracts.
-- **Git Guardrails Hook**: Intercepts `run_command` in Antigravity to block destructive git operations (`push`, `reset --hard`, `clean -f`, `branch -D`) using native PowerShell ([`block-dangerous-git.ps1`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.ps1)) and Node.js ([`block-dangerous-git.js`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.js)).
+- **5-Tier Memory Architecture & Cross-Session Protocol**: Implemented `memory-management.md` rule (`trigger: always_on`), root `CONTEXT.md` living domain glossary, `docs/adr/0001-antigravity-5-tier-memory-system.md`, and standardized session handoff templates with `.scratch/` sandboxing.
+- **Antigravity Native Lifecycle Hooks**: Configured in `.agents/hooks.json` supporting `PreToolUse` (git guardrails) and `Stop` (`quality-gate` running `verify-on-stop.ps1` to prevent exit with failing tests).
+- **Git Guardrails Hook**: Intercepts `run_command` in Antigravity to block destructive git operations (`push`, `reset --hard`, `clean -f`, `branch -D`) using native PowerShell ([`block-dangerous-git.ps1`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.ps1)).
 - **Autonomous Multi-Agent Subagent Graphs**: Leverages `invoke_subagent` with isolated workspace branches (`Workspace: "branch"` or `"share"`), enabling concurrent implementation of spec task graphs.
 - **Multi-VCS Model Context Protocol (MCP)**: Native workspace configuration for **Gitea MCP** (stdio) and **GitHub Copilot MCP** (remote SSE) in `.agents/mcp_config.json`.
 - **Workspace Plugins Architecture**: Implemented `.agents/plugins/workspace-integrations/` packaging workspace-scoped MCP servers and sidecars, registered via explicit `.agents/plugins.json` and `.agents/skills.json`.
 - **Background Sidecars Engine**: Integrated persistent background runner architecture (`sidecar.json`) with an automated repository health and branch hygiene monitor (`repo-health`).
-- **Rule Progressive Disclosure Triggers**: Configured `trigger: always_on` across modular rules (`caveman.md`, `coding-standards.md`, `git-workflow.md`, `ponytail.md`).
-- **Credential Quarantine**: Added comprehensive `.gitignore` sandboxing for `.agents/mcp_config.json`, `.agents/plugins/**/mcp_config.json`, `.env`, tokens, keys, and PATs, alongside sanitized example templates.
+- **Complete 64-Skill Compliance Audit**: Verified all 64 skills against 8 Antigravity operational dimensions across 7 task batches, tracked in `docs/audit-checklist-64-skills.md` (512 checks passing, 100% compliant).
+- **Rule Progressive Disclosure Triggers**: Configured `trigger: always_on` across modular rules (`caveman.md`, `coding-standards.md`, `git-workflow.md`, `ponytail.md`, `memory-management.md`).
+- **Credential Quarantine**: Added comprehensive `.gitignore` sandboxing for `.agents/mcp_config.json`, `.agents/plugins/**/mcp_config.json`, `.env`, `.scratch/*`, tokens, keys, and PATs, alongside sanitized example templates.
 - **Windows PowerShell 5.1+ Parity**: Fully tested for Windows PowerShell command execution (strictly replacing `&&` with `;`).
 
 ### Changed
