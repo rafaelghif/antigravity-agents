@@ -5,6 +5,17 @@
       "headers": {
         "Authorization": "Bearer YOUR_GITHUB_PAT"
       }
+    },
+    "gitea": {
+      "command": "gitea-mcp",
+      "args": [
+        "-t",
+        "stdio"
+      ],
+      "env": {
+        "GITEA_HOST": "https://gitea.com",
+        "GITEA_ACCESS_TOKEN": "YOUR_GITEA_PAT"
+      }
     }
   }
 }
