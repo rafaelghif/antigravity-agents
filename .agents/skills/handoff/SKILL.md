@@ -5,9 +5,9 @@ description: >-
   Use when the user asks to create a handoff, prepare context for a new session, or summarize progress for another agent.
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+Write a handoff document summarizing the current conversation so a fresh agent can continue the work seamlessly. Save it as an artifact in the conversation artifact directory or `.scratch/handoff.md`.
 
-Include a "suggested skills" section in the document, naming which skills the next agent should call the Skill tool for.
+Include a "suggested skills" section in the document, naming which skills the next agent should inspect via `view_file`.
 
 Do not duplicate content already captured in other artifacts (specs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
 

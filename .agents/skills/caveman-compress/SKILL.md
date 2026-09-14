@@ -1,7 +1,7 @@
 ---
 name: caveman-compress
 description: >
-  Compress a memory file such as CLAUDE.md or a todo list into caveman format
+  Compress a memory file such as AGENTS.md, rules, or a todo list into caveman format
   to save input tokens, keeping a readable backup. Trigger: /caveman-compress.
 ---
 
@@ -9,7 +9,7 @@ description: >
 
 ## Purpose
 
-Compress natural language files (CLAUDE.md, todos, preferences) into caveman-speak to reduce input tokens. Compressed version overwrites original. Human-readable backup saved as `<filename>.original.md`, but NOT beside the source file — it lives in an out-of-tree data dir (`$XDG_DATA_HOME/caveman-compress/backups/<parent-dir-name>/`, or `%LOCALAPPDATA%\caveman-compress\backups\<parent-dir-name>\` on Windows) so skill auto-loaders don't re-ingest it as a live file.
+Compress natural language files (AGENTS.md, rules, todos, preferences) into caveman-speak to reduce input tokens. Compressed version overwrites original. Human-readable backup saved as `<filename>.original.md`, but NOT beside the source file — it lives in an out-of-tree data dir (`$XDG_DATA_HOME/caveman-compress/backups/<parent-dir-name>/`, or `%LOCALAPPDATA%\caveman-compress\backups\<parent-dir-name>\` on Windows) so skill auto-loaders don't re-ingest it as a live file.
 
 ## Trigger
 
@@ -21,13 +21,13 @@ Compress natural language files (CLAUDE.md, todos, preferences) into caveman-spe
 
 2. From the directory containing this SKILL.md, run:
 
-python3 -m scripts <absolute_filepath>
+python -m scripts <absolute_filepath>
 
 3. The CLI will:
 - detect file type (no tokens)
-- call Claude to compress
+- compress content using caveman rules
 - validate output (no tokens)
-- if errors: cherry-pick fix with Claude (targeted fixes only, no recompression)
+- if errors: cherry-pick fix with targeted adjustments
 - retry up to 2 times
 - if still failing after 2 retries: report error to user, leave original file untouched
 

@@ -55,7 +55,28 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 - **Middle Man**: a class or function that mostly just delegates onward. → cut it, call the real target direct.
 - **Refused Bequest**: a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
-### 4. Spawn both sub-agents in parallel
+### 4. Spawn both sub-agents in parallel via `invoke_subagent`
+
+Dispatch both reviews concurrently in a single Antigravity `invoke_subagent` tool call:
+
+```json
+invoke_subagent({
+  "Subagents": [
+    {
+      "Role": "Standards Reviewer",
+      "TypeName": "research",
+      "Model": "flash",
+      "Prompt": "<Standards sub-agent prompt below>"
+    },
+    {
+      "Role": "Spec Reviewer",
+      "TypeName": "research",
+      "Model": "flash",
+      "Prompt": "<Spec sub-agent prompt below>"
+    }
+  ]
+})
+```
 
 **Standards sub-agent prompt** should include:
 

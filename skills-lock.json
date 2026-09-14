@@ -91,10 +91,10 @@
       "skillPath": "skills/caveman-stats/SKILL.md",
       "computedHash": "5aba475d0e43a26d7448e6537902e3137beca3024663dfdecf1009cbe16bc299"
     },
-    "claude-handoff": {
+    "subagent-handoff": {
       "source": "mattpocock/skills",
       "sourceType": "github",
-      "skillPath": "skills/in-progress/claude-handoff/SKILL.md",
+      "skillPath": "skills/in-progress/subagent-handoff/SKILL.md",
       "computedHash": "c0fa5d0eede556bc7809c8461a25ec2c7db5726f338970458aa7bbf702b8ea8c"
     },
     "code-review": {
@@ -121,10 +121,10 @@
       "skillPath": "skills/engineering/domain-modeling/SKILL.md",
       "computedHash": "336547f3ff285e822fc70b69b170dc58bceef9c8ed5fad18de0046287d6be837"
     },
-    "git-guardrails-claude-code": {
+    "git-guardrails": {
       "source": "mattpocock/skills",
       "sourceType": "github",
-      "skillPath": "skills/misc/git-guardrails-claude-code/SKILL.md",
+      "skillPath": "skills/misc/git-guardrails/SKILL.md",
       "computedHash": "fa22f1aa2708d95cc3149640f33e085381b184a0322609930f7971c1dca11835"
     },
     "grill-me": {
