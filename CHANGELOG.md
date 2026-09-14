@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.2] - 2026-09-14
+
+### Fixed
+- **Installer Completeness**: Ensured `docs/` (ADRs, tracker configs, templates), `CLAUDE.md` (`@AGENTS.md`), and `skills-lock.json` are properly included in the NPM distribution manifest (`package.json` `"files"`) and copied by all installers (`npx init`, `install.ps1`, `install.sh`).
+- **Source Directory Init Guard**: Fixed `bin/cli.mjs init` throwing when run inside the framework source repository itself.
+
 ## [5.0.1] - 2026-09-14
 
 ### Changed

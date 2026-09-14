@@ -16,27 +16,26 @@ const packageRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
-const VERSION = '5.0.1';
+const VERSION = '5.0.2';
 
 function showHelp() {
   console.log(`
-🚀 AAC - Antigravity Agent Core CLI (v${VERSION})
-Autonomous engineering framework for Google Antigravity
+AAC (Antigravity Agent Core) CLI v${VERSION}
+Minimalist autonomous engineering framework for Google Antigravity
 
 USAGE:
   npx @rafaelghif/aac-core <command> [options]
   (or: npx github:rafaelghif/antigravity-agents-core <command> [options])
 
 COMMANDS:
-  init          Scaffold Antigravity workspace (.agents/, AGENTS.md, CONTEXT.md) into current directory
-  audit         Deeply audit current workspace against Antigravity best practices (8 dimensions)
-  doctor        Perform environment and workspace diagnostic health checks
-  list          Display all 64 skills categorized by task batch
-  version, -v   Show CLI version
-  help, -h      Display this help menu
+  init          Scaffold AAC into current workspace (never touches package.json)
+  audit         Audit workspace skills, rules, hooks, and integrity
+  doctor        Diagnose environment, runtime, and configuration health
+  list          List all available skills with triggers and descriptions
+  help          Show this help banner
 
 OPTIONS:
-  --force       Overwrite existing files during init
+  --force       Overwrite existing configuration files
   --json        Output results in JSON format
 `);
 }
@@ -46,8 +45,9 @@ function runInit() {
   const force = args.includes('--force');
   console.log(`\n🚀 Initializing AAC (Antigravity Agent Core v${VERSION}) in:\n   ${targetDir}\n`);
 
-  if (targetDir === packageRoot) {
-    console.log('ℹ️ Current directory is the framework source repository itself.');
+  if (path.resolve(targetDir) === path.resolve(packageRoot)) {
+    console.log('ℹ️ Current directory is the framework source repository itself (nothing to scaffold).');
+    return;
   }
 
   // 1. Copy .agents directory
@@ -59,8 +59,17 @@ function runInit() {
     fs.cpSync(sourceAgents, targetAgents, { recursive: true, force });
   }
 
-  // 2. Copy root files
-  const rootFiles = ['AGENTS.md', 'GEMINI.md', 'CONTEXT.md'];
+  // 2. Copy docs directory (ADRs, agents domain/tracker configs, templates)
+  const sourceDocs = path.join(packageRoot, 'docs');
+  const targetDocs = path.join(targetDir, 'docs');
+
+  if (fs.existsSync(sourceDocs)) {
+    console.log('📚 Scaffolding docs/ directory (ADRs, tracker configs, templates)...');
+    fs.cpSync(sourceDocs, targetDocs, { recursive: true, force });
+  }
+
+  // 3. Copy root files
+  const rootFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'CONTEXT.md', 'skills-lock.json'];
   for (const rf of rootFiles) {
     const srcFile = path.join(packageRoot, rf);
     const dstFile = path.join(targetDir, rf);

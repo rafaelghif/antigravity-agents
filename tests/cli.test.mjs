@@ -8,9 +8,9 @@ import os from 'node:os';
 const rootDir = path.resolve('.');
 const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
 
-test('CLI --version prints v5.0.1', () => {
+test('CLI --version prints v5.0.2', () => {
   const output = execSync(`node "${cliPath}" --version`, { encoding: 'utf-8' });
-  assert.match(output, /@rafaelghif\/aac-core v5\.0\.1/);
+  assert.match(output, /@rafaelghif\/aac-core v5\.0\.2/);
 });
 
 test('CLI --help prints usage banner', () => {
@@ -41,7 +41,12 @@ test('CLI init never creates or overwrites package.json in target directory', ()
   try {
     execSync(`node "${cliPath}" init`, { cwd: tempDir, encoding: 'utf-8' });
     assert.ok(fs.existsSync(path.join(tempDir, '.agents')), '.agents/ must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'docs')), 'docs/ must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, 'AGENTS.md')), 'AGENTS.md must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'GEMINI.md')), 'GEMINI.md must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'CLAUDE.md')), 'CLAUDE.md must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'CONTEXT.md')), 'CONTEXT.md must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, 'skills-lock.json')), 'skills-lock.json must be scaffolded');
     assert.ok(!fs.existsSync(path.join(tempDir, 'package.json')), 'package.json MUST NEVER BE CREATED in target project');
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });

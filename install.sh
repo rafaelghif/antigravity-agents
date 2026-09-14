@@ -7,7 +7,7 @@
 set -e
 
 TARGET_DIR="$(pwd)"
-echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.1)..."
+echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.2)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
 TEMP_ZIP="/tmp/aac-main.zip"
@@ -32,8 +32,14 @@ SOURCE_ROOT="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 echo "📦 Copying .agents/ (rules, skills, hooks, plugins)..."
 cp -r "${SOURCE_ROOT}/.agents" "${TARGET_DIR}/"
 
-# 2. Copy root context and directives (NEVER copy package.json)
-for file in AGENTS.md GEMINI.md CONTEXT.md; do
+# 2. Copy docs directory (ADRs, tracker configs, templates)
+if [ -d "${SOURCE_ROOT}/docs" ]; then
+  echo "📚 Copying docs/ (ADRs, agents domain & tracker configs, templates)..."
+  cp -r "${SOURCE_ROOT}/docs" "${TARGET_DIR}/"
+fi
+
+# 3. Copy root context and directives (NEVER copy package.json)
+for file in AGENTS.md GEMINI.md CLAUDE.md CONTEXT.md skills-lock.json; do
   if [ -f "${SOURCE_ROOT}/${file}" ]; then
     if [ ! -f "${TARGET_DIR}/${file}" ]; then
       cp "${SOURCE_ROOT}/${file}" "${TARGET_DIR}/${file}"

@@ -6,7 +6,7 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $targetDir = Get-Location
 
-Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.1)..." -ForegroundColor Cyan
+Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.2)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
 $repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
@@ -28,8 +28,15 @@ try {
     Write-Host "📦 Copying .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow
     Copy-Item -Path (Join-Path $sourceRoot ".agents") -Destination $targetDir -Recurse -Force
 
-    # 2. Copy root context and directives (NEVER COPY package.json)
-    $rootFiles = @("AGENTS.md", "GEMINI.md", "CONTEXT.md")
+    # 2. Copy docs directory (ADRs, tracker configs, templates)
+    $sourceDocs = Join-Path $sourceRoot "docs"
+    if (Test-Path $sourceDocs) {
+        Write-Host "📚 Copying docs/ (ADRs, agents domain & tracker configs, templates)..." -ForegroundColor Yellow
+        Copy-Item -Path $sourceDocs -Destination $targetDir -Recurse -Force
+    }
+
+    # 3. Copy root context and directives (NEVER COPY package.json)
+    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "CONTEXT.md", "skills-lock.json")
     foreach ($file in $rootFiles) {
         $src = Join-Path $sourceRoot $file
         $dst = Join-Path $targetDir $file
