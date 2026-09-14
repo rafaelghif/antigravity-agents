@@ -1,12 +1,12 @@
 # Issue Tracker Configuration
 
-Primary issue tracking configuration for **antigravity-agents**.
+Primary issue tracking configuration for **AAC (Antigravity Agent Core)**.
 
 ## Primary Tracker: GitHub
 
 Issues, specifications, and wayfinder maps are tracked on GitHub via `gh` CLI or GitHub MCP tools.
 
-- **Remote**: `origin` -> `https://github.com/rafaelghif/antigravity-agents.git`
+- **Remote**: `origin` -> `https://github.com/rafaelghif/antigravity-agents-core.git`
 - **Commands**:
   - Create issue: `gh issue create --title "..." --body "..."`
   - Read issue: `gh issue view <number> --comments`

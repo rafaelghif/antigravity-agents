@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Antigravity Agents CLI
+ * AAC (Antigravity Agent Core) CLI
  * The official setup, audit, and management tool for Google Antigravity workspaces.
  */
 
