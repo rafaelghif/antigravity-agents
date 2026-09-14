@@ -1,10 +1,11 @@
 {
-  "name": "antigravity-agents",
+  "name": "antigravity-agents-core",
   "version": "5.0.0",
   "description": "Autonomous engineering framework for Google Antigravity",
   "keywords": [
     "aac",
     "antigravity",
+    "antigravity-agents-core",
     "google-antigravity",
     "agentic-ai",
     "gemini",
@@ -15,16 +16,17 @@
   ],
   "author": "Muhammad Rafael Ghifari <business.rafaelghifari@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/rafaelghif/antigravity-agents",
+  "homepage": "https://github.com/rafaelghif/antigravity-agents-core",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rafaelghif/antigravity-agents.git"
+    "url": "https://github.com/rafaelghif/antigravity-agents-core.git"
   },
   "type": "module",
   "main": "bin/cli.mjs",
   "bin": {
-    "antigravity-agents": "./bin/cli.mjs",
-    "aac": "./bin/cli.mjs"
+    "antigravity-agents-core": "./bin/cli.mjs",
+    "aac": "./bin/cli.mjs",
+    "antigravity-agents": "./bin/cli.mjs"
   },
   "scripts": {
     "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs",

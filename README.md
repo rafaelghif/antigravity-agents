@@ -8,7 +8,7 @@
 *Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
 
 <p align="center">
-  <a href="https://github.com/rafaelghif/antigravity-agents/releases/tag/v5.0.0"><img src="https://img.shields.io/badge/version-5.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.0.0" /></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.0.0"><img src="https://img.shields.io/badge/version-5.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.0.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/optimized_for-Gemini_3.8_Flash-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini 3.8 Flash" /></a>
   <a href="#-autonomous-skills-suite"><img src="https://img.shields.io/badge/skills-64_verified-success.svg?style=for-the-badge" alt="64 Skills" /></a>
@@ -59,21 +59,20 @@ Install AAC into **any existing project** (Python, Go, Rust, Node, Java, PHP, C+
 ### Option 1: Universal NPX (Any OS with Node.js)
 ```bash
 # Directly from GitHub:
-npx github:rafaelghif/antigravity-agents init
+npx github:rafaelghif/antigravity-agents-core init
 
-# Or via npm:
-npx aac init
-# (or: npx antigravity-agents init)
+# Or via npm (once published):
+npx antigravity-agents-core init
 ```
 
 ### Option 2: Standalone Windows PowerShell (Zero Node.js Prerequisite)
 ```powershell
-irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
 ```
 
 ### Option 3: Standalone Linux / macOS (Zero Node.js Prerequisite)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
 ```
 
 > [!IMPORTANT]

@@ -1,17 +1,17 @@
-# Antigravity Agents Installer for Windows PowerShell
+# AAC (Antigravity Agent Core) Installer for Windows PowerShell
 # Usage:
 #   Local:  powershell -ExecutionPolicy Bypass -File install.ps1
-#   Remote: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex
+#   Remote: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $targetDir = Get-Location
 
-Write-Host "`n🚀 Installing Antigravity Agents (v5.0.0)..." -ForegroundColor Cyan
+Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.0)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
-$repoUrl = "https://github.com/rafaelghif/antigravity-agents/archive/refs/heads/main.zip"
-$tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "antigravity-agents-main.zip"
-$tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "antigravity-agents-temp"
+$repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
+$tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-main.zip"
+$tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "aac-temp"
 
 try {
     Write-Host "📥 Downloading framework archive from GitHub..." -ForegroundColor Yellow
@@ -22,7 +22,7 @@ try {
     }
 
     Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-    $sourceRoot = Join-Path $tempExtract "antigravity-agents-main"
+    $sourceRoot = (Get-ChildItem -Directory -Path $tempExtract | Select-Object -First 1).FullName
 
     # 1. Copy .agents directory
     Write-Host "📦 Copying .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow

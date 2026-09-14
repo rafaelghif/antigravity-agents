@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Antigravity Agents Installer for Linux / macOS
+# AAC (Antigravity Agent Core) Installer for Linux / macOS
 # Usage:
 #   Local:  bash install.sh
-#   Remote: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash
+#   Remote: curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
 
 set -e
 
 TARGET_DIR="$(pwd)"
-echo -e "\n🚀 Installing Antigravity Agents (v5.0.0)..."
+echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.0)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
-TEMP_ZIP="/tmp/antigravity-agents-main.zip"
-TEMP_DIR="/tmp/antigravity-agents-temp"
+TEMP_ZIP="/tmp/aac-main.zip"
+TEMP_DIR="/tmp/aac-temp"
 
 cleanup() {
   rm -f "$TEMP_ZIP"
@@ -20,13 +20,13 @@ cleanup() {
 trap cleanup EXIT
 
 echo "📥 Downloading framework archive from GitHub..."
-curl -fsSL "https://github.com/rafaelghif/antigravity-agents/archive/refs/heads/main.zip" -o "$TEMP_ZIP"
+curl -fsSL "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip" -o "$TEMP_ZIP"
 
 rm -rf "$TEMP_DIR"
 mkdir -p "$TEMP_DIR"
 unzip -q "$TEMP_ZIP" -d "$TEMP_DIR"
 
-SOURCE_ROOT="${TEMP_DIR}/antigravity-agents-main"
+SOURCE_ROOT="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 
 # 1. Copy .agents directory
 echo "📦 Copying .agents/ (rules, skills, hooks, plugins)..."

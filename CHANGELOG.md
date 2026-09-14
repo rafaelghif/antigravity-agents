@@ -18,9 +18,9 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
   - `mattpocock` suite (`ask-matt`, `to-spec`, `to-tickets`, `tdd`, `code-review`, `wayfinder`, `triage`, `grilling`, `domain-modeling`).
 - **5-Tier Memory Architecture & Cross-Session Protocol**: Implemented `memory-management.md` rule (`trigger: always_on`), root `CONTEXT.md` living domain glossary, `docs/adr/0001-antigravity-5-tier-memory-system.md`, and standardized session handoff templates with `.scratch/` sandboxing.
 - **Multi-Platform Zero-Pollution Installers**:
-  - Universal NPX CLI ([`bin/cli.mjs`](file:///D:/Project/antigravity-agents/bin/cli.mjs)): `npx github:rafaelghif/antigravity-agents init` or `npx antigravity-agents init`.
-  - Standalone Windows PowerShell installer ([`install.ps1`](file:///D:/Project/antigravity-agents/install.ps1)): `irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex`.
-  - Standalone Linux/macOS installer ([`install.sh`](file:///D:/Project/antigravity-agents/install.sh)): `curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash`.
+  - Universal NPX CLI ([`bin/cli.mjs`](file:///D:/Project/antigravity-agents/bin/cli.mjs)): `npx github:rafaelghif/antigravity-agents-core init` or `npx antigravity-agents-core init`.
+  - Standalone Windows PowerShell installer ([`install.ps1`](file:///D:/Project/antigravity-agents/install.ps1)): `irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex`.
+  - Standalone Linux/macOS installer ([`install.sh`](file:///D:/Project/antigravity-agents/install.sh)): `curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash`.
   - **Zero Package.json Pollution Guarantee**: Installers safely scaffold `.agents/`, `AGENTS.md`, and `CONTEXT.md` without ever writing or overwriting `package.json` in user workspaces (protecting Python, Go, Rust, C++, PHP, and existing Node projects).
 - **Cross-Platform Node.js Lifecycle Hooks & ADR-0002**:
   - Migrated lifecycle hooks in `.agents/hooks.json` to universal Node.js CommonJS scripts ([`block-dangerous-git.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/block-dangerous-git.cjs) and [`verify-on-stop.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.cjs)), documented in [`docs/adr/0002-cross-platform-node-lifecycle-hooks.md`](file:///D:/Project/antigravity-agents/docs/adr/0002-cross-platform-node-lifecycle-hooks.md).
