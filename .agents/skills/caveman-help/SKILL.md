@@ -1,6 +1,6 @@
 ---
 name: caveman-help
-description: Quick-reference card for caveman modes, skills, and commands. Trigger via /caveman-help or "caveman help".
+description: Quick-reference card for caveman modes, skills, and commands. Use when asked for /caveman-help or "caveman help". Trigger: /caveman-help.
 ---
 
 # Caveman Help

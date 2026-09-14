@@ -53,3 +53,22 @@ test('session handoff template exists', () => {
   const templatePath = path.join(rootDir, 'docs', 'templates', 'handoff.template.md');
   assert.ok(fs.existsSync(templatePath), 'handoff.template.md must exist');
 });
+
+test('all 64 skills comply with Antigravity operational criteria', () => {
+  const skillsDir = path.join(rootDir, '.agents', 'skills');
+  const skillFolders = fs.readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+  assert.equal(skillFolders.length, 64, 'Expected exactly 64 skills');
+
+  for (const sf of skillFolders) {
+    const skillFile = path.join(skillsDir, sf, 'SKILL.md');
+    assert.ok(fs.existsSync(skillFile), `Skill ${sf} missing SKILL.md`);
+    const content = fs.readFileSync(skillFile, 'utf-8');
+    assert.match(content, /^---\r?\n[\s\S]*?\r?\n---/, `Skill ${sf} invalid frontmatter`);
+    assert.match(content, new RegExp(`name:\\s*${sf}`), `Skill ${sf} name must match folder`);
+    assert.match(content, /description:\s*[\s\S]*?(?:use when|trigger:)/i, `Skill ${sf} missing trigger`);
+    assert.doesNotMatch(content, /`Skill` tool|"Skill" tool/, `Skill ${sf} has hallucinated Skill tool`);
+    assert.doesNotMatch(content, /CLAUDE\.md|\.claude\//, `Skill ${sf} mentions Claude paths`);
+  }
+});
