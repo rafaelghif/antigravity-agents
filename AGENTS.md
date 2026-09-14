@@ -29,6 +29,8 @@ Welcome to **antigravity-agents**. This file is the root instruction set uncondi
 
 ## 2. Rule Hierarchy & Precedence
 
+This repository strictly operates on **workspace-level configurations** within [.agents/](file:///D:/Project/antigravity-agents/.agents). Never write to or depend on machine-global configurations (`~/.gemini/config/`).
+
 When resolving behavior, strictly follow this precedence order:
 
 1. **Root Instructions**: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) (Highest workspace precedence).
@@ -37,9 +39,9 @@ When resolving behavior, strictly follow this precedence order:
    - [caveman.md](file:///D:/Project/antigravity-agents/.agents/rules/caveman.md): Fluff-free, compressed communication protocol.
    - [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
    - [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
-3. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)):
+3. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers).
+4. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)):
    - Loaded progressively. The agent automatically inspects `SKILL.md` via `view_file` when a task matches.
-4. **Global Configuration**: Machine-level settings in `~/.gemini/config/`.
 
 ---
 
