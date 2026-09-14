@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File hooks/block-dangerous-git.ps1",
+            "command": "node hooks/block-dangerous-git.js",
             "timeout": 5
           }
         ]
@@ -19,7 +19,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File hooks/verify-on-stop.ps1",
+        "command": "node hooks/verify-on-stop.js",
         "timeout": 15
       }
     ]
