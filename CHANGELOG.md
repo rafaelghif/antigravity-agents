@@ -17,8 +17,19 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
   - `caveman` suite (ultra-compact token conservation and subagent output).
   - `mattpocock` suite (`ask-matt`, `to-spec`, `to-tickets`, `tdd`, `code-review`, `wayfinder`, `triage`, `grilling`, `domain-modeling`).
 - **5-Tier Memory Architecture & Cross-Session Protocol**: Implemented `memory-management.md` rule (`trigger: always_on`), root `CONTEXT.md` living domain glossary, `docs/adr/0001-antigravity-5-tier-memory-system.md`, and standardized session handoff templates with `.scratch/` sandboxing.
-- **Antigravity Native Lifecycle Hooks**: Configured in `.agents/hooks.json` supporting `PreToolUse` (git guardrails) and `Stop` (`quality-gate` running `verify-on-stop.ps1` to prevent exit with failing tests).
-- **Git Guardrails Hook**: Intercepts `run_command` in Antigravity to block destructive git operations (`push`, `reset --hard`, `clean -f`, `branch -D`) using native PowerShell ([`block-dangerous-git.ps1`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/scripts/block-dangerous-git.ps1)).
+- **Multi-Platform Zero-Pollution Installers**:
+  - Universal NPX CLI ([`bin/cli.mjs`](file:///D:/Project/antigravity-agents/bin/cli.mjs)): `npx github:rafaelghif/antigravity-agents init` or `npx antigravity-agents init`.
+  - Standalone Windows PowerShell installer ([`install.ps1`](file:///D:/Project/antigravity-agents/install.ps1)): `irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.ps1 | iex`.
+  - Standalone Linux/macOS installer ([`install.sh`](file:///D:/Project/antigravity-agents/install.sh)): `curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents/main/install.sh | bash`.
+  - **Zero Package.json Pollution Guarantee**: Installers safely scaffold `.agents/`, `AGENTS.md`, and `CONTEXT.md` without ever writing or overwriting `package.json` in user workspaces (protecting Python, Go, Rust, C++, PHP, and existing Node projects).
+- **Cross-Platform Node.js Lifecycle Hooks & ADR-0002**:
+  - Migrated lifecycle hooks in `.agents/hooks.json` to universal Node.js CommonJS scripts ([`block-dangerous-git.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/block-dangerous-git.cjs) and [`verify-on-stop.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.cjs)), documented in [`docs/adr/0002-cross-platform-node-lifecycle-hooks.md`](file:///D:/Project/antigravity-agents/docs/adr/0002-cross-platform-node-lifecycle-hooks.md).
+  - Ensures seamless hook execution across both Windows (`cmd /c`) and POSIX (`sh -c`) platforms.
+- **Automated Verification Suites**:
+  - Added unit test suite in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying CLI commands (`init`, `doctor`, `audit`, `list`) and asserting zero `package.json` creation in target directories.
+  - Added test suite in [`tests/memory-system.test.mjs`](file:///D:/Project/antigravity-agents/tests/memory-system.test.mjs) verifying memory architecture and 64-skill compliance.
+- **Antigravity Native Lifecycle Hooks**: Configured in `.agents/hooks.json` supporting `PreToolUse` (git guardrails) and `Stop` (`quality-gate` running `verify-on-stop.cjs` to prevent exit with failing tests).
+- **Git Guardrails Hook**: Intercepts `run_command` in Antigravity to block destructive git operations (`push`, `reset --hard`, `clean -f`, `branch -D`) using cross-platform Node.js ([`block-dangerous-git.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/block-dangerous-git.cjs)).
 - **Autonomous Multi-Agent Subagent Graphs**: Leverages `invoke_subagent` with isolated workspace branches (`Workspace: "branch"` or `"share"`), enabling concurrent implementation of spec task graphs.
 - **Multi-VCS Model Context Protocol (MCP)**: Native workspace configuration for **Gitea MCP** (stdio) and **GitHub Copilot MCP** (remote SSE) in `.agents/mcp_config.json`.
 - **Workspace Plugins Architecture**: Implemented `.agents/plugins/workspace-integrations/` packaging workspace-scoped MCP servers and sidecars, registered via explicit `.agents/plugins.json` and `.agents/skills.json`.
@@ -26,7 +37,7 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Complete 64-Skill Compliance Audit**: Verified all 64 skills against 8 Antigravity operational dimensions across 7 task batches, tracked in `docs/audit-checklist-64-skills.md` (512 checks passing, 100% compliant).
 - **Rule Progressive Disclosure Triggers**: Configured `trigger: always_on` across modular rules (`caveman.md`, `coding-standards.md`, `git-workflow.md`, `ponytail.md`, `memory-management.md`).
 - **Credential Quarantine**: Added comprehensive `.gitignore` sandboxing for `.agents/mcp_config.json`, `.agents/plugins/**/mcp_config.json`, `.env`, `.scratch/*`, tokens, keys, and PATs, alongside sanitized example templates.
-- **Windows PowerShell 5.1+ Parity**: Fully tested for Windows PowerShell command execution (strictly replacing `&&` with `;`).
+- **Multi-Platform Parity**: Fully tested across Windows PowerShell 5.1+, Windows cmd, macOS, and Linux bash/sh environments.
 
 ### Changed
 - Refactored all inherited Claude Code specific patterns (`CLAUDE.md`, `.claude/`, generic `Skill` tool calls, `Bash` tool calls) to native Google Antigravity primitives (`AGENTS.md`, `.agents/`, `view_file`, `run_command`, `invoke_subagent`).

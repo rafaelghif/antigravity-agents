@@ -24,7 +24,7 @@
 2. **Gemini 3.8 Flash (High) Optimization**: Designed for ultra-fast, deterministic, low-token pair programming following the **Caveman Principle** (terse technical precision) and **Ponytail Principle** (7-rung minimalist code ladder).
 3. **64 Progressive Disclosure Skills**: Houses 64 modular engineering, testing, architectural, and token-saving skills that load dynamically on demand without polluting the main context window.
 4. **5-Tier Memory Architecture**: Governed by `memory-management.md`, `CONTEXT.md`, ADRs (`docs/adr/`), and inter-session bridge handoffs (`.scratch/handoff.md` via `handoff` skill).
-5. **First-Class Lifecycle Hooks**: Configured via `.agents/hooks.json` supporting `PreToolUse` (git guardrails) and `Stop` gates (`quality-gate` running `verify-on-stop.ps1`).
+5. **First-Class Lifecycle Hooks**: Configured via `.agents/hooks.json` supporting `PreToolUse` (git guardrails) and `Stop` gates (`quality-gate` running cross-platform `verify-on-stop.cjs`).
 6. **Autonomous Subagent Workspaces**: Native DAG execution via `invoke_subagent` utilizing isolated workspace branches (`Workspace: "branch"` or `"share"`).
 7. **Multi-VCS Model Context Protocol (MCP)**: Out-of-the-box configuration for **Gitea MCP** (stdio) and **GitHub MCP** (remote SSE) with zero-leak credential isolation (`.gitignore` sandboxing).
 8. **Strict Workspace Isolation**: 100% scoped to `.agents/`. Zero machine-global pollution. Fully tested on Windows (PowerShell 5.1+) and cross-platform POSIX.
@@ -106,7 +106,7 @@ flowchart TD
 antigravity-agents/
 ├── .agents/
 │   ├── hooks.json                     # Antigravity lifecycle hooks (PreToolUse git-guardrails, Stop quality-gate)
-│   ├── hooks/                         # Executable hook scripts (block-dangerous-git.ps1, verify-on-stop.ps1)
+│   ├── hooks/                         # Cross-platform hooks (block-dangerous-git.cjs, verify-on-stop.cjs)
 │   ├── plugins.json                   # Explicit workspace plugin registration
 │   ├── skills.json                    # Explicit workspace skills registration
 │   ├── mcp_config.example.json        # Public sanitized template for Gitea and GitHub MCP
@@ -119,13 +119,19 @@ antigravity-agents/
 │   │   ├── ponytail.md                # 7-rung minimalist code ladder (YAGNI to one-liners)
 │   │   └── memory-management.md       # 5-tier memory hierarchy & cross-session handoff protocol
 │   └── skills/                        # 64 On-demand skills (Progressive disclosure via skills.json)
+├── bin/                               # NPX CLI executable (zero-pollution workspace initializer)
+│   └── cli.mjs                        # Universal CLI (init, audit, doctor, list)
 ├── docs/                              # Project documentation & decision records
-│   ├── adr/                           # Architectural Decision Records (0001-5-tier-memory)
+│   ├── adr/                           # Architectural Decision Records (0001-memory, 0002-node-hooks)
 │   ├── agents/                        # Agent skill configs (issue-tracker, domain, triage-labels)
 │   ├── templates/                     # Standardized session handoff template
 │   └── audit-checklist-64-skills.md   # Persistent 8-dimension audit checklist for all 64 skills
 ├── tests/                             # Automated verification suites (node --test)
-│   └── memory-system.test.mjs         # Verified 64-skill criteria and memory architecture checks
+│   ├── memory-system.test.mjs         # Verified 64-skill criteria and memory architecture checks
+│   └── cli.test.mjs                   # CLI tests (including zero-package.json pollution test)
+├── install.ps1                        # Standalone Windows PowerShell 1-liner installer (Zero Node)
+├── install.sh                         # Standalone Linux/macOS curl 1-liner installer (Zero Node)
+├── package.json                       # Package manifest for npm/npx distribution
 ├── .scratch/                          # Local session scratchpad & handoff staging (gitignored)
 ├── AGENTS.md                          # Root instructions unconditionally loaded per turn (<12k chars)
 ├── GEMINI.md                          # Pointer alias to AGENTS.md
@@ -233,9 +239,9 @@ Configure your credentials:
 
 Destructive git operations are blocked before execution by the Antigravity `PreToolUse` hook in `.agents/hooks.json`:
 
-```powershell
-# Tested on Windows PowerShell:
-'{"toolCall":{"name":"run_command","args":{"CommandLine":"git push origin main"}}}' | powershell -File .agents/skills/git-guardrails/scripts/block-dangerous-git.ps1
+```bash
+# Cross-platform Node.js hook (works on Windows, Linux, macOS):
+echo '{"toolCall":{"name":"run_command","args":{"CommandLine":"git push origin main"}}}' | node .agents/hooks/block-dangerous-git.cjs
 # Returns: {"decision":"deny","reason":"BLOCKED: 'git push origin main' matches dangerous git pattern '\\bgit\\s+push\\b'..."}
 ```
 
