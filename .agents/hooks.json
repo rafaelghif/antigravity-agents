@@ -1,0 +1,17 @@
+{
+  "pre-command-guard": {
+    "enabled": false,
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Write-Output '{\"decision\": \"allow\"}'\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
