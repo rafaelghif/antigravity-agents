@@ -1,0 +1,47 @@
+{
+  "name": "antigravity-agents",
+  "version": "5.0.0",
+  "description": "The Production-Grade, Autonomous Engineering Framework for Google Antigravity",
+  "keywords": [
+    "antigravity",
+    "google-antigravity",
+    "agentic-ai",
+    "gemini",
+    "gemini-flash",
+    "pair-programming",
+    "mcp",
+    "skills"
+  ],
+  "author": "Muhammad Rafael Ghifari <business.rafaelghifari@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/rafaelghif/antigravity-agents",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rafaelghif/antigravity-agents.git"
+  },
+  "type": "module",
+  "main": "bin/cli.mjs",
+  "bin": {
+    "antigravity-agents": "./bin/cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs",
+    "audit": "node bin/cli.mjs audit",
+    "doctor": "node bin/cli.mjs doctor",
+    "skills": "node bin/cli.mjs list"
+  },
+  "files": [
+    "bin/",
+    ".agents/",
+    "docs/",
+    "AGENTS.md",
+    "GEMINI.md",
+    "CONTEXT.md",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

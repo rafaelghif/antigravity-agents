@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import { execSync } from 'node:child_process';
+const fs = require('node:fs');
+const { execSync } = require('node:child_process');
 
 let input = '';
 try {

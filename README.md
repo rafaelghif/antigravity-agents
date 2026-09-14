@@ -31,6 +31,24 @@
 
 ---
 
+## ⚡ Quick Start via `npx`
+
+Scaffold, audit, or inspect any repository with a single command:
+
+```bash
+# Scaffold Antigravity (.agents/, AGENTS.md, CONTEXT.md) into any repo
+npx antigravity-agents init
+
+# Run diagnostic environment health checks
+npx antigravity-agents doctor
+
+# Audit current workspace against Antigravity best practices
+npx antigravity-agents audit
+
+# Browse all 64 available progressive disclosure skills
+npx antigravity-agents list
+```
+
 ## 🏗️ Architecture Overview
 
 ```mermaid

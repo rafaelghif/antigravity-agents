@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node hooks/block-dangerous-git.js",
+            "command": "node hooks/block-dangerous-git.cjs",
             "timeout": 5
           }
         ]
@@ -19,7 +19,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "node hooks/verify-on-stop.js",
+        "command": "node hooks/verify-on-stop.cjs",
         "timeout": 15
       }
     ]
