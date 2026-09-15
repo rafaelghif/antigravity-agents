@@ -6,7 +6,7 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $targetDir = Get-Location
 
-Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.2)..." -ForegroundColor Cyan
+Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.3)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
 $repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
@@ -14,15 +14,26 @@ $tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-main.zip"
 $tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "aac-temp"
 
 try {
-    Write-Host "📥 Downloading framework archive from GitHub..." -ForegroundColor Yellow
-    Invoke-WebRequest -Uri $repoUrl -OutFile $tempZip -UseBasicParsing
+    $sourceRoot = $null
+    if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot ".agents"))) {
+        $sourceRoot = $PSScriptRoot
+        Write-Host "📦 Using local framework source: $sourceRoot" -ForegroundColor Yellow
+    } else {
+        Write-Host "📥 Downloading framework archive from GitHub..." -ForegroundColor Yellow
+        Invoke-WebRequest -Uri $repoUrl -OutFile $tempZip -UseBasicParsing
 
-    if (Test-Path $tempExtract) {
-        Remove-Item -Recurse -Force $tempExtract
+        if (Test-Path $tempExtract) {
+            Remove-Item -Recurse -Force $tempExtract
+        }
+
+        Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
+        $sourceRoot = (Get-ChildItem -Directory -Path $tempExtract | Select-Object -First 1).FullName
     }
 
-    Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-    $sourceRoot = (Get-ChildItem -Directory -Path $tempExtract | Select-Object -First 1).FullName
+    if ((Resolve-Path $targetDir).Path -eq (Resolve-Path $sourceRoot).Path) {
+        Write-Host "ℹ️ Target directory is the framework source repository itself (nothing to scaffold)." -ForegroundColor Cyan
+        return
+    }
 
     # 1. Copy .agents directory
     Write-Host "📦 Copying .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow

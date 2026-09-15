@@ -7,7 +7,7 @@
 set -e
 
 TARGET_DIR="$(pwd)"
-echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.2)..."
+echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.3)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
 TEMP_ZIP="/tmp/aac-main.zip"
@@ -19,14 +19,29 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "📥 Downloading framework archive from GitHub..."
-curl -fsSL "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip" -o "$TEMP_ZIP"
+SCRIPT_DIR=""
+if [ -n "$BASH_SOURCE" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "$BASH_SOURCE")" 2>/dev/null && pwd)"
+fi
 
-rm -rf "$TEMP_DIR"
-mkdir -p "$TEMP_DIR"
-unzip -q "$TEMP_ZIP" -d "$TEMP_DIR"
+if [ -n "$SCRIPT_DIR" ] && [ -d "${SCRIPT_DIR}/.agents" ]; then
+  SOURCE_ROOT="$SCRIPT_DIR"
+  echo "📦 Using local framework source: ${SOURCE_ROOT}"
+else
+  echo "📥 Downloading framework archive from GitHub..."
+  curl -fsSL "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip" -o "$TEMP_ZIP"
 
-SOURCE_ROOT="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+  rm -rf "$TEMP_DIR"
+  mkdir -p "$TEMP_DIR"
+  unzip -q "$TEMP_ZIP" -d "$TEMP_DIR"
+
+  SOURCE_ROOT="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+fi
+
+if [ "$(cd "$TARGET_DIR" && pwd -P 2>/dev/null)" = "$(cd "$SOURCE_ROOT" && pwd -P 2>/dev/null)" ]; then
+  echo "ℹ️ Target directory is the framework source repository itself (nothing to scaffold)."
+  exit 0
+fi
 
 # 1. Copy .agents directory
 echo "📦 Copying .agents/ (rules, skills, hooks, plugins)..."

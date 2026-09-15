@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.3] - 2026-09-15
+
+### Added
+- **Init Scaffolding Verification**: Added comprehensive assertions in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying that `bin/cli.mjs init` creates `.scratch/` (with `.gitkeep`) and `.gitignore` alongside `.agents/`, `docs/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `CONTEXT.md`, and `skills-lock.json` with zero `package.json` pollution.
+- **Manifest Package Completeness**: Included `install.ps1` and `install.sh` in `package.json` `"files"` array to provide offline inspection of standalone installation scripts within the NPM distribution package.
+
+### Changed
+- **Version Bump**: Bumped version to `5.0.3` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
+- **Markdown Link Standard Alignment**: Updated example file links in [`AGENTS.md`](file:///D:/Project/antigravity-agents/AGENTS.md) to unescaped GitHub-style `file:///` markdown links for instant clickability while strictly maintaining character limits (<12k chars).
+
+### Fixed
+- **CLI Guidance Diagnostics**: Fixed outdated legacy package references in [`bin/cli.mjs`](file:///D:/Project/antigravity-agents/bin/cli.mjs) (`npx antigravity-agents doctor` and `npx antigravity-agents init`) to canonical `@rafaelghif/aac-core`.
+- **Stop Hook Execution Directory**: Resolved working directory resolution in [`.agents/hooks/verify-on-stop.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.cjs) and [`.agents/hooks/verify-on-stop.js`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.js) to execute against workspace root (`workspacePaths[0]` or parent of `.agents/`) with a test file existence guard, preventing false-positive Stop Quality Gate failures when lifecycle hooks are invoked from `.agents/`.
+- **Multi-Shell Hook Parity**: Updated [`.agents/hooks/verify-on-stop.ps1`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.ps1) and [`.agents/hooks/verify-on-stop.sh`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.sh) with workspace root directory resolution and existence checks.
+
 ## [5.0.2] - 2026-09-14
 
 ### Fixed

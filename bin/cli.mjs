@@ -16,7 +16,7 @@ const packageRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
-const VERSION = '5.0.2';
+const VERSION = '5.0.3';
 
 function showHelp() {
   console.log(`
@@ -132,7 +132,7 @@ function runInit() {
 👉 Next steps:
    1. Open in Antigravity IDE or Antigravity 2.0.
    2. Configure MCP tokens by copying .agents/mcp_config.example.json to .agents/mcp_config.json
-   3. Run 'npx antigravity-agents doctor' to verify readiness.
+   3. Run 'npx @rafaelghif/aac-core doctor' to verify readiness.
 `);
 }
 
@@ -237,7 +237,7 @@ function runDoctor() {
         const cwd = process.cwd();
         const hasAgents = fs.existsSync(path.join(cwd, '.agents'));
         const hasAgentsMd = fs.existsSync(path.join(cwd, 'AGENTS.md'));
-        return { ok: hasAgents && hasAgentsMd, message: hasAgents && hasAgentsMd ? 'Antigravity workspace detected' : 'Not an Antigravity workspace (run npx antigravity-agents init)' };
+        return { ok: hasAgents && hasAgentsMd, message: hasAgents && hasAgentsMd ? 'Antigravity workspace detected' : 'Not an Antigravity workspace (run npx @rafaelghif/aac-core init)' };
       }
     },
     {

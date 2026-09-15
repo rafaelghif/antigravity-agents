@@ -21,7 +21,7 @@ Welcome to **antigravity-agents**. This file is the root instruction set uncondi
     7. **Minimal Diff**: Fix root cause, not symptoms.
 - **Clickable Links (Mandatory)**:
   - Every file path, directory, or code symbol mentioned MUST be formatted as a GitHub-style markdown link using the `file://` scheme with forward slashes:
-    - Example: `[AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md)` or `[coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md)`
+    - Example: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) or [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md)
 - **Documentation & Comment Integrity**:
   - Never strip existing comments, licenses, or docstrings unless explicitly requested.
 
@@ -104,7 +104,7 @@ Antigravity operates with specific native tools. Never hallucinate Claude or non
   - Use `;` to chain commands (e.g., `git add . ; git commit -m "feat: message"`).
 - **Path Formatting**:
   - Always quote paths containing spaces or special characters.
-  - Forward slashes are preferred in markdown links (e.g., `file:///D:/Project/antigravity-agents/AGENTS.md`).
+  - Forward slashes are preferred in markdown links (e.g., [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md)).
 - **Safety**:
   - Never execute destructive commands (`rmdir /s`, `Remove-Item -Recurse` without explicit scope, `git reset --hard`, `git push --force`) without user consent.
 
