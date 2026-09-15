@@ -38,6 +38,11 @@ else
   SOURCE_ROOT="$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 fi
 
+if [ -z "$SOURCE_ROOT" ] || [ ! -d "$SOURCE_ROOT" ]; then
+  echo "❌ Error: Framework source directory could not be resolved."
+  exit 1
+fi
+
 if [ "$(cd "$TARGET_DIR" && pwd -P 2>/dev/null)" = "$(cd "$SOURCE_ROOT" && pwd -P 2>/dev/null)" ]; then
   echo "ℹ️ Target directory is the framework source repository itself (nothing to scaffold)."
   exit 0
@@ -65,12 +70,12 @@ for file in AGENTS.md GEMINI.md CLAUDE.md CONTEXT.md skills-lock.json; do
   fi
 done
 
-# 3. Create .scratch directory
+# 4. Create .scratch directory
 mkdir -p "${TARGET_DIR}/.scratch"
 echo "# Ephemeral scratchpad directory" > "${TARGET_DIR}/.scratch/.gitkeep"
 echo "📁 Created .scratch/ directory"
 
-# 4. Update .gitignore
+# 5. Update .gitignore
 GITIGNORE="${TARGET_DIR}/.gitignore"
 RULES="
 # Antigravity Runtime & Ephemeral State

@@ -343,11 +343,22 @@ npm test
 ✔ description specifies what it does and when to invoke
 ✔ body specifies Antigravity research subagent and native tools
 ✔ artifact carries no placeholder markers
+✔ SKILL.md has valid frontmatter
+✔ SKILL.md states the binding honesty rules
+✔ SKILL.md covers the cavemem_offload move
+✔ SKILL.md closes the longitudinal outcome loop honestly
+✔ SKILL.md never turns a behavioral finding into an imperative
+✔ SKILL.md has no placeholders
 ✔ CLI --version prints v5.0.3
 ✔ CLI --help prints usage banner
 ✔ CLI list displays skills count
 ✔ CLI doctor performs environment health checks
 ✔ CLI init never creates or overwrites package.json in target directory
+✔ install.ps1 scaffolds workspace with zero package.json pollution
+✔ install.sh scaffolds workspace with zero package.json pollution
+✔ lifecycle hook block-dangerous-git.cjs blocks dangerous git commands
+✔ lifecycle hook verify-on-stop.cjs executes quality gate on model_stop
+✔ lifecycle hook verify-on-stop.cjs returns continue when tests fail
 ✔ AGENTS.md remains strictly below 12000 characters limit
 ✔ memory-management rule exists with trigger: always_on
 ✔ CONTEXT.md living domain document exists at root
@@ -356,7 +367,7 @@ npm test
 ✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
 ✔ session handoff template exists
 ✔ all 64 skills comply with Antigravity operational criteria
-ℹ pass 17, fail 0, duration_ms 443
+ℹ pass 28, fail 0
 ```
 
 ---

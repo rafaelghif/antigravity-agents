@@ -1,0 +1,7 @@
+# Ignore secrets and active configs from npm package tarball
+.agents/mcp_config.json
+.agents/**/mcp_config.json
+.scratch/
+*.log
+*.tmp
+.env*

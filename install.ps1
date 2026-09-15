@@ -30,6 +30,11 @@ try {
         $sourceRoot = (Get-ChildItem -Directory -Path $tempExtract | Select-Object -First 1).FullName
     }
 
+    if (-not $sourceRoot -or -not (Test-Path $sourceRoot)) {
+        Write-Host "❌ Error: Framework source directory could not be resolved." -ForegroundColor Red
+        return
+    }
+
     if ((Resolve-Path $targetDir).Path -eq (Resolve-Path $sourceRoot).Path) {
         Write-Host "ℹ️ Target directory is the framework source repository itself (nothing to scaffold)." -ForegroundColor Cyan
         return
@@ -61,7 +66,7 @@ try {
         }
     }
 
-    # 3. Create .scratch directory
+    # 4. Create .scratch directory
     $scratchDir = Join-Path $targetDir ".scratch"
     if (-not (Test-Path $scratchDir)) {
         New-Item -ItemType Directory -Path $scratchDir -Force | Out-Null
@@ -69,7 +74,7 @@ try {
         Write-Host "📁 Created .scratch/ directory" -ForegroundColor Green
     }
 
-    # 4. Update .gitignore (never overwrite existing)
+    # 5. Update .gitignore (never overwrite existing)
     $gitignorePath = Join-Path $targetDir ".gitignore"
     $rulesToAppend = @"
 

@@ -18,16 +18,16 @@ try {
 
 # Run quality checks only on model stop
 if ($payload.terminationReason -eq "model_stop") {
-    $rootDir = if ($payload.workspacePaths -and $payload.workspacePaths.Count -gt 0) { $payload.workspacePaths[0] } else { Split-Path -Parent $PSScriptRoot }
+    $rootDir = if ($payload.workspacePaths -and $payload.workspacePaths.Count -gt 0) { $payload.workspacePaths[0] } else { Split-Path -Parent (Split-Path -Parent $PSScriptRoot) }
     $testFile = Join-Path $rootDir "tests/memory-system.test.mjs"
     if (Test-Path $testFile) {
         Push-Location $rootDir
         try {
-            $testOutput = node --test tests/memory-system.test.mjs 2>&1
+            $testOutput = node --test tests/memory-system.test.mjs tests/cli.test.mjs 2>&1
             if ($LASTEXITCODE -ne 0) {
                 $result = @{
                     decision = "continue"
-                    reason   = "Quality Gate Failed: Unit tests in tests/memory-system.test.mjs are failing. Please fix regressions before concluding."
+                    reason   = "Quality Gate Failed: Unit tests are failing. Please fix regressions before concluding."
                 } | ConvertTo-Json -Compress
                 Write-Output $result
                 exit 0

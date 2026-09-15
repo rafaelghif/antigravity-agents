@@ -32,7 +32,7 @@
     "aac": "bin/cli.mjs"
   },
   "scripts": {
-    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs",
+    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs .agents/skills/caveman-learn/tests/skill-file.test.mjs",
     "audit": "node bin/cli.mjs audit",
     "doctor": "node bin/cli.mjs doctor",
     "skills": "node bin/cli.mjs list"
@@ -40,6 +40,8 @@
   "files": [
     "bin/",
     ".agents/",
+    "!.agents/mcp_config.json",
+    "!.agents/**/mcp_config.json",
     "docs/",
     "AGENTS.md",
     "GEMINI.md",

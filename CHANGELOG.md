@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.3] - 2026-09-15
 
 ### Added
-- **Init Scaffolding Verification**: Added comprehensive assertions in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying that `bin/cli.mjs init` creates `.scratch/` (with `.gitkeep`) and `.gitignore` alongside `.agents/`, `docs/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `CONTEXT.md`, and `skills-lock.json` with zero `package.json` pollution.
+- **Init & Installer Scaffolding Verification**: Added comprehensive assertions in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying that `bin/cli.mjs init`, `install.ps1`, and `install.sh` create `.scratch/` (with `.gitkeep`) and `.gitignore` alongside `.agents/`, `docs/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `CONTEXT.md`, and `skills-lock.json` with zero `package.json` pollution.
+- **Lifecycle Hook Test Verification**: Added automated test coverage in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying `block-dangerous-git.cjs` (blocking destructive git operations) and `verify-on-stop.cjs` (quality gate allowing clean stops and blocking on regressions).
+- **Test Suite Completeness**: Wired `.agents/skills/caveman-learn/tests/skill-file.test.mjs` into `package.json` `"test"` script, bringing total automated test count to 28 passing tests.
+- **License Restoration**: Restored canonical MIT [`LICENSE`](file:///D:/Project/antigravity-agents/LICENSE) matching `package.json` manifest and `README.md`.
 - **Manifest Package Completeness**: Included `install.ps1` and `install.sh` in `package.json` `"files"` array to provide offline inspection of standalone installation scripts within the NPM distribution package.
 
 ### Changed
@@ -17,8 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **CLI Guidance Diagnostics**: Fixed outdated legacy package references in [`bin/cli.mjs`](file:///D:/Project/antigravity-agents/bin/cli.mjs) (`npx antigravity-agents doctor` and `npx antigravity-agents init`) to canonical `@rafaelghif/aac-core`.
-- **Stop Hook Execution Directory**: Resolved working directory resolution in [`.agents/hooks/verify-on-stop.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.cjs) and [`.agents/hooks/verify-on-stop.js`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.js) to execute against workspace root (`workspacePaths[0]` or parent of `.agents/`) with a test file existence guard, preventing false-positive Stop Quality Gate failures when lifecycle hooks are invoked from `.agents/`.
-- **Multi-Shell Hook Parity**: Updated [`.agents/hooks/verify-on-stop.ps1`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.ps1) and [`.agents/hooks/verify-on-stop.sh`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.sh) with workspace root directory resolution and existence checks.
+- **Stop Hook Execution Directory**: Resolved working directory resolution in [`.agents/hooks/verify-on-stop.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.cjs), [`.agents/hooks/verify-on-stop.js`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.js), and [`.agents/hooks/verify-on-stop.ps1`](file:///D:/Project/antigravity-agents/.agents/hooks/verify-on-stop.ps1) to resolve two directory levels up (`path.resolve(__dirname, '..', '..')` / `Split-Path -Parent (Split-Path -Parent $PSScriptRoot)`) to the true workspace root, fixing false-positive Stop Quality Gate bypasses.
+- **Test Context Isolation**: Stripped `NODE_TEST_*` environment variables in `verify-on-stop.cjs` and `verify-on-stop.js` child execution to prevent inherited test-runner filtering from bypassing the Stop Quality Gate.
+- **Installer Source Directory Guard**: Added missing source directory existence checks in `install.ps1` and `install.sh` preventing unhandled exceptions when source directory extraction fails.
+
+### Security
+- **NPM Package Secret Exclusion**: Added negative matching rules `!.agents/mcp_config.json` and `!.agents/**/mcp_config.json` in `package.json` `"files"` array along with `.npmignore`, completely eliminating risk of active MCP tokens or PATs leaking into published NPM distribution tarballs.
 
 ## [5.0.2] - 2026-09-14
 
@@ -78,3 +85,10 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Installer Source Validation & CLI Sandbox Alignment**: Fixed `install.py` aborting during release source validation by passing `--source-only` and decoupling external host CLI settings from source archive validation.
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
+
+[5.0.3]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.2...v5.0.3
+[5.0.2]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.1...v5.0.2
+[5.0.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.0...v5.0.1
+[5.0.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v4.47.2...v5.0.0
+[4.47.2]: https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v4.47.2
+
